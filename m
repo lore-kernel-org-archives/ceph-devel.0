@@ -1,124 +1,192 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f181.google.com (mail-pf1-f181.google.com [209.85.210.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 442E4E55A
-	for <ceph-devel@vger.kernel.org>; Sat,  7 Mar 2026 09:38:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A69C2D9EEA
+	for <ceph-devel@vger.kernel.org>; Sat,  7 Mar 2026 14:07:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772876290; cv=none; b=GK/21ecFMHbSj/i0RYprxIlCfx+nwSWG/6udfvdPXPH3IacM3CisXeTsBPgpsZNeFCwnzlaRJwg2N6zst/b8CWIskLV9Q3WIM4YzZu2Umol03c82szjMSwqPX1JeRNMkXnBlwuNXjs3wRwSbEUDrmnn3nNsy7KCmnSptEasHUag=
+	t=1772892475; cv=none; b=Trm8vCY4QTrCuqC1DXXCHm//2squija/3QmpulCuFT/CHrGBUIRHwZUUDDXQe2tMpPlzrhUMjqEo7TMZegpHZsu1zkXlt7y8VAlGRqdY0ib4Axy0j1w0J+AfKq2xENMwwpmMzOfHw27J6uonJxac5jsM3S3CkHoyA1khi5poW2U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772876290; c=relaxed/simple;
-	bh=t9u6CVCAZvzsOm6q0Clw8mfj0jgha2hIrbqfrJ7NznQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=WSRPV7aCMCUpFRGVLO90dsliJthjAF7/YLmMJylUnOoQxoXkNfcZJ3HUEIYW6B1lGN1YPYy38pR94cHEXQ9voErx+5EtLb9s/woUGWpDgEOQO9SNKEuCgbFd3y59zvn1doem958N4KkOmCPuo0M8dfhThonvfiPb9+z4nyma/MY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=zzwb6ZWM; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1772892475; c=relaxed/simple;
+	bh=q0HizNdLQtkBg+6I2Uwr71BFH46+Qf7XsNZYRKQhaSU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gsqwAwLphLkOSr5atoGAQEJ9nmwuVicvj7vjXD7kRvg3/qUoqWNTD1RKzcESggnmSZ61DT1qBcCTq02Bv+s2l6EQlqtKe88zdZMJUIKv1ahq67cbLe9IgTgwc4JAJI93COAatIx1XdqfI6H+CU7fi/l5xDx5SEbF3SnvtULhMFI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=E0w/g9Nx; arc=none smtp.client-ip=209.85.210.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="zzwb6ZWM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1772876278; h=message-id
- : date : mime-version : subject : to : cc : references : from :
- in-reply-to : content-type : content-transfer-encoding : from;
- bh=t9u6CVCAZvzsOm6q0Clw8mfj0jgha2hIrbqfrJ7NznQ=;
- b=zzwb6ZWM3WwcXvnP8JGlgiRXXJ9dBah2ZtPu6kWoB1ClenTL0MR94wO1vaOKKe76f2fIX
- G1bX9xarm64neC/ZxEGAulJRnd8KM4IqbqnkTlnJaKpllbndMco0hdvTnE1tY1og8ctCKuX
- A4nv+c55yFc5Sbe/4FKxdKFA8ovxQtSpPxzOU0K9En1yY1qZHXROLWxtUEUNCgoA17epPB6
- ehLGUjKOytrdNkKhre597MidPeq1WeM9eRWr/Nh6vCrHsE6XfVi6Y6lHYgEkOuXS6FUMFk6
- uN/qnCmg+6X5dNinfBXS3hbyzeDVZqxoaUD5CMl9c9TSAET6faF+uo4pP17w==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 796F660170;
-	Sat,  7 Mar 2026 10:37:58 +0100 (CET)
-Received: from [192.168.178.114] (unknown [217.252.212.162])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 527F35FC96;
-	Sat,  7 Mar 2026 10:37:55 +0100 (CET)
-Message-ID: <1bf00a3a-d022-49eb-890e-a9b52a9da0bb@tu-ilmenau.de>
-Date: Sat, 7 Mar 2026 10:37:54 +0100
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E0w/g9Nx"
+Received: by mail-pf1-f181.google.com with SMTP id d2e1a72fcca58-829b8b6c4d0so486954b3a.0
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Mar 2026 06:07:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1772892474; x=1773497274; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=jdS9yl/p7UlIdGAR7tR/qX6v6/HUi/AMSzKRwMf8jaY=;
+        b=E0w/g9NxXfrlsysae4YQT/Z4nbnodAnvGWqE08bbrpnk1Aq8YcRn0aFEoF/5vlTbWW
+         WujCp1WTHP84Vu9NzWTO5cm19RDvgowO5A8HjFVs/hLEZsuKZhdoCmxRM1kaWWg6hT9c
+         bEfqNF3eBHHzthgEHDGPLfvBskdeKoecQKp8je7JmxvNFEnShD+loq8YA1b8Lr504KP2
+         xELbXsCVqhhCpORruuwseOoRWd68tcGotqQRIRoTxeaZu2zirMid0nJj4pJhOVtCD8Rd
+         sHPN9q7TYpWWhwqC5Xs3rOMAh574q3FGNCxBTWnBEAs5nFnCCOLTUcyPs5aTqQGSpRPX
+         08gQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772892474; x=1773497274;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jdS9yl/p7UlIdGAR7tR/qX6v6/HUi/AMSzKRwMf8jaY=;
+        b=jaw6Q0iwPEipzYrkbJB9kDYrjwPaIAioV1oFogkoqUfJtLVY1pr5CZySChsOiy8yN9
+         b/57NWWFIttm4uw25NqPt6KD4+YENw2mvtQylunNAlAeZbUrNqm63uogxw1ZZYbTVl5w
+         XDbmqyoiv4vDPzVvlysJf4oPzKMy+GsS8ICgaVXl7vIeesTHxAM53A53MOWVLa+7J+Sh
+         atq+iG/OANx/R6hxb0DWUva/+Hp2vmFy8GegayMaFpWRDdTUMgc9oEs+d0+wBsXefxUZ
+         54R1QbT13HAqPsWyjL/6vPzqQOpmgUxFah1OcwbLmHDi3zmOqg9I4sUc9eofCY2MKNnD
+         hggA==
+X-Forwarded-Encrypted: i=1; AJvYcCW2CEIrPasM54Mysce1KHuhF5e+nzN7BxjzU3ebPzIahhaf6jdpI6NYY7dH1vt9UtbTEYQUGHaGk42D@vger.kernel.org
+X-Gm-Message-State: AOJu0YyWwMPQ0CiPYcRT56Mfo/Ejg4rwB9H9WU1NXsuGjVNNUznHvCPT
+	T3W+mRqTCd+TxkNfjhGaFVCDVAtWuLiPZLSuGvAPqbrJGvSgyTdmjxNvehlteqyu
+X-Gm-Gg: ATEYQzxUo7Z+HWMn8UsIY/4YZeKg4L7F21ej3b68JxBLgSaH+L0z95vsgq8v5fihZ1g
+	p4Tub4HQEGNsdagtEMPQMtuyd0Om7sHs9SeWvBOXVa3l/FnXfoOPAlHmobK713EqjRwK8Gt/0KN
+	DpMZ9MkmQMrLC4XCe8cP4gZMsnvrWHfKQmq48QetqeCdaYGAGUVm/IjUrItoMb6eYc+VeFfwnml
+	bScAzs5I+WJ6HoGK0gxeuBbiAaCFadGuPjahC7Rz9D8fvZNW//zePgTgmkCgGUKN/IVEtwq4tCd
+	ujgsNAKuLNIvTVZcb2SnKiagv20S1bbEJsf1SFKIiidCPPcdW0X5wzT3C9dmvRC8HOTLIsVu7st
+	3qRRsMrO8RDLRWzdQjFoPE6zmCRNUtqwWAPWe0SkLJjh+tmnoLt2wRBCl/BkTXJ8J4OXKQSHjdC
+	PMEpMZosboR/SV8q1dxFSRid/LoatMov4AeqKBgP+bZ2MzPZqq27nc7AvDCvmYkKuZdQ==
+X-Received: by 2002:a05:6a00:1581:b0:827:26b0:58d6 with SMTP id d2e1a72fcca58-829a30bf515mr4247393b3a.47.1772892473854;
+        Sat, 07 Mar 2026 06:07:53 -0800 (PST)
+Received: from toolbx ([103.103.35.10])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-829a48ddd18sm4747313b3a.56.2026.03.07.06.07.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 07 Mar 2026 06:07:53 -0800 (PST)
+From: Dorjoy Chowdhury <dorjoychy111@gmail.com>
+To: linux-fsdevel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org,
+	linux-api@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	gfs2@lists.linux.dev,
+	linux-nfs@vger.kernel.org,
+	linux-cifs@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-kselftest@vger.kernel.org,
+	viro@zeniv.linux.org.uk,
+	brauner@kernel.org,
+	jack@suse.cz,
+	jlayton@kernel.org,
+	chuck.lever@oracle.com,
+	alex.aring@gmail.com,
+	arnd@arndb.de,
+	adilger@dilger.ca,
+	mjguzik@gmail.com,
+	smfrench@gmail.com,
+	richard.henderson@linaro.org,
+	mattst88@gmail.com,
+	linmag7@gmail.com,
+	tsbogend@alpha.franken.de,
+	James.Bottomley@HansenPartnership.com,
+	deller@gmx.de,
+	davem@davemloft.net,
+	andreas@gaisler.com,
+	idryomov@gmail.com,
+	amarkuze@redhat.com,
+	slava@dubeyko.com,
+	agruenba@redhat.com,
+	trondmy@kernel.org,
+	anna@kernel.org,
+	sfrench@samba.org,
+	pc@manguebit.org,
+	ronniesahlberg@gmail.com,
+	sprasad@microsoft.com,
+	tom@talpey.com,
+	bharathsm@microsoft.com,
+	shuah@kernel.org,
+	miklos@szeredi.hu,
+	hansg@kernel.org
+Subject: [PATCH v5 0/4] OPENAT2_REGULAR flag support for openat2
+Date: Sat,  7 Mar 2026 20:06:42 +0600
+Message-ID: <20260307140726.70219-1-dorjoychy111@gmail.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] libceph: Fix potential out-of-bounds access in
- ceph_handle_auth_reply()
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
- "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze
- <amarkuze@redhat.com>, "slava@dubeyko.com" <slava@dubeyko.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-References: <20260305164049.2844606-1-raphael.zimmer@tu-ilmenau.de>
- <9a967105c12095a4e5f32d1c49550c2424580483.camel@ibm.com>
- <1b946af9-8c9f-49e4-9f36-efacaf2bcbde@tu-ilmenau.de>
- <2ddfc235e05ab8705a92f5e2e1ed780f47b9cc30.camel@ibm.com>
-Content-Language: en-US
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-In-Reply-To: <2ddfc235e05ab8705a92f5e2e1ed780f47b9cc30.camel@ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 3/6/26 8:24 PM, Viacheslav Dubeyko wrote:
-> On Fri, 2026-03-06 at 10:14 +0100, Raphael Zimmer wrote:
->> On 05.03.26 8:33 PM, Viacheslav Dubeyko wrote:
->>> On Thu, 2026-03-05 at 17:40 +0100, Raphael Zimmer wrote:
->>>> This patch fixes an out-of-bounds access in ceph_handle_auth_reply()
->>>> that can be triggered by a message of type CEPH_MSG_AUTH_REPLY. In
->>>> ceph_handle_auth_reply(), the value of the payload_len field of such a
->>>> message is stored in a variable of type int. A value greater than
->>>> INT_MAX leads to an integer overflow and is interpreted as a negative
->>>> value. This leads to decrementing the pointer address by this value and
->>>> subsequently accessing it because ceph_decode_need() only checks that
->>>> the memory access does not exceed the end address of the allocation.
->>>>
->>>
->>> Do you mean that payload_len could be bigger than INT_MAX? Is it possible
->>> scenario to have so big payload size in one message?
->>>
->>> Maybe, the problem is more serious than simple changing of int on u32? It sounds
->>> like we are hiding a real issue by this fix.
->>>
->>> Thanks,
->>> Slava.
->>>
->>
->> Hi Slava,
->> actually, I don't think that a correctly functioning monitor will ever
->> send an auth_reply message with a payload larger than 2GB. This patch
->> shall prevent a (maliciously) corrupted message with a huge value in the
->> payload_len field from causing a memory access to an out-of-bounds address.
->>
-> 
-> You've shared the Call Trace with the patch. So, I expected that you had a real
-> crash.
-> 
-> OK. If we have the corrupted message with a huge value, then we need:
-> (1) Convert int into u32 -> you've already did this.
-> (2) It is dangerous to continue parsing the payload with corrupted payload_len
-> because we definitely will try to access the out-of-bounds address during teh
-> parsing. We need to check the correctness of payload_len. As far as I can see,
-> ceph_handle_auth_reply() receives buf pointer and len value. I assume that
-> payload_len cannot be bigger than len. I suggest to compare the payload_len and
-> len. Does it make sense to you?
-> 
-> Thanks,
-> Slava.
-Hi Slava,
-I don't completely agree with your second point. In fact, payload_len 
-should always be smaller than len. But with the current version of the 
-patch, we will not try to access the out-of-bounds address during 
-parsing if this doesn't hold true. That's because this check [1] ensures 
-that the address does not lie beyond the end of the allocation. Changing 
-the data type of payload_len to u32 ensures that the address can only be 
-incremented and therefore only be inside the allocation or greater, but 
-no longer smaller. The only exception from this would be if p += 
-payload_len would lead to an overflow of p. This would require p to be 
-already greater than 0xffffffff00000000 in the beginning. As far as I 
-know, this is not possible because you can't get an address in this 
-range from an allocation.
-Consequently, adding a check that compares payload_len to len would not 
-hurt, but it's not necessary to fix the problem.
+Hi,
 
-Best regards,
-Raphael
+I came upon this "Ability to only open regular files" uapi feature suggestion
+from https://uapi-group.org/kernel-features/#ability-to-only-open-regular-files
+and thought it would be something I could do as a first patch and get to
+know the kernel code a bit better.
 
-[1] https://elixir.bootlin.com/linux/v7.0-rc1/source/net/ceph/auth.c#L222
+The following filesystems have been tested by building and booting the kernel
+x86 bzImage in a Fedora 43 VM in QEMU. I have tested with OPENAT2_REGULAR that
+regular files can be successfully opened and non-regular files (directory, fifo etc)
+return -EFTYPE.
+- btrfs
+- NFS (loopback)
+- SMB (loopback)
+
+Changes in v5:
+- EFTYPE is already used in BSDs mentioned in commit message
+- consistently return -EFTYPE in all filesystems
+
+Changes in v4:
+- changed O_REGULAR to OPENAT2_REGULAR
+- OPENAT2_REGULAR does not affect O_PATH
+- atomic_open codepaths updated to work properly for OPENAT2_REGULAR
+- commit message includes the uapi-group URL
+- v3 is at: https://lore.kernel.org/linux-fsdevel/20260127180109.66691-1-dorjoychy111@gmail.com/T/
+
+Changes in v3:
+- included motivation about O_REGULAR flag in commit message e.g., programs not wanting to be tricked into opening device nodes
+- fixed commit message wrongly referencing ENOTREGULAR instead of ENOTREG
+- fixed the O_REGULAR flag in arch/parisc/include/uapi/asm/fcntl.h from 060000000 to 0100000000
+- added 2 commits converting arch/{mips,sparc}/include/uapi/asm/fcntl.h O_* macros from hex to octal
+- v2 is at: https://lore.kernel.org/linux-fsdevel/20260126154156.55723-1-dorjoychy111@gmail.com/T/
+
+Changes in v2:
+- rename ENOTREGULAR to ENOTREG
+- define ENOTREG in uapi/asm-generic/errno.h (instead of errno-base.h) and in arch/*/include/uapi/asm/errno.h files
+- override O_REGULAR in arch/{alpha,sparc,parisc}/include/uapi/asm/fcntl.h due to clash with include/uapi/asm-generic/fcntl.h
+- I have kept the kselftest but now that O_REGULAR and ENOTREG can have different value on different architectures I am not sure if it's right
+- v1 is at: https://lore.kernel.org/linux-fsdevel/20260125141518.59493-1-dorjoychy111@gmail.com/T/
+
+Thanks.
+
+Regards,
+Dorjoy
+
+Dorjoy Chowdhury (4):
+  openat2: new OPENAT2_REGULAR flag support
+  kselftest/openat2: test for OPENAT2_REGULAR flag
+  sparc/fcntl.h: convert O_* flag macros from hex to octal
+  mips/fcntl.h: convert O_* flag macros from hex to octal
+
+ arch/alpha/include/uapi/asm/errno.h           |  2 +
+ arch/alpha/include/uapi/asm/fcntl.h           |  1 +
+ arch/mips/include/uapi/asm/errno.h            |  2 +
+ arch/mips/include/uapi/asm/fcntl.h            | 22 +++++------
+ arch/parisc/include/uapi/asm/errno.h          |  2 +
+ arch/parisc/include/uapi/asm/fcntl.h          |  1 +
+ arch/sparc/include/uapi/asm/errno.h           |  2 +
+ arch/sparc/include/uapi/asm/fcntl.h           | 35 +++++++++---------
+ fs/ceph/file.c                                |  4 ++
+ fs/gfs2/inode.c                               |  6 +++
+ fs/namei.c                                    |  4 ++
+ fs/nfs/dir.c                                  |  4 ++
+ fs/open.c                                     |  4 +-
+ fs/smb/client/dir.c                           | 14 ++++++-
+ include/linux/fcntl.h                         |  2 +
+ include/uapi/asm-generic/errno.h              |  2 +
+ include/uapi/asm-generic/fcntl.h              |  4 ++
+ tools/arch/alpha/include/uapi/asm/errno.h     |  2 +
+ tools/arch/mips/include/uapi/asm/errno.h      |  2 +
+ tools/arch/parisc/include/uapi/asm/errno.h    |  2 +
+ tools/arch/sparc/include/uapi/asm/errno.h     |  2 +
+ tools/include/uapi/asm-generic/errno.h        |  2 +
+ .../testing/selftests/openat2/openat2_test.c  | 37 ++++++++++++++++++-
+ 23 files changed, 127 insertions(+), 31 deletions(-)
+
+-- 
+2.53.0
+
