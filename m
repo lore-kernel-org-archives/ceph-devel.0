@@ -1,235 +1,179 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dy1-f179.google.com (mail-dy1-f179.google.com [74.125.82.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E006114A4CC;
-	Mon,  9 Mar 2026 19:01:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773082873; cv=none; b=aZqu906/3H8AZ1W0bOaFhhO3F1b1/f3wkfFQswIL/BTwx2Q9H3xqD2j+QlLBPm1OHEyz66wrqF5yXGEkoRhW06tJWAZ1UZM9tg2IRIDCKu/AoIrpduOw8rxyEGmgZ+aspxn+D5zoNMsthOks5PwDsdNlnFMXxxCKrJRUoAwXHrA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773082873; c=relaxed/simple;
-	bh=zuZybXxG4NWtCCamlMtgm4GPhCUwWs75GokKHhfMbyA=;
-	h=Message-ID:Subject:From:To:Cc:In-Reply-To:References:Content-Type:
-	 Date:MIME-Version; b=QCmBAwOLqWrnXR8eva6gXElo4OqrkXzQuB5QYgU3FvYWtoDJC7B85wjJTWwGoLp5rzxGkemZmw0E57Jvh2Atm6KSaM5c86CDvWQ/ujg1lSONgiypvYEUN/lpO0DGycqC65/yg5OSCt0zXJJXHxjsbOWwPU75UcJZPDJlQBPVqhk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=d2IgH4d2; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B87235CB8B
+	for <ceph-devel@vger.kernel.org>; Mon,  9 Mar 2026 19:03:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.179
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773082998; cv=pass; b=V9MWDYXvCUnNSBg2FZgAVs2GTnovtGKOdrqvU2Db6RNE9kz5iUX7W1ib3NooV4/1KSaJoq9k658Tuus+fLBGTo4GmG+dB2+osGDJPR2qfNBH5laUg1SGUdS+MWMfLXAkBiJYYaAaBlYZD+VRxOVOa4xj6XNInXzXHr6dwbu7tzY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773082998; c=relaxed/simple;
+	bh=OXPPcfI0w6kUdoA04ygt5Z9dpHTxne5EAIvXBYWTzdw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=M1my1hszI0zr1ww7oodPWdqg80I1cVmssedsjC5bkWmz6fRZqIJrCbODPkpNtbkrejYNzaT0Rzd/ZL2xkv6bbljUMY/wL91w+cDmPH4+0bKehac7bp/qoxmopdUZA1fKJHsCGZHyTOAmyEtMNQcQyukHBamumgEP0RXAPWoqVHE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=glCfRu22; arc=pass smtp.client-ip=74.125.82.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="d2IgH4d2"
-Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 629BiYp9402979;
-	Mon, 9 Mar 2026 19:00:10 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=5swsN0
-	rUxxavDq9zMYnPJS2Jv47BUk07HnZRz0pbh40=; b=d2IgH4d2cI76xjXosS08+5
-	z7p4cmRM3+vsUQToHiG2nB8DP/joMF596z7727f61cqMRXeNJJpaPHxOajT8sUoA
-	4hdB+fd4u1HsuNVMFr3OsadtAG1CKvM35tVtsMpgaqqCM2ZBMMXJkpG++BlAdorh
-	a25OzV7jJWb6oFmtakhiLNn+qzaAmqYeRhvuloIidiB6X0BgKDL71O4yfuzN3RUh
-	AoqpvZ653XjMWMMwrSPrZbVK8uRNsl6RplSUCc6nWvYsnXyDf2A2VF2Up7qZowSZ
-	aJlNA2A77/MP8caSRZkmC6D9PsUx9bOXT5BvUfyuxzfxj3qWmymQF0ir3jH77L1w
-	==
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4crcun7rdb-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 09 Mar 2026 19:00:09 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 629FvaW1015771;
-	Mon, 9 Mar 2026 19:00:08 GMT
-Received: from smtprelay05.wdc07v.mail.ibm.com ([172.16.1.72])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4cs121ww0t-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 09 Mar 2026 19:00:08 +0000
-Received: from smtpav03.dal12v.mail.ibm.com (smtpav03.dal12v.mail.ibm.com [10.241.53.102])
-	by smtprelay05.wdc07v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 629J079s4915810
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 9 Mar 2026 19:00:08 GMT
-Received: from smtpav03.dal12v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id B444C58064;
-	Mon,  9 Mar 2026 19:00:07 +0000 (GMT)
-Received: from smtpav03.dal12v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id E09F35805A;
-	Mon,  9 Mar 2026 19:00:04 +0000 (GMT)
-Received: from li-43857255-d5e6-4659-90f1-fc5cee4750ad.ibm.com (unknown [9.61.72.80])
-	by smtpav03.dal12v.mail.ibm.com (Postfix) with ESMTP;
-	Mon,  9 Mar 2026 19:00:04 +0000 (GMT)
-Message-ID: <c9500adc562665d44feaca9206f23a5ba07432c1.camel@linux.ibm.com>
-Subject: Re: [PATCH v3 00/12] vfs: change inode->i_ino from unsigned long
- to u64
-From: Mimi Zohar <zohar@linux.ibm.com>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-trace-kernel@vger.kernel.org, nvdimm@lists.linux.dev,
-        fsverity@lists.linux.dev, linux-mm@kvack.org, netfs@lists.linux.dev,
-        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
-        samba-technical@lists.samba.org, linux-nilfs@vger.kernel.org,
-        v9fs@lists.linux.dev, linux-afs@lists.infradead.org,
-        autofs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        codalist@coda.cs.cmu.edu, ecryptfs@vger.kernel.org,
-        linux-mtd@lists.infradead.org, jfs-discussion@lists.sourceforge.net,
-        ntfs3@lists.linux.dev, ocfs2-devel@lists.linux.dev,
-        devel@lists.orangefs.org, linux-unionfs@vger.kernel.org,
-        apparmor@lists.ubuntu.com, linux-security-module@vger.kernel.org,
-        linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
-        amd-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linaro-mm-sig@lists.linaro.org,
-        netdev@vger.kernel.org, linux-perf-users@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, linux-xfs@vger.kernel.org,
-        linux-hams@vger.kernel.org, linux-x25@vger.kernel.org,
-        audit@vger.kernel.org, linux-bluetooth@vger.kernel.org,
-        linux-can@vger.kernel.org, linux-sctp@vger.kernel.org,
-        bpf@vger.kernel.org
-In-Reply-To: <f22758116dabd3c135a833bcb5cfcd2ea4f6ecf4.camel@kernel.org>
-References: <20260304-iino-u64-v3-0-2257ad83d372@kernel.org>
-		 <05b5d55c49b5a1bbc43a5315e3c84872e7e634b3.camel@linux.ibm.com>
-	 <f22758116dabd3c135a833bcb5cfcd2ea4f6ecf4.camel@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Date: Mon, 09 Mar 2026 15:00:04 -0400
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="glCfRu22"
+Received: by mail-dy1-f179.google.com with SMTP id 5a478bee46e88-2bdfc4b191fso7377580eec.1
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Mar 2026 12:03:16 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773082996; cv=none;
+        d=google.com; s=arc-20240605;
+        b=Dj8rqLECkP8Wcss7fQ7OjVcBbmADdxAnDc8WVcs0CzPCMyWvyNHchNse8S9BCRaQCq
+         TCy6kW5m7pROisR+HhpEFojMBUEX0koLNPfEtvfyBCISsZ3iAOR/zHb8gf9IsxL+hV3J
+         a8/zFieJc9ZVbUfo/ZPYmQCuKrkLoG8ZcKSFTPlEQQfsBIlJU8d7YrTvrl4Ln36NsfTS
+         8h5mb/Bi4OJsC+DRHZlOG/PlJvFBzxcY21uF+85avhbrZH+1q8Cm70laFgc++n8wLQhZ
+         Mdq2syWPd6DTFoXJg45CuGb4oJkcIzEdwiglnjT4Oo15f6hdAeGyhg0hy5sPlEqkM37o
+         bTsg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=WTZmon5RCZKPp5j1dG7L4Dz0Cgc/ulj/Rn94Bmks9rs=;
+        fh=FBgesWuv5taG5LgP/mAgmU5o+8GnVB+EqMDMRyA8WLA=;
+        b=C/9tcuW34cNpZfiiIrmXJqfeEui9HK6VyqEjbSrEV8ANLel/lf38tVcT8ZijAibXrS
+         taE5MlP3itJY29VBCZq/vyCfY0+yoTa4zbyDF+etZBNCXncgeWxbRkDSDbe4LMckjl53
+         ZMLAG2Nxx2GXLfs0+i1jB/xXSRv8JCDUDvSM2I2u6DuG5KA6iZVVXP+nmN5HGA1Ga6/R
+         haLxXeZgJ3mhY8HaUJBydZ9cronvbm87ywp2ODnN0TOhtfw8TSWtAGd+Y8dm5RY+a9SX
+         UsUsd4ZPHfy2I5kxyyTTUsV3G0m6i1osk6EJiKuUH6UULt3/Dc3xS+EWyIOgyPzFexAk
+         01Fg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1773082996; x=1773687796; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WTZmon5RCZKPp5j1dG7L4Dz0Cgc/ulj/Rn94Bmks9rs=;
+        b=glCfRu22HKqq9U8LlzgBG7DTTGXtG5PiMsUHe+Vq3dFKBkqEBuXyKmEVUEoUyVHJiv
+         IWtsXhTUUb94Wnm4NvPqdPoNeHfpQTOoaB4Piu/bBw0QG6uGkSTbWtwUWGXcvUJ45bks
+         63bFUcAOocL/BR5pYpR+u7JVY45FMqEEUtQaCeA0sIwp8XjP+m5ufrU+9e/U4DK94cLE
+         B4gDuia5uvR1UQgbLJjVcLzvHYtB70FL4ZT0TOfTFWnfYQZQ/x+z81THFprYKhvAl8MZ
+         IBlC+nKd9jJFoe4zi1M5g81W/BWhaltuwQu8GuemwWNuoozUGZm8DSM1DZm5cSEsRo3m
+         tWYA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1773082996; x=1773687796;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=WTZmon5RCZKPp5j1dG7L4Dz0Cgc/ulj/Rn94Bmks9rs=;
+        b=sWSeAdapwO1Zb562mB2X922O7ruJvht3KJhgsqJJgolwKnZW6p8eQIWgQ9Hv10OBx3
+         A8x9mlXgvbYuz9GrgfUndXBMWolx56ZMHv3l+8f+3qisnh6/Q7lO26x/evNghsmWd38c
+         LZYQs6lcXiySl2ZlOu2o5OXzkKyi4H7YCTNS27cUEglGxqS9UWwjHpwwd2n9gW0IjSE0
+         LXw8FV6biCJoPywILDZ+oaKvWMM8gCCcbfbM9tLRlWa9dTi5o6zt2h8U47Zvkh/t3axF
+         wsqkL1HOYxLOrWLE4NGwBc5UYrUl/TRqnHaC0KbA1VRaCmKSvj53h3Ulw5QXsLT0JSNw
+         MLbQ==
+X-Gm-Message-State: AOJu0YzJu5/n9pD/YgEa/HfTfD5yJdUsxUcJsSV+EI+Tuyl5/tpeqPoj
+	tZBNrgcPV1SeqC4LujpyJs6qvS7qnv4lwg2Im2t/pw33+hcTNRVne7vTYG7omVH1sFt8Y243yne
+	VfiROp0DqrJQ2XqWooE35xrV55PsKpX4=
+X-Gm-Gg: ATEYQzyYZBrbIQrnA8qnzddtDcVHE0uHHpzU9pD78AIN3z11PrL7hpDhy9vnOo14AZT
+	H0PbXHJNx7NjaokFuUd2AO2O/lE4hz/BRvluCFc671skeHB7M9dRKVbHiy6xUjWKSVzXmJ0Gigl
+	YKABWsq2kJLSh8cQfUP6ItPHBFBIqn40Ofs2p8dMslTGxMBgMTkFblkJNE7Lo3m76alh/vvT7Cv
+	Yee5YdGnFtXvFWgv+HfLnp90NU9zQtTtMy6kINPFv/YpAXVCua6yLy6U71a/MoAPf6G6VYqo60T
+	fmpLjR0=
+X-Received: by 2002:a05:7022:10a:b0:128:ccb7:7fa3 with SMTP id
+ a92af1059eb24-128ccb780c0mr3957056c88.34.1773082995830; Mon, 09 Mar 2026
+ 12:03:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Evolution 3.56.2 (3.56.2-2.fc42) 
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: IXXixi4WEaMt5ZLipHNyYmLY2v6HWLsd
-X-Authority-Analysis: v=2.4 cv=Hp172kTS c=1 sm=1 tr=0 ts=69af18ba cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=IkcTkHD0fZMA:10 a=Yq5XynenixoA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=RnoormkPH1_aCDwRdu11:22 a=Y2IxJ9c9Rs8Kov3niI8_:22 a=VwQbUJbxAAAA:8
- a=o9bg_TheAfZNAX0b3qsA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzA5MDE2NSBTYWx0ZWRfX6z/xa1oiKPHE
- y5EqU++9e+D9gbPsThEA40KAIQaMNONuQFv6rphXC4UXK9hbuizpabscJIBcCstT+gR2HtuKysP
- juuUkxGaMl7wxMTZHQleqdpaj1BApzfJEmhJlxbY5TY+zaAhKCE7FmRzIMEIOEQTi0cM+UreNNn
- frwDdmfnFwh4sJREHHlQDdGWVECyjZbYar7Sfrv1WmeMPxeeCh8/LcWzrRHQxRnw2tvA2a4D8NR
- c7ma8KolSpfVjNgJ0OleioMQBwEZGtoJr7jBKqVpvCDiflI9IHYr2EnI/OMDVmsDQcjOAtzHE2E
- Cqs2ZZL0dk00OuX7g/sw5bXFEAXaWjWvfls2vJrY4HNOaz6u97184uDaehJuW5B2dmjBv87lTJU
- mdY20MyhE/Ql/CExB+A/Xcl6KkN3u1kmsdTu44KKD0LP1RVDdsR5dGWPIvWKEchoHvJnuy6WqMG
- FGu2ZyF+vBxNE+HNtfg==
-X-Proofpoint-ORIG-GUID: IXXixi4WEaMt5ZLipHNyYmLY2v6HWLsd
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-03-09_05,2026-03-09_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 adultscore=0 malwarescore=0 impostorscore=0 suspectscore=0
- spamscore=0 phishscore=0 clxscore=1015 priorityscore=1501 lowpriorityscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2602130000 definitions=main-2603090165
+References: <20260308220804.694227-1-idryomov@gmail.com> <5815cbe7cb93857effc0757a765a15ef1a2e4cc9.camel@ibm.com>
+In-Reply-To: <5815cbe7cb93857effc0757a765a15ef1a2e4cc9.camel@ibm.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Mon, 9 Mar 2026 20:03:04 +0100
+X-Gm-Features: AaiRm51HL0YRC2r_owJYJvilFlquT04-j0pi8bXswmVcN7m39-iJ4ATdFsp76cQ
+Message-ID: <CAOi1vP8-fDD_nQQvbSrqrHzAa-OPqBpNjk3kd53UdqqVzRMR5Q@mail.gmail.com>
+Subject: Re: [PATCH] libceph: prevent potential out-of-bounds reads in process_message_header()
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 
+	"raphael.zimmer@tu-ilmenau.de" <raphael.zimmer@tu-ilmenau.de>, Alex Markuze <amarkuze@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 2026-03-09 at 13:59 -0400, Jeff Layton wrote:
-> On Mon, 2026-03-09 at 13:47 -0400, Mimi Zohar wrote:
-> > [ I/O socket time out.  Trimming the To list.]
-> >=20
-> > On Wed, 2026-03-04 at 10:32 -0500, Jeff Layton wrote:
-> > > This version squashes all of the format-string changes and the i_ino
-> > > type change into the same patch. This results in a giant 600+ line pa=
-tch
-> > > at the end of the series, but it does remain bisectable.  Because the
-> > > patchset was reorganized (again) some of the R-b's and A-b's have bee=
-n
-> > > dropped.
-> > >=20
-> > > The entire pile is in the "iino-u64" branch of my tree, if anyone is
-> > > interested in testing this.
-> > >=20
-> > >     https://git.kernel.org/pub/scm/linux/kernel/git/jlayton/linux.git=
-/
-> > >=20
-> > > Original cover letter follows:
-> > >=20
-> > > ----------------------8<-----------------------
-> > >=20
-> > > Christian said [1] to "just do it" when I proposed this, so here we a=
-re!
-> > >=20
-> > > For historical reasons, the inode->i_ino field is an unsigned long,
-> > > which means that it's 32 bits on 32 bit architectures. This has cause=
-d a
-> > > number of filesystems to implement hacks to hash a 64-bit identifier
-> > > into a 32-bit field, and deprives us of a universal identifier field =
-for
-> > > an inode.
-> > >=20
-> > > This patchset changes the inode->i_ino field from an unsigned long to=
- a
-> > > u64. This shouldn't make any material difference on 64-bit hosts, but
-> > > 32-bit hosts will see struct inode grow by at least 4 bytes. This cou=
-ld
-> > > have effects on slabcache sizes and field alignment.
-> > >=20
-> > > The bulk of the changes are to format strings and tracepoints, since =
-the
-> > > kernel itself doesn't care that much about the i_ino field. The first
-> > > patch changes some vfs function arguments, so check that one out
-> > > carefully.
-> > >=20
-> > > With this change, we may be able to shrink some inode structures. For
-> > > instance, struct nfs_inode has a fileid field that holds the 64-bit
-> > > inode number. With this set of changes, that field could be eliminate=
-d.
-> > > I'd rather leave that sort of cleanups for later just to keep this
-> > > simple.
-> > >=20
-> > > Much of this set was generated by LLM, but I attributed it to myself
-> > > since I consider this to be in the "menial tasks" category of LLM usa=
-ge.
-> > >=20
-> > > [1]: https://lore.kernel.org/linux-fsdevel/20260219-portrait-winkt-95=
-9070cee42f@brauner/
-> > >=20
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> >=20
-> > Jeff, missing from this patch set is EVM.  In hmac_add_misc() EVM copie=
-s the
-> > i_ino and calculates either an HMAC or file meta-data hash, which is th=
-en
-> > signed.=20
-> >=20
-> >=20
->=20
-> Thanks Mimi, good catch.
->=20
-> It looks like we should just be able to change the ino field to a u64
-> alongside everything else. Something like this:
->=20
-> diff --git a/security/integrity/evm/evm_crypto.c b/security/integrity/evm=
-/evm_crypto.c
-> index c0ca4eedb0fe..77b6c2fa345e 100644
-> --- a/security/integrity/evm/evm_crypto.c
-> +++ b/security/integrity/evm/evm_crypto.c
-> @@ -144,7 +144,7 @@ static void hmac_add_misc(struct shash_desc *desc, st=
-ruct inode *inode,
->                           char type, char *digest)
->  {
->         struct h_misc {
-> -               unsigned long ino;
-> +               u64 ino;
->                 __u32 generation;
->                 uid_t uid;
->                 gid_t gid;
->=20
+On Mon, Mar 9, 2026 at 7:49=E2=80=AFPM Viacheslav Dubeyko <Slava.Dubeyko@ib=
+m.com> wrote:
+>
+> On Sun, 2026-03-08 at 23:08 +0100, Ilya Dryomov wrote:
+> > If the message frame is (maliciously) corrupted in a way that the
+> > length of the control segment ends up being less than the size of the
+> > message header or a different frame is made to look like a message
+> > frame, out-of-bounds reads may ensue in process_message_header().
+> >
+> > Perform an explicit bounds check before decoding the message header.
+> >
+> > Cc: stable@vger.kernel.org
+> > Reported-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> > ---
+> >  net/ceph/messenger_v2.c | 9 ++++++++-
+> >  1 file changed, 8 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
+> > index 5ec3272cd2dd..ed618435d33a 100644
+> > --- a/net/ceph/messenger_v2.c
+> > +++ b/net/ceph/messenger_v2.c
+> > @@ -2833,12 +2833,15 @@ static int process_message_header(struct ceph_c=
+onnection *con,
+> >                                 void *p, void *end)
+> >  {
+> >       struct ceph_frame_desc *desc =3D &con->v2.in_desc;
+> > -     struct ceph_msg_header2 *hdr2 =3D p;
+> > +     struct ceph_msg_header2 *hdr2;
+> >       struct ceph_msg_header hdr;
+> >       int skip;
+> >       int ret;
+> >       u64 seq;
+> >
+> > +     ceph_decode_need(&p, end, sizeof(*hdr2), bad);
+> > +     hdr2 =3D p;
+> > +
+> >       /* verify seq# */
+> >       seq =3D le64_to_cpu(hdr2->seq);
+> >       if ((s64)seq - (s64)con->in_seq < 1) {
+> > @@ -2869,6 +2872,10 @@ static int process_message_header(struct ceph_co=
+nnection *con,
+> >       WARN_ON(!con->in_msg);
+> >       WARN_ON(con->in_msg->con !=3D con);
+> >       return 1;
+> > +
+> > +bad:
+> > +     pr_err("failed to decode message header\n");
+> > +     return -EINVAL;
+> >  }
+> >
+> >  static int process_message(struct ceph_connection *con)
+>
+> Mostly, looks good.
+>
+> Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+>
+> But, I have one question. As far as I can see, process_message_header() i=
+s
+> called by __handle_control() [1]. And end pointer is calculated [2]:
+>
+> void *end =3D p + con->v2.in_desc.fd_lens[0];
+>
+> But fd_lens has integer data type [3]:
+>
+> struct ceph_frame_desc {
+>         int fd_tag;  /* FRAME_TAG_* */
+>         int fd_seg_cnt;
+>         int fd_lens[CEPH_FRAME_MAX_SEGMENT_COUNT];  /* logical */
+>         int fd_aligns[CEPH_FRAME_MAX_SEGMENT_COUNT];
+> };
+>
+> Is it possible that end pointer will have value is smaller than p pointer=
+ value
+> because fd_lens value(s) is/are negative?
 
-Agreed.
+Hi Slava,
 
->=20
-> That should make no material difference on 64-bit hosts. What's the
-> effect on 32-bit? Will they just need to remeasure everything or would
-> the consequences be more dire? Do we have any clue whether anyone is
-> using EVM in 32-bit environments?
+I don't think so.  fd_lens values are checked in decode_preamble() and
+the fact that it's a signed integer type is accounted for there.
 
-All good questions. Unfortunately I don't know the answer to most of them. =
-What
-we do know: changing the size of the i_ino field would affect EVM file meta=
-data
-verification and would require relabeling the filesystem.  Even packages
-containing EVM portable signatures, which don't include or verify the i_ino
-number, would be affected.
+Thanks,
 
-Mimi
-
-
-
-
+                Ilya
