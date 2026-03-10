@@ -1,65 +1,84 @@
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99CE339935E
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 12:54:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F8483B0AC1
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 13:22:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773147251; cv=none; b=qLTsnVtS3f2tUbQsM+f9QmAK2ipyXKD0JcUU+QZTQ6IolAcuiBWz6IDN5g7/qQJxw8IgxiwmWIIMxWRagcv3wxGHsNQh6R9pcWGrEsoZv1pCrNE5ZFkmUYE6toTsNBc2ICp8zCX8lhDdM//Gjjjxd4GiigP1NSB7Naj/hr0B4Ng=
+	t=1773148930; cv=none; b=HEDgat1WGfmcf291Lriyd3Dqs8liEMW769hdCxn5PmQbKCizGwEY4S5hVEFPWK5W7ZQKK0bcpweYMCx+x7lGoGR1hUrs9rfUjo0rEPAUpydHqC6ALucIzuPmDzL506jpXeefcFFivB3R4y3jf8G+mTXVxcECGBEoFGENiBgk/Yc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773147251; c=relaxed/simple;
-	bh=TgoJchP8+G/BTHDKgmEWupOwORUqE0/FZPIUEYu9Z9g=;
+	s=arc-20240116; t=1773148930; c=relaxed/simple;
+	bh=7C48eJwQxF2SZSyojjO4eehKdtPdDBqSboD/LkVXOwA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=O8aG2LM7VCS7Wz/IwNrBrr/g2hJpOCimE/HhTxau7hSPVSkC1fpjczhL9EllTL9PKpyYJNgCILnKCg3iPRfyJNrS9GCFhQ0fhXSXLhGoKANeN99o6QGg/s0sEAT48CQM94OlDa/v2z9SZxY7+XSsgauHZI6rUq241V13ubvDBzw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=0+cOK+VW; arc=none smtp.client-ip=209.85.214.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=OFAEdpp1AClATX7ryLlgtAqsPYbgAmgmV2viIYer0WUUN77SCKNsRTVfjvoFlAk6ao+NhCCedi+m1qrFoPBRe71EYDyMIbM1V33vc0DS2DS36oU6YGsnBNgGBYOd7wpUcM3gWQvg8VxEI8YepvzPu7q0rpZkaOssJr42F5HWMQ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ADQQpd+b; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=DLhvlaPb; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="0+cOK+VW"
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-2ae3f822163so83485ad.0
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 05:54:08 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ADQQpd+b";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="DLhvlaPb"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1773148926;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5/adDEbR57gUpYJcJq84OoDVxrrM3xMPFmZCRo0jKXM=;
+	b=ADQQpd+bpcMvyiI6BuK6I/AtlFPVjRaT1jbvm8x0bcg2sn4Mv+l/q+wGsOaa7zGZavpvJL
+	HOw6n0NTrJxN8BVrJlzy+3Oyq/AicE10gafpjzfnHFVMImjvlOy3qRSEO7jpexZVWETsUQ
+	RoRPrXnJkd5ZbUZ0X+x9wM3CIJYSD9c=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-211-pEXhFw1cPbWibpO8eneefQ-1; Tue, 10 Mar 2026 09:22:05 -0400
+X-MC-Unique: pEXhFw1cPbWibpO8eneefQ-1
+X-Mimecast-MFC-AGG-ID: pEXhFw1cPbWibpO8eneefQ_1773148925
+Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-8cd81506677so1375226785a.1
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 06:22:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1773147248; x=1773752048; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=mm6hm+LHoMGo5Ew01sq1dP9YSITnoqIDxYFDqmtgvh0=;
-        b=0+cOK+VWVXA7uE31Sh5y2bmP9hRSr0LFsM2f3kDgfCZ6lyHaVbAytIQCv+2vF+eTEx
-         oUic6e9ZAVnZqnGzIPB8kHUyMA2zwpMw5U/9RUdKEhoG2/xX9/VKIHC9XNEBOVXeDKo9
-         mU/QEMBf02iFKn4H5erDKYU3pW/pqjbI7j+6ZcB0Qt9z/KGqBlkshVJTzzKx2oXtAxlL
-         E18h73O/s3dn+xBEwK308w7agQS5m2RYZzHNrLUdhfdZKeG/e+Dr27X21QpoIwd1KCAl
-         PxttLdZl6PZf2goM/cRw6Bbw12/00xnTFdgSr8ytAWjU88JMxI5kTd4reOjRdKpNjh+N
-         Ix/w==
+        d=redhat.com; s=google; t=1773148925; x=1773753725; darn=vger.kernel.org;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5/adDEbR57gUpYJcJq84OoDVxrrM3xMPFmZCRo0jKXM=;
+        b=DLhvlaPbwaSFQKg/FmxemLJJZifDd7cIIhpxvIrZaWROKjgqKnQK81zS2r/WSu9mvZ
+         1x4TVLhhO06glvOYJXTBYTQHe1C/lCEECiyKmpprEGkSpnbhT/+Xy+wfN5x6paEUKxsd
+         eleVUcWebznHZRscghpqRSurxi7A6fJyr8+SC/oFm4tth2mVEOc19JKZit9S00HY03E/
+         XNzQnAGkguTRFL3rrkTJWt1Ev4Xq7DVoDTHr6r9kNjeVPxV8v11X5FGr4E58NddnvLYv
+         QUA4HTbgZjVMx4thX/P6FGMyY+HUc/G2+EnczacjtLqtmfpojjqt59bZxWNPmXy2pn5x
+         ulpQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773147248; x=1773752048;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=mm6hm+LHoMGo5Ew01sq1dP9YSITnoqIDxYFDqmtgvh0=;
-        b=UPpUu/X3HbeTPcctrgSueHq9OA/kcqhYwoFCQhS8nT3e4eNHoQJ/Oiul7fiR9r7lhM
-         TitPMkvb+ap1DxqGo8EryrbUxhP6URbThr/fmpvF7zdiZd8uufspwduFLIVoVhZp1FBU
-         LBUfS2WIfts6TECqgDVgnRNVVMNq3p3pBO5idVVCumpPx02aKMyuhCd/G88h8RQ7cjIg
-         2qU7VVpoJ0JJy9yfqOlsdXfgDHXHBV77egFZv1LuLd5sQOEba310QsnO5U6uNSxSaC3c
-         WTT87mYuN8XQeefNvL+Yt34YYcX1Dakflo4PcV2mW87EbAGLaHGhtTpiPYvqTJpdBw1e
-         icBg==
-X-Forwarded-Encrypted: i=1; AJvYcCViuvoOWgE3AOeCZzqWXDJjTvN6JuTkKB7YKMYqNVXorV6rBTU6nkmgtIRReDrs34rw+X5lgNnaADfA@vger.kernel.org
-X-Gm-Message-State: AOJu0YxCKoviw5MtP40wImO0XNvwSV5BYlExZkT6R/NvhwX/EgVeBfAY
-	AQqyP3SmRQ4YBX5zKMqmpV/jyOly1sDdcnKScpOl/V45VCqZXXuEO/coTwTVue0KZ/6OqqvuOct
-	K4A/synXH
-X-Gm-Gg: ATEYQzyW97bNwUW6yOq5TrAdEs/aU5VydYcZRBpp5N2/hTYkhJV1ooiBL15H8hqxoXg
-	zCLYD+bVUtXAkFQEsybcDB4Jz+565jhnj8/Z++s0ObDwifSriRqN/G7U4+3VsbTyD6i1iOko7vR
-	DjC+ZI+7BlxCGIHIVkEsU6pnI0il3CTKcpVtgnKKDIFECbLx3eEnVFPQKJbI4J5y5cMv7fIJllM
-	AYAOZuIix9Z1pn6t3v0bcttgh2bvCjxlq4dGoRpY37M6OYGcFVio2OVETWbXTP5BKtDk+eX+rBy
-	0/8pCBaQGqhOc3lIue/YlKXpUoCvyRmlLP6e1E3WRI7BDL0ubxILyC3Gld2r1HEcxjIGQ3aPL0U
-	mjqt0xZWTKRQ8FaSrC8v9RJsX5HFV/ypUlTrX530u0HsnMZMuP7nBFYYynZ/cL4/6gsIAQhdEBw
-	+t4p5vgUaubMp8OJP60ID3zATQpoxP1PrHr15Sg3IfsG4fY/DEMHl4Erkm3w==
-X-Received: by 2002:a17:902:ebd2:b0:2ae:45bb:bc4e with SMTP id d9443c01a7336-2aea30ebe48mr3008685ad.24.1773147247400;
-        Tue, 10 Mar 2026 05:54:07 -0700 (PDT)
-Received: from google.com (10.129.124.34.bc.googleusercontent.com. [34.124.129.10])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c739e0cb73dsm12445679a12.11.2026.03.10.05.53.57
+        d=1e100.net; s=20230601; t=1773148925; x=1773753725;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=5/adDEbR57gUpYJcJq84OoDVxrrM3xMPFmZCRo0jKXM=;
+        b=fRfHleBjopdwYQ4w4MVuP2zTfBjQkuqYWijXZILrPTWMzhApT58obkcXTn83vKlaEF
+         VvE4EseSQlu13b0kK+cs9p27Rxk3QcHNq4FMiaBYbFI2LUg1ST2i5Mor4eNPKRIlKcaU
+         WUYelKPFE/m+GgLvZCpIxkqDC4CpeEvYdlDLduMgYq/CIVp8O0Noloi8n+SP832xyE8U
+         Dga/KIdqF9wiiuULpCXbM0drVhLbsD0qPvOxE7yB1tzroDYE67MqJIDPwxeCGNwxq+4T
+         /lYcZQGM+PbNsTCn+s3lhrSv76UwE028FJd7eMF7qXhl3k0Q4XfEELool3W5CA72hpXS
+         kNFg==
+X-Forwarded-Encrypted: i=1; AJvYcCUEMM2clvnKkE7qnk/WXYxnHxdeHnuUou4cLvBymD3NskIoGX3RQTWDFXtovipklao3rHc/HNSDNnMk@vger.kernel.org
+X-Gm-Message-State: AOJu0YzZzdCVwBuaXhKaAwbybfFikr8IbcA/59hwlAQ43HaIPRhhp/D9
+	v1avACwp7La9Tuu7792v8N6Xd8vBMNHkEb5lHcXsly32EUrXuQxyDKz1hEIJoGV1qHvruJnzL1x
+	CcV5Qv3GUhv5iGhb/BASZzEI0VcH4lvjIRZJgQarVpytNZuUhNRLFOK8KZ9TAoHEYavyV4b1FTA
+	==
+X-Gm-Gg: ATEYQzzxNWIUDZOn1GKLttQIoKpRpGjxf8OQvwdUVPGku3x4YBnD8kX4oAQmktkc5vc
+	thKK8WLpeBkJNzAM/tT1sqcGHpn2zFNDQAa6KA0tB8JpUzZSCstU593BrYivT+Jxa4KixQn+2wm
+	F0ciffgW8YGT2Yw4YXJ/+s4/jgnjZalLy3zv+pSR6c7/LVLdxZ2nUWlknZh7cmjHDEJJHMR7KaT
+	anOjlsQyReZdUKOAsVYKjcH3cNVjxxNFYvUG+8RZV1qckZoRGoU5e2hzrOVhb/K7dMfKkqZT0QU
+	mtw5U9wjMuiQ1xG3hiCD93Hn8JZuhDKLTtNQRqHWk15Nhiufq3Fjj0iCxL7aQrgIpaTdw99ywRM
+	eiixmFh8HlmYrw/Ud98sy+Aw8Z0S69yZji8CfCii8D/IaRjkN25kjf17c
+X-Received: by 2002:a05:620a:3713:b0:8ca:1240:4991 with SMTP id af79cd13be357-8cd6d4f9469mr1830784685a.45.1773148924677;
+        Tue, 10 Mar 2026 06:22:04 -0700 (PDT)
+X-Received: by 2002:a05:620a:3713:b0:8ca:1240:4991 with SMTP id af79cd13be357-8cd6d4f9469mr1830766185a.45.1773148922638;
+        Tue, 10 Mar 2026 06:22:02 -0700 (PDT)
+Received: from redhat.com (c-73-183-52-120.hsd1.pa.comcast.net. [73.183.52.120])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-8cd8576db0esm474754485a.47.2026.03.10.06.21.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Mar 2026 05:54:06 -0700 (PDT)
-Date: Tue, 10 Mar 2026 12:53:54 +0000
-From: Pranjal Shrivastava <praan@google.com>
+        Tue, 10 Mar 2026 06:22:01 -0700 (PDT)
+Date: Tue, 10 Mar 2026 09:21:58 -0400
+From: Brian Masney <bmasney@redhat.com>
 To: Philipp Hahn <phahn-oss@avm.de>
 Cc: amd-gfx@lists.freedesktop.org, apparmor@lists.ubuntu.com,
 	bpf@vger.kernel.org, ceph-devel@vger.kernel.org, cocci@inria.fr,
@@ -88,11 +107,14 @@ Cc: amd-gfx@lists.freedesktop.org, apparmor@lists.ubuntu.com,
 	ntfs3@lists.linux.dev, samba-technical@lists.samba.org,
 	sched-ext@lists.linux.dev, target-devel@vger.kernel.org,
 	tipc-discussion@lists.sourceforge.net, v9fs@lists.linux.dev,
-	Alex Williamson <alex@shazbot.org>
-Subject: Re: [PATCH 46/61] vfio: Prefer IS_ERR_OR_NULL over manual NULL check
-Message-ID: <abAUYvx6VEdSmInm@google.com>
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>,
+	Daniel Lezcano <daniel.lezcano@kernel.org>,
+	Thomas Gleixner <tglx@kernel.org>
+Subject: Re: [PATCH 56/61] clk: Prefer IS_ERR_OR_NULL over manual NULL check
+Message-ID: <abAa9vQg4BSxl1BJ@redhat.com>
 References: <20260310-b4-is_err_or_null-v1-0-bd63b656022d@avm.de>
- <20260310-b4-is_err_or_null-v1-46-bd63b656022d@avm.de>
+ <20260310-b4-is_err_or_null-v1-56-bd63b656022d@avm.de>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -101,42 +123,31 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260310-b4-is_err_or_null-v1-46-bd63b656022d@avm.de>
+In-Reply-To: <20260310-b4-is_err_or_null-v1-56-bd63b656022d@avm.de>
+User-Agent: Mutt/2.2.14 (2025-02-20)
 
-On Tue, Mar 10, 2026 at 12:49:12PM +0100, Philipp Hahn wrote:
+On Tue, Mar 10, 2026 at 12:49:22PM +0100, Philipp Hahn wrote:
 > Prefer using IS_ERR_OR_NULL() over using IS_ERR() and a manual NULL
 > check.
 > 
-> Change generated with coccinelle.
+> Semantich change: Previously the code only printed the warning on error,
+
+Semantic ...
+
+> but not when the pointer was NULL. Now the warning is printed in both
+> cases!
 > 
-> To: Alex Williamson <alex@shazbot.org>
-> Cc: kvm@vger.kernel.org
+> Change found with coccinelle.
+> 
+> To: Michael Turquette <mturquette@baylibre.com>
+> To: Stephen Boyd <sboyd@kernel.org>
+> To: Daniel Lezcano <daniel.lezcano@kernel.org>
+> To: Thomas Gleixner <tglx@kernel.org>
+> Cc: linux-clk@vger.kernel.org
 > Cc: linux-kernel@vger.kernel.org
 > Signed-off-by: Philipp Hahn <phahn-oss@avm.de>
-> ---
->  drivers/vfio/vfio_main.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/vfio/vfio_main.c b/drivers/vfio/vfio_main.c
-> index 742477546b15d4dbaf9ebcfb2e67627db71521e0..d71922dfde5885967398deddec3e9e04b05adfec 100644
-> --- a/drivers/vfio/vfio_main.c
-> +++ b/drivers/vfio/vfio_main.c
-> @@ -923,7 +923,7 @@ vfio_ioctl_device_feature_mig_device_state(struct vfio_device *device,
->  
->  	/* Handle the VFIO_DEVICE_FEATURE_SET */
->  	filp = device->mig_ops->migration_set_state(device, mig.device_state);
-> -	if (IS_ERR(filp) || !filp)
-> +	if (IS_ERR_OR_NULL(filp))
->  		goto out_copy;
->  
->  	return vfio_ioct_mig_return_fd(filp, arg, &mig);
-> 
 
-Reviewed-by: Pranjal Shrivastava <praan@google.com>
+With the minor typo addressed:
 
-The cleanup alone looks fine, but I'm not sure if the maintainers would
-be happy about the tree-wide spam, since each patch might go through a
-different tree. I'd wait for Alex's preference/ack on that.
+Reviewed-by: Brian Masney <bmasney@redhat.com>
 
-Thanks,
-Praan
