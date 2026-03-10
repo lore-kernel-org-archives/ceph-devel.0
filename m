@@ -1,234 +1,218 @@
-Received: from mail-dy1-f173.google.com (mail-dy1-f173.google.com [74.125.82.173])
+Received: from mail-dl1-f42.google.com (mail-dl1-f42.google.com [74.125.82.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E58633E1CF9
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 20:00:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54CFC31B828
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 20:15:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.42
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773172806; cv=pass; b=WAch5V3u3YCTA8fSaRWSu5F6axiM2oe3b91WXs15BOcGsfVcLsl53M+gbTho3rpljStHm25HeyB+ZWexVfbdCkjXnNWR4VwwScMg5bqQ1eDy619A9plFKGZmyglMcnLdqb0Kcgv+09Lk/BrDTtk+pd9XZhSpz8EX0ec5CfecDkk=
+	t=1773173732; cv=pass; b=ouZTCuT3usm9+zleMFvoglQytqUKpqauutLy89jmG4DvpkWDcs2awpbTo2buqTTNdE4bWc2jszzqcPB4ETRWqzpZt43Rr/dJztwZOPxli2aSLN2pD/blVfyxDVAfBPNdun7qHd1iOcft2aaibKEeMvb/RGUxRWvr5g+pO7qkUbo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773172806; c=relaxed/simple;
-	bh=idb6D+oz1sMkRSsKyBwIuhLzPJ1DB8eh0aCUtCAgr/k=;
+	s=arc-20240116; t=1773173732; c=relaxed/simple;
+	bh=7JQU5p+6t+bMhEiDC8ETgDZ28PSGAqoxjB7XgazXNwA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=qkji7Y41OnNr7rh+r5+HaiTVOl3psuWhU4ub01piXNiCqrlB96cHS3O/GW/ERbWF46auehw1ruRaCwaGQatu0JS6aNRQZT5/zXykwVjji7O5I0JUA9504k47G+YaFsxJ2UlM2Mw1IOKeQG6T61Rn87QsBD1p+swR7OXVJ8sVbA8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ui+Jd1F7; arc=pass smtp.client-ip=74.125.82.173
+	 To:Cc:Content-Type; b=u9GelgzANEuPmajZIxdW4b74Wgft50sH9s9fLna8RSY4KrEyCPi8oSmh1EyMOL53kg9bRBUzDxcrcB8gMb8xDVoS5Mx5zRDmZwowRmOv1WZFxo8d67AfXXYP9ppxn1jxFpfRUa8roGurbLXhwH2ABTwor+emenSGAdJp/uAPKyE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Tg68W1KK; arc=pass smtp.client-ip=74.125.82.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ui+Jd1F7"
-Received: by mail-dy1-f173.google.com with SMTP id 5a478bee46e88-2ba9c484e5eso13524623eec.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 13:00:04 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773172804; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Tg68W1KK"
+Received: by mail-dl1-f42.google.com with SMTP id a92af1059eb24-1279eced0b9so13509563c88.0
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 13:15:31 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773173730; cv=none;
         d=google.com; s=arc-20240605;
-        b=SK96sqEDuSUiK0Dt/WcE1dKTuvK8cZCp38+W0PAy0yEF07d8OpgW0/5kSLCeg/F9x4
-         qd7jcSn1LmMDUqsWjBh+8YrPZvXIeP4kyqhOWMOz29jlz4u17ely0d9mqh47SbFNrmaQ
-         L6CtwtlYNtSWh9/Xk77wEwk9CTkS+bG8TQ37knplOasYRWeXVTtpUZOJTadOhlkG66r6
-         3cNOuIdOjCiqHnaHhdcW3B7hlh/Rk/Tk5ZXQRvS/085ecyubLtAkIIfV6XVwPIxuS1xj
-         sq7IVC05v3h9hzF42UfSgBZjiibFwcZToaL852GdIGNSB2M2lmYczirIq+XcrIWpw7Ri
-         0XYg==
+        b=UlNlAXIxlLR16iai6+zWAsWmiSlnPb9NbOO8T9u3nlwH5BS6ng0gvS+YcVP645j+4A
+         5RWzIl2ChmQOm6WaMI1AZ/dFsBbHhSJtEBycN9Yyol7eILTPFq85jRp3QYKtplwxUjFu
+         CSfbT0P9rltezfO2uQ47p4TqGV4ZzmrBDKI6+fdPhcHHHqgfteZ1rIJ+IBHVAut972jq
+         FQiCSZpdeFs5vZZ4uQyHEwp2tEedcshHs7zMb7Qmb8l8XlayBlu22wjKbIQB10GE0v9A
+         OBO9eEcrDfNh/M7jXy2U8kM/bLPsTDxfQAsyOwRzW6xU58aG0GWJiRQRZHUNIzBNQvt2
+         IwGQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=OduxUVJhEHxBq3d0ED4CaS6I7KLyBwki3XSRlcfEc4I=;
-        fh=xuUd3x3Q7uGH5J7UDthtUDdMfKD0btWIXx/siNysgzk=;
-        b=cpJ+IjORMIrr64OCSpqR9bRk7vU0RMcmPWpOc+UGDPAF0YY4auJSrtejBPzOkiX0L9
-         n+0s2jKz1q0D2dHeUZVZk2S/rji9KGtQTnQAo8vk1estjiCv4ARxoeKH9cbwtt3s+FwL
-         ih2oJg5MGsG1oXhgEhuMKiDAoFccYrjq7CurfSiPbGMzCXfkdvsSJHI6RLFoTOIUzvA0
-         CAD5nz2uN4vz0H2Rkodt4oIhoduAX5pNjLJ8vDMe9NJLuMkFcI+f9vlpKDPXrUTl6Rol
-         Mt1DLXurkV1yCRq0SdpLDgqBmiTmd26BNXTjw+37CybxeqiaMz4HqbrIIgFJYHfjwL/5
-         Jxvg==;
+        bh=BYHXiQrocNln+bJpY9YDkRcCEgLP9SshpANek1qf+A4=;
+        fh=cINBpnWJwMVJy3zzSFq+nb0eSpeAq1g8S5rvQRM/qkY=;
+        b=WKLdUlMl7sgV2lfKihGAaoedP9RzpQsqfCIohNTf8XiF3pcsPptt+RKI7VMg6LVTvt
+         or0ERPkFqj6bB/3SL87kghP0RToDvgK/AXSuhNLtkoDUw5Iu8RCDbNVDRk1RcA0v6xRH
+         9cncAiZMeV2D7DVftRxy3Seb3X5qiKiMz6oQABg9+39D22ljQ0/NBcSKx2ykQ/9PESVY
+         VMOaKU5zA/E44GtcHI+jdQjnBNZyKYrxQqfqvnmGUsr0CyMGUomtOKSmVtEXtf2eEYFT
+         kvCRtnphdMqfGFhHdG8hp1XdVFavvN2/QEQNMvzRRXCEaYfoFuZUd2yHCCnMgxkih4LI
+         Ivkg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773172804; x=1773777604; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1773173730; x=1773778530; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=OduxUVJhEHxBq3d0ED4CaS6I7KLyBwki3XSRlcfEc4I=;
-        b=Ui+Jd1F7E5eeYfZ+AaKy9GYjGSmlo4n9f8RXeAZ7tAyUnqkiKHG/iK3btgI/kHcvm8
-         QjkdLQ1gP2aTJYRCTkEGYxHyJcVYW8WwgBQuH9MITo5sSRSxwwy4maSVyzDsKb2mZxI8
-         kDXnBiu22/nNqA8ejbDqoaYSkukm1wTu0VMCejsxcs+1e199A0dE0FG6M+7m+jC7jveW
-         hJCZ037o2xjF5zSk0LHDcp6rkU1NOTzPgdL2DPVNvLNp7WAojq0H09N7OJ/cmTCFMu2h
-         c1rzSeMSz2oIHGthRjfIZei1NHbW68VF1rrH5h3bsqywdw7gOKYmWqh2NcUj3Z2T5f6C
-         9TQQ==
+        bh=BYHXiQrocNln+bJpY9YDkRcCEgLP9SshpANek1qf+A4=;
+        b=Tg68W1KKHIRsYmH32qHQhXivxZDJ6UlR+1hBGd3L/+p2WicB82TJvzxqFlf27K7Zh/
+         ML/EW/2C/ZkJrcelt5rjENMGq6K8EsMfE+BNUSshpkPHjwd1Db/NNEJQgCreIUGzCu5z
+         GM/B1gMauxdwcuHcix+p2Wkz4X14Pg5DUhQOwbf6niPbA6riHcck0ULEfx5p9HxeEBge
+         2vdZQ5yWx3wtmMXaYBWT9cwFWdW57mff/LcT12We20QkM5aKIJ4zQfLsi0XTNtqIaNZG
+         jhIy3S8XKLywXCAa8lagr65Az8wAJrIwl61/XHpw4VVDrIuj2l8K62ChbfR1oRYnNDLM
+         N1lA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773172804; x=1773777604;
+        d=1e100.net; s=20230601; t=1773173730; x=1773778530;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=OduxUVJhEHxBq3d0ED4CaS6I7KLyBwki3XSRlcfEc4I=;
-        b=LqfM0v7mu5+x7Qu/4ctZ/oHm8PSvgzyIrgHI4XrNRA+hhJBWkhfhI0O3sxwoJ6Cioh
-         md0VETs7BroXLQAJKVRJ22vtBVBha1gmUKb9635CacUxSh6Jj1BePKn0N+IM+sN3uGv8
-         t3Tp6nAq3xmVWl5WMvhZfXY45o0KvmiDh9O3xqLaZ+8srO7iek7mecLYfSeFAjFaVIJB
-         l6lNAGxMFMlcCXOaNlbZMubNPv6JZ8sg5gUY5/iWkFmHljTVfaQD/zh0U9+9tB5WEh99
-         51iFsEVG40tGfHSk0hAyN/4fEWvGySFN8eYQfKgdhXiSX4Ln/6PTzTp36BTGjgRX5ghX
-         1Msw==
-X-Forwarded-Encrypted: i=1; AJvYcCX7FXbRnWsG71Hlmurftv9Krp5+RcPQqngL8WPq7W6goosKO6C3zVuzuBieFi6t/usEg3je6bnmz0/h@vger.kernel.org
-X-Gm-Message-State: AOJu0YzDtsRCDhZCmEU+ifxLDhuHYKfV8YbWocnGfJ6QESVv7WhCcjXW
-	41A4l92E/iPwvNWsfGoInX3LcZg3YNE9GmWFnuS8vB8OZWE8iI1SQA8De+Yq66Zha455Zp5uAsy
-	Qbx9F1pagv6ozTPZTJZpgJu0LF5pxreQ=
-X-Gm-Gg: ATEYQzyqYv/NKcHT9Oi2gThGewN2cyVDMZfEhjs+iLBT54gBXYn+CmssOer4wyKTGIb
-	T8AO9ySbTJdx0B2FZ8XH+o7GZj4hn8IQsuaxpg9y6tv3JD4t89xawBrs74A7pBA2sLajL1I4OF2
-	VSH7+oJm98e+cmTrWBUwETpfVSDAp/f+Yxc7MtJPTHD8ZOibWgAidpfZnNcu6Syw9QiT1ImUddP
-	8YX6lMarzbPHExxyGkdtd3DOXVhMeIYrChu7tTiRlYYBfp9yChG1aYxSvL4jkU5VVb8MCSmpRMk
-	LO4AoW8=
-X-Received: by 2002:a05:693c:3001:b0:2b7:1d38:3596 with SMTP id
- 5a478bee46e88-2be4dfd0933mr7144905eec.4.1773172803921; Tue, 10 Mar 2026
- 13:00:03 -0700 (PDT)
+        bh=BYHXiQrocNln+bJpY9YDkRcCEgLP9SshpANek1qf+A4=;
+        b=MtR+w4DRkHq44l+2AvDDmuS+tfOp52RPes3WBTMjItqMYWzSz4g5YbnzuABZsc3RZX
+         Q5SoCKUXtxdRIVeCRtY0PsPng38y8lOYfwOUWksh36/Bb5g/cSXKoE6no/ipsQUQRHGU
+         Eys4pwqGS5v7BWFAjXfHDMATDK1tnFHZa6Hu4NPBPCaCORehp2XIN0N1sn40FvEx3knU
+         mNZCytoVtljj0bpPqC7mjvSbZodAjRtXsv98q9pkDAmc42+dJKZerSJnH7nsijI//gh+
+         ECbHdyKyP6TGuE7YF5d59Q6NJWJr5qnC0bWu6D8mq3R3eTuP6duQHdDIquI7fWnk2gTC
+         +z0Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUrtfJToPRhoTEOFODSughY2jPwXvQ3Bfod3o2BbOIxB17cGSHKaUMiGBbUWpxXHoq/MGkY0RMJBfey@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx/LC3oGiLpb+jl9AhgpxjQdvtZXd1Zln6I1/3tlGMdaBtqgw+6
+	nQyDCh52qw90HF3dISd4RAWqTe1noQMtUB+XDtrFMimC1eqQtxSLdBkL8dRbQifHXYsojwhMTxj
+	14NM13yWnoCHl4K8zRLLRfPP+BPV7UP4=
+X-Gm-Gg: ATEYQzwF34IbLs8gc7gY8q8q3HAPz0f7/YiaB1Ov8Zo3TZnP5ytP4F+FVTYy1KcwxwL
+	JYM7kaGVgA7hFNMkThernOOcMRP9HTDvEf1ilLgdKecEBXTKf0nvC0QPkEgTJivEMUTdVul2kIM
+	uHPI7AWmSCzDTWcRxyjAN0GLyyBu39Aoo5zx9iujUpyZTxGj1u8pi6eVRudb5PqDwY5rg6vBN53
+	Od0h+g4vx7S4gRT7XU9qtWEU2yIBuNg6Y3DGK4jwvA5vjAqBgAsTOWOET+RmklyWAB1ZB3b3Xi8
+	qQRLul8=
+X-Received: by 2002:a05:7022:160b:b0:128:cbc7:4c1d with SMTP id
+ a92af1059eb24-128e78bb317mr30452c88.44.1773173730310; Tue, 10 Mar 2026
+ 13:15:30 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260308221142.695096-1-idryomov@gmail.com> <a02c4542718e9647072bcb7661f4d7834c64fcaa.camel@ibm.com>
- <CAOi1vP8nUc_H_WAc=iGxcQAwsJBD1AtXp0gyMekm9W8U3boa8w@mail.gmail.com> <72ec1d6227ebf4a07e3fa4c487ec274bc3e20e1a.camel@ibm.com>
-In-Reply-To: <72ec1d6227ebf4a07e3fa4c487ec274bc3e20e1a.camel@ibm.com>
+References: <20260310142815.3747443-1-raphael.zimmer@tu-ilmenau.de>
+In-Reply-To: <20260310142815.3747443-1-raphael.zimmer@tu-ilmenau.de>
 From: Ilya Dryomov <idryomov@gmail.com>
-Date: Tue, 10 Mar 2026 20:59:52 +0100
-X-Gm-Features: AaiRm507YXRHgNELUYNTh6VMwzKmiIidC28ix5NbNuUjpxuSdR9V5YXDRSuRWXs
-Message-ID: <CAOi1vP81eV8tMOQ3UEjA47napt9AsHyOXSWii4Qk_4feVcOCgQ@mail.gmail.com>
-Subject: Re: [PATCH] libceph: reject preamble if control segment is empty
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: "raphael.zimmer@tu-ilmenau.de" <raphael.zimmer@tu-ilmenau.de>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alex Markuze <amarkuze@redhat.com>
+Date: Tue, 10 Mar 2026 21:15:18 +0100
+X-Gm-Features: AaiRm50YMkWy5Z0S7MdiyTkFnUxR6bKMMyiICz0cdrFmMPF33zycv0SY8ml_QMY
+Message-ID: <CAOi1vP9sVPbZ7yk=Ae85xL9-5mLE=H6iSQYR6-zDcWVQ8afYaA@mail.gmail.com>
+Subject: Re: [PATCH v2] libceph: Fix potential out-of-bounds access in ceph_handle_auth_reply()
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Cc: Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Mar 10, 2026 at 8:08=E2=80=AFPM Viacheslav Dubeyko
-<Slava.Dubeyko@ibm.com> wrote:
+On Tue, Mar 10, 2026 at 3:28=E2=80=AFPM Raphael Zimmer
+<raphael.zimmer@tu-ilmenau.de> wrote:
 >
-> On Mon, 2026-03-09 at 21:46 +0100, Ilya Dryomov wrote:
-> > On Mon, Mar 9, 2026 at 8:18=E2=80=AFPM Viacheslav Dubeyko <Slava.Dubeyk=
-o@ibm.com> wrote:
-> > >
-> > > On Sun, 2026-03-08 at 23:11 +0100, Ilya Dryomov wrote:
-> > > > While head_onwire_len() has a branch to handle ctrl_len =3D=3D 0 ca=
-se,
-> > > > prepare_read_control() always sets up a kvec for the CRC meaning th=
-at
-> > > > a non-empty control segment is effectively assumed.  All frames tha=
-t
-> > > > clients deal with meet that assumption, so let's make it official a=
-nd
-> > > > treat the preamble with an empty control segment as malformed.
-> > > >
-> > > > Cc: stable@vger.kernel.org
-> > > > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> > > > ---
-> > > >  net/ceph/messenger_v2.c | 17 ++++++++---------
-> > > >  1 file changed, 8 insertions(+), 9 deletions(-)
-> > > >
-> > > > diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
-> > > > index c4ddf7911f7d..50f65820f623 100644
-> > > > --- a/net/ceph/messenger_v2.c
-> > > > +++ b/net/ceph/messenger_v2.c
-> > > > @@ -392,7 +392,7 @@ static int head_onwire_len(int ctrl_len, bool s=
-ecure)
-> > > >       int head_len;
-> > > >       int rem_len;
-> > > >
-> > > > -     BUG_ON(ctrl_len < 0 || ctrl_len > CEPH_MSG_MAX_CONTROL_LEN);
-> > > > +     BUG_ON(ctrl_len < 1 || ctrl_len > CEPH_MSG_MAX_CONTROL_LEN);
-> > >
-> > > Frankly speaking, I cannot follow from the commit message why 0 has b=
-een changed
-> > > on 1. So, why? :) It will be great to have more clear explanation of =
-this
-> >
-> > Both branches of prepare_read_control() set up a kvec for the CRC even
-> > if ctrl_len =3D=3D 0:
-> >
-> >     add_in_kvec(con, CTRL_BODY(buf) + ctrl_len, CEPH_CRC_LEN);
-> >
-> >     add_in_kvec(con, con->v2.in_buf, CEPH_CRC_LEN);
-> >
-> > This instructs the main loop to read CEPH_CRC_LEN bytes off the wire
-> > and essentially translates to an implicit assumption that the control
-> > segment isn't empty (i.e. ctrl_len > 0).  This assumption holds in real
-> > life (i.e. when the client is talking to actual Ceph servers) but not
-> > when incoming frames are tampered with.  The patch made that assumption
-> > explicit -- we won't even admit frames whose control segment is empty
-> > anymore.
-> >
+> This patch fixes an out-of-bounds access in ceph_handle_auth_reply()
+> that can be triggered by a message of type CEPH_MSG_AUTH_REPLY. In
+> ceph_handle_auth_reply(), the value of the payload_len field of such a
+> message is stored in a variable of type int. A value greater than
+> INT_MAX leads to an integer overflow and is interpreted as a negative
+> value. This leads to decrementing the pointer address by this value and
+> subsequently accessing it because ceph_decode_need() only checks that
+> the memory access does not exceed the end address of the allocation.
 >
-> As far as I can see, we have several calls of head_onwire_len:
+> This patch fixes the issue by changing the data type of payload_len to
+> u32. Additionally, the data type of result_msg_len is changed to u32,
+> as it is also a variable holding a non-negative length.
 >
->     net/ceph/messenger_v2.c
-> [1]        line 1348
-> [2]        line 1372
-> [3]        line 1409
-> [4]        line 1436
-> [5]        line 1480
-> [6]        line 1517
-> [7]        line 1787
+> Also, an additional layer of sanity checks is introduced, ensuring that
+> directly after reading it from the message, payload_len and
+> result_msg_len are not greater than the overall segment length.
 >
-> The [1-6] cases have ctrl_len always bigger than 1. And only case [7] loo=
-ks
-> differently:
+> BUG: KASAN: slab-out-of-bounds in ceph_handle_auth_reply+0x642/0x7a0 [lib=
+ceph]
+> Read of size 4 at addr ffff88811404df14 by task kworker/20:1/262
 >
-> static int prepare_read_control(struct ceph_connection *con)
-> {
->         int ctrl_len =3D con->v2.in_desc.fd_lens[0];
->         int head_len;
->         void *buf;
+> CPU: 20 UID: 0 PID: 262 Comm: kworker/20:1 Not tainted 6.19.2 #5 PREEMPT(=
+voluntary)
+> Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.16.3-debian=
+-1.16.3-2 04/01/2014
+> Workqueue: ceph-msgr ceph_con_workfn [libceph]
+> Call Trace:
+>  <TASK>
+>  dump_stack_lvl+0x76/0xa0
+>  print_report+0xd1/0x620
+>  ? __pfx__raw_spin_lock_irqsave+0x10/0x10
+>  ? kasan_complete_mode_report_info+0x72/0x210
+>  kasan_report+0xe7/0x130
+>  ? ceph_handle_auth_reply+0x642/0x7a0 [libceph]
+>  ? ceph_handle_auth_reply+0x642/0x7a0 [libceph]
+>  __asan_report_load_n_noabort+0xf/0x20
+>  ceph_handle_auth_reply+0x642/0x7a0 [libceph]
+>  mon_dispatch+0x973/0x23d0 [libceph]
+>  ? apparmor_socket_recvmsg+0x6b/0xa0
+>  ? __pfx_mon_dispatch+0x10/0x10 [libceph]
+>  ? __kasan_check_write+0x14/0x30i
+>  ? mutex_unlock+0x7f/0xd0
+>  ? __pfx_mutex_unlock+0x10/0x10
+>  ? __pfx_do_recvmsg+0x10/0x10 [libceph]
+>  ceph_con_process_message+0x1f1/0x650 [libceph]
+>  process_message+0x1e/0x450 [libceph]
+>  ceph_con_v2_try_read+0x2e48/0x6c80 [libceph]
+>  ? __pfx_ceph_con_v2_try_read+0x10/0x10 [libceph]
+>  ? save_fpregs_to_fpstate+0xb0/0x230
+>  ? raw_spin_rq_unlock+0x17/0xa0
+>  ? finish_task_switch.isra.0+0x13b/0x760
+>  ? __switch_to+0x385/0xda0
+>  ? __kasan_check_write+0x14/0x30
+>  ? mutex_lock+0x8d/0xe0
+>  ? __pfx_mutex_lock+0x10/0x10
+>  ceph_con_workfn+0x248/0x10c0 [libceph]
+>  process_one_work+0x629/0xf80
+>  ? __kasan_check_write+0x14/0x30
+>  worker_thread+0x87f/0x1570
+>  ? __pfx__raw_spin_lock_irqsave+0x10/0x10
+>  ? __pfx_try_to_wake_up+0x10/0x10
+>  ? kasan_print_address_stack_frame+0x1f7/0x280
+>  ? __pfx_worker_thread+0x10/0x10
+>  kthread+0x396/0x830
+>  ? __pfx__raw_spin_lock_irq+0x10/0x10
+>  ? __pfx_kthread+0x10/0x10
+>  ? __kasan_check_write+0x14/0x30
+>  ? recalc_sigpending+0x180/0x210
+>  ? __pfx_kthread+0x10/0x10
+>  ret_from_fork+0x3f7/0x610
+>  ? __pfx_ret_from_fork+0x10/0x10
+>  ? __switch_to+0x385/0xda0
+>  ? __pfx_kthread+0x10/0x10
+>  ret_from_fork_asm+0x1a/0x30
+>  </TASK>
 >
->         reset_in_kvecs(con);
->         if (con->state =3D=3D CEPH_CON_S_V2_HELLO ||
->             con->state =3D=3D CEPH_CON_S_V2_AUTH) {
->                 head_len =3D head_onwire_len(ctrl_len, false);
->                 buf =3D alloc_conn_buf(con, head_len);
->                 if (!buf)
->                         return -ENOMEM;
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+>  net/ceph/auth.c | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
 >
->                 /* preserve preamble */
->                 memcpy(buf, con->v2.in_buf, CEPH_PREAMBLE_LEN);
+> diff --git a/net/ceph/auth.c b/net/ceph/auth.c
+> index d38c9eadbe2f..ee85c5e45773 100644
+> --- a/net/ceph/auth.c
+> +++ b/net/ceph/auth.c
+> @@ -205,9 +205,9 @@ int ceph_handle_auth_reply(struct ceph_auth_client *a=
+c,
+>         s32 result;
+>         u64 global_id;
+>         void *payload, *payload_end;
+> -       int payload_len;
+> +       u32 payload_len;
+>         char *result_msg;
+> -       int result_msg_len;
+> +       u32 result_msg_len;
+>         int ret =3D -EINVAL;
 >
->                 add_in_kvec(con, CTRL_BODY(buf), ctrl_len);
->                 add_in_kvec(con, CTRL_BODY(buf) + ctrl_len, CEPH_CRC_LEN)=
-;
->                 add_in_sign_kvec(con, buf, head_len);
->         } else {
->                 if (ctrl_len > CEPH_PREAMBLE_INLINE_LEN) {
->                         buf =3D alloc_conn_buf(con, ctrl_len);
->                         if (!buf)
->                                 return -ENOMEM;
->
->                         add_in_kvec(con, buf, ctrl_len);
->                 } else {
->                         add_in_kvec(con, CTRL_BODY(con->v2.in_buf), ctrl_=
-len);
->                 }
->                 add_in_kvec(con, con->v2.in_buf, CEPH_CRC_LEN);
->         }
->         con->v2.in_state =3D IN_S_HANDLE_CONTROL;
->         return 0;
-> }
->
-> So, we do reset_in_kvecs(), call head_onwire_len(), and we do add_in_kvec=
-() only
-> after that. And ctrl_len value is defined by con->v2.in_desc.fd_lens[0]. =
-What is
-> the guarantee here that ctrl_len should be bigger than 0? Do we have prot=
-ection
+>         mutex_lock(&ac->mutex);
+> @@ -217,10 +217,14 @@ int ceph_handle_auth_reply(struct ceph_auth_client =
+*ac,
+>         result =3D ceph_decode_32(&p);
+>         global_id =3D ceph_decode_64(&p);
+>         payload_len =3D ceph_decode_32(&p);
+> +       if (payload_len > len)
+> +               goto bad;
 
-Hi Slava,
+Hi Raphael,
 
-decode_preamble() is where con->v2.in_desc.fd_lens array is populated:
+Using ceph_decode_need() would be preferred for consistency with
+e.g. process_auth_reply_more() and other code:
 
-    for (i =3D 0; i < desc->fd_seg_cnt; i++) {
-            desc->fd_lens[i] =3D ceph_decode_32(&p);
-            ...
-    }
-    ...
-    if (desc->fd_lens[0] < 1 ||
-        desc->fd_lens[0] > CEPH_MSG_MAX_CONTROL_LEN) {
-            pr_err("bad control segment length %d\n", desc->fd_lens[0]);
-            return -EINVAL;
-    }
+  -       if (payload_len > len)
+  -               goto bad;
+  +       ceph_decode_need(&p, end, payload_len, bad);
 
-prepare_read_control() won't be called if decode_preamble() fails.
-This is what is meant by "reject" in the title of the patch.
+If it's fine with you, I can make this change when applying the patch
+to save another posting.
 
 Thanks,
 
