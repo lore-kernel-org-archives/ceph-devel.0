@@ -1,127 +1,157 @@
-Received: from mail-dl1-f42.google.com (mail-dl1-f42.google.com [74.125.82.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C043385528
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 11:15:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773141311; cv=pass; b=KNqpAasTmiGtrA8ZkVQgjeeJ4XRMHi9/JGjq6M7hrS90z+EPJYp1XuVIG/cMMKBozdoqbI6jNqoDu40Ann6OFLk05F6VUmkMkFD9Yd2z3ljGa44ZbiLUDodKjXpYau+R00+2Ag3kCHuD+uFSsZ9aBDayd8w9UWvnorcnCL0WNSg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773141311; c=relaxed/simple;
-	bh=Q4ib8gUIRl7s8kF9Gl9OyKG76XX49+I9rBDHVIBBGzI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ALgN0YX8m6ohQB+bc6BnreXeE57opMnjHpFRrvCRlaXhTaOBbMjVeigdexSdflbh4HqSCu4ftiqhoLabLbwVdWT0TdA8CChu3HfbhYEVuO5pIoxOmB9jH8zv+LoCWCP5xqWQdQX5+sHrfei2p2pl47Waxou7G4VDuYwFutvxbmg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fFfeBN6O; arc=pass smtp.client-ip=74.125.82.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 689413876B0;
+	Tue, 10 Mar 2026 11:24:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773141858; cv=none; b=VeTUd4UCVxmrskyMzm87HzIkcQDWfwEELIyEPvzvjZ1z/CToxLjseW9v+5dVrxC0FspmgHKpOYBnGHonHhNYInGF6TpRY3/09ZBDNDsEQ+UforgiDsXIBUu7r+p5CxXdnNwcjB9NiEZ0c6dOD6zKDewFZT5C95Rk+QSbiaE9NP8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773141858; c=relaxed/simple;
+	bh=xT53Ttf/NyogikS/gfdkFymB7LtDXRO0Yz6j+bwKsPU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aX1r5lG+WDjqGkk0Fwqqs1hScgJi2aitgJJMRJiBwd2iN1Yn+leS1n+Ocle9dUuoq/aZRRv8QyaTfSaIqHHb0GsFiE2JNGWQHzztFTZdLlqS7cLwTQq3n+LEpqNaqTZtmSs2KQ3Ebcwg2PJ00Bj8qnW5qMgigTuTWtOeqo/7388=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JkOoejQb; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fFfeBN6O"
-Received: by mail-dl1-f42.google.com with SMTP id a92af1059eb24-128cba36eceso1434833c88.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 04:15:10 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773141309; cv=none;
-        d=google.com; s=arc-20240605;
-        b=ELseXrh6l43Gn9P+ppZC1DmWhvCNCnvfGUQ8vj37Dleb8FORPdc6ze4hnhc84xMvaO
-         KZuuMMjF7G2dvmPx8zgWkUgsPxdf6orqBzOrB6ulhfOmvV/P3l+RTDcmlCtE8AUKC80j
-         adlCM9aMditp+q2vxjbz7k4qYfO081HHXXt7IXO1pOnIRk34dKiqiOTENtg+pMoHO7gZ
-         p0U/VnDwEpI0sQ1I8KwdbV9wff4zLcEYByc+pyXD5E5TFIjhKugJ/wc8nfmAJJXLgl7R
-         B1e1pnQockLSRPLrMxOuwE1zFowXyNPsbvp2KVabsDjpfFBoE+cHSOVfBrWZOSvFRxWH
-         H9mQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=pWGnhgVXkTa7LbWD/8Ldc3qdEVL8etFyKY3NfyYZWE0=;
-        fh=qRHVn4YWLV5ka8wlyBXVswyhP5ChimidqL60uAjCDMQ=;
-        b=Cx9Zh74ZIsJ/aK8EqaNPXgQXFV2hpTGeLNxsEKVWtWdVw+2Ezw2jEB2wrNxrSpiqdV
-         5BHRIEHXCgD5es6lJ0s7LcEuCrrEWY6+eVvdE1QhT7ME5sUNEGU/o4koQgHrotmF/knY
-         /ChcUF4CibakRHRyyr3c4g5PJNk/mbh9B5jjDphtsaHsmIYACy6Cx3WeF7zm4FbBvnxS
-         4J50uLAgCs2Egdk1c3/v9JZYqko635zSc+4pas4W7obiQtHb34GC3vWOQJRdDDWDaddP
-         HQbnZotcjD6gMwShwXDXZP2AtJCqljybDVHdtGNnjtXT0vcUmFVRs1YX/BnwkRdDyU3a
-         lWtQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773141309; x=1773746109; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pWGnhgVXkTa7LbWD/8Ldc3qdEVL8etFyKY3NfyYZWE0=;
-        b=fFfeBN6OCHmxIVCQKSkJMegYOOFKWNvt4wbypFGnJLWpulSuoVJ7f4Pdu+/M2XTy+V
-         cDpEk+TH0rJ+98HyoIyQEjUzF7VtsgzmcOLMr6TGsRMaTPOeKB0EQMc2tLTtXaZ/+f6H
-         9ZPCc5kHVwDiqyIhgtu4isJ3drqlByq6+eOgcn3KSnvAhWRivINreElBz0eNieRsrmpX
-         VKIEcVFlVEtyCN7u4uqlZub0fPxYszcOvzULFCEhc9wIb6vCVr5gbqVGH7lEu20uqsEE
-         Tk6MsJxY31om9u15dBGXdQ1UsRYGoKgcplkSWeBDre2aUoe4ZtMTbpf6TSEELhh2cwJb
-         uWxw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773141309; x=1773746109;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=pWGnhgVXkTa7LbWD/8Ldc3qdEVL8etFyKY3NfyYZWE0=;
-        b=CsblQHWon3nF1/wtysOyb4vGGoyRp0AYacEzzcyeXlMQKg5VmGQi50NPLeE+EnwjGF
-         HoeA1U9HGcKacjlqvMEj2VAAORZZE2BMY0CuISNafVmB6+IqFWnEWuWtHPq+zwuIh2ma
-         fHmh4qoMNN+tVj87elQL7YGlNuZ6BNzrw2yOogZrdgXl9nJMTGJBMQlCiwq3mwbHKkFS
-         Q12yqyx2p9FTquHdoUIV6T2FWtgqXIijbaNv+x6sbKmhzO/nJnIaMfx98R9nkizlJ1Nq
-         Nx4gTYq79ZF4NECf9EqnV/CE+6tAHhVJPAfnG2GaYDmrL+9SHwrW0u6alz/WOjeGM/Dy
-         zHRA==
-X-Gm-Message-State: AOJu0Yx5mF5joKSW8Yv5FzeF81EkJuGpR5TRTZnubQFsjUHevW0rpbxG
-	TcyuKYIpwwWLV1Qhc2sCzvBEJSbxCEzYw+RvoY+THY09llSM9A3utB5MiaIV07cyrRl2nyqK1B+
-	rV0pY9M5CQ/rIgFrFch7vidKkWoSdeN8WJNKQ
-X-Gm-Gg: ATEYQzzdZiExDKtbJRZhzVRJHS84/oA4OyNW0HhHWeafBYwBj/3We0Z3L+6C2QEoVC7
-	UmER3aJN860BeZnWtclP9m+qCH/fUa2yNpvLrkUWlVlc++VvP9bvsE+kcTMp1N+Lem/Cz0bbRw0
-	vFsGXzuMbY/anBiH4iCiYsW6n6M61DE2EDHvF55T8IhYDpXJ78jEjm1WzDhrSZEUhqCVWO7Y6yq
-	D9+x0yICE649C6Deo1KbhSj3FOViJIbXbRv8as3FiehaEpoTZemYQwmsqBwlw86yumrYvQ0vtMg
-	+6YWYrZ4RY8Tzp4lXQ==
-X-Received: by 2002:a05:7022:49c:b0:11b:baa5:f4d1 with SMTP id
- a92af1059eb24-128c2d8e759mr6915660c88.6.1773141309085; Tue, 10 Mar 2026
- 04:15:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JkOoejQb"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8497BC19423;
+	Tue, 10 Mar 2026 11:24:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1773141858;
+	bh=xT53Ttf/NyogikS/gfdkFymB7LtDXRO0Yz6j+bwKsPU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=JkOoejQbIY5sFLhLxCkOVN4kxiKJQN7lTCbiqMhI2bPYZCWqCDH0QcPHkf9E94N1P
+	 jGKWxOZDnrBvfZwk3KlNfSPE8lrfyGUmy/E8KZRXnZ3WA2W+jaNVCXVB0fdXzl2Epk
+	 xdyGfd3tLRQx0V4K/FAplurzOKD4T7ZCDXJbb1/yW+bnAtN/DEPHfz+j7RrHKIT4et
+	 mst/xUtfedv4qkVcmjou7az+d7Do3wm3dxVhtCDP9L1/BM2ZP0qghkq/jyHg4SSkSp
+	 MiB5UsygHd+YPYVvodLr6rfXKh/5Fgbcu9NvSb0LZNXu/UpDt3L4jAOcvxUwz9rzo4
+	 xluXx/3QcCvGA==
+Date: Tue, 10 Mar 2026 12:24:05 +0100
+From: Christian Brauner <brauner@kernel.org>
+To: Andy Lutomirski <luto@amacapital.net>
+Cc: Jeff Layton <jlayton@kernel.org>, 
+	Dorjoy Chowdhury <dorjoychy111@gmail.com>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-api@vger.kernel.org, ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, 
+	linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, 
+	linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, jack@suse.cz, chuck.lever@oracle.com, 
+	alex.aring@gmail.com, arnd@arndb.de, adilger@dilger.ca, mjguzik@gmail.com, 
+	smfrench@gmail.com, richard.henderson@linaro.org, mattst88@gmail.com, 
+	linmag7@gmail.com, tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com, 
+	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, idryomov@gmail.com, 
+	amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, trondmy@kernel.org, 
+	anna@kernel.org, sfrench@samba.org, pc@manguebit.org, ronniesahlberg@gmail.com, 
+	sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com, shuah@kernel.org, 
+	miklos@szeredi.hu, hansg@kernel.org
+Subject: Re: [PATCH v5 1/4] openat2: new OPENAT2_REGULAR flag support
+Message-ID: <20260310-ausdehnen-wahrnehmen-f9d9c6224799@brauner>
+References: <20260307140726.70219-1-dorjoychy111@gmail.com>
+ <20260307140726.70219-2-dorjoychy111@gmail.com>
+ <CALCETrXVBA9uGEUdQPEZ2MVdxjLwwcWi5kzhOr1NdOWSSRaROw@mail.gmail.com>
+ <801cf2c42b80d486726ea0a3774e52abcb158100.camel@kernel.org>
+ <CALCETrVt7o+7JCMfTX3Vu9PANJJgR8hB5Z2THcXzam61kG9Gig@mail.gmail.com>
+ <20260309-umsturz-herfallen-067eb2df7ec2@brauner>
+ <CALCETrWjb+V-zrMT412MtmgDCx9y8simJBQ7+45C9MtdiSMnuw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260310070515.518225-1-dongsheng.yang@linux.dev>
-In-Reply-To: <20260310070515.518225-1-dongsheng.yang@linux.dev>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Tue, 10 Mar 2026 12:14:57 +0100
-X-Gm-Features: AaiRm52WjIUUBG2CDEfbn34qSpn9mhUf5mYciQphgWd_G6eXLRcCEOZZ4tOkYbw
-Message-ID: <CAOi1vP8VRAPxjBMJ2uZNKEvKVmqG1hx8dUWcOVTovKJv5OOQhw@mail.gmail.com>
-Subject: Re: [PATCH] MAINTAINERS: update email address of Dongsheng Yang
-To: Dongsheng Yang <dongsheng.yang@linux.dev>
-Cc: ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CALCETrWjb+V-zrMT412MtmgDCx9y8simJBQ7+45C9MtdiSMnuw@mail.gmail.com>
 
-On Tue, Mar 10, 2026 at 8:05=E2=80=AFAM Dongsheng Yang <dongsheng.yang@linu=
-x.dev> wrote:
->
-> My easystack email will be unreachable soon, update my email address to
-> linux.dev one.
->
-> Signed-off-by: Dongsheng Yang <dongsheng.yang@linux.dev>
-> ---
->  MAINTAINERS | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 55af015174a5..0ba9a0509cf0 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -21955,7 +21955,7 @@ F:      drivers/media/radio/radio-tea5777.c
->
->  RADOS BLOCK DEVICE (RBD)
->  M:     Ilya Dryomov <idryomov@gmail.com>
-> -R:     Dongsheng Yang <dongsheng.yang@easystack.cn>
-> +R:     Dongsheng Yang <dongsheng.yang@linux.dev>
->  L:     ceph-devel@vger.kernel.org
->  S:     Supported
->  W:     http://ceph.com/
-> --
-> 2.43.0
->
+On Mon, Mar 09, 2026 at 09:50:18AM -0700, Andy Lutomirski wrote:
+> On Mon, Mar 9, 2026 at 1:58 AM Christian Brauner <brauner@kernel.org> wrote:
+> >
+> > On Sun, Mar 08, 2026 at 10:10:05AM -0700, Andy Lutomirski wrote:
+> > > On Sun, Mar 8, 2026 at 4:40 AM Jeff Layton <jlayton@kernel.org> wrote:
+> > > >
+> > > > On Sat, 2026-03-07 at 10:56 -0800, Andy Lutomirski wrote:
+> > > > > On Sat, Mar 7, 2026 at 6:09 AM Dorjoy Chowdhury <dorjoychy111@gmail.com> wrote:
+> > > > > >
+> > > > > > This flag indicates the path should be opened if it's a regular file.
+> > > > > > This is useful to write secure programs that want to avoid being
+> > > > > > tricked into opening device nodes with special semantics while thinking
+> > > > > > they operate on regular files. This is a requested feature from the
+> > > > > > uapi-group[1].
+> > > > > >
+> > > > >
+> > > > > I think this needs a lot more clarification as to what "regular"
+> > > > > means.  If it's literally
+> > > > >
+> > > > > > A corresponding error code EFTYPE has been introduced. For example, if
+> > > > > > openat2 is called on path /dev/null with OPENAT2_REGULAR in the flag
+> > > > > > param, it will return -EFTYPE. EFTYPE is already used in BSD systems
+> > > > > > like FreeBSD, macOS.
+> > > > >
+> > > > > I think this needs more clarification as to what "regular" means,
+> > > > > since S_IFREG may not be sufficient.  The UAPI group page says:
+> > > > >
+> > > > > Use-Case: this would be very useful to write secure programs that want
+> > > > > to avoid being tricked into opening device nodes with special
+> > > > > semantics while thinking they operate on regular files. This is
+> > > > > particularly relevant as many device nodes (or even FIFOs) come with
+> > > > > blocking I/O (or even blocking open()!) by default, which is not
+> > > > > expected from regular files backed by “fast” disk I/O. Consider
+> > > > > implementation of a naive web browser which is pointed to
+> > > > > file://dev/zero, not expecting an endless amount of data to read.
+> > > > >
+> > > > > What about procfs?  What about sysfs?  What about /proc/self/fd/17
+> > > > > where that fd is a memfd?  What about files backed by non-"fast" disk
+> > > > > I/O like something on a flaky USB stick or a network mount or FUSE?
+> > > > >
+> > > > > Are we concerned about blocking open?  (open blocks as a matter of
+> > > > > course.)  Are we concerned about open having strange side effects?
+> > > > > Are we concerned about write having strange side effects?  Are we
+> > > > > concerned about cases where opening the file as root results in
+> > > > > elevated privilege beyond merely gaining the ability to write to that
+> > > > > specific path on an ordinary filesystem?
+> >
+> > I think this is opening up a barrage of question that I'm not sure are
+> > all that useful. The ability to only open regular file isn't intended to
+> > defend against hung FUSE or NFS servers or other random Linux
+> > special-sauce murder-suicide file descriptor traps. For a lot of those
+> > we have O_PATH which can easily function with the new extension. A lot
+> > of the other special-sauce files (most anonymous inode fds) cannot even
+> > be reopened via e.g., /proc.
+> 
+> On the flip side, /proc itself can certainly be opened.  Should
+> O_REGULAR be able to open the more magical /proc and /sys files?  Are
+> there any that are problematic?
 
-Applied.
+If procfs job isn't to provide problematic files to userspace I'm not
+sure what it is. Joking aside, I think in general you are of course
+right that procfs is full of files that under a very strict
+interpretation of "regular file" should absolutely not count as a
+regular file. sysfs probably as well and let's ignore debugfs and
+tracefs and all the other magic filesystems or files.
 
-Thanks,
+In general, Linux has been so loosey-goosey with "regular file" for such
+a long-time that making OPENAT2_REGULAR come up with some strict
+definition of "this is a regular file - no really, pinky-promise a
+regular one" - is just doomed to fail.
 
-                Ilya
+The other problem is that we cannot reasonably determine what odd file
+the user really wanted to defend against opening with OPENAT2_REGULAR.
+A caller may really want to open /proc/kmsg and just be sure that
+someone didn't overmount it with a fifo (systemd does that in containers
+iirc).
+
+My personal "hot take" is that adding an api built around a regular file
+with immediate irreversible side-effects for the caller on VFS
+syscall-based open [1] is a bug. Such broken semantics is what ioctl()s
+are for.
+
+[1]: I mean specifically open(), openat2() etc. I'm excluding all
+     dedicated APIs that return file descriptors that cannot be reopened
+     via regular lookup.
+
+From my pov, what would help is if one had a flexible way to scope opens
+on e.g., filesystem. But imo, that is not policy the kernel can
+reasonably express at the syscall api layer - it would look fugly as
+hell and how many other knobs would we have to add to satisfy all needs.
+I think that is best left to an lsm hooking into security_file_open()
+which can maintain a map of files and filesystems to allow or deny - a
+bpf lsm can do this quite nicely.
