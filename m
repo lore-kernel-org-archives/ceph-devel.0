@@ -1,39 +1,39 @@
 Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96C7A3EE1C4
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 21:30:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED80C3DD522
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Mar 2026 21:34:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773178212; cv=none; b=a2h6khWrfWJFv95MzzPqXuwvd/NrzoGU0krp5V4HJcAMock10UC/b3fMNypOPIE+yVfaDRfzgsPulLYT3TFxdbZTRgrrkfO/aZQxiA5PwSi14cIVVAlvRRpT2iGya6n1B8y+YeEnYEzKi0dbpfO7rr81hXGgg9tluSPU2s00oik=
+	t=1773178501; cv=none; b=r4A3F6O4ZWFsuWRD3vhlMbOfn34wLlGJmmJKXlLg9QohEGhG2kI4pWrV/LEgmRa0ypXCUxT58LwNVULaZeL5ztysqBhtdngYt/eIXIzYTltM5CcNz2VWjJoYGPf9D/eZr8fsinQvrtG2cmr7gov9jj23boB24W4/JQxq6hKKQ7M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773178212; c=relaxed/simple;
-	bh=NGdmvhucr2WLgd3vn6+V3n4LW/+kE3ZXGA8s1kKwaVI=;
+	s=arc-20240116; t=1773178501; c=relaxed/simple;
+	bh=qfeSQzmAksPetc74lzOfbFBmffv9XCfA49G7wmVS6Yc=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AzieIoO6Sl5bF6yXdqIY50aKV4GyhwS4jZN+kRX+Ss4x9A/r8d8m1I5P230ATmgyhUowEZ2ecvCNmukGK3u5WFhE1lM0ITW7WP7saOaJ1OShd/ElzuxaYYXnMWp7qfWZ1kv01jbWsWMj1tuSJYXSY9zFQzTTARat59EfYJeejcU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=DXko1CYn; arc=none smtp.client-ip=141.24.179.34
+	 In-Reply-To:Content-Type; b=g2T3YVJ2O63t0UdPkpYsggB5q8ghrt52XAKIBmAZ+TgWluDo3RyqDwAwaAgnD6dECh/CPOXfJdaYvMjISLtcUjizpCHP+sUjW+H8krYKnA6tljcgnye0rxGi5szsIAavsY5LJkyp3px6KnVMwlCeUchWlVCPm4tcVQCXhOMK4vM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=o+y+7v0w; arc=none smtp.client-ip=141.24.179.34
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="DXko1CYn"
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="o+y+7v0w"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1773178205; h=message-id
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1773178498; h=message-id
  : date : mime-version : subject : to : cc : references : from :
  in-reply-to : content-type : content-transfer-encoding : from;
- bh=NGdmvhucr2WLgd3vn6+V3n4LW/+kE3ZXGA8s1kKwaVI=;
- b=DXko1CYn0aKSp4YOzbnjxFI2ucJOWGEfqdpa/a6RCRMa8vOGBKgnqoTONvB7WFD7JYAyS
- KEpaZrezy7/ky0nYj3d1TNaQ5lunY4inxkogl8BqNXSMmq6zXX/m7wrzTKO7Nk9IZtX3JWN
- 8yTWdhO6PIyz/dOO87QxXLTan4x8Q2kowf/OPXkFCRs07xH9VjDH4ZlwCwKJ7/h+xNjKR6T
- Ya08fbN/NKpHscbICumFX3cIX2JwWACQBwEQeTmflpAk9LYnypBYmstN6+CDN7CZ2WeW44R
- Rmp+aAc5bGeiXe5a23rJ+vO7jZBjps8H6vkwTxP7ZScWVz81K8OPFA8QZFJQ==
+ bh=qfeSQzmAksPetc74lzOfbFBmffv9XCfA49G7wmVS6Yc=;
+ b=o+y+7v0ws/nXAMAmGtj613BiUHC0zS/Ki93TK488z60ys49FRAjnlPE84Zz37pNrcp0+j
+ qbAD0FvEla8r75FleGRHhyRNrYmxfdc1iGYn2QGUadq6OHAl/AO5C8pKVPT3iYdwkuMrG4f
+ iYX9Zx6jQIkfTBD+bJ/YiVcEGIpXlPSb5fQknIwiEJRAn0BN5tKYEiu1sWrSGYQkSYSmG1K
+ 2H25/NfG2bGJmXrCwMRywjnW0pwnkZM3YgQQRQVTPYiD/52Ro8axLg6bodgBZ4MV+fBTG1V
+ J8W3oGqwtzwrN+EPq7MuHebtsKpw15PMaJOLoHKCGBAdeeyfnlVPJpEgawPw==
 Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 2DBC85FD88;
-	Tue, 10 Mar 2026 22:30:04 +0100 (CET)
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 559C95FD88;
+	Tue, 10 Mar 2026 22:34:58 +0100 (CET)
 Received: from [192.168.178.114] (unknown [217.252.212.162])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 5838D5FC60;
-	Tue, 10 Mar 2026 22:30:04 +0100 (CET)
-Message-ID: <c462d328-d8a0-48f3-93ef-d9f4fdbc6078@tu-ilmenau.de>
-Date: Tue, 10 Mar 2026 22:30:03 +0100
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 190695FC60;
+	Tue, 10 Mar 2026 22:34:58 +0100 (CET)
+Message-ID: <eb6789bc-e13f-44ba-b955-8c7703eb78c2@tu-ilmenau.de>
+Date: Tue, 10 Mar 2026 22:34:57 +0100
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -43,20 +43,21 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH v2] libceph: Fix potential out-of-bounds access in
  ceph_handle_auth_reply()
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
- "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze
- <amarkuze@redhat.com>, "slava@dubeyko.com" <slava@dubeyko.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko
+ <slava@dubeyko.com>, ceph-devel@vger.kernel.org
 References: <20260310142815.3747443-1-raphael.zimmer@tu-ilmenau.de>
- <f26dfec7535ea353bd78606a2db11a21d9cd4e96.camel@ibm.com>
+ <CAOi1vP9sVPbZ7yk=Ae85xL9-5mLE=H6iSQYR6-zDcWVQ8afYaA@mail.gmail.com>
 Content-Language: en-US
 From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-In-Reply-To: <f26dfec7535ea353bd78606a2db11a21d9cd4e96.camel@ibm.com>
+In-Reply-To: <CAOi1vP9sVPbZ7yk=Ae85xL9-5mLE=H6iSQYR6-zDcWVQ8afYaA@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 3/10/26 7:22 PM, Viacheslav Dubeyko wrote:
-> On Tue, 2026-03-10 at 15:28 +0100, Raphael Zimmer wrote:
+On 3/10/26 9:15 PM, Ilya Dryomov wrote:
+> On Tue, Mar 10, 2026 at 3:28 PM Raphael Zimmer
+> <raphael.zimmer@tu-ilmenau.de> wrote:
+>>
 >> This patch fixes an out-of-bounds access in ceph_handle_auth_reply()
 >> that can be triggered by a message of type CEPH_MSG_AUTH_REPLY. In
 >> ceph_handle_auth_reply(), the value of the payload_len field of such a
@@ -129,19 +130,6 @@ On 3/10/26 7:22 PM, Viacheslav Dubeyko wrote:
 >>   ? __pfx_kthread+0x10/0x10
 >>   ret_from_fork_asm+0x1a/0x30
 >>   </TASK>
-> 
-> I still don't quite follow how you got this call trace. :) There is no
-> explanation of this in commit message.
-> 
-
-I triggered the call trace with a (specifically created) message 
-containing a very high value for payload_len to show the potential 
-impact (and that it can actually occur). I also created a corresponding 
-issue here: https://tracker.ceph.com/issues/75352.
-
-Best regards,
-Raphael
-
 >>
 >> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 >> ---
@@ -153,40 +141,42 @@ Raphael
 >> --- a/net/ceph/auth.c
 >> +++ b/net/ceph/auth.c
 >> @@ -205,9 +205,9 @@ int ceph_handle_auth_reply(struct ceph_auth_client *ac,
->>   	s32 result;
->>   	u64 global_id;
->>   	void *payload, *payload_end;
->> -	int payload_len;
->> +	u32 payload_len;
->>   	char *result_msg;
->> -	int result_msg_len;
->> +	u32 result_msg_len;
->>   	int ret = -EINVAL;
->>   
->>   	mutex_lock(&ac->mutex);
+>>          s32 result;
+>>          u64 global_id;
+>>          void *payload, *payload_end;
+>> -       int payload_len;
+>> +       u32 payload_len;
+>>          char *result_msg;
+>> -       int result_msg_len;
+>> +       u32 result_msg_len;
+>>          int ret = -EINVAL;
+>>
+>>          mutex_lock(&ac->mutex);
 >> @@ -217,10 +217,14 @@ int ceph_handle_auth_reply(struct ceph_auth_client *ac,
->>   	result = ceph_decode_32(&p);
->>   	global_id = ceph_decode_64(&p);
->>   	payload_len = ceph_decode_32(&p);
->> +	if (payload_len > len)
->> +		goto bad;
->>   	payload = p;
->>   	p += payload_len;
->>   	ceph_decode_need(&p, end, sizeof(u32), bad);
->>   	result_msg_len = ceph_decode_32(&p);
->> +	if (result_msg_len > len)
->> +		goto bad;
->>   	result_msg = p;
->>   	p += result_msg_len;
->>   	if (p != end)
+>>          result = ceph_decode_32(&p);
+>>          global_id = ceph_decode_64(&p);
+>>          payload_len = ceph_decode_32(&p);
+>> +       if (payload_len > len)
+>> +               goto bad;
 > 
-> Looks good.
+> Hi Raphael,
 > 
-> Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+> Using ceph_decode_need() would be preferred for consistency with
+> e.g. process_auth_reply_more() and other code:
 > 
-> Let me run xfstests for your patch. I am sure that everything will be OK but
-> another check always makes sense. :)
+>    -       if (payload_len > len)
+>    -               goto bad;
+>    +       ceph_decode_need(&p, end, payload_len, bad);
+> 
+> If it's fine with you, I can make this change when applying the patch
+> to save another posting.
 > 
 > Thanks,
-> Slava.
+> 
+>                  Ilya
 
+Hi Ilya,
+I'm fine with this. You can change these two checks to ceph_decode_need.
+
+Best regards,
+Raphael
