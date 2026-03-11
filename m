@@ -1,168 +1,185 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2744D35DA60
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Mar 2026 16:10:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75B68276058
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Mar 2026 18:07:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773245422; cv=pass; b=sdvhoru0SjxgKyR5MygzqGIV5kh71VTjX37NHSvjgmvYr7346KmEnOoxUJxC4hNqljq4YjLms+XKhPByGFkCEnGMpgUnCTgiKIIV9OrDWVgPTv+aaB2nCAgMYrkpperU0+E4c4bTmeBrh2V8okIIXE5oxdAyj+TcJ63vPWflT6o=
+	t=1773252480; cv=fail; b=Dx+rLKzgx2yKlRRM7ny95I9f8j0OdE91ZIR1v6BAfWpfs/YESCX/L34vyYnZe4l6kRIrfD/+sZWoHG9boFGJlF65j5Sp2AUjlgqQaNxoJRP9djGT77sUgVu8sgJfHsVc7iwG1q6oyIsQ48HQhC0BwHA5LKWxbKtdFxk3asa1I7U=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773245422; c=relaxed/simple;
-	bh=RINC3OxukObTWwNgLj8cUCMQfmLKMyUKoc5ifoxu7lY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=n3i+/3tlXO7Vm1K9F8zhAhOSib9N87YGciM53Z6DnwO2AxC+Uqbqk8uyiOC6BB9O9FxbSuPv/CrzjRUd2vGihx1XIrHaFAd0m/Wv2TWylRTOEozaUMXu0a85RZKhZX9CuFVWwNvoc8+ucsMberGZOOp0y5QFI/qpON5AnWWHscA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=amacapital.net; spf=pass smtp.mailfrom=amacapital.net; dkim=pass (2048-bit key) header.d=amacapital-net.20230601.gappssmtp.com header.i=@amacapital-net.20230601.gappssmtp.com header.b=DQI1cRxa; arc=pass smtp.client-ip=209.85.167.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=amacapital.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amacapital.net
+	s=arc-20240116; t=1773252480; c=relaxed/simple;
+	bh=rZq3zw/TCJ18bNxxOAti1UPqqpZvurxLSC74GmKXVfE=;
+	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
+	 MIME-Version:Subject; b=HAbGI01CpoUxfAUdanuhU/qL5g+B8S1DgatXyJNB7QnZSlr9MygQ9c3JTDReyjeXzi79FaajBcTX60u5l7ecdDLMGgO8G24xL4xh3jfVuCKrIs6ZcB2GSy76xM1hMjWcedv6BQBHbiqA3ZYzZ+bWfErE1EnaiCBJRAK72k4vyjQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Xsr9fiLs; arc=fail smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=amacapital-net.20230601.gappssmtp.com header.i=@amacapital-net.20230601.gappssmtp.com header.b="DQI1cRxa"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5a1330ac6c3so131076e87.1
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Mar 2026 09:10:20 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773245418; cv=none;
-        d=google.com; s=arc-20240605;
-        b=ADqpYHchV2ppkQRmYaQcF7Wu0Vq7Dy1fXE9lE8GE0ZrnVFrzt3t4D9NW1BrPhBepIK
-         MU4SNtt5l231+D+gxsIz8NMNbodojUm5D5uclv96Nu6xDU8sQzEtO/aLlHLOwfjvKkQJ
-         6SWFBlArNRFQhLCeSa6jVXplkZN5ofsSbOzdmVMSrRUghZogw1DwsXEsJLKaqEa78OH5
-         BCFips3N3cHvJpGRUdr2ZabbWgtyYq+ImvThAkjRPoHeBSLSH0U5HYxBu9CUBfNeFQUi
-         KvZiQxG288OELvl4ecPuxF1Ngghuq9yk68GeoR0FK6Cnr9fsvqYXzLGz6/tbOFJ4sltp
-         ASyQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=zQf3bqKM0prJaYagyzgzwBy7UALOn5Wa6w4qvhYX8FU=;
-        fh=ADW8jfl0cIFS14mLJWUTJhFsnAs3vq+UHPoAeDLrlQA=;
-        b=UfvB8BPk1jvFl23kCpC3kE5zpFenRJNYzlY00Hd5toqBvoadpfz7tC45+taC41yUag
-         ozfSUUDMmuylwE/ROY8VRRM8kEwDPoituBqrSw+GyXLnytWSurFzeJvyHTS61YB/vybr
-         NhFDOkQVoiGOAKZKzYsLk33C9amIRb6FjENU/O6b0qteZw2qj2p+MnBm7GLEnL1IrIrq
-         QZTCRh2NkY1yNzJZUBdZTCEisf/HrzzApA6JiHO3pfHfAKQrOf3LPWoUVysdHCO11o/j
-         kYhhSLtFXFP8PkhSg3Oswo2O5HGO+TylDVJD0YHLnoOFZZ+4UDhKEtlSHDNrK8r6tJ4U
-         sDqQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=amacapital-net.20230601.gappssmtp.com; s=20230601; t=1773245418; x=1773850218; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=zQf3bqKM0prJaYagyzgzwBy7UALOn5Wa6w4qvhYX8FU=;
-        b=DQI1cRxaYaxsZCMcyoPsKK9oceAAMF2Z/4ka0wFpZB8+XmCfMpWDiiF7wWVvKTnenh
-         fLiq0/4041WV6SUN9UIAUOBG/CMSj6vFuAOInXJ4NveJurk01cGbF8fRy51alCQzW54O
-         UmWAXgDLBXidwZi/zen/FyMiT4+9QZH++ETKQNT+c0cTD2imeB9je4SnL8TKcC48glED
-         ooRh8mXUApVARqvWJDY7zkjpZo16/2+cEhSB1AU7m2IZ8+56OmAYPqCj9CJqISqpRtn0
-         +Gzbol7v857u1b5Km8cgfWLXwWaOdvanog3a0ycMGHtle6ytBjRh/50KWHHrh5a7Q75q
-         +ZMA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773245418; x=1773850218;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=zQf3bqKM0prJaYagyzgzwBy7UALOn5Wa6w4qvhYX8FU=;
-        b=C6QXYQA3kq/kl/fTdBOmrykI1r50ER1yv5AGMNCVWo7QRlkyY7h16cUi/0DcSOF1uB
-         v9qEq0VM5H0fGJn2oVMaN4KC04R+x23SOp0LTOFuUS+7UvMPx9XiD/flQOYoQisjjb0C
-         FzUi0X8YpMkRpULi2CYt6Q40PzAxczKHfJyUOlMOBsI+jtv3D52AG/NZoK4ZhHv2yl37
-         eix1nbT7D/usRR6M90cl4ZNAyh44dPFwYEmDZX9uWFRpzfUdVjkMPsW8J9Q7WDE5r8Vg
-         AvvKjo6Z1eoVi54JvIhdtdER/KV05rdBGp1/ruViCRyaiKOFOIArX9zz7ixyuBVvZnUL
-         RqFw==
-X-Forwarded-Encrypted: i=1; AJvYcCUP0UZKQV7kIjoCvusat4OwXb8s2TzZMy36xqxXqX/qR7SaM5fyqXnlceXy1p+UKYyPV9bp2qw+hgim@vger.kernel.org
-X-Gm-Message-State: AOJu0YzO15zYMATh+MBUvxYhYxREPwnhX/ophhAgAz5l1s6NtSAUXMPX
-	QHPTT1LeO7ApyoM7YPI2NPH+7jXga67LJdSXhnX1pFtv6HGbBnDF7smKUtt3xgYyMrQ1HArr1M9
-	axxfxlDTKcaVYQ0eh4cDJzPVOVQN017veit6dq5yf
-X-Gm-Gg: ATEYQzya99x/U+2NpUssb4wdtkEmIoLtgdI3ViyZU+R5QBwh7WdWFahpSUkI9cMWe4A
-	rN4x7cBLz1zqRP0p17q9eQvN8q691WQYMFWz+aIk5U0FI9pKufTLDl7sRi7gZ/LUaPsCV9PIYX8
-	4faNPVlWBQj2g+tIz4ui3oEJ+gzVMa7/ldbCml6FTTtqnGWxFWkAUiC9cze1SMk8U7A8fPYhpwI
-	eyHmITBzhY4JxZwEUCOmgNKidAtri7dUjbBoUMeF/pU3vFIr/LXFpK5IrPgKjHdys18WWpqLLXc
-	IVa1
-X-Received: by 2002:a05:6512:712:b0:5a1:4835:306f with SMTP id
- 2adb3069b0e04-5a156baf0a8mr762062e87.19.1773245418128; Wed, 11 Mar 2026
- 09:10:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Xsr9fiLs"
+Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62BE4rJr1487567;
+	Wed, 11 Mar 2026 18:07:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-id:content-transfer-encoding:content-type:date:from
+	:in-reply-to:message-id:mime-version:references:subject:to; s=
+	pp1; bh=rZq3zw/TCJ18bNxxOAti1UPqqpZvurxLSC74GmKXVfE=; b=Xsr9fiLs
+	h+eStViLqJeXS+p9veGQ964hdedQNu2FZdLLaXE3YKSl3D44yvwYwGLZPYUGCwbA
+	EBY+gD6a0ho1rHEWsTyo8nUveI47w6AnBdSP7gsI5V/lpxgHs/N1Kmn1DzqOCznz
+	gYpaLMgxYrSuPCbdjDgM/5DdY9I57x3iBYkXKAWaI7/8iGPs800FTtiS49L6Zr+t
+	KCDjXN9bTmSvhxDs+oozGLEgRyciry/cYIsW/BhZtSoADQPxkNezodanCWOA56qT
+	nIU0N1hjBo0LtKO1Gfo3RRgmNLD1BL0uq5+5HOZcag3RidltrF1fAOudQ+dxfe4x
+	UY0iM0tbU7SjzQ==
+Received: from byapr05cu005.outbound.protection.outlook.com (mail-westusazon11010038.outbound.protection.outlook.com [52.101.85.38])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4crcungr3v-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Wed, 11 Mar 2026 18:07:46 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=VjGae2QAjhCcJC5KOZ/u79nUVs3VWb77DTwhdkotLUWel3UzsncpRm4JjDSLO8gK4fzXPh2LdpcvXvued/sGD+xKd0ycqS3smC/WyWl1fZFa6lPCQEa6HfnAGfGYmeJu9kyBOvWbAo2aGEQP831pPcqsn9KArRroxZretLkjsEmGlDYtHJoNskEs65MS00KlxB8CCstpbmr4uC+kIhqFWKhbiw6GyJs6yx8HkIGjAGavefdBKqC52F4LSjceislurdGAa4QNUyLjn1eVQqpHGRHwdeWNhyya4VzvPiRe8xGjCquLfVEwSDiNI6p8p0f3cVm4XjSYXQF67PmECREP8w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=rZq3zw/TCJ18bNxxOAti1UPqqpZvurxLSC74GmKXVfE=;
+ b=nvBUehdZGG4qPpF5g6/ts83Lwx2KmMxxYhrWnQcgh7bHOI1TbU93yI5O6Rx9Gpga7LugCHGr+Sm/b/Awx9eng6UCTGfSrh/rWqOCOc1aYYUEC8De1eR38bzTctkEHJN3Qphqh5S+2wlVpWe1Q+7s2q2WqhX2lz/ijW7Fvyh0DkcSdvroY8abNlymU461aIkDJHSBDyoZuYHwxVQ3BNsO7TI7gS0YMRBKO3PWj3mcJPgQvuEMzwCr2sRWGWqc8PN+r7Umu7h/Pwm94yStMdGxlqlNePc1x6P6D7zbvbk6+8M5pkKckhZhSrnOb8+nOnsegTdOibpBqSka/PSN//2BOg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
+ header.d=ibm.com; arc=none
+Received: from SJ0PR15MB5821.namprd15.prod.outlook.com (2603:10b6:a03:4e4::8)
+ by DS4PPFFAB2B5BD7.namprd15.prod.outlook.com (2603:10b6:f:fc00::9d5) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9700.11; Wed, 11 Mar
+ 2026 18:07:44 +0000
+Received: from SJ0PR15MB5821.namprd15.prod.outlook.com
+ ([fe80::7a72:f65e:b0be:f93f]) by SJ0PR15MB5821.namprd15.prod.outlook.com
+ ([fe80::7a72:f65e:b0be:f93f%4]) with mapi id 15.20.9723.000; Wed, 11 Mar 2026
+ 18:07:44 +0000
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+To: "raphael.zimmer@tu-ilmenau.de" <raphael.zimmer@tu-ilmenau.de>,
+        "idryomov@gmail.com" <idryomov@gmail.com>,
+        Alex Markuze
+	<amarkuze@redhat.com>,
+        "slava@dubeyko.com" <slava@dubeyko.com>
+CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Thread-Topic: [EXTERNAL] Re:  [PATCH v2] libceph: Fix potential out-of-bounds
+ access in ceph_handle_auth_reply()
+Thread-Index: AQHcsYH1YYPFYPl/b0WSD6P5B/z5GQ==
+Date: Wed, 11 Mar 2026 18:07:44 +0000
+Message-ID: <6ad9dbe9d50b38b92a6a775650ff6457193c48c6.camel@ibm.com>
+References: <20260310142815.3747443-1-raphael.zimmer@tu-ilmenau.de>
+	 <f26dfec7535ea353bd78606a2db11a21d9cd4e96.camel@ibm.com>
+In-Reply-To: <f26dfec7535ea353bd78606a2db11a21d9cd4e96.camel@ibm.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SJ0PR15MB5821:EE_|DS4PPFFAB2B5BD7:EE_
+x-ms-office365-filtering-correlation-id: b3de91bc-aea9-4c3f-ed42-08de7f991815
+x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|366016|376014|10070799003|1800799024|38070700021|22082099003|56012099003|18002099003;
+x-microsoft-antispam-message-info:
+ x77WJXwUNsy38qeCAHnZZNmg0QG7BtdDV72pTZ+1HdlSbQ9zw0fGDJqWNekEXkxmIUPuXOqb0ZA80Sp98xaj7ziILQustfipMeMvdVndsy5BuTQ8e/RG41N4Vxs5NVhxRCTGwwuC2Ut1RAxHzbXgxkwQ3mkWctzZuaL+jjeWvkqf7SD4VQQjH34lvgK5cYkN9P4bGbOR/DGfQ76mFNYzaCidMdZMqtwa4yLFcdTfZtKKIxOEI2ZV8bQcIPWxPGV8buptkArLCw55auNV8Cw/kFc94+xXK92p2zoII/pPVrmtFjf3SV/QY6vOojsGrLXF14B2c6z9pJhji+h0OlCg0eTDf61SG9IEmf8CIc33n5NfrdAcT3r607Anj/nHSoT6twwxYsJDMeG2Kw3XMzcWG2K83V+p4Q/PZl8E0olMsCYagb+myyl8vgvsAAzz2qvU+aDB6887YyTZ/B3eBnHMvyAq4qR0TmDhVlH+8phEI1T9ePd1D6Wlv7CdPHItXfuaaRMXFbMJJc77G6CmXzNhWdOnwch923LlyJuc9Xsi3QuJTGB0MR/HZK9inEkLV50mBoM3dTmwFSWUjk+JajDPihveWMG875xn3cXbHZ5nHmTTyO/0pnEBF4A6t1VgRYboqxnnyBCr/7RmC+l3gQbQjrJ34aqWKaVIMYTCfkpVElSRKq8fIcY0tN+SBMadj5gDoG1G89PNP5WQOdxxoUtzheqB9kZTIpCOwa+J6C0XaA2DdgpGCyCxwtAmlXE1PQR92F+uJCWL0Xz70Ua+m8biL2EO6Lej+901rJmcHeN1Vb8=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR15MB5821.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(10070799003)(1800799024)(38070700021)(22082099003)(56012099003)(18002099003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?U3NQcTNXZWxVL056OWpOeVlIcm9sK0kwRyt1NzNicTVHNVhBY3ZyR3V5TFNo?=
+ =?utf-8?B?cHVOK1JpSHI5VmpibHFGckRNRTNpUTFTRW1vaDFKd1lqeGd2U1JYbmxiL3lN?=
+ =?utf-8?B?anFTYnNVRTlPWTY5bXFBd05KdU81QnMvVk9RMG5kRUhyWS9BSGN5Q3hSOVlq?=
+ =?utf-8?B?dHRJTGVRU2xQanYzeExidHVvRlk4RHpVUEwrMFQyWGRXMFhrdUpMMHRkM3U4?=
+ =?utf-8?B?NDgxbllLSmNCYjIwTThsSk83S3lZZ2tIK1FVVy82WHgrMHVvSmFERFo5bjNJ?=
+ =?utf-8?B?RnkwT0VXRUEzc2txYm91K0xTRHNmZElySjAxaDRPak9NTUhuc2lFWEU0V2p6?=
+ =?utf-8?B?MEdpQlJFVDl4Vnl3WVJYVUhVSnVpaEpqNGxjUEhRMnBldWZ3UTNTQld1Z0JD?=
+ =?utf-8?B?a28vcTNXRGVDZ00xc1NXYVdIcnJ2SnlnZDZiYjRmcnRmWlZ1RUlnL3JydHlL?=
+ =?utf-8?B?WnQyTHF4RE43ZkNMZmVpVmJFV0dYR1VZaEFDTHJJQUQzNE1WeUp5WWtveHZS?=
+ =?utf-8?B?RlVaSzMrNWVCVFd2YnU1Y3pRZlY3NThKdjdRMWFJaWdQRHRFZER4dyt3V0FR?=
+ =?utf-8?B?ZkZJMGRzK0FTTXZudmJqTUhZOStZY0E5Nk80TEhRemIydmMyWW44RGZsUTh3?=
+ =?utf-8?B?T3J3bGFrQXhqMnhXekFZRUlmcnVnQkZDeHM4dldZN2kzMWZBQzBqaHIzaEF1?=
+ =?utf-8?B?VW5ERitKVCtUYVh0NEhGTVJuRnFEcGlub2xyS0ZaYklHVmFFMnY3eDAxa003?=
+ =?utf-8?B?VTRLdEpoT01FOVVSbjlUdHZnVVd1Y1oxODhIdkQ4VmhkVm1JUnV4QWhSVS9L?=
+ =?utf-8?B?VzFTdWcxM1N5ZnpEYXZzOWNlamZtNWVSU2FPNjZtNW5WeFVJVEJYbWhKRXpE?=
+ =?utf-8?B?YVB5L2tvc0dzbThRRWNhQTFURXMwSFhHSzYwQ3lXbGpHQUNUZi9ZY296Q2NT?=
+ =?utf-8?B?V2lzRkJkNTR3UVdhZGhpTnVhYUROY2cxZ0ZCZ0VoWlduNTNEaVlpMUZIV2gr?=
+ =?utf-8?B?UG85NGZ0QTFpd0J1Q2NiWjVxSldoeWVqU1ZqcjFGK0ZOSEwwRUFWa3IwZ3Q1?=
+ =?utf-8?B?UnJVT085aDhsR2VqZytqR0trMEpndDhzOFQyZlB3T1orV0lteUM1NmsxK0Er?=
+ =?utf-8?B?NDlNNmYxcXNtR2V6d2U5VXhkQ3NVTzN5TU1HNlNPM2FqNjVKYmVodlNBa2Y0?=
+ =?utf-8?B?Z3o0Qit5VjQ5b2ZYUzJEMGNpclNieGhrRGdreUdrY0Y0MkQ0RVdTd2Y2Z2cz?=
+ =?utf-8?B?ME1LeVFSRWJxTEhTck04bitweWFKdzB3VlRDejBzZm16VjhGcDZFTzhoK0h4?=
+ =?utf-8?B?R3FHMDU2SkZKc1loeHlDbWUyVXlEVTF1cWZHMmo2ejNZRkxSRzhHU281Q284?=
+ =?utf-8?B?T1gybEF1MStNSlo5TmRBbHgzVFA5VGw2by9vVytkQnNxNnczU0kvZ0JOZE80?=
+ =?utf-8?B?V3ZJcmpIT3JaT3lkUHBQZHNqYTBaaUF2bkc5NGt3YVM0VlI2bHNZandNbWFR?=
+ =?utf-8?B?ekxLN1ZHM2xQYWFqN1RhSTZLNm12RGMyellzcEhkM3cxRzBSQTg2R2xmZFVJ?=
+ =?utf-8?B?UFFjdGpvSUdLU2RrSS9PZkJmRFNGSmhTaUlZSlJKYVNmVjZDRTJaVmVxaGIx?=
+ =?utf-8?B?cWpzTTBwajlTeXFMbVlkZE82YTVabTU1dFR4QjNsaEtsclVkaEtQcFlzSHNF?=
+ =?utf-8?B?Y3Ezb2VrMVdOWWpTQjVhWFlOcW5UejBqcGRqUXpKcTIvSytmTmp3aGo4TktE?=
+ =?utf-8?B?d2p5ZzFOak8xc0ZoMHIyUEk3RlFWU0UwbENaMW1QdUU2di9yUEY1elV6a1Fy?=
+ =?utf-8?B?TlBRWEgrR2ZVbTB4SmRpWnF5Q0E5VldEV0lBcTZLV1VieEpXdHZFcEkrU20r?=
+ =?utf-8?B?RStRR3lYM2VROUZmWEVRTDVMd2ZsbmdIZmU0TW5VS3NveVN4ZTJiZDdKV3lN?=
+ =?utf-8?B?TndhNTllcjJVVHArcGlxNGRSWlBHTDkwSjVzL3ZyZElCRnh5MXpTd3Q0ODFH?=
+ =?utf-8?B?UHdJTWtpUitVYjcrSXdwNU9OYlVYVFJCSTd0aXhaMHk2SHVsb0dBeHJmbVEr?=
+ =?utf-8?B?ZmFYbUhIZ0NacUlKSDIyM0RZS1d5SGMweVc4WDZFUnJqWndVY20rRG03QkpX?=
+ =?utf-8?B?d1U1MkpjVnp6Z3ZXbmxyRDcraXZBRWR1R21iUTBzUDZSZloxZ2QvMjN2Y2JP?=
+ =?utf-8?B?WXozUFpwL3ExeEJyYzkxVlVZRTF1VThwKzRsQ3FyNk5UQ1lDdFhUODdSeDZ5?=
+ =?utf-8?B?b3hwanR5WkVUdkk0ZTRSTTg1bUxYM3dadHZiSjhUenpoTXhJZVphUnpRYkRq?=
+ =?utf-8?B?d2pIRjIvM2pUUDJNT25mVnZYbFNCN1JYRHlRd3ROWWwvempvRWR5QWlOemEv?=
+ =?utf-8?Q?uLcHpfg5OfOUdC1xAPo1Ro9aPh5pX5pgwOu7+?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <31D71ABDB4853B41BE8E82721BEE6A2A@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260307140726.70219-1-dorjoychy111@gmail.com>
- <20260307140726.70219-2-dorjoychy111@gmail.com> <CALCETrXVBA9uGEUdQPEZ2MVdxjLwwcWi5kzhOr1NdOWSSRaROw@mail.gmail.com>
- <801cf2c42b80d486726ea0a3774e52abcb158100.camel@kernel.org>
- <CALCETrVt7o+7JCMfTX3Vu9PANJJgR8hB5Z2THcXzam61kG9Gig@mail.gmail.com>
- <20260309-umsturz-herfallen-067eb2df7ec2@brauner> <2026-03-11-regular-sore-census-shops-DqYcUT@cyphar.com>
-In-Reply-To: <2026-03-11-regular-sore-census-shops-DqYcUT@cyphar.com>
-From: Andy Lutomirski <luto@amacapital.net>
-Date: Wed, 11 Mar 2026 09:10:05 -0700
-X-Gm-Features: AaiRm51EXHFpn1BAVpxsTY5E2VQC7PD0Lwp6wdRjddj9MKMq4N9OfHTiuPJrR94
-Message-ID: <CALCETrVMF3VBr0cuEYOg-M_u+hX77Jfdujv3ZMtLGCzHgOcsGA@mail.gmail.com>
-Subject: Re: [PATCH v5 1/4] openat2: new OPENAT2_REGULAR flag support
-To: Aleksa Sarai <cyphar@cyphar.com>
-Cc: Christian Brauner <brauner@kernel.org>, Jeff Layton <jlayton@kernel.org>, 
-	Dorjoy Chowdhury <dorjoychy111@gmail.com>, linux-fsdevel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-api@vger.kernel.org, 
-	ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, linux-nfs@vger.kernel.org, 
-	linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, 
-	linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, jack@suse.cz, 
-	chuck.lever@oracle.com, alex.aring@gmail.com, arnd@arndb.de, 
-	adilger@dilger.ca, mjguzik@gmail.com, smfrench@gmail.com, 
-	richard.henderson@linaro.org, mattst88@gmail.com, linmag7@gmail.com, 
-	tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com, 
-	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, idryomov@gmail.com, 
-	amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, 
-	trondmy@kernel.org, anna@kernel.org, sfrench@samba.org, pc@manguebit.org, 
-	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, 
-	bharathsm@microsoft.com, shuah@kernel.org, miklos@szeredi.hu, 
-	hansg@kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-Exchange-RoutingPolicyChecked:
+	NWe2y7FrBp5jpUvOwM+Y4V62vWgJqc+FVXo8Xh7ma2RueLF9uCefINLMW7KS9aDN6V6BjLx6lqyyf87rlHQ7mHOoGHWdq8PDU2x/riYWRU9+jAvBxW2m+Kgcn+0TlPJcxJ+1kpsTErwEcj6lDK7WNQe5gQmzkm6EnFkDE0CMNGiVuyvXQEw2RPAb5no4h6u2fcSf9j+RGaTpM0tndR4TtA79mujUNbkutu7vcWvh3lSSvCF6CkJZ+s4TdQEJkrrOdLDvvEt6gT5nzxlCFsLCeafC2F+1mjdLc3mlXMYE7BNaXpbHzXuUk/HOUqtKtMHDKZQLDbGPxM1UoEi9XgY65w==
+X-OriginatorOrg: ibm.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SJ0PR15MB5821.namprd15.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b3de91bc-aea9-4c3f-ed42-08de7f991815
+X-MS-Exchange-CrossTenant-originalarrivaltime: 11 Mar 2026 18:07:44.3980
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: XD8PqzwH8Vuu88o/2TRPB8b9t+N7hs98s41tDyPNeY6MY7DJsr4Fj//6BWxjIwckmgb9CyrXKfYHdGkePyOxow==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS4PPFFAB2B5BD7
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Proofpoint-GUID: 93zWnziYvmUCzXi_r_tgVXRc6wlpse-6
+X-Authority-Analysis: v=2.4 cv=Hp172kTS c=1 sm=1 tr=0 ts=69b1af73 cx=c_pps
+ a=EPZJxM4MYJNUcCtligPUUQ==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=Yq5XynenixoA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=Y2IxJ9c9Rs8Kov3niI8_:22 a=VnNF1IyMAAAA:8 a=6X-IYPjw_pHFGEfm8mAA:9
+ a=QEXdDO2ut3YA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzExMDE1MiBTYWx0ZWRfX7gH5ITECQywA
+ apuQfIetwozmadzbSB6iax64GRdoXFpL1bOWbvCSqX7AdbZSYewBcIH1a4/Mwm1rAuyTSSiDZ9w
+ 9/JrlAZxigMnWE6mZc/tXd2Ksj/M2m/NskaDGV8XxYnopLwziSNWQUFRv3gk1S2YrQIzM0PY5Rd
+ EGW6qbA+Pnhhj//Xdic3Tqdwp59zol4Rtt7uZZqXT8r2Ecu4I9wL3+GEitU5ubutohORu5/lg69
+ JOrY3rDWOf7U0AfCxSmND/hnscymDM4YdL2yK9tHXQdMHGIxH03tGs03WJshVgg7L/1i8n/GuKi
+ eC2lbrVoJNF6KtCaHvtIIOzc9iqxTuEGeHs6Vttfz2SXqyIIJ4eRu9/c4U88PzeRL7d6KnrcoBd
+ ju9I9V6xUWQ/DiEAbgnwtAkM6O1Q51YftXzCu8t0/XRgYanSB936ceC+p4zib/HmzcDWPYHo3z5
+ oEef1QDhYO5s5SS9UEQ==
+X-Proofpoint-ORIG-GUID: 7NooaiPMC_DN-ps-Gm6L-N0gG8b1_nYI
+Subject: RE:  [PATCH v2] libceph: Fix potential out-of-bounds access in
+ ceph_handle_auth_reply()
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-03-11_02,2026-03-09_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 adultscore=0 malwarescore=0 impostorscore=0 suspectscore=0
+ spamscore=0 phishscore=0 clxscore=1015 priorityscore=1501 lowpriorityscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2602130000 definitions=main-2603110152
 
-On Tue, Mar 10, 2026 at 9:49=E2=80=AFPM Aleksa Sarai <cyphar@cyphar.com> wr=
-ote:
->
-> On 2026-03-09, Christian Brauner <brauner@kernel.org> wrote:
-> > > > On Sat, 2026-03-07 at 10:56 -0800, Andy Lutomirski wrote:
-> > > > > I think this needs more clarification as to what "regular" means,
-> > > > > since S_IFREG may not be sufficient.  The UAPI group page says:
-> > > > >
-> > > > > Use-Case: this would be very useful to write secure programs that=
- want
-> > > > > to avoid being tricked into opening device nodes with special
-> > > > > semantics while thinking they operate on regular files. This is
-> > > > > particularly relevant as many device nodes (or even FIFOs) come w=
-ith
-> > > > > blocking I/O (or even blocking open()!) by default, which is not
-> > > > > expected from regular files backed by =E2=80=9Cfast=E2=80=9D disk=
- I/O. Consider
-> > > > > implementation of a naive web browser which is pointed to
-> > > > > file://dev/zero, not expecting an endless amount of data to read.
-> > > > >
-> > > > > What about procfs?  What about sysfs?  What about /proc/self/fd/1=
-7
-> > > > > where that fd is a memfd?  What about files backed by non-"fast" =
-disk
-> > > > > I/O like something on a flaky USB stick or a network mount or FUS=
-E?
-> > > > >
-> > > > > Are we concerned about blocking open?  (open blocks as a matter o=
-f
-> > > > > course.)  Are we concerned about open having strange side effects=
-?
-> > > > > Are we concerned about write having strange side effects?  Are we
-> > > > > concerned about cases where opening the file as root results in
-> > > > > elevated privilege beyond merely gaining the ability to write to =
-that
-> > > > > specific path on an ordinary filesystem?
-> >
-> > I think this is opening up a barrage of question that I'm not sure are
-> > all that useful. The ability to only open regular file isn't intended t=
-o
-> > defend against hung FUSE or NFS servers or other random Linux
-> > special-sauce murder-suicide file descriptor traps. For a lot of those
-> > we have O_PATH which can easily function with the new extension. A lot
-> > of the other special-sauce files (most anonymous inode fds) cannot even
-> > be reopened via e.g., /proc.
->
-> Indeed, I see OPENAT2_REGULAR as a way of optimising the tedious checks
-> that userspace does using O_PATH+/proc/self/fd/$n re-opening when
-> dealing with regular files.
-
-Can you give a brief decription or a link to what these checks are and
-what problem they solve?
-
---Andy
+T24gVHVlLCAyMDI2LTAzLTEwIGF0IDE4OjIyICswMDAwLCBWaWFjaGVzbGF2IER1YmV5a28gd3Jv
+dGU6DQo+IA0KDQo8c2tpcHBlZD4NCg0KPiANCj4gTG9va3MgZ29vZC4NCj4gDQo+IFJldmlld2Vk
+LWJ5OiBWaWFjaGVzbGF2IER1YmV5a28gPFNsYXZhLkR1YmV5a29AaWJtLmNvbT4NCj4gDQo+IExl
+dCBtZSBydW4geGZzdGVzdHMgZm9yIHlvdXIgcGF0Y2guIEkgYW0gc3VyZSB0aGF0IGV2ZXJ5dGhp
+bmcgd2lsbCBiZSBPSyBidXQNCj4gYW5vdGhlciBjaGVjayBhbHdheXMgbWFrZXMgc2Vuc2UuIDop
+DQo+IA0KDQpJIGRvbid0IHNlZSBhbnkgbmV3IGlzc3VlcyBhZnRlciBydW5uaW5nIHhmc3Rlc3Rz
+IHdpdGggYXBwbGllZCBwYXRjaC4NCg0KVGVzdGVkLWJ5OiBWaWFjaGVzbGF2IER1YmV5a28gPFNs
+YXZhLkR1YmV5a29AaWJtLmNvbT4NCg0KVGhhbmtzLA0KU2xhdmEuDQo=
