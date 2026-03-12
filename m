@@ -1,345 +1,307 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from flow-b6-smtp.messagingengine.com (flow-b6-smtp.messagingengine.com [202.12.124.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 942ED34A797;
-	Thu, 12 Mar 2026 21:39:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.156.1
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773351553; cv=fail; b=IJpzPIiOMu+saozn/C0BrNVyEQHImKIZYctrtLfXPoR3mSi4CZ6HGmWDuHkctTfMcJfbXj9vxg2zVh1mMwkso1XpZ0w1Beguay+y1eBsYlgdxUVCA013DajD2Ul1HB0myO+KAsLFnq7W8kHkr+qsVJRRKo15GRKJ4I47RGVqYME=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773351553; c=relaxed/simple;
-	bh=6q2VRhSB769H97u55O1B8Wo1ns5rHhsBFOUELxBJLIU=;
-	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=kNT+aQsOJFA79ufxKgmGikRwI58kWjw04DXurLGSeAePw9yvS93HYfNNnN0NVGemDYrgw/x7Xg8LzW1NCgx2YlXPxcZJ22BqWVt1LS3h8oj4zpUYeBw2Iax0ahk5llsTCf6+H0suR9aigaLewcOsaXaUk9pZozPSEDeKffIJYhc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=jtGAscxw; arc=fail smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BB423F0768;
+	Thu, 12 Mar 2026 21:44:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.141
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773351870; cv=none; b=T8gi5K2EdvGVk41BvXFahFM2GeGswx0/QHlUSlz7hFlqmeDksAySsw8gaKHOPXSnN6Gzkyu85rZAL9NegwwXfG44EQ6VNYjQSV7L73LjuMfCVZ90Y/PVQ70mOQn/pIVbybI3E+AlnTwZXVcIN1h1O+VONBWk45Bw4aQ0wh5lvis=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773351870; c=relaxed/simple;
+	bh=Dfk/v8M2XGUkYMjdT8IWZm5Z9z/SvJrEfRIjyScAHm4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=dXgEs+3emdQ4KvGP7H1b8+17qdstyp0+MLHZe+0utR3IbVnkFjUkotitD3iQDNyH8mzg19d7bBznEtQ8I6IjFCf7LjsA8L/5gQlRa89U5/ACzWL1JB5PjflR2rrxU3RH1Q3GFsEtNGrJtnQy+cc1HkRKgSo9l4Z8rmfdtG1p1jk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=HynKVXD7; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=sD1IpxmF; arc=none smtp.client-ip=202.12.124.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="jtGAscxw"
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62CF4StP2277765;
-	Thu, 12 Mar 2026 21:39:09 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=6q2VRhSB769H97u55O1B8Wo1ns5rHhsBFOUELxBJLIU=; b=jtGAscxw
-	KKLJbAMhaOFpvSN9GAzvvjyG9KFU7rcScd1x12Bukz+8bgiIb2ewePwfdUDYGL1j
-	L3baj0VHAfj7tZe3gVh5DxTp8Q3Dfj0r6saDAEOReuSmnfkcoUwt45x1ALxDVhYg
-	64zafRECC5P9q6wAtIVaGxiPffCrrGXnD/6UDjmH470bbi5+7SrXbmB4EUEks7b0
-	Dq4dWadU2Ut1fzX7hvc2WMcOP/anL7MrM0Y9ivIRvuN+9nluxAaQ72gACCJ+YgS9
-	+mSzFJQX/ID70GsoPj1bFaPFsAQRJgO0tL+hjSot59egpXzeIryv/ShCUYjTmDxG
-	66CRnoWSUdVgXg==
-Received: from cy3pr05cu001.outbound.protection.outlook.com (mail-westcentralusazon11013041.outbound.protection.outlook.com [40.93.201.41])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4cuh91my83-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Thu, 12 Mar 2026 21:39:08 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=r/kk247F1px9f/9fncUl42pEWH7BtcJx/sEHX44qzkiCz9jGN6mQN8l6s3dg1iO8qQylcpAGJ9e3JwlxP33CrgH1IKb4mhD8LC5Xtp32BWgrf0jTrwlxLMISsczqVow82VT4A86CPXqgKOLcR/Fkebc4Mu8y9KASY7qQKoavU+zhCUjlhhwtJQDRVQsOlckJIzIb3zVcR0WbSz5CdoFEN6RebbShRPHdCZkXlw0IHz0j3HkoBNuetrKHepS6BBI6ZP9akt9uPi/rRu0egZ76hK5rmUI/VfYyf7iNu71wk4pxdoSEOxTrJ5CEwjCKDl8+AKzvRAHDKLDFmvoCzAIBgA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=6q2VRhSB769H97u55O1B8Wo1ns5rHhsBFOUELxBJLIU=;
- b=wcfhV4W79zWm3F3GVhpgAZvAKVmQ5AumJMDO5HTz0BDc1PY7b9zHU++hTM067Accngq1Khwp/gHE250VTibLMz2Fc0oyyyxgD7UVHCmT3nF6idQwBb2FwSmhHD0JQL9fhRNcj3I8KtdM7D217jnN3S+rvHUHtBK3KLUaqCmCgl+q+NN0aBbA+ILe3Fn9pych6gynPmkEvRawo+zfVwvnlpUwDuIbU3VGEX+zS6DlZ+XgJSL7mTW6UJ+lh6z1prRBK5WTMF+d4/uwHx2YhusZ4OO7IpSkO6ZfugNXjpzg9jlsRYmViWJo7e5RR1UQjHeax4EPFcrdzvpWfzGNRfadFA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by SAVPR15MB7142.namprd15.prod.outlook.com (2603:10b6:806:4e8::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.6; Thu, 12 Mar
- 2026 21:39:06 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.20.9723.000; Thu, 12 Mar 2026
- 21:39:06 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-        "ionut.nechita@windriver.com" <ionut.nechita@windriver.com>
-CC: "idryomov@gmail.com" <idryomov@gmail.com>, Xiubo Li <xiubli@redhat.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "ionut_n2001@yahoo.com" <ionut_n2001@yahoo.com>
-Thread-Topic: [EXTERNAL] [PATCH v1 11/13] libceph: reset source address on
- persistent EADDRNOTAVAIL
-Thread-Index: AQHcsfk9INxEoSpFWEiTg6qdI4oYC7WrbVsA
-Date: Thu, 12 Mar 2026 21:39:06 +0000
-Message-ID: <1aa4e598d3c0f45d408c66153addd3502ae432c0.camel@ibm.com>
-References: <20260312081619.40854-1-ionut.nechita@windriver.com>
-	 <20260312081619.40854-12-ionut.nechita@windriver.com>
-In-Reply-To: <20260312081619.40854-12-ionut.nechita@windriver.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|SAVPR15MB7142:EE_
-x-ms-office365-filtering-correlation-id: e0909d16-ff09-4ec1-3b2b-08de807fc9c5
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|366016|10070799003|1800799024|56012099003|22082099003|18002099003|38070700021;
-x-microsoft-antispam-message-info:
- BZBDpMifUmiehvBJizj7ZJMz7wLMkvthrvcPAw8gs4rwKscG86Yo3SkfyQw0O6/A1wMbunHSkVzKsqzHNHDakNPV6vFLbbtlFZS7VZ22qWsIRetJCdK4M92LEo0AXp//7TQHb9E3kfm9+HLhkhJWrjTo2BYJXdGxlyWcmsKUZ4ytf1Dq7I8sN7NyVySvad6rN7r3m+arhfT+6JOfVaj/ciDbY9D37+mfsoQW2mifPKdzxyqYu/Npu2vmpfiYUVkHJO3rk5Gp3G/Wn7EChQecIHfgwdCWxXyNPAXYNyL8GcmriVJN842+BCm+Z3xhSxZptxAeWm3KBToyflcAK2WVKll+Mpd96422sKxl6nrJRNuYDtB3wq1TVCYtCCUDZuOqLi1WxPZOsb9O1XDNsuYfGmohe0fixh3ur/PxsT2IZTuU7SaSM2AmPF59JfqvJhp8TTEoAqKhW/mV1PfHaQ/uax7zChy6nlRQK8AqxWG9qeUCZyLHudsRgCE+t6+9EKdKkttf47Y8fMltSPihDQS7Mvb3e65ji+XqwFd76ktyerE39aa2b4LNrbXDtU9vJug/CXH8ZKR9R1ui8VRhrLPtWkNChvEBaIAjCtUePt9QMEVTUkF79CUD53McE6qbcUtF1UgvGAYIWJAUOlKAi6BxctnNv4k3GZUEJAEBzDYe6TsCM0MU8Ojt9o7YuoH8oFc90y1OAlg3NmCk+iHNWA1/nKw37pMUKc1xtgC1cfM3OpxxOQoRAvdKFtpBLUJ/+sXunJGx6+DEdThk2PftidrX3KNml7m0CIDtRiRU3TvQCHc=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(10070799003)(1800799024)(56012099003)(22082099003)(18002099003)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?ekFtcGEycWdqSTZUYUJpcDc0QWhuUmdSM0lnM1gyQlFJbURHMTgwZ3dDSXZy?=
- =?utf-8?B?UXhZTFhGWnkrSlFRSldIYU1YU1dITS9Ycld4ajd6UTFCby8yR1ZreVZzNFhS?=
- =?utf-8?B?QTdBYjJLMk5PRzdDSkd0ZU5FTnkxTFRIdlNELytQWEVQMjFBd1hqK3lvSndW?=
- =?utf-8?B?MHgycFdOeXM1RHYwN1o4UDVjOHJrb1VQUlNzZGt6OUNOZXFpcVlWdWhPQSt5?=
- =?utf-8?B?UUxCMWhMK2p3dVN4T3dYMmZacXRscldkWWJrZTFxSFp3dlRpeXp6MElia3RR?=
- =?utf-8?B?S2Q4WHFHUXRYQnVCK1BZNFdqRDgxMzlvdzZnV3AyMXAzVVV1L0RnM2lHQ3Bw?=
- =?utf-8?B?RG4xVWt6a3pVQThxZWNXRlBaL1JKNjlaeUh6ZE9IMXNGZWU5M1VuVzdEWm1i?=
- =?utf-8?B?RmtoTWNQRGwvOTAvWUZHdStkOG1BQ1d5eGVmNnY4WEV2dnF4NVBqN1k5b0NL?=
- =?utf-8?B?M3c0dUVHU3BZbkdLK0xjQzNVaVNJREdyK3RoN01BSmdBc2FSemE4YWRTTy9J?=
- =?utf-8?B?VkVxLzRnQkZlYWZjYndYa1M0a2x6dk8yb2wxemVtakYwUmE1ZDZrQ3JxcmNO?=
- =?utf-8?B?dFB6ZGdMOUIzKytMZDFSVUJrMktiU21Id0ZNejNYdGZ0eUxQU1U3NlFNenhZ?=
- =?utf-8?B?eDRYZUQ5VWFwMDVnVE5tZ1BWbjNQVmxDdHd6blN6eW5Ob0QrQk8wSHRxdGJj?=
- =?utf-8?B?Q1dlelMxLzkxYy9xMkJNdUtYNnlsMVlpalhteTlFdTRnbGpCVEVTQ2FSSDdo?=
- =?utf-8?B?TWVKbGl5dHo0bnlWVUl4TCtiOVlsdmNXVUI3K0xsQkF1MGlzZ3B0VG95aWJR?=
- =?utf-8?B?dHlLcEczQjhScUNsMmdYZEZoam9NVFlrV1RNVDE5Tmpkck0wT3dQSTFGVDlm?=
- =?utf-8?B?di85L01QVGlLUEtHSTV5Y2tRNkpFNTlxZjh2OE5wOXFDTU93c1pqbnp2eVlU?=
- =?utf-8?B?d1UxZ2N5dzhlK3krTFI2NjBUS29SanF5S2p5WDNoZUh1bTN2Z1M3UnhXRDlG?=
- =?utf-8?B?WDVVamZsSzVXOUNKVEFDZ2E5c3NQcnc0a3dYejl0UUxab3VKR1BiS1ZiUWpk?=
- =?utf-8?B?anczYnVFaW5TOXJlOGNVNUc3OXZhdHlmcjBWaWZDUDRWUWY0aGVhendFUHZV?=
- =?utf-8?B?SXdpWThQbmVqMTh5ZUJyNUNtOXkrRzl4T2dud1ppcUU2cFNTemNIcVZCRkla?=
- =?utf-8?B?MlZYNFp2SGNBTlRRT3FsSGxZaVA5ODBYUVM4UUhpeGUzblFjZUl1d0VnNnVy?=
- =?utf-8?B?bTQ2ZDYzUWhFU0RmYTErZTgza0pieXJIQ1krV2hvVWk5WHlXSThMZ1I3ck9W?=
- =?utf-8?B?Ykg5Z2NxUzlNT1R3V2M0UDJXZ2N3UGlqN2p2TnJlVUF2Mm1NYS9GdjBEQWJQ?=
- =?utf-8?B?UkpzcWJJNGZqMWdTNW5RQlo1YVVyR2xZSDZERVN2aFdnTXFzdGJ4aFNyNTBx?=
- =?utf-8?B?bC9OWHY3SmFQUGxwWUtKckhTaUxFSy82dnVNN010dzJaZmFOZGRPN1N3bUVx?=
- =?utf-8?B?aVNWVHk0QXFzZGRvY2NjcVZLeFJrTkQ5MnBGUkxXWDc2czA5bHVEczc1WDlC?=
- =?utf-8?B?aHZZb2JHYzFhWjdBcWZsd0ZyVzk1MmwvVXJnQ3JvNTZidXVVSVdvd0N0VzNs?=
- =?utf-8?B?cXVhU29DSHBKM1QzaERsSTJySDhUd0V5WWZTdXVuc3BmeUlFVmt0dnVINEFv?=
- =?utf-8?B?N0Y3d0NyM0QrQ2tYWHQyZXNxK2MrZHNBNDdyQjBYYWpQQk1XVTZVb3dRRks5?=
- =?utf-8?B?Ny84bVZiZlo2SlY3dDVCdzRGUVY5R0xxeXBvT3pOcW9xdVBFODNBbDJzUjJ2?=
- =?utf-8?B?MzBoNnVNdEd1ZWhScWVMejg2M2dSU1BIUkZETHk5Ly9IM3RSNUs5b0RMekFv?=
- =?utf-8?B?QkFrMlh2WFp2U0JrRzl1WW1aTWtrMDBEbE9UMEIwWnRRU3Bta3pxSVRLWEtG?=
- =?utf-8?B?WnM0ZDFZb0pNQUtvLytsLy9LTE1DakdMckh5TWxrdjJLUW5tczY1R240L0RZ?=
- =?utf-8?B?VjkvamlqV0NiR2lDVHRxYVY4c0E3Skc3SGZSY20yT3pja2wwbTE1QUQ1Y29o?=
- =?utf-8?B?VHc5TTdXNTk2enV4aFRISFpqUjRjcFBhcnFoOGlFVVRaSFpOckp5NXU0Mkhm?=
- =?utf-8?B?MXZodUxnYlluOVBBb2IwS1ZhZk5WeFF6enFEakRMZDA1WFN2TmFibnljeHVW?=
- =?utf-8?B?ZldkR04yWUNjWXpHWG5MbVRCaXE3M2t5ZGR6ZDhYZEpBVmpqL3JTL1FZZ05S?=
- =?utf-8?B?L2RpZjdXMmR5QmZodFlrZzQ3dzI4bmNUUjNiU2xlS09PT2xUVGpRRnNnUUNy?=
- =?utf-8?B?NnNjb0EyVXhkTVVwQS9jYkh6WVNlVTVNS0dXV2NrYzU4Q0RrZzdsZ1BwUlNU?=
- =?utf-8?Q?J96SoeSCz5yOAgTdylrMBPCSLcPx0douF1NAW?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <BA4F051B7745C542B2F098A4456B1DF8@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="HynKVXD7";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="sD1IpxmF"
+Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
+	by mailflow.stl.internal (Postfix) with ESMTP id 649AD1300FE6;
+	Thu, 12 Mar 2026 17:44:25 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-05.internal (MEProxy); Thu, 12 Mar 2026 17:44:27 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to; s=fm1; t=1773351865; x=1773359065; bh=FHJsH8Kre5
+	d09x8tLYt2s8UM1ZjvIsbiC0DN+DyY4Wk=; b=HynKVXD7sGiagH9pyAhm4nEmbG
+	vnoLEKsMRIiSoa4G7euyElVNaPJlW0anEmEFcWVt480xGfw7ZBeWqyJHh/ktIp9H
+	PvZZACKxP9UOdtcmm83xJahGzP6ashogKl0QDSMPEPl70AAQ3icBB8PfEnzEFMRq
+	sX3yWNvxvY/eWlaObNEhjpO2PDvl14q8XwgFR80C8mJOcy9vmuKQRaNg5N7I0NBu
+	YzYQ2wP8zbtuE/A1y/UOTxlh7tZ0N66BfUwAQyR2N36DYGboFbAHY0UTwAvDGw1M
+	d6RYVJexiZ6tvhPF9XL+NJ38N7femUBleqpharU4wR7cs3N8FjN0xclTa88Q==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:date:date:feedback-id:feedback-id:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1773351865; x=1773359065; bh=FHJsH8Kre5d09x8tLYt2s8UM1Zjv
+	IsbiC0DN+DyY4Wk=; b=sD1IpxmFFBbUWLaj2WkVbBMNwpLBYky36Wu3DMHfzT0X
+	nYRW/ck1rxXdAMzJNXUejfFN/jOa+nMSve9JT7wFkvNE8kcvSIA6yoXL/zieN3xM
+	iZ+dMzyq43JMAdlzXgdWh8E1/CDLAWkabqAdcZh+T2TEs39XC5Dyt8plLkNXPMtI
+	Y+r2Dz3efkKqhCljIQwPhIv8XYGf4dd7RG0/DSMZfTI3O1ghah+7C1QcisTS9EWV
+	p5Ay6DlW7fs9l7Lbcemw1oXfwXFw+gQWGOzjp8GKsZTmGNsABOtouzH+861W6TOI
+	iR7R/iP6i1+Z6AxnjMg7KFFlVxvvm0hDCXBMXVB/MQ==
+X-ME-Sender: <xms:tjOzaYKtAlzNy0f_EhbkSUlhoa8KZMOzdeNH9009TcjkYG6tbvC7Aw>
+    <xme:tjOzab1mfdu_QmTDPbYrOK1x4qA-DPLvzT8zO8FZQfoiZZpM2Q7PewNcOWSFkbzBx
+    CSJqJJgR4xO9u5VcliHKe4FVdaI6_GR5jWwjPvhZ8TLoSIpYA>
+X-ME-Received: <xmr:tjOzaTyaQLH6LrWbZtAo1MENQavCeD4QUFklDYoSz_Wa54OtONiqLZpomwLKI-d-C--YgCofWm54r8ueiEOhXittozc2IECd2HHHlL6ixNjG>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgddvkeejkeelucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurhephffvvefufffkofhrggfgsedtkeertdertddtnecuhfhrohhmpefpvghilheurhho
+    fihnuceonhgvihhlsgesohifnhhmrghilhdrnhgvtheqnecuggftrfgrthhtvghrnhepge
+    etfeegtddtvdeigfegueevfeelleelgfejueefueektdelieeikeevtdelveelnecuvehl
+    uhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepnhgvihhlsgesoh
+    ifnhhmrghilhdrnhgvthdpnhgspghrtghpthhtohephedupdhmohguvgepshhmthhpohhu
+    thdprhgtphhtthhopehvihhrohesiigvnhhivhdrlhhinhhugidrohhrghdruhhkpdhrtg
+    hpthhtoheplhhinhhugidqgihfshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphht
+    thhopehlihhnuhigqdhunhhiohhnfhhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtg
+    hpthhtoheplhhinhhugidqthhrrggtvgdqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghl
+    rdhorhhgpdhrtghpthhtoheplhhinhhugidqnhhfshesvhhgvghrrdhkvghrnhgvlhdroh
+    hrghdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdr
+    ohhrghdprhgtphhtthhopehlihhnuhigqdhfshguvghvvghlsehvghgvrhdrkhgvrhhnvg
+    hlrdhorhhgpdhrtghpthhtoheplhhinhhugidqvgigthegsehvghgvrhdrkhgvrhhnvghl
+    rdhorhhgpdhrtghpthhtoheplhhinhhugidqvghfihesvhhgvghrrdhkvghrnhgvlhdroh
+    hrgh
+X-ME-Proxy: <xmx:tjOzaS1z3HXh4-ifJRBEJTkKAyUPCr8OJLgJiRXU1S3hJu4gX6A32Q>
+    <xmx:tjOzaU6VCxafI3qHQH8oosSQuqDVIy-CStyT6UaG1DYXnTDBEu-EpA>
+    <xmx:tjOzadctLaB3wfFUZXTX37T5TIQ88OOFc6eu00-UyziGYU-aaSZemw>
+    <xmx:tjOzaQYHqOUYatlEsE5TwG61VUO_YB38t6wNqngJFK5w5KsHFjx8_w>
+    <xmx:uTOzacGeKHU7F90aeYZNDwvYEnwYDWXkCfp88n2OwGQGooB6gIONyBVa>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 12 Mar 2026 17:44:08 -0400 (EDT)
+From: NeilBrown <neilb@ownmail.net>
+To: Linus Torvalds <torvalds@linux-foundation.org>,
+	Alexander Viro <viro@zeniv.linux.org.uk>,
+	Christian Brauner <brauner@kernel.org>,	Jan Kara <jack@suse.cz>,
+	Jeff Layton <jlayton@kernel.org>,	Trond Myklebust <trondmy@kernel.org>,
+	Anna Schumaker <anna@kernel.org>,	Carlos Maiolino <cem@kernel.org>,
+	Miklos Szeredi <miklos@szeredi.hu>,	Amir Goldstein <amir73il@gmail.com>,
+	Jan Harkes <jaharkes@cs.cmu.edu>,	Hugh Dickins <hughd@google.com>,
+	Baolin Wang <baolin.wang@linux.alibaba.com>,
+	David Howells <dhowells@redhat.com>,
+	Marc Dionne <marc.dionne@auristor.com>,	Steve French <sfrench@samba.org>,
+	Namjae Jeon <linkinjeon@kernel.org>,
+	Sungjong Seo <sj1557.seo@samsung.com>,
+	Yuezhang Mo <yuezhang.mo@sony.com>,
+	Andreas Hindborg <a.hindborg@kernel.org>,
+	Breno Leitao <leitao@debian.org>,	"Theodore Ts'o" <tytso@mit.edu>,
+	Andreas Dilger <adilger.kernel@dilger.ca>,
+	Steven Rostedt <rostedt@goodmis.org>,
+	Masami Hiramatsu <mhiramat@kernel.org>,
+	Ilya Dryomov <idryomov@gmail.com>,	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,	Tyler Hicks <code@tyhicks.com>,
+	Andreas Gruenbacher <agruenba@redhat.com>,
+	Richard Weinberger <richard@nod.at>,
+	Anton Ivanov <anton.ivanov@cambridgegreys.com>,
+	Johannes Berg <johannes@sipsolutions.net>,	Jeremy Kerr <jk@ozlabs.org>,
+	Ard Biesheuvel <ardb@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	linux-unionfs@vger.kernel.org,
+	coda@cs.cmu.edu,
+	linux-mm@kvack.org,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-ext4@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-trace-kernel@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	ecryptfs@vger.kernel.org,
+	gfs2@lists.linux.dev,
+	linux-um@lists.infradead.org,
+	linux-efi@vger.kernel.org
+Subject: [PATCH RFC 00/53] lift lookup out of exclive lock for dir ops
+Date: Fri, 13 Mar 2026 08:11:47 +1100
+Message-ID: <20260312214330.3885211-1-neilb@ownmail.net>
+X-Mailer: git-send-email 2.50.0.107.gf914562f5916.dirty
+Reply-To: NeilBrown <neil@brown.name>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	NxXqrAvPI1tvftaqrsM+SHXzLTh9hFT/q2v6d0spDTGg/YCZE7ALhFi1LWUHH4XpUZuBrCAMjdlbHdGnM1mWZnB5HqsSHmfvU7Oms0w2zb0ZyxugCClD6hJHBKs2s62kvYdK/nmxmD9SOlEvK1nK/1AJM7Rjx/6ZyweQrvUIsd5USXXUJiIvY0LzBivu3XakGrYHTQrfppi52om6qLaWEw4O+ovmFmzNg1oZM3f+1Ztc9j2UccC7nNHBC4ptvFORIwwMOGWFIJHxUrICuxWfSqLAdn5ttp6vRSgmdJ2fbwZhyBRuf9Kv6pXdMPmwK0WPNTtWlS17Cq6kCT0PwyKjYQ==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e0909d16-ff09-4ec1-3b2b-08de807fc9c5
-X-MS-Exchange-CrossTenant-originalarrivaltime: 12 Mar 2026 21:39:06.7461
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 9Mu5kHzx4iot69/Nf1O6+lAoI5W24lKr3PAABowHYHZhD3VEpjAmSKk+g2kzomMDeP4Irjn/UdK7TaAHKgk16Q==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SAVPR15MB7142
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-GUID: 19bzE79nfnKNetxn6ILWn_oMpzDcovyM
-X-Authority-Analysis: v=2.4 cv=E6/AZKdl c=1 sm=1 tr=0 ts=69b3327d cx=c_pps
- a=7YeuQJ2t1o+NR7xo1DCA9A==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=Yq5XynenixoA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=uAbxVGIbfxUO_5tXvNgY:22 a=t7CeM3EgAAAA:8 a=L3q8fR6H_wJ4gNNn8Q4A:9
- a=LONr8ofnQXjLKK9x:21 a=QEXdDO2ut3YA:10 a=FdTzh2GWekK77mhwV6Dw:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzEyMDE3MyBTYWx0ZWRfX0TQ21ielyMf/
- /pCCiPtn3xCBxr/ezD7y59zj7oj1J1w6fMsg4HpZfSethiJWQ8fTltn7mIhGxzQvfFQXJnvutP2
- EVk3jVpu8I8qsORb7ggsRCcoGaVK8EsNJeJF5lbMNI5rF8mvDc0sodbXXFy1WSCZKX6PdqLlh71
- YG5Bg0UqGUnUo4jnQKrd1GOLfVr5yuwkY5K/75Lm2Cnlm/6Zj/PCxt2N+flQ1J7VWsmRYP6r3hq
- p6hW6ZGXozhdqHfmINYtYoqRFpN1FSqVIWzcOi8Zont3Cop+bDFYAdAOYQNuLWH2+iv0DQDMLSP
- ItkSk0/bHuwnAmLie1VeRs4qeAzueuvFsSk/Fcr0gM8mk9fl02LffhSmdLncSanRvSPQi8sE3F7
- z1ezHgnyvSY221OeRS5Y6JBPRAYHDHDiUXT9bwQS0gou1HjxyaR3vuyX7Hz4xW7hcqF+UeqKoam
- G+/JD+YTwe/4m+7qqPw==
-X-Proofpoint-ORIG-GUID: TMhbA0pb-GHN93jsFujrmCGrRRVgakS-
-Subject: Re:  [PATCH v1 11/13] libceph: reset source address on persistent
- EADDRNOTAVAIL
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-03-12_02,2026-03-12_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 impostorscore=0 clxscore=1015 malwarescore=0 phishscore=0
- suspectscore=0 priorityscore=1501 spamscore=0 lowpriorityscore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2603050001 definitions=main-2603120173
+Content-Transfer-Encoding: 8bit
 
-T24gVGh1LCAyMDI2LTAzLTEyIGF0IDEwOjE2ICswMjAwLCBJb251dCBOZWNoaXRhIChXaW5kIFJp
-dmVyKSB3cm90ZToNCj4gRnJvbTogSW9udXQgTmVjaGl0YSA8aW9udXQubmVjaGl0YUB3aW5kcml2
-ZXIuY29tPg0KPiANCj4gSW4gY29udGFpbmVyaXplZCBlbnZpcm9ubWVudHMgKGUuZy4sIFJvb2st
-Q2VwaCB3aXRoDQo+IENhbGljbyBDTkkpLCB0aGUga2VybmVsIENlcGhGUyBjbGllbnQncyBzb3Vy
-Y2UgYWRkcmVzcw0KPiAobXNnci0+aW5zdC5hZGRyKSBpcyBsZWFybmVkIGZyb20gdGhlIGZpcnN0
-IHN1Y2Nlc3NmdWwgbW9uaXRvcg0KPiBjb25uZWN0aW9uIHZpYSBwcm9jZXNzX2hlbGxvKCkuIElm
-IHRoZSBpbml0aWFsIGNvbm5lY3Rpb24gd2FzIG1hZGUNCj4gdGhyb3VnaCBhIHRyYW5zaWVudCBD
-TkkgcG9kIGFkZHJlc3MgKGUuZy4sIGEgQ2FsaWNvLWFzc2lnbmVkDQo+IGRlYWQ6YmVlZjo6Li4u
-IGFkZHJlc3MgZnJvbSBhIENTSSBwbHVnaW4gcG9kKSwgdGhhdCBhZGRyZXNzIGlzDQo+IHN0b3Jl
-ZCBwZXJtYW5lbnRseSBpbiBpbnN0LmFkZHIuDQo+IA0KPiBXaGVuIHRoZSBwb2QgaXMgbGF0ZXIg
-cmVzY2hlZHVsZWQgb3IgdGhlIENOSSByZWNvbmZpZ3VyZXMgbmV0d29ya2luZywNCj4gdGhlIG9y
-aWdpbmFsIHBvZCBhZGRyZXNzIGlzIHJlbW92ZWQgYW5kIENhbGljbyBpbnN0YWxscyBhIGJsYWNr
-aG9sZQ0KPiByb3V0ZSBmb3IgdGhlIG9sZCBhZGRyZXNzIHJhbmdlLiBBbGwgc3Vic2VxdWVudCBr
-ZXJuZWwgc29ja2V0DQo+IGNvbm5lY3Rpb25zIGZhaWwgd2l0aCBFQUREUk5PVEFWQUlMIGF0IGlw
-Nl9kc3RfbG9va3VwX2Zsb3coKSBiZWZvcmUNCj4gZXZlbiBzZW5kaW5nIGEgVENQIFNZTiwgYmVj
-YXVzZSB0aGUgSVB2NiBzb3VyY2UgYWRkcmVzcyBzZWxlY3Rpb24NCj4gZmluZHMgdGhlIGJsYWNr
-aG9sZSByb3V0ZSBmb3IgdGhlIG9sZCBhZGRyZXNzIHJhbmdlLg0KPiANCj4gVGhpcyBjcmVhdGVz
-IGEgcGVybWFuZW50IGRlYWRsb2NrOg0KPiAtIEFsbCBjb25uZWN0aW9ucyAobW9uLCBtZHMsIG9z
-ZCkgZmFpbCB3aXRoIEVBRERSTk9UQVZBSUwNCj4gLSBUaGUgY2xpZW50IGNhbm5vdCByZWFjaCBh
-bnkgbW9uaXRvciB0byByZS1sZWFybiBpdHMgYWRkcmVzcw0KPiAtIGluc3QuYWRkciBpcyBuZXZl
-ciBibGFuayBhZ2FpbiAoc2V0IG9uY2UsIG5ldmVyIGNsZWFyZWQpDQo+IC0gVGhlIG9ubHkgcmVj
-b3ZlcnkgaXMgZm9yY2UtdW5tb3VudGluZyBhbmQgcmVtb3VudGluZw0KPiANCj4gRml4IHRoaXMg
-YnkgdHJhY2tpbmcgY29uc2VjdXRpdmUgRUFERFJOT1RBVkFJTCBmYWlsdXJlcyBhY3Jvc3MgYWxs
-DQo+IGNvbm5lY3Rpb25zIHVzaW5nIGFuIGF0b21pYyBjb3VudGVyIGluIHN0cnVjdCBjZXBoX21l
-c3Nlbmdlci4gQWZ0ZXINCj4gQUREUk5PVEFWQUlMX1JFU0VUX1RIUkVTSE9MRCAoMzApIGNvbnNl
-Y3V0aXZlIGZhaWx1cmVzICh+MyBzZWNvbmRzDQo+IGF0IDEwMG1zIHJldHJ5IGludGVydmFsKSwg
-cmVzZXQgaW5zdC5hZGRyLmluX2FkZHIgdG8gemVybyAoYmxhbmspDQo+IHdoaWxlIHByZXNlcnZp
-bmcgdGhlIG5vbmNlIGFuZCB0eXBlLiBUaGlzIGFsbG93cyBwcm9jZXNzX2hlbGxvKCkNCj4gKG1z
-Z3IyKSBvciBwcm9jZXNzX2Jhbm5lcigpIChtc2dyMSkgdG8gcmUtbGVhcm4gdGhlIHNvdXJjZSBh
-ZGRyZXNzDQo+IGZyb20gdGhlIG5leHQgc3VjY2Vzc2Z1bCBtb25pdG9yIGNvbm5lY3Rpb24sIHdo
-aWNoIHdpbGwgdXNlIHRoZQ0KPiBjdXJyZW50IHN0YWJsZSBob3N0IGFkZHJlc3MgaW5zdGVhZCBv
-ZiB0aGUgZGVmdW5jdCBwb2QgYWRkcmVzcy4NCj4gDQo+IFRoZSBjb3VudGVyIGlzIHJlc2V0IHRv
-IHplcm8gd2hlbjoNCj4gLSBBIFRDUCBjb25uZWN0aW9uIHN1Y2NlZWRzIChpbiBjZXBoX3RjcF9j
-b25uZWN0KQ0KPiAtIFRoZSBhZGRyZXNzIGlzIHN1Y2Nlc3NmdWxseSByZS1sZWFybmVkIChpbiBw
-cm9jZXNzX2hlbGxvLw0KPiAgIHByb2Nlc3NfYmFubmVyKQ0KPiANCj4gT2JzZXJ2ZWQgaW4gcHJv
-ZHVjdGlvbiAoa2VybmVsIDYuMTIuMC0xLXJ0LWFtZDY0LCBDZXBoIFJlZWYNCj4gMTguMi4yLT4x
-OC4yLjUgdXBncmFkZSwgSVB2Ni1vbmx5IGNsdXN0ZXIpOg0KPiAgIC0gQ2xpZW50IGluc3RhbmNl
-OiBjbGllbnQuNTUxMzYgW2RlYWQ6YmVlZjo6YTJiZjpjOTRjOjM0NWQ6YmM2Nl06MA0KPiAgIC0g
-QWRkcmVzcyBkZWFkOmJlZWY6OmEyYmY6Yzk0YzozNDVkOmJjNjYgd2FzIGEgQ2FsaWNvIHBvZCBh
-ZGRyZXNzDQo+ICAgLSBBZnRlciBwb2QgcmVzY2hlZHVsZTogYmxhY2tob2xlIGRlYWQ6YmVlZjo6
-YTJiZjpjOTRjOjM0NWQ6YmM0MC8xMjINCj4gICAtIEFsbCBjb25uZWN0aW9ucyBzdHVjayBpbiBF
-QUREUk5PVEFWQUlMIGxvb3AgZm9yIDE2KyBob3Vycw0KPiAgIC0gQWZ0ZXIgZm9yY2UtdW5tb3Vu
-dCArIHJlbW91bnQ6IG5ldyBjbGllbnQgZ290IHN0YWJsZSBob3N0IGFkZHJlc3MNCj4gICAgIFth
-ZWZkOjoyYjkzOmQyNDU6ZmQwOToxMjdlXTowIGFuZCB3b3JrZWQgaW1tZWRpYXRlbHkNCj4gDQo+
-IFNpZ25lZC1vZmYtYnk6IElvbnV0IE5lY2hpdGEgPGlvbnV0Lm5lY2hpdGFAd2luZHJpdmVyLmNv
-bT4NCj4gLS0tDQo+ICBpbmNsdWRlL2xpbnV4L2NlcGgvbWVzc2VuZ2VyLmggfCAyMCArKysrKysr
-KysrKysrDQo+ICBuZXQvY2VwaC9tZXNzZW5nZXIuYyAgICAgICAgICAgfCA1MSArKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrDQo+ICBuZXQvY2VwaC9tZXNzZW5nZXJfdjEuYyAgICAg
-ICAgfCAgNyArKysrKw0KPiAgbmV0L2NlcGgvbWVzc2VuZ2VyX3YyLmMgICAgICAgIHwgMTIgKysr
-KysrKysNCj4gIDQgZmlsZXMgY2hhbmdlZCwgOTAgaW5zZXJ0aW9ucygrKQ0KPiANCj4gZGlmZiAt
-LWdpdCBhL2luY2x1ZGUvbGludXgvY2VwaC9tZXNzZW5nZXIuaCBiL2luY2x1ZGUvbGludXgvY2Vw
-aC9tZXNzZW5nZXIuaA0KPiBpbmRleCA3MzBhNzU0MzUzYWVkLi5kOGY3OTQ2ZDg1YTY4IDEwMDY0
-NA0KPiAtLS0gYS9pbmNsdWRlL2xpbnV4L2NlcGgvbWVzc2VuZ2VyLmgNCj4gKysrIGIvaW5jbHVk
-ZS9saW51eC9jZXBoL21lc3Nlbmdlci5oDQo+IEBAIC0xMTMsNiArMTEzLDE3IEBAIHN0cnVjdCBj
-ZXBoX21lc3NlbmdlciB7DQo+ICAJICovDQo+ICAJdTMyIGdsb2JhbF9zZXE7DQo+ICAJc3Bpbmxv
-Y2tfdCBnbG9iYWxfc2VxX2xvY2s7DQo+ICsNCj4gKwkvKg0KPiArCSAqIFRyYWNrIGNvbnNlY3V0
-aXZlIEVBRERSTk9UQVZBSUwgZmFpbHVyZXMgYWNyb3NzIGFsbA0KPiArCSAqIGNvbm5lY3Rpb25z
-LiBXaGVuIHRoaXMgZXhjZWVkcyBhIHRocmVzaG9sZCwgdGhlIGNsaWVudCdzDQo+ICsJICogaW5z
-dC5hZGRyIGlzIHJlc2V0IHRvIGJsYW5rIHNvIHRoYXQgcHJvY2Vzc19oZWxsbygpIHdpbGwNCj4g
-KwkgKiByZS1sZWFybiB0aGUgc291cmNlIGFkZHJlc3MgZnJvbSB0aGUgbmV4dCBzdWNjZXNzZnVs
-DQo+ICsJICogbW9uaXRvciBjb25uZWN0aW9uLiBUaGlzIGhhbmRsZXMgdGhlIGNhc2Ugd2hlcmUg
-dGhlDQo+ICsJICogb3JpZ2luYWwgc291cmNlIGFkZHJlc3Mgd2FzIGEgdHJhbnNpZW50IENOSSBw
-b2QgYWRkcmVzcw0KPiArCSAqIHRoYXQgbm8gbG9uZ2VyIGV4aXN0cy4NCj4gKwkgKi8NCj4gKwlh
-dG9taWNfdCBhZGRyX25vdGF2YWlsX2NvdW50Ow0KDQpXb3VsZCBhdG9taWNfdCBiZSBlbm91Z2g/
-IERvIHdlIG5lZWQgdG8gY29uc2lkZXIgYXRvbWljNjRfdD8gQW55IHRob3VnaHRzPw0KDQo+ICB9
-Ow0KPiAgDQo+ICBlbnVtIGNlcGhfbXNnX2RhdGFfdHlwZSB7DQo+IEBAIC0zMjgsNiArMzM5LDE1
-IEBAIHN0cnVjdCBjZXBoX21zZyB7DQo+ICAgKi8NCj4gICNkZWZpbmUgQUREUk5PVEFWQUlMX0RF
-TEFZCShIWiAvIDEwKQ0KDQpZb3UgYWxyZWFkeSBpbnRyb2R1Y2UgbGlrZXdpc2UgY29uc3RhbnQu
-IFdoeSBkbyB5b3UgbmVlZCBpbnRyb2R1Y2UgYW5vdGhlciBvbmU/DQpBbmQgd2h5IEhaLzEwIG5h
-bWVseT8NCg0KPiAgDQo+ICsvKg0KPiArICogTnVtYmVyIG9mIGNvbnNlY3V0aXZlIEVBRERSTk9U
-QVZBSUwgZmFpbHVyZXMgKGFjcm9zcyBhbGwgY29ubmVjdGlvbnMpDQo+ICsgKiBiZWZvcmUgcmVz
-ZXR0aW5nIHRoZSBtZXNzZW5nZXIncyBzb3VyY2UgYWRkcmVzcy4gQXQgfjEwMG1zIHBlciByZXRy
-eSwNCj4gKyAqIDMwIGZhaWx1cmVzIG1lYW5zIH4zIHNlY29uZHMgb2YgcGVyc2lzdGVudCBFQURE
-Uk5PVEFWQUlMIGJlZm9yZSB3ZQ0KPiArICogY29uY2x1ZGUgdGhlIHNvdXJjZSBhZGRyZXNzIGlz
-IHBlcm1hbmVudGx5IGdvbmUgKGUuZy4sIGEgQ05JIHBvZA0KPiArICogYWRkcmVzcyB0aGF0IHdh
-cyByZW1vdmVkKSBhbmQgbmVlZHMgdG8gYmUgcmUtbGVhcm5lZC4NCj4gKyAqLw0KPiArI2RlZmlu
-ZSBBRERSTk9UQVZBSUxfUkVTRVRfVEhSRVNIT0xECTMwDQoNCkkgYW0gbm90IGNvbXBsZXRlbHkg
-c3VyZSB0aGF0IHRoaXMgbWF0aCBzb3VuZHMgcmVhc29uYWJseSB3ZWxsLiA6KQ0KDQo+ICsNCj4g
-IHN0cnVjdCBjZXBoX2Nvbm5lY3Rpb25fdjFfaW5mbyB7DQo+ICAJc3RydWN0IGt2ZWMgb3V0X2t2
-ZWNbOF0sICAgICAgICAgLyogc2VuZGluZyBoZWFkZXIvZm9vdGVyIGRhdGEgKi8NCj4gIAkJKm91
-dF9rdmVjX2N1cjsNCj4gZGlmZiAtLWdpdCBhL25ldC9jZXBoL21lc3Nlbmdlci5jIGIvbmV0L2Nl
-cGgvbWVzc2VuZ2VyLmMNCj4gaW5kZXggYzQwYzdjMzMyZTdmNC4uODE2NWU2YThmZTA5MiAxMDA2
-NDQNCj4gLS0tIGEvbmV0L2NlcGgvbWVzc2VuZ2VyLmMNCj4gKysrIGIvbmV0L2NlcGgvbWVzc2Vu
-Z2VyLmMNCj4gQEAgLTQ5Nyw2ICs0OTcsMTAgQEAgaW50IGNlcGhfdGNwX2Nvbm5lY3Qoc3RydWN0
-IGNlcGhfY29ubmVjdGlvbiAqY29uKQ0KPiAgCWVsc2UNCj4gIAkJY29uLT52MS5hZGRyX25vdGF2
-YWlsID0gZmFsc2U7DQo+ICANCj4gKwkvKiBSZXNldCB0aGUgcGVyc2lzdGVudCBFQUREUk5PVEFW
-QUlMIGNvdW50ZXIgb24gc3VjY2VzcyAqLw0KPiArCWlmIChhdG9taWNfcmVhZCgmY29uLT5tc2dy
-LT5hZGRyX25vdGF2YWlsX2NvdW50KSA+IDApDQoNCldoeSBkbyB5b3UgY2hlY2sgdGhlIGFkZHJf
-bm90YXZhaWxfY291bnQgdmFsdWU/IElmIGl0IGlzIHN1Y2Nlc3MsIHRoZW4gd2hvIGNhcmVzDQp3
-aGF0IHRoaXMgdmFsdWUgaGFzIGJlZm9yZS4NCg0KPiArCQlhdG9taWNfc2V0KCZjb24tPm1zZ3It
-PmFkZHJfbm90YXZhaWxfY291bnQsIDApOw0KPiArDQo+ICAJcmV0dXJuIDA7DQo+ICB9DQo+ICAN
-Cj4gQEAgLTE2NjMsNiArMTY2Nyw1MiBAQCBzdGF0aWMgdm9pZCBjb25fZmF1bHQoc3RydWN0IGNl
-cGhfY29ubmVjdGlvbiAqY29uKQ0KPiAgCQl9DQo+ICAJfQ0KPiAgDQo+ICsJLyoNCj4gKwkgKiBU
-cmFjayBwZXJzaXN0ZW50IEVBRERSTk9UQVZBSUwgYWNyb3NzIGFsbCBjb25uZWN0aW9ucy4NCj4g
-KwkgKiBJZiB0aGUgc291cmNlIGFkZHJlc3Mgc3RvcmVkIGluIG1zZ3ItPmluc3QuYWRkciBpcyBu
-byBsb25nZXINCj4gKwkgKiB2YWxpZCAoZS5nLiwgaXQgd2FzIGEgdHJhbnNpZW50IENOSSBwb2Qg
-YWRkcmVzcyB0aGF0IGhhcyBiZWVuDQo+ICsJICogcmVtb3ZlZCksIGFsbCBjb25uZWN0aW9ucyB3
-aWxsIGZhaWwgd2l0aCBFQUREUk5PVEFWQUlMIGF0DQo+ICsJICogaXA2X2RzdF9sb29rdXBfZmxv
-dygpIGJlZm9yZSBldmVuIHNlbmRpbmcgYSBTWU4uDQo+ICsJICoNCj4gKwkgKiBBZnRlciBBRERS
-Tk9UQVZBSUxfUkVTRVRfVEhSRVNIT0xEIGNvbnNlY3V0aXZlIGZhaWx1cmVzLA0KPiArCSAqIHJl
-c2V0IGluc3QuYWRkciB0byBibGFuayBzbyB0aGF0IHByb2Nlc3NfaGVsbG8oKSB3aWxsDQo+ICsJ
-ICogcmUtbGVhcm4gdGhlIHNvdXJjZSBhZGRyZXNzIGZyb20gdGhlIG5leHQgc3VjY2Vzc2Z1bA0K
-PiArCSAqIG1vbml0b3IgY29ubmVjdGlvbi4gVGhlIG5vbmNlIGlzIHByZXNlcnZlZC4NCj4gKwkg
-Ki8NCj4gKwlpZiAoYWRkcl9pc3N1ZSkgew0KDQpXaGVyZSBhZGRyX2lzc3VlIGhhcyBiZWVuIGRl
-Y2xhcmVkIGFuZCBpbml0aWFsaXplZD8NCg0KPiArCQlpbnQgY291bnQgPSBhdG9taWNfaW5jX3Jl
-dHVybigmY29uLT5tc2dyLT5hZGRyX25vdGF2YWlsX2NvdW50KTsNCj4gKw0KPiArCQlpZiAoY291
-bnQgPT0gQUREUk5PVEFWQUlMX1JFU0VUX1RIUkVTSE9MRCkgew0KDQpXaHkgbm90IGNvdW50ID49
-IEFERFJOT1RBVkFJTF9SRVNFVF9USFJFU0hPTEQ/DQoNCj4gKwkJCXN0cnVjdCBjZXBoX2VudGl0
-eV9hZGRyICpteV9hZGRyID0NCj4gKwkJCQkmY29uLT5tc2dyLT5pbnN0LmFkZHI7DQoNCkl0IGxv
-b2tzIGxpa2UgeW91IG5lZWQgdG8gaW50cm9kdWNlIGEgc3RhdGljIGlubGluZSBmdW5jdGlvbiBp
-ZiB5b3UgbmVlZCB0byBwbGF5DQpsaWtld2lzZSB0cmlja3MuDQoNCj4gKw0KPiArCQkJcHJfd2Fy
-bigibGliY2VwaDogJWQgY29uc2VjdXRpdmUgRUFERFJOT1RBVkFJTCBlcnJvcnMsIHJlc2V0dGlu
-ZyBzb3VyY2UgYWRkcmVzcyAlcyAod2lsbCByZS1sZWFybiBmcm9tIG1vbml0b3IpXG4iLA0KPiAr
-CQkJCWNvdW50LCBjZXBoX3ByX2FkZHIobXlfYWRkcikpOw0KPiArDQo+ICsJCQkvKg0KPiArCQkJ
-ICogWmVybyBvdXQgdGhlIGFkZHJlc3MgcG9ydGlvbiBvZiBpbl9hZGRyIGJ1dA0KPiArCQkJICog
-cHJlc2VydmUgc3NfZmFtaWx5LCBub25jZSwgYW5kIHR5cGUgc28gdGhlDQo+ICsJCQkgKiBjbGll
-bnQgaWRlbnRpdHkgaXMgbWFpbnRhaW5lZCBhbmQgZGVidWcgb3V0cHV0DQo+ICsJCQkgKiByZW1h
-aW5zIHJlYWRhYmxlLiBwcm9jZXNzX2hlbGxvKCkgY2hlY2tzDQo+ICsJCQkgKiBjZXBoX2FkZHJf
-aXNfYmxhbmsoKSBhbmQgd2lsbCBmaWxsIGluIHRoZSBuZXcNCj4gKwkJCSAqIGFkZHJlc3MgZnJv
-bSB0aGUgbW9uaXRvcidzIGFkZHJfZm9yX21lIHJlc3BvbnNlLg0KPiArCQkJICoNCj4gKwkJCSAq
-IFdlIHByZXNlcnZlIHNzX2ZhbWlseSBzbyB0aGF0IGNlcGhfcHJfYWRkcigpDQo+ICsJCQkgKiBz
-aG93cyBlLmcuICJbOjpdOjAiIGluc3RlYWQgb2YNCj4gKwkJCSAqICIodW5rbm93biBzb2NrYWRk
-ciBmYW1pbHkgMCkiLg0KPiArCQkJICovDQo+ICsJCQl7DQoNCkl0IGlzIGFub3RoZXIgcmVhc29u
-IG9mIG5lY2Vzc2l0eSBvZiBzdGF0aWMgaW5saW5lIGZ1bmN0aW9uLg0KDQo+ICsJCQkJc2FfZmFt
-aWx5X3QgZmFtaWx5ID0NCj4gKwkJCQkJZ2V0X3VuYWxpZ25lZCgmbXlfYWRkci0+aW5fYWRkci5z
-c19mYW1pbHkpOw0KPiArCQkJCW1lbXNldCgmbXlfYWRkci0+aW5fYWRkciwgMCwNCj4gKwkJCQkg
-ICAgICAgc2l6ZW9mKG15X2FkZHItPmluX2FkZHIpKTsNCj4gKwkJCQlwdXRfdW5hbGlnbmVkKGZh
-bWlseSwNCj4gKwkJCQkJICAgICAgJm15X2FkZHItPmluX2FkZHIuc3NfZmFtaWx5KTsNCg0KRG8g
-d2UgaGF2ZSBhbnkgZXhpc3RpbmcgZnVuY3Rpb24gZm9yIHRoaXM/DQoNCj4gKwkJCX0NCj4gKwkJ
-CWNlcGhfZW5jb2RlX215X2FkZHIoY29uLT5tc2dyKTsNCj4gKwkJfQ0KPiArCX0NCj4gKw0KPiAg
-CVdBUk5fT04oY29uLT5zdGF0ZSA9PSBDRVBIX0NPTl9TX1NUQU5EQlkgfHwNCj4gIAkJY29uLT5z
-dGF0ZSA9PSBDRVBIX0NPTl9TX0NMT1NFRCk7DQo+ICANCj4gQEAgLTE3NDAsNiArMTc5MCw3IEBA
-IHZvaWQgY2VwaF9tZXNzZW5nZXJfaW5pdChzdHJ1Y3QgY2VwaF9tZXNzZW5nZXIgKm1zZ3IsDQo+
-ICAJY2VwaF9lbmNvZGVfbXlfYWRkcihtc2dyKTsNCj4gIA0KPiAgCWF0b21pY19zZXQoJm1zZ3It
-PnN0b3BwaW5nLCAwKTsNCj4gKwlhdG9taWNfc2V0KCZtc2dyLT5hZGRyX25vdGF2YWlsX2NvdW50
-LCAwKTsNCj4gIAl3cml0ZV9wbmV0KCZtc2dyLT5uZXQsIGdldF9uZXQoY3VycmVudC0+bnNwcm94
-eS0+bmV0X25zKSk7DQo+ICANCj4gIAlkb3V0KCIlcyAlcFxuIiwgX19mdW5jX18sIG1zZ3IpOw0K
-PiBkaWZmIC0tZ2l0IGEvbmV0L2NlcGgvbWVzc2VuZ2VyX3YxLmMgYi9uZXQvY2VwaC9tZXNzZW5n
-ZXJfdjEuYw0KPiBpbmRleCAwY2I2MWM3NmI5Yjg3Li40ZjM4NjhmMjk2YzA2IDEwMDY0NA0KPiAt
-LS0gYS9uZXQvY2VwaC9tZXNzZW5nZXJfdjEuYw0KPiArKysgYi9uZXQvY2VwaC9tZXNzZW5nZXJf
-djEuYw0KPiBAQCAtNzM2LDYgKzczNiwxMyBAQCBzdGF0aWMgaW50IHByb2Nlc3NfYmFubmVyKHN0
-cnVjdCBjZXBoX2Nvbm5lY3Rpb24gKmNvbikNCj4gIAkJY2VwaF9lbmNvZGVfbXlfYWRkcihjb24t
-Pm1zZ3IpOw0KPiAgCQlkb3V0KCJwcm9jZXNzX2Jhbm5lciBsZWFybmVkIG15IGFkZHIgaXMgJXNc
-biIsDQo+ICAJCSAgICAgY2VwaF9wcl9hZGRyKG15X2FkZHIpKTsNCj4gKw0KPiArCQlpZiAoYXRv
-bWljX3JlYWQoJmNvbi0+bXNnci0+YWRkcl9ub3RhdmFpbF9jb3VudCkgPiAwKSB7DQo+ICsJCQlw
-cl9pbmZvKCJsaWJjZXBoOiByZS1sZWFybmVkIHNvdXJjZSBhZGRyZXNzICVzIGZyb20gcGVlciAl
-c1xuIiwNCj4gKwkJCQljZXBoX3ByX2FkZHIobXlfYWRkciksDQo+ICsJCQkJY2VwaF9wcl9hZGRy
-KCZjb24tPnBlZXJfYWRkcikpOw0KDQpEbyB3ZSBuZWVkIHRvIGluZm9ybSBhYm91dCB0aGlzPyBJ
-IGFzc3VtZSB3ZSBjb3VsZCBoYXZlIGJ1bmNoIG9mIG1lc3NhZ2VzIGluDQpzeXN0ZW0gbG9nLg0K
-DQo+ICsJCQlhdG9taWNfc2V0KCZjb24tPm1zZ3ItPmFkZHJfbm90YXZhaWxfY291bnQsIDApOw0K
-PiArCQl9DQo+ICAJfQ0KPiAgDQo+ICAJcmV0dXJuIDA7DQo+IGRpZmYgLS1naXQgYS9uZXQvY2Vw
-aC9tZXNzZW5nZXJfdjIuYyBiL25ldC9jZXBoL21lc3Nlbmdlcl92Mi5jDQo+IGluZGV4IGJkNjA4
-ZmZhMDYyNzkuLjEyYWQ5ZjU3MWRjY2EgMTAwNjQ0DQo+IC0tLSBhL25ldC9jZXBoL21lc3Nlbmdl
-cl92Mi5jDQo+ICsrKyBiL25ldC9jZXBoL21lc3Nlbmdlcl92Mi5jDQo+IEBAIC0yMjYwLDYgKzIy
-NjAsMTggQEAgc3RhdGljIGludCBwcm9jZXNzX2hlbGxvKHN0cnVjdCBjZXBoX2Nvbm5lY3Rpb24g
-KmNvbiwgdm9pZCAqcCwgdm9pZCAqZW5kKQ0KPiAgCQlkb3V0KCIlcyBjb24gJXAgc2V0IG15IGFk
-ZHIgJXMsIGFzIHNlZW4gYnkgcGVlciAlc1xuIiwNCj4gIAkJICAgICBfX2Z1bmNfXywgY29uLCBj
-ZXBoX3ByX2FkZHIobXlfYWRkciksDQo+ICAJCSAgICAgY2VwaF9wcl9hZGRyKCZjb24tPnBlZXJf
-YWRkcikpOw0KPiArDQo+ICsJCS8qDQo+ICsJCSAqIElmIHdlIHJlLWxlYXJuZWQgdGhlIGFkZHJl
-c3MgYWZ0ZXIgYSByZXNldCBkdWUgdG8NCj4gKwkJICogcGVyc2lzdGVudCBFQUREUk5PVEFWQUlM
-LCBsb2cgaXQgYW5kIGNsZWFyIHRoZQ0KPiArCQkgKiBmYWlsdXJlIGNvdW50ZXIuDQo+ICsJCSAq
-Lw0KPiArCQlpZiAoYXRvbWljX3JlYWQoJmNvbi0+bXNnci0+YWRkcl9ub3RhdmFpbF9jb3VudCkg
-PiAwKSB7DQo+ICsJCQlwcl9pbmZvKCJsaWJjZXBoOiByZS1sZWFybmVkIHNvdXJjZSBhZGRyZXNz
-ICVzIGZyb20gbW9uaXRvciAlc1xuIiwNCj4gKwkJCQljZXBoX3ByX2FkZHIobXlfYWRkciksDQo+
-ICsJCQkJY2VwaF9wcl9hZGRyKCZjb24tPnBlZXJfYWRkcikpOw0KDQpUaGUgc2FtZSBxdWVzdGlv
-biBoZXJlLg0KDQpUaGFua3MsDQpTbGF2YS4NCg0KPiArCQkJYXRvbWljX3NldCgmY29uLT5tc2dy
-LT5hZGRyX25vdGF2YWlsX2NvdW50LCAwKTsNCj4gKwkJfQ0KPiAgCX0gZWxzZSB7DQo+ICAJCWRv
-dXQoIiVzIGNvbiAlcCBteSBhZGRyIGFscmVhZHkgc2V0ICVzXG4iLA0KPiAgCQkgICAgIF9fZnVu
-Y19fLCBjb24sIGNlcGhfcHJfYWRkcihteV9hZGRyKSk7DQo=
+This patch set progresses my effort to improve concurrency of
+directory operations and specifically to allow concurrent updates
+in a given directory.
+
+There are a bunch of VFS patches which introduce some new APIs and
+improve existing ones.  Then a bunch of per-filesystem changes which
+adjust to meet new needs, often using the new APIs, then a final bunch
+of VFS patches which discard some APIs that are no longer wanted, and
+one (the second last) which makes the big change.  Some of the fs
+patches don't depend on any preceeding patch and if maintainers wanted
+to take those early I certainly wouldn't object!  I've put a '*' next
+to patches which I think can be taken at any time.
+
+My longer term goal involves pushing the parent-directory locking down
+into filesystems (which can then discard it if it isn't needed) and using
+exclusive dentry locking in the VFS for all directory operations other
+than readdir - which by its nature needs shared locking and will
+continue to use the directory lock.
+
+The VFS already has exclusive dentry locking for the limited case of
+lookup.  Newly created dentries (when created by d_alloc_parallel()) are
+exclusively locked using the DCACHE_PAR_LOOKUP bit.  They remain
+exclusive locked until they are hashed as negative or positive dentries,
+or they are discarded.
+
+DCACHE_PAR_LOOKUP currently depends on a shared parent lock to exclude
+directory modifying operations.  This patch set removes this dependency
+so that d_alloc_parallel() can be called without locking and all
+directory modifying operations receive either a hashed dentry or an
+in-lookup dentry (they currently recieve either a hashed or unhashed,
+or sometimes in-lookup (atomic_open only)).
+
+The cases where a filesystem can receive an in-lookup dentry are:
+ - lookup. Currently can receive in-lookup or unhashed.  After this patch set
+    it always receives in-lookup
+ - atomic_open.  Currently can receive in-lookup or hashed-negative.
+    This doesn't change with this patchset.
+ - rename. currently can receive hashed or unhashed.  After this patchset
+    can also receive in-lookup where previously it would receive unhashed.
+    This is only for the target of a rename over NFS.
+ - link, mknod, mkdir, symlink.  currently received hashed-negative except for
+    NFS which notices the implied exclusive create and skips the lookup so
+    the filesystem can received unhashed-negative for the operation.
+
+There are two particular needs to be addressed before we can use d_alloc_parallel()
+outside of the directory lock.
+
+1/ d_alloc_parallel() effects a blocking lock so lock ordering is important.
+  If we are to take the directory lock *after* calling d_alloc_parallel() (and 
+  still holding an in-lookup dentry, as happens at least when ->atomic_open
+  is called) then we must never call d_alloc_parallel() while holding the
+  directory lock, even a shared lock.
+  This particularly affects readdir as several filesystems prime the dcache
+  with readdir results and so use d_alloc_parallel() in the ->iterate_shared
+  handler, which will now have deadlock potential.  To address this we
+  introduce d_alloc_noblock() which fails rather than blocking.
+
+  A few other cases of potential lock inversion exist.  These are
+  addressed by dropping the directory lock when it is safe to do so
+  before calling d_alloc_parallel().  This requires the addtion of
+  LOOKUP_SHARED so that ->lookup knows how the parent is locked.  This
+  is ugly but is gone by the end of the series. After the locking is
+  rearranged in the second last patch, ->lookup is only ever called
+  with a shared lock.
+
+
+2/ As d_alloc_parallel() will be able to run without the directory lock,
+  holding that lock exclusively is not enough to protect some dcache
+  manipulations.  In particular, several filesystems d_drop() a dentry
+  and (possibly) re-hash it.  This will no longer be safe as
+  d_alloc_parallel() could run while the dentry was dropped, would find
+  that name doesn't exist in the dcache, and would create a new dentry
+  leading to two uncoordinated dentries with the same name.
+
+  It will still be safe to d_drop() a dentry after the operation has
+  completed, whether in success or failure.  But d_drop()ing before that
+  is best avoided.  An early d_drop() that isn't followed by a rehash is
+  not clearly problematic for a filesystem which still uses parent locking
+  (as all do at present) but is good to discourage that pattern now.
+
+  This is addressed, in part, by changing d_splice_alias() to be able to
+  instantiate any negative dentry, whether hashed, unhashed, or
+  in-lookup.  This removes the need for d_drop() in most cases.
+
+New APIs added are:
+
+ - d_alloc_noblock - see patch 05 for details
+ - d_duplicate - patch 06
+
+Removed APIs:
+
+ - d_alloc
+ - d_rehash
+ - d_add
+ - lookup_one
+ - lookup_noperm
+
+Changed APIs:
+
+ - d_alloc_paralle - no longer requires a waitqueue_head_t
+ - d_splice_alias - now works with in-lookup dentry
+ - d_alloc_name - now works with ->d_hash
+
+d_alloc_name() should be used with d_make_persistent().  These don't require
+VFS locking as the filesystem doesn't permit create/remove via VFS calls,
+and provides its own locking to avoid duplicate names.
+
+d_splice_alias() should *always* be used:
+  in ->lookup 
+  in ->iterate_shared for cache priming.
+  in ->atomic_open, possibly via a call to ->lookup
+  in ->mkdir unless d_instantiate_new() can be used.
+  in ->link ->symlink ->mknod if ->lookup skips LOOKUP_CREATE|LOOKUP_EXCL
+
+Thanks for reading this far!  I've been testing NFS but haven't tried
+anything else yet.  As well as the normal review of details I'd love to
+know if I've missed any important conseqeunces of the locking change.
+It is a big conceptual change and there could easily be surprising
+implications.
+
+Thanks,
+NeilBrown
+
+
+ [PATCH 01/53] VFS: fix various typos in documentation for
+ [PATCH 02/53] VFS: enhance d_splice_alias() to handle in-lookup
+ [PATCH 03/53] VFS: allow d_alloc_name() to be used with ->d_hash
+ [PATCH 04/53] VFS: use global wait-queue table for d_alloc_parallel()
+ [PATCH 05/53] VFS: introduce d_alloc_noblock()
+ [PATCH 06/53] VFS: add d_duplicate()
+ [PATCH 07/53] VFS: Add LOOKUP_SHARED flag.
+ [PATCH 08/53] VFS/xfs: drop parent lock across d_alloc_parallel() in
+*[PATCH 09/53] nfs: remove d_drop()/d_alloc_parallel() from
+ [PATCH 10/53] nfs: use d_splice_alias() in nfs_link()
+ [PATCH 11/53] nfs: don't d_drop() before d_splice_alias()
+ [PATCH 12/53] nfs: don't d_drop() before d_splice_alias() in
+ [PATCH 13/53] nfs: Use d_alloc_noblock() in nfs_prime_dcache()
+ [PATCH 14/53] nfs: use d_alloc_noblock() in silly-rename
+ [PATCH 15/53] nfs: use d_duplicate()
+*[PATCH 16/53] ovl: drop dir lock for lookups in impure readdir
+*[PATCH 17/53] coda: don't d_drop() early.
+ [PATCH 18/53] shmem: use d_duplicate()
+*[PATCH 19/53] afs: use d_time instead of d_fsdata
+*[PATCH 20/53] afs: don't unhash/rehash dentries during unlink/rename
+ [PATCH 21/53] afs: use d_splice_alias() in afs_vnode_new_inode()
+ [PATCH 22/53] afs: use d_alloc_nonblock in afs_sillyrename()
+ [PATCH 23/53] afs: lookup_atsys to drop and reclaim lock.
+ [PATCH 24/53] afs: use d_duplicate()
+*[PATCH 25/53] smb/client: use d_time to store a timestamp in dentry,
+*[PATCH 26/53] smb/client: don't unhashed and rehash to prevent new
+*[PATCH 27/53] smb/client: use d_splice_alias() in atomic_open
+ [PATCH 28/53] smb/client: Use d_alloc_noblock() in
+*[PATCH 29/53] exfat: simplify exfat_lookup()
+*[PATCH 30/53] configfs: remove d_add() calls before
+ [PATCH 31/53] configfs: stop using d_add().
+*[PATCH 32/53] ext4: move dcache modifying code out of __ext4_link()
+*[PATCH 33/53] ext4: use on-stack dentries in
+ [PATCH 34/53] tracefs: stop using d_add().
+ [PATCH 35/53] cephfs: stop using d_add().
+*[PATCH 36/53] cephfs: remove d_alloc from CEPH_MDS_OP_LOOKUPNAME
+ [PATCH 37/53] cephfs: Use d_alloc_noblock() in
+ [PATCH 38/53] cephfs: Don't d_drop() before d_splice_alias()
+ [PATCH 39/53] ecryptfs: stop using d_add().
+ [PATCH 40/53] gfs2: stop using d_add().
+ [PATCH 41/53] libfs: stop using d_add().
+ [PATCH 42/53] fuse: don't d_drop() before d_splice_alias()
+ [PATCH 43/53] fuse: Use d_alloc_noblock() in fuse_direntplus_link()
+ [PATCH 44/53] hostfs: don't d_drop() before d_splice_alias() in
+ [PATCH 45/53] efivarfs: use d_alloc_name()
+ [PATCH 46/53] Remove references to d_add() in documentation and
+ [PATCH 47/53] VFS: make d_alloc() local to VFS.
+ [PATCH 48/53] VFS: remove d_add()
+ [PATCH 49/53] VFS: remove d_rehash()
+ [PATCH 50/53] VFS: remove lookup_one() and lookup_noperm()
+ [PATCH 51/53] VFS: use d_alloc_parallel() in lookup_one_qstr_excl().
+ [PATCH 52/53] VFS: lift d_alloc_parallel above inode_lock
+ [PATCH 53/53] VFS: remove LOOKUP_SHARED
