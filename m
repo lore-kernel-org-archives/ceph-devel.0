@@ -1,63 +1,115 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 504C3381B13;
-	Fri, 13 Mar 2026 21:07:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28F0C139D;
+	Sat, 14 Mar 2026 21:26:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773436052; cv=none; b=Nvjf9c8TgN29JzKk6B2Pnhy2kL6f5noE5to1KEQhSju5W3RdKtV4kox+P+KbfjtxlhP21JdlEnaAkiiHCyiyWJFPDYDwdBfqtK9v+rOW2FNhgYVJnMusE6MTv/qC9xCNjJsMwVVKqsdqTluBzHldfc4zb68V6T0v60PTEt3EKA4=
+	t=1773523601; cv=none; b=WYVv8ggpZytvavK905KSVgXOJXCZOEHJU16M0pxHRS1EF3aHvsJt1AUJjMdceSKIa6GQbz80fDL1H0zsr3Bm2uIzA8FpnDs0FNY7QyDTHBucn+qQ59uojJZet97fJ9VqZ6m5nS73AHXEWfEhVj/Gg1rfHStUBnfauS0B0yDoOyI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773436052; c=relaxed/simple;
-	bh=SlFj1W+KC4wzNwaZ8L/g9Fe+Sk1yCyeh2JhUAq9W/ac=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=TCEXby5JsMFw31OyyAlCw4WxSoY7MA1GscPVGlYpKGRT/UHLVeWlLhj2Bazdap1+ALjkH/yPwDL01Kz5MgMCKBUYKAFMNanhyS0zTTlD8ZSFY8IJ7HrqBl//nEl7wRpa0t/0IaT44RnKgJ2JN/dGAP7FKvSVrJZp/+rwaPu5hNc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rzruf/Qh; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1773523601; c=relaxed/simple;
+	bh=hpx71h7qJT5RDq4f+fg9Wv2fxlT5wg8N1TZ8XscUfmw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mGvzaAOSrJH6DOuC+fHusQEIwdbN/HxU9+mzKLsjbA++ex8xtkRi4FSiczo/i17HXDW43+XgmjWi4/JagMl7eyGOtehpiYrf9fIc2lv7J/TZn51iM/sXPKROoxBmVTjyk6VVyfhgO4/jk5EDGAIffIGF+gbNl4W7Cd8usvm/zyo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XnlMNrRX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rzruf/Qh"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D33E6C19421;
-	Fri, 13 Mar 2026 21:07:31 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XnlMNrRX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E8BEC116C6;
+	Sat, 14 Mar 2026 21:26:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773436051;
-	bh=SlFj1W+KC4wzNwaZ8L/g9Fe+Sk1yCyeh2JhUAq9W/ac=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=rzruf/QhGBHJtEW5qR3MQ8SPfBkAbWysbI1DKrh9KttFYP7KxNPcODNAfqMrwfOIF
-	 g4KXY65W9wEruBpmU5b8PJJNv6H6gUC6c2FHCkKsdAWKoGAG4lQNd28rxpAifq11Jy
-	 AIfQBSUbKZXWhn21kGIRnq3S2np0uKdhTTifpyGtCt+nJLuQXb1QoIgzIAsLMXuXPx
-	 p4oiFQgtzzPyZxo3EhW1KRaGHH4RQyICGK1FgDELIIKcLnq/cptxMdstFymoM3V7QD
-	 iAbOhYPp5g09PRrCaRysucL4Lb1JfxVMienyrjup7Iw/Dwar8bCimVmd5w1klsJa/G
-	 CseuOEpiyJ69g==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id BA1E83808200;
-	Fri, 13 Mar 2026 21:07:27 +0000 (UTC)
-Subject: Re: [GIT PULL] Ceph fixes for 7.0-rc4
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20260313191403.1075765-1-idryomov@gmail.com>
-References: <20260313191403.1075765-1-idryomov@gmail.com>
-X-PR-Tracked-List-Id: <ceph-devel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20260313191403.1075765-1-idryomov@gmail.com>
-X-PR-Tracked-Remote: https://github.com/ceph/ceph-client.git tags/ceph-for-7.0-rc4
-X-PR-Tracked-Commit-Id: b282c43ed156ae15ea76748fc15cd5c39dc9ab72
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 2c361c9b7f452cf5331fe0d1230ab23c374a1fd2
-Message-Id: <177343604634.1505832.4273315072474584033.pr-tracker-bot@kernel.org>
-Date: Fri, 13 Mar 2026 21:07:26 +0000
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+	s=k20201202; t=1773523600;
+	bh=hpx71h7qJT5RDq4f+fg9Wv2fxlT5wg8N1TZ8XscUfmw=;
+	h=From:To:Cc:Subject:Date:From;
+	b=XnlMNrRXurLLMm39G4PW3/FOoSSk2oZnhq3uJuRSuhU1cdtJmfpVA8d0ZnVCbHQJQ
+	 32lzRpJ22jyxNoBGvm2B1wLft25EEzm4MgYRdpbJEs91Q6xT+r6zbHmK4Qh4fZp0X5
+	 ti4jDYzyNW6O3WcKkmaI5hebUli7K4xo6lwuyzYsYquqDvoXBxP8qFqRf+dm6HNpCn
+	 z3j3fsY4uqOB7uxRwgS/WHv3+eJRPz0E5f/uiyWxqrGcy+UohMzqBbxzaSpV8XBIfX
+	 a1ovZMsB8n1ENxf51W5nZEhALpalqZrlePfLSkCbaMgm2Pu/UK62iakBOKkzRkyMVJ
+	 ij01cOsuBqlkA==
+From: Eric Biggers <ebiggers@kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org,
+	Eric Biggers <ebiggers@kernel.org>
+Subject: [PATCH] libceph: Remove obsolete session key alignment logic
+Date: Sat, 14 Mar 2026 14:25:19 -0700
+Message-ID: <20260314212519.84244-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-The pull request you sent on Fri, 13 Mar 2026 20:14:02 +0100:
+Since the call to crypto_shash_setkey() was replaced with
+hmac_sha256_preparekey() which doesn't allocate memory regardless of the
+alignment of the input key, remove the session key alignment logic from
+process_auth_done().  Also remove the inclusion of crypto/hash.h, which
+is no longer needed since crypto_shash is no longer used.
 
-> https://github.com/ceph/ceph-client.git tags/ceph-for-7.0-rc4
+Signed-off-by: Eric Biggers <ebiggers@kernel.org>
+---
+ net/ceph/messenger_v2.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/2c361c9b7f452cf5331fe0d1230ab23c374a1fd2
+diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
+index 50f65820f623f..865a9221315b0 100644
+--- a/net/ceph/messenger_v2.c
++++ b/net/ceph/messenger_v2.c
+@@ -6,11 +6,10 @@
+  */
+ 
+ #include <linux/ceph/ceph_debug.h>
+ 
+ #include <crypto/aead.h>
+-#include <crypto/hash.h>
+ #include <crypto/sha2.h>
+ #include <crypto/utils.h>
+ #include <linux/bvec.h>
+ #include <linux/crc32c.h>
+ #include <linux/net.h>
+@@ -2350,20 +2349,18 @@ static int process_auth_reply_more(struct ceph_connection *con,
+ 	pr_err("failed to decode auth_reply_more\n");
+ 	return -EINVAL;
+ }
+ 
+ /*
+- * Align session_key and con_secret to avoid GFP_ATOMIC allocation
+- * inside crypto_shash_setkey() and crypto_aead_setkey() called from
+- * setup_crypto().  __aligned(16) isn't guaranteed to work for stack
++ * Align con_secret to avoid GFP_ATOMIC allocation inside crypto_aead_setkey()
++ * called from setup_crypto().  __aligned(16) isn't guaranteed to work for stack
+  * objects, so do it by hand.
+  */
+ static int process_auth_done(struct ceph_connection *con, void *p, void *end)
+ {
+-	u8 session_key_buf[CEPH_MAX_KEY_LEN + 16];
++	u8 session_key[CEPH_MAX_KEY_LEN];
+ 	u8 con_secret_buf[CEPH_MAX_CON_SECRET_LEN + 16];
+-	u8 *session_key = PTR_ALIGN(&session_key_buf[0], 16);
+ 	u8 *con_secret = PTR_ALIGN(&con_secret_buf[0], 16);
+ 	int session_key_len, con_secret_len;
+ 	int payload_len;
+ 	u64 global_id;
+ 	int ret;
+@@ -2413,11 +2410,11 @@ static int process_auth_done(struct ceph_connection *con, void *p, void *end)
+ 	}
+ 
+ 	con->state = CEPH_CON_S_V2_AUTH_SIGNATURE;
+ 
+ out:
+-	memzero_explicit(session_key_buf, sizeof(session_key_buf));
++	memzero_explicit(session_key, sizeof(session_key));
+ 	memzero_explicit(con_secret_buf, sizeof(con_secret_buf));
+ 	return ret;
+ 
+ bad:
+ 	pr_err("failed to decode auth_done\n");
 
-Thank you!
-
+base-commit: 1c9982b4961334c1edb0745a04cabd34bc2de675
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.53.0
+
