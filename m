@@ -1,184 +1,211 @@
-Received: from mail-dl1-f48.google.com (mail-dl1-f48.google.com [74.125.82.48])
+Received: from mail-vs1-f45.google.com (mail-vs1-f45.google.com [209.85.217.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4DBA290DBB
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2026 15:28:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0753331A65
+	for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2026 16:12:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.217.45
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773674898; cv=pass; b=p6GekAxmzRTGATOLhebzFb/9j7H7rZe8VYYVoE1vzI9PIvBKDzM74Lzr7PAM+UFM/8rH+kYNiKk66FW4r3vNboMp9qlfBZ8YrLIQSrmkRf5a2JrB9SQ9LeGHpRgwF/NJfiaDu7hiORPv6MEARLdfeLmhV9mtBzkrSJ0L+Apnpss=
+	t=1773677572; cv=pass; b=jn6chEHfN4L06JNpOjSH+LIDlrP25wKCLRYPwHWK2+2a/W93G+t8aRTHDgoQxt5xIDx1OdcRJHnDsnANUyfMLdO9KKr1R6uQ1Xrw+CXARFFd4E7MVFxVdl/9JeHm5JHeEhwhkenPSjAnhj1/B9+T2538HBo83HQjihqJxzqjEqk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773674898; c=relaxed/simple;
-	bh=6Y3Ocfi3aFI+5qoBUkMChnK9MMprf2Q2tZ7QrGrPhyI=;
+	s=arc-20240116; t=1773677572; c=relaxed/simple;
+	bh=mngjUXyQIGRdPpzvMVY93piHPQBoPK11l7fLKRKjC7A=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=n1NvDYFH2QdbEIi+4TSZX7E9qJL58p3TzcSaermxx5EJ+RmabxUWYIVk84m3z3bBF29hozWqz+tKQ2P3Cqaomn2wPtxTNte8daTneK7B8uJsxYbmzYOfRj3eBT+ySgmghq/VlPpZd4RmUhDwQCEkz/8nv4TM0tynzKE62UYBT4A=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=M1akr2oB; arc=pass smtp.client-ip=74.125.82.48
+	 To:Cc:Content-Type; b=qtNZY2v+9ml9dGnt/J98yKRlEwqCFmC1soAaX35FBGlOzFCXpov85rWI1DQ2sFhm4qKmRbxn0m7xhY1c04OnzeTnFoMBy4rkarxUJW/tzzh8NTcJ1Al9MkVURX5elfjt3Ra/EMJe39Y465ZzgIEihBxSBR5DtOyDtYaMevtW2E4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=j44JMaNr; arc=pass smtp.client-ip=209.85.217.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M1akr2oB"
-Received: by mail-dl1-f48.google.com with SMTP id a92af1059eb24-128ebee22caso2306810c88.0
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2026 08:28:15 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773674895; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="j44JMaNr"
+Received: by mail-vs1-f45.google.com with SMTP id ada2fe7eead31-5ffbcfbcec4so1031510137.3
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Mar 2026 09:12:50 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773677570; cv=none;
         d=google.com; s=arc-20240605;
-        b=ADXfcpM7XmJb4BQaX7J5kyyrqD0Y3C5Jlrmr1Ggt6543cx46iTA19TmagHi2YFqkP4
-         25LPZJF9T3knNa2zZ+lqZ76A5I6s2sg3+Ic19H9PIILKXAVATD9u8FC2bpb4MUmuFIpy
-         iPHbVoIGdfK+F+WPuuB/ZNU05yViTfsmo9DA0DtClSW8Lvvm9AJJc/Xy0ogXSLOAvXM6
-         ZWmNHiO/Sb7Q7wRqpesSJ1BU3TgLQzBkc01k4GFAQ4+IAbn9EW57n4myCTi1o25QZb1F
-         5I+x9jAGB09RMvYPKk7VEwC6Ig6tVGmzAlbbUDno+p4iYtX6ignlwdUsLz4LRYNkhBYR
-         g/Vw==
+        b=F2PC0JqaaqaqxN0yH8U4CjAJw3NZU51h2E2rZA1N8Rq3kngsV0j8gwXA3wz8K6uQu9
+         16xjhjK31opMKFcTkaKEgbvtgZ+uwgLh3nfqZib4yoB3CVTh2JzlfnEV0rFb/3mFDoTq
+         vcr6PvtpGoln9obWn518GkG/N3xFXsvGmlSHgVNnKZRfBpNLc0ca6bBirrFmed76eQEl
+         591FLPPiA2npnWTuCy+xflK8AU+2egD1j4383jfO+rQ4AuMBakQPnpY0d+d+/NYKpgbM
+         kyP4nhTyGUiDzam4iGp2pydJl8HS5NWPfWJww4PK05DOpZ3OJuL7ds5cW+lSI2A+5qfJ
+         j++Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=EvQAcxmqFLgzw1sjp3twnJxruWxSFSf3BC9/XVBhj6s=;
-        fh=b4GPjcYzQh4CQ03wxSUd0cswHINRbuF6cdq/V3zj4tg=;
-        b=VuhCZEXxSV915WuwxlWNGnJ+wVu8qO2GZrNAHcDMV+1v3SpKp1tZYiF+Q1D/hKmdrH
-         CSoZKpybrq18XINSJCa3faROqAzRyFMZz+SmoBaXej21po3uNXNzZaMm0R20LEMM06dr
-         qOzQ76qo2BzQab/WtIrRtKFE3HoCUMUYJ1SNRShR812Mp2nmd2DztVrfcnhHXn44Yys4
-         2m2nnp0Ft8F3xLhWoCQW5awIaDO0gST/shZ7si9W8aftCwQvQtU/oal4qHR7Fu3kNhl6
-         WKP2M9Rn5pS8tomfaOBXu+z5bKRFl2faU5kh/PMU0TYaYNWke0dz+1ioxOKDSZebAgrX
-         09Rg==;
+        bh=J1pru+Gdj6fAyFCvZjE2fE08MsUs87siGvVmJJo9pqs=;
+        fh=enatmGduLc0+HOkjaDJXcxSW1Ll3nFUR8J/L3QxSzL0=;
+        b=P9DvuyY7kWCTAIQ72OW3c0Z9nVdreYJnkY9D20aq10mwCtHWk9xokC/DTTZHAGWaeR
+         SiVsgmLuC607Y76QVIJI1uSiQbbbqr4U63gYTnywnMM2sES0OvKpi14G/KDj8yZXVMKO
+         AEBR1Ac7ZkIW8MWQvE1uHdzY7pqR9Zw0otxFj1Nc/qSW/Pk1Yp3V0y0VkQ5Oo3nTCZT1
+         2rCsy3T2JUdPve73Jxgjc29m/ujtCM6JISX8HlwHsvOHcjuLWr+S+GzZcgmskIkXDTj0
+         4EPefy/aVcPc8PItOHLlwMLcagPFfA/kVnEk4gDIxL5qqsmtD1JxxS2ZQgd7OKijFV59
+         6pKg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773674895; x=1774279695; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1773677570; x=1774282370; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=EvQAcxmqFLgzw1sjp3twnJxruWxSFSf3BC9/XVBhj6s=;
-        b=M1akr2oBu9OMSjBfQi0NjGIeXXHCFRZW6x4JoAy0QHQesD+yN9AzaBEBrZQHe1oPuJ
-         7V0DubN8noFFGb0+qhr7x0EzwkiNxZmDcFjp9c+c0KFXkc+RVyUySZTC/nWkh6MibIaN
-         wPQWNv7ijxKqDkhjFjWCY55F/P/YB2Ccaj7GDc6bszUPMHCG2tsu0dTjw8xsrdWdgUdV
-         XI4pmTgBG1S9ILFeHqH103PQUxWUtd16NLjeS4OmsUJk4zvSW1Zqi6qGHEfa1Cz6xHCn
-         Ms3vFsESD1OgR1JtSZ2kdr09se8u8DPrPo3N7djCcFzfpEt1t5+PgaBN6n+HFaFnZZkq
-         Xb8w==
+        bh=J1pru+Gdj6fAyFCvZjE2fE08MsUs87siGvVmJJo9pqs=;
+        b=j44JMaNrFBAXhZkUUvHY/tt1leg33h3rAo3Ugh3BKflwB6ZUzBgJTvqJM5+uLK+FZI
+         7vHgnOIh005vRT1XNeK/P28EbrLwAY/wN+E+a1YpUsrgtcArcEtuNr0CPqNh5BysxXra
+         a1BHvzFzgS8inLM8Q756Pdnf/ddDwQ2KtDCmWdoKhl9nzPbZ/02QEnbg2oOhAd+Y8f2+
+         Gwir3ZTttiZa04Dp0+sfXei0I5H6h548/Nk8m3hrRxqGTwtVSaWVo98q9kies8dh9PG0
+         VGYddRJgagKEk5WsBQZj7dJEx4hbG6Svn6nf3WPOYIFjG5q1dQWstWlCGXxL7pby2XZO
+         8XeQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773674895; x=1774279695;
+        d=1e100.net; s=20251104; t=1773677570; x=1774282370;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=EvQAcxmqFLgzw1sjp3twnJxruWxSFSf3BC9/XVBhj6s=;
-        b=s2uhks+qTJtUY2Th6+um7b+8duhhZrwzSP63MpSUzsB6N6UO8OsZmApx/P8NbFWwRL
-         88PJTdOveDUe81b/6w97u7pq83NlKrrPKJ+vPokNu/k1DdwfIER+kcIN/lZmrttKpIXh
-         xo+QXF4hPMie/zSfHCbkgwMgnSVftkkSGQGRVgY+xbbW3hxjLtyWWy64yTutsifRcbTR
-         2i3V7OgsJ3kHBUNJ5XLgcnXyVLhDtp4pSDIIVskOWXIgixwcwba7uynba5MRiaxiF/OH
-         ptrQxHLlgTL77pmTx3Ecd59Ow8dGPDwP/pkM9CxhkQxcFbwKuZob2rqJTU6mNyaRkLtZ
-         g+8Q==
-X-Gm-Message-State: AOJu0Yzoa0dLHIo5Jnx5Op2MaFdaGIOSiC28FyspFZoO/hZ+s7JG050s
-	6vjSgNElCbe+wN0rqsrZ6KF0oXttGeSLrovOkj1xfPq8j7WgcOhWU7DcJ6gJFxwD2/tbB82Pvfp
-	4zAnvpGVWx80e2x+IREz3MeazzqofiGNWlJQb
-X-Gm-Gg: ATEYQzxO/odGSKZIFE4jf1lLOW0IAqDqe4HDMj2HWqgatvqVSwQ2r3k1xvyRHha6yBa
-	dla+38iKetSUbRmysvrj2uToA1UnsVbDQ7lg2plPaqY7gewWxduD/+5penApwXVtBOMqvBRH3Cf
-	xK52bawyR6hPKytIQYOF7w4SMGvvYE1O2do+rPy7OW3e1/7dMEFEtVBzzj+Sf4oqvuObiGPFl/l
-	UAHrtwLFaqamHbUia+Ih3OngjWge/c88Ka2zO9vY1uvYYLD/cHT6v9t5qkA96AyyhuMahbHMuVC
-	0NcCpS4=
-X-Received: by 2002:a05:7022:4394:b0:119:e56b:958a with SMTP id
- a92af1059eb24-128f3d65964mr6491614c88.15.1773674894710; Mon, 16 Mar 2026
- 08:28:14 -0700 (PDT)
+        bh=J1pru+Gdj6fAyFCvZjE2fE08MsUs87siGvVmJJo9pqs=;
+        b=MXzHbhRz64HI03c4hhK44pfEOuJuzINYACzWyiR0ZnvGqkJddXiCD0LHhPCuRo4SXH
+         8aYao6vbZZ1OlXARuZ4MyBw7j7HCzRmiFsKFSEcyEkLUunkAoW08E0p2ONueCG7ewjLU
+         G/FKZhZvfi5v7cpB/tfewhfeaJ5KTeXvlIPMYwxMCn2gxWwFn3mH9eAk7xvteGEvxcIJ
+         Y7zuqHy/yMwZStDT/VoIP1rwynov2mKm8mhOcApGxtFUzGIwNQRvfxzMdPd9cj6BbGb9
+         VOc3AWSu00GHQOJQCoKSZKVR0pb+Aa6ZaX2icYm9ZBWK226MjRKEqF3QVVC5nHASMiPV
+         r+ow==
+X-Forwarded-Encrypted: i=1; AJvYcCV7sYvhvZMuO47QqlaQLmfS6PeIPKpbqyTWTOkodCkLogBOH1X17NsnV1iwbsVM9JroosdIg25jTV1C@vger.kernel.org
+X-Gm-Message-State: AOJu0YyLNFLsZhi65NZDlAqSf/Rl2ZRLmOukH5WFR0P14QdGZm6cd7L4
+	3E1DI/bhWGGTULWL9q7KVWfzs41a0Q6szcLLswuL6v2796RAvSUJpvqcV3j+uEsT7SWwOThktzR
+	kiZBvVO5MSVUQF5i6pJZjYfmKFzsTHpw=
+X-Gm-Gg: ATEYQzw1KOR26EQvmkBCXA5EqRZaTl0+SW3EKAMcVvfD8ZLSs5d59PMf89hFjsGYUUG
+	yeeNQGkJKJQntC5jo6kci+k0gkMV898nCmw7L8H86XrINicwlvzYsfVqyLf8Ah5xtP/BpYnXvyM
+	Of4BRQJbOh++QDOj1hm4WWKDO7DfGFNS+6cLJ5Pz6uqfJhW6KR+wevUqkAdGLlUaYv0GsSoYnJ7
+	1DJFCpcDDVe+Dadbr38UINmDq5wzyJq+r4ODD5CGk+k7OegnKd37chtPSvFaGCUSAd68uA1X1Yt
+	10gxt4+ER16TbW/XpLpq7EffezUQqc5mtpOMChoDpf7j
+X-Received: by 2002:a05:6102:b0f:b0:5ff:fbe4:8a7 with SMTP id
+ ada2fe7eead31-6020e52bc2cmr4525326137.24.1773677569597; Mon, 16 Mar 2026
+ 09:12:49 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260312081619.40854-1-ionut.nechita@windriver.com> <20260312081619.40854-14-ionut.nechita@windriver.com>
-In-Reply-To: <20260312081619.40854-14-ionut.nechita@windriver.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Mon, 16 Mar 2026 16:28:03 +0100
-X-Gm-Features: AaiRm52NqoyRuxYd-YVn5lM4dO9V-pzvp2X1rAqpG3Z3Q6xIAnjlBvyafX3UseU
-Message-ID: <CAOi1vP_OYc2LKQV5PRRMM4G9C1-cxpq3Ts2p8Xbt0+hVwZXX6Q@mail.gmail.com>
-Subject: Re: [PATCH v1 13/13] libceph: force host network namespace for kernel
- CephFS mounts
-To: "Ionut Nechita (Wind River)" <ionut.nechita@windriver.com>
-Cc: ceph-devel@vger.kernel.org, xiubli@redhat.com, 
-	linux-kernel@vger.kernel.org, ionut_n2001@yahoo.com
+References: <20260307140726.70219-1-dorjoychy111@gmail.com>
+In-Reply-To: <20260307140726.70219-1-dorjoychy111@gmail.com>
+From: Dorjoy Chowdhury <dorjoychy111@gmail.com>
+Date: Mon, 16 Mar 2026 22:12:38 +0600
+X-Gm-Features: AaiRm53PnIFKVZg8YyfIZR4HMQW1Q6cca8fQLreG4GsNHelMK8lmfHxNIAUkk-o
+Message-ID: <CAFfO_h6iNKbcKUi+Em2emRvXdZCfxcm7HnCenpTg9pSsHMb6YA@mail.gmail.com>
+Subject: Re: [PATCH v5 0/4] OPENAT2_REGULAR flag support for openat2
+To: linux-fsdevel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-api@vger.kernel.org, 
+	ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, linux-nfs@vger.kernel.org, 
+	linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, 
+	linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, brauner@kernel.org, 
+	jack@suse.cz, jlayton@kernel.org, chuck.lever@oracle.com, 
+	alex.aring@gmail.com, arnd@arndb.de, adilger@dilger.ca, mjguzik@gmail.com, 
+	smfrench@gmail.com, richard.henderson@linaro.org, mattst88@gmail.com, 
+	linmag7@gmail.com, tsbogend@alpha.franken.de, 
+	James.Bottomley@hansenpartnership.com, deller@gmx.de, davem@davemloft.net, 
+	andreas@gaisler.com, idryomov@gmail.com, amarkuze@redhat.com, 
+	slava@dubeyko.com, agruenba@redhat.com, trondmy@kernel.org, anna@kernel.org, 
+	sfrench@samba.org, pc@manguebit.org, ronniesahlberg@gmail.com, 
+	sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com, 
+	shuah@kernel.org, miklos@szeredi.hu, hansg@kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Mar 12, 2026 at 9:17=E2=80=AFAM Ionut Nechita (Wind River)
-<ionut.nechita@windriver.com> wrote:
+Ping...
+Requesting for review on this patch series please.
+
+Regards,
+Dorjoy
+
+
+On Sat, Mar 7, 2026 at 8:07=E2=80=AFPM Dorjoy Chowdhury <dorjoychy111@gmail=
+.com> wrote:
 >
-> From: Ionut Nechita <ionut.nechita@windriver.com>
+> Hi,
 >
-> In containerized environments (e.g., Rook-Ceph CSI with
-> forcecephkernelclient=3Dtrue), the mount() syscall
-> for kernel CephFS may be invoked from a pod's network namespace
-> instead of the host namespace. This happens despite the CSI node
-> plugin (csi-cephfsplugin) running with hostNetwork: true, due to
-> race conditions during kubelet restart or pod scheduling.
-
-Hi Ionut,
-
-Can you elaborate on these race conditions?  It sounds like a bug or
-a misconfiguration in the orchestration in userspace that this patch is
-trying to work around in the kernel client.
-
+> I came upon this "Ability to only open regular files" uapi feature sugges=
+tion
+> from https://uapi-group.org/kernel-features/#ability-to-only-open-regular=
+-files
+> and thought it would be something I could do as a first patch and get to
+> know the kernel code a bit better.
 >
-> ceph_messenger_init() captures current->nsproxy->net_ns at mount
-> time and uses it for all subsequent socket operations. When a pod
-> NS is captured, all kernel ceph sockets (mon, mds, osd) are
-> created in that namespace, which typically lacks routes to the
-> Ceph monitors (e.g., fd04:: ClusterIP addresses).
-> This causes permanent EADDRNOTAVAIL (-99) on every connection
-> attempt at ip6_dst_lookup_flow(), with no possibility of recovery
-> short of force-unmount and remount from the correct namespace.
-
-What network provider (in the sense of [1]) are you using?
-
+> The following filesystems have been tested by building and booting the ke=
+rnel
+> x86 bzImage in a Fedora 43 VM in QEMU. I have tested with OPENAT2_REGULAR=
+ that
+> regular files can be successfully opened and non-regular files (directory=
+, fifo etc)
+> return -EFTYPE.
+> - btrfs
+> - NFS (loopback)
+> - SMB (loopback)
 >
-> Root cause confirmed via kprobe tracing on ip6_dst_lookup_flow:
-> the net pointer passed to the routing lookup was the pod's
-> net_ns (0xff367a0125dd5780) instead of init_net
-> (0xffffffffbda76940). The pod NS had no route for fd04::/64
-> (monitor ClusterIP range), while userspace python connect() from
-> the same host succeeded because it ran in host NS.
+> Changes in v5:
+> - EFTYPE is already used in BSDs mentioned in commit message
+> - consistently return -EFTYPE in all filesystems
 >
-> Fix this by always using init_net (the host network namespace)
-> in ceph_messenger_init(). The kernel CephFS client inherently
-> requires host-level network access to reach Ceph monitors, OSDs,
-> and MDS daemons. Using the caller's namespace was inherited from
-> generic socket patterns but is incorrect for a kernel filesystem
-
-This behavior wasn't inherited but actually introduced as a feature in
-commit [2] at someone's request.  Prior to that change attempting to
-mount a CephFS filesytem or map an RBD image from anywhere but init_net
-produced an error, see commit [3].
-
-I'm going to challenge your "incorrect for a kernel filesystem" claim
-because NFS, SMB/CIFS, AFS and likely other network filesystem clients
-in the kernel behave the same way.  Mounts outside of init_net are
-allowed with the mounting process network namespace getting captured
-and used when creating sockets.
-
-> client that must survive beyond the lifetime of the mounting
-> process and its network namespace.
-
-Network namespaces are reference counted and CephFS grabs a reference
-for the namespace it's mounted in.  The namespace should persist for as
-long as the CephFS mount persists even if the mounting process goes
-away: another process should be able to enter that namespace, etc.  The
-namespace can of course get wedged by the orchestration tearing down
-the relevant virtual network devices prematurely, but it's a separate
-issue.
-
+> Changes in v4:
+> - changed O_REGULAR to OPENAT2_REGULAR
+> - OPENAT2_REGULAR does not affect O_PATH
+> - atomic_open codepaths updated to work properly for OPENAT2_REGULAR
+> - commit message includes the uapi-group URL
+> - v3 is at: https://lore.kernel.org/linux-fsdevel/20260127180109.66691-1-=
+dorjoychy111@gmail.com/T/
 >
-> A warning is logged when a mount from a non-init namespace is
-> detected, to aid debugging.
+> Changes in v3:
+> - included motivation about O_REGULAR flag in commit message e.g., progra=
+ms not wanting to be tricked into opening device nodes
+> - fixed commit message wrongly referencing ENOTREGULAR instead of ENOTREG
+> - fixed the O_REGULAR flag in arch/parisc/include/uapi/asm/fcntl.h from 0=
+60000000 to 0100000000
+> - added 2 commits converting arch/{mips,sparc}/include/uapi/asm/fcntl.h O=
+_* macros from hex to octal
+> - v2 is at: https://lore.kernel.org/linux-fsdevel/20260126154156.55723-1-=
+dorjoychy111@gmail.com/T/
 >
-> Observed in production (kernel 6.12.0-1-rt-amd64, Ceph Reef
-> 18.2.5, IPv6-only cluster, ceph-csi v3.13.1):
->   - Fresh boot of compute-0, ceph-csi mounts CephFS via kernel
->   - All monitor connections fail with EADDRNOTAVAIL immediately
->   - kprobe confirms wrong net_ns in ip6_dst_lookup_flow
->   - Workaround: umount -l + systemctl restart kubelet
->   - After restart: mount captures host NS, works immediately
-
-[1] https://github.com/rook/rook/blob/master/Documentation/CRDs/Cluster/net=
-work-providers.md
-[2] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/comm=
-it/?id=3D757856d2b9568a701df9ea6a4be68effbb9d6f44
-[3] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/comm=
-it/?id=3Deea553c21fbfa486978c82525ee8256239d4f921
-
-Thanks,
-
-                Ilya
+> Changes in v2:
+> - rename ENOTREGULAR to ENOTREG
+> - define ENOTREG in uapi/asm-generic/errno.h (instead of errno-base.h) an=
+d in arch/*/include/uapi/asm/errno.h files
+> - override O_REGULAR in arch/{alpha,sparc,parisc}/include/uapi/asm/fcntl.=
+h due to clash with include/uapi/asm-generic/fcntl.h
+> - I have kept the kselftest but now that O_REGULAR and ENOTREG can have d=
+ifferent value on different architectures I am not sure if it's right
+> - v1 is at: https://lore.kernel.org/linux-fsdevel/20260125141518.59493-1-=
+dorjoychy111@gmail.com/T/
+>
+> Thanks.
+>
+> Regards,
+> Dorjoy
+>
+> Dorjoy Chowdhury (4):
+>   openat2: new OPENAT2_REGULAR flag support
+>   kselftest/openat2: test for OPENAT2_REGULAR flag
+>   sparc/fcntl.h: convert O_* flag macros from hex to octal
+>   mips/fcntl.h: convert O_* flag macros from hex to octal
+>
+>  arch/alpha/include/uapi/asm/errno.h           |  2 +
+>  arch/alpha/include/uapi/asm/fcntl.h           |  1 +
+>  arch/mips/include/uapi/asm/errno.h            |  2 +
+>  arch/mips/include/uapi/asm/fcntl.h            | 22 +++++------
+>  arch/parisc/include/uapi/asm/errno.h          |  2 +
+>  arch/parisc/include/uapi/asm/fcntl.h          |  1 +
+>  arch/sparc/include/uapi/asm/errno.h           |  2 +
+>  arch/sparc/include/uapi/asm/fcntl.h           | 35 +++++++++---------
+>  fs/ceph/file.c                                |  4 ++
+>  fs/gfs2/inode.c                               |  6 +++
+>  fs/namei.c                                    |  4 ++
+>  fs/nfs/dir.c                                  |  4 ++
+>  fs/open.c                                     |  4 +-
+>  fs/smb/client/dir.c                           | 14 ++++++-
+>  include/linux/fcntl.h                         |  2 +
+>  include/uapi/asm-generic/errno.h              |  2 +
+>  include/uapi/asm-generic/fcntl.h              |  4 ++
+>  tools/arch/alpha/include/uapi/asm/errno.h     |  2 +
+>  tools/arch/mips/include/uapi/asm/errno.h      |  2 +
+>  tools/arch/parisc/include/uapi/asm/errno.h    |  2 +
+>  tools/arch/sparc/include/uapi/asm/errno.h     |  2 +
+>  tools/include/uapi/asm-generic/errno.h        |  2 +
+>  .../testing/selftests/openat2/openat2_test.c  | 37 ++++++++++++++++++-
+>  23 files changed, 127 insertions(+), 31 deletions(-)
+>
+> --
+> 2.53.0
+>
