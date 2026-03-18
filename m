@@ -1,125 +1,162 @@
-Received: from mail-dl1-f51.google.com (mail-dl1-f51.google.com [74.125.82.51])
+Received: from mail-ot1-f52.google.com (mail-ot1-f52.google.com [209.85.210.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E067224B12
-	for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2026 19:48:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.51
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773776918; cv=pass; b=m0OkCWkH77p7wHL6teZsgjW3iA5WNPj2s4DH6fCaT3UrcZjTSd6rjc26bbftHUQpOgCI5nk705/hnyydEklSkK/u/FjPRfm3X8PHZiBrJ0JBtPDpuqVTmaA0l1Qifq5bSbtmdgSGP9YJSVd3yNARKrz3RWPHysdra7rM8tcag6o=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773776918; c=relaxed/simple;
-	bh=at1k0kn6fTTPQA+HIlCY+DsBGv8Sub72wHsmakW5ET8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=i6mq80LpNpBKcwHgvxFuwUMKSRwdaf6yX9hVCPaTFM/ET8v/My7Ed1YUtwjaB8zFdDNrWngW20XKvzbfkyPAyyEXGG8CPX3mN+h5yCwoE0hvIjhsbeQaBktUHoKqaflao6I6QW1SZKMS5QbjPk7WTbLQYh3ARDrDnt+680ZVKng=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WeNbeeS1; arc=pass smtp.client-ip=74.125.82.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6BA4263C8C
+	for <ceph-devel@vger.kernel.org>; Wed, 18 Mar 2026 02:37:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.52
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773801481; cv=none; b=K2HoYnsxGf9j/CM9kmG4xZegU8tiPTeME6SCrWiFh1R5mrsuZXsUcNe/zl8lwPqhb5j7776E6kwpR1Ks8UPUDmQCLoiSd1old2eF2UiCZZsUrOMmzdpHVrNzBI/sJDOknGjIY5e1s9OSrICIb/ss61hQGEKj6xZUOd1PgIO3kZo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773801481; c=relaxed/simple;
+	bh=n0w6e/nOGgYAcidng5lDiAq12GtXKpGxxsbG7TpMjxU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Z3nmIS3t1YqHSXMGUNaMk9Pa8WtgVAIzmXjjTGg8+tiUty1SrZ/JNWMn8hPCi31nXzSrHk/LG54NsabVmD2CGPELAt6KdbteZA1VsMRzjVygh2Eh+TbBdcUPVgp4oMXUhu5OZLvvMKQG5uDzTAK0D5Krk6Nd0wA4wFBue8n1Q4Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Uaw8Yzqb; arc=none smtp.client-ip=209.85.210.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WeNbeeS1"
-Received: by mail-dl1-f51.google.com with SMTP id a92af1059eb24-128b9b7e3edso109554c88.0
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2026 12:48:37 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773776916; cv=none;
-        d=google.com; s=arc-20240605;
-        b=hgPJllq/yq8VuFoEY1UBvxuDPmYikkVwFndWD3i2T6/lNgijcZPt/V3/WBWLRsA+P/
-         lSTs25uZRg4kMWq69Mu9gztQNUgrydmCBEGynqGtFfb658O8Av9nAnuLYrBoqRAnS4IA
-         jppCFQrpwbTDtkes+e6A4C2VPWiWtCfH4FglzZMJ9f633UvRbvwo3tyg8FZpdAJuxj2N
-         ufuhI/xMd8tPISmUfFJeY4TQhOh70kfWwyYtJraTbQRDbb3dzqcqU57IX5hbBbReKEjw
-         bx/IaIzowSqOuhZjRekN1WsRdBFK9Y+oMAImAa1yv28ZNpgg84/Wsz6KFzERYYee3Vqr
-         AQYA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=OZR68tqLqYaTbBWC4ZvIpqSiIjzkYBPYPzLDQM+z3q0=;
-        fh=JdszBmq6HqnO7sTMwr4K+1emcij6GUkI1A/mQxJ4WMI=;
-        b=e16TLCYaSAzezRtMrGwjm7Q+YbGwGGe6Sne3asWsjCsoT9ewvgHJhj78PIiuiGXAE0
-         nUY5T3kDUUP5PmhcxFtb46rvHmbnRl++YkmNQj6m43F7SfJ0b1WniOLGpzfKybpRGIEO
-         vqLeL0yYI7hi5mtN8h6XB06BGrD7UyQTunyLkNwya//VnaZB0gSVp/NXFAkBEHY68AzO
-         Z6cBHHc2lRFD7KPrsGjHn4FJcBg+M0WvJ+eJcWabQ2l+XhgcTjcWhfOpevB4N88YMlHn
-         6AqHvIY/UXH01cwDwJt+Bw7iku+0ivAAwEHC2pKZxoRceqGc7nX0BkdiZE1W8CxDmnKO
-         Eu/A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Uaw8Yzqb"
+Received: by mail-ot1-f52.google.com with SMTP id 46e09a7af769-7d7c5b8cb24so701544a34.0
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Mar 2026 19:37:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773776916; x=1774381716; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=OZR68tqLqYaTbBWC4ZvIpqSiIjzkYBPYPzLDQM+z3q0=;
-        b=WeNbeeS18DXloST+3zj0LIqtOnaOlwx+UePsxO9z8O1k8pyUucRmxBzWFVrwqlbYIT
-         dyLZn/heIKGXYS+tE9pIIhawteiy3jHD7g4DVmCl5OvYjk2Mx6keFwIYZWjDHAl4PNgm
-         4MkuAfDhza68M+N6APFuvoQ1AvsfBhZLyWgivNGTGKFApG7IE72pphw6lRaNHvl07VP/
-         2rePJxQ216466V+b4iaakEt7lC/xds+Y3KWlFvdDR/6hBJnhSqvv2vcL9QQQxsljzIat
-         MutLuCdLMZ/k5FxuY5zNlWZqd1FaSxvuvQCrABKk0AocCkBFObRWmFTBY+U+TOC2pnfu
-         NjzQ==
+        d=gmail.com; s=20230601; t=1773801479; x=1774406279; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=RHBZTmx3gpGoOcOvI5wr45XrMLqrJh4cbl+ScbRtWNE=;
+        b=Uaw8YzqbmszcT7KbRQpAqaawKS3M3JDNRi5ZGai01YXZf8xpha/3Ugs84HZu7NJSI2
+         KakJ6579ALRu2QoRmdeqkVh8QHqDWG2++ZZxr9vph7qOkVz3I2ysGw20F/qEgcYRK24T
+         iS+oSZuW5IYr/CFd9LKEAxh+qHk8nu7dEA7X++MXEFNyeUZUJ0iASz/KyXicEwjaMOJs
+         Lvtgmp/fAJq6JOMjTtgEHrOfYrB/P4nbuCzDfzzOZupVn9vYijtc20U1WuEjL0QEh4ph
+         tvGu5Io/9HUb9ZlMcE3PxBnVwUefpY0+aKEBEwe9BkdfuwGheK3ZMBuxzAtAIQrUVfiD
+         Wn0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773776916; x=1774381716;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=OZR68tqLqYaTbBWC4ZvIpqSiIjzkYBPYPzLDQM+z3q0=;
-        b=oC0M+JfU3uFX8fGaOGKm/VKFU5Y3tDpQpCBcq/k9WVUPrSNAUKjcXsF5JLbVj8z6sy
-         SfR8O2SsFS3QeRmh6/cDBJUufj99saIBJ1Opgrz09UTW992/WcSI/KiE2ocBU+lrjfVd
-         9i2rbfj8FyDIfvfplqLy57vghXRqYD+xDoZJJfDnwxh9SuhBb8Cbb4sR/x5mQWHxnhyn
-         jjJk1+fRcbPQZB2H2BKofuX7g2XY0JZGlE6cA+LhcWQgOa2S9Zyos58ibCUaStQaHn2C
-         LmsvtcKRDsMBywo0vUdX3k8L1oiWTWDQHbkyNLrg1+fGxLmq0W3hX4orMiW7GczaEzo5
-         KnOA==
-X-Forwarded-Encrypted: i=1; AJvYcCXNcBKbzr52JDJ1UHuT6vaW9A/e6sowkiE5kDIAHcUATMOn1eVfyVcOlruQ8nM1tQ4cX6s5s5C/A3mG@vger.kernel.org
-X-Gm-Message-State: AOJu0YwJz8pj/+ffyeDYcwgkLnRCOrxH7ooQYLhRR4WnEhTs4F9hAHta
-	Grv0mkCwtr0Uzq13y9qZKLticav0Qa/JzP5ejUFA4rsSIYeQNBtLTVfbJ5x0GxyF4/38pTsf6D5
-	rUf9VlU+pfJvOY/xvNatEKq2IYLZuktE=
-X-Gm-Gg: ATEYQzy3dE7GR+x+GjArTB8hTHjT64dOZLbo9x5ZY/RwDgK2ieEpwOAUYhK8Yo4oEf2
-	kM9Go1XUGujICceVML5TK5kePQbwJZDY4XXr1kBzVxkmTGaiZfVDyxsiX4hGsBKKoK7EY9A7gIn
-	hGUIZfgM6nSfR3F0PxeoD3/I2PUc1efyreetPuffN4FrsU4SkimafBU55VroF/2qF8XbcsliW6N
-	0xIesa2+BdJrj8xzLeg69YgRHSTVWhuWJAoWTYI+geel0bz+cROtrdQDdE5wyY+Ue5MqNTOF5wo
-	yr2nmxg=
-X-Received: by 2002:a05:7022:6088:b0:128:d24a:a5c1 with SMTP id
- a92af1059eb24-129a71b42cfmr402951c88.28.1773776916013; Tue, 17 Mar 2026
- 12:48:36 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1773801479; x=1774406279;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=RHBZTmx3gpGoOcOvI5wr45XrMLqrJh4cbl+ScbRtWNE=;
+        b=E9UN9QPTbmqqibgLvUKGYkct33kukZJVBfwoZxi4wdgT0O8Zvwn6u4/LCD3lnH5DVu
+         XUfiJelB2RwfYBbfSkCCNhMJgPnRT57UE016xQQpV58/ABiHOwl7aq6kfWMwG5U2c3KR
+         8AOWEPW4eg4rqwPxXQWEe7CL+MgGgYYXEHCJOAprjV0PQBa/bj9V99T1pQGUO+rXtakD
+         17sTLIqV1GWxYnvPm34ma6be/vcCCjUjApa3U2cYeviKMya050kgQu7+HjQKOvxk1W7Q
+         2wujGDylyRkpc9EFJhPWIwhjqAoqiOogXR38W6jHETYJDkzTiJchJxhhR+tMiNT3ei52
+         QkrQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWUCBVotvplmlmTjwTBd567i/Y/BM4y4VnXAPrgvshM2VHQjg6fSTyC9E3NpoLheFVYHbsAXhLZ8h1S@vger.kernel.org
+X-Gm-Message-State: AOJu0YwOaWb2Itd2up4Wxip6Tp2DAgseHnmgqmTlCgBR670xK7xu1/Xq
+	CtLNFzul2myccQbUQar4mfjdGvlY8m3248AATYxCPk9ZhL0oQuEjYj4k
+X-Gm-Gg: ATEYQzwi9JyyifuMgl7V1CpfyZcpb29XUKdqPJ53cvZmGqNjujRnCFAn63XHJHNidG9
+	9b+mfkZm5ilbKjwg9imUuGrc5X37YGcdEoIeRvftNqfE88ezyN4BWLRNovj5t8MAa9dA8m/ZfoX
+	pJZZjXrUe8M2XCM6ZcwaQ01lKj07TEM/4FByG6dVz2NTTe8WDL/k4t/tCidH0SdhihmavtN+aqu
+	3NNDMc8PsBSHRTVJyTln2sFpaZbUH8bwgWfqSGkA8NbQhiIahXwFFTBh3EOM6zDrcBJc1TEnbpU
+	DUVEwMQUPfnxz4pTskciNUX+07giMpNn6Q3jvmPCWMsNZ3oeuuNSmgvz5EH0Kn20Ngm8S2TQY5j
+	hhcfiR3H12NSXgNHV6MtnTtEaDPrY0G3ld90lYhiB9kPELQ/n2fSfHILc+5hGWO3Vp1dxQi8HyF
+	dhqQ0/540NqD803IIH+IWErAYp40IU1qfkmRvZ7CD7fzlRPEe+kgDOH8dyrL78XSGu7M3t/oYS
+X-Received: by 2002:a05:6820:2d43:b0:67b:c368:136b with SMTP id 006d021491bc7-67c0da8c338mr1059481eaf.29.1773801478708;
+        Tue, 17 Mar 2026 19:37:58 -0700 (PDT)
+Received: from celestia.turtle.lan (static-23-234-115-121.cust.tzulo.com. [23.234.115.121])
+        by smtp.gmail.com with ESMTPSA id 006d021491bc7-67c0d88c5bbsm880101eaf.10.2026.03.17.19.37.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Mar 2026 19:37:58 -0700 (PDT)
+From: Sam Edwards <cfsworks@gmail.com>
+X-Google-Original-From: Sam Edwards <CFSworks@gmail.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: Milind Changire <mchangir@redhat.com>,
+	Xiubo Li <xiubli@redhat.com>,
+	Jeff Layton <jlayton@kernel.org>,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	regressions@lists.linux.dev,
+	Sam Edwards <CFSworks@gmail.com>,
+	stable@vger.kernel.org
+Subject: [REGRESSION] [PATCH v2] ceph: fix num_ops OBOE when crypto allocation fails
+Date: Tue, 17 Mar 2026 19:37:33 -0700
+Message-ID: <20260318023733.116789-1-CFSworks@gmail.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260315232500.251088-1-CFSworks@gmail.com> <bbc55ded3e226cee35e04a071400981e2069eb3e.camel@ibm.com>
- <CAH5Ym4j6gPCR9UhM1ywkDmvcDAccNrL72LFLy468T4PfPTxU7Q@mail.gmail.com>
- <cebd075d8e2e7e926fbcb56b19ec43fe7dec6ef1.camel@ibm.com> <CAH5Ym4hjSxtVG1v58Yd83FYeU+8+S_1M2_5pPJmMs=_fHb7orA@mail.gmail.com>
-In-Reply-To: <CAH5Ym4hjSxtVG1v58Yd83FYeU+8+S_1M2_5pPJmMs=_fHb7orA@mail.gmail.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Tue, 17 Mar 2026 20:48:24 +0100
-X-Gm-Features: AaiRm50NvrjdiizwGHwwvI76QCvgHLwjqKbJM9xXqNl3BgKYYWVZdHXFwxQ0QAw
-Message-ID: <CAOi1vP88hEdnZXyib+toGumicWzoH+_iYbfFUut8Mvq+s_3xRA@mail.gmail.com>
-Subject: Re: [REGRESSION] [PATCH] ceph: fix num_ops OBOE when crypto
- allocation fails
-To: Sam Edwards <cfsworks@gmail.com>
-Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, Xiubo Li <xiubli@redhat.com>, 
-	"slava@dubeyko.com" <slava@dubeyko.com>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Markuze <amarkuze@redhat.com>, 
-	"jlayton@kernel.org" <jlayton@kernel.org>, Milind Changire <mchangir@redhat.com>, 
-	"stable@vger.kernel.org" <stable@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Tue, Mar 17, 2026 at 8:13=E2=80=AFPM Sam Edwards <cfsworks@gmail.com> wr=
-ote:
-> > I think that it makes sense to create the issue in Ceph tracker and to =
-add
-> > Closes to the fix.
->
-> I don't currently have a Ceph tracker account and don't think I can
-> add anything of substance to an issue report. Feel free to create the
-> issue on my behalf if it's important for Ceph's processes, and I can
-> Closes: tag it in v2.
+move_dirty_folio_in_page_array() may fail if the file is encrypted, the
+dirty folio is not the first in the batch, and it fails to allocate a
+bounce buffer to hold the ciphertext. When that happens,
+ceph_process_folio_batch() simply redirties the folio and flushes the
+current batch -- it can retry that folio in a future batch.
 
-Hi Sam,
+However, if this failed folio is not contiguous with the last folio that
+did make it into the batch, then ceph_process_folio_batch() has already
+incremented `ceph_wbc->num_ops`; because it doesn't follow through and
+add the discontiguous folio to the array, ceph_submit_write() -- which
+expects that `ceph_wbc->num_ops` accurately reflects the number of
+contiguous ranges (and therefore the required number of "write extent"
+ops) in the writeback -- will panic the kernel:
 
-It's not important.  A tracker ticket is useful for when the issue is
-purely reported as the placeholder for investigation, log attachments,
-etc.  In this case you both reported the issue and proposed a fix for
-it, so the patch description is the only thing that matters.  Creating
-a tracker ticket just for the sake of it isn't needed.
+    BUG_ON(ceph_wbc->op_idx + 1 != req->r_num_ops);
 
-Thanks,
+This issue can be reproduced on affected kernels by writing to
+fscrypt-enabled CephFS file(s) with a 4KiB-written/4KiB-skipped/repeat
+pattern (total filesize should not matter) and gradually increasing the
+system's memory pressure until a bounce buffer allocation fails.
 
-                Ilya
+Fix this crash by decrementing `ceph_wbc->num_ops` back to the correct
+value when move_dirty_folio_in_page_array() fails, but the folio already
+started counting a new (i.e. still-empty) extent.
+
+The defect corrected by this patch has existed since 2022 (see first
+`Fixes:`), but another bug blocked multi-folio encrypted writeback until
+recently (see second `Fixes:`). The second commit made it into 6.18.16,
+6.19.6, and 7.0-rc1, unmasking the panic in those versions. This patch
+therefore fixes a regression (panic) introduced by cac190c7674f.
+
+Cc: stable@vger.kernel.org # v6.18+
+Fixes: d55207717ded ("ceph: add encryption support to writepage and writepages")
+Fixes: cac190c7674f ("ceph: fix write storm on fscrypted files")
+Signed-off-by: Sam Edwards <CFSworks@gmail.com>
+---
+
+Changes v1->v2:
+- Added a paragraph to the commit log briefly explaining the I/O pattern to
+  reproduce the issue (thanks Slava)
+
+- Additionally Cc'd regressions@lists.linux.dev as required when handling
+  regressions
+
+Feedback not addressed:
+- "Commit message should link to the mentioned BUG_ON line in a source listing"
+    (link would not really help anyone, and the line is a moving target anyway)
+
+- "Commit message should indicate that ceph_wbc->num_ops is passed to
+   ceph_osdc_new_request() to explain why ceph_wbc->num_ops == req->r_num_ops"
+    (ceph_wbc->num_ops is easy enough to search; and the cause->effect of the
+     BUG_ON() is secondary to the central point that ceph_process_folio_batch()
+     is responsible for ensuring ceph_wbc->num_ops is correct before returning)
+
+- "An issue should be filed in the Ceph Redmine, linked via Closes:"
+    (thanks Ilya for clarifying this is unnecessary)
+
+---
+ fs/ceph/addr.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index e87b3bb94ee8..f366e159ffa6 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1366,6 +1366,10 @@ void ceph_process_folio_batch(struct address_space *mapping,
+ 		rc = move_dirty_folio_in_page_array(mapping, wbc, ceph_wbc,
+ 				folio);
+ 		if (rc) {
++			/* Did we just begin a new contiguous op? Nevermind! */
++			if (ceph_wbc->len == 0)
++				ceph_wbc->num_ops--;
++
+ 			folio_redirty_for_writepage(wbc, folio);
+ 			folio_unlock(folio);
+ 			break;
+-- 
+2.52.0
+
