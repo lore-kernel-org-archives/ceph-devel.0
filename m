@@ -1,148 +1,173 @@
-Received: from mail-dy1-f173.google.com (mail-dy1-f173.google.com [74.125.82.173])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6993633F8C3
-	for <ceph-devel@vger.kernel.org>; Wed, 18 Mar 2026 22:38:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC53730E0FB
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Mar 2026 14:13:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773873507; cv=none; b=fRKmDy6Bth7X+0DmcxO5/aL4tZrgZhnuQ1kNYMn/iCOmQGV1Yih57lSIen6wdPJ9s6qoA4QaRT6iMTEYLW+PJDymzDvGdunyOJUshBnH/SbTKjrsQRcGhD/0ejkJknTBIOJuQhhZyd4h1obWmRHMYqnNLsOu6ejKz8fvK0XLGmI=
+	t=1773929637; cv=none; b=j3A59BMqfr7stXvquk5R2Izp5dj2p7YSh6ggwNVcDB7ewfuKaG6TJke3XlHZ32fl0aT0RX6keBUzsEzdmTopNbIawZ9xOKP5qNRc5/tA+DWcm5LSBYMSt6uJj45zSF4Rz0vpGNnur/1MPti0QstwlCOT9jXT+5tmuwyaxFm1gmY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773873507; c=relaxed/simple;
-	bh=VBsTejieZ4/3JN0cuPvkOf3dN8STc9QC3P7rgFdbtt4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=SVUvNEW5qL2yvWvyJyMhpZ8aqVq8Kce5nGSKa8pFZU4IorJLd0cUQ2crbFhQshFqa7oSyTcmhShk/5n7ma0kPGcheddTkBkqZC5AgfJ+seLKL8NgFLhSpsMla1tWrguxtdvZZJzRx+wTXWVWUrchQ8STg7dQ1XCTI+ulEAp7ZvI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=czchIZvk; arc=none smtp.client-ip=74.125.82.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1773929637; c=relaxed/simple;
+	bh=4zAon2/wL1xkF183JwLxXVvEK05OvlwLI29zwOFhq2E=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=rzTwE6LyBzmA6JQ1f06So+hoMrdkt48sNg6riCh6W+6KzBufQYD0xJjTgTsJ8hSZYg/MbJdXOXmU50ugi2orATp/TR5wkjj+p7GrIYdV83Lcp9PjRjRmoAKu/J1eVZyxJcVso9xTv8y/z43hDuA1wrTa/Y83jgFg43ENMwX7/W4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=qJFdgiFw; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=4jpB79yc; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=OrcSAEzL; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=HXVk5/yP; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="czchIZvk"
-Received: by mail-dy1-f173.google.com with SMTP id 5a478bee46e88-2ba9c484e5eso589050eec.1
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Mar 2026 15:38:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773873505; x=1774478305; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=sFZ8Dw3ibckO1MSlkY5sWNvcjNJn2NjoNVKwCGOBcLE=;
-        b=czchIZvkOI4C9/L3qj0irB/tGdL3JEHojFnQ5fLu//QCLK454kg70eVGAbQE898kUM
-         td8vvPHsRMJdGxypfPD2xwroqoa+B/WOX3hiiFlTsnZrLBDyu+laHD1Av6qE+2AfVi7Q
-         mWXPawWhWWbZF1tqxyltwkJFmAu+u6HXLcYo//ptIzq5yGO44lJACYzkShcJpz1z/07/
-         OXmtuWjZF3L//Z+hvpPIRMlOGxxysXFz3f5ZHgpnQbO8B+1WHxaPGrkZ0quR1kIMm1k9
-         I1GWNvzhHpyX9/b1QsjAbGijeQUc5GXBiHL8wg+fyGMay2DSPGjCUx15fWZp059Ipn4k
-         LuKw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773873505; x=1774478305;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=sFZ8Dw3ibckO1MSlkY5sWNvcjNJn2NjoNVKwCGOBcLE=;
-        b=l6uV024thNiLnrxFGzToNPiCQ/7gVNLbcRTB5ck8LbdadLsGmezx7NBcoD/b/sSYva
-         tZVy/PhIEtJUBQlsJg5UuLUsdIMavM/FPu9gVyrHuBtGkkepOyefA21THv7o9i/XwEL8
-         IBwevpJN/VoVo+3bAEMpT8BuztcFK6WVHFE3J0fvsoyV3n93QcnWbm/9YtMUdvAGFh5t
-         Rt5+mlN7Mro6o4RMm8999iLoMBj2KoNaok9Eu1lIS18M+gVWBz75Iwet9LNtJiXTq1HU
-         OSYuKbpBfMVSVImxsApWswlfxJmdqPQxuZnROpy81RC1IGwvNkYX1w/dyyj5aPB8zcL5
-         +61g==
-X-Forwarded-Encrypted: i=1; AJvYcCUvYyzfg7IDJgWeQTjONq4O3S4qRXc1J+cP3vzQXPmNmOaH5BurtGnc1i0nwJxghyA18PXx9d82xC2l@vger.kernel.org
-X-Gm-Message-State: AOJu0YxsedR/GEZA5DKg5xko9A4ugCFrVLIaqPihrXf1ByCa1cLOFjX2
-	V4dc6eeijHk8QstJWArLcU+ka/dy7Q/DWQhuYKLXMlno4izFvIHH4l6+
-X-Gm-Gg: ATEYQzxO/fqMHWmEW9o/O1BUzeFUZmCwo/5bRUqfGT0Rb3ydiUdou0+eTOGbPcukK/a
-	BlVfFVItFLZAmE/ydoijXpVW458ezjlWT2hrAlH/IVzL8QyeKYWyKJ3ZDzzl+xn8Xu7b8ossXRK
-	JAVF7ZlygyIv4XzAPFfnte+fPkfGMbkJ1GvNuU+mvszh2YDTyeKK+5/8Ta1U1gOmx9o97UIsnps
-	0fFsxl0GUg9YcI21A/IsQXVwDp7iaEAunBj4EszrJ+lEeQqR5NxzS9neqG1V717LwKJePlsWaAe
-	19nYNeiWX14iFCPDeKAjO83NoaYDMVESU75VCg2Dfib+uo1fWocGAlO8m7LpUQ9XXNYgocf0wSg
-	IzqfEPm0X7tMsh2Jl+VJ9TIFp4e4B8Yg57atMtVZNeynVPy6vfWbznKsd3PVkMhmcIfF4cOS3Wx
-	qNMkupD9lEUJiiQpvC6LN6rZvzNAAVYVLRjHu0Q7C7HZP1n6zC4uArkYHJ8Rbsi1Fy4OTGAwsgj
-	Q==
-X-Received: by 2002:a05:7300:fb97:b0:2c0:c1e0:244a with SMTP id 5a478bee46e88-2c0e509746emr2235424eec.9.1773873505407;
-        Wed, 18 Mar 2026 15:38:25 -0700 (PDT)
-Received: from [192.168.68.191] (67-2-26-43.slkc.qwest.net. [67.2.26.43])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-2c0e5583533sm6354714eec.18.2026.03.18.15.38.24
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 18 Mar 2026 15:38:25 -0700 (PDT)
-Message-ID: <a7d899ba-1e42-4a78-8835-f89a01d10328@gmail.com>
-Date: Wed, 18 Mar 2026 16:38:24 -0600
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="qJFdgiFw";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="4jpB79yc";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="OrcSAEzL";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="HXVk5/yP"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 233AB5BD4B;
+	Thu, 19 Mar 2026 14:13:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1773929632; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=4fUFXPph0d+U/6GDmGbgLZ/FXBjYuxpYsgD69WTKZEc=;
+	b=qJFdgiFwZof840urwELAyJUPmqr5R5KSb1T4rwYuc7bb8XNbCm/kv+M5FkrKSBEOM1bZiu
+	/MGyuwm/OFnFKmJm/t/Uz/+GbEcAEAQCMtEWioCbgwKOh4DWZ0qNVZOg9g66xDY+m4U+fD
+	w9Xqoe30eNI+goFz62hSwZMzWorThdA=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1773929632;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=4fUFXPph0d+U/6GDmGbgLZ/FXBjYuxpYsgD69WTKZEc=;
+	b=4jpB79ycXSQsxOkgtV3HKUa6Dm/vQ/wRir8pmFsiYnB6qgK3LbPe12RtulXb4tol7/E3ij
+	faYPra8B4GTfZjDQ==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1773929631; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=4fUFXPph0d+U/6GDmGbgLZ/FXBjYuxpYsgD69WTKZEc=;
+	b=OrcSAEzL/6c4UDB40dZmtUkHL2UKN/t418W/3/WLfRE3VUYtttdOTA1LBRs2LexriSZBXr
+	IUCLAcO9QxQoLCNXA0PSitgNb7BC5cuH9t+EXroQLbXGhfbC1mTChSWj64vc6V41FfYy8R
+	mio6pb/J12e+5TPnOnmBoDRex83ce1A=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1773929631;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=4fUFXPph0d+U/6GDmGbgLZ/FXBjYuxpYsgD69WTKZEc=;
+	b=HXVk5/yPJtxIjyky0dtujMNvVHE9KONXRU8D1O6wb4LBxoqwDaKPYOnkGEkCrYDJmYyVOA
+	klxEA++oJw6AsaAw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 14B714273B;
+	Thu, 19 Mar 2026 14:13:51 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id TmUEBZ8EvGlPZwAAD6G6ig
+	(envelope-from <jack@suse.cz>); Thu, 19 Mar 2026 14:13:51 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id C850FA0B32; Thu, 19 Mar 2026 15:13:46 +0100 (CET)
+Date: Thu, 19 Mar 2026 15:13:46 +0100
+From: Jan Kara <jack@suse.cz>
+To: Philipp Hahn <phahn-oss@avm.de>
+Cc: amd-gfx@lists.freedesktop.org, apparmor@lists.ubuntu.com, 
+	bpf@vger.kernel.org, ceph-devel@vger.kernel.org, cocci@inria.fr, 
+	dm-devel@lists.linux.dev, dri-devel@lists.freedesktop.org, gfs2@lists.linux.dev, 
+	intel-gfx@lists.freedesktop.org, intel-wired-lan@lists.osuosl.org, iommu@lists.linux.dev, 
+	kvm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-block@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	linux-cifs@vger.kernel.org, linux-clk@vger.kernel.org, linux-erofs@lists.ozlabs.org, 
+	linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-gpio@vger.kernel.org, 
+	linux-hyperv@vger.kernel.org, linux-input@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-leds@vger.kernel.org, linux-media@vger.kernel.org, linux-mips@vger.kernel.org, 
+	linux-mm@kvack.org, linux-modules@vger.kernel.org, linux-mtd@lists.infradead.org, 
+	linux-nfs@vger.kernel.org, linux-omap@vger.kernel.org, linux-phy@lists.infradead.org, 
+	linux-pm@vger.kernel.org, linux-rockchip@lists.infradead.org, linux-s390@vger.kernel.org, 
+	linux-scsi@vger.kernel.org, linux-sctp@vger.kernel.org, 
+	linux-security-module@vger.kernel.org, linux-sh@vger.kernel.org, linux-sound@vger.kernel.org, 
+	linux-stm32@st-md-mailman.stormreply.com, linux-trace-kernel@vger.kernel.org, linux-usb@vger.kernel.org, 
+	linux-wireless@vger.kernel.org, netdev@vger.kernel.org, ntfs3@lists.linux.dev, 
+	samba-technical@lists.samba.org, sched-ext@lists.linux.dev, target-devel@vger.kernel.org, 
+	tipc-discussion@lists.sourceforge.net, v9fs@lists.linux.dev, Jan Kara <jack@suse.com>
+Subject: Re: [PATCH 12/61] quota: Prefer IS_ERR_OR_NULL over manual NULL check
+Message-ID: <ol2d7c5z7yfyuwo5tyfxurgqedruhr6bzmuv37bx5phhrmmoyh@4zjspbtexid3>
+References: <20260310-b4-is_err_or_null-v1-0-bd63b656022d@avm.de>
+ <20260310-b4-is_err_or_null-v1-12-bd63b656022d@avm.de>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [ceph-users] Cephfs kernel client bug report
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
- Venky Shankar <vshankar@redhat.com>
-Cc: Alex Markuze <amarkuze@redhat.com>,
- "ceph-users@ceph.io" <ceph-users@ceph.io>,
- "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-References: <0100019cfdd4fb2d-5355e1f0-8561-4826-a592-16093c7bc4de-000000@email.amazonses.com>
- <CACPzV1=Fz9Qxu2hT=23wApZjW=m2DBtDx__g=wE8Pgy=9k98aA@mail.gmail.com>
- <2106322c86b05486ecf34b35198a644e112aac23.camel@ibm.com>
-Content-Language: en-US
-From: Alain Bertrand <the.roger.thornhill@gmail.com>
-In-Reply-To: <2106322c86b05486ecf34b35198a644e112aac23.camel@ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260310-b4-is_err_or_null-v1-12-bd63b656022d@avm.de>
+X-Spam-Score: -2.30
+X-Spam-Level: 
+X-Spamd-Result: default: False [-2.30 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	TO_DN_SOME(0.00)[];
+	ARC_NA(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	MISSING_XM_UA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	FROM_HAS_DN(0.00)[];
+	RCVD_COUNT_THREE(0.00)[3];
+	TO_MATCH_ENVRCPT_SOME(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	R_RATELIMIT(0.00)[to_ip_from(RLck44p98ib5bmd95s13xxw3gp)];
+	RCVD_TLS_LAST(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	RCPT_COUNT_GT_50(0.00)[55];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email]
+X-Spam-Flag: NO
 
-Slava,
+On Tue 10-03-26 12:48:38, Philipp Hahn wrote:
+> Prefer using IS_ERR_OR_NULL() over using IS_ERR() and a manual NULL
+> check.
+> 
+> Change generated with coccinelle.
+> 
+> To: Jan Kara <jack@suse.com>
+> Cc: linux-kernel@vger.kernel.org
+> Signed-off-by: Philipp Hahn <phahn-oss@avm.de>
 
-I just put the details in the bug 
-report https://tracker.ceph.com/issues/75609 .  The kernels I was able 
-to reproduce the issue on were the proxmox supplied 6.17.13-1-pve, and 
-6.14.11-5-pve, and the Pop!_OS kernel version 6.18.7-76061807-generic.  
-The problem didn't happen on a different machine running CachyOS kernel 
-6.19.6-2-cachyos.
+Thanks for the patch but frankly I find the original variant clearer wrt
+what is going on. So I prefer to keep the code as is.
 
-All I needed to do to reproduce the problem was go to the cephfs 
-mountpoint (/mnt/ceph) and run find -maxdepth 3 -type d -exec ls 
-"{}/.snap/" \; which should have listed snapshots from about 1015 
-directories.  This wasn't the smartest way to find snapshots, it was 
-just the first one I thought of.
+								Honza
 
-Each time the effect is a little different.  Sometimes it immediately 
-panics, sometimes the machine just gets slow for a few minutes with lots 
-of errors being logged before it panics.
-
-
-Thanks,
-
-Alain
-
-
-On 2026-03-18 13:07, Viacheslav Dubeyko wrote:
-> Hi Alain,
->
-> The ceph-devel@vger.kernel.org is the email list for sharing issues in CephFS
-> kernel client.
->
-> I remember that we had the fix for likewise issue recently. Could you please
-> share which kernel version you have? Which particular call trace do you have for
-> this kernel panic? How anybody can reproduce the issue?
->
-> Thanks,
-> Slava.
->
-> On Wed, 2026-03-18 at 15:17 +0530, Venky Shankar wrote:
->> cc Alex/Slava (cephfs kernel driver maintainers)
->>
->> On Wed, Mar 18, 2026 at 3:35 AM Alain Bertrand via ceph-users
->> <ceph-users@ceph.io> wrote:
->>> Hi.
->>>
->>> I'm new here.  I have been playing with ceph for a few years (nothing
->>> dramatic, just using it in my proxmox cluster to store VM images and
->>> host a cephfs with a lot of shared files).  I think I found a bug in the
->>> cephfs client in the Linux kernel.  Listing snapshots (ls .snap) in a
->>> lot of directories quickly causes a kernel panic.  I tried to create an
->>> account on the bug tracker at tracker.ceph.com a week ago, but still
->>> can't log in there.  Do I put details here, or report somewhere else?
->>> What's the next step I should take?
->>>
->>>
->>> Thanks,
->>>
->>> Alain
->>> _______________________________________________
->>> ceph-users mailing list -- ceph-users@ceph.io
->>> To unsubscribe send an email to ceph-users-leave@ceph.io
->>
+> ---
+>  fs/quota/quota.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/fs/quota/quota.c b/fs/quota/quota.c
+> index 33bacd70758007129e0375bab44d7431195ec441..2e09fc247d0cf45b9e83a4f8a0be7ea694c8c2a1 100644
+> --- a/fs/quota/quota.c
+> +++ b/fs/quota/quota.c
+> @@ -965,7 +965,7 @@ SYSCALL_DEFINE4(quotactl, unsigned int, cmd, const char __user *, special,
+>  	else
+>  		drop_super_exclusive(sb);
+>  out:
+> -	if (pathp && !IS_ERR(pathp))
+> +	if (!IS_ERR_OR_NULL(pathp))
+>  		path_put(pathp);
+>  	return ret;
+>  }
+> 
+> -- 
+> 2.43.0
+> 
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
