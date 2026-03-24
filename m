@@ -1,275 +1,205 @@
-Received: from mail-dy1-f180.google.com (mail-dy1-f180.google.com [74.125.82.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A91DC35A938
-	for <ceph-devel@vger.kernel.org>; Tue, 24 Mar 2026 20:54:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.180
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774385658; cv=none; b=GA7gf0KrmvSx1lohmbELDFhcyPgL9xJf3GZi0YmZe95C3yxtZJoOLykdCMJHmzevgOwMOv9XgU4rmSJCA+3/28lSo1LX3IbBixu2iNlsbRp2UUyRyqbcVDLcXQ3CLZetqPTjYQyn+2UfJiEVgsPL3zfcDgL4PrYX6ujTVesA55A=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774385658; c=relaxed/simple;
-	bh=YLz6uSmqoShYeeRXY1+z3t1X794Ak/CPp1kM4sr09Qg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=CiQOp2efHDItr+Jodkt4vzYCGPF7H1TUym0jwTBgBhuCLcXVP7vvvhOd6kE3zIKBKGAd89TJJXU117wYm0NlKt6hiJBR+Lgh/l+FTTuEpXDRld4rDrpU7waVgLQPZuDBuDH3pGStKIOrVKRbWBO6a/QyEDjjLIctRyedVjDcP/w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RW4n7vLe; arc=none smtp.client-ip=74.125.82.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6784B333441
+	for <ceph-devel@vger.kernel.org>; Tue, 24 Mar 2026 21:04:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774386254; cv=fail; b=pvHCHxItUCyN9x3xYO0NzG+aVWM0e6t24zoKcduKHBmnKOCdUXfutvAu49XXPIfJX908onvupuM6G77ArPhXy6M06Eka1VD2rbtyIPhbphGIEE1HKJd4uqMommA/C5zLJe6bmjgP4SPWv3GuU8LJ6F0ypQW12TVO+xIVVzbEyNU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774386254; c=relaxed/simple;
+	bh=o5g3Wq4RJJbwnb9MGx5Vt03XFhZOnt43KIoCsnkb1XA=;
+	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
+	 MIME-Version:Subject; b=dgI++Lvaz93NgTPyxfaHwQHYbCgDAOZkG8ptBCYWeJ9KzxZmAFx7glOqM6cRnJibc8prots86ilB0NWYVhDR61jkwUH5RRTV6vXaBgiIr2kelsyWQD0iwx8Jjz40Xi5AnGBgdZ4mdPrPmmkQp54q90OyQjQ8vhlvdG6FVaYGZwA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=dvsHl6V6; arc=fail smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RW4n7vLe"
-Received: by mail-dy1-f180.google.com with SMTP id 5a478bee46e88-2bd9a485bd6so3088810eec.1
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Mar 2026 13:54:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1774385656; x=1774990456; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=GV/Le0LYBfD23tTmCrTD0oDiRR7WCUFJTnltlnUdhoY=;
-        b=RW4n7vLeQVsKTOf4HsWTAgd0aB4LgeO9g11RpE+UmNfeFivG4Ap6wo6t847wWsiKUA
-         j1xG6RI3b4kfPmRP4KmfyFRnHFkIws9f9Ev4bzQ+VCQ2mIZn7jcj+sco7XoSfvvLUK/v
-         yTdvL48lA9cOwxx8JtzfYPIDQryCX5Yr5Ibv1h+1ADB+GoOwTfCeDJtzExMdEIztgrC7
-         N+93pAP3XaiOXTvrRfXw1LiX0bdvDrX2cHz7L8xLhwA61ITRC5CEcNmDiFgmhY5UJy6k
-         iVjZuV6zFNHuYplFdbBenM8ol2Ope06nQbYSQyPfcUjpCT9P4Ok2CDEvIWrta1IESJFx
-         2diw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774385656; x=1774990456;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=GV/Le0LYBfD23tTmCrTD0oDiRR7WCUFJTnltlnUdhoY=;
-        b=gycJ8YwXNCJkfA1kdsDKmDfS0Xys3P2bLsb/iGkcqfQAPp4ZJHYzKh3afdwpJGEUur
-         QzQTWUeNGL6SKKPV7eLNznKCBHN4aQCPh7CX3yG29n75IYYPTcq/Rg1uURz7cL8I9fHn
-         XSe+edmfmigXYlj8kHEf51dvh1FFQts3S0v2KhoCpbnwKKO+8LP+G5937nicROjzmUhV
-         8+qMCh+f3s0Dj5hvzZk3/SPbIh68zPlOthEetN1DrAeFCkn6xKW4xHADiFOp2c4C9cZ/
-         VqIo5m9PvTeHESO5oneD1Nyl8JJbjXbrs/45GBmVzxOpYml/JEIRIOAKBjRQP+rVis2U
-         3snw==
-X-Forwarded-Encrypted: i=1; AJvYcCUg8F/mCxX8pAC6T99+JTgdpxfeOSKmnPW3RM/LzSwChOmoBxW2LaebZ+sAoEZPn31zO+6dLDE5vLw4@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw42qbpAVsPzd0eq3kkxxJpT6SqM5sweSBrboqm/i1gP43yE/Ut
-	hzOp3o6HKEEYFth62/x8iIJh7a0acvLwDrhewlsHdRi2FeM60QTbq6aT
-X-Gm-Gg: ATEYQzwpZcsFSUXvs8274U/MFJTfa6XbDd0MNc92webLGe3PbA6zFt2MCGyNepxaQSy
-	GKE20WH9QdztmH+gNXxmAwEJqlTki/Te+AVLLGA4xuVdI66UV1g9jR2h/xXBcGtbK1qecXSl1PL
-	BHzRKrmJlbqA/TE3eVxNd2qhQXh0JiN9ZZYR097pn1VMGHxIazyyk9xsmZOFZjwdkT1pnL3O3sI
-	kqlgcmO1wfVGjvVyl1YubgsZa+s64OmsghNjKOrrxKPkhA6Yti2NxKUJfCu94Yn/s/OHJcE5ns/
-	VNQtwnkLH/h8o0uNDXJOy5SJQPxfqLQu5IW03HTdIqOou5P0hyb6KwdcSMjpw60F1zxvD5MYDZd
-	2SRYIv1LDqCRZWfVYTjYxhw/2kjY8ArH6+HNRfhwKeSeBpFIY9DOTXFnBbmWdhaOzZS4jspWeM4
-	RBXYVbWEkuq32FhA63Usu62NQbZbJqgVJ2ynU1Q/d3YSjq6/JrHrS1MnaIph/SCtTBcMS9vFx0N
-	g==
-X-Received: by 2002:a05:7300:e427:b0:2c0:c775:a46b with SMTP id 5a478bee46e88-2c15d2fed07mr465631eec.8.1774385655399;
-        Tue, 24 Mar 2026 13:54:15 -0700 (PDT)
-Received: from [192.168.68.191] (67-2-26-43.slkc.qwest.net. [67.2.26.43])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-2c10b14cadbsm19529863eec.3.2026.03.24.13.54.14
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 24 Mar 2026 13:54:14 -0700 (PDT)
-Message-ID: <b1da3970-306f-4345-bace-7101a39874f9@gmail.com>
-Date: Tue, 24 Mar 2026 14:54:13 -0600
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="dvsHl6V6"
+Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62OGGN8j3893308;
+	Tue, 24 Mar 2026 21:04:11 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-id:content-transfer-encoding:content-type:date:from
+	:in-reply-to:message-id:mime-version:references:subject:to; s=
+	pp1; bh=o5g3Wq4RJJbwnb9MGx5Vt03XFhZOnt43KIoCsnkb1XA=; b=dvsHl6V6
+	4XkoeMAyhHxCUCQmVYQH53MzJVb0OrNWHoRXmqUaDkwIL6FXlmuU4o0vTG17m74y
+	MCZF9xbTvw4z7aeYV0re8q2KspgUOI5oTKVODAePzCUzUgDvT6QxKMmPhjmzM6/z
+	HHbVbUWcbdq4EpZjlfijfuy7N/GrTFQHI4080C6gcIb2YUUdXhW/Z356/3X+rMyY
+	RMsqQIiMGazT99PgmYfWa0UdqCmpUH4G978PumXMk3gq35h5XEtCm7fBXHJU7agR
+	FeVrkZtR2kSbJUg1ZVn6Tb7Ds+RNh/pwPIgLTphi5Wmz3XHtmUQQ9n9bEFlwTjFo
+	CUhtjQAMKc5Zgg==
+Received: from ch5pr02cu005.outbound.protection.outlook.com (mail-northcentralusazon11012041.outbound.protection.outlook.com [40.107.200.41])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4d1ktuw23p-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Tue, 24 Mar 2026 21:04:10 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=yyFTxoRuFJk65dJILOeEafg1RRW7xtjkTSdP4X6rKwYgfT+RbUzoDjSOzaNKDqZXmFBmxBzCTf2D2PIDRWNocAQ0VxSetgt6vx8VEFnK1ZY6tvw9o8m9lacqT7czPYhqOjBmmb++tHPmFrqYt7ws4no7ULS5qD9SvYFUsJ2FPu/WFPWpRDaO2NIL0yFHhYP4I1PvWta9v8BUOfWN6JwRvnweSv6oNLqCAche1BlIU+6pQBrfypm3BTlRSKaF9MP742p8agAoT7NTuanTEiJOLyf/lO6CxgoR14oc7W6p5DPLjaqVkrHIpPGYl+XVoaGw/1jGgeeVfGLApypnmvzMsg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=o5g3Wq4RJJbwnb9MGx5Vt03XFhZOnt43KIoCsnkb1XA=;
+ b=vvdiwYz5kT6+MGywsmICq2ROabCe/CDkml/KgELUKUid4My+XtWQF8v3gWy7LnIVZNTGdmfOI7S+MNB9TO54NJJfGVQWXValve5lc5amX0IcqAJui9JxfA9OPuvrLQjY/uI35Ap9WePhAYoB9sEwxus5NEG+PCwRSuD4cdFNiMVjHjS1vqIa0BZ4Q+GiV34kER+za3W4Wf+ZSASpURNuDs6ibyXFNIfQ5bfQIoDWB2IhO15EdmjTZ436fCL6lswgm14ANd6zr8f1vDmmyIJ4MG4zg7B+tsnB0hPSY21Xie40OONjhElw9AHCzyr0a9mbD0FFJzWiG0opi12gVYx9sQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
+ header.d=ibm.com; arc=none
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
+ by IA1PR15MB5467.namprd15.prod.outlook.com (2603:10b6:208:3a9::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Tue, 24 Mar
+ 2026 21:04:08 +0000
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.20.9745.019; Tue, 24 Mar 2026
+ 21:04:08 +0000
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+To: Venky Shankar <vshankar@redhat.com>,
+        "the.roger.thornhill@gmail.com"
+	<the.roger.thornhill@gmail.com>
+CC: Alex Markuze <amarkuze@redhat.com>,
+        "ceph-devel@vger.kernel.org"
+	<ceph-devel@vger.kernel.org>
+Thread-Topic: [EXTERNAL] Re: [ceph-users] Cephfs kernel client bug report
+Thread-Index: AQHctrxhtiASTaMOmUSx0tJVzicXcLW0p28AgAA69ACAB5o9AIABtqSAgAACwwA=
+Date: Tue, 24 Mar 2026 21:04:08 +0000
+Message-ID: <4c807ec8cf54668cae886a3a1b7bf0796839e3d0.camel@ibm.com>
+References:
+ <0100019cfdd4fb2d-5355e1f0-8561-4826-a592-16093c7bc4de-000000@email.amazonses.com>
+	 <CACPzV1=Fz9Qxu2hT=23wApZjW=m2DBtDx__g=wE8Pgy=9k98aA@mail.gmail.com>
+	 <2106322c86b05486ecf34b35198a644e112aac23.camel@ibm.com>
+	 <a7d899ba-1e42-4a78-8835-f89a01d10328@gmail.com>
+	 <01a85528e6a81df3388a80778cd4c014c4def417.camel@ibm.com>
+	 <b1da3970-306f-4345-bace-7101a39874f9@gmail.com>
+In-Reply-To: <b1da3970-306f-4345-bace-7101a39874f9@gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|IA1PR15MB5467:EE_
+x-ms-office365-filtering-correlation-id: cd42d5ad-1778-4063-0c12-08de89e8e3e7
+x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|376014|10070799003|366016|38070700021|18002099003|22082099003|56012099003;
+x-microsoft-antispam-message-info:
+ Q9/LBt5qBUjHkl1Pg8jcTOZ5qr276tSCLppviebR18nB3eJz23QdxgIgK3xujQ8sITL2mCu3W6HoLsGXQ6Olr7yvSQnij+ldaDTR25V8bknnCAHUITStBdjQi6nTvMYLNemwQPHbup1yJ0w+4cJBwZYgU+5xTikyfQJxExfIsGV5wq/BBKD516/ihkx5QRabSiSRquszwu9FzOnPL8WzjtfHLg1XoY6IOyel8ztImlK9njV9p73d3JsBHhAUm1qW+P+uMQgCyWXcQglqa4tA05QuGKZY1S+YbBuud6fxgSVQX3EB5v99ERypArMuYxJMHIkdqGaviONZiz3D0hDuITU9YGKsuzqIIXjEazCTt9kA/OARQ7p5DX/LMufpzhaenBqrSIDwAcmz0HVDDzEsFAm1lPQV8ZZyCKf5PBUAVUKpJuienvMOOcNRTnUK2/WAIsiuz8LnZxzplktBO07nJSjPtrncOAwI1JE0Uso5/lgVSIYKPmuTKDnAuTfKiskp9eGlsSBk1HmdkVkIaqH502bo+NC6ncWZIgYPjCX+Mm0gzUK36Rj3tDPPdF7bYaFyCGR/tNTnxxZcdFvkbM6Z+tgGrcsIT8BVf4kFUSCE6FcvubLOFuqJUbZ+85vpvqZg+w40I9AIKom6V+pxa/n0NhJfJKRqDXJQp4UMKsj2aRCLupchMIHgz8ABO+U5lC1jvw+bmpgp1gccv/c5HBOeZpgXnnqbXWGI8yd/eyqUqfom18/7LjZxqAWK2+uUkwzzvb8fSKjKkHnQdH0vK94vGdRXuOqDmC4D3cgeicsLCX4=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(10070799003)(366016)(38070700021)(18002099003)(22082099003)(56012099003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?RE1sUFphb1dNelkvSGZ2NVQ2QWRld3ZPMVNoYm9nSEZJLy9OZS91Z2ZkaFc1?=
+ =?utf-8?B?cFhwUllVZkE1ejBMSGZ1eXZwMng0Y0FBN2JPWEpUNjRDMzQ0dVVvcmNWMW9D?=
+ =?utf-8?B?ZGVkUERKVzFUVXhXT1BTeUZzcVZoNTRGQUdIdEYzOWVoYnR3THROazNwNWI5?=
+ =?utf-8?B?N1pjUWhZZS9OWEl4dkdMMEVjRm5JZTV5NVVjRnplQm85dzlPdkQ1TU56Tm1t?=
+ =?utf-8?B?S1BwZTM4cjhZa3JGQ2lhMWFKeEVlUXVwU3c4eldBY2pWSHFoNXVuUk5qamoz?=
+ =?utf-8?B?dHIxcldyNE10QTU2RndHVTdId0VRYnQ4QXFLLytrdFcwejZJYkN1bk9qVGl3?=
+ =?utf-8?B?MVdkb3Q0YjVDa3VHZmt3N1dSL0MzL1RrbGZWZUlDOHNWQmZ1YXk4SW14UTZn?=
+ =?utf-8?B?WnJjUFlVdS9wQ3lKQ01PVlphNC82VGhFTEpXMGhUUzgvVEMrQm1SK0NDQjNQ?=
+ =?utf-8?B?aG54YXRLMTJaNXliZllMYXlCaG1uamRPb3l1NThqV3J6ckF5UnQ2RElGcC9v?=
+ =?utf-8?B?alIrNU5PMEVKTFgwMmlUZ2lPZm8wbXBldTIxODhWYmdWNkIyaytKVGFxcUJK?=
+ =?utf-8?B?UGJHUWg3UmFDajB6RG12OEk1NkNydmJnZDBzTTBiMXhrcnluZkQ4d0xUWSsy?=
+ =?utf-8?B?YmxZdW5CeXBPOW5hdktid3hDRnFla1J1Sm8rSUo5UmxrVE5UVUtaWWkzK21X?=
+ =?utf-8?B?REtVeEhQL1BaTGRhei9McUduVTVibEx6VWZrUHJiNms4cVdwRmZBQUdabUU1?=
+ =?utf-8?B?anVUTjlnbjBlVGFlbVZiaHZkWmpmd3dMN2oxREticlJSVkhyZ2pGUUJ0ak42?=
+ =?utf-8?B?aE1YbW5yRzlFSUpQcnpYQ2xsMTBuNXpsaGNCYUcwZHlCN1Q3VEZOcHJsTUpQ?=
+ =?utf-8?B?TGZjREg1U2gvaHVxczk3aTZQUVlaSzV5RkdaT0orZTFjM0l6aVcvODE3alFC?=
+ =?utf-8?B?YWFFUTluQ1Yxcy9VUjE2eU9MeVFRWThPL21KQStrcHRPMy9KeUppMzkxa0dQ?=
+ =?utf-8?B?WjQvMC9ZanBqU1F4ZVBXbEhFUTgwY2VNeUJXbUYwYTNab1hzNndPQm54a3Zo?=
+ =?utf-8?B?enBXaEFHRXg3TEtER0E3UDRNQlBSN211S0lZVy9Jd2tjamNvbmtaZWltQWUx?=
+ =?utf-8?B?VTdmR1VKMDlTT3Q1cmwxTWVwVk9zTkhsLytzMzhJdUNLa212L1p1aDFoNUdl?=
+ =?utf-8?B?SHNUby9EanZFWkthV3g5ZUhKZzNMZDhXaWI2UDAyOG9NalJualM3S2c1S1dR?=
+ =?utf-8?B?TjRVWnV1dTYxKzVnNzR6bHc2WTJPMUIzZXB6VitKOU5zSFVqVlBuVlltMm1l?=
+ =?utf-8?B?M2JzYVp0WVFENllHRzF1cUxuM2xHb1FPZHdISFlZRjlsYkpkM2ZiSlk5UlRu?=
+ =?utf-8?B?Q1ZuUjY3cW13OE10Z1VvVjVBa05BNHZlRi9KY2w2QmcyZzFJdHh4bGlNeTZj?=
+ =?utf-8?B?a0Y5YlZkQnAxZ0szK0xITGs0cndzdDFhK0EwZGtLeWxWdmV5S1RsZlZEbW9N?=
+ =?utf-8?B?L3V2M3EvK2JNakhMaVFWZldOS1UxeW0wc2FGeW93dHBrSXNjcTk2aVVGQVhO?=
+ =?utf-8?B?TzdLVDJlUm1Wc25mR004RjVvVjdUVHpTQkhGZW81bXpHcHp6ZHF0YjNJZ0xB?=
+ =?utf-8?B?d042ZmJydUxSbkFiYlNoN3hnNCtrcXpIUE14ZDNuTmxWeUxCTndWTmtSNG5R?=
+ =?utf-8?B?N0NwWXF0UXd1WTR6MzhJYzNoMmg0c3VWWmlUSHNQS0JuNHVoTEowUFNWRnRS?=
+ =?utf-8?B?cUpaWC90RzMvQlA0RGJZRDNwaHBwWUtxRDNkSDNGVWUrMm5PZzRlYm9Oajh5?=
+ =?utf-8?B?ZmJQU01kVWQzTlRCR3VjQTd4WldFa25pSHNBOTh6bUtuQUdFenphdkxIVmc0?=
+ =?utf-8?B?K2xXUVVYU0VtbkR2ODU2ZE1TL0l2OFVXWnJvTXFRanlvdExzaGp3bTRtSDd5?=
+ =?utf-8?B?Y1dqcTR4dzZ0Nzg1aFUvNVdGdTlFMEswN3lsWHZXOGhvVFh0YklGK1R4dHFH?=
+ =?utf-8?B?NGxQSU1ZOHpuVEJ3b05vWGUrdWxYRFR5T2N5VmNNMFpkRm8xTHk0TDFGZXFu?=
+ =?utf-8?B?bytRczY5ZThhTVlHNDZtNW9hY3I2blVpVFFoV0tnMHZMYW5aMVhSZExOanVp?=
+ =?utf-8?B?U2tQWS9hdVpUaUVYUmJieDBIT1hBNTRWZTIycDNHMEMxNFNtZ3MyOUZDVkl6?=
+ =?utf-8?B?cFZ2c1p1ejd5RldBU1FSMEhyRWZaekFKYm80S3FMV0RXOVZtckt2ZTdBbXJY?=
+ =?utf-8?B?Zlo3cEMzZ0ZSUHRtelpuOEZsV2FOUnhid1RGaHBEZkJKcVVKcFRFWkRzYjJU?=
+ =?utf-8?B?NnJkMnN2M0JQUlYxRmVSaDk2SVVmMysxeHBOL1ZKZWFBUFVkdEdRclJtV2Rt?=
+ =?utf-8?Q?uSX1IejfhZJMTWLMrCorOJC03Nkh+lVSMXtFf?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <D7BD3C50ACFF1142A3836000D67D5D87@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [ceph-users] Cephfs kernel client bug report
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
- Venky Shankar <vshankar@redhat.com>
-Cc: Alex Markuze <amarkuze@redhat.com>,
- "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-References: <0100019cfdd4fb2d-5355e1f0-8561-4826-a592-16093c7bc4de-000000@email.amazonses.com>
- <CACPzV1=Fz9Qxu2hT=23wApZjW=m2DBtDx__g=wE8Pgy=9k98aA@mail.gmail.com>
- <2106322c86b05486ecf34b35198a644e112aac23.camel@ibm.com>
- <a7d899ba-1e42-4a78-8835-f89a01d10328@gmail.com>
- <01a85528e6a81df3388a80778cd4c014c4def417.camel@ibm.com>
-Content-Language: en-US
-From: Alain Bertrand <the.roger.thornhill@gmail.com>
-In-Reply-To: <01a85528e6a81df3388a80778cd4c014c4def417.camel@ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+X-Exchange-RoutingPolicyChecked:
+	TGZ0Tjo3kINNELtoKgWnJfJSJu3SXAHRU9RgDtIrObE7ywrJE2Z8sVIPWgC/D5dyEVbERNJqThMVSXT9x2K6JC9uuQvdYi7hklAmedfPSaZNWLg+DEz/nfA/gtifd1gXhc2hfMiA5nFnKrZ5cPMsBbkKP2PJNxDdywDhy9VqFeEtaAChhVWGsbA9wy9J3TAkAHixLOCQZtOaEb+wtG6DnTEPzexQiz/SdA9m5p58yzY0ZE8RhrJVfevKdrnAzQ1VMTC5he8hzGglz/HoJZwYhX4GFCZy+HWoF0Tv5H7W0XLObQlmHQ2zQoAjOWFyzgwJoI5ZvJvEdUHi10reEPyNTg==
+X-OriginatorOrg: ibm.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: cd42d5ad-1778-4063-0c12-08de89e8e3e7
+X-MS-Exchange-CrossTenant-originalarrivaltime: 24 Mar 2026 21:04:08.1155
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: NJMdvKXO6k+wn2AB1zxFxfjCumk9Z55+ZS6QiETcOrdzBs9RASOjZifidKABk4+Fh/b0/5qF0J2GeWpso52hrg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA1PR15MB5467
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Proofpoint-ORIG-GUID: XWnj2uZRokd9Q92v0LLWNfpYfMWcLHdS
+X-Authority-Analysis: v=2.4 cv=aMr9aL9m c=1 sm=1 tr=0 ts=69c2fc4a cx=c_pps
+ a=kwEYnkRUmkAH8qI+i8sEWA==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=Yq5XynenixoA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=Y2IxJ9c9Rs8Kov3niI8_:22 a=zGhc7xlHvciLHWUA6QYA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzI0MDE2MSBTYWx0ZWRfX9oWKCXGyYHTL
+ FttXYSO545uutM1/qAeZVHxsJlwMLHD/tqR20BvA/T+KOq91lHcEMpGsOPrY91QsnfngDpBb/QV
+ sqq5d9oU0vZ1P+Pae7PwD0YDYzp9UmmtNJapMzWfYYWVlCcXppyZBj+EjjG4TFinBp2hqLbh71T
+ 4WxDKHAxYkH+fUrYSAkie5v/gKHIb1hpWFY1Gp2vbPpd9vAO8Ho5UxwrQ4eKq4BYahh7HzuWXZS
+ fLO5wnTW4zDxO8fyONar9YCmh87jt8u2soHOGmnP0/6B7HgWCv26xY4JTHGuVh9GN9//uVCvmQc
+ IMBh0me5REbbNRC3KoQwapRlM078Pf2K7GvFwqrlHWlD229uHhBcHicSSbK3+rxxaoTqjr3rXRr
+ KWe2KbmQAhl1ETZ0bJN5WVgYPUyMwNY28jOunpjn5l//5KXz2iLFIJk4Y40nxu828pxH1T/fC8g
+ P7IYDYxiLC8C09PPjRg==
+X-Proofpoint-GUID: JBIqNQ5GWOIXnhYQKhdMzHpJUulLGtxb
+Subject: RE: [ceph-users] Cephfs kernel client bug report
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-03-24_03,2026-03-24_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 lowpriorityscore=0 adultscore=0 impostorscore=0 malwarescore=0
+ suspectscore=0 phishscore=0 priorityscore=1501 bulkscore=0 clxscore=1015
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2603050001 definitions=main-2603240161
 
-Hi Slava,
-
-Thank you for taking time to look into it.  I am sorry it took a while 
-to get back to you, I had some struggles building the patched kernel (I 
-am not a developer).  I had to build 6.17.13-2-pve because I couldn't 
-make 6.17.13-1-pve, so I first checked that the default 6.17.13-2-pve 
-still has the problem, and then tested that the rebuilt kernel with that 
-patch works.  That patch does indeed fix it.  I was able to list out the 
-snapshot directory of about 4 times as many directories without any 
-problems, and I repeated that test many  times just to be sure it wasn't 
-just luck.
-
-I am sorry to have bothered you with something that was already fixed, I 
-didn't see that conversation while looking to see if this was already 
-reported.  Would you like me to update the bug report to say that this 
-patch fixes the problem I reported?
-
-BTW, I want to take a moment to thank you for your work.  I am sure you 
-don't get thanked enough for working hard making things better for all 
-of us.
-
-
-Thanks,
-
-Alain
-
-
-On 2026-03-23 12:44, Viacheslav Dubeyko wrote:
-> Hi Alain,
->
-> On Wed, 2026-03-18 at 16:38 -0600, Alain Bertrand wrote:
->> Slava,
->>
->> I just put the details in the bug
->> report https://urldefense.proofpoint.com/v2/url?u=https-3A__tracker.ceph.com_issues_75609&d=DwIDaQ&c=BSDicqBQBDjDI9RkVyTcHQ&r=q5bIm4AXMzc8NJu1_RGmnQ2fMWKq4Y4RAkElvUgSs00&m=l3Zx9FbG-WJdrbXCbJZPxTTB-kIMC3ZBXxTv7IVCvuh9iCYcgqxMnu9WakaH-0bO&s=fmKB-I_ZRE5nnjiPqAFOQmJsNjp1ay1dzoWM7kKqxwg&e=  .  The kernels I was able
->> to reproduce the issue on were the proxmox supplied 6.17.13-1-pve, and
->> 6.14.11-5-pve, and the Pop!_OS kernel version 6.18.7-76061807-generic.
->> The problem didn't happen on a different machine running CachyOS kernel
->> 6.19.6-2-cachyos.
->>
->> All I needed to do to reproduce the problem was go to the cephfs
->> mountpoint (/mnt/ceph) and run find -maxdepth 3 -type d -exec ls
->> "{}/.snap/" \; which should have listed snapshots from about 1015
->> directories.  This wasn't the smartest way to find snapshots, it was
->> just the first one I thought of.
->>
->> Each time the effect is a little different.  Sometimes it immediately
->> panics, sometimes the machine just gets slow for a few minutes with lots
->> of errors being logged before it panics.
->>
->>
-> As far as I can see, you have 6.17.13-1-pve kernel version. And you have this
-> crash as reported first:
->
-> 2026-03-10T17:08:36.865704-06:00 ti kernel: Oops: general protection fault,
-> probably for non-canonical address 0xe512d51cad6e7b3f: 0000 [#1] SMP PTI
-> 2026-03-10T17:08:36.865745-06:00 ti kernel: CPU: 2 UID: 0 PID: 2450314 Comm:
-> kworker/2:0 Tainted: P O 6.17.13-1-pve #1 PREEMPT(voluntary)
-> 2026-03-10T17:08:36.865750-06:00 ti kernel: Tainted: [P]=PROPRIETARY_MODULE,
-> [O]=OOT_MODULE
-> 2026-03-10T17:08:36.865773-06:00 ti kernel: Hardware name: Supermicro Super
-> Server/X10SRM-TF, BIOS 3.4 06/09/2021
-> 2026-03-10T17:08:36.865776-06:00 ti kernel: Workqueue: ceph-msgr ceph_con_workfn
-> [libceph]
-> 2026-03-10T17:08:36.865781-06:00 ti kernel: RIP:
-> 0010:__kmalloc_node_track_caller_noprof+0x176/0x510
-> 2026-03-10T17:08:36.865785-06:00 ti kernel: Code: 03 0f b6 91 60 cc 55 b5 e9 29
-> ff ff ff 4d 85 c0 74 91 48 85 db 74 8c bf ff ff ff ff 41 8b 45 28 49 8b 75 00 4c
-> 01 c0 48 89 c1 <48> 8b 00 49 33 85 b8 00 00 00 48 0f c9 48 31 c8 48 8d 8a 00 20
-> 00
-> 2026-03-10T17:08:36.865823-06:00 ti kernel: RSP: 0018:ffffca16a9def810 EFLAGS:
-> 00010286
-> 2026-03-10T17:08:36.865826-06:00 ti kernel: RAX: e512d51cad6e7b3f RBX:
-> ffffed3ac4045b80 RCX: e512d51cad6e7b3f
-> 2026-03-10T17:08:36.865836-06:00 ti kernel: RDX: 0000000182e28002 RSI:
-> ffffffffb66b2de0 RDI: 00000000ffffffff
-> 2026-03-10T17:08:36.865838-06:00 ti kernel: RBP: ffffca16a9def870 R08:
-> e512d51cad6e7b1f R09: 0000000000000000
-> 2026-03-10T17:08:36.865840-06:00 ti kernel: R10: ffffca16a9def890 R11:
-> 0000000000000025 R12: 0000000000000025
-> 2026-03-10T17:08:36.865842-06:00 ti kernel: R13: ffff892d8004af00 R14:
-> 00000000ffffffff R15: 0000000000000cc0
-> 2026-03-10T17:08:36.865844-06:00 ti kernel: FS: 0000000000000000(0000)
-> GS:ffff894cc9286000(0000) knlGS:0000000000000000
-> 2026-03-10T17:08:36.865846-06:00 ti kernel: CS: 0010 DS: 0000 ES: 0000 CR0:
-> 0000000080050033
-> 2026-03-10T17:08:36.865848-06:00 ti kernel: CR2: 00007f48068999a4 CR3:
-> 000000033e42a005 CR4: 00000000003726f0
-> 2026-03-10T17:08:36.865850-06:00 ti kernel: Call Trace:
-> 2026-03-10T17:08:36.865852-06:00 ti kernel: <TASK>
-> 2026-03-10T17:08:36.865854-06:00 ti kernel: ? parse_longname+0x5c/0x270 [ceph]
-> 2026-03-10T17:08:36.865863-06:00 ti kernel: kmemdup_nul+0x3b/0xb0
-> 2026-03-10T17:08:36.865865-06:00 ti kernel: ? ip_finish_output+0x2b/0x140
-> 2026-03-10T17:08:36.865867-06:00 ti kernel: ? kmemdup_nul+0x3b/0xb0
-> 2026-03-10T17:08:36.865869-06:00 ti kernel: parse_longname+0x5c/0x270 [ceph]
-> 2026-03-10T17:08:36.865871-06:00 ti kernel: ceph_fname_to_usr+0x1e1/0x3a0 [ceph]
-> 2026-03-10T17:08:36.865873-06:00 ti kernel: ? cbc_encrypt+0x8a/0xc0
-> [aesni_intel]
-> 2026-03-10T17:08:36.865881-06:00 ti kernel: ? crypto_skcipher_encrypt+0x2d/0x60
-> 2026-03-10T17:08:36.865883-06:00 ti kernel: ? ceph_aes_crypt+0x3a3/0x510
-> [libceph]
-> 2026-03-10T17:08:36.865885-06:00 ti kernel: ? ceph_decode_copy+0x18/0x30 [ceph]
-> 2026-03-10T17:08:36.865887-06:00 ti kernel: parse_reply_info+0x4fe/0xab0 [ceph]
-> 2026-03-10T17:08:36.865889-06:00 ti kernel: mds_dispatch+0x899/0x2060 [ceph]
-> 2026-03-10T17:08:36.865891-06:00 ti kernel: ceph_con_process_message+0x7d/0x160
-> [libceph]
-> 2026-03-10T17:08:36.865893-06:00 ti kernel: ?
-> ceph_x_check_message_signature+0x6c/0xd0 [libceph]
-> 2026-03-10T17:08:36.865900-06:00 ti kernel: ceph_con_v1_try_read+0x1068/0x1d10
-> [libceph]
-> 2026-03-10T17:08:36.865902-06:00 ti kernel: ?
-> finish_task_switch.isra.0+0x9c/0x340
-> 2026-03-10T17:08:36.865904-06:00 ti kernel: ceph_con_workfn+0x2fe/0x660
-> [libceph]
-> 2026-03-10T17:08:36.865912-06:00 ti kernel: process_one_work+0x18b/0x370
-> 2026-03-10T17:08:36.865913-06:00 ti kernel: worker_thread+0x33a/0x480
-> 2026-03-10T17:08:36.865915-06:00 ti kernel: ? __pfx_worker_thread+0x10/0x10
-> 2026-03-10T17:08:36.865923-06:00 ti kernel: kthread+0x10b/0x220
-> 2026-03-10T17:08:36.865925-06:00 ti kernel: ? __pfx_kthread+0x10/0x10
-> 2026-03-10T17:08:36.865927-06:00 ti kernel: ret_from_fork+0x208/0x240
-> 2026-03-10T17:08:36.865929-06:00 ti kernel: ? __pfx_kthread+0x10/0x10
-> 2026-03-10T17:08:36.865931-06:00 ti kernel: ret_from_fork_asm+0x1a/0x30
-> 2026-03-10T17:08:36.865933-06:00 ti kernel: </TASK>
-> 2026-03-10T17:08:36.865936-06:00 ti kernel: Modules linked in: tcp_diag
-> inet_diag veth rbd ceph libceph netfs ebtable_filter ebtables ip6table_raw
-> ip6t_REJECT nf_reject_ipv6 ip6table_filter ip6_tables iptable_raw xt_mac
-> xt_connmark ipt_REJECT nf_reject_ipv4 xt_set xt_physdev xt_addrtype xt_multiport
-> xt_conntrack nf_conntrack nf_defrag_ipv6 nf_defrag_ipv4 xt_comment xt_tcpudp
-> xt_mark iptable_filter ip_set_hash_net ip_set sctp ip6_udp_tunnel udp_tunnel
-> rdma_ucm ib_uverbs rdma_cm iw_cm ib_cm target_core_user uio scsi_transport_iscsi
-> target_core_mod ib_core nf_tables 8021q garp mrp qrtr bonding tls softdog sunrpc
-> binfmt_misc nfnetlink_log dm_crypt sch_fq_codel intel_rapl_msr intel_rapl_common
-> intel_uncore_frequency intel_uncore_frequency_common sb_edac
-> x86_pkg_temp_thermal intel_powerclamp coretemp zram 842_decompress 842_compress
-> lz4hc_compress lz4_compress kvm_intel ipmi_ssif acpi_power_meter kvm ast
-> acpi_pad irqbypass acpi_ipmi mei_me ses ipmi_si vga16fb joydev rapl ipmi_devintf
-> input_leds enclosure intel_cstate pcspkr vgastate i2c_algo_bit mei
-> 2026-03-10T17:08:36.865946-06:00 ti kernel: scsi_transport_sas ipmi_msghandler
-> mac_hid zfs(PO) spl(O) vhost_net vhost vhost_iotlb tap msr nvme_fabrics
-> efi_pstore nfnetlink dmi_sysfs ip_tables x_tables autofs4 usbmouse xfs usbkbd
-> btrfs blake2b_generic uas usb_storage hid_generic usbhid hid raid1 dm_raid
-> raid456 async_raid6_recov async_memcpy async_pq async_xor async_tx xor raid6_pq
-> nvme nvme_core xhci_pci i2c_i801 nvme_keyring polyval_clmulni
-> ghash_clmulni_intel ixgbe i2c_mux nvme_auth ehci_pci i40e lpc_ich xfrm_algo
-> ehci_hcd mdio ahci xhci_hcd i2c_smbus ioatdma megaraid_sas libahci libie dca
-> libie_adminq wmi aesni_intel
-> 2026-03-10T17:08:36.865964-06:00 ti kernel: ---[ end trace 0000000000000000 ]---
-> 2026-03-10T17:08:36.933002-06:00 ti kernel: RIP:
-> 0010:__kmalloc_node_track_caller_noprof+0x176/0x510
-> 2026-03-10T17:08:36.935018-06:00 ti kernel: Code: 03 0f b6 91 60 cc 55 b5 e9 29
-> ff ff ff 4d 85 c0 74 91 48 85 db 74 8c bf ff ff ff ff 41 8b 45 28 49 8b 75 00 4c
-> 01 c0 48 89 c1 <48> 8b 00 49 33 85 b8 00 00 00 48 0f c9 48 31 c8 48 8d 8a 00 20
-> 00
-> 2026-03-10T17:08:36.935036-06:00 ti kernel: RSP: 0018:ffffca16a9def810 EFLAGS:
-> 00010286
-> 2026-03-10T17:08:36.936968-06:00 ti kernel: RAX: e512d51cad6e7b3f RBX:
-> ffffed3ac4045b80 RCX: e512d51cad6e7b3f
-> 2026-03-10T17:08:36.936978-06:00 ti kernel: RDX: 0000000182e28002 RSI:
-> ffffffffb66b2de0 RDI: 00000000ffffffff
-> 2026-03-10T17:08:36.937556-06:00 ti kernel: RBP: ffffca16a9def870 R08:
-> e512d51cad6e7b1f R09: 0000000000000000
-> 2026-03-10T17:08:36.937572-06:00 ti kernel: R10: ffffca16a9def890 R11:
-> 0000000000000025 R12: 0000000000000025
-> 2026-03-10T17:08:36.938808-06:00 ti kernel: R13: ffff892d8004af00 R14:
-> 00000000ffffffff R15: 0000000000000cc0
-> 2026-03-10T17:08:36.938819-06:00 ti kernel: FS: 0000000000000000(0000)
-> GS:ffff894cc9286000(0000) knlGS:0000000000000000
-> 2026-03-10T17:08:36.939981-06:00 ti kernel: CS: 0010 DS: 0000 ES: 0000 CR0:
-> 0000000080050033
-> 2026-03-10T17:08:36.939998-06:00 ti kernel: CR2: 00007f48068999a4 CR3:
-> 000000033e42a005 CR4: 00000000003726f0
-> 2026-03-10T17:08:40.218090-06:00 ti there is no tcmu-runner data available
->
-> This crash reminds me the fix [1]. Could you please check that this fix resolves
-> (or not) the issue on your side?
->
-> You reported several crashes. So, potentially, other ones can be side effects of
-> the same issue. Or, maybe, you, have several issues on your side. Let's check
-> everything step by step.
->
-> Sorry, I had crash of my system last week. So, I was out of normal routine
-> several days.
->
-> Thanks,
-> Slava.
->
-> [1]
-> https://lore.kernel.org/ceph-devel/CAOi1vP8w1si2kdL7jY3LOh35k6H9JQU6ck0B81OQFJt6eFV6qQ@mail.gmail.com/
+SGkgQWxhaW4sDQoNCk9uIFR1ZSwgMjAyNi0wMy0yNCBhdCAxNDo1NCAtMDYwMCwgQWxhaW4gQmVy
+dHJhbmQgd3JvdGU6DQo+IEhpIFNsYXZhLA0KPiANCj4gVGhhbmsgeW91IGZvciB0YWtpbmcgdGlt
+ZSB0byBsb29rIGludG8gaXQuwqAgSSBhbSBzb3JyeSBpdCB0b29rIGEgd2hpbGUgDQo+IHRvIGdl
+dCBiYWNrIHRvIHlvdSwgSSBoYWQgc29tZSBzdHJ1Z2dsZXMgYnVpbGRpbmcgdGhlIHBhdGNoZWQg
+a2VybmVsIChJIA0KPiBhbSBub3QgYSBkZXZlbG9wZXIpLsKgIEkgaGFkIHRvIGJ1aWxkwqA2LjE3
+LjEzLTItcHZlIGJlY2F1c2UgSSBjb3VsZG4ndCANCj4gbWFrZcKgNi4xNy4xMy0xLXB2ZSwgc28g
+SSBmaXJzdCBjaGVja2VkIHRoYXQgdGhlIGRlZmF1bHTCoDYuMTcuMTMtMi1wdmUgDQo+IHN0aWxs
+IGhhcyB0aGUgcHJvYmxlbSwgYW5kIHRoZW4gdGVzdGVkIHRoYXQgdGhlIHJlYnVpbHQga2VybmVs
+IHdpdGggdGhhdCANCj4gcGF0Y2ggd29ya3MuDQo+IA0KDQpFdmVuIGRldmVsb3BlcnMgc3RydWdn
+bGUgc29tZXRpbWUgd2l0aCBrZXJuZWwgYnVpbGRzLiA6KQ0KDQo+IFRoYXQgcGF0Y2ggZG9lcyBp
+bmRlZWQgZml4IGl0LsKgIEkgd2FzIGFibGUgdG8gbGlzdCBvdXQgdGhlIA0KPiBzbmFwc2hvdCBk
+aXJlY3Rvcnkgb2YgYWJvdXQgNCB0aW1lcyBhcyBtYW55IGRpcmVjdG9yaWVzIHdpdGhvdXQgYW55
+IA0KPiBwcm9ibGVtcywgYW5kIEkgcmVwZWF0ZWQgdGhhdCB0ZXN0IG1hbnnCoCB0aW1lcyBqdXN0
+IHRvIGJlIHN1cmUgaXQgd2Fzbid0IA0KPiBqdXN0IGx1Y2suDQo+IA0KDQpTb3VuZHMgcmVhbGx5
+IGdyZWF0IQ0KDQo+IEkgYW0gc29ycnkgdG8gaGF2ZSBib3RoZXJlZCB5b3Ugd2l0aCBzb21ldGhp
+bmcgdGhhdCB3YXMgYWxyZWFkeSBmaXhlZCwgSSANCj4gZGlkbid0IHNlZSB0aGF0IGNvbnZlcnNh
+dGlvbiB3aGlsZSBsb29raW5nIHRvIHNlZSBpZiB0aGlzIHdhcyBhbHJlYWR5IA0KPiByZXBvcnRl
+ZC7CoCBXb3VsZCB5b3UgbGlrZSBtZSB0byB1cGRhdGUgdGhlIGJ1ZyByZXBvcnQgdG8gc2F5IHRo
+YXQgdGhpcyANCj4gcGF0Y2ggZml4ZXMgdGhlIHByb2JsZW0gSSByZXBvcnRlZD8NCj4gDQoNCkRv
+bid0IHdvcnJ5LiBTb21ldGltZXMgYnVncyBjYW4gc3Vydml2ZSBldmVuIGFmdGVyIHRoZSBmaXgu
+IEl0J3MgYmV0dGVyIHRvDQpkb3VibGUgY2hlY2suDQoNClN1cmUuIEkgY2FuIGRvIHRoaXMuIExl
+dCB1cyBrbm93IGlmIHlvdSBzdGlsbCBjYW4gc2VlIG90aGVyIGNhbGwgdHJhY2VzIHRoYXQNCnlv
+dSd2ZSByZXBvcnRlZC4NCg0KPiBCVFcsIEkgd2FudCB0byB0YWtlIGEgbW9tZW50IHRvIHRoYW5r
+IHlvdSBmb3IgeW91ciB3b3JrLsKgIEkgYW0gc3VyZSB5b3UgDQo+IGRvbid0IGdldCB0aGFua2Vk
+IGVub3VnaCBmb3Igd29ya2luZyBoYXJkIG1ha2luZyB0aGluZ3MgYmV0dGVyIGZvciBhbGwgDQo+
+IG9mIHVzLg0KPiANCg0KVGhhbmtzLA0KU2xhdmEuDQo=
