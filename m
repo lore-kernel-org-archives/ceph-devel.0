@@ -1,91 +1,92 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A074237FF42
-	for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 19:31:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4996389447
+	for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 21:58:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774639919; cv=none; b=DUdsZOmSurgkeP/z3/i/2EH5JWEE1BSWbGXxF3Lx7c3QUh8rpNVoF2owpz6ShktHcQ0hrdYUX6nijqTdggqwH9hvQQyHrb7GyaFuBhtWZQmfukOPod7xlKaqJ2ht9qPP9Ox34FmMiKTABp1GYEpoN6BLdnq/TNkY2ODuXtAs/34=
+	t=1774648688; cv=none; b=WR/NUC2puEGVB3tfhhHUCjpQP3n6xGgu/YB3T3pXPhdGMrLjXT9kliw+Ee5NnrRNsx652OLM2nxqcUAZkTph8NTCuCrEMmFkxqer2HxypQOQW1Ge31qsCUDLr0Ybp52IJSzykX6LeEJ5pjiaYVjpDP8VnElBaNuLXdSzU3Rs4+Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774639919; c=relaxed/simple;
-	bh=x4+BqjXP11AfUUwh3LWO+/WyCVx0H7CmB4sF6qI9dko=;
+	s=arc-20240116; t=1774648688; c=relaxed/simple;
+	bh=LzATXYW+mc/fuACZ24wTN4X7oF3qEGacyYCW+C4ZrHk=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=oME20pXC+yQ8VwovGKUwxg2Ciq96m1Wt2vKwoh387hzYRBC2mcvhlJw+ODvFRGpiPXqcpdXS7sYW8iH3NIch9NXh8++DvsbJSuK01jQwaSfosIxSY8mPlH/BecTcA1DFo6ECd5ECTP2f6Mu3XpCWE8rw2DxptNqvWA2gouZclfM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Jpmd4vq7; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=RyqsXAEs; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:MIME-Version; b=hbv9dhr1mUN8KsUuIA4xhWybJDPTT9yC/gf5DEadnnvFDqcc+kxwrYiyDhsMYjLwcYopoP6RjfzjpvL5H5L5a109bAtMBkv/wtlqBPTT3jRCuoFktuHwqNc/C7Er4283aWXuLnYsawMYuxQgALqaua+3OqMI/qD4Oeb0vmQzvms=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=c9djB8Bf; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=HetAz8TU; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Jpmd4vq7";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="RyqsXAEs"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="c9djB8Bf";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="HetAz8TU"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1774639913;
+	s=mimecast20190719; t=1774648685;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=gmebsfF1GIj0IbrIcp0Kqgqyk2tYg+hHzhcW6Lvc0bI=;
-	b=Jpmd4vq7bMIk4D4cH3a/BGk93lMsBRYqUA3Mhj7Q3sOj7IqWsFc6r0ouDAGKj1zkWuUEKf
-	vUbDxQoRwFdr2GbLH15UHAkOCFrbzHYzFS2d23fEykWMbTeAMNZ3EGhiBt9xKWWuSOSR/J
-	YVL0/wMl1gWN23sjHOkl0xYjTmmGHvg=
-Received: from mail-yx1-f72.google.com (mail-yx1-f72.google.com
- [74.125.224.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=XHVrz8aem6/a6o9MtVoEU9Cw1uMMvnBHVyohXKaBn3k=;
+	b=c9djB8BfQwCnJ03IWXdPSsI8LUIxboNWrg9kgyQcrtImM/82SIqo0vQr5YWxuqsvBHp/G8
+	vawAz8OEBM4N62v/aMCBQ6cKMMa57hl9NH0+6pzEsZBb6vuYyEjVuSTUy+nnn1CzBdupHk
+	829QhCPY7Rzh4Wcgcoyy43ADW/Uxv/s=
+Received: from mail-yx1-f69.google.com (mail-yx1-f69.google.com
+ [74.125.224.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-593-_g2pGoKoNDmYYGzCfQZm5A-1; Fri, 27 Mar 2026 15:31:49 -0400
-X-MC-Unique: _g2pGoKoNDmYYGzCfQZm5A-1
-X-Mimecast-MFC-AGG-ID: _g2pGoKoNDmYYGzCfQZm5A_1774639909
-Received: by mail-yx1-f72.google.com with SMTP id 956f58d0204a3-64ef16112f4so5846054d50.2
-        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 12:31:49 -0700 (PDT)
+ us-mta-263-7ImW1Ob9OZmw426bxAjYzw-1; Fri, 27 Mar 2026 17:58:04 -0400
+X-MC-Unique: 7ImW1Ob9OZmw426bxAjYzw-1
+X-Mimecast-MFC-AGG-ID: 7ImW1Ob9OZmw426bxAjYzw_1774648684
+Received: by mail-yx1-f69.google.com with SMTP id 956f58d0204a3-64edc582406so3270189d50.0
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 14:58:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1774639909; x=1775244709; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1774648684; x=1775253484; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=gmebsfF1GIj0IbrIcp0Kqgqyk2tYg+hHzhcW6Lvc0bI=;
-        b=RyqsXAEszlU6xR2A+M0Y9A+M1lEvjkbS4LrP9/6C50VrCsWIdlIIA6ibv6dxqCeTqg
-         7Bbik+Jn5udpku1GZIo42hB8HhChURfY7qpxgPflOFSLvX4py8WVgEEWtDMfo7F+Mv01
-         bu/CcJrJOoWRiFNmU5CTEBzAxxVdaGsfpPI42cZ1inAry4ReuXWYsuF5zF/5s0uS7QRu
-         IbNoO8Fx1o3lfme1bHekMqgyYtQg6geGaak4Cj4CA6cJYon07uhh5y5DZnArXYC0J9Ag
-         wZPNTmvzrDt1AjNSJyNNKIky1gR5qFQYz2LKOugVn3B7UNGutyAovIWQ3x47KENGYoJm
-         8d3Q==
+        bh=XHVrz8aem6/a6o9MtVoEU9Cw1uMMvnBHVyohXKaBn3k=;
+        b=HetAz8TUKfSX03MpBhTu836y1cCV2Bcis11wt6KjbKXZ8N+Z3j3IU6sNYI4aB3oy82
+         MeOBOMeiM5mPmqE1n9AGxcA4ROBZMpS+r4td6sS6kTevat1bAvOeLyjahsx3VUCbIQv1
+         n+CxcKkMbAr3Wg6IS66p//bw+8OLJPZZccd0uRMDJZItmYgdBdMEI2glednMXpJSoZod
+         mKg82CsdudfmH/Y7GbOG401TmoMu9hnrdiAwUYo+xVIsRyhNel/5/hYWTAhBsQBNADyL
+         8kBw7wtcr2FLig6KF4etRODN2ZHUYg44x+tfzrIKmbo7CXgK067tE3RnwqvVO+rJmtFo
+         lvVg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774639909; x=1775244709;
+        d=1e100.net; s=20251104; t=1774648684; x=1775253484;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=gmebsfF1GIj0IbrIcp0Kqgqyk2tYg+hHzhcW6Lvc0bI=;
-        b=SQWAzprZ4gilPM/iPpFEHpV4TSP7/Y2G0P4AAPsOqVxFPPJyLt7WFYnsO+Hr1o0a3s
-         jWLde9vooTa0Rq1IWiMWNR6Bq3YWnXXrEx/UKVoiFVmgrstqme+OKDW/lGJ9x6zSgQww
-         B8b4pBIPBZ7p5X1sc1NU0pWJsaX47ceVZuMVQVUKTt7n+F88qb9xw5Q3s/ohrfsWHbT3
-         FJlkZb2FAFGUj80egqHrfc2989JDNa8xWD6O65eD5tUAbd/RXHll1cvANyNWRbAxzMKh
-         SWdgYU5XR3JV+cj7SfgFrfibj91yNoWd0yq/W/cBglUthno2862NseheC2QcOgEwx1Nf
-         e9Tw==
-X-Forwarded-Encrypted: i=1; AJvYcCXwQw0Lduo0YWIuANWsELFEBXqJTYnafGnxRRaJnAwHC2diS5LGP6cSXUpB01Ubxoo3F+aVgKuV4Dk9@vger.kernel.org
-X-Gm-Message-State: AOJu0Yylt7UyK8AUsBALG63bF1Pi52MJm9wcy+KwZHWJu1VfNzpRqAYW
-	obz3QOE8+yuHO0/sygmhSPecJKxa2pS9cJEEoTrvGPA5d4kG6HFyl+68A+i9g/+knvcU9taENqD
-	UpC2ew55WbxnyxKV5i9UjwUUK70Xmfdl17BqxA+QDwN8RNey3aomvc6gTeEYoYpM=
-X-Gm-Gg: ATEYQzyd9YcVITuvXnnIikE1l8F+xXuaEkBkon8lLI+/zMS8DGKMYO2vMzobZ702Mc2
-	VlWAmVyUoJgm73RGNekcPdFwiTg12JDlArupIZD2hKwg90RJ+mkZJlz7GiClBAX7rXYb9O3cSV/
-	z7UcfJePTTWvBTywCMnOzb/VGtrRpB+367AycQODLSYJQOG37ontgEzRm/NJIs0nuOLyLmBkPXi
-	hWRgTV39kw+nMu+xg8irYR1MVdJ1vlYKV1N+o7Ujz5K7wocQpmgV1uQ8QRQfr+slUXPcjgfpBgf
-	EIRYd0p2X/uVKE0Io52SeD3IFPg0th9H1y0i9uhVZ0nJyJm7oZRca7VnlOQCt9ZlWSWJ8S5Bm4C
-	S+4LYbCb8gjhEEfJ3x1IOmmE4qsANvEXj69xMVdbfLLyMGeoCyDgB
-X-Received: by 2002:a53:ef05:0:b0:64e:b33b:c6bb with SMTP id 956f58d0204a3-64ff71c1d26mr3111558d50.5.1774639909191;
-        Fri, 27 Mar 2026 12:31:49 -0700 (PDT)
-X-Received: by 2002:a53:ef05:0:b0:64e:b33b:c6bb with SMTP id 956f58d0204a3-64ff71c1d26mr3111513d50.5.1774639908556;
-        Fri, 27 Mar 2026 12:31:48 -0700 (PDT)
+        bh=XHVrz8aem6/a6o9MtVoEU9Cw1uMMvnBHVyohXKaBn3k=;
+        b=WE2Apzc4DqYlDfHSm0XTFd4aCJigw+OQ/K8zP9xeyVUJu5r/HQMdaCprIDZICptoGH
+         r5ZBjGANsWNRcZSrDxFNrQgvSlAD35GDBABRIVaIF62SFm5F1RKAs9WBQ4D3n+d8TwyR
+         zLCKbVUlZrbNuqpDJgYcz52qWUB99FIAwPD+i2xtelX1U1Xx6PQsrI7ojmu5O+uPXH1c
+         /i0eeXzDQyUij0TgnGj6pHR9Lw5CE8EafQ4gW/iIwJgxTDYsT+oyCZXV8hJuLaKlIjZn
+         ljFI7OvJuLoINztr84BZZy2k9s8jn/9oywWSgpyoPsaRHuFjAVVI8/xIxEQERrghowZr
+         UPIw==
+X-Forwarded-Encrypted: i=1; AJvYcCWfCNc42mzGojM6+liZANOO6b8rdMiBNHnHahcTRJwcrurUG//RrfylL04anpi8rtdCJU1tJDUoTz8j@vger.kernel.org
+X-Gm-Message-State: AOJu0YyJSygXACsKI8GjBgRkKiLUJ20scMxejWGW6h4DOGOtAGuOe87x
+	8utW35WfQaO+nDBbJ6rfYA5qyqSo52W2fnMkTIKo4lioHwwAnjNkE6J/J5ay/ikDUeUnSEhcAOG
+	tFHOq/ZLy4sdnPwt238p9DpCp+1jaPjFE3KjhNUlYK7OojGGfE2lzpDfNvh8NJ+MOrJSh1N0=
+X-Gm-Gg: ATEYQzxg1PlYIim/MuK5UlBuF09+EXl3rM3SEqoksqcMqZ1K2cseHLPf+y5BRsJPEwJ
+	gmJ4iqK4EhSXLRQngLphjRSPkJ3lrtVxC8bGC5FKf/TDTNs6P1zbHCRrz2FfE42VcGdLDJ+C9u0
+	OGfvfXZm2SIo6fNwVajzwR8/DZcQxdzao/GrbuILhzsojIbIrjmaILXNF3j+13zxUXuy4Rjl+yi
+	yF95uNzFPO5yiMkpxWUk53ppDIAWwvTtyQWauxA+NO4+deMT/x68aahnjwCqGnraN83S+oFvI69
+	JvGJR2/CAG4/lCWGJwlrDAkiaEgJ0VkviYLtkyDZV99dDZE2EPpUV6jMh6b+pRKoz8xl07uIzzz
+	SpTzfMQwvzO04P/jdG0juq1jLBOmt5HdURpykiKFgqA4XnETeN9BJ
+X-Received: by 2002:a05:690c:6d84:b0:79a:57a2:ed75 with SMTP id 00721157ae682-79bde0105e3mr44985027b3.34.1774648683642;
+        Fri, 27 Mar 2026 14:58:03 -0700 (PDT)
+X-Received: by 2002:a05:690c:6d84:b0:79a:57a2:ed75 with SMTP id 00721157ae682-79bde0105e3mr44984807b3.34.1774648683219;
+        Fri, 27 Mar 2026 14:58:03 -0700 (PDT)
 Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-64ef58b8707sm3254860d50.4.2026.03.27.12.31.47
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-79cba95b868sm1227907b3.45.2026.03.27.14.58.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Mar 2026 12:31:48 -0700 (PDT)
-Message-ID: <110e26d0e6d0f594fc294a9ffda2b17e143b3566.camel@redhat.com>
-Subject: Re: [PATCH 01/10] ceph: convert inode flags to named bit positions
+        Fri, 27 Mar 2026 14:58:02 -0700 (PDT)
+Message-ID: <b5efea03a044228464faee0aebc7d38386b56789.camel@redhat.com>
+Subject: Re: [PATCH 02/10] ceph: add bounded timeout and diagnostics to
+ wait_caps_flush()
 From: Viacheslav Dubeyko <vdubeyko@redhat.com>
 To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, linux-fsdevel@vger.kernel.org
-Date: Fri, 27 Mar 2026 12:31:46 -0700
-In-Reply-To: <20260327143045.1393612-2-amarkuze@redhat.com>
+Date: Fri, 27 Mar 2026 14:58:00 -0700
+In-Reply-To: <20260327143045.1393612-3-amarkuze@redhat.com>
 References: <20260327143045.1393612-1-amarkuze@redhat.com>
-	 <20260327143045.1393612-2-amarkuze@redhat.com>
+	 <20260327143045.1393612-3-amarkuze@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.58.3 (3.58.3-1.fc43app2) 
@@ -97,228 +98,175 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Fri, 2026-03-27 at 14:30 +0000, Alex Markuze wrote:
-> Define all CEPH_I_* flags as named bit positions with derived bitmask
-> values so the Ceph client can use test_bit(), set_bit(), and clear_bit()
-> consistently on inode error and state flags. This prepares the later
-> reset path to use atomic bit operations on the file-lock error state.
+> Convert wait_caps_flush() from an unbounded wait into a bounded loop that
+> periodically dumps outstanding flush state when progress stalls. This
+> preserves the original data-integrity semantics while making hung cap
+> flushes diagnosable during reset development and validation.
 >=20
-> Co-authored-by: Viacheslav Dubeyko <vdubeyko@redhat.com>
 > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 > ---
->  fs/ceph/file.c       |  2 +-
->  fs/ceph/locks.c      |  8 +++----
->  fs/ceph/mds_client.c |  3 ++-
->  fs/ceph/mds_client.h |  2 +-
->  fs/ceph/super.h      | 54 +++++++++++++++++++++++++++-----------------
->  5 files changed, 40 insertions(+), 29 deletions(-)
+>  fs/ceph/caps.c       |  7 +++++++
+>  fs/ceph/mds_client.c | 47 ++++++++++++++++++++++++++++++++++++++++++--
+>  fs/ceph/super.h      |  2 ++
+>  3 files changed, 54 insertions(+), 2 deletions(-)
 >=20
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 66bbf6d517a9..aa9ee283dfda 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -579,7 +579,7 @@ static void wake_async_create_waiters(struct inode *i=
-node,
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index d51454e995a8..be030fb8e864 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -1648,6 +1648,7 @@ static void __ceph_flush_snaps(struct ceph_inode_in=
+fo *ci,
 > =20
->  	spin_lock(&ci->i_ceph_lock);
->  	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
-> -		clear_and_wake_up_bit(CEPH_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
-> +		clear_and_wake_up_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
+>  		spin_lock(&mdsc->cap_dirty_lock);
+>  		capsnap->cap_flush.tid =3D ++mdsc->last_cap_flush_tid;
+> +		capsnap->cap_flush.ci =3D ci;
+>  		list_add_tail(&capsnap->cap_flush.g_list,
+>  			      &mdsc->cap_flush_list);
+>  		if (oldest_flush_tid =3D=3D 0)
+> @@ -1846,6 +1847,9 @@ struct ceph_cap_flush *ceph_alloc_cap_flush(void)
+>  		return NULL;
 > =20
->  		if (ci->i_ceph_flags & CEPH_I_ASYNC_CHECK_CAPS) {
->  			ci->i_ceph_flags &=3D ~CEPH_I_ASYNC_CHECK_CAPS;
-> diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-> index dd764f9c64b9..2f21574dfb99 100644
-> --- a/fs/ceph/locks.c
-> +++ b/fs/ceph/locks.c
-> @@ -58,7 +58,7 @@ static void ceph_fl_release_lock(struct file_lock *fl)
->  	if (atomic_dec_and_test(&ci->i_filelock_ref)) {
->  		/* clear error when all locks are released */
->  		spin_lock(&ci->i_ceph_lock);
-> -		ci->i_ceph_flags &=3D ~CEPH_I_ERROR_FILELOCK;
-> +		clear_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
->  		spin_unlock(&ci->i_ceph_lock);
->  	}
->  	fl->fl_u.ceph.inode =3D NULL;
-> @@ -272,9 +272,8 @@ int ceph_lock(struct file *file, int cmd, struct file=
-_lock *fl)
->  		wait =3D 1;
-> =20
->  	spin_lock(&ci->i_ceph_lock);
-> -	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
-> +	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags))
->  		err =3D -EIO;
-> -	}
->  	spin_unlock(&ci->i_ceph_lock);
->  	if (err < 0) {
->  		if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(fl))
-> @@ -332,9 +331,8 @@ int ceph_flock(struct file *file, int cmd, struct fil=
-e_lock *fl)
->  	doutc(cl, "fl_file: %p\n", fl->c.flc_file);
-> =20
->  	spin_lock(&ci->i_ceph_lock);
-> -	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
-> +	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags))
+>  	cf->is_capsnap =3D false;
+> +	cf->ci =3D NULL;
+> +	cf->tid =3D 0;
+> +	cf->wake =3D false;
 
-There are several other places of using CEPH_I_ERROR_FILELOCK. I believe we=
- need
-to convert that cases too:
+It looks like cf->caps needs initialization too. Am I correct?
+The dump_cap_flushes() unconditionally calls ceph_cap_string(cf->caps).
 
-[1] https://elixir.bootlin.com/linux/v7.0-rc5/source/fs/ceph/caps.c#L2832
-[2] https://elixir.bootlin.com/linux/v7.0-rc5/source/fs/ceph/caps.c#L5083
-[3] https://elixir.bootlin.com/linux/v7.0-rc5/source/fs/ceph/mds_client.c#L=
-4696
-
->  		err =3D -EIO;
-> -	}
->  	spin_unlock(&ci->i_ceph_lock);
->  	if (err < 0) {
->  		if (lock_is_unlock(fl))
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 23b6d00643c9..12f1b57d4b1c 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -3610,7 +3610,8 @@ static void __do_request(struct ceph_mds_client *md=
-sc,
-> =20
->  		spin_lock(&ci->i_ceph_lock);
->  		cap =3D ci->i_auth_cap;
-> -		if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE && mds !=3D cap->mds) {
-> +		if (test_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags) &&
-> +		    mds !=3D cap->mds) {
->  			doutc(cl, "session changed for auth cap %d -> %d\n",
->  			      cap->session->s_mds, session->s_mds);
-> =20
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index 0428a5eaf28c..e91a199d56fd 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -658,7 +658,7 @@ static inline int ceph_wait_on_async_create(struct in=
-ode *inode)
->  {
->  	struct ceph_inode_info *ci =3D ceph_inode(inode);
-> =20
-> -	return wait_on_bit(&ci->i_ceph_flags, CEPH_ASYNC_CREATE_BIT,
-> +	return wait_on_bit(&ci->i_ceph_flags, CEPH_I_ASYNC_CREATE_BIT,
->  			   TASK_KILLABLE);
+>  	return cf;
 >  }
 > =20
+> @@ -1931,6 +1935,7 @@ static u64 __mark_caps_flushing(struct inode *inode=
+,
+>  	doutc(cl, "%p %llx.%llx now !dirty\n", inode, ceph_vinop(inode));
+> =20
+>  	swap(cf, ci->i_prealloc_cap_flush);
+> +	cf->ci =3D ci;
+>  	cf->caps =3D flushing;
+>  	cf->wake =3D wake;
+> =20
+> @@ -3826,6 +3831,8 @@ static void handle_cap_flush_ack(struct inode *inod=
+e, u64 flush_tid,
+>  	bool wake_ci =3D false;
+>  	bool wake_mdsc =3D false;
+> =20
+> +	ci->i_last_cap_flush_ack =3D flush_tid;
+
+Do we have race condition here with dump_cap_flushes()? Maybe,
+READ_ONCE/WRITE_ONCE pair make sense?
+
+> +
+>  	list_for_each_entry_safe(cf, tmp_cf, &ci->i_cap_flush_list, i_list) {
+>  		/* Is this the one that was flushed? */
+>  		if (cf->tid =3D=3D flush_tid)
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 12f1b57d4b1c..d70c0b669b75 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -27,6 +27,8 @@
+>  #include <trace/events/ceph.h>
+> =20
+>  #define RECONNECT_MAX_SIZE (INT_MAX - PAGE_SIZE)
+> +#define CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC 60
+> +#define CEPH_CAP_FLUSH_MAX_DUMP_COUNT 5
+> =20
+>  /*
+>   * A cluster of MDS (metadata server) daemons is responsible for
+> @@ -2285,6 +2287,40 @@ static int check_caps_flush(struct ceph_mds_client=
+ *mdsc,
+>  	return ret;
+>  }
+> =20
+> +/*
+> + * Dump pending cap flushes for diagnostic purposes.
+> + *
+> + * cf->ci is safe to dereference here: the inode remains alive while its
+> + * ceph_cap_flush is on i_cap_flush_list, which holds a reference.
+> + */
+> +static void dump_cap_flushes(struct ceph_mds_client *mdsc, u64 want_tid)
+> +{
+> +	struct ceph_client *cl =3D mdsc->fsc->client;
+> +	struct ceph_cap_flush *cf;
+> +
+> +	pr_info_client(cl, "still waiting for cap flushes through %llu:\n",
+> +		       want_tid);
+> +	spin_lock(&mdsc->cap_dirty_lock);
+> +	list_for_each_entry(cf, &mdsc->cap_flush_list, g_list) {
+
+So, what's about inode lifetime here? The iteration is over the global
+cap_flush_list (via g_list), not i_cap_flush_list. Are we safe here?
+
+> +		if (cf->tid > want_tid)
+> +			break;
+> +		if (!cf->ci) {
+> +			pr_info_client(cl,
+> +				       "(null ci) %s tid=3D%llu wake=3D%d%s\n",
+> +				       ceph_cap_string(cf->caps), cf->tid,
+> +				       cf->wake,
+> +				       cf->is_capsnap ? " is_capsnap" : "");
+> +			continue;
+> +		}
+> +		pr_info_client(cl, "%llx:%llx %s %llu %llu %d%s\n",
+> +			       ceph_vinop(&cf->ci->netfs.inode),
+> +			       ceph_cap_string(cf->caps), cf->tid,
+> +			       cf->ci->i_last_cap_flush_ack, cf->wake,
+> +			       cf->is_capsnap ? " is_capsnap" : "");
+> +	}
+> +	spin_unlock(&mdsc->cap_dirty_lock);
+> +}
+> +
+>  /*
+>   * flush all dirty inode data to disk.
+>   *
+> @@ -2294,11 +2330,18 @@ static void wait_caps_flush(struct ceph_mds_clien=
+t *mdsc,
+>  			    u64 want_flush_tid)
+>  {
+>  	struct ceph_client *cl =3D mdsc->fsc->client;
+> +	int i =3D 0;
+> +	long ret;
+> =20
+>  	doutc(cl, "want %llu\n", want_flush_tid);
+> =20
+> -	wait_event(mdsc->cap_flushing_wq,
+> -		   check_caps_flush(mdsc, want_flush_tid));
+> +	do {
+> +		ret =3D wait_event_timeout(mdsc->cap_flushing_wq,
+> +			   check_caps_flush(mdsc, want_flush_tid),
+> +			   CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC * HZ);
+> +		if (ret =3D=3D 0 && i++ < CEPH_CAP_FLUSH_MAX_DUMP_COUNT)
+> +			dump_cap_flushes(mdsc, want_flush_tid);
+> +	} while (ret =3D=3D 0);
+> =20
+>  	doutc(cl, "ok, flushed thru %llu\n", want_flush_tid);
+>  }
 > diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 29a980e22dc2..272c287836c1 100644
+> index 272c287836c1..5de1e5923b63 100644
 > --- a/fs/ceph/super.h
 > +++ b/fs/ceph/super.h
-> @@ -655,23 +655,35 @@ static inline struct inode *ceph_find_inode(struct =
-super_block *sb,
+> @@ -238,6 +238,7 @@ struct ceph_cap_flush {
+>  	bool is_capsnap; /* true means capsnap */
+>  	struct list_head g_list; // global
+>  	struct list_head i_list; // per inode
+> +	struct ceph_inode_info *ci;
+>  };
+> =20
 >  /*
->   * Ceph inode.
->   */
-> -#define CEPH_I_DIR_ORDERED	(1 << 0)  /* dentries in dir are ordered */
-> -#define CEPH_I_FLUSH		(1 << 2)  /* do not delay flush of dirty metadata =
-*/
-> -#define CEPH_I_POOL_PERM	(1 << 3)  /* pool rd/wr bits are valid */
-> -#define CEPH_I_POOL_RD		(1 << 4)  /* can read from pool */
-> -#define CEPH_I_POOL_WR		(1 << 5)  /* can write to pool */
-> -#define CEPH_I_SEC_INITED	(1 << 6)  /* security initialized */
-> -#define CEPH_I_KICK_FLUSH	(1 << 7)  /* kick flushing caps */
-> -#define CEPH_I_FLUSH_SNAPS	(1 << 8)  /* need flush snapss */
-> -#define CEPH_I_ERROR_WRITE	(1 << 9) /* have seen write errors */
-> -#define CEPH_I_ERROR_FILELOCK	(1 << 10) /* have seen file lock errors */
-> -#define CEPH_I_ODIRECT_BIT	(11) /* inode in direct I/O mode */
-> -#define CEPH_I_ODIRECT		(1 << CEPH_I_ODIRECT_BIT)
-> -#define CEPH_ASYNC_CREATE_BIT	(12)	  /* async create in flight for this =
-*/
-> -#define CEPH_I_ASYNC_CREATE	(1 << CEPH_ASYNC_CREATE_BIT)
-> -#define CEPH_I_SHUTDOWN		(1 << 13) /* inode is no longer usable */
-> -#define CEPH_I_ASYNC_CHECK_CAPS	(1 << 14) /* check caps immediately afte=
-r async
-> -					     creating finishes */
-> +#define CEPH_I_DIR_ORDERED_BIT		(0)  /* dentries in dir are ordered */
+> @@ -443,6 +444,7 @@ struct ceph_inode_info {
+>  	struct ceph_snap_context *i_head_snapc;  /* set if wr_buffer_head > 0 o=
+r
+>  						    dirty|flushing caps */
+>  	unsigned i_snap_caps;           /* cap bits for snapped files */
+> +	u64 i_last_cap_flush_ack;		/* latest cap flush_ack tid for this inode *=
+/
 
-Somehow, we skip the bit 1. I assume we need to have some comment here why =
-it
-was skipped.
-
-As far as I can see, bit 1 was CEPH_I_NODELAY, which was removed by commit:
-
-a0d93e327fc4 ("ceph: remove delay check logic from ceph_check_caps()")
-
-  -#define CEPH_I_NODELAY  (1 << 1)  /* do not delay cap release */        =
-   =20
-                                                                           =
-                                                   =20
-  The layout just before removal was:                                      =
-   =20
-  #define CEPH_I_DIR_ORDERED  (1 << 0)
-  #define CEPH_I_NODELAY      (1 << 1)  /* removed */                      =
-   =20
-  #define CEPH_I_FLUSH        (1 << 2)                                     =
-   =20
-  #define CEPH_I_POOL_PERM    (1 << 3)
-  ...
-
-When CEPH_I_NODELAY was deleted, the remaining flags were not renumbered,
-leaving bit 1 permanently vacant.
-
-So, what could we do here? Simply add comment?
+It looks like i_last_cap_flush_ack is not initialized properly anywhere.
 
 Thanks,
 Slava.
 
-> +#define CEPH_I_FLUSH_BIT		(2)  /* do not delay flush of dirty metadata *=
-/
-> +#define CEPH_I_POOL_PERM_BIT		(3)  /* pool rd/wr bits are valid */
-> +#define CEPH_I_POOL_RD_BIT		(4)  /* can read from pool */
-> +#define CEPH_I_POOL_WR_BIT		(5)  /* can write to pool */
-> +#define CEPH_I_SEC_INITED_BIT		(6)  /* security initialized */
-> +#define CEPH_I_KICK_FLUSH_BIT		(7)  /* kick flushing caps */
-> +#define CEPH_I_FLUSH_SNAPS_BIT		(8)  /* need flush snapss */
-> +#define CEPH_I_ERROR_WRITE_BIT		(9)  /* have seen write errors */
-> +#define CEPH_I_ERROR_FILELOCK_BIT	(10) /* have seen file lock errors */
-> +#define CEPH_I_ODIRECT_BIT		(11) /* inode in direct I/O mode */
-> +#define CEPH_I_ASYNC_CREATE_BIT		(12) /* async create in flight for this=
- */
-> +#define CEPH_I_SHUTDOWN_BIT		(13) /* inode is no longer usable */
-> +#define CEPH_I_ASYNC_CHECK_CAPS_BIT	(14) /* check caps after async creat=
-ing finishes */
-> +
-> +#define CEPH_I_DIR_ORDERED		(1 << CEPH_I_DIR_ORDERED_BIT)
-> +#define CEPH_I_FLUSH			(1 << CEPH_I_FLUSH_BIT)
-> +#define CEPH_I_POOL_PERM		(1 << CEPH_I_POOL_PERM_BIT)
-> +#define CEPH_I_POOL_RD			(1 << CEPH_I_POOL_RD_BIT)
-> +#define CEPH_I_POOL_WR			(1 << CEPH_I_POOL_WR_BIT)
-> +#define CEPH_I_SEC_INITED		(1 << CEPH_I_SEC_INITED_BIT)
-> +#define CEPH_I_KICK_FLUSH		(1 << CEPH_I_KICK_FLUSH_BIT)
-> +#define CEPH_I_FLUSH_SNAPS		(1 << CEPH_I_FLUSH_SNAPS_BIT)
-> +#define CEPH_I_ERROR_WRITE		(1 << CEPH_I_ERROR_WRITE_BIT)
-> +#define CEPH_I_ERROR_FILELOCK		(1 << CEPH_I_ERROR_FILELOCK_BIT)
-> +#define CEPH_I_ODIRECT			(1 << CEPH_I_ODIRECT_BIT)
-> +#define CEPH_I_ASYNC_CREATE		(1 << CEPH_I_ASYNC_CREATE_BIT)
-> +#define CEPH_I_SHUTDOWN			(1 << CEPH_I_SHUTDOWN_BIT)
-> +#define CEPH_I_ASYNC_CHECK_CAPS		(1 << CEPH_I_ASYNC_CHECK_CAPS_BIT)
 > =20
->  /*
->   * Masks of ceph inode work.
-> @@ -691,18 +703,18 @@ static inline struct inode *ceph_find_inode(struct =
-super_block *sb,
->   */
->  static inline void ceph_set_error_write(struct ceph_inode_info *ci)
->  {
-> -	if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
-> +	if (!test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
->  		spin_lock(&ci->i_ceph_lock);
-> -		ci->i_ceph_flags |=3D CEPH_I_ERROR_WRITE;
-> +		set_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
->  		spin_unlock(&ci->i_ceph_lock);
->  	}
->  }
-> =20
->  static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
->  {
-> -	if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
-> +	if (test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
->  		spin_lock(&ci->i_ceph_lock);
-> -		ci->i_ceph_flags &=3D ~CEPH_I_ERROR_WRITE;
-> +		clear_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
->  		spin_unlock(&ci->i_ceph_lock);
->  	}
->  }
+>  	unsigned long i_last_rd;
+>  	unsigned long i_last_wr;
 
