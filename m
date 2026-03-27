@@ -1,89 +1,74 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 906C53ED123
-	for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 14:31:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2EA2349B0A
+	for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 16:23:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774621886; cv=none; b=gLb1ErtlTLMGS+bc17oNnOpTdDtyJir22bkOuidVDfYGwtjnkmklSWJUvrFaCxd2fwVLOe7hNrI8CtjHLLvW3rVA+jg7VY09KlIRSWAdyH3BtPTdJ3KXzlLFP8kvMS9Bi1wb/9chCU2wEaUai+tPS6Lau9MiF9KGVtAartR2XDU=
+	t=1774628609; cv=none; b=pxWP1ur8flJxAvCYCX5wOLQIPu4o6EdXii63x5EQH2lMOBJi6YaDFaXhLWbCPPUuwOf0vCHNjlF8kOiuaQuwQTjxlk7gGfiLtm8DPeTFkqhfS7luVQFr/uz2NuwFZVB+uCLnE6AqSjyzqNCff+yrfGu2ZHEAxm4qwoGCZbXG6IE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774621886; c=relaxed/simple;
-	bh=wTWPsLZLjTdHXqVGzL8ldy8dTc6aNnVtgNcFoUiBjiE=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=swboesqDOA+V2X6f6fkp7g//AydgCAK+Go8Yuz7mmBqQr5gKQfTVCXiR63omIPFzu2LRL03Msoxki7y3ftTR0MUexb72Moxaiaw7OhsTV11AowBeyPwignkJo7+0O9+bp4QZccB8GgrQFaiDiuWxefQR1quV67LoEbgYD5uRyGw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UoU+JPku; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=BTreVxpc; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1774628609; c=relaxed/simple;
+	bh=kM6h7buYmvPWe3WeN4m+xIms9TRX4kj6vu1ECi4LQ8Q=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=MIBWukQa6XkoyqQeCKuB5OwAMQW+PkbIPvbuiqP7tnawZjG4WfkTTZJ7cTRVouYH6xHTqKD7WExgWxMg4tZfwfJG+X1gifIKUEg3OyPt/lm4ROzlsGR/doIuKv6ct9tzllJtn14SW5PnXksK8QBBMhhxy8sSrE+lsKughyi33ns=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=dFlUZDKm; arc=none smtp.client-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UoU+JPku";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="BTreVxpc"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1774621883;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=wKRCSGhjp3JJfBN4HsapCNygZwEljeRSphUGPKITJJU=;
-	b=UoU+JPku2tAITz7F3jb9XiqUUdk7nsTEowNe7xdLrU2JRIl9Y97TV0ntgz4pwp/PiTJ187
-	HoThsgc60wnwIMVDb0BRJOMrjcwe0YMH52sid9/cvxJn+ECnCU3CI1VD15ghKFr4tY1jcQ
-	cdu0qtORgiND/wpgDI+yV+gQQPNVE0Q=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-594-ZZjvZr6-PRCDP3bCngurVQ-1; Fri, 27 Mar 2026 10:31:21 -0400
-X-MC-Unique: ZZjvZr6-PRCDP3bCngurVQ-1
-X-Mimecast-MFC-AGG-ID: ZZjvZr6-PRCDP3bCngurVQ_1774621881
-Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-8cfd8067379so516974585a.3
-        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 07:31:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="dFlUZDKm"
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-48541edecf9so28790785e9.1
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Mar 2026 09:23:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1774621881; x=1775226681; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1774628606; x=1775233406; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=wKRCSGhjp3JJfBN4HsapCNygZwEljeRSphUGPKITJJU=;
-        b=BTreVxpceJHmFPnl64WPbCFG0UwpPLzqvY3RjyQ7uKoiGrVSQg96gJNyqoKH3Lf+c7
-         Rpro7TG2ULGY8z5fC/5cfj4E/uf348mccD8ex0kMM5+FSHDYRRh9M5Lh9PWvp6tRXXH7
-         X+3AGmt8rOf9fD2CAxQg02uxkMJmSy0xsBywusHutYs19V/gslhIRIrc+Cht8P0ASq1J
-         AS6ofq3v25i8ytPPRZI02IO1z3klKfP4dTTDeZN+B37051zU0UUztahTofQ/gh1Xwj3k
-         y32BNh5j92JYunYPE6zoxtxyMZK/NUjvgBJThVDTGLcdgsh8EAT0YLDMYjwta0EUXXOS
-         yH+Q==
+        bh=Li+MhdhKR/VteHKksntf5bm/t2yJMb4kcBZQfykWGTU=;
+        b=dFlUZDKmBRY1fmnnK16YeViu7Zb+gj1Z2dR46ickp8ZY5iSqmX3bwV8lQYjpS9VOgR
+         sfUPMUTTholfEsJ7EBlVJxmlNFt3uATsJ5eBKD3/zXbnOpieY7oHjLooLdeaOK7Yc6P7
+         XvyR9Feg79e3c8dKcv9oVTwms8bUmOnMtThKvqHK0K9pf7Y+jU6nqCbt0Ut4Sy0yyOX8
+         bXDl6cvtKtJWxgrgTuqF2UbSYvem+jVADrqOLVQLipJX49kdXART1WIfJMiUeSnpvz9T
+         UZ4p7Xu1AUimd+GlMElEBn0NWHMv8UkSimpyCL+7gU9+C/gqRUKxYUEbd7Dh4Vt4AftS
+         VOcg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774621881; x=1775226681;
+        d=1e100.net; s=20251104; t=1774628606; x=1775233406;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=wKRCSGhjp3JJfBN4HsapCNygZwEljeRSphUGPKITJJU=;
-        b=rSIH/j47xw3Zs+yyUJxm6R/VAkQOi70we0f96fmudT4DiWNXOU74AYey5rTNRo8VAZ
-         7ymHPo4Kz0QyhGgqJ802h7OSld+WULJT3GKxgd18vmS++dzBYZ0bIYrL46xEjK8jxVM6
-         w9D/nhQoWc/m+VNMWGFFcOxv15mqD+m+ghCY4Q0vk3cHkgAv4vQ3IUuQHl/JU2/SRDfd
-         +GWksJgAQWWwB9Ky83rzxajSb+Lq7Rc9OzsGPFUm4EbJqCGRkRTqfl/VTzEFh8BqlZBp
-         Hv3q/+WBpUqHJW6/yF8mMSf7sxQ+uO/2t/G2hv469JKo2scEYQiwjlpYcbbG0I8tNyY6
-         mjFw==
-X-Gm-Message-State: AOJu0Yz7NTsVtc8lks+Eslc6E9ISzusEUcgpRFZEbyVvM4z2TrXdsuy0
-	wMmXKaVCnaomQxfl3pqoUQf1z1bIqJ0qTrA1NAblBUmwJLTZ2L3MzNr+zmvfgODuOguu4gmMCQI
-	n4WNDUZNvfJycPS+2ckmUwm/8OoHghCStciyus7GicJyJsXbN+X3DYuYKY7OM5ILPT9NRz33Fif
-	153lNu+CrqMPnNYtgmnEzHR4YvwtvVqcohSq92WeSjvORmR2n+vw==
-X-Gm-Gg: ATEYQzxmPWCBGh1DVSge8hIaTGIPv/16WgCqbmNLdaENte4nRStpYrml7FrxfiCSmmA
-	+61MDO6G/NTK7FnzDvco6Yn6N8F7GRbAPIfKbb43ACXOgIqtLhU8Jgl+sBDVMsT31giLPf81iyV
-	I6FEj8WgwcSfSm4b7q7O+zbuYO3PScC5/CacduY3JmJjRfjFRrRFeBG/uHlYF00Mj0YZuhQ+A3y
-	GNbx/G2NwlZNf0bm9lc8Di3l6v9rwPB+Hf1Hw0OgHUw0BKYrdeKIB5if2WPuIxMwGZkr3obrvam
-	pWFwPvadVKwCEkx2iHCf4lL+lDXaFUzEMzYfIYJTb30/AzVQoLWt+bItA4Dd7Nd14B49IZcGJTy
-	ucjt5ggciBGxx3bi6OrfUk3G5uypq2bkwDeYK6Pnte65lEcE1zruZ5Dw=
-X-Received: by 2002:a05:620a:468c:b0:8cd:9322:d449 with SMTP id af79cd13be357-8d01c7e338dmr353004685a.56.1774621877912;
-        Fri, 27 Mar 2026 07:31:17 -0700 (PDT)
-X-Received: by 2002:a05:620a:468c:b0:8cd:9322:d449 with SMTP id af79cd13be357-8d01c7e338dmr352787885a.56.1774621852301;
-        Fri, 27 Mar 2026 07:30:52 -0700 (PDT)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-8d00e502081sm515168585a.36.2026.03.27.07.30.50
+        bh=Li+MhdhKR/VteHKksntf5bm/t2yJMb4kcBZQfykWGTU=;
+        b=XvmvZ3F/TQAe2P0ZU0zUM5UaURbuZYNETqGC07Dqj3Yigwp7555vIY36rwpxKG4As6
+         4XvAmYY4Fieod2TogEOTdoP/jsH0ZC6qpgr2URQEWEIJrWq7AJ63n4V3/8NoijHIMOJO
+         pdRn/kyhviaazXSr0daz24VsBQyX4gfCPwTAsRknbqhj/qEjq2pC42SDFZ+KVvw2RQ1H
+         2l1BnZ1J+wokwkWgn+6vcmYLUAt/BsINXMIZkJgh0iZnOSIi1Ggv2jV9/hZI3g6dpW4E
+         0ExneYSsHlmr14FFUFbsI0k+xnp6x+xAaI0kKDCgQbg+h1X414L81pUjoyCqF5B/xiCW
+         AjHA==
+X-Forwarded-Encrypted: i=1; AJvYcCUhaWNChPUVFnbFe12h+Sy8PgMyCzkW+f+PuxkMcyOztTLtF9MNlTxItRKN0JapDX5wvPeosD8ngqiT@vger.kernel.org
+X-Gm-Message-State: AOJu0YzFDHlzaemJm73Zqo9zedmw1l6DTgxpwtMCDECp6CyldGkW/eoi
+	gstUen2mFdvWBy31y03Zdj4C2juxO+zuqfneJeHTYrzjTAJoyd0U6CBzkCjwsU/jfQTjlalVKAz
+	wZRSs
+X-Gm-Gg: ATEYQzwumxPuzCTe3Jtf4ujsx4xDxuXM8CkvzTiP80hgrIEjI2PXqskbOZlGaxhUFQS
+	ocDuOQhWUVg11LZyh/FiZ+C+QU35rlJBHaI6Zhv5qVj0q+Bqb73jkiSnhHA4XWU1aSt1aIL9tK2
+	0Mmz3Ir9edo2bf0aXBbIWB96TotgCczeodyRiaTMJfx4rkFO3fIyTaOBcVx9sNC2xYJMNmqfNYI
+	+lozU1XMe33sw/A/RGLlJp2m+/l0dR47PsCzPBsU02MmHbs0q9nJuG47sgVpHGOzNnGqHUOk7xO
+	Pz/Ep7/ZpyhvCDwXlugALg53DdWu+vqASHBbmqpvB6EkSs+5kcmePnQYY7OOZ21YPe7WWpUoaPK
+	ERNYnD/p5hOUF6mf/xMktWB0/FRJDLQP3O/jWoLedcftV+3HMjaz21zZZzSbmF4+IBBrVMf0UQg
+	Y66TSfHBHI6Yyvl+UA7hlME/XrgpnIXbJ8+5Hf880i2iWbpGRLNriPt5qO4QxjGpOE7HunWBlL5
+	ayWAmEN2D1LRHR/g1p5N53+fTg=
+X-Received: by 2002:a05:600c:a108:b0:485:4388:348b with SMTP id 5b1f17b1804b1-48727c81d77mr45901305e9.0.1774628605920;
+        Fri, 27 Mar 2026 09:23:25 -0700 (PDT)
+Received: from raven.intern.cm-ag (p200300dc6f2b4400023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f2b:4400:230:64ff:fe74:809])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48722c7cec3sm97085725e9.6.2026.03.27.09.23.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Mar 2026 07:30:51 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
-	linux-fsdevel@vger.kernel.org,
+        Fri, 27 Mar 2026 09:23:25 -0700 (PDT)
+From: Max Kellermann <max.kellermann@ionos.com>
+To: idryomov@gmail.com,
 	amarkuze@redhat.com,
-	vdubeyko@redhat.com
-Subject: [PATCH v1 0/10] ceph: add manual client reset and selftests
-Date: Fri, 27 Mar 2026 14:30:36 +0000
-Message-Id: <20260327143045.1393612-1-amarkuze@redhat.com>
-X-Mailer: git-send-email 2.34.1
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Max Kellermann <max.kellermann@ionos.com>,
+	stable@vger.kernel.org
+Subject: [PATCH] ceph: only d_add() negative dentries when they are unhashed
+Date: Fri, 27 Mar 2026 17:23:08 +0100
+Message-ID: <20260327162308.1118621-1-max.kellermann@ionos.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -92,88 +77,104 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Manual client reset gives operators a way to break client/MDS capability
-ownership stalemates without unmounting the client. The reset blocks new
-metadata work, gives dirty state a bounded chance to drain, asks each MDS
-to close the session, and then tears the local sessions down so the client
-can rebuild clean state.
+Ceph can call d_add(dentry, NULL) on a negative dentry that is already
+present in the primary dcache hash.
 
-The debugfs interface in this series is only the control surface used to
-develop and validate the reset flow. It is not the core feature, and the
-long-term intent is to have the client trigger the reset automatically
-when it detects the stuck condition.
+In the current VFS that is not safe.  d_add() goes through __d_add()
+to __d_rehash(), which unconditionally reinserts dentry->d_hash into
+the hlist_bl bucket.  If the dentry is already hashed, reinserting the
+same node can corrupt the bucket, including creating a self-loop.
+Once that happens, __d_lookup() can spin forever in the hlist_bl walk,
+typically looping only on the d_name.hash mismatch check and
+eventually triggering RCU stall reports like this one:
 
-A reconnect-only reset would require MDS support for accepting reconnects
-outside the normal MDS RECONNECT phase. Because that support does not
-exist today, the series first wires up the reconnect-based worker for
-validation and then switches the recovery path over to direct session
-teardown.
+ rcu: INFO: rcu_sched self-detected stall on CPU
+ rcu:         87-....: (2100 ticks this GP) idle=3a4c/1/0x4000000000000000 softirq=25003319/25003319 fqs=829
+ rcu:         (t=2101 jiffies g=79058445 q=698988 ncpus=192)
+ CPU: 87 UID: 2952868916 PID: 3933303 Comm: php-cgi8.3 Not tainted 6.18.17-i1-amd #950 NONE
+ Hardware name: Dell Inc. PowerEdge R7615/0G9DHV, BIOS 1.6.6 09/22/2023
+ RIP: 0010:__d_lookup+0x46/0xb0
+ Code: c1 e8 07 48 8d 04 c2 48 8b 00 49 89 fc 49 89 f5 48 89 c3 48 83 e3 fe 48 83 f8 01 77 0f eb 2d 0f 1f 44 00 00 48 8b 1b 48 85 db <74> 20 39 6b 18 75 f3 48 8d 7b 78 e8 ba 85 d0 00 4c 39 63 10 74 1f
+ RSP: 0018:ff745a70c8253898 EFLAGS: 00000282
+ RAX: ff26e470054cb208 RBX: ff26e470054cb208 RCX: 000000006e958966
+ RDX: ff26e48267340000 RSI: ff745a70c82539b0 RDI: ff26e458f74655c0
+ RBP: 000000006e958966 R08: 0000000000000180 R09: 9cd08d909b919a89
+ R10: ff26e458f74655c0 R11: 0000000000000000 R12: ff26e458f74655c0
+ R13: ff745a70c82539b0 R14: d0d0d0d0d0d0d0d0 R15: 2f2f2f2f2f2f2f2f
+ FS:  00007f5770896980(0000) GS:ff26e482c5d88000(0000) knlGS:0000000000000000
+ CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+ CR2: 00007f5764de50c0 CR3: 000000a72abb5001 CR4: 0000000000771ef0
+ PKRU: 55555554
+ Call Trace:
+  <TASK>
+  lookup_fast+0x9f/0x100
+  walk_component+0x1f/0x150
+  link_path_walk+0x20e/0x3d0
+  path_lookupat+0x68/0x180
+  filename_lookup+0xdc/0x1e0
+  vfs_statx+0x6c/0x140
+  vfs_fstatat+0x67/0xa0
+  __do_sys_newfstatat+0x24/0x60
+  do_syscall_64+0x6a/0x230
+  entry_SYSCALL_64_after_hwframe+0x76/0x7e
 
-I split the work into smaller reviewable steps so the preparatory cleanup
-lands first, then the reset framework and control path, then the initial
-worker, then the direct-teardown refinements, and finally the single-client
-selftests and validation harness.
+This is reachable with reused cached negative dentries.  A Ceph lookup
+or atomic_open can be handed a negative dentry that is already hashed,
+and fs/ceph/dir.c then hits one of two paths that incorrectly assume
+"negative" also means "unhashed":
 
-Patch breakdown:
-- 1/10 converts the Ceph inode flags to named bit positions and keeps the
-  file-lock error bit ready for atomic bitops.
-- 2/10 adds a bounded wait and diagnostics to wait_caps_flush().
-- 3/10 adds reset state tracking and blocks new metadata requests and lock
-  acquisition while reset is in progress.
-- 4/10 adds the manual reset debugfs control surface, status reporting
-  plumbing, scheduling hooks, and tracepoints.
-- 5/10 adds the initial reconnect-based reset worker and the reconnect
-  completion tracking needed by that worker.
-- 6/10 switches reset recovery from reconnect to direct session teardown.
-- 7/10 adds the explicit reset state machine, bounded drain phase, and
-  richer status reporting.
-- 8/10 removes reconnect bookkeeping left behind by the direct-teardown
-  design.
-- 9/10 queues CEPH_SESSION_REQUEST_CLOSE before the forced teardown so
-  the MDS can release state immediately.
-- 10/10 adds the single-client stress, corner-case, and validation tests
-  used to exercise the reset flow, and passes the configured debugfs root
-  through the validation wrapper so child scripts observe the same client
-  namespace.
+  - ceph_finish_lookup():
+      MDS reply is -ENOENT with no trace
+      -> d_add(dentry, NULL)
 
-Alex Markuze (10):
-  ceph: convert inode flags to named bit positions
-  ceph: add bounded timeout and diagnostics to wait_caps_flush()
-  ceph: add client reset state and request gating
-  ceph: add manual reset debugfs control and trace plumbing
-  ceph: implement reconnect-based manual reset worker
-  ceph: replace reconnect with direct session teardown in manual reset
-  ceph: add reset state machine, drain phase, and status reporting
-  ceph: drop reset reconnect bookkeeping after direct teardown switch
-  ceph: send SESSION_REQUEST_CLOSE before forced teardown in manual
-    reset
-  ceph: add single-client reset selftests and validation harness
+  - ceph_lookup():
+      local ENOENT fast path for a complete directory with shared caps
+      -> d_add(dentry, NULL)
 
- fs/ceph/caps.c                                |   7 +
- fs/ceph/debugfs.c                             | 172 ++++-
- fs/ceph/file.c                                |   2 +-
- fs/ceph/locks.c                               |  24 +-
- fs/ceph/mds_client.c                          | 630 +++++++++++++++-
- fs/ceph/mds_client.h                          |  38 +-
- fs/ceph/super.h                               |  60 +-
- include/trace/events/ceph.h                   |  60 ++
- tools/testing/selftests/filesystems/Makefile  |   1 +
- .../selftests/filesystems/ceph/HOWTO.md       | 121 +++
- .../selftests/filesystems/ceph/Makefile       |   6 +
- .../selftests/filesystems/ceph/README.md      |  40 +
- .../filesystems/ceph/reset_corner_cases.sh    | 707 ++++++++++++++++++
- .../filesystems/ceph/reset_stress.sh          | 682 +++++++++++++++++
- .../filesystems/ceph/run_validation.sh        | 317 ++++++++
- .../filesystems/ceph/validate_consistency.py  | 291 +++++++
- 16 files changed, 3105 insertions(+), 53 deletions(-)
- create mode 100644 tools/testing/selftests/filesystems/ceph/HOWTO.md
- create mode 100644 tools/testing/selftests/filesystems/ceph/Makefile
- create mode 100644 tools/testing/selftests/filesystems/ceph/README.md
- create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
- create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress.sh
- create mode 100755 tools/testing/selftests/filesystems/ceph/run_validation.sh
- create mode 100755 tools/testing/selftests/filesystems/ceph/validate_consistency.py
+Both paths can therefore re-add an already-hashed negative dentry.
 
+Ceph already uses the correct pattern elsewhere: ceph_fill_trace() only
+calls d_add(dn, NULL) for a negative null-dentry reply when d_unhashed(dn)
+is true.
+
+Fix both fs/ceph/dir.c sites the same way: only call d_add() for a
+negative dentry when it is actually unhashed.  If the negative dentry
+is already hashed, leave it in place and reuse it as-is.
+
+This preserves the existing behavior for unhashed dentries while
+avoiding d_hash list corruption for reused hashed negatives.
+
+Fixes: 2817b000b02c ("ceph: directory operations")
+Cc: stable@vger.kernel.org
+Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+---
+ fs/ceph/dir.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index bac9cfb6b982..27ce9e55e947 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -769,7 +769,8 @@ struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
+ 				d_drop(dentry);
+ 				err = -ENOENT;
+ 			} else {
+-				d_add(dentry, NULL);
++				if (d_unhashed(dentry))
++					d_add(dentry, NULL);
+ 			}
+ 		}
+ 	}
+@@ -840,7 +841,8 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 			spin_unlock(&ci->i_ceph_lock);
+ 			doutc(cl, " dir %llx.%llx complete, -ENOENT\n",
+ 			      ceph_vinop(dir));
+-			d_add(dentry, NULL);
++			if (d_unhashed(dentry))
++				d_add(dentry, NULL);
+ 			di->lease_shared_gen = atomic_read(&ci->i_shared_gen);
+ 			return NULL;
+ 		}
 -- 
-2.34.1
+2.47.3
 
