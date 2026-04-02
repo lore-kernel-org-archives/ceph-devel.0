@@ -1,274 +1,200 @@
-Received: from mx0b-0064b401.pphosted.com (mx0b-0064b401.pphosted.com [205.220.178.238])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A46953D3CEE;
-	Thu,  2 Apr 2026 17:06:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.178.238
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A685C371CE1;
+	Thu,  2 Apr 2026 18:11:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.156.1
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775149623; cv=fail; b=gSIkfEaouX8cimGgglHB8yp9YQL4bFej9uPnR4EwYV+NIrGc3OTsjIh1Pz5BYGNB7t2dNsmSIAcCqd6MjAfE0Yq0Uhn+Y4CgyS1AZEz5y9XTNLKWdjBEpYrA7QcB/ts54NqERPM8t2MmnXnVlb5UY0rfB/XB5nZnfjzNS15MGvE=
+	t=1775153507; cv=fail; b=aRdTn6VrjAPPmKYA9OGdjzYCSQtx9G+wnF0xOjLhKSUeT2Y+9sJ1EilfYSLPU0wFir1LYWcOsTMadPuJvoAhT6ExUj1wV7O+VGkMup1esGmJGuk6Ue9LeZbKwc87f+r1WtJm4J8lDe3ue8/b9BoKEsf7VA6aG5bhmhHxS1j5Ipo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775149623; c=relaxed/simple;
-	bh=lJJ+RKWXJs7vEsjtrT3mZO8bEA0mdYN+v18HyXjt4ww=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=uX0kM8rt07ZPJOIj9vTUpY7AQvpvw9sxfnuBkedX60OFhT0yUcqKt7OgSRrawFjJxgEfxJ5s3L2f1cu1uyen/dIqySnYUQqj4Zuh2UeTqZFiGfi4wUwoVVGVtC0nS+pG9zLF/teMBspsi5Wx17bac1rxmVYoYVLjC48aBjH4E+s=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=windriver.com; spf=pass smtp.mailfrom=windriver.com; dkim=pass (2048-bit key) header.d=windriver.com header.i=@windriver.com header.b=iwxtyRjV; arc=fail smtp.client-ip=205.220.178.238
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=windriver.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=windriver.com
+	s=arc-20240116; t=1775153507; c=relaxed/simple;
+	bh=paDsSvS6OyEAWQgzK6BuJbj59vqTh5a8HYU/UJMhdYU=;
+	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
+	 MIME-Version:Subject; b=BSzShG442u3nBiOKFy9NHOGYITaKzM1c3CoOVww+A/4o7Xs8N4jQPk3blaREQvHCT+1KfWMeVX5re6kukp0EgNcV2Fk/MS5AXjX64tAIlXu2BiRzNi3nTpw0WA5TvGXmipvxrGgbHLuPQY+XOzkGsTwb9o8kjn38YFOqUJ0gbRU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=eyaBSwXW; arc=fail smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=windriver.com header.i=@windriver.com header.b="iwxtyRjV"
-Received: from pps.filterd (m0250812.ppops.net [127.0.0.1])
-	by mx0a-0064b401.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6322nsnG786371;
-	Thu, 2 Apr 2026 17:06:44 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=windriver.com;
-	 h=cc:content-transfer-encoding:content-type:date:from
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="eyaBSwXW"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 632BFde93644103;
+	Thu, 2 Apr 2026 18:11:35 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-id:content-transfer-encoding:content-type:date:from
 	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	PPS06212021; bh=aiAuJ9wZEZIHYAfBJq+EUiBh7FmUai6ze711+ejIuXE=; b=
-	iwxtyRjV+GlxafYT7Dz877KKqD7xVVFZUz4xqyF5Umi6R4wxTZEc8El5Z5h40wRT
-	Be1F/TOR0DB/M8foM8/p3fQwv0zQM9mcEOC8f+z2NhzhJi+2vbTN5AoY4QMLOYBz
-	c5uNgm/dSL2II4Bht3fRmuqXQij63+J0fKfFD81SgyvQctJ4ip/h7lf2W9iQjGbQ
-	oB1ab0z3NAgTFzsQpW5NhJrKP5LZejwS3uTrpd1A2sIV6goGqjOUPOMWkyPP5jeN
-	8BV5r3mCA8bFefLCG9151+wx5fZxJCOYrULTJg1A35JA542m72ilN9fStXO5cDUF
-	sKMLXlV0zCDvRGyuOS8c3A==
-Received: from dm5pr21cu001.outbound.protection.outlook.com (mail-centralusazon11011070.outbound.protection.outlook.com [52.101.62.70])
-	by mx0a-0064b401.pphosted.com (PPS) with ESMTPS id 4d65y4g9bt-1
+	pp1; bh=paDsSvS6OyEAWQgzK6BuJbj59vqTh5a8HYU/UJMhdYU=; b=eyaBSwXW
+	tDWbshGExFs4KjPCbFIZl3Hz6jxMcE3l5ogrJbWlIXdxgAEBHapPuva7l4airyPq
+	rkmH5xdu8TNvJvJlghP/9RhyYoQJqe6eRtG3PoiZyfPKqX3An0uC+gZNRJmy4aGh
+	tkNhe0cBpij/EJHUP9GOtHOBQctq9URv5qGi6HPAxvgR+UgC4YxgOw10IIR+5rwG
+	io6dTpn6qXFBHpdqPOsTa+A7hWN2QwsVb9oxYKjMDxLvOqcDdWCfpbxseefSzn5X
+	Z+5Y3PL3N+f4iLJ54cOapFjffPnOfxeXyk6fZY2yEhPmNGSWYcSGYu5R08xaKCvh
+	h8BMBOxH4ModWA==
+Received: from ph7pr06cu001.outbound.protection.outlook.com (mail-westus3azon11010001.outbound.protection.outlook.com [52.101.201.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4d66q3dyjh-1
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Thu, 02 Apr 2026 17:06:44 +0000 (GMT)
+	Thu, 02 Apr 2026 18:11:34 +0000 (GMT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=UXC0d78P4z2T/1wg6ll/Ij5tkrCzWGrUHwmdUVAxT7bAzVv77fqNMCNqdzDLRGrFiy2FG4n/MDElDt/MHkhaJ6ufqwkVcwEARRs1Hjsts/py64X73b9CW/dI8IL8HMEdSA9Yd/ryDjGNX7fEkX576NV2/DsU7WLYTCo0/ScOee41c6yFBgAt/tGDV3GUSaNUuKSWf9sKQS2lAWSiXMprgRdeMxosBbwYCG+0X6yFMXgIbUnFPhluD+xUcBbND9YB6LyOAbsfjH9DDePUMFgTkQth8c6h1Jk6MunJKcAMLqKiKsRxLMDQb+ca2+xGZJpVMlGJyXiDO1NFfZSa7z3b2g==
+ b=OjsDV+TNFHBczWzJXrLEuiDKwZdAZbHNk/u/L3xDJHE2z6RQbWwY++XjRdSqSTfUDU9sIvaGWnCgIRHpeQsFbPKFt3CBnhnInfnKQxSNO7jDzpRnTglKUDIqVyzvgb7Y4fdv0YLtfyZV6j2A91ZM3IQ9WaVGxUDxfctgIVNtdBIPqm4bnamIGaJdV/wDwJ04gzzE4QW3Pc2t0dMvoQksoJlfO/5hDagwbh1DO7p16GRS570l4kFAujzeGw0t2UbJ8VkNdGw5vmebriflxV7pBJN1vpCgFb4/atX56rYnJ/l7jgAQZyhUd/Ei2rHl4wGi9RLo+H5ygQ3RQ5Jj6TEF2Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=aiAuJ9wZEZIHYAfBJq+EUiBh7FmUai6ze711+ejIuXE=;
- b=FCnCvk6/Bn8tLK98X0I9Q2ZPr+/4lEVGjrtytUup1lLXykdFYxRyx9Kp+cUYJszBMNb0p9BeG8nzbv1KHO4cvceh4ZzCYaCCg9PWquvLcAxlq9LY+EIeLeSJgHTi34fgZK/OJSVABMQNaKuzTg6AawfYOgMP63rceGXRIiSmpVFxVJmjJlC5EaxcYofg9kiMrNs2ZLEI4Q8+lxMTeMKLYLiIEeX6KICzpwJAOmG1SE6oYWD+6YymBcwr51jAG4EzKPiFA3wyAJ02CUMtYFMRDnf5i8b3yPrFvI5ho96xZCBtgr2Spx5cYElReA+gAii+SiDyo+tSAHPcBuR/QAv5eA==
+ bh=paDsSvS6OyEAWQgzK6BuJbj59vqTh5a8HYU/UJMhdYU=;
+ b=vgTByzJTCBDMcPlOPnw2VMheW/B+0V9r9qAvqkAs6iETW2yYuKUKNd8PuiXk252K3mLVl3wK1ZzCy+htC/2R2/QTbibaHW0q2P0aYWqyAvkicfDPBHNT9UM3ltkXjDEnJWcsg3xg7gk2GlqCSO70iOrCo5IuVjyddCSIz+NgqXMYUnQYU9iqbA8BFFBhO6dRUjpXuWvFda1MOtPOdCC8IBSTWA+HZqGA82PpCpygJ8HQXplks2nE1jvMJSd6CqrGc4bVKyjgZvpgTVdubg0SisEbiaoFJbt815+3J5aK9Z60wu8MRs/CMvObjU50jAb5nexPJepRNvQm+mosKn30KQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=windriver.com; dmarc=pass action=none
- header.from=windriver.com; dkim=pass header.d=windriver.com; arc=none
-Received: from SJ2PR11MB7546.namprd11.prod.outlook.com (2603:10b6:a03:4cc::8)
- by BN9PR11MB5227.namprd11.prod.outlook.com (2603:10b6:408:134::9) with
+ smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
+ header.d=ibm.com; arc=none
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
+ by PH0PR15MB7174.namprd15.prod.outlook.com (2603:10b6:510:3b6::17) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9769.20; Thu, 2 Apr
- 2026 17:06:41 +0000
-Received: from SJ2PR11MB7546.namprd11.prod.outlook.com
- ([fe80::ca9b:dcf:8881:bced]) by SJ2PR11MB7546.namprd11.prod.outlook.com
- ([fe80::ca9b:dcf:8881:bced%5]) with mapi id 15.20.9769.016; Thu, 2 Apr 2026
- 17:06:41 +0000
-From: "Ionut Nechita (Wind River)" <ionut.nechita@windriver.com>
-To: idryomov@gmail.com
-Cc: ceph-devel@vger.kernel.org, ionut_n2001@yahoo.com,
-        linux-kernel@vger.kernel.org, xiubli@redhat.com
-Subject: Re: [PATCH v1 13/13] libceph: force host network namespace for kernel CephFS mounts
-Date: Thu,  2 Apr 2026 20:06:20 +0300
-Message-ID: <20260402170620.575757-1-ionut.nechita@windriver.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260316212041.67098-1-ionut.nechita@windriver.com>
-References: <20260316212041.67098-1-ionut.nechita@windriver.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: FR3P281CA0043.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:4a::15) To SJ2PR11MB7546.namprd11.prod.outlook.com
- (2603:10b6:a03:4cc::8)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9769.21; Thu, 2 Apr
+ 2026 18:11:33 +0000
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.20.9769.015; Thu, 2 Apr 2026
+ 18:11:32 +0000
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+To: "max.kellermann@ionos.com" <max.kellermann@ionos.com>,
+        "idryomov@gmail.com" <idryomov@gmail.com>,
+        Alex Markuze
+	<amarkuze@redhat.com>,
+        "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>,
+        "ceph-devel@vger.kernel.org"
+	<ceph-devel@vger.kernel.org>
+CC: "stable@vger.kernel.org" <stable@vger.kernel.org>
+Thread-Topic: [EXTERNAL] RE:  [PATCH] ceph: only d_add() negative dentries
+ when they are unhashed
+Thread-Index: AQHcwGczdLET/MkZjkWLja1B6qa1JLXI31oAgAM4G4A=
+Date: Thu, 2 Apr 2026 18:11:32 +0000
+Message-ID: <cae25009b37ffd152af27c1c10f75d7258983aca.camel@ibm.com>
+References: <20260327162308.1118621-1-max.kellermann@ionos.com>
+			 <765945680a8b83b26148430752295deedea831e7.camel@ibm.com>
+		 <f8c25bcd64be6fdaafd4e49507ea9e04110d56a5.camel@ibm.com>
+	 <93e1f2a995ad4c8977e1519a542f9b7b58f47894.camel@ibm.com>
+In-Reply-To: <93e1f2a995ad4c8977e1519a542f9b7b58f47894.camel@ibm.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|PH0PR15MB7174:EE_
+x-ms-office365-filtering-correlation-id: fc4c91e3-53b0-40b8-58d4-08de90e34561
+x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|366016|10070799003|376014|38070700021|18002099003|56012099003|22082099003;
+x-microsoft-antispam-message-info:
+ Hda/DeLVu0AsddDkjDo/i9yqYUB1sPj1WX9lKjwCsBbadidMe9a5Ob+rosgSDjmYMgngtss7rlym4dtp358IrhF4bWwzv7xS2scHYZrgQUEHmPtjgwAWyK8cHKSBsymJbvCChLqQEUjtvVwyLsGkOOQMxhguGQFlhmArYk34egPIg7RbB94B+uvv+hAm9/vCwppd+TW7TffxlyTab6gPNw8QKT25iCohciB+1VLnYzPUkR1DtLgRYPrhAIGgKh+RSuL8oIw7M0ykf/QcqD/hj1qI+zJoM+zV4hjypFNosjnQVNpL59e2ulfNF/AxKKSXgJus8pq4YfLZS0COzfB1Qa8fOSjdnJBmyP4S0CqN/IhHJtGK2nsF1XFlPgPqClHgaIrB2dyTaMZF1s+lZJq7SQF/OHBD2H8swDzMIFVtx7YM06vehHiejHMzs0RmduBhOWlWjTdBeEC7oKQAtxvYQ+4Vv4U4n49Kobat+E/Wyk4QsXLx2qhjqf/UndnyEgpO4ZShIDaJzv6RFKIY9OnWPP5xbcEtCvV8QEP6JNaE9ERaQ0ZOaACwcZ5qDLeJKwxbZIFy1mxucwYqBfzdVthGPCbANcLTz8il194m7bGfPn3mCUDULbs9mVd37Zck8JeqPj7NjMqUds1NnEcGbLsKWJooc/y3Z8yDbyXfGQQGepPh73wq3jsYj1m0lTFvZPr73qzSpoN6BiJX/lDZWhMRv/qwHuy9VA79vynLREqW2604gS01jCplBb61kOD+PhdAufmeyigym7yMvVlYdLqVgGjWG3fykc4M+v6JVGfxr7M=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(10070799003)(376014)(38070700021)(18002099003)(56012099003)(22082099003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?VDI2anJvT1pwemFNN2Z6Vm5nWmtRNmRVeGxQdmNNVjJIVm1nSXk1S0tOcGwy?=
+ =?utf-8?B?cm1KSERFMTVtUGxhWTM0TUYwQ1c4bGJ6TUU0cjlJSXFXQ0NZWm1uZ211M0x3?=
+ =?utf-8?B?ZG1pdTVOZXZqcDFnaXc2bmkxTkFnek5LRktVMmthLzREM3pnNGFQY3YvMXdB?=
+ =?utf-8?B?cGJqR1k4SFVDRlliS3cxQ1JBMDBIcHBKOGdqWWIxNzdpVFVGSWcrYS83d3c5?=
+ =?utf-8?B?azB6Y0dhZU9odktRTmF1cmtMY2pwbFFSUkR3bnlkUUxjSTVUeTJqWnVpS3hH?=
+ =?utf-8?B?L2lZZUljb2VDZmdsbnB6NU9oM2oycENJQ2F1MTRkN0l6M2s4WXJlKzUzdFll?=
+ =?utf-8?B?dmdGMXZrdXNDd1kyZGZQT3NjbkhpdldKd0dmWUkxQkZlbFp4c3FFVUpwQ2tH?=
+ =?utf-8?B?TjJxb3I3bXZUakV0OHNPVzJIcXBiK3RRbDBzMVpvMHcxZVZleWQxS0d0VUxL?=
+ =?utf-8?B?ajBhQ3h6ejJBNWJjVEFqTnh5ZE9zY1VMWmR2eUoxREE4ZGpDb1A2QTUvRlow?=
+ =?utf-8?B?c2MzSFI5UDRVbktTekphMTArZ21HbG13TUJqOGJDVzRkd1F3V1dFRGNlTjZ2?=
+ =?utf-8?B?ejBmM3hnM1UwZTJjdHNYSmplNm1xOEM0STZSODYva2xZNWFvendFWVZCc01n?=
+ =?utf-8?B?QkpqNFd5Q293RzdUeEV1alJzQ2VaaC9jbERRZjlsK2RrTytlb3FjWWV5cG9P?=
+ =?utf-8?B?bVhzQ3V2eWFTRCtTL3doVHNCRFR6dUk5NzhNMnNhcllXL1g3aGkyeGhWb203?=
+ =?utf-8?B?Q09OZlBhVzFFckNHVHE3NElNSFc1a05hcUIweGdhczI2WWE1N0w0OUh5anpC?=
+ =?utf-8?B?bzUrNUYrRXpKS1BLejUrTDBONE56eHdsTTh1dlpEMWQxekw2NG5ocWE1YS9x?=
+ =?utf-8?B?TTFFcEhBUlR0MklVaUtPejBGZ25xNHh2aDR5MFZZbDVxZ29oa0dGMWZiSGY5?=
+ =?utf-8?B?a0ZRVUdZQ0w5M0JFaitBVDFnNHRiYmFQb3gyTnh1TWdNVXF6OU82TzM0YTB3?=
+ =?utf-8?B?bnA4bjVVcnI4ZUF0dTVxVTU0TE9HUkM0S2RlV1lmRnBHYWl1L2dNRk9oeWlL?=
+ =?utf-8?B?cnNCYVdteHB6ZmlGQ3F6Z3V1bU03cWgwa2ptYnlKdkF1aEZ5WXdhL1F4ano3?=
+ =?utf-8?B?M1pmNW1MOVR6VURLQ25KZUEwVVd0a0E0VVhkbi9xRTFFNk5lblhmRGdUOTNZ?=
+ =?utf-8?B?K29RdFNCd3ZuVWd5WkwwMkVLeVlSMHlraGZUdmhyaE1ueXFoS0FIOGRWZTIx?=
+ =?utf-8?B?MWxLdXJHL2UvRE1WM2NMODh6YXRXMkVDTm1mMWNiYTJNblI0c3pZWjljNGdY?=
+ =?utf-8?B?QWhtMVd0UmZzQ0IxcUxYaUg5K3J1eUgvOWFibmtzUml0aWVPZ3ZTMXZVU3Bq?=
+ =?utf-8?B?SHFzdGw4M3ZhUElWcEh2V2E0RHgxa25rTTIzZ1l3eWpBMzNJNWZxaTFRZGJj?=
+ =?utf-8?B?MmlONEJCTmk2UEhlZVNPR3FzMDdkdUN3QlJQUGhNRmlianJ3WkZUL3hmSm1q?=
+ =?utf-8?B?WjZOU1NNOWVlbytkMDZuUDJ0TmdodC85S1VIMVEzSG9RUWF1RkdPVjR5dFlQ?=
+ =?utf-8?B?Z1MvTTQzeHJ5UkdJd3REb1poTXZTcXVTV0kvSzdzWGN6ckFmQ2FBMFFydktH?=
+ =?utf-8?B?b2grTHBPRm83M2hrYmRUNE14V010SkZ0UURZall1OTFyNUJPaFUzUHcrVDNp?=
+ =?utf-8?B?ejF0VCtHWEhPTkJ5a1Q2V1ErWFNLTC9oelVIK29sNFV5bFVKR0lyWDJsTzFE?=
+ =?utf-8?B?eTh4THB4SHBnY0ZEem91eUlIMk1BU3RyVWNNODRyMEpmbUN5QmdZQjBmeHFu?=
+ =?utf-8?B?dzBMdGIrODR1UGNnQndOUU1hbStnWWw0ZFhyOG9sRmgxc1o4ZUJZSEpXR3J1?=
+ =?utf-8?B?M0pMRXR5QjhLRkRoVk5kNFArREFrWWFnU2ZFaXNCdDhoR0FoenlKemF0YmZm?=
+ =?utf-8?B?QXRCb0x0R1pOMEcxSWVGSkFGa1dkZUpCa2FIZTd5ZkNGWG85RDFxQlZTbGxX?=
+ =?utf-8?B?U09oV1JJUUhTUHVCZlJPeDNocXExOSt5b0g0am5OOWNVTkdmQzZUYy93eGkr?=
+ =?utf-8?B?VGE0ZXczR3lmaXgwOTVDM29Eb1NCRDVvaG4zcnBjU3ZJZ2ZrZzBqcGkwVVE2?=
+ =?utf-8?B?cTFFaDY3RWp5TWdLWEk5dEJETlFGSGd5b0gwUUhuWnVGUHZoWmdqZWd5ZDlJ?=
+ =?utf-8?B?M1lOWkEzaUszeFNZRGZ6cm5nOVVvcGlxbE9sK0tzRytDUWV4a3VucHRjVFNa?=
+ =?utf-8?B?bXpGb2owYm1qWkNUcnRQQ3hKTTJucXBuN3NSY1U3cWt3TDVseGFVQTZBYlpm?=
+ =?utf-8?B?WjF0WFVUQ01IQ2xaWEFucmdheG55UlJ1bEw3czd6OWY5VkQ4SzhuaC9adjdi?=
+ =?utf-8?Q?ltq+A2cgOtkkN+JRJkVbO1aKEVLw7qwd0DV0P?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <9FBC26BBC7613A4B94F37ED631BF7D15@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SJ2PR11MB7546:EE_|BN9PR11MB5227:EE_
-X-MS-Office365-Filtering-Correlation-Id: 9e4bb64b-b90e-4668-1667-08de90da35bf
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|52116014|376014|38350700014|56012099003|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	v46EdAc2QU0TOJ1i/8JrzWDTyE1r8BmywDITGlrP+i8AuNw4hAcNYyfe0DRUGIBWBn3SV1mC6xA3ggeIbNn/3q65ZIfJS2+t1Egxoi5F2A1gyqSNoKsFRLJm7s10VD+bMlKjzc2bQSakP87fwXitrg011WUWMsh5iSrxPByPggXVVThN1kCtXXhOdyimnSFi8Caf1jPA2I0RoIBMgu3Ap+nsW3TgioDHLVIm0sgSB9U4miVcAM826IJHfFsqPW+oCWwrKQKzqU0zqxqQYVFcWkSCTGftZMtyv9GU8m5bzwgUdfKNpYlPncvXMWf0TdTcU02nUfKP82Xrq/Kscft38E6aoWrXN8bVHhKKsBzpyXavSQI3mptvjkFdhyhthLnUJ21q3rwDjN9OWYt5z5fsc/9oHz8WCu97jUsK0Txt2wpgIDAEmczeGrYBZcQgviw6xJ0GHyCnoT9w4MT5Sy/sBkiv40ktG2hiCk9DOURgNOjlNrpB0hSHspb0ROfHjw3RX93jWCpLAAinqvIxZGiEQ7vK1O/CVRuIkrIT/51rb7beWxHhy45C5ori94L5ugnNG0hAIc1ahcJCHJ0HV4uQtcqoZ+2Y3LmE75wB8mIyMfkmHTP9HlqPZ2SZJvpBNpvk6Bu8QZ5f2mzrYHgtsYh+GaETCS0EdBiFyxl6X6uns3lzKUrBQKiYRn+t/qAYTNBT35TxBa1XaJTnMmAuv/ItWY5rUvv7vSmugtZMY9wg5l75OQmUiRSld3bI5w55KbN0
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ2PR11MB7546.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(52116014)(376014)(38350700014)(56012099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?QrXVnmn306zDQlNhIFMW94rBjeY/TAiaLGVURvPvAIrfXvFR/+QIjouj5t4f?=
- =?us-ascii?Q?6wlLWWjjNIUYfpif61hT584SO7GJlqNRHhLuuSJ0TX/mkEwkBo2ktB4R59DG?=
- =?us-ascii?Q?9tgeGjo9/NfoIV/yfdJsi57L/YdAgNtLh7Z0fDnWV/nVPzH1OHU5NA3XRGMa?=
- =?us-ascii?Q?7aQRyO6qab7vIUaHoMsfrTXWBVWeV/hGTGTm+IQcz2ju/v1Hk8GVPR8wuSjc?=
- =?us-ascii?Q?MLc932u570tgOxjg9y/MqdUGNlKav2fWfh5++KPe4r3vvl9QNebY7uCVuNvj?=
- =?us-ascii?Q?dLoGsFpsEOoQygQD3WO1p299HX1UHQd/WB5pzUzZj3zGlXIgG2zw4E0Ln7Re?=
- =?us-ascii?Q?fa+L+txwXHnpZ/UYclqADpTPEAPkGhBieMQaH5i+ZK7Tausweaiu62PjHG1z?=
- =?us-ascii?Q?U5mUFpi9JbjHuLtbKN/K88GWqxQBCJr3hF1Qa3sV6TJdz05INsm0z5u3nEkF?=
- =?us-ascii?Q?dHenLEc54dVXRSOYGBnWMtCe5fyntvViNX+CzFz6/a0vLdTO+Hnanhis13d0?=
- =?us-ascii?Q?OJufD4vNNcjGxXhKDFOCWte6i0H7tHwtP7DFaMALufpAfysAxOELnK3o6oo+?=
- =?us-ascii?Q?YisJOvmugAYavBaH3wwmyzoak6LTlNE3sidlnnCzT3IJ7qKYqPsKwpH8gVS1?=
- =?us-ascii?Q?0PIvJ8fX/GHZ3lb5CHNurrE6yN683CCO/7csZtjFqwqaPbMQDna7+RAedm/l?=
- =?us-ascii?Q?uT2vdlqFWWAFlvOmcG7fAi42f8/93kfHjITM1IZ52LJ0nmGt9gionwRCNvjT?=
- =?us-ascii?Q?DQ5XAg/RLOC3n6c/LElSTDEhZp80HOY/sEczwwO2f+2X7z4q5pCmI9hWdjik?=
- =?us-ascii?Q?90HLndhRg09emxYQZOD56KDNM4BK0cxwzaeKaAafd+qL7IjSi0HyEuO6fk/4?=
- =?us-ascii?Q?uaVmEaXyWa/jX9B5BNbq0eT1P2NWY/e9PrmQuPHkkGe5H2f1xxHFsiqRf9B4?=
- =?us-ascii?Q?OEdvRKWrc81TNA83/H5+S/v1MwTVQf114SzL6BwO2c65NQQAvnqowhkRlRVm?=
- =?us-ascii?Q?PRPZ/f7LNskd3EXPo0r4sLtVn0DUqD7DK+CDCjupohbg7KxZ9X8U3v0i0lwp?=
- =?us-ascii?Q?kDN0+RqzkqyHAy99sBR0puFxKVBN4vReP/7b6KMuTASP4wcVI0OoGmOcboW+?=
- =?us-ascii?Q?rNEIDlvi1pXutjqDXoQjvOxLW6stUB+vpMvfOUrrMWSoN12NqFy3dSzbkLfO?=
- =?us-ascii?Q?SO1Iw+arDEUiS+yXhpn7G1JGmYKdtkqwSV34cWaz5TrREV5DeSgFbXrBMlXG?=
- =?us-ascii?Q?ppemUK6IM8GQiGUHnT8TkEBfdF8vKsOXxpHTCA8g8Jlo53bio3VLkYdFqetK?=
- =?us-ascii?Q?TzdushqObmLCJFcqoGtHDwiACEyUbjo6vCOkkGXv+CbOXsGHBamUvVkbtOCP?=
- =?us-ascii?Q?0sgJkjsaBHG7GIytF+gCjEUxaq/mGiG5teFLdPmYcGJJPh4t/QREeUstNjMB?=
- =?us-ascii?Q?opTDQq5ZcwUS8kPyVSXBHUpIMwM7It4aQwPllVDWQKsm3CuHSUFgzEUzqNNG?=
- =?us-ascii?Q?AXYwiNzHySd7xXOpCsvblmkeORmHp7gwEdLSDyJZewaAeRawzj1tCEa1tTkg?=
- =?us-ascii?Q?fIhS4iG6uu9tE97/WyMnS3z6xxP+FaESbQPJhllM0ixNjxH147X8wpv+Hhgx?=
- =?us-ascii?Q?r0716HJmRZ3eltRzoIXNdcVLnqtlUIczW5YFhBvaHg88WPyDDOh9EPt5X9iz?=
- =?us-ascii?Q?/x3Nll0NdBJkN1Ndrj57N0KeCre+t0TvWD4CIJSW2Q/EdEDW1X4i9mtWVfop?=
- =?us-ascii?Q?lLA2A53FV66kUhGSJSD3VEjxzv4KKso=3D?=
 X-Exchange-RoutingPolicyChecked:
-	QXh+Tk0WIVBzXmRl/bVxzwk2q50I5noio7vMlZiJYU78QKW/UBbTan5JgVqLJCMTMjar4fT/0gbvpwikgJL9qknc1WPmtELhHex/9WltiCNuWDWGhRnkHTJffZA5l9HuPSJCpnx5Vw/i1HDhOQYvMS0szgtLe2DekJWeHRzDItzUyaW8+4utI2t4othJeABZLG52fc5ANxfAX2KYphOVyudFCoPeW/5wXpFxDcwlY4H7B0i8VE+wPB7UMqfW38CB7iFeCIQZIKAErRi/UKaHVGGMUZTmXcgQlmTXgPp5EBjGC7hBL/BJsEeLrUPGnynwf3+GEa8yFcXffpZbVkdh/A==
-X-OriginatorOrg: windriver.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9e4bb64b-b90e-4668-1667-08de90da35bf
-X-MS-Exchange-CrossTenant-AuthSource: SJ2PR11MB7546.namprd11.prod.outlook.com
+	FkGb+1feCYqZgW9quIVyMYhms3IWK70jHjTefefZcc/EVe8PeEITWars8EBO0RFE+kFNilveEaWkW1V8rWvth18Jm/iHo+uFWhnYI/jWfXeJWjcZOKDn7gBkVOV/iDBwctgYFRPr1sUm+IsdLoHb3nkSVi2LRAgcZSk5z1JWM1XaFy24m16F0QN9ER3CM73pzhJ5Hcci5hy97HhsD5LtvhI0Es45s/jEh3f1e/HTWu7wNhrrfENvSfwidoDMHulJ9DmV8TysEwFo7IbDsq/s8MPEItRPL9V4yuv4jcs+r2oMN32moq3kCpDsreTm0P4wD63CMNc9q86g6aTukBtXBg==
+X-OriginatorOrg: ibm.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Apr 2026 17:06:41.4420
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: fc4c91e3-53b0-40b8-58d4-08de90e34561
+X-MS-Exchange-CrossTenant-originalarrivaltime: 02 Apr 2026 18:11:32.8439
  (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 8ddb2873-a1ad-4a18-ae4e-4644631433be
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: YCG44Is0Vymo8NvCh7hT/GJQj6hj/0EAY41OX00F+/KHTYGuwJNFQhA2k1os2TpayIt6gfU7Eu9m7NBY37d9RIUVsSp5ha/RBm+8WcV5vZI=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN9PR11MB5227
-X-Authority-Analysis: v=2.4 cv=QaZrf8bv c=1 sm=1 tr=0 ts=69cea224 cx=c_pps
- a=CrKnoqqb99nOpAJSR4mnrQ==:117 a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19
- a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19
- a=xqWC_Br6kY4A:10 a=A5OVakUREuEA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=bi6dqmuHe4P4UrxVR6um:22 a=fTW__CHxibyLmBMfj2wP:22 a=4u6H09k7AAAA:8
- a=mXWxCJuavaFtOZvtEhoA:9 a=5yerskEF2kbSkDMynNst:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDAyMDE1MyBTYWx0ZWRfX5YQXo815Gi5U
- 0scfYMSjYIfgb7xY2SaJl+r/ktOZEa5JpA6I6bm3FUpdo7vWUTqWL4a6DpcsioP24hqYNdmqcPa
- ifSuwSFgjNnUwHqESWWaSCxjtSSRbLoo+iTLpz/w3RoZSxWbscguZfqfSXT8hIs2DJu1bCpxyYn
- V/Qf6Y6qLongR6h03a3X7G9ju0v4wySAVtD3Sqcnh8vTRG0efWZxHRSZFQDNSquFve3jGbOqjeI
- jgoqPt1Q/4P2AiT5f1wVi2cOkXuX7AZL+NniLtJErY7M8H01vmaTvelYlWH9YfCuLz+C+EojpxY
- OPB6fvlX75x9+ox3LdH1D8BgrSIQsSRH1ofQEUXXqLtaRA6C+PmHiLVK20oYs6vx1KUestns8LW
- wUaBHkzPAikbiwBllny9eVwLsiET77BENSaoXVj4eY1+xip8qvKjfXaf+ndMU/8VuSRppqlj1vH
- HMIOPgGlpxqwLFg578A==
-X-Proofpoint-GUID: QOkGRZenEMwdgFo-gKhaIIcaZBmUhs4c
-X-Proofpoint-ORIG-GUID: QOkGRZenEMwdgFo-gKhaIIcaZBmUhs4c
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: HdnqDQr3r/8JCxfeksGYZOPHBQ/ZJ+LirBgl9Lky8MjAkO0ZtKxpAiJsAupc6W5g3SY5cFg85OrX+aZIKsFFLg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR15MB7174
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Proofpoint-GUID: e62m1h2Xe9CDgHnNQWZYMt-hllO2SORa
+X-Authority-Analysis: v=2.4 cv=frzRpV4f c=1 sm=1 tr=0 ts=69ceb157 cx=c_pps
+ a=k7JwuLoshMfzPsPeu96bmQ==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=A5OVakUREuEA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=U7nrCbtTmkRpXpFmAIza:22 a=VnNF1IyMAAAA:8 a=WVHjsFipXO6o1lmZKqsA:9
+ a=QEXdDO2ut3YA:10
+X-Proofpoint-ORIG-GUID: ag31krMdQGRaq6mwmg7i10YjumostDph
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDAyMDE1OSBTYWx0ZWRfX2zsuGytTiC4t
+ nz3ydgJeIj5Yaf3hqBwhvMYqXLTAgOwe+X3rdB+iBWY40E8OT7pcG18Bu29qSLacYkk61WAJMpi
+ gh/LCXuz9CTEoKgZNLGN8Tf8GJNmZ4GFiNAY3X5grF6Op6dLCDzK698CgvNEhg2S7ZRX3GcFGl3
+ grIANRo4pNniQ9/6WyWJsuGyNT5ddAkPTvuRSLQuYE+Vn/UavH11d/L8lMYbIIliTKlDmZ8Ebks
+ GdMK4ChRJi9UT6gJRug8FH1OKTDTI9ByHuunWWUrtnLYTQKU6HSB2L+mWJY9CCAwTa0j1KyEnZV
+ /PtwmplHJO+xfGFNJTesATPAyerNK6VxstELElNcV6h468rgGr38ccebWjM9RzOBRIaUEnjncyB
+ lZPd2NTJYNvH0IEOw27gu/1/EclbOLy40O++T6JtFAU3dd1lVwHNMUAkqa4Ho8Phq6PSSg/GpK+
+ sp1dSIv3gKIOXpGDYgQ==
+Subject: RE:  [PATCH] ceph: only d_add() negative dentries when they are
+ unhashed
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
  definitions=2026-04-02_03,2026-04-02_05,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 phishscore=0 bulkscore=0 priorityscore=1501 lowpriorityscore=0
- malwarescore=0 adultscore=0 suspectscore=0 clxscore=1015 impostorscore=0
+ impostorscore=0 spamscore=0 priorityscore=1501 malwarescore=0 clxscore=1015
+ lowpriorityscore=0 bulkscore=0 adultscore=0 suspectscore=0 phishscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2603050001 definitions=main-2604020153
+ reason=mlx scancount=1 engine=8.22.0-2603050001 definitions=main-2604020159
 
-Hi Ilya,
-
-Following up with the additional data I promised. I reproduced the
-issue on a fresh cluster and have concrete evidence of the namespace
-problem.
-
-Environment (4-node cluster, 2 controllers + 2 workers):
-
-  $ kubectl get nodes
-  NAME           STATUS   ROLES           KERNEL-VERSION
-  compute-0      Ready    <none>          6.12.0-1-rt-amd64
-  compute-1      Ready    <none>          6.12.0-1-rt-amd64
-  controller-0   Ready    control-plane   6.12.0-1-amd64
-  controller-1   Ready    control-plane   6.12.0-1-amd64
-
-  - OS: Debian GNU/Linux 11 (bullseye)
-  - Container runtime: containerd 1.7.27
-  - Kubernetes: v1.29.2
-  - Rook: v1.16.6
-  - ceph-csi: v3.13.1
-  - Ceph: 18.2.5 (Reef)
-  - Network: Calico + Multus, IPv6-only
-  - Pod CIDR: dead:beef::/64 (Calico, vxlanMode: Never)
-  - Service CIDR: fd04::/112
-  - CSI_FORCE_CEPHFS_KERNEL_CLIENT: true
-  - CSI_ENABLE_HOST_NETWORK: true
-
-The scenario is a Rook-Ceph rolling upgrade (Ceph 18.2.2 -> 18.2.5).
-During the upgrade, Rook recreates the CSI DaemonSet pods and various
-Ceph daemon pods (MON, MDS, OSD). Kubelet then needs to remount
-CephFS volumes for workload pods on the node.
-
-After the upgrade, the kernel ceph client is stuck with permanent
-EADDRNOTAVAIL (-99) on all monitor connections:
-
-  libceph: connect (1)[fd04::652b]:6789 error -99
-  libceph: mon0 (1)[fd04::652b]:6789 connect error
-
-The monitors are Kubernetes ClusterIP services:
-
-  rook-ceph-mon-a  ClusterIP  fd04::652b  6789/TCP,3300/TCP
-  rook-ceph-mon-b  ClusterIP  fd04::c0e7  6789/TCP,3300/TCP
-  rook-ceph-mon-c  ClusterIP  fd04::1981  6789/TCP,3300/TCP
-
-Here is the key evidence. The kernel ceph client debugfs status shows:
-
-  $ cat /sys/kernel/debug/ceph/*/status
-  instance: client.374328 (3)[dead:beef::a2bf:c94c:345d:bc66]:0
-
-The source address dead:beef::a2bf:c94c:345d:bc66 is from the Calico
-pod CIDR (dead:beef::/64). This address does NOT belong to any
-currently running pod on the node. I enumerated all active CNI
-namespaces:
-
-  $ for ns in $(ip netns list | awk '{print $1}'); do
-      ip netns exec $ns ip -6 addr show | grep dead:beef
-    done
-
-  ...bc6d  kube-sriov-cni-ds
-  ...bc70  stx-centos
-  ...bc73  rook-ceph-mon-a
-  ...bc74  rook-ceph-crashcollector
-  ...bc75  rook-ceph-exporter
-  ...bc76  rook-ceph-mgr-c
-  ...bc78  rook-ceph-osd-0
-
-Address ...bc66 is not present in any existing namespace. The pod
-that owned it was destroyed during the upgrade, and Calico removed
-its veth interfaces during CNI cleanup.
-
-Meanwhile, the CSI plugin pod is correctly in the host namespace:
-
-  $ kubectl exec csi-cephfsplugin-gdrqr -c csi-cephfsplugin \
-      -- readlink /proc/1/ns/net
-  net:[4026531840]
-
-  $ readlink /proc/1/ns/net   # on host
-  net:[4026531840]
-
-And from host userspace, connecting to the same ClusterIP monitors
-works fine (goes through kube-proxy iptables DNAT):
-
-  $ python3 -c "import socket; s=socket.socket(socket.AF_INET6, \
-      socket.SOCK_STREAM); s.connect(('fd04::652b', 6789)); print('OK')"
-  OK
-
-But ping6 from host fails (ICMP not NAT'd by kube-proxy):
-
-  $ ping6 -c1 fd04::652b
-  From fdff:719a:bf60:4008::46e icmp_seq=1 Destination unreachable: No route
-
-So the situation is:
-  1. The kernel ceph client captured a pod network namespace at mount
-     time (source address from dead:beef::/64 proves this)
-  2. That pod was later destroyed during the upgrade
-  3. Calico tore down the veth interfaces in that namespace
-  4. The namespace persists (ref-counted by ceph) but has no
-     interfaces or routes -- it is a zombie namespace
-  5. All kernel ceph connect() calls fail with EADDRNOTAVAIL
-  6. No recovery is possible without force-unmount + remount
-
-As you noted, this is the "orchestration tearing down the relevant
-virtual network devices prematurely" scenario. The namespace is kept
-alive by the ceph reference, but it becomes non-functional.
-
-I'm still investigating exactly how mount.ceph ends up in a pod
-namespace despite the CSI plugin having hostNetwork: true. I have a
-monitoring script set up to capture the namespace of mount.ceph
-processes during the next upgrade attempt. I suspect it happens
-during the brief window when the old CSI pod is terminated and the
-new one is not yet ready, but kubelet still attempts to mount
-volumes. I'll follow up with that data.
-
-I've also filed this on the Ceph tracker:
-  https://tracker.ceph.com/issues/74897
-
-Thanks,
-Ionut
+T24gVHVlLCAyMDI2LTAzLTMxIGF0IDE3OjAxICswMDAwLCBWaWFjaGVzbGF2IER1YmV5a28gd3Jv
+dGU6DQo+IE9uIE1vbiwgMjAyNi0wMy0zMCBhdCAxNzowNCArMDAwMCwgVmlhY2hlc2xhdiBEdWJl
+eWtvIHdyb3RlOg0KPiA+IE9uIEZyaSwgMjAyNi0wMy0yNyBhdCAxODo0NCArMDAwMCwgVmlhY2hl
+c2xhdiBEdWJleWtvIHdyb3RlOg0KPiA+ID4gT24gRnJpLCAyMDI2LTAzLTI3IGF0IDE3OjIzICsw
+MTAwLCBNYXggS2VsbGVybWFubiB3cm90ZToNCj4gPiA+ID4gDQo+IA0KPiA8c2tpcHBlZD4NCj4g
+DQo+ID4gPiANCj4gPiA+IExldCBtZSBydW4geGZzdGVzdHMgZm9yIHRoZSBwYXRjaCB0byBkb3Vi
+bGUgY2hlY2sgdGhhdCBldmVyeXRoaW5nIHdvcmtzIHdlbGwuDQo+ID4gPiANCj4gPiANCj4gPiBJ
+IGhhZCBtdWx0aXBsZSB4ZnN0ZXN0cyBpc3N1ZXMgZHVyaW5nIGxhc3QgcnVuLiBNb3N0IHByb2Jh
+Ymx5LCBpdCB3YXMgc29tZQ0KPiA+IGdsaXRjaCBvbiBteSBzaWRlIG9yIGluY29uc2lzdGVudCBi
+dWlsZC4gSSBuZWVkIHRvIHJlcGVhdCB0aGUgeGZzdGVzdHMgcnVuIHdpdGgNCj4gPiB0aGUgcGF0
+Y2guDQo+ID4gDQo+IA0KPiBTb3JyeSwgaXQgbG9va3MgbGlrZSA3LjAtcmM1IGhhcyBzb21lIGlu
+Y29uc2lzdGVudCBzdGF0ZS4gTGV0IG1lIHN3aXRjaCBvbiA3LjAtDQo+IHJjMSBiZWNhdXNlIEkg
+d2FzIGFibGUgdG8gcnVuIHhmc3Rlc3RzIHN1Y2Nlc3NmdWxseSBiZWZvcmUgb24gNy4wLXJjMS4N
+Cj4gDQo+IA0KDQpGaW5hbGx5LCBJIG5lZWRlZCB0byBkZXBsb3kgZnJlc2ggQ2VwaCBjbHVzdGVy
+IGFuZCBJIHJhbiB0aGUgeGZzdGVzdHMgd2l0aA0KYXBwbGllZCBwYXRjaCBmb3IgNy4wLXJjNiB2
+ZXJzaW9uLiBJIGRvbid0IHNlZSBhbnkgbmV3IGlzc3VlcyByZWxhdGVkIHRvIHRoZQ0KcGF0Y2gu
+DQoNClRlc3RlZC1ieTogVmlhY2hlc2xhdiBEdWJleWtvIDxTbGF2YS5EdWJleWtvQGlibS5jb20+
+DQoNClRoYW5rcywNClNsYXZhLg0K
