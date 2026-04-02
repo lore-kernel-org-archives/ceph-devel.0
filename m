@@ -1,70 +1,70 @@
-Received: from mail-pg1-f180.google.com (mail-pg1-f180.google.com [209.85.215.180])
+Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CED333AD53D
-	for <ceph-devel@vger.kernel.org>; Thu,  2 Apr 2026 11:02:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12D82346766
+	for <ceph-devel@vger.kernel.org>; Thu,  2 Apr 2026 11:02:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775127732; cv=none; b=O4LyOFp/r1N+JvVUYz2OMO/NxzLNgTTyFA4AwGUEaAKrBsA4vRgfHCblO7TulqladBEv6Qd4iHJqf9koPXKnh7T4TASJxYXBh0Z+dB/DFZcNTDSRRxx6pR9P9XhNm6ksGNo9GF036DWBqxa2MVJC+iH8VcGKuD+/mx85zaKcgbI=
+	t=1775127762; cv=none; b=OiKZ/ElYVxePYl4xt5viCysMeGEa8WLV3PJuvhkFCf01tRnL3a1KuW1pAK2LsLYXRiN/5xQO99Iq3u/5gw+PhJ70qfFXeidDxx9OTnbJzC6cLfoajir8DqxyPQf7OOr9kPAJZpBzirOtbYbb3urYlcLb3pq6++0GoUwmjHnlFjg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775127732; c=relaxed/simple;
-	bh=P9jaeAAPUa91hJxiCcSwpe3gnKmrQH4sDeRL3TGRa+g=;
-	h=Message-ID:From:To:Cc:Subject:Date:MIME-Version:Content-Type; b=CxiXpf75tab4jEfojThg2MLk8z9rLGiqnbgZVpaX0mR8pMTYRxa4CO8lDFvSn8DMs2G+fnuSuZ18dvNZ9F2CiRvaZDXyGPgEX00cLEUqfnKwpPTZQ5bAWqZwIIWt1Er7wyY6TMdH4NNehtbsardV4ifROIE0tecgivbP8bnI8bE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aYgJcR5i; arc=none smtp.client-ip=209.85.215.180
+	s=arc-20240116; t=1775127762; c=relaxed/simple;
+	bh=TV/v07Ls87GlweaK/zjI1EApvWQBaTcyje+xlVKZI54=;
+	h=Message-ID:From:To:Cc:Subject:Date:MIME-Version:Content-Type; b=mKb+q0AFVAfWWTmT2Gd5ApI1TSWtSIKLBB4bQIhf9lEx5c93evJ/H+YRwFfbCj3Ue54/JKA/7gm44511ZQqyzaBjy61zz8P2t/hzzauD2AUvmjfSuvW58PXI1+Xwi/gRNLriRfroGWggehOQQJQnig864tAOBUCqqeldxMkQ1sg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DCIHWI3M; arc=none smtp.client-ip=209.85.210.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aYgJcR5i"
-Received: by mail-pg1-f180.google.com with SMTP id 41be03b00d2f7-b6ce6d1d3dcso252907a12.3
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Apr 2026 04:02:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DCIHWI3M"
+Received: by mail-pf1-f174.google.com with SMTP id d2e1a72fcca58-82748257f5fso1157957b3a.1
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Apr 2026 04:02:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1775127729; x=1775732529; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1775127759; x=1775732559; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:date:subject:cc:to:from
          :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=43IDfHN9SDlVKzIfEL7sbw3pEOqT5HUgjt45m3HB6E4=;
-        b=aYgJcR5ibOBVjndcM8R2JmNiFevMiY8L+nefOeXYIRTqQXNZLUmvAoRp86U+TUCVJB
-         D8y0BZwMs4Rb304fepZbCWUKoFph50HhRVdbDeqqN49OLkqXOTJA9hhvOIdJmPvUMb4m
-         wVBDA9QcxgAr74dcv+b0NOqnYOJkhdOqPDGAw+6G1QsyNanMZj8wauPgAZmw2BGeb5Hx
-         UjeUwwY54saEBiPExx02belCLqUoer0qlwBcZ+0DKG5Js+pD1wEirZSgMnePc+P47zyv
-         Dir8WP3fSgnnvWZfPFAiOT3xVJsUoR7sCAvviwY8DhW840HwTNn1GSnCyt/IZsJ5gf/F
-         IxSQ==
+        bh=bD6hxrjoL3zY29yjIFUvmOGd5Vvb3HUAvN0+0dLRAkA=;
+        b=DCIHWI3MyqFEnDCnDYlyGh+jpboaLW6UOdFqSoGliGTMTQ6TMK+8Ys48lgyrOCihH1
+         ilCg3cmg6YDAjkoKOm3NP9y924mQM6Yd/Kd2wvromT46pTJAqdSwVpd/2OcFZEhitFNo
+         TDkBajySYUK02BlTMVrBYa2xdIKdkW9mQSrGTEEziEbO7qJwLL3UexSFb+9bdP8KJkPY
+         br6cjcR8oIfXdMMEv6KWVM2kdVy92rupZ6opoZUm+UYVj1AkU6Ria1a2Cf9FUnB/eHq4
+         M2ASeqf36bDoliMRGVDKUL5ArNCVc2qyRxDBgEPvvUEAyGJSX+4qW5cZVbRTsvWHFVFK
+         v7YQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775127729; x=1775732529;
+        d=1e100.net; s=20251104; t=1775127759; x=1775732559;
         h=content-transfer-encoding:mime-version:date:subject:cc:to:from
          :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=43IDfHN9SDlVKzIfEL7sbw3pEOqT5HUgjt45m3HB6E4=;
-        b=C/uwHAv4S6Oq4pTAjyNMPuIbAepRAZEpbc2O3BSTGm44+MLcewt0do6+yNvI/R0uqn
-         CU/dx3xlsbsbGrFI3qUlVSxOjnfTSogYDf0qrFmU65gj9gZVySvJ2a7hF9A9Yb/nLwuM
-         3nJSRc4qO1eFZ06UcydA1Nb4Ajk1ed+r3gtu8AP2pEoe8tq+kSC42ONmdsNDJku11Tj+
-         OMdG31ddV8xmT+LNIyeQqC08elTaKbpnAoVPobUS0g6U67jgWLakMWEmpsubkrERLFgP
-         ECtB2I7mUSnsXSdPJIu41I2mQS2lrDO9A29J5yalSDfeYR0diVGloqGzEGfSmXBMSw93
-         ac4Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWPErqaDyzl8nbuNNcCB+suMmDz1js3bJaSJqP5kOVUqa7y81a5QPJUUliOsivujoXDRAQspg2AZ8Lx@vger.kernel.org
-X-Gm-Message-State: AOJu0YzlUPTp2TzLxJK5Vt5k4GZaBrTwmULPo167IPToQimis4XS/so4
-	ofy0oOGrFz9hKyzaya2nPliPCeiWkdrkQeJ/DF+g66kAQ6Z3LWDOWrZ+CphwnoR9Owc=
-X-Gm-Gg: AeBDieuM4U0GoG/Y9XqRCuwRTbQc890V77WJAXiMp9uLXur6SOBu+dlrS/c+DKyDYlb
-	wUUvKv4hLryDey6UelKoJ50bWv0f3SH/h+2Ibh5VAnc3OdjZLsmIDkPOyyN4PprqrrN6TvHatV+
-	ZTOwvpdkcEC81lsq1AVk2+hlo/SeHXIHMoel02bbrB6hwYq3833GgCWgN3cmnjvWOdjbliIdZJ2
-	RMenQaziVQoPVcEn1DD+yXpL4qq+KzDQs0DMAFLvkkzwojHE4GR5O0uRbbm9JKT8JmJTFqaUf+f
-	qWtcLCZLeBi8y0stUTWwTgO/XIzbbVR3n7TwY9eetO+Xa+yTfN3wY/BL+2GinkBJmDxk9vQIen1
-	JZuuZyV/hRnYcITAq6ziluikkKsPC4e8E40rH5V9MWqDHscYXRdIc8m+EQ8qKKuZGDzlbbtdxB3
-	9EFI9dH6GNsYcq25ymIXY=
-X-Received: by 2002:a17:902:ef43:b0:2b2:5258:a23d with SMTP id d9443c01a7336-2b2758be62bmr29665045ad.14.1775127728937;
-        Thu, 02 Apr 2026 04:02:08 -0700 (PDT)
+        bh=bD6hxrjoL3zY29yjIFUvmOGd5Vvb3HUAvN0+0dLRAkA=;
+        b=KEQP5xzlJPAXKIvGJTkcgF8z2S4sG0NVYhVI5T7aRg6newUoNrskD8h4tY6TtOOamy
+         rkfmr9OPrk36MhnaHdsNli74WTZo3TBfxITe+xBx8kMbyDBQTMsXOWlgROOhHQmnuPCh
+         7o/gmMRgi0+Bs4owMLkgpFesdBe1xUMRsfhI+s0bjKoF0L3dXhhjO5aWupLqbk2rqp6b
+         2tQ52ICaOjHtN1BD9pgcUq74dup1iPJBlHMDUHOs9R4F6hIoHWboaxBU2UjN4L8fcBW3
+         FAiBaAAox3JERdPFmEvK8inzbQfiW2PakJS/ZyFsq9K/dEruCgjUs9WYOAv7Ttl1tUIk
+         542g==
+X-Forwarded-Encrypted: i=1; AJvYcCXFfCSvlGe+t5IaOcS6c8bfjhWWJFXOqOhHsKAMWGI+kc4YIzVS9WZkp64ClMCyhTu47XlINQ+zXNXy@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx2mmRnOGp0sjdye0balCt24YPXiZhhsg8ufggvl5tC+mz15FAf
+	yG3pjSZ5WkqjilVTY9Mv5kgLpUDiMGIHfBXqCJjAKqwvs3Q7o2ZU19P6
+X-Gm-Gg: ATEYQzzt6fsevVS1qu6ONvSfB3QI5ruAqurwmtoIHeFvrQOPKUGNr1ZbxTjjKrMk3tj
+	0G1cJSY58RvU6LlY5sZxLZH3oXpe6kiNl8aVma0Xwute7PBTHwBr2hh1fQm7sPHG2u7xWEPW1Xy
+	QH62by0Eeeq25HXxodw7x3+PUyWRSn0J8dhJk4JaAGUW5ZljtmMzbuP0rrRVHwoBUIr6LkdrKfM
+	A7AIkiCocvuk9ckOd8KcN8ecj4amp0AkA50q+onzzmrfiGwsbPG/DXD27qh1SaXO7TvIjraMLiB
+	7dRYQevN8Ed5qVr2I95qjBbkEmN5Htwd4oVhPiLiRcJJ1Pb05/dsjuWMaN46rAkHiCxzUXO2xls
+	dCK6+v08JH1xBc/BkU/QQ0pEWHEwo5gY5XRMUoE5UQLBjg+aNfQVlCXO2meKU3T5PE4RWeGtc2W
+	zSJzMwQfqVoEDjHXIzhPA=
+X-Received: by 2002:a05:6a00:1ad3:b0:82a:6e4b:5b4d with SMTP id d2e1a72fcca58-82d0035bd98mr1788145b3a.23.1775127759155;
+        Thu, 02 Apr 2026 04:02:39 -0700 (PDT)
 Received: from localhost ([137.132.22.254])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b27475ff56sm25452745ad.22.2026.04.02.04.02.08
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-82cf9b3baffsm2812910b3a.14.2026.04.02.04.02.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 02 Apr 2026 04:02:08 -0700 (PDT)
-Message-ID: <69ce4cb0.170a0220.1c00f7.f5f4@mx.google.com>
+        Thu, 02 Apr 2026 04:02:38 -0700 (PDT)
+Message-ID: <69ce4cce.050a0220.83ffb.e251@mx.google.com>
 From: ven0mfuzzer <ven0mkernelfuzzer@gmail.com>
 To: Viacheslav Dubeyko <slava@dubeyko.com>,
         Ilya Dryomov <idryomov@gmail.com>,
         Alex Markuze <amarkuze@redhat.com>
 Cc: linux-kernel@vger.kernel.org,
         ceph-devel@vger.kernel.org
-Subject: [BUG] OrangeFS Kernel Client Slab-Out-of-Bounds Read in _copy_from_iter
-Date: Thu, 02 Apr 2026 19:02:07 +0800
+Subject: [BUG] OrangeFS Kernel Client Use-After-Free in atomic_dec_and_lock
+Date: Thu, 02 Apr 2026 19:02:37 +0800
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -75,30 +75,30 @@ Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 X-Mailer: KernelStackFuzz send_email.sh
 
-OrangeFS Kernel Client Slab-Out-of-Bounds Read in _copy_from_iter
+OrangeFS Kernel Client Use-After-Free in atomic_dec_and_lock
 
   1. Vulnerability Title
 
-Linux Kernel OrangeFS/Ceph Client Slab-Out-of-Bounds Read via Corrupted Message Length in _copy_from_iter
+Linux Kernel OrangeFS/Ceph Client Use-After-Free Write in atomic_dec_and_lock via Corrupted Server Response (ceph_put_snapid_map)
 
   2. High-Level Overview
 
-A slab-out-of-bounds read vulnerability exists in the Linux kernel's OrangeFS/Ceph messaging layer. When the OrangeFS kernel client receives a server response with a corrupted `front_len` or `data_len` field, the ceph messenger (MSGR v1) trusts the peer-supplied length without validation. This causes `_copy_from_iter()` to read up to 31,793 bytes from a 4,096-byte slab object during `tcp_sendmsg_locked()`, overreading 27,697 bytes of adjacent kernel heap memory.
+A use-after-free write vulnerability exists in the Linux kernel's Ceph filesystem layer, triggered via the OrangeFS kernel client. When a corrupted OrangeFS/Ceph server response causes inode state to become inconsistent, the `snapid_map` object is freed prematurely. A subsequent directory operation (`mkdir` → `lookup` → `d_invalidate` → `iput` → `evict`) calls `ceph_evict_inode()` → `ceph_put_snapid_map()`, which performs an `atomic_dec_and_lock()` on the already-freed `snapid_map` object — a 4-byte use-after-free write.
 
-Because the overread data is subsequently transmitted over the network via `tcp_sendmsg`, an attacker controlling or intercepting the OrangeFS server connection can receive leaked kernel heap contents — a direct kernel heap information disclosure primitive that could reveal KASLR base, cryptographic keys, or other sensitive kernel state.
+This is a moderate-severity vulnerability: the corrupted response may cause premature freeing of the snapid_map object, potentially leading to kernel memory corruption or denial of service when subsequently accessed.
 
 This vulnerability was discovered using ven0mfuzzer, our custom-designed MITM-based network filesystem fuzzer developed by our team. Following the common syzkaller practice, we submit the kernel crash trace as the primary reproduction artifact.
 
   3. Affected Product and Version Information
 
 Product: Linux Kernel (upstream mainline)
-Affected Component: `fs/orangefs/` — OrangeFS kernel client; `net/ceph/messenger_v1.c` — Ceph MSGR v1 transport layer
+Affected Component: `fs/ceph/snap.c` — `ceph_put_snapid_map()`; `fs/orangefs/` — OrangeFS kernel client triggering the code path
 
   Tested Version (confirmed vulnerable)
 - Linux kernel 6.19.0 (mainline, commit `44331bd6a610`, gcc 11.4.0, built with KASAN + LOCKDEP + UBSAN + KFENCE)
 
   Affected Version Range
-All kernels with `CONFIG_ORANGEFS_FS=y` that use the ceph messenger v1 transport are believed affected. OrangeFS uses the ceph MSGR protocol internally for BMI/TCP communication.
+All kernels with `CONFIG_ORANGEFS_FS=y` and `CONFIG_CEPH_FS=y` are believed affected.
 
   Affected Environments
 
@@ -112,94 +112,88 @@ All kernels with `CONFIG_ORANGEFS_FS=y` that use the ceph messenger v1 transport
 
   4.a. Detailed Description
 
-The OrangeFS kernel client communicates with the pvfs2-client-core userspace daemon, which relays requests to the OrangeFS server over BMI/TCP (port 3334). The ceph messenger v1 protocol is used as the transport layer. When a message is constructed via `ceph_msg_new2()`, a buffer of `front_len` bytes is allocated (typically 4,096 bytes). However, when the server response contains a corrupted (inflated) length field, the `iov_iter` that wraps this buffer is configured with the corrupted length rather than the actual allocation size. When `ceph_con_v1_try_write()` calls `ceph_tcp_sendmsg()` → `tcp_sendmsg_locked()` → `_copy_from_iter()`, the copy operation reads far beyond the allocated buffer boundary.
+The OrangeFS kernel client shares infrastructure with the Ceph filesystem, including inode management and snapid mapping. When a MITM-corrupted server response causes the kernel to build an inode with inconsistent snapshot state, the `snapid_map` reference count becomes mismanaged. The corrupted response leads to a premature free of the `snapid_map` object. When a subsequent directory operation triggers inode eviction via `ceph_evict_inode()`, it calls `ceph_put_snapid_map()` which performs `atomic_dec_and_lock()` on the already-freed memory — a 4-byte write to freed slab memory.
 
-The core issue is that the ceph messenger trusts peer-supplied message lengths without bounds-checking them against the actual allocated buffer size.
+The fundamental issue is that the OrangeFS/Ceph client does not validate server-supplied inode attributes before using them to initialize internal kernel structures. Corrupted attributes lead to refcount mismanagement and eventually use-after-free.
 
   4.b. Code Flow
 
 ---
-ceph_con_v1_try_write()                    [net/ceph/messenger_v1.c]
-  → prepare_write_message_footer()
-    → ceph_tcp_sendmsg()
-      → sock_sendmsg()
-        → tcp_sendmsg_locked()
-          → _copy_from_iter(31793 bytes)   ← reads 27697 bytes past 4096-byte buffer
----
+[Initial corruption — premature free]
+pvfs2-client-core → /dev/pvfs2-req
+  → orangefs_inode_getattr()
+    → [corrupted inode attributes from server]
+      → [snapid_map refcount becomes inconsistent]
+        → [premature kfree of snapid_map]
 
-The allocation path:
+[Trigger path — UAF write]
+mkdir(2)
+  → lookup_one_qstr_excl()
+    → lookup_dcache()
+      → d_invalidate()
+        → shrink_dcache_tree()
+          → shrink_dentry_list()
+            → __dentry_kill()
+              → dentry_unlink_inode()
+                → iput()
+                  → evict()
+                    → ceph_evict_inode()
+                      → ceph_put_snapid_map()
+                        → atomic_dec_and_lock()    ← UAF WRITE (4 bytes)
 ---
-ceph_msg_new2()                            [net/ceph/messenger.c]
-  → __kvmalloc_node_noprof(4096)           ← allocates 4096-byte front buffer
----
-
-The mismatch: `iov_iter` length = 31,793 (from corrupted response), actual buffer = 4,096 bytes.
 
   4.c. Crash Trace
 
 This vulnerability was discovered by ven0mfuzzer. The following kernel trace is submitted following syzkaller's common practice of providing the raw crash trace as the primary reproduction evidence:
 
 ---
-BUG: KASAN: slab-out-of-bounds in _copy_from_iter+0x9e9/0x1690
-Read of size 31793 at addr ffff888117449000 by task kworker/1:2/155
+BUG: KASAN: slab-use-after-free in atomic_dec_and_lock+0x24/0x120
+Write of size 4 at addr ffff888109374a68 by task mkdir/905
 
-CPU: 1 UID: 0 PID: 155 Comm: kworker/1:2 Not tainted 6.19.0-g44331bd6a610-dirty #9 PREEMPT(lazy)
+CPU: 1 UID: 0 PID: 905 Comm: mkdir Tainted: G W 6.19.0-g44331bd6a610-dirty #9 PREEMPT(lazy)
 Hardware name: QEMU Standard PC (i440FX + PIIX, 1996)
-Workqueue: ceph-msgr ceph_con_workfn
 Call Trace:
  <TASK>
  dump_stack_lvl+0xc6/0x120
  print_report+0xce/0x660
  kasan_report+0xe0/0x110
  kasan_check_range+0x105/0x1b0
- __asan_memcpy+0x23/0x60
- _copy_from_iter+0x9e9/0x1690
- tcp_sendmsg_locked+0x1d70/0x3f70
- tcp_sendmsg+0x2e/0x50
- inet_sendmsg+0xb9/0x140
- sock_sendmsg+0x359/0x450
- ceph_tcp_sendmsg+0xda/0x140
- prepare_write_message_footer+0x297/0x4f0
- ceph_con_v1_try_write+0xcf0/0x24d0
- ceph_con_workfn+0x40c/0x1340
- process_one_work+0x962/0x1a40
- worker_thread+0x6ce/0xf10
- kthread+0x378/0x490
- ret_from_fork+0x676/0xac0
+ atomic_dec_and_lock+0x24/0x120
+ ceph_put_snapid_map+0x3f/0x260
+ ceph_evict_inode+0x2e8/0x890
+ evict+0x3c2/0xad0
+ iput+0x79a/0xd30
+ dentry_unlink_inode+0x29c/0x480
+ __dentry_kill+0x1d0/0x600
+ shrink_dentry_list+0x134/0x680
+ shrink_dcache_tree+0x100/0x5e0
+ d_invalidate+0x13a/0x290
+ lookup_dcache+0x13c/0x170
+ lookup_one_qstr_excl+0x2a/0x250
  </TASK>
-
-Allocated by task 674:
- __kvmalloc_node_noprof+0x332/0x910
- ceph_msg_new2+0x284/0x4e0
- ceph_monc_init+0x69e/0xcc0
- ceph_create_client+0x25b/0x370
- ceph_get_tree+0x1bd/0x1780
- vfs_get_tree+0x8e/0x330
- path_mount+0x79a/0x2370
- __x64_sys_mount+0x293/0x310
-
-The buggy address belongs to the object at ffff888117449000
- which belongs to the cache kmalloc-4k of size 4096
-The buggy address is located 0 bytes inside of
- allocated 4096-byte region [ffff888117449000, ffff88811744a000)
 ---
 
-Reproduced 3 times independently.
+Reproduced 1 time.
 
   4.d. Suggested Fix
 
-Validate peer-supplied message lengths against actual buffer allocations before constructing the `iov_iter`:
+Add refcount validation in the inode initialization path when processing server-supplied attributes, and validate `snapid_map` is not already freed before decrementing:
 
 ---
-/ In ceph messenger v1 write path, cap iov_len to actual allocation /
-if (msg->front.iov_len > msg->front_alloc_len) {
-    pr_warn("ceph: msg front_len %zu exceeds alloc %zu, truncating\n",
-            msg->front.iov_len, msg->front_alloc_len);
-    msg->front.iov_len = msg->front_alloc_len;
+/ In ceph_put_snapid_map(), add a refcount sanity check /
+void ceph_put_snapid_map(struct ceph_snapid_map *sm)
+{
+    if (!sm)
+        return;
++   if (WARN_ON(refcount_read(&sm->ref) == 0))
++       return;
+    if (atomic_dec_and_lock(&sm->ref, &snap_empty_lock)) {
+        ...
+    }
 }
 ---
 
-Additionally, the incoming message header's `front_len` should be validated during `ceph_con_v1_try_read()` before allocating/reusing buffers.
+The deeper fix should validate server-supplied inode attributes before using them to initialize internal kernel structures.
 
   5. Discovery Method and Reproduction
 
@@ -217,7 +211,7 @@ VM-A (pvfs2 client + pvfs2-client-core) ──BMI/TCP port 3334──► Host (M
 
 - Kernel: Linux 6.19.0 (commit `44331bd6a610`) with KASAN + LOCKDEP + UBSAN + KFENCE enabled
 - Server: OrangeFS 2.10.0 (compiled with AddressSanitizer)
-- Trigger: MITM mutation of the MSGR v1 message length field in server→client responses during normal file operations (touch, ls, mkdir, dd)
+- Trigger: MITM mutation of server responses during directory operations causes inode corruption → premature snapid_map free → UAF on subsequent operation
 - No standalone PoC — the crash trace above serves as the reproduction artifact
 
 ---
