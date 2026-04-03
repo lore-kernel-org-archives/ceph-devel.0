@@ -1,115 +1,104 @@
-Received: from mail-ej1-f42.google.com (mail-ej1-f42.google.com [209.85.218.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from cstnet.cn (smtp25.cstnet.cn [159.226.251.25])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0768A2701BB
-	for <ceph-devel@vger.kernel.org>; Fri,  3 Apr 2026 18:13:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775239995; cv=pass; b=aI1mWruSnPT65HE+9a8Y6+E386TGwElAfusQJNJ1IekkEkjOYDjifmb8SP7fx3L8GEHpvpWRTThvCmEDXu5lh3X/xQ3LE54dgDJ3k0gVcDdwqnEvIueiVoCsP7OQFx6nr+gk26uGlFbOB/2Ng8zR9UAQ1cYaGFbLVFFn+guoaoE=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775239995; c=relaxed/simple;
-	bh=ElB7ZuZLzGIcWqd5VRRtQQIBNNObowpCHWvdAYEp0Ls=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=RmhbCYMjfzMNLYN3IVvXv4vZsYxz1YWNejf1QdMjlXplS23E6mIQ8HO69XcyP2ao4qF3RDdHS5cEp6oVtT1OYoQfkv3BFKfZkkN0puEtrFoudcDb/anJKnbERw/cX/p1O3vCawT7IbtsAiki2/XefE6SBNK7AX1NRXi0W6XFjy4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=GVvl531T; arc=pass smtp.client-ip=209.85.218.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="GVvl531T"
-Received: by mail-ej1-f42.google.com with SMTP id a640c23a62f3a-b9b1ffbb9f5so237701466b.2
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Apr 2026 11:13:13 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1775239992; cv=none;
-        d=google.com; s=arc-20240605;
-        b=I0+dfN03cw7rBTJ/5iUeuwZduCbWLC20Ju0cZgE9CojxVj13OSgjQ0jwO5ddocKwHH
-         xERqdwKkJdu7z27USlE7Ta5CdzjrfKJ4bdmKKiNXHclLiSD1yAo1yirWZKnN3/P6voby
-         oHAb3p86mEzTg9RIUd93imm+74x0v+AJvfVxEdqbSOiBuvCC5PyHlpqOz+DXScAlO1G1
-         pg1zEfKxq6rltmSsGXQvivUT6oW5+GyIq859L0Kk+WDOnAJL+zaHQ6YD54jt0fhcjCqt
-         Me3kCypshXDUrOP19P8ZDxPFOc8cC/+pRHN+PlVYhx/SpCfJ8UGluLOjbfV29OW0CSCk
-         uC7g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=ElB7ZuZLzGIcWqd5VRRtQQIBNNObowpCHWvdAYEp0Ls=;
-        fh=cV8Ke9886QsAmHh3sFuoCgW0jetRgWbRSUPDPp6W40w=;
-        b=ImkSaWwbb//pj0msqfeyj1uxm1yl9pfUc24jyXdFYRXOaRwKsi9g+mr773ywwCjVmg
-         KHLyUA5NTkJ0rtrF2FkeDgSIKEp2xzp8HVXw0jXfJt3LUsXMExf++4mZvNb6/IVpx7v0
-         xVAyx9JZtkIrwaORrK61ODHGOTs3lYU2zQTA6oChpBCw4/Z7swe0uKHUAzaVUrpGPsun
-         03ytqctdCCXKTS0zYyEuPgX+7ZQ/wlwUzdLvHJUY9D0nWX0n1GfgiHTmIu08Nh76zRlv
-         IuGGe/mDh9K8TOR8RDg3v1tW1Y0kxQGz0FbiVoDDf9utbn/NB3uGavreD+mzPfe+YJCt
-         8ilw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1775239992; x=1775844792; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ElB7ZuZLzGIcWqd5VRRtQQIBNNObowpCHWvdAYEp0Ls=;
-        b=GVvl531TxMUOKpb0vNb+9XWD54gbzLa8iMX9bcfWNLMvhKREOiQUmVoaGUy7VTkiSq
-         U5qsESEgWGha73syRHIBhBjUjm0fcmyEyviElh5OB0Id2v/2NW8I+2iA5jrmoQv4jkdx
-         LNH9xl/kOIQAoOzOmZgTzeX285myu8rzd36mJd2DX/LJPt5Z40Q1HgEap3nrqwQIWwkH
-         PEQ7sgKqb+Kz5TKrykDt1pQ4E5s//1gwc7pPA6FaJWnsFmBGFAey+saFHCJwzFFMhTfQ
-         kc+qHL4vjYfW/5PXA0yL3EPSHJB3EFUFcwXQ/N3dM9xwevJCTZ5dZZKIU7yJOtYo1nfu
-         VuJQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775239992; x=1775844792;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=ElB7ZuZLzGIcWqd5VRRtQQIBNNObowpCHWvdAYEp0Ls=;
-        b=i12EsHFluwS9KuNzcWnDP9YPgWm8N2rqXgPLMRo6nx+SopvGhwoYbnaCRVra5lZN0u
-         YcYuR8oRmBdyCk6mbc2XmI8CJnMN1FB9+fJaiirxJ8upeja2euRg7HYuKAuIE0JkfDxD
-         XuTqqG9u3i68hCuIj8cx+Xx612+/Byvmcwu6O1fm8BC3HeW+kxF6uXxZrakjZ8lAJRsJ
-         nCQ+s/3xiNhTGUDcdqYTlxsKRz7V0z5wvtHJCb1Bo7FE1CE5ka6Zx0Cr5wKfdoxl77ag
-         KJqo/rh8FBXAQ+zRabjR8tWMxyWUb19CUYFQWVI2zTq4CwoFDcuTAWvYRtRnMLuviGcO
-         NQ/g==
-X-Forwarded-Encrypted: i=1; AJvYcCXZB8p6drRYFbLSK+R+yJzCrQ4oYSSbIzQBH4wvkqz2ezq6rUwegsJXRVZXhDZTwQ4nSw4PNfxIbycy@vger.kernel.org
-X-Gm-Message-State: AOJu0YzaFYjAkE4sry3hixAvQ30w6zzQ0rpxsUbLCLxs6BMGeZVokM6V
-	oNRkbM42Yxo8RcoOLieggyX0u+FytqdoLivu961ufqb0v+7WptEPxsRyK4MZG+kJrN6mQWCy2o0
-	t3QphKwxZrBq8r6uPI664kEfHF8OSA4ZnEJ400c6OzQ==
-X-Gm-Gg: AeBDiesrS0pAvnglSGEwHvSGfgFAgj0hYsgTNhotvAdm7jrnj5Bp7xbgFMpsekECAR4
-	UE8aSAsg4yyiNfqmBk6fiiphS7m0aYrATx+dIgBZVUzgAw8Sxnq9ywaaxuVHKxSar7ulIqTFIPN
-	7pRV+BUYN9R7ZjnnK6vWM4FUEAQ6LN3g3SJkd+DwpscZYbo8pq4/U12yH+Pp//l2sQ9b+y3Exbi
-	VTB6P4gsAdJL+tBedYU7k6xszu6Cjs65x3KabcQbEpfhQ/ueyejcXI1KetJuQ5JU8zzlcsF83g7
-	W3XHZqX7Owhnt10VLnAw5UxVnSPo26M/RsIP
-X-Received: by 2002:a17:907:c002:b0:b97:f22f:43c3 with SMTP id
- a640c23a62f3a-b9c67951924mr190315866b.31.1775239992468; Fri, 03 Apr 2026
- 11:13:12 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC549267AF2;
+	Sat,  4 Apr 2026 08:51:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.25
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1775292690; cv=none; b=HXYgDhEFqkUguwCZ98PoECr6o+wKYEf9JzduwrnH0inXeInrvOT8V+b1nBq1orUWzHXN2N252jNQzrALRkmQMNuiwj3vjtGTX+ecCkElZ7VrKyvANKcpJcK2zLBfvoGyL78XOQfc+rEKz7Bhm4/1OgvWH4yETjxNs0vBv32mVtk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1775292690; c=relaxed/simple;
+	bh=4UifaLmxQ5P51TnR+hoxOcIam9UOLneCJNLAc2O8s1M=;
+	h=From:Date:Message-ID:To:Cc:Subject; b=nl4GLBQvHBamg6fEWoLA3Knx4HKmPFraYdqayySBAe8+35J0fJ1G+vV+3mN2iy1exbmeyVb3+zW+xjpHHZLF1mG0BWgH/TGlvyiJ6wjmnOBXvL8KFZTnuQqhNLwJo4rOlfhhAekDRhIOnGyElaXbP8opdl5KdvCBgKM+XI9uhYk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.25
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
+Received: from 0003-ceph.eml (unknown [111.196.245.197])
+	by APP-05 (Coremail) with SMTP id zQCowADHVAgG0dBpB7VzDA--.7749S2;
+	Sat, 04 Apr 2026 16:51:18 +0800 (CST)
+From: Pengpeng Hou <pengpeng@iscas.ac.cn>
+Date: Fri, 3 Apr 2026 16:56:27 +0800
+Message-ID: <20260404101003.3-ceph-pengpeng@iscas.ac.cn>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, pengpeng@iscas.ac.cn
+Subject: [PATCH] ceph: bound encrypted snapshot suffix formatting
+X-CM-TRANSID:zQCowADHVAgG0dBpB7VzDA--.7749S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7Aw48JrWkGr18KryktFWrKrg_yoW8CFW8pF
+	1fKa45Kr4kJrs2kr97tFn5Wr95Aa95WF45Ca9rA3WfCws3Zr40q3ySkF1Y9FnrGF4fAFWU
+	tan5t34UCF4UtaDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUvl14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2jI8I6cxK6x804I0_Grv_XF1l8cAvFVAK0II2c7
+	xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2IY67AKxVW5JVW7JwA2z4x0Y4vE
+	2Ix0cI8IcVCY1x0267AKxVW8JVWxJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwV
+	C2z280aVCY1x0267AKxVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC
+	0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUXVWUAwAv7VC2z280aVAFwI0_Jr0_Gr
+	1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcVAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIF
+	xwCY1x0262kKe7AKxVWUAVWUtwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJV
+	W8JwC20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF
+	1VAFwI0_JF0_Jw1lIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6x
+	IIjxv20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvE
+	x4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvj
+	DU0xZFpf9x0JUDpnQUUUUU=
+X-CM-SenderInfo: pshqw1xhqjqxpvfd2hldfou0/
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20260401205613.2095623-1-max.kellermann@ionos.com>
- <dc807d60a59d18dca7a14256285b1cfdeb13d907.camel@redhat.com>
- <CAKPOu+9FvR-ZdhcQc-+KzVMgobCkrJpzEsJis2ekuz0zwC_qZQ@mail.gmail.com> <ff8929f3cc1ceb1fef43f292c9c5926a25d8336a.camel@redhat.com>
-In-Reply-To: <ff8929f3cc1ceb1fef43f292c9c5926a25d8336a.camel@redhat.com>
-From: Max Kellermann <max.kellermann@ionos.com>
-Date: Fri, 3 Apr 2026 20:13:01 +0200
-X-Gm-Features: AQROBzCml0wejgS8KWhp_lEvInrGoAcd3uhJWZZ3HEky3MQRfu_mu4yL7bGyHI4
-Message-ID: <CAKPOu+_ghf7cw8zT2K-hyKhdWiFaQss2jFQ-JsUUPBU0MmSFfQ@mail.gmail.com>
-Subject: Re: [PATCH] ceph: do not fill fscache for RWF_DONTCACHE writeback
-To: Viacheslav Dubeyko <vdubeyko@redhat.com>
-Cc: idryomov@gmail.com, amarkuze@redhat.com, ceph-devel@vger.kernel.org, 
-	dhowells@redhat.com, pc@manguebit.org, netfs@lists.linux.dev, 
-	linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Fri, Apr 3, 2026 at 7:18=E2=80=AFPM Viacheslav Dubeyko <vdubeyko@redhat.=
-com> wrote:
-> Why the offset is not good enough?
+`ceph_encode_encrypted_dname()` base64-encodes the encrypted snapshot
+name into the caller buffer and then, for long snapshot names, appends
+`_<ino>` with `sprintf(p + elen, ...)`.
 
-Because the "offset" variable tracks the whole write, including the
-folios that are supposed to be omitted from the fscache.
+Some callers only provide `NAME_MAX` bytes. For long snapshot names, the
+returned length also includes the leading underscore that stays in place
+ahead of the encoded text. On 64-bit kernels, a long inode suffix can
+push the final encoded name past `NAME_MAX` even though the encrypted
+prefix itself stayed within the documented 240-byte budget.
 
---=20
-Max Kellermann
-Principal Architect
-Hosting Technology
+Format the suffix into a small local buffer first and reject names whose
+suffix would exceed the caller's `NAME_MAX` output buffer.
 
-cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
-General information about the company can be found here:
-https://www.cm4all.com/impressum
-A member of the IONOS Group
+Signed-off-by: Pengpeng Hou <pengpeng@iscas.ac.cn>
+---
+ fs/ceph/crypto.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
+index f3de43ccb470..eeba8ffb0554 100644
+--- a/fs/ceph/crypto.c
++++ b/fs/ceph/crypto.c
+@@ -208,6 +208,7 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
+ 	struct ceph_client *cl = ceph_inode_to_client(parent);
+ 	struct inode *dir = parent;
+ 	char *p = buf;
++	char suffix[1 + 20 + 1];
+ 	u32 len;
+ 	int name_len = elen;
+ 	int ret;
+@@ -271,8 +272,20 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
+ 
+ 	/* To understand the 240 limit, see CEPH_NOHASH_NAME_MAX comments */
+ 	WARN_ON(elen > 240);
+-	if (dir != parent) // leading _ is already there; append _<inum>
+-		elen += 1 + sprintf(p + elen, "_%ld", dir->i_ino);
++	if (dir != parent) { // leading _ is already there; append _<inum>
++		ret = snprintf(suffix, sizeof(suffix), "_%lu", dir->i_ino);
++		if (ret < 0) {
++			elen = ret;
++			goto out;
++		}
++		if (ret >= NAME_MAX - elen) {
++			elen = -ENAMETOOLONG;
++			goto out;
++		}
++
++		memcpy(p + elen, suffix, ret);
++		elen += ret + 1;
++	}
+ 
+ out:
+ 	kfree(cryptbuf);
+-- 
+2.50.1 (Apple Git-155)
+
