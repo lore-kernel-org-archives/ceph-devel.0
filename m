@@ -1,104 +1,396 @@
-Received: from cstnet.cn (smtp25.cstnet.cn [159.226.251.25])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from mail-ua1-f53.google.com (mail-ua1-f53.google.com [209.85.222.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC549267AF2;
-	Sat,  4 Apr 2026 08:51:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.25
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775292690; cv=none; b=HXYgDhEFqkUguwCZ98PoECr6o+wKYEf9JzduwrnH0inXeInrvOT8V+b1nBq1orUWzHXN2N252jNQzrALRkmQMNuiwj3vjtGTX+ecCkElZ7VrKyvANKcpJcK2zLBfvoGyL78XOQfc+rEKz7Bhm4/1OgvWH4yETjxNs0vBv32mVtk=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775292690; c=relaxed/simple;
-	bh=4UifaLmxQ5P51TnR+hoxOcIam9UOLneCJNLAc2O8s1M=;
-	h=From:Date:Message-ID:To:Cc:Subject; b=nl4GLBQvHBamg6fEWoLA3Knx4HKmPFraYdqayySBAe8+35J0fJ1G+vV+3mN2iy1exbmeyVb3+zW+xjpHHZLF1mG0BWgH/TGlvyiJ6wjmnOBXvL8KFZTnuQqhNLwJo4rOlfhhAekDRhIOnGyElaXbP8opdl5KdvCBgKM+XI9uhYk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
-Received: from 0003-ceph.eml (unknown [111.196.245.197])
-	by APP-05 (Coremail) with SMTP id zQCowADHVAgG0dBpB7VzDA--.7749S2;
-	Sat, 04 Apr 2026 16:51:18 +0800 (CST)
-From: Pengpeng Hou <pengpeng@iscas.ac.cn>
-Date: Fri, 3 Apr 2026 16:56:27 +0800
-Message-ID: <20260404101003.3-ceph-pengpeng@iscas.ac.cn>
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, pengpeng@iscas.ac.cn
-Subject: [PATCH] ceph: bound encrypted snapshot suffix formatting
-X-CM-TRANSID:zQCowADHVAgG0dBpB7VzDA--.7749S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7Aw48JrWkGr18KryktFWrKrg_yoW8CFW8pF
-	1fKa45Kr4kJrs2kr97tFn5Wr95Aa95WF45Ca9rA3WfCws3Zr40q3ySkF1Y9FnrGF4fAFWU
-	tan5t34UCF4UtaDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUvl14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2jI8I6cxK6x804I0_Grv_XF1l8cAvFVAK0II2c7
-	xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2IY67AKxVW5JVW7JwA2z4x0Y4vE
-	2Ix0cI8IcVCY1x0267AKxVW8JVWxJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwV
-	C2z280aVCY1x0267AKxVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC
-	0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUXVWUAwAv7VC2z280aVAFwI0_Jr0_Gr
-	1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcVAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIF
-	xwCY1x0262kKe7AKxVWUAVWUtwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJV
-	W8JwC20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF
-	1VAFwI0_JF0_Jw1lIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6x
-	IIjxv20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvE
-	x4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvj
-	DU0xZFpf9x0JUDpnQUUUUU=
-X-CM-SenderInfo: pshqw1xhqjqxpvfd2hldfou0/
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 848EA283FC8
+	for <ceph-devel@vger.kernel.org>; Sat,  4 Apr 2026 15:17:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.53
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1775315842; cv=pass; b=n3hxKWnOJbwWzEl0cTsAAGTBy9VxgnzdZJmXUBboSz/TSukQe/uucKrn1hzykjSPRkF8DIBeKyHfV706yCtL4QaY4fzHfcWErdBm8G7B9jtjYlICdHu0zTN/+7g+aimCgHuLCHtCBeth/VqQe0FcoSt+fDfs2KTXZE/AfeEsJTg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1775315842; c=relaxed/simple;
+	bh=iJkUBTHI8W8Yq4GfHOouMA+FFui5r396sp7Kzj9EaR0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=eEjjubUby0kM2f2+bNzlP8hxIr7eYg/faLf3WQJBkUSNVXAlsXjg0o/Dxa+zw1NqxloSP0WvMakz1Tae8q1DDkO8n0K1TXOetmK049UwIwejXCzZ9NYq0ouRKgwESmeQ0oQgs+Jj8QSclCSWDqYVKz6e6ecrh5Tl7LiiBI4inLQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=s77Y1FzX; arc=pass smtp.client-ip=209.85.222.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="s77Y1FzX"
+Received: by mail-ua1-f53.google.com with SMTP id a1e0cc1a2514c-953b85a10bbso1796554241.3
+        for <ceph-devel@vger.kernel.org>; Sat, 04 Apr 2026 08:17:20 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1775315839; cv=none;
+        d=google.com; s=arc-20240605;
+        b=fqKUW3DIwI7tB10XZtNrd+W2hcIootfSM1xhpYDPvy1lVUeP2E6aItr84sYz6pqXAd
+         aNBRI/MbJJPjDVVr7TGt47TXz21P4sGTeXAftUUE5LXlgKKYWl1yAEmUdjeACk3Ixmhx
+         cL6eoXH8xraHcmEkGVijCApCjHrl/4j8tur4vA1/dCo+tXtPqBh1ZbXdUTxsoAP5DTMf
+         8GZOUcaRdWFV3k9J1AIJLkD2F7yIScUUsaF/D2DVHezhCC1UoB52KoCFEAcVSIq1fqM9
+         hwHgJwSBqRAZ10DYOxnKANAEUBsk5iV0BGsS1d2ffVFtddk8F6woG5loDOSuWR6uv2Qp
+         gcVw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=n1MY/rgzPW8aC/hTJxOzosMzWp+WcyNGjBARHB4s6mE=;
+        fh=7k3TzagI/jzsi2Ax8youYiiJHxFaEZpVG7Q9ipSBOjA=;
+        b=Yy7PMCwEkSRILBtocf3dPe4+8+K7oUOIlA859DfMwOPlHkCnOZlaMxIYHwSmdbszU6
+         CMAWWa/iiGjSaCKxWTjGVPzovOBG3ZwxE2h1eyF5HTVHBV/h0CiQ2pmhhofrogdeL43o
+         II6d8GHIVQqrjk5ci5h+OvvpDGEJQSOjCf4x6j7UL/JyYXjqrcNI7Fy0Ur2xnYgfTCk4
+         9gJ9lEi/3WZGRuKscWCReL68o6Qv9IEK9kzXiBzbf1uY1vQbnMqQTBK/Ri31gSRfMYI+
+         L/d+PdDa5lSsVOQCAIERTXbdKAvdHz/LtyGLwax9SqABRS57pIx1vKa3KDwKzNm4Gf37
+         NgPw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1775315839; x=1775920639; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=n1MY/rgzPW8aC/hTJxOzosMzWp+WcyNGjBARHB4s6mE=;
+        b=s77Y1FzXFarjgMt/1UF7yVWyGwofP1rrRJZ793/XKhISR6nPYvGAzxESq2L/Q8kK74
+         NFoEm5E6kfl4AivMnU/c+5VoDIjEbUVLnJvG75KOY2Ik0pKi4lT57u7z8zVH8oyZUP3H
+         okq0yfKsa+kX7zT8e3oFWM6jv0QAWdEfmni/hRZJ5Ws1zslDKPoYEsqUKHI1Z5mZ5wPd
+         g0m/5M+VHUg0oeftYfabAqfxbrAO0D3gQPtS1sM4OJMMcWNtD2Z9TwrFf4Fea4TkN5OQ
+         Ayife0wHbUDV1iFOf7Ja0EY8S5U9DqzKM/ZzVboKjrNZMOWTv7dUw9Gc+U9JIOVAolkr
+         e3rw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1775315839; x=1775920639;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=n1MY/rgzPW8aC/hTJxOzosMzWp+WcyNGjBARHB4s6mE=;
+        b=EuzwFh8t8Xzk7dFsOVM1bqTXd2o25zaynn+14EOKbUbLwOozdgLuhis/aWfv7KS7DQ
+         dpNwMF1XuytJzkxJzPoBOyZ1WZZEsRDlq5NG3/fvr0uzMWZ+cqFA9hJcqBRAtGpqgB7Y
+         kAiMi1RgJxrd1uif/NYu6bHurnybfrufn/rN+xvMLClnx0trFcBWbHaCcO2fNsSq/H99
+         /Y/yxESsyOq4X0hCjtY4T/b4F763xCLQNzhKk7Gj/h/T8YX1RkFlfUy/yL1LOpmBjgGj
+         CzeHmGS+cnVm4q4jvMkjqrjKtOvpCydaajFtyOiQeUSHPH2oeAYbexKl495AW5lFYhNW
+         GlOQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWERkYAjeWjgA9Ljr3hALMdMC7aUmv5dPDesJroQc/cKut3YzUqD4ySyMTip7hHf3Wcp7UdQzre8VYC@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxpz3RmzLfrt2eHsYCxF8ibfj2Rw4HkiDCpvtuZpR6Ll5Cy69rr
+	XRRBFwij0FXnMHBoBNyOkhaStwKSvAEmk/+3T9yr+p7TK6cqj2WXkTS6R1CZ+Y4CGX48mD0jADx
+	TPl9oyf0pw2AC4gV5nZ0JxPi1ph9rR3g=
+X-Gm-Gg: AeBDietahcq+dOJwZXdHI9CoJxb3zXHZ2Jpr5eJ9K0wOUe4qcUWFDrRIm9ka+QTxxdg
+	oHU8HwknpWcM5BwJgf9dDaDS9O+IAURZv/BZXgqURi3jMGHkDSsYwwcEl8Z3YO3Gf09xdf1m7gy
+	THiUBKH9aTLaS2M19vM5vKZlSMFry23rhwVjpRKuFGRHS5i+7SXTh0vkmIk+Cc4EME2bPE88BdE
+	aHToZNIdi69aMCEEmpniBJAVRLD140YlmRYWRrqr73uzPa0GU3gLhO/b9FGdbXe84/1Dp0XPDH8
+	6RdHfcmolnTYYdOlXZsenJ+Jkdqr9rTb+pPZx3mji6w=
+X-Received: by 2002:a05:6102:6046:b0:601:f85b:efeb with SMTP id
+ ada2fe7eead31-605a4dced8bmr2528576137.9.1775315839238; Sat, 04 Apr 2026
+ 08:17:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+References: <20260328172314.45807-1-dorjoychy111@gmail.com>
+ <20260328172314.45807-2-dorjoychy111@gmail.com> <e526fbdb450a593b575355c1c9ae21f286427275.camel@kernel.org>
+ <CAFfO_h75dF2s83VNtUaNuRmto1NVVcxo7kN6eAtNtN3ME8mPiQ@mail.gmail.com> <4385168f2147efb8131d5fe4209e88d2d15a60bf.camel@kernel.org>
+In-Reply-To: <4385168f2147efb8131d5fe4209e88d2d15a60bf.camel@kernel.org>
+From: Dorjoy Chowdhury <dorjoychy111@gmail.com>
+Date: Sat, 4 Apr 2026 21:17:08 +0600
+X-Gm-Features: AQROBzCQF2-YPXzLWBuj6trmnUQAKh_7YQnhBAKjxSQrB6QucZDOdQgFzGpIDh4
+Message-ID: <CAFfO_h4dhsXji=+FjO9EikX0_oUUDkWe8tC1F7u4WqhNAjRB=g@mail.gmail.com>
+Subject: Re: [PATCH v6 1/4] openat2: new OPENAT2_REGULAR flag support
+To: Jeff Layton <jlayton@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-api@vger.kernel.org, ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, 
+	linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, 
+	linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, brauner@kernel.org, 
+	jack@suse.cz, chuck.lever@oracle.com, alex.aring@gmail.com, arnd@arndb.de, 
+	adilger@dilger.ca, mjguzik@gmail.com, smfrench@gmail.com, 
+	richard.henderson@linaro.org, mattst88@gmail.com, linmag7@gmail.com, 
+	tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com, 
+	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, idryomov@gmail.com, 
+	amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, 
+	trondmy@kernel.org, anna@kernel.org, sfrench@samba.org, pc@manguebit.org, 
+	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, 
+	bharathsm@microsoft.com, shuah@kernel.org, miklos@szeredi.hu, 
+	hansg@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-`ceph_encode_encrypted_dname()` base64-encodes the encrypted snapshot
-name into the caller buffer and then, for long snapshot names, appends
-`_<ino>` with `sprintf(p + elen, ...)`.
+On Thu, Apr 2, 2026 at 1:02=E2=80=AFAM Jeff Layton <jlayton@kernel.org> wro=
+te:
+>
+> On Mon, 2026-03-30 at 21:07 +0600, Dorjoy Chowdhury wrote:
+> > On Mon, Mar 30, 2026 at 5:49=E2=80=AFPM Jeff Layton <jlayton@kernel.org=
+> wrote:
+> > >
+> > > On Sat, 2026-03-28 at 23:22 +0600, Dorjoy Chowdhury wrote:
+> > > > This flag indicates the path should be opened if it's a regular fil=
+e.
+> > > > This is useful to write secure programs that want to avoid being
+> > > > tricked into opening device nodes with special semantics while thin=
+king
+> > > > they operate on regular files. This is a requested feature from the
+> > > > uapi-group[1].
+> > > >
+> > > > A corresponding error code EFTYPE has been introduced. For example,=
+ if
+> > > > openat2 is called on path /dev/null with OPENAT2_REGULAR in the fla=
+g
+> > > > param, it will return -EFTYPE. EFTYPE is already used in BSD system=
+s
+> > > > like FreeBSD, macOS.
+> > > >
+> > > > When used in combination with O_CREAT, either the regular file is
+> > > > created, or if the path already exists, it is opened if it's a regu=
+lar
+> > > > file. Otherwise, -EFTYPE is returned.
+> > > >
+> > > > When OPENAT2_REGULAR is combined with O_DIRECTORY, -EINVAL is retur=
+ned
+> > > > as it doesn't make sense to open a path that is both a directory an=
+d a
+> > > > regular file.
+> > > >
+> > > > [1]: https://uapi-group.org/kernel-features/#ability-to-only-open-r=
+egular-files
+> > > >
+> > > > Signed-off-by: Dorjoy Chowdhury <dorjoychy111@gmail.com>
+> > > > ---
+> > > >  arch/alpha/include/uapi/asm/errno.h        |  2 ++
+> > > >  arch/alpha/include/uapi/asm/fcntl.h        |  1 +
+> > > >  arch/mips/include/uapi/asm/errno.h         |  2 ++
+> > > >  arch/parisc/include/uapi/asm/errno.h       |  2 ++
+> > > >  arch/parisc/include/uapi/asm/fcntl.h       |  1 +
+> > > >  arch/sparc/include/uapi/asm/errno.h        |  2 ++
+> > > >  arch/sparc/include/uapi/asm/fcntl.h        |  1 +
+> > > >  fs/ceph/file.c                             |  4 ++++
+> > > >  fs/fcntl.c                                 |  4 ++--
+> > > >  fs/gfs2/inode.c                            |  6 ++++++
+> > > >  fs/namei.c                                 |  4 ++++
+> > > >  fs/nfs/dir.c                               |  4 ++++
+> > > >  fs/open.c                                  |  8 +++++---
+> > > >  fs/smb/client/dir.c                        | 14 +++++++++++++-
+> > > >  include/linux/fcntl.h                      |  2 ++
+> > > >  include/uapi/asm-generic/errno.h           |  2 ++
+> > > >  include/uapi/asm-generic/fcntl.h           |  4 ++++
+> > > >  tools/arch/alpha/include/uapi/asm/errno.h  |  2 ++
+> > > >  tools/arch/mips/include/uapi/asm/errno.h   |  2 ++
+> > > >  tools/arch/parisc/include/uapi/asm/errno.h |  2 ++
+> > > >  tools/arch/sparc/include/uapi/asm/errno.h  |  2 ++
+> > > >  tools/include/uapi/asm-generic/errno.h     |  2 ++
+> > > >  22 files changed, 67 insertions(+), 6 deletions(-)
+> > > >
+> > > > diff --git a/arch/alpha/include/uapi/asm/errno.h b/arch/alpha/inclu=
+de/uapi/asm/errno.h
+> > > > index 6791f6508632..1a99f38813c7 100644
+> > > > --- a/arch/alpha/include/uapi/asm/errno.h
+> > > > +++ b/arch/alpha/include/uapi/asm/errno.h
+> > > > @@ -127,4 +127,6 @@
+> > > >
+> > > >  #define EHWPOISON    139     /* Memory page has hardware error */
+> > > >
+> > > > +#define EFTYPE               140     /* Wrong file type for the in=
+tended operation */
+> > > > +
+> > > >  #endif
+> > > > diff --git a/arch/alpha/include/uapi/asm/fcntl.h b/arch/alpha/inclu=
+de/uapi/asm/fcntl.h
+> > > > index 50bdc8e8a271..fe488bf7c18e 100644
+> > > > --- a/arch/alpha/include/uapi/asm/fcntl.h
+> > > > +++ b/arch/alpha/include/uapi/asm/fcntl.h
+> > > > @@ -34,6 +34,7 @@
+> > > >
+> > > >  #define O_PATH               040000000
+> > > >  #define __O_TMPFILE  0100000000
+> > > > +#define OPENAT2_REGULAR      0200000000
+> > > >
+> > > >  #define F_GETLK              7
+> > > >  #define F_SETLK              8
+> > > > diff --git a/arch/mips/include/uapi/asm/errno.h b/arch/mips/include=
+/uapi/asm/errno.h
+> > > > index c01ed91b1ef4..1835a50b69ce 100644
+> > > > --- a/arch/mips/include/uapi/asm/errno.h
+> > > > +++ b/arch/mips/include/uapi/asm/errno.h
+> > > > @@ -126,6 +126,8 @@
+> > > >
+> > > >  #define EHWPOISON    168     /* Memory page has hardware error */
+> > > >
+> > > > +#define EFTYPE               169     /* Wrong file type for the in=
+tended operation */
+> > > > +
+> > > >  #define EDQUOT               1133    /* Quota exceeded */
+> > > >
+> > > >
+> > > > diff --git a/arch/parisc/include/uapi/asm/errno.h b/arch/parisc/inc=
+lude/uapi/asm/errno.h
+> > > > index 8cbc07c1903e..93194fbb0a80 100644
+> > > > --- a/arch/parisc/include/uapi/asm/errno.h
+> > > > +++ b/arch/parisc/include/uapi/asm/errno.h
+> > > > @@ -124,4 +124,6 @@
+> > > >
+> > > >  #define EHWPOISON    257     /* Memory page has hardware error */
+> > > >
+> > > > +#define EFTYPE               258     /* Wrong file type for the in=
+tended operation */
+> > > > +
+> > > >  #endif
+> > > > diff --git a/arch/parisc/include/uapi/asm/fcntl.h b/arch/parisc/inc=
+lude/uapi/asm/fcntl.h
+> > > > index 03dee816cb13..d46812f2f0f4 100644
+> > > > --- a/arch/parisc/include/uapi/asm/fcntl.h
+> > > > +++ b/arch/parisc/include/uapi/asm/fcntl.h
+> > > > @@ -19,6 +19,7 @@
+> > > >
+> > > >  #define O_PATH               020000000
+> > > >  #define __O_TMPFILE  040000000
+> > > > +#define OPENAT2_REGULAR      0100000000
+> > > >
+> > > >  #define F_GETLK64    8
+> > > >  #define F_SETLK64    9
+> > > > diff --git a/arch/sparc/include/uapi/asm/errno.h b/arch/sparc/inclu=
+de/uapi/asm/errno.h
+> > > > index 4a41e7835fd5..71940ec9130b 100644
+> > > > --- a/arch/sparc/include/uapi/asm/errno.h
+> > > > +++ b/arch/sparc/include/uapi/asm/errno.h
+> > > > @@ -117,4 +117,6 @@
+> > > >
+> > > >  #define EHWPOISON    135     /* Memory page has hardware error */
+> > > >
+> > > > +#define EFTYPE               136     /* Wrong file type for the in=
+tended operation */
+> > > > +
+> > > >  #endif
+> > > > diff --git a/arch/sparc/include/uapi/asm/fcntl.h b/arch/sparc/inclu=
+de/uapi/asm/fcntl.h
+> > > > index 67dae75e5274..bb6e9fa94bc9 100644
+> > > > --- a/arch/sparc/include/uapi/asm/fcntl.h
+> > > > +++ b/arch/sparc/include/uapi/asm/fcntl.h
+> > > > @@ -37,6 +37,7 @@
+> > > >
+> > > >  #define O_PATH               0x1000000
+> > > >  #define __O_TMPFILE  0x2000000
+> > > > +#define OPENAT2_REGULAR      0x4000000
+> > > >
+> > > >  #define F_GETOWN     5       /*  for sockets. */
+> > > >  #define F_SETOWN     6       /*  for sockets. */
+> > > > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> > > > index 66bbf6d517a9..6d8d4c7765e6 100644
+> > > > --- a/fs/ceph/file.c
+> > > > +++ b/fs/ceph/file.c
+> > > > @@ -977,6 +977,10 @@ int ceph_atomic_open(struct inode *dir, struct=
+ dentry *dentry,
+> > > >                       ceph_init_inode_acls(newino, &as_ctx);
+> > > >                       file->f_mode |=3D FMODE_CREATED;
+> > > >               }
+> > > > +             if ((flags & OPENAT2_REGULAR) && !d_is_reg(dentry)) {
+> > > > +                     err =3D -EFTYPE;
+> > > > +                     goto out_req;
+> > > > +             }
+> > >
+> > > ^^^
+> > > This doesn't look quite right. Here's a larger chunk of the code:
+> > >
+> > > -------------------------8<--------------------------
+> > >         if (d_in_lookup(dentry)) {
+> > >                 dn =3D ceph_finish_lookup(req, dentry, err);
+> > >                 if (IS_ERR(dn))
+> > >                         err =3D PTR_ERR(dn);
+> > >         } else {
+> > >                 /* we were given a hashed negative dentry */
+> > >                 dn =3D NULL;
+> > >         }
+> > >         if (err)
+> > >                 goto out_req;
+> > >         if (dn || d_really_is_negative(dentry) || d_is_symlink(dentry=
+)) {
+> > >                 /* make vfs retry on splice, ENOENT, or symlink */
+> > >                 doutc(cl, "finish_no_open on dn %p\n", dn);
+> > >                 err =3D finish_no_open(file, dn);
+> > >         } else {
+> > >                 if (IS_ENCRYPTED(dir) &&
+> > >                     !fscrypt_has_permitted_context(dir, d_inode(dentr=
+y))) {
+> > >                         pr_warn_client(cl,
+> > >                                 "Inconsistent encryption context (par=
+ent %llx:%llx child %llx:%llx)\n",
+> > >                                 ceph_vinop(dir), ceph_vinop(d_inode(d=
+entry)));
+> > >                         goto out_req;
+> > >                 }
+> > >
+> > >                 doutc(cl, "finish_open on dn %p\n", dn);
+> > >                 if (req->r_op =3D=3D CEPH_MDS_OP_CREATE && req->r_rep=
+ly_info.has_create_ino) {
+> > >                         struct inode *newino =3D d_inode(dentry);
+> > >
+> > >                         cache_file_layout(dir, newino);
+> > >                         ceph_init_inode_acls(newino, &as_ctx);
+> > >                         file->f_mode |=3D FMODE_CREATED;
+> > >                 }
+> > >                 err =3D finish_open(file, dentry, ceph_open);
+> > >         }
+> > > -------------------------8<--------------------------
+> > >
+> > > It looks like this won't handle it correctly if the pathwalk terminat=
+es
+> > > on a symlink (re: d_is_symlink() case). You should either set up a te=
+st
+> > > ceph cluster on your own, or reach out to the ceph community and ask
+> > > them to test this.
+> > >
+> >
+> > Thanks for reviewing. The d_is_symlink() case seems to be calling
+> > finish_no_open so shouldn't this be okay?
+> >
+>
+> My mistake -- you're correct. I keep forgetting that finish_no_open()
+> will handle this case regardless of what else happens.
+>
+> > > >               err =3D finish_open(file, dentry, ceph_open);
+> > > >       }
+> > > >  out_req:
+> > > > diff --git a/fs/fcntl.c b/fs/fcntl.c
+> > > > index beab8080badf..240bb511557a 100644
+> > > > --- a/fs/fcntl.c
+> > > > +++ b/fs/fcntl.c
+> > > > @@ -1169,9 +1169,9 @@ static int __init fcntl_init(void)
+> > > >        * Exceptions: O_NONBLOCK is a two bit define on parisc; O_ND=
+ELAY
+> > > >        * is defined as O_NONBLOCK on some platforms and not on othe=
+rs.
+> > > >        */
+> > > > -     BUILD_BUG_ON(20 - 1 /* for O_RDONLY being 0 */ !=3D
+> > > > +     BUILD_BUG_ON(21 - 1 /* for O_RDONLY being 0 */ !=3D
+> > > >               HWEIGHT32(
+> > > > -                     (VALID_OPEN_FLAGS & ~(O_NONBLOCK | O_NDELAY))=
+ |
+> > > > +                     (VALID_OPENAT2_FLAGS & ~(O_NONBLOCK | O_NDELA=
+Y)) |
+> > > >                       __FMODE_EXEC));
+> > > >
+> > > >       fasync_cache =3D kmem_cache_create("fasync_cache",
+> > > > diff --git a/fs/gfs2/inode.c b/fs/gfs2/inode.c
+> > > > index 8344040ecaf7..4604e2e8a9cc 100644
+> > > > --- a/fs/gfs2/inode.c
+> > > > +++ b/fs/gfs2/inode.c
+> > > > @@ -738,6 +738,12 @@ static int gfs2_create_inode(struct inode *dir=
+, struct dentry *dentry,
+> > > >       inode =3D gfs2_dir_search(dir, &dentry->d_name, !S_ISREG(mode=
+) || excl);
+> > > >       error =3D PTR_ERR(inode);
+> > > >       if (!IS_ERR(inode)) {
+> > > > +             if (file && (file->f_flags & OPENAT2_REGULAR) && !S_I=
+SREG(inode->i_mode)) {
+> > >
+> > > Isn't OPENAT2_REGULAR getting masked off in ->f_flags now?
+> > >
+> > Yes, I thought the masking off was happening after this codepath got
+> > executed. Maybe it's better anyway to pass another flags param to this
+> > function and forward the flags from the gfs2_atomic_open function and
+> > in other call sites pass 0 ? What do you think?
+> >
+>
+> Also my mistake. That happens in do_dentry_open() which happens in
+> finish_open(), so you should be OK here.
+>
+> Reviewed-by: Jeff Layton <jlayton@kernel.org>
 
-Some callers only provide `NAME_MAX` bytes. For long snapshot names, the
-returned length also includes the leading underscore that stays in place
-ahead of the encoded text. On 64-bit kernels, a long inode suffix can
-push the final encoded name past `NAME_MAX` even though the encrypted
-prefix itself stayed within the documented 240-byte budget.
+Thanks for patiently reviewing this! I am planning on sending patches
+for man-pages and looking into some xfs-tests for this. But I am not
+sure if this patch series will get more reviews from others or if it
+will be picked up in the vfs branch?
 
-Format the suffix into a small local buffer first and reject names whose
-suffix would exceed the caller's `NAME_MAX` output buffer.
-
-Signed-off-by: Pengpeng Hou <pengpeng@iscas.ac.cn>
----
- fs/ceph/crypto.c | 17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index f3de43ccb470..eeba8ffb0554 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -208,6 +208,7 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
- 	struct ceph_client *cl = ceph_inode_to_client(parent);
- 	struct inode *dir = parent;
- 	char *p = buf;
-+	char suffix[1 + 20 + 1];
- 	u32 len;
- 	int name_len = elen;
- 	int ret;
-@@ -271,8 +272,20 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
- 
- 	/* To understand the 240 limit, see CEPH_NOHASH_NAME_MAX comments */
- 	WARN_ON(elen > 240);
--	if (dir != parent) // leading _ is already there; append _<inum>
--		elen += 1 + sprintf(p + elen, "_%ld", dir->i_ino);
-+	if (dir != parent) { // leading _ is already there; append _<inum>
-+		ret = snprintf(suffix, sizeof(suffix), "_%lu", dir->i_ino);
-+		if (ret < 0) {
-+			elen = ret;
-+			goto out;
-+		}
-+		if (ret >= NAME_MAX - elen) {
-+			elen = -ENAMETOOLONG;
-+			goto out;
-+		}
-+
-+		memcpy(p + elen, suffix, ret);
-+		elen += ret + 1;
-+	}
- 
- out:
- 	kfree(cryptbuf);
--- 
-2.50.1 (Apple Git-155)
-
+Regards,
+Dorjoy
