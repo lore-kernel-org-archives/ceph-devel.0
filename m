@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FDFA2D321B
-	for <ceph-devel@vger.kernel.org>; Sat, 11 Apr 2026 08:57:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 684EA3346A8
+	for <ceph-devel@vger.kernel.org>; Sat, 11 Apr 2026 08:57:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775897836; cv=none; b=GKciynPv+RnD0FKqtz5IbLaEyCISjtHRyPTQrmVibyVw3FvpzuhtUuXI8j8emhSrI1AkYH+JwAHzXFfn+uxTH6Hs/ULfQ7M7dI1oripEuAJ0op6V4DR9Qh74bXbVpWb55sx8Ih19tKzR4EhHFqs1k74+MxhSRnWLDmLfEg+YTnY=
+	t=1775897844; cv=none; b=ut2DAafriMIkklMriwaAeH4dN3ohVjtujTquHvqXRDFi75rj3lMX7bZkSYm0YAVr5IrQy/cM4UKc7wdEndJfXVN9PvEVYjYwGCE8ATdzV43gcinWHNZmgzSruX6S6etCvewJzdiMg6w5Js7AkvXrShBHCoNq5skyWHo9O3eLfcM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775897836; c=relaxed/simple;
-	bh=Va5ic3j+XPVGHImNKjNKAB4SnRGmH/mONtJLhCgEHPk=;
+	s=arc-20240116; t=1775897844; c=relaxed/simple;
+	bh=Ysw+0v2QMxySbx347DtfHjbHKop4ioYtzWactI42FLU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=f69iu51ltNsf14GGgMKx4Y+8BP8OFgZ7U9fybXaDAFndZI7auQezqpaXRqj6v6DH7WmvQ8kweKSCJC4zGuysJiVTo2LTETGJo8odDyqn1zV3aB+ZlRIGHdiQdpmkTDBysrh8iM0M16ePIxYVGZZ4Cz4n3HY7OuMgPuyPydaEYf8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Jb7EghGd; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=rKMMLBDxaxdAlxztCQALky8tEZNyQQdUf+ICUXo84KjS+HDyQ1EAhGZ2FDgl7amDXWLXWHFolnKoP1S3ocjHBo5L/59a+Hdg9B/WkWUHMMBrpYrC53/XsFqErdG2Kcx/XJyWepNLNLvNj4lhopBpDB1UVz5hsSawKhPU3RNdw0Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZptxJDPT; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Jb7EghGd"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZptxJDPT"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1775897834;
+	s=mimecast20190719; t=1775897842;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=wyv45w2ugH74c2VSCb7J4MMwtcNcSvmG464mF8qh4Dc=;
-	b=Jb7EghGd5Bl8EhCM3dwVpTF4dONHl3KkZRVlKMFAwIW6oj+wYcE4gyfCk4T2W1d9K/s4qg
-	oQ/O5nsIO0Fm/xHA3JvcbDU3s08dU5OezUB9SwH+erXMpjkLMBaQ/7WaqC4nc40aD0Nitl
-	cUN+cJYJ3II7XQyVrq7hy/b+8DMtIn4=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+	bh=X397l0CU5nIL2ooMDVBSVen1USL5XU13r/GdYHGDVL8=;
+	b=ZptxJDPTYCWr+Fx0PyMS8LsrGShV3p+c42CYoX8To6bge3oxvEt+CB0zIRsjppDMoVmD0W
+	86h1v95+fs8aw/isQUldL3HTAG3lGBiRy6ghEdpi1RZnskLBKnVE4bshko0mRKL5KCtP4P
+	5HZOCcRSaB05y6+oEs5Iv6cSmFkT4QU=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-465-lpn6ZtJpNsCHJ9bBcnhvXg-1; Sat,
- 11 Apr 2026 04:57:10 -0400
-X-MC-Unique: lpn6ZtJpNsCHJ9bBcnhvXg-1
-X-Mimecast-MFC-AGG-ID: lpn6ZtJpNsCHJ9bBcnhvXg_1775897829
-Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-204-s7j74AqoM9e1zZ8ujLleew-1; Sat,
+ 11 Apr 2026 04:57:17 -0400
+X-MC-Unique: s7j74AqoM9e1zZ8ujLleew-1
+X-Mimecast-MFC-AGG-ID: s7j74AqoM9e1zZ8ujLleew_1775897835
+Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id B0C901956061;
-	Sat, 11 Apr 2026 08:57:08 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id CD696195608B;
+	Sat, 11 Apr 2026 08:57:14 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.48.47])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 8B19219560AB;
-	Sat, 11 Apr 2026 08:57:04 +0000 (UTC)
+	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 98E4C180049F;
+	Sat, 11 Apr 2026 08:57:10 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -52,13 +52,12 @@ Cc: David Howells <dhowells@redhat.com>,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	NeilBrown <neilb@ownmail.net>,
 	Marc Dionne <marc.dionne@auristor.com>,
-	NeilBrown <neil@brown.name>,
-	"Paulo Alcantara (Red Hat)" <pc@manguebit.org>
-Subject: [PATCH 3/4] cachefiles: fix incorrect dentry refcount in cachefiles_cull()
-Date: Sat, 11 Apr 2026 09:56:41 +0100
-Message-ID: <20260411085643.3221565-4-dhowells@redhat.com>
+	Paulo Alcantara <pc@manguebit.org>,
+	Matthew Wilcox <willy@infradead.org>
+Subject: [PATCH 4/4] netfs: Fix netfs_invalidate_folio() to clear dirty bit if all changes gone
+Date: Sat, 11 Apr 2026 09:56:42 +0100
+Message-ID: <20260411085643.3221565-5-dhowells@redhat.com>
 In-Reply-To: <20260411085643.3221565-1-dhowells@redhat.com>
 References: <20260411085643.3221565-1-dhowells@redhat.com>
 Precedence: bulk
@@ -68,51 +67,116 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
 
-From: NeilBrown <neilb@ownmail.net>
+If a streaming write is made, this will leave the relevant modified folio
+in a not-uptodate, but dirty state with a netfs_folio struct hung off of
+folio->private indicating the dirty range.  Subsequently truncating the
+file such that the dirty data in the folio is removed, but the first part
+of the folio theoretically remains will cause the netfs_folio struct to be
+discarded... but will leave the dirty flag set.
 
-The patch mentioned below changed cachefiles_bury_object() to expect 2
-references to the 'rep' dentry.  Three of the callers were changed to
-use start_removing_dentry() which takes an extra reference so in those
-cases the call gets the expected references.
+If the folio is then read via mmap(), netfs_read_folio() will see that the
+page is dirty and jump to netfs_read_gaps() to fill in the missing bits.
+netfs_read_gaps(), however, expects there to be a netfs_folio struct
+present and can oops because truncate removed it.
 
-However there is another call to cachefiles_bury_object() in
-cachefiles_cull() which did not need to be changed to use
-start_removing_dentry() and so was not properly considered.
-It still passed the dentry with just one reference so the net result is
-that a reference is lost.
+Fix this by calling folio_cancel_dirty() in netfs_invalidate_folio() in the
+event that all the dirty data in the folio is erased (as nfs does).
 
-To meet the expectations of cachefiles_bury_object(), cachefiles_cull()
-must take an extra reference before the call.  It will be dropped by
-cachefiles_bury_object().
+Also add some tracepoints to log modifications to a dirty page.
+
+This can be reproduced with something like:
+
+    dd if=/dev/zero of=/xfstest.test/foo bs=1M count=1
+    umount /xfstest.test
+    mount /xfstest.test
+    xfs_io -c "w 0xbbbf 0xf96c" \
+           -c "truncate 0xbbbf" \
+           -c "mmap -r 0xb000 0x11000" \
+           -c "mr 0xb000 0x11000" \
+           /xfstest.test/foo
+
+with fscaching disabled (otherwise streaming writes are suppressed) and a
+change to netfs_perform_write() to disallow streaming writes if the fd is
+open O_RDWR:
+
+	if (//(file->f_mode & FMODE_READ) || <--- comment this out
+	    netfs_is_cache_enabled(ctx)) {
+
+It should be reproducible even without this change, but if prevents the
+above trivial xfs_io command from reproducing it.
+
+Note that the initial dd is important: the file must start out sufficiently
+large that the zero-point logic doesn't just clear the gaps because it knows
+there's nothing in the file to read yet.  Unmounting and mounting is needed to
+clear the pagecache (there are other ways to do that that may also work).
+
+This was initially reproduced with the generic/522 xfstest on some patches
+that remove the FMODE_READ restriction.
 
 Reported-by: Marc Dionne <marc.dionne@auristor.com>
-Fixes: 7bb1eb45e43c ("VFS: introduce start_removing_dentry()")
-Signed-off-by: NeilBrown <neil@brown.name>
 Signed-off-by: David Howells <dhowells@redhat.com>
-Acked-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
+cc: Paulo Alcantara <pc@manguebit.org>
+cc: Matthew Wilcox <willy@infradead.org>
 cc: netfs@lists.linux.dev
-cc: linux-afs@lists.infradead.org
 cc: linux-fsdevel@vger.kernel.org
 ---
- fs/cachefiles/namei.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ fs/netfs/misc.c              | 6 +++++-
+ include/trace/events/netfs.h | 4 ++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/fs/cachefiles/namei.c b/fs/cachefiles/namei.c
-index e5ec90dccc27..eb9eb7683e3c 100644
---- a/fs/cachefiles/namei.c
-+++ b/fs/cachefiles/namei.c
-@@ -810,6 +810,11 @@ int cachefiles_cull(struct cachefiles_cache *cache, struct dentry *dir,
- 	if (ret < 0)
- 		goto error_unlock;
+diff --git a/fs/netfs/misc.c b/fs/netfs/misc.c
+index 6df89c92b10b..d8e8a4b59768 100644
+--- a/fs/netfs/misc.c
++++ b/fs/netfs/misc.c
+@@ -256,6 +256,7 @@ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length)
+ 			/* Move the start of the data. */
+ 			finfo->dirty_len = fend - iend;
+ 			finfo->dirty_offset = offset;
++			trace_netfs_folio(folio, netfs_folio_trace_invalidate_front);
+ 			return;
+ 		}
  
-+	/*
-+	 * cachefiles_bury_object() expects 2 references to 'victim',
-+	 * and drops one.
-+	 */
-+	dget(victim);
- 	ret = cachefiles_bury_object(cache, NULL, dir, victim,
- 				     FSCACHE_OBJECT_WAS_CULLED);
- 	dput(victim);
+@@ -264,12 +265,14 @@ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length)
+ 		 */
+ 		if (iend >= fend) {
+ 			finfo->dirty_len = offset - fstart;
++			trace_netfs_folio(folio, netfs_folio_trace_invalidate_tail);
+ 			return;
+ 		}
+ 
+ 		/* A partial write was split.  The caller has already zeroed
+ 		 * it, so just absorb the hole.
+ 		 */
++		trace_netfs_folio(folio, netfs_folio_trace_invalidate_middle);
+ 	}
+ 	return;
+ 
+@@ -277,8 +280,9 @@ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length)
+ 	netfs_put_group(netfs_folio_group(folio));
+ 	folio_detach_private(folio);
+ 	folio_clear_uptodate(folio);
++	folio_cancel_dirty(folio);
+ 	kfree(finfo);
+-	return;
++	trace_netfs_folio(folio, netfs_folio_trace_invalidate_all);
+ }
+ EXPORT_SYMBOL(netfs_invalidate_folio);
+ 
+diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
+index cbe28211106c..88d814ba1e69 100644
+--- a/include/trace/events/netfs.h
++++ b/include/trace/events/netfs.h
+@@ -194,6 +194,10 @@
+ 	EM(netfs_folio_trace_copy_to_cache,	"mark-copy")	\
+ 	EM(netfs_folio_trace_end_copy,		"end-copy")	\
+ 	EM(netfs_folio_trace_filled_gaps,	"filled-gaps")	\
++	EM(netfs_folio_trace_invalidate_all,	"inval-all")	\
++	EM(netfs_folio_trace_invalidate_front,	"inval-front")	\
++	EM(netfs_folio_trace_invalidate_middle,	"inval-mid")	\
++	EM(netfs_folio_trace_invalidate_tail,	"inval-tail")	\
+ 	EM(netfs_folio_trace_kill,		"kill")		\
+ 	EM(netfs_folio_trace_kill_cc,		"kill-cc")	\
+ 	EM(netfs_folio_trace_kill_g,		"kill-g")	\
 
