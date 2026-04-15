@@ -1,94 +1,89 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F0E93E5561
-	for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 17:01:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2764396567
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 17:01:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776272518; cv=none; b=FUQv8cWL9VOvbh6sUCuNcEnhTjFlUgLbTmGWpPzox4/sWGshzpd2yfBexkgFX2PfTQGQd7h15FjxzOUoTtmAmrPhtvECF6smdlsBSwk2TzxwonC7BXmwAMrzOsgsPEOodfhvQ5vKCmQRSYZ6sMIH0glnl1ZvcxeVXU/H35W4/yI=
+	t=1776272519; cv=none; b=pmsUVtTNzn0ar1mw4MoscDPIiRzl3fn6OULbKCX4dLeSuanFU3MmXIchzyBqSmfLA/8x2cr2TySAlskW16aJuPHt//ci7rTBX5v3m3IFhMmiNErMuav8Kpw4SfUhaLuHVBiFMz++rjUBL8cZ1DtxrBDEwn9sTnda2hVJCJg+1n4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776272518; c=relaxed/simple;
-	bh=nKbqGY84rIJB8BOdLzFBm2ltPcQM/ROZhxewUnBDS9I=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=APjo1xGi/MlXPZlzM81uRZwUTZz9zOyaNM44LaETJMqpXfjZkK1lLOrXhgFIc/jAajWnWDtFRM1YrCtL9/J+iGXoTCMrh2UQwe8U88Kf90dMgnBqPjtmIzlqoWfhPWv19oNanzHrYmt+gOai8/qP0Jz2+OrQWrLBJbaieQjjRL4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gmxIaoFI; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=C/+xH+3Q; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1776272519; c=relaxed/simple;
+	bh=EjpLUZD65b4tabg+yzSnnYbDXhagBAIufBacfc+cllk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=i/IMq9kvt7vMIc/hFOz0mIx2mdRsKGZvHfyRozUYnuN3tHOK1eIjXYER6pBkuVbadMtm+1ito5p5yuuk4mzbMbRQ4HIhfCeqL0MqYJ51gdsxE4GALFiwoC7r6HFBv63JHXv0dOy+l1clyX7Rypc6p62T3+0pUJgynfe1Q1pax6A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MI6W+HGC; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=odByD+At; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gmxIaoFI";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="C/+xH+3Q"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MI6W+HGC";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="odByD+At"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1776272515;
+	s=mimecast20190719; t=1776272516;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=6Nj+i/zUf6yIYxwBMDoj27NRKQ28v/DcLzCnlkUqOk8=;
-	b=gmxIaoFIBay6wbi0Ag+vOlNSBzzIt8YamKdyv3LZv0X6XQIscOB1D3Cqjow8XSDn6XGvWx
-	FAyQhsXAI6aq+AwIpQKKHleyRBp2dP1c/J8/WqpNto/q6Yj8nrHV97Hb1DFvD9/IcU3k0L
-	Q15LlUUjO3tixHBwTGAv9mU0xv61BQk=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=H4wsvwRJbqgcLtEjgPuYkCxpD7ZHOSfOGTS4tTJGptA=;
+	b=MI6W+HGCvORXjzx1uCKETbisUvjhBg9QwFtxr59JqsVEzKug9jQjRJzl/hPXUvxAYBsFxs
+	W8TG0pfJJTS1TU391y2TIelvPe+eC927WGcRPpZIVhhLqqzZljxnVaY3b22NAFcHXiIQmL
+	+YoMwM3JWExuytvTLcAoitXZaZ7cGCM=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-634-T2HTCzLIMYC4F_9F3WlrAw-1; Wed, 15 Apr 2026 13:01:54 -0400
-X-MC-Unique: T2HTCzLIMYC4F_9F3WlrAw-1
-X-Mimecast-MFC-AGG-ID: T2HTCzLIMYC4F_9F3WlrAw_1776272513
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-50d63962d83so167608361cf.2
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 10:01:54 -0700 (PDT)
+ us-mta-235-h3OJSDVTOGSDRLy4STfX7Q-1; Wed, 15 Apr 2026 13:01:55 -0400
+X-MC-Unique: h3OJSDVTOGSDRLy4STfX7Q-1
+X-Mimecast-MFC-AGG-ID: h3OJSDVTOGSDRLy4STfX7Q_1776272515
+Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-8aca6f796d5so117543786d6.0
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 10:01:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1776272513; x=1776877313; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=6Nj+i/zUf6yIYxwBMDoj27NRKQ28v/DcLzCnlkUqOk8=;
-        b=C/+xH+3QWDkFzBLtLnYCJLNo15/IeWQ7ulquc8fDx8OiY5Mx9PrrIyGREtK9X+TqjE
-         3p1Tgxw17O9QyUOoTcJMYafQMGLKyaRxTIuvcpbB/5GUDkt/8Qy5KCCGTfOimbxjY0Hi
-         LGg36s1gfP/GGV2VhQTPuPKwJJ8+nnBfxyqVfc5bjiyM721huKcgEoc1F1MiOWGBXZlp
-         Kb6lu17mT1Wx641nwXfAU8ZtMVi8EGx17k3STacTLKtI+g9zFmJ4cw0jbAxuW5YPgV7p
-         Hgl8TTaGnq+ba3HKI4GQZ5K444WDy7t60l8c+dmXUjP1FOMQW/gtSZAAsQGYHxZ5Lm4f
-         Q+sg==
+        d=redhat.com; s=google; t=1776272514; x=1776877314; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=H4wsvwRJbqgcLtEjgPuYkCxpD7ZHOSfOGTS4tTJGptA=;
+        b=odByD+At41nheLjEeH8pyOv8YkAn6Q2ng95mjgKmXK5GiZg6Dj7aTGwPndugVz5mbG
+         IxPdJCTN3E7s1LkVIAixSCjqmBOjyaYgtmv37mmTU39DcbUtyRr1C5ooSsw/Z8Un4oz9
+         5ZSiRVZbAz0fvr3aHKsd8sJAhoTVzDtf5IsjJ7IAev0bumSG1Lt9NlZqjLyjmJkS7LGR
+         PoIVyJB/4PredtunK2jPOWPKlHF7rsnZjbcleWKXAQj4tDJu3/2Fge4bOfPTUQnWGDb2
+         FVyu4CZnzc1YP59Jknc2xEisIbQn1J78q7IrjZ5pbeDTbKJddU83Uu/rQ2b4vGJtALjq
+         Tx7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776272513; x=1776877313;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=6Nj+i/zUf6yIYxwBMDoj27NRKQ28v/DcLzCnlkUqOk8=;
-        b=AXmvG63ys2FmX7jzEtsALTYT+FJOlToog+eKqyiWz/UpoAE8C/gmtlya7sJq4j9TU0
-         UUZaTksMbUrzDmtas7QeniYNn1xNY5Xvfyz70NmS34RFyJhIqbDxG9vquRGwsceE5MlW
-         eE0hFG1wtUrcPCWA0mVsBem4JfI6lkCz65AxPEZoolyUfvvWZD053HT4SMg5QHx+qk9O
-         n5bU7l6vvVzk0LVBQn4ywXpkW4J4+UYL5Chq3LkTHYV0Jv9qP4vU6RKptWBojw/CB6lU
-         vI2bsCD6RBymx19mG2IRE5cKWZ4mk8Q38Iv/DTFAv0uLQ6cytvnO17XoRS88EITF7CZB
-         7+Rg==
-X-Gm-Message-State: AOJu0YyssihBgDGl5HQyDhi3Np6cFC+17DdPi4rPFtrndq7Z4zdXbXhv
-	bHk9t3q2pGkCKWllE2S8VtmlWMgfbHyY8AFofhc6GSKsnPruuLJVrdgOw114jO6prwDajRr1/54
-	FuO6QKl7j6/hyz7mdtRHrb+/gDzbV4wOwY06DjUYwpt7k5QyGxR7h8/YUNfQqYceHm0QTLEoPI5
-	lh5P/8hUKNZAa9EjJh2PxaCGNqd34J32p+WuMyDv6upRQkC0vptQ==
-X-Gm-Gg: AeBDiet4P7VVJMeeHft2vAxjLsfbj48MFFjmRy6S+0EJ4t398SrPsxUrPPxzAXQRDQb
-	MzCWZLvfpPcVRx9nBgT3sj9TR3V0YjUyCOekCjDhXCh7f9SlP+we8tO4OzO1yON0ZaPvMhz26NU
-	E7G+xxYOTN0J4SHhnJq4baq+xJrBQI9ZezT9ay2oLuOg8NUX3tsMXjikm2LYdlLq01bGgqDzQHg
-	MJLbij5gjfjyNzDvFguKTWk9K2EgJB0VY0FllqHstm/hsHjdDKtgw0YsjPT29qeotw4seOM2chh
-	CP7YWKX/+TZTynkFeLWGFwG4s5CYQVHHe+LVQ+VePFHQc8wzaw4F7W073jHx7vFb6mKCs2IGQfO
-	nQj7r8hvBRA7RKy/S7Xmvs7YaB8a9UEw7OnypWDgaXb2f0pUprMnOXlIFKP1Zzeg1/Q==
-X-Received: by 2002:a05:622a:10c:b0:50d:c69c:d01c with SMTP id d75a77b69052e-50dd5c3d6e0mr339858701cf.37.1776272497723;
-        Wed, 15 Apr 2026 10:01:37 -0700 (PDT)
-X-Received: by 2002:a05:622a:10c:b0:50d:c69c:d01c with SMTP id d75a77b69052e-50dd5c3d6e0mr339824561cf.37.1776272464530;
-        Wed, 15 Apr 2026 10:01:04 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1776272514; x=1776877314;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=H4wsvwRJbqgcLtEjgPuYkCxpD7ZHOSfOGTS4tTJGptA=;
+        b=kt9S/qlXqiEpx1HhIzYEQ+MUhtHDdxWHORT5lc5AW/iaHTkNqKNSRcmspvbtg1WRu4
+         3RxyM9iF1h1KJSD76l8wOJOz5i4uvp8hpSuo6d/7atxtIZvGEHmjQlA93k4yZyqlx8d7
+         Gw/Wrqn/mDq6Y1+zWmc0MMkiaUBFQ5PGPZ+c8c0nqRyPR4/sTKOYapjwjcOzWSJYEkLj
+         LIqAdFVBC5ABhzVJAtApGyNa0VPAG4gEGx0yx2Gc3kgZ1pH9h1KwEYKDHYCk0+1ClXG8
+         OdKDLGJOWCsmXBjORyWmajHF38T9Lct36ueJFh/upPs2+JSoSklW3P/U7lA3N/qCvGGf
+         cC2g==
+X-Gm-Message-State: AOJu0YwagPWsYtL8tAsGQh6hMbecBrckoeYUBJ4fO2n5ZcAYnng9srkV
+	cZgECL+E/rqYzbzwtQbOadbOLbX4kJjdG/40H/MrPaD1Nkh+W7GrUmuNpPAAS6tAwX9H8YTvVG5
+	+pSFmC5uo3TaUauRfQbgP7QT/gUzhUHtN8zFkdjC9RTilGSgm5V5z8NuZ92OnIeHw18dj2ENSp5
+	YFWcBuYB6sCacMombXPPbWteqp1y5ojHccmqns0GJ6Ksi9DeMt1g==
+X-Gm-Gg: AeBDiesUVFXTQS08u38pblXUDoSR0DuSwBOVat39mCA+tGhn7V2/fHw7BSCPLoyWfJp
+	lTIgio5qo1reXx45iAPD4YoRNHAqzrM17/4sk/+kODVt6wGOhhQ61KP/JfqVaCWdYA6dpaHHqn4
+	+7CxehTbVka0/H88lY3pTsYXqug7eLdaT+CSLgmjHD86t3JbHdqL7HkgSojhauMH07CJGnk6lRQ
+	WHWZlDSqKNnxCUkBbTBd5OydHeGVSiAdtbuNqDj4m6diBufQNFdLhXcanhSFDeGomD7WY66CRns
+	Dv6lNGAFa+wB56NLceQnTDzMnfKbH+VWlqr/3UKsO980KrVg2Xlggk4Mb3Ov6AbT7Hjdq4jXf20
+	8T04aWhumyd0zKEVYaSt0hz4cB4lW52Oda5Qjz0xLlI99glOyaAXJMSpyoBhbgbZCXw==
+X-Received: by 2002:ac8:5ac4:0:b0:50d:e298:8f1c with SMTP id d75a77b69052e-50defc74506mr255466861cf.32.1776272504776;
+        Wed, 15 Apr 2026 10:01:44 -0700 (PDT)
+X-Received: by 2002:ac8:5ac4:0:b0:50d:e298:8f1c with SMTP id d75a77b69052e-50defc74506mr255421761cf.32.1776272458487;
+        Wed, 15 Apr 2026 10:00:58 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50e1af9dc5fsm16817841cf.16.2026.04.15.10.01.03
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50e1af9dc5fsm16817841cf.16.2026.04.15.10.00.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Apr 2026 10:01:04 -0700 (PDT)
+        Wed, 15 Apr 2026 10:00:57 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v2 2/7] ceph: use proper endian conversion for flock_len in reconnect
-Date: Wed, 15 Apr 2026 17:00:38 +0000
-Message-Id: <20260415170043.3882912-3-amarkuze@redhat.com>
+Subject: [PATCH v2 0/7] ceph: manual client session reset
+Date: Wed, 15 Apr 2026 17:00:36 +0000
+Message-Id: <20260415170043.3882912-1-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260415170043.3882912-1-amarkuze@redhat.com>
-References: <20260415170043.3882912-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -97,35 +92,169 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Replace the __force __le32 cast with cpu_to_le32() for the flock_len field
-in reconnect_caps_cb(). The old code used a type-system bypass to silence
-sparse; the new form uses the proper endian conversion macro.
+This series adds operator-initiated manual client session reset for
+CephFS, providing a controlled escape hatch for client/MDS stalemates
+in which caps, locks, or unsafe metadata state stop making forward
+progress.
 
-Also switch from a raw bitmask test against i_ceph_flags to test_bit() on
-the named CEPH_I_ERROR_FILELOCK_BIT, which is the correct accessor for the
-unsigned long flags field after the bit-position conversion.
+Motivation
+----------
 
-Signed-off-by: Alex Markuze <amarkuze@redhat.com>
----
- fs/ceph/mds_client.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+When a CephFS client enters a stalemate with the MDS -- stuck cap
+flushes, hung file locks, or unsafe requests that cannot be journaled --
+the only current recovery options are client eviction from the MDS side
+or a full client node restart.  Both are disruptive and can cascade to
+other workloads on the same node.
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index ccf0d53dde2b..871f0eef468d 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -4693,8 +4693,9 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
- 		rec.v2.issued = cpu_to_le32(cap->issued);
- 		rec.v2.snaprealm = cpu_to_le64(ci->i_snap_realm->ino);
- 		rec.v2.pathbase = cpu_to_le64(path_info.vino.ino);
--		rec.v2.flock_len = (__force __le32)
--			((ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) ? 0 : 1);
-+		rec.v2.flock_len = cpu_to_le32(
-+			test_bit(CEPH_I_ERROR_FILELOCK_BIT,
-+				 &ci->i_ceph_flags) ? 0 : 1);
- 	} else {
- 		struct timespec64 ts;
- 
--- 
+Manual reset gives the operator a targeted tool: block new metadata
+work, attempt a bounded best-effort drain of dirty client state while
+sessions are still alive, then tear sessions down and let new requests
+re-open fresh sessions.  State that cannot drain (the stuck state
+causing the stalemate) is force-dropped -- that is the point of the
+reset.
+
+Design
+------
+
+The reset is triggered via debugfs:
+
+    echo "reason" > /sys/kernel/debug/ceph/<client>/reset/trigger
+    cat /sys/kernel/debug/ceph/<client>/reset/status
+
+The state machine tracks four phases:
+
+    IDLE -> QUIESCING -> DRAINING -> TEARDOWN -> IDLE
+
+QUIESCING is set synchronously by schedule_reset() before the workqueue
+item is dispatched.  This provides immediate request gating from the
+caller's context -- new metadata requests and file-lock acquisitions
+block the moment the operator triggers the reset, with no race window
+between scheduling and the work function starting.  All non-IDLE phases
+block callers on blocked_wq; the hot path adds only a single READ_ONCE
+per request.
+
+The drain phase (bounded at 5 seconds) flushes the MDS journal, dirty
+caps, and pending cap releases.  Non-stuck state drains in milliseconds;
+stuck state times out and is force-dropped during teardown.
+
+The session teardown follows the established check_new_map() forced-close
+pattern: unregister sessions under mdsc->mutex, then clean up caps and
+requests under s->s_mutex.  Reconnect is not attempted because the MDS
+only accepts CLIENT_RECONNECT during its own RECONNECT phase after
+restart, not from an active client.  A SESSION_REQUEST_CLOSE is sent to
+each MDS before local teardown so the MDS can release server-side state
+promptly rather than waiting for session_autoclose timeout.
+
+Blocked callers are released when reset completes and observe the final
+result.  The wait path verifies the phase is still IDLE under the lock
+after wakeup, looping back if a new reset was scheduled in the interim.
+
+Patch breakdown
+---------------
+
+Prep / cleanup:
+
+ 1. Convert all CEPH_I_* inode flags to named bit-position constants
+    and switch all flag modifications to atomic bitops (set_bit,
+    clear_bit, test_and_clear_bit).  The previous code mixed lockless
+    atomics with non-atomic read-modify-write on the same unsigned long,
+    which is a correctness hazard.  Flag reads under i_ceph_lock that
+    only test lock-serialised flags retain bitmask tests.
+
+ 2. Fix a __force endian cast in reconnect_caps_cb() to use the proper
+    cpu_to_le32() macro and the new test_bit() accessor.
+
+Hardening / diagnostics:
+
+ 3. Harden send_mds_reconnect() with error return, early bailout for
+    closed/rejected/unregistered sessions, state restoration on
+    transient failure.  Rewrite mds_peer_reset() to handle active-MDS
+    (past RECONNECT phase) by tearing the session down locally.
+
+ 4. Convert wait_caps_flush() to a diagnostic timeout loop that
+    periodically dumps pending flush state, improving observability
+    for reset-drain stalls and existing sync/writeback hangs.
+
+Core feature:
+
+ 5. Add the reset state machine, request gating, session teardown
+    work function, scheduling, and destroy-path coordination.
+
+ 6. Add the debugfs trigger/status interface and four tracepoints
+    (schedule, complete, blocked, unblocked).
+
+Testing:
+
+ 7. Add kselftest-integrated shell tests: stress testing with
+    concurrent I/O and random-interval reset injection, targeted
+    corner cases (overlapping resets, dirty data across reset,
+    stale locks, unmount during reset), a five-stage validation
+    wrapper with per-stage timeouts, and a post-run data integrity
+    checker.  All 5 validation stages pass on a real CephFS cluster.
+
+Changes since v1
+-----------------
+
+ - Patch 1 now converts ALL flag modifications to atomic bitops,
+   eliminating the mixed atomic/non-atomic RMW hazard on the shared
+   i_ceph_flags field.  Removed mask defines for flags that are only
+   accessed via the _BIT form.  Fixed Co-authored-by -> Co-developed-by.
+ - Rewrote mds_peer_reset() to handle active-MDS state correctly
+   instead of sending a doomed reconnect (patch 3).
+ - Added state restoration in send_mds_reconnect() failure path to
+   prevent sessions stranding in RECONNECTING (patch 3).
+ - Added early bailout checks in send_mds_reconnect() for
+   closed/rejected/unregistered sessions (patch 3).
+ - Added diagnostic timeout loop to wait_caps_flush() (patch 4).
+ - Patch 5 commit message now documents the QUIESCING phase purpose
+   (synchronous request gating before async work dispatch).
+ - Fixed TOCTOU in ceph_mdsc_wait_for_reset(): the phase is now
+   re-verified under the lock after wakeup, with a deadline-based
+   retry loop if a new reset was scheduled in the interim (patch 5).
+ - Added tracepoints for reset lifecycle events (patch 6).
+ - Added selftest validation harness with kselftest integration
+   (patch 7).
+ - Rebased onto v7.0.
+
+Alex Markuze (7):
+  ceph: convert inode flags to named bit positions and atomic bitops
+  ceph: use proper endian conversion for flock_len in reconnect
+  ceph: harden send_mds_reconnect and handle active-MDS peer reset
+  ceph: add diagnostic timeout loop to wait_caps_flush()
+  ceph: add client reset state machine and session teardown
+  ceph: add manual reset debugfs control and tracepoints
+  ceph: add manual reset selftests and validation harness
+
+ MAINTAINERS                                   |   1 +
+ fs/ceph/addr.c                                |  16 +-
+ fs/ceph/caps.c                                |  29 +-
+ fs/ceph/debugfs.c                             | 104 +++
+ fs/ceph/file.c                                |  12 +-
+ fs/ceph/inode.c                               |   5 +-
+ fs/ceph/locks.c                               |  38 +-
+ fs/ceph/mds_client.c                          | 656 ++++++++++++++++-
+ fs/ceph/mds_client.h                          |  44 +-
+ fs/ceph/snap.c                                |   2 +-
+ fs/ceph/super.h                               |  73 +-
+ fs/ceph/xattr.c                               |   2 +-
+ include/trace/events/ceph.h                   |  63 ++
+ tools/testing/selftests/Makefile              |   1 +
+ .../selftests/filesystems/ceph/Makefile       |   7 +
+ .../selftests/filesystems/ceph/README.md      |  84 +++
+ .../filesystems/ceph/reset_corner_cases.sh    | 646 ++++++++++++++++
+ .../filesystems/ceph/reset_stress.sh          | 694 ++++++++++++++++++
+ .../filesystems/ceph/run_validation.sh        | 350 +++++++++
+ .../selftests/filesystems/ceph/settings       |   1 +
+ .../filesystems/ceph/validate_consistency.py  | 297 ++++++++
+ 21 files changed, 3025 insertions(+), 100 deletions(-)
+ create mode 100644 tools/testing/selftests/filesystems/ceph/Makefile
+ create mode 100644 tools/testing/selftests/filesystems/ceph/README.md
+ create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
+ create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress.sh
+ create mode 100755 tools/testing/selftests/filesystems/ceph/run_validation.sh
+ create mode 100644 tools/testing/selftests/filesystems/ceph/settings
+ create mode 100755 tools/testing/selftests/filesystems/ceph/validate_consistency.py
+
+--
 2.34.1
 
