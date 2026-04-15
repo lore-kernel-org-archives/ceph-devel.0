@@ -1,441 +1,321 @@
-Received: from mail-vs1-f54.google.com (mail-vs1-f54.google.com [209.85.217.54])
+Received: from mail-ot1-f49.google.com (mail-ot1-f49.google.com [209.85.210.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B649D3F0743
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Apr 2026 17:34:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.217.54
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776188046; cv=pass; b=guZ14MQoIc9MvO66CodcR+HTObm4+ItJufZCRFOLkiq0Q5bjUDPpvumSHz/VLBFVU82+jtlTKoeOUwRO/1nWURnpVPYk62uvVefgGftNYrWbclLLnjpnL8/+po5egmMLnXkGKYXRkb8g5FsW3RxRYXXZumFWHwMGWY+Wn7s95UY=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776188046; c=relaxed/simple;
-	bh=aqzzp+0vLBh3YuoQvULxfP8uzdG3c/fQ3+lDAhEwwZE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FvLK9TxrXshGMbpDcr0J+EUMzBh1GraCspbwTG3sA6bTeOplc8ZLdkuZTRbViDa5AVGWE5Q4hUl1V1fEaNIETyxShNBnmTDE9nSPOpgJHYvBtVlINhtGyJrCt4v7bQiIQ5M02QzJTDavyscmHqJNUNYlS+ivC7S2qsixKEnAu2k=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aPP+I9bM; arc=pass smtp.client-ip=209.85.217.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E16CA23E32B
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 03:40:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.49
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776224443; cv=none; b=lRo0wy6X/YoxNEUsR9keDdKP2ErieKX5dg6c7pOZwerrej9FMtxIVKAwJzbI9LYT39VNJ2pz5t9xkxeHuhTkdj83wGlH20KIZ9lEyN+tDq85PRDu6Au0Lru4YxvQtVuHoxOr4ZxaFKUtGnGKAoKBscW51nWELi0FxxXC3rBkR8s=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776224443; c=relaxed/simple;
+	bh=hx277u65/fzGNUl+wVDdWk92PAb2Koe4lYjW7etulnQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YEMYlj4hUTNyI3NyI16EMKHzFCGHnaDAPqNQG7UfktovXOieEr+lvV3FwVgHwlGgu5dheDkyRkO+nq4EGAaZU69wYenNy/6fw4fRKMPOcLI4+c0knU/M6DlglH7REFyMFuyEhq+iwaOw6ezos9koBkT29TBjDC3QIafkeGko6bk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fjLC2/Ii; arc=none smtp.client-ip=209.85.210.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aPP+I9bM"
-Received: by mail-vs1-f54.google.com with SMTP id ada2fe7eead31-60fea0840f3so1279938137.0
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Apr 2026 10:34:04 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1776188044; cv=none;
-        d=google.com; s=arc-20240605;
-        b=lhAtg5NXeMY4FEAuP0qegQOXDrE+GJVG4imH8r8pg/TI/94DuKwT3xT23FrDnBhPM5
-         ctjQjobxNwm2vpkvXMLiYpdPTzG+2tDTpfB8HuN4sLRZQ/ffw8SgI5VgTsytUYG1L90r
-         TDo99eaeoFQJ4jPGnX+xKbWyFgOkYzEE+QoqA8m9w+26QEwoeGgwZXjhJEwn/yVEgvDy
-         l7LpEY71jp6r4HFVSudRSUp1m4jLSDOdzP50J+uGH8vpiSGhzc13/QPpL1s11+lPDo0l
-         9tHQk7Yy0HpvGFyMx3CvSI44E+r+mErU7FziV7yx4HFbXB5SJsiNP57e6By4UXh1fBjK
-         ks5g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=wipA6JR7QuvB/7F2g+7cyOg5TyFlmr55ecUXy0B0Xes=;
-        fh=LpQDkGgCWOLzTM9iw0GqsbVZmVfBybqM3hT/jKkxC4I=;
-        b=hgY+10NMWd2MutUw6RaNxjm6LZ/PEIWnHwUhrkmO8gULGg0NwQWyfCHEGKTpHjhMRI
-         h+N/QD8+GccxZo0++n4XPRuvPl+/7m8Ph+Psq/HQgrCOW/qxUck2YoCtwx+PLOLcRRdq
-         BHu3lS4U8sEvDLb9oWZhwanKgkIHU0b08/5u2tVRL03O9e3k/wpRet+QrLFY0c3EPfqC
-         UZ4EP35NzQD+1fh1NPJVxvk3WLKref7CXHWWntFe5tW3qFvfRUcc0Nt12a8PMpQsjh+S
-         Pr0UBlnRkaaqcCLVI74unzOpHVhdt6Kt1+PqCWMjpUD4Zn3BvEMaGQcF8MG0DOQGtHJL
-         nDAw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fjLC2/Ii"
+Received: by mail-ot1-f49.google.com with SMTP id 46e09a7af769-7d7fdb922a5so4999469a34.3
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Apr 2026 20:40:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776188044; x=1776792844; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=wipA6JR7QuvB/7F2g+7cyOg5TyFlmr55ecUXy0B0Xes=;
-        b=aPP+I9bMUvf0Tn6zr0KhzJkBdhB4Q4uNxchBSVO2YFiNTZC0H/0SYHPhn7U+xXBt9Z
-         8UlD9+qBUWs1qPfKKWV5I3Md1FWYlE7s0j2pXfBpS1JEeQ3TrsUSEAUZOGm24P3uQUkK
-         apDGKCc9N+NzMozyDoPGAgwwSEhZXaMsao8uiF61Yn3+BRbWV2R3AhY77dEOjLf+bOgh
-         /l3M4URi4z/mXDS9c+02mitMm5z5DIFlnJ92k2LCcWNOwiGSNllSjwtXOtPHG54DZ2bG
-         8CPrwxaTEUCZKWibMIrNJJ59xQfKC39EDZfZSai6d//r6B5zCr0UroKnD7ucxvLTtOfc
-         uswA==
+        d=gmail.com; s=20251104; t=1776224438; x=1776829238; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=j5QrcX++J0nRyJXYFuEZ6avVXz1u4CwVJN9SMD/1CtM=;
+        b=fjLC2/IiW4wn3WUK29YN5vvBxXvrGqfDiqUTh8vNJQvCPDj3Hqq0I8/DA7UxWNIsCU
+         0jrVvLT8JndPObJWTkwTrFAV/s2A+JQ7ABvKsUcu/39EwE0WZljx5NfVAeTMff5W1oWK
+         FrU8b9KZ9uDMWpvSPTcbQnCxUfDvW2owYNqgYey7R1SmMIV4kMWb3ohBvMhgciKJIWgg
+         1n/cSZrnEcIlrAAMyTkG38Qyd0CxUcCvkCiLJCEei7iwbKQr3sXNCvrRXHVmfDhxvX6m
+         gm2aY4YNmn3UVt1hEzPXkB4reHgSE+VpbgfmyzefV/xAsoQf5jEwMUAcBfXrAAolaLF/
+         sVvQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776188044; x=1776792844;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=wipA6JR7QuvB/7F2g+7cyOg5TyFlmr55ecUXy0B0Xes=;
-        b=ZnJtnOv1qqgPVEG81VCTLQbGDFZV9KfLb2C4ay5zk5KvV+58M7zUJMpPGVMqPcltbe
-         /u32vL1kM9yhoLCEXApEMdD0qdjFBqUP76a+TFBgtxMdsLvS6cH0mmzZhMhMIqzo9wd0
-         7MEUM5x3Nxnyeh3IghVIuiDwEpqSSnP/YMEiPrg8IEZiZBKW9gSJXx4aXT7AlcQfzNqj
-         sv6WoZMyG0VVhWBVtkqWmI5mhQdnc+A0+0MfbzSmZtTDvHTitfb8aKHa9bR2ilJk44W8
-         F3YY6QX0hQLe9nrJrUzgSDrruUZtsPnht8VBG8CnLpKVgYK0MBvYJBlMUwRHucuZe4X2
-         UW6w==
-X-Forwarded-Encrypted: i=1; AFNElJ8nl/fgbGsy2mUk+22YUrXbQkyBD2Rladf4M284LnankB0DeoV9CS4lZM6qohzOtdriwRYMf1hMJH1F@vger.kernel.org
-X-Gm-Message-State: AOJu0YyLeaBjyDhi9lTUgih/cF+uM+y1BayePM+RW0pC/800iWYATEbp
-	xpBR1lJOAFneTNA5ibb3TLIzcIJfjuElVpxbcvyFnGlLIW8wIBtxvtQbtY3Jo9Dy6FDxY7OMKMX
-	Vd0Cx9MQ66DslEz6zYH+hZ0ronuP1JPs=
-X-Gm-Gg: AeBDiev/+fMV0ZQK1LqMzvUXKv2IJoU+5HH3Tod1eLKJnTJZY6/6gPtYd97VI4HH04N
-	8bYIfwGHprtQE1BD0hhRXe5Xl1shK06Kxdbphlt1rv0+1TkEVbYKEAPBswpmCdRdd0RSKxZr265
-	D5RalnnIZySxoyEJTHeHXIutA9x8UbvptGU1nm6yKFuoDMNleXLsejssVhdfalRjJsa5Yq0PgIF
-	Su0uZfhg8Y+sXxrSVSQwavLNj+mV5LqHbq1+Srn11sF8CY7E0ThUSfv1ekWuMSSLipK4ZB0Yx7w
-	m3fiSjENMQ5YoXwz7IN09VMNtwbwnuN8stwe5v8EAA==
-X-Received: by 2002:a05:6102:c8f:b0:5fd:eacf:27df with SMTP id
- ada2fe7eead31-60a0aae09b1mr6274707137.10.1776188043491; Tue, 14 Apr 2026
- 10:34:03 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1776224438; x=1776829238;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=j5QrcX++J0nRyJXYFuEZ6avVXz1u4CwVJN9SMD/1CtM=;
+        b=j+xFZymZ9cRgHVgJdug3Q0uSYbNOZEQK+poj8rztZFE9lRiXVMl3SRf5ahQmIT9l0u
+         qGnxQKfqiW4YyZrJ8/T/fbXkoRk1zEPPJqTAPOnvX6rJwrApgx9KTFM9V3zt2t5yhSD7
+         vFJarIdD1kaWC0VcYIaBf1CYgOSA5crshoCn/+3mTYhG2yONjonzUTYWBazy97Tm5GMT
+         1FxVMnsHF2zFIujxvck4yrzS0far5DZ/NX6fWLA+c2rxUvq0jmdaSe9x6rZaparQAWwH
+         mhNIJ6qLvz666ITg0PQinKOJo1CFoGrWNr8fqbh8s9ZUFZovFrQU6gNhpBmkCXqeSWqt
+         fFwg==
+X-Gm-Message-State: AOJu0Yx1fpI4LV3t4xlbIrbLUIEOJcj80YKldHH+QjuMA3KhymjIRYdr
+	UD0YfwH0r4lf1jFYo7DYgji4oTR3Fsl7WiDgLN1UbyZjlo5WX72kjiNg
+X-Gm-Gg: AeBDieuj7964euCm6efi/cmGl7HdoHo6ob/pePCtfIKak9iKqukkrBYZn+yUJQF74/f
+	iwojyouOqGi5hz6lkJmYyG2ZmuVf6AUzGfs6LngyThqn2HuxhM8KH+XWakCyB99yc9YmdSgkpcQ
+	d4AqpJgy+BAoD1IPfn3A7WiNEih41wy9kkPVL/cVpUXlYDUPoxK50ZhhqoQd78hkporf/1xWZ1+
+	osUvO0sg5+y6wOJqb2f8MZ80NoO3Yz9A5h5OLD1lclQRm7zppFfCejkvZys/x3OisSZi1tE2rLL
+	xP/oqz+5PVXi2kIOIazLIScs3P3YTl1dALkuaOJ6XLG1vkq6qihf6T1bdltAkrlWb2v3kEPn+3c
+	txGY8FgUgPoVmN5w8dRwEy9z3jZ4vNdNF+G9t2V7IO2fhvkEipXeuGuhiiog08SFmQOuSfIQJq7
+	gsHoNDFNLcJjsXZroXCOKr0CmnilAq7iLW2vZQIp6hrhiFhNltKBhlZodntusK7rJlNoYMyhGTR
+	2oO42GW
+X-Received: by 2002:a05:6830:4c0c:b0:7d9:b2ba:a35d with SMTP id 46e09a7af769-7dc27e878a0mr12102180a34.29.1776224437509;
+        Tue, 14 Apr 2026 20:40:37 -0700 (PDT)
+Received: from localhost (static-23-234-115-121.cust.tzulo.com. [23.234.115.121])
+        by smtp.gmail.com with UTF8SMTPSA id 46e09a7af769-7dc76b2c5ccsm518036a34.14.2026.04.14.20.40.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 14 Apr 2026 20:40:36 -0700 (PDT)
+From: Sam Edwards <cfsworks@gmail.com>
+X-Google-Original-From: Sam Edwards <CFSworks@gmail.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Sam Edwards <CFSworks@gmail.com>
+Subject: [RFC/BUG] Use a bounce buffer for mds client decryption
+Date: Tue, 14 Apr 2026 20:40:20 -0700
+Message-ID: <20260415034020.11530-1-CFSworks@gmail.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260328172314.45807-1-dorjoychy111@gmail.com>
- <20260328172314.45807-2-dorjoychy111@gmail.com> <e526fbdb450a593b575355c1c9ae21f286427275.camel@kernel.org>
- <CAFfO_h75dF2s83VNtUaNuRmto1NVVcxo7kN6eAtNtN3ME8mPiQ@mail.gmail.com>
- <4385168f2147efb8131d5fe4209e88d2d15a60bf.camel@kernel.org>
- <CAFfO_h4dhsXji=+FjO9EikX0_oUUDkWe8tC1F7u4WqhNAjRB=g@mail.gmail.com>
- <ce36e877adf7a639bc4e61090d148c06fed63bf7.camel@kernel.org> <CAFfO_h5FOTv-VMbh2Dmwkp04BFxQu192gsvFLohDFXAWPccRNA@mail.gmail.com>
-In-Reply-To: <CAFfO_h5FOTv-VMbh2Dmwkp04BFxQu192gsvFLohDFXAWPccRNA@mail.gmail.com>
-From: Dorjoy Chowdhury <dorjoychy111@gmail.com>
-Date: Tue, 14 Apr 2026 23:33:52 +0600
-X-Gm-Features: AQROBzAPq6lrkXdB5aGpvZdh9ex-ri9hhZLo6oK5cSe7bhKl-nNcQlGucluVdVQ
-Message-ID: <CAFfO_h5hZ00XAOY1Gen+HGLDNSWGz2PH_H-0YspOkuaRT1ULsA@mail.gmail.com>
-Subject: Re: [PATCH v6 1/4] openat2: new OPENAT2_REGULAR flag support
-To: linux-fsdevel@vger.kernel.org, brauner@kernel.org
-Cc: Jeff Layton <jlayton@kernel.org>, linux-kernel@vger.kernel.org, 
-	linux-api@vger.kernel.org, ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, 
-	linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, 
-	linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, jack@suse.cz, 
-	chuck.lever@oracle.com, alex.aring@gmail.com, arnd@arndb.de, 
-	adilger@dilger.ca, mjguzik@gmail.com, smfrench@gmail.com, 
-	richard.henderson@linaro.org, mattst88@gmail.com, linmag7@gmail.com, 
-	tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com, 
-	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, idryomov@gmail.com, 
-	amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, 
-	trondmy@kernel.org, anna@kernel.org, sfrench@samba.org, pc@manguebit.org, 
-	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, 
-	bharathsm@microsoft.com, shuah@kernel.org, miklos@szeredi.hu, 
-	hansg@kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Mon, Apr 6, 2026 at 9:30=E2=80=AFPM Dorjoy Chowdhury <dorjoychy111@gmail=
-.com> wrote:
->
-> On Mon, Apr 6, 2026 at 5:27=E2=80=AFAM Jeff Layton <jlayton@kernel.org> w=
-rote:
-> >
-> > On Sat, 2026-04-04 at 21:17 +0600, Dorjoy Chowdhury wrote:
-> > > On Thu, Apr 2, 2026 at 1:02=E2=80=AFAM Jeff Layton <jlayton@kernel.or=
-g> wrote:
-> > > >
-> > > > On Mon, 2026-03-30 at 21:07 +0600, Dorjoy Chowdhury wrote:
-> > > > > On Mon, Mar 30, 2026 at 5:49=E2=80=AFPM Jeff Layton <jlayton@kern=
-el.org> wrote:
-> > > > > >
-> > > > > > On Sat, 2026-03-28 at 23:22 +0600, Dorjoy Chowdhury wrote:
-> > > > > > > This flag indicates the path should be opened if it's a regul=
-ar file.
-> > > > > > > This is useful to write secure programs that want to avoid be=
-ing
-> > > > > > > tricked into opening device nodes with special semantics whil=
-e thinking
-> > > > > > > they operate on regular files. This is a requested feature fr=
-om the
-> > > > > > > uapi-group[1].
-> > > > > > >
-> > > > > > > A corresponding error code EFTYPE has been introduced. For ex=
-ample, if
-> > > > > > > openat2 is called on path /dev/null with OPENAT2_REGULAR in t=
-he flag
-> > > > > > > param, it will return -EFTYPE. EFTYPE is already used in BSD =
-systems
-> > > > > > > like FreeBSD, macOS.
-> > > > > > >
-> > > > > > > When used in combination with O_CREAT, either the regular fil=
-e is
-> > > > > > > created, or if the path already exists, it is opened if it's =
-a regular
-> > > > > > > file. Otherwise, -EFTYPE is returned.
-> > > > > > >
-> > > > > > > When OPENAT2_REGULAR is combined with O_DIRECTORY, -EINVAL is=
- returned
-> > > > > > > as it doesn't make sense to open a path that is both a direct=
-ory and a
-> > > > > > > regular file.
-> > > > > > >
-> > > > > > > [1]: https://uapi-group.org/kernel-features/#ability-to-only-=
-open-regular-files
-> > > > > > >
-> > > > > > > Signed-off-by: Dorjoy Chowdhury <dorjoychy111@gmail.com>
-> > > > > > > ---
-> > > > > > >  arch/alpha/include/uapi/asm/errno.h        |  2 ++
-> > > > > > >  arch/alpha/include/uapi/asm/fcntl.h        |  1 +
-> > > > > > >  arch/mips/include/uapi/asm/errno.h         |  2 ++
-> > > > > > >  arch/parisc/include/uapi/asm/errno.h       |  2 ++
-> > > > > > >  arch/parisc/include/uapi/asm/fcntl.h       |  1 +
-> > > > > > >  arch/sparc/include/uapi/asm/errno.h        |  2 ++
-> > > > > > >  arch/sparc/include/uapi/asm/fcntl.h        |  1 +
-> > > > > > >  fs/ceph/file.c                             |  4 ++++
-> > > > > > >  fs/fcntl.c                                 |  4 ++--
-> > > > > > >  fs/gfs2/inode.c                            |  6 ++++++
-> > > > > > >  fs/namei.c                                 |  4 ++++
-> > > > > > >  fs/nfs/dir.c                               |  4 ++++
-> > > > > > >  fs/open.c                                  |  8 +++++---
-> > > > > > >  fs/smb/client/dir.c                        | 14 ++++++++++++=
-+-
-> > > > > > >  include/linux/fcntl.h                      |  2 ++
-> > > > > > >  include/uapi/asm-generic/errno.h           |  2 ++
-> > > > > > >  include/uapi/asm-generic/fcntl.h           |  4 ++++
-> > > > > > >  tools/arch/alpha/include/uapi/asm/errno.h  |  2 ++
-> > > > > > >  tools/arch/mips/include/uapi/asm/errno.h   |  2 ++
-> > > > > > >  tools/arch/parisc/include/uapi/asm/errno.h |  2 ++
-> > > > > > >  tools/arch/sparc/include/uapi/asm/errno.h  |  2 ++
-> > > > > > >  tools/include/uapi/asm-generic/errno.h     |  2 ++
-> > > > > > >  22 files changed, 67 insertions(+), 6 deletions(-)
-> > > > > > >
-> > > > > > > diff --git a/arch/alpha/include/uapi/asm/errno.h b/arch/alpha=
-/include/uapi/asm/errno.h
-> > > > > > > index 6791f6508632..1a99f38813c7 100644
-> > > > > > > --- a/arch/alpha/include/uapi/asm/errno.h
-> > > > > > > +++ b/arch/alpha/include/uapi/asm/errno.h
-> > > > > > > @@ -127,4 +127,6 @@
-> > > > > > >
-> > > > > > >  #define EHWPOISON    139     /* Memory page has hardware err=
-or */
-> > > > > > >
-> > > > > > > +#define EFTYPE               140     /* Wrong file type for =
-the intended operation */
-> > > > > > > +
-> > > > > > >  #endif
-> > > > > > > diff --git a/arch/alpha/include/uapi/asm/fcntl.h b/arch/alpha=
-/include/uapi/asm/fcntl.h
-> > > > > > > index 50bdc8e8a271..fe488bf7c18e 100644
-> > > > > > > --- a/arch/alpha/include/uapi/asm/fcntl.h
-> > > > > > > +++ b/arch/alpha/include/uapi/asm/fcntl.h
-> > > > > > > @@ -34,6 +34,7 @@
-> > > > > > >
-> > > > > > >  #define O_PATH               040000000
-> > > > > > >  #define __O_TMPFILE  0100000000
-> > > > > > > +#define OPENAT2_REGULAR      0200000000
-> > > > > > >
-> > > > > > >  #define F_GETLK              7
-> > > > > > >  #define F_SETLK              8
-> > > > > > > diff --git a/arch/mips/include/uapi/asm/errno.h b/arch/mips/i=
-nclude/uapi/asm/errno.h
-> > > > > > > index c01ed91b1ef4..1835a50b69ce 100644
-> > > > > > > --- a/arch/mips/include/uapi/asm/errno.h
-> > > > > > > +++ b/arch/mips/include/uapi/asm/errno.h
-> > > > > > > @@ -126,6 +126,8 @@
-> > > > > > >
-> > > > > > >  #define EHWPOISON    168     /* Memory page has hardware err=
-or */
-> > > > > > >
-> > > > > > > +#define EFTYPE               169     /* Wrong file type for =
-the intended operation */
-> > > > > > > +
-> > > > > > >  #define EDQUOT               1133    /* Quota exceeded */
-> > > > > > >
-> > > > > > >
-> > > > > > > diff --git a/arch/parisc/include/uapi/asm/errno.h b/arch/pari=
-sc/include/uapi/asm/errno.h
-> > > > > > > index 8cbc07c1903e..93194fbb0a80 100644
-> > > > > > > --- a/arch/parisc/include/uapi/asm/errno.h
-> > > > > > > +++ b/arch/parisc/include/uapi/asm/errno.h
-> > > > > > > @@ -124,4 +124,6 @@
-> > > > > > >
-> > > > > > >  #define EHWPOISON    257     /* Memory page has hardware err=
-or */
-> > > > > > >
-> > > > > > > +#define EFTYPE               258     /* Wrong file type for =
-the intended operation */
-> > > > > > > +
-> > > > > > >  #endif
-> > > > > > > diff --git a/arch/parisc/include/uapi/asm/fcntl.h b/arch/pari=
-sc/include/uapi/asm/fcntl.h
-> > > > > > > index 03dee816cb13..d46812f2f0f4 100644
-> > > > > > > --- a/arch/parisc/include/uapi/asm/fcntl.h
-> > > > > > > +++ b/arch/parisc/include/uapi/asm/fcntl.h
-> > > > > > > @@ -19,6 +19,7 @@
-> > > > > > >
-> > > > > > >  #define O_PATH               020000000
-> > > > > > >  #define __O_TMPFILE  040000000
-> > > > > > > +#define OPENAT2_REGULAR      0100000000
-> > > > > > >
-> > > > > > >  #define F_GETLK64    8
-> > > > > > >  #define F_SETLK64    9
-> > > > > > > diff --git a/arch/sparc/include/uapi/asm/errno.h b/arch/sparc=
-/include/uapi/asm/errno.h
-> > > > > > > index 4a41e7835fd5..71940ec9130b 100644
-> > > > > > > --- a/arch/sparc/include/uapi/asm/errno.h
-> > > > > > > +++ b/arch/sparc/include/uapi/asm/errno.h
-> > > > > > > @@ -117,4 +117,6 @@
-> > > > > > >
-> > > > > > >  #define EHWPOISON    135     /* Memory page has hardware err=
-or */
-> > > > > > >
-> > > > > > > +#define EFTYPE               136     /* Wrong file type for =
-the intended operation */
-> > > > > > > +
-> > > > > > >  #endif
-> > > > > > > diff --git a/arch/sparc/include/uapi/asm/fcntl.h b/arch/sparc=
-/include/uapi/asm/fcntl.h
-> > > > > > > index 67dae75e5274..bb6e9fa94bc9 100644
-> > > > > > > --- a/arch/sparc/include/uapi/asm/fcntl.h
-> > > > > > > +++ b/arch/sparc/include/uapi/asm/fcntl.h
-> > > > > > > @@ -37,6 +37,7 @@
-> > > > > > >
-> > > > > > >  #define O_PATH               0x1000000
-> > > > > > >  #define __O_TMPFILE  0x2000000
-> > > > > > > +#define OPENAT2_REGULAR      0x4000000
-> > > > > > >
-> > > > > > >  #define F_GETOWN     5       /*  for sockets. */
-> > > > > > >  #define F_SETOWN     6       /*  for sockets. */
-> > > > > > > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > > > > > > index 66bbf6d517a9..6d8d4c7765e6 100644
-> > > > > > > --- a/fs/ceph/file.c
-> > > > > > > +++ b/fs/ceph/file.c
-> > > > > > > @@ -977,6 +977,10 @@ int ceph_atomic_open(struct inode *dir, =
-struct dentry *dentry,
-> > > > > > >                       ceph_init_inode_acls(newino, &as_ctx);
-> > > > > > >                       file->f_mode |=3D FMODE_CREATED;
-> > > > > > >               }
-> > > > > > > +             if ((flags & OPENAT2_REGULAR) && !d_is_reg(dent=
-ry)) {
-> > > > > > > +                     err =3D -EFTYPE;
-> > > > > > > +                     goto out_req;
-> > > > > > > +             }
-> > > > > >
-> > > > > > ^^^
-> > > > > > This doesn't look quite right. Here's a larger chunk of the cod=
-e:
-> > > > > >
-> > > > > > -------------------------8<--------------------------
-> > > > > >         if (d_in_lookup(dentry)) {
-> > > > > >                 dn =3D ceph_finish_lookup(req, dentry, err);
-> > > > > >                 if (IS_ERR(dn))
-> > > > > >                         err =3D PTR_ERR(dn);
-> > > > > >         } else {
-> > > > > >                 /* we were given a hashed negative dentry */
-> > > > > >                 dn =3D NULL;
-> > > > > >         }
-> > > > > >         if (err)
-> > > > > >                 goto out_req;
-> > > > > >         if (dn || d_really_is_negative(dentry) || d_is_symlink(=
-dentry)) {
-> > > > > >                 /* make vfs retry on splice, ENOENT, or symlink=
- */
-> > > > > >                 doutc(cl, "finish_no_open on dn %p\n", dn);
-> > > > > >                 err =3D finish_no_open(file, dn);
-> > > > > >         } else {
-> > > > > >                 if (IS_ENCRYPTED(dir) &&
-> > > > > >                     !fscrypt_has_permitted_context(dir, d_inode=
-(dentry))) {
-> > > > > >                         pr_warn_client(cl,
-> > > > > >                                 "Inconsistent encryption contex=
-t (parent %llx:%llx child %llx:%llx)\n",
-> > > > > >                                 ceph_vinop(dir), ceph_vinop(d_i=
-node(dentry)));
-> > > > > >                         goto out_req;
-> > > > > >                 }
-> > > > > >
-> > > > > >                 doutc(cl, "finish_open on dn %p\n", dn);
-> > > > > >                 if (req->r_op =3D=3D CEPH_MDS_OP_CREATE && req-=
->r_reply_info.has_create_ino) {
-> > > > > >                         struct inode *newino =3D d_inode(dentry=
-);
-> > > > > >
-> > > > > >                         cache_file_layout(dir, newino);
-> > > > > >                         ceph_init_inode_acls(newino, &as_ctx);
-> > > > > >                         file->f_mode |=3D FMODE_CREATED;
-> > > > > >                 }
-> > > > > >                 err =3D finish_open(file, dentry, ceph_open);
-> > > > > >         }
-> > > > > > -------------------------8<--------------------------
-> > > > > >
-> > > > > > It looks like this won't handle it correctly if the pathwalk te=
-rminates
-> > > > > > on a symlink (re: d_is_symlink() case). You should either set u=
-p a test
-> > > > > > ceph cluster on your own, or reach out to the ceph community an=
-d ask
-> > > > > > them to test this.
-> > > > > >
-> > > > >
-> > > > > Thanks for reviewing. The d_is_symlink() case seems to be calling
-> > > > > finish_no_open so shouldn't this be okay?
-> > > > >
-> > > >
-> > > > My mistake -- you're correct. I keep forgetting that finish_no_open=
-()
-> > > > will handle this case regardless of what else happens.
-> > > >
-> > > > > > >               err =3D finish_open(file, dentry, ceph_open);
-> > > > > > >       }
-> > > > > > >  out_req:
-> > > > > > > diff --git a/fs/fcntl.c b/fs/fcntl.c
-> > > > > > > index beab8080badf..240bb511557a 100644
-> > > > > > > --- a/fs/fcntl.c
-> > > > > > > +++ b/fs/fcntl.c
-> > > > > > > @@ -1169,9 +1169,9 @@ static int __init fcntl_init(void)
-> > > > > > >        * Exceptions: O_NONBLOCK is a two bit define on parisc=
-; O_NDELAY
-> > > > > > >        * is defined as O_NONBLOCK on some platforms and not o=
-n others.
-> > > > > > >        */
-> > > > > > > -     BUILD_BUG_ON(20 - 1 /* for O_RDONLY being 0 */ !=3D
-> > > > > > > +     BUILD_BUG_ON(21 - 1 /* for O_RDONLY being 0 */ !=3D
-> > > > > > >               HWEIGHT32(
-> > > > > > > -                     (VALID_OPEN_FLAGS & ~(O_NONBLOCK | O_ND=
-ELAY)) |
-> > > > > > > +                     (VALID_OPENAT2_FLAGS & ~(O_NONBLOCK | O=
-_NDELAY)) |
-> > > > > > >                       __FMODE_EXEC));
-> > > > > > >
-> > > > > > >       fasync_cache =3D kmem_cache_create("fasync_cache",
-> > > > > > > diff --git a/fs/gfs2/inode.c b/fs/gfs2/inode.c
-> > > > > > > index 8344040ecaf7..4604e2e8a9cc 100644
-> > > > > > > --- a/fs/gfs2/inode.c
-> > > > > > > +++ b/fs/gfs2/inode.c
-> > > > > > > @@ -738,6 +738,12 @@ static int gfs2_create_inode(struct inod=
-e *dir, struct dentry *dentry,
-> > > > > > >       inode =3D gfs2_dir_search(dir, &dentry->d_name, !S_ISRE=
-G(mode) || excl);
-> > > > > > >       error =3D PTR_ERR(inode);
-> > > > > > >       if (!IS_ERR(inode)) {
-> > > > > > > +             if (file && (file->f_flags & OPENAT2_REGULAR) &=
-& !S_ISREG(inode->i_mode)) {
-> > > > > >
-> > > > > > Isn't OPENAT2_REGULAR getting masked off in ->f_flags now?
-> > > > > >
-> > > > > Yes, I thought the masking off was happening after this codepath =
-got
-> > > > > executed. Maybe it's better anyway to pass another flags param to=
- this
-> > > > > function and forward the flags from the gfs2_atomic_open function=
- and
-> > > > > in other call sites pass 0 ? What do you think?
-> > > > >
-> > > >
-> > > > Also my mistake. That happens in do_dentry_open() which happens in
-> > > > finish_open(), so you should be OK here.
-> > > >
-> > > > Reviewed-by: Jeff Layton <jlayton@kernel.org>
-> > >
-> > > Thanks for patiently reviewing this! I am planning on sending patches
-> > > for man-pages and looking into some xfs-tests for this. But I am not
-> > > sure if this patch series will get more reviews from others or if it
-> > > will be picked up in the vfs branch?
-> > >
-> >
-> > This is a change to rather core VFS infrastructure so yes, you should
-> > expect some more review. Assuming no major issues are found, then yes,
-> > this should eventually get picked up by the VFS maintainers.
-> >
-> > Cheers,
-> > --
-> > Jeff Layton <jlayton@kernel.org>
->
-> Ping....
-> This patch series got a "Reviewed-by" from Jeff Layton but it probably
-> requires more reviews from other maintainers/reviewers as well. So
-> requesting for review on this patch series. Thanks!
->
+Hi Ceph list,
 
-Ping...
-Requesting for review on this patch series please.
+This is a combination RFC and bug report. I'm holding off cleaning up the patch
+until I get confirmation that this is the right approach. There are some edge
+cases stemming from complexities in ceph_fname_to_usr(), making this patch into
+more of a shotgun bugfix than I'd like.
 
-Regards,
-Dorjoy
+I have thoroughly tested this patch: In my live (AArch64) environment, certain
+workloads would trigger this particular oops->panic 3-5 times per day. Since I
+applied this patch ~2 weeks ago, I get no further panics. I do not think my MDS
+contains any base64-only dentries, however.
+
+Bug description
+---------------
+
+On architectures that implement flush_dcache_page() (most of the non-x86 ones),
+scatterwalk_done_dst() will attempt to flush each page of the destination when
+a skcipher decryption completes. If passed a destination buffer that isn't in
+the linear region, virt_to_page() yields a bogus `struct page *`, leading to a
+kernel oops/panic.
+
+For this reason, sg_set_buf() requires a linear buffer (and will assert it with
+BUG_ON, if the kernel is built with CONFIG_DEBUG_SG). By extension, that means
+`fscrypt_str`s must only point to kmalloc() buffers.
+
+The MDS client's parse_reply_info_readdir() invokes fscrypt in-place, reusing
+the message's `front` buffer. However, ceph_msg_new2() allocates the `front`
+buffer with kvmalloc(), which attempts kmalloc() (linear region) allocation
+first, then falls back to vmalloc() (vmalloc region) if that fails.
+
+This means that: when physical memory is fragmented, fscrypt is enabled, MDS
+responses are rather large, and the host architecture implements
+flush_dcache_page(), the CephFS client will oops/panic.
+
+Reproduction steps
+------------------
+
+1. Build the kernel with the following configs enabled:
+- CONFIG_DEBUG_SG
+  - This enables a BUG_ON() to confirm that only linear virt addresses are
+    passed to sg_set_buf(); this is necessary to see the issue on x86
+    (on ARCH_IMPLEMENTS_FLUSH_DCACHE_PAGE archs like arm/64, MIPS, RISC-V, etc.
+     the oops will happen on flush)
+- CONFIG_FAULT_INJECTION
+- CONFIG_FAILSLAB
+- CONFIG_FAULT_INJECTION_DEBUG_FS
+
+2. Create a directory in CephFS, encrypt it with fscrypt, and populate it with
+   10 files:
+```
+cd /path/to/cephfs
+mkdir fscrypted
+fscrypt encrypt fscrypted
+seq 1 10 | while read i; do touch fscrypted/file$i; done
+```
+
+3. Enable fault injection on kmalloc, so that 1% of kvmalloc() attempts use the
+   vmalloc() fallback:
+```
+echo -1 > /sys/kernel/debug/failslab/times
+echo 0 > /sys/kernel/debug/failslab/interval
+echo 1 > /sys/kernel/debug/failslab/probability
+```
+
+4. Repeatedly retrieve/decrypt the directory listing:
+while true; do ls fscrypted >/dev/null; sysctl -q vm.drop_caches=1; done
+
+5. Within 3-10 seconds, expect an oops like:
+Oops: invalid opcode: 0000 [#1] SMP NOPTI
+CPU: 0 UID: 0 PID: 1474 Comm: kworker/0:2 Not tainted 7.0.0-rc6 #79 PREEMPT(lazy)
+Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.16.3-20240910_120124-localhost 04/01/2014
+Workqueue: ceph-msgr ceph_con_workfn
+RIP: 0010:sg_init_one+0x88/0xa0
+Code: [[[SNIP SNIP]]]
+RSP: 0018:ffffbb730042f618 EFLAGS: 00010246
+RAX: 0000000000000000 RBX: ffffbb73001591b7 RCX: 0000000000000000
+RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
+RBP: 0000000000000020 R08: ffffbb73001591b7 R09: ffffbb730042f638
+R10: ffff97e7c42cc630 R11: 0000000000000000 R12: ffffbb730042f638
+R13: ffff97e7c42cc630 R14: ffffbb730042f658 R15: ffff97e7c3937000
+FS:  0000000000000000(0000) GS:ffff97e865a61000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007fe46ff2f000 CR3: 0000000003bb9000 CR4: 0000000000350eb0
+Call Trace:
+ <TASK>
+ fname_decrypt+0x10b/0x1b0
+ fscrypt_fname_disk_to_usr+0x14d/0x1b0
+ ceph_fname_to_usr+0x1df/0x2f0
+ ? __pfx_crypto_cbc_encrypt+0x10/0x10
+ ? crypto_lskcipher_crypt_sg+0xf7/0x140
+ ? ceph_aes_crypt+0x1d7/0x2b0
+ ? __kmalloc_noprof+0x19c/0x570
+ ? ceph_decode_copy+0x13/0x30
+ parse_reply_info+0x49d/0x9c0
+ mds_dispatch+0x890/0x2000
+ ceph_con_process_message+0x72/0x140
+ ceph_con_v1_try_read+0xaf9/0x1cc0
+ ? put_prev_task_fair+0x1d/0x40
+ ? finish_task_switch.isra.0+0x90/0x2c0
+ ceph_con_workfn+0x2e0/0x6e0
+ process_one_work+0x192/0x3a0
+ worker_thread+0x1aa/0x330
+ ? __pfx_worker_thread+0x10/0x10
+ kthread+0xde/0x120
+ ? __pfx_kthread+0x10/0x10
+ ret_from_fork+0x2d7/0x360
+ ? __pfx_kthread+0x10/0x10
+ ret_from_fork_asm+0x1a/0x30
+ </TASK>
+Modules linked in:
+---[ end trace 0000000000000000 ]---
+
+6. If unable to repro with 10 files, try again with 5, 15, and 20. The mds
+   readdir reply's front section needs to be a particular size: if it's one
+   page or smaller, kvmalloc() does not attempt the vmalloc() fallback; if it's
+   larger than KMALLOC_MAX_CACHE_SIZE (2 pages), kmalloc() doesn't respect
+   failslab (this is apparently an oversight in failslab).
+
+Summery of changes
+------------------
+
+All changes are in parse_reply_info_readdir():
+
+- Move the `inode`/`ci` declaration/initialization out of the loop; they are
+  loop-invariant anyway, and we need the directory's inode before entering the
+  loop.
+
+- Add a `struct fscrypt_str bname` to serve as a bounce buffer.
+
+- Any time *p is in the vmalloc region, call ceph_fname_alloc_buffer() to
+  attempt to allocate the bounce buffer. This is very rare (it only happens if
+  kmalloc() fails) and only does anything if the directory has encryption
+  enabled. The bounce buffer is reused for all filenames in the readdir
+  response, therefore I allocate it only once, before entering the loop.
+
+- Let oname/ctext/tname be initialized normally, but if the bounce buffer is
+  active (indicating it *must* be used):
+  a) If there is an `altname`, then this is a binary blob of the ciphertext,
+     and ceph_fname_to_usr() will use it directly; copy it into the bounce
+     buffer.
+  b) If there is no `altname`, then ceph_fname_to_usr() will perform base64
+     decoding on `name` into `tname`. The bounce buffer need not be
+     initialized, but it's easy enough to have the memcpy() in there
+     unconditionally.
+
+- Redirect all potentially-crypted pointers into the bounce buffer. The unused
+  ones are ignored by ceph_fname_to_usr():
+  - fname.ctext (ciphertext if `altname` is present)
+  - tname.name (ciphertext if `altname` is absent; base64 decoder buffer)
+  - oname.name (output for the plaintext filename)
+
+- After calling ceph_fname_to_usr(), if it chose to keep `oname.name` pointed
+  at the bounce buffer:
+  - Restore `oname.name` to point to its original location in the `front`
+    buffer (which survives past the end of this function)
+  - Copy the plaintext back out of the bounce buffer to the long-lived buffer
+
+- Finally, free the bounce buffer with ceph_fname_free_buffer(), which is a
+  no-op if the buffer was never allocated.
+---
+ fs/ceph/mds_client.c | 30 ++++++++++++++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index b1746273f186..a583032c0041 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -414,6 +414,9 @@ static int parse_reply_info_readdir(void **p, void *end,
+ {
+ 	struct ceph_mds_reply_info_parsed *info = &req->r_reply_info;
+ 	struct ceph_client *cl = req->r_mdsc->fsc->client;
++	struct fscrypt_str bname = FSTR_INIT(NULL, 0);
++	struct inode *inode = d_inode(req->r_dentry);
++	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	u32 num, i = 0;
+ 	int err;
+ 
+@@ -441,10 +444,18 @@ static int parse_reply_info_readdir(void **p, void *end,
+ 		goto bad;
+ 	}
+ 
++	/*
++	 * `p` points into the message's `front` buffer, which ceph_msg_new2()
++	 * allocates using kvmalloc(), so the buffer may end up outside of the
++	 * kmalloc() region -- but fscript_str.name must be in that region, so
++	 * use a bounce buffer in that case
++	 */
++	if (unlikely(is_vmalloc_addr(*p)))
++		if ((err = ceph_fname_alloc_buffer(inode, &bname)))
++			goto out_bad;
++
+ 	info->dir_nr = num;
+ 	while (num) {
+-		struct inode *inode = d_inode(req->r_dentry);
+-		struct ceph_inode_info *ci = ceph_inode(inode);
+ 		struct ceph_mds_reply_dir_entry *rde = info->dir_entries + i;
+ 		struct fscrypt_str tname = FSTR_INIT(NULL, 0);
+ 		struct fscrypt_str oname = FSTR_INIT(NULL, 0);
+@@ -514,6 +525,13 @@ static int parse_reply_info_readdir(void **p, void *end,
+ 			oname.name = altname;
+ 			oname.len = altname_len;
+ 		}
++
++		if (bname.name) {
++			BUG_ON(oname.len > bname.len);
++			memcpy(bname.name, oname.name, oname.len);
++			fname.ctext = tname.name = oname.name = bname.name;
++		}
++
+ 		rde->is_nokey = false;
+ 		err = ceph_fname_to_usr(&fname, &tname, &oname, &rde->is_nokey);
+ 		if (err) {
+@@ -521,6 +539,12 @@ static int parse_reply_info_readdir(void **p, void *end,
+ 				      _name_len, _name, err);
+ 			goto out_bad;
+ 		}
++
++		if (unlikely(oname.name == bname.name)) {
++			oname.name = (altname_len == 0) ? _name : altname;
++			memcpy(oname.name, bname.name, oname.len);
++		}
++
+ 		rde->name = oname.name;
+ 		rde->name_len = oname.len;
+ 
+@@ -537,12 +561,14 @@ static int parse_reply_info_readdir(void **p, void *end,
+ done:
+ 	/* Skip over any unrecognized fields */
+ 	*p = end;
++	ceph_fname_free_buffer(inode, &bname);
+ 	return 0;
+ 
+ bad:
+ 	err = -EIO;
+ out_bad:
+ 	pr_err_client(cl, "problem parsing dir contents %d\n", err);
++	ceph_fname_free_buffer(inode, &bname);
+ 	return err;
+ }
+ 
+-- 
+2.52.0
+
