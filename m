@@ -1,89 +1,94 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2764396567
-	for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 17:01:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72F783E7169
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 17:02:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776272519; cv=none; b=pmsUVtTNzn0ar1mw4MoscDPIiRzl3fn6OULbKCX4dLeSuanFU3MmXIchzyBqSmfLA/8x2cr2TySAlskW16aJuPHt//ci7rTBX5v3m3IFhMmiNErMuav8Kpw4SfUhaLuHVBiFMz++rjUBL8cZ1DtxrBDEwn9sTnda2hVJCJg+1n4=
+	t=1776272524; cv=none; b=e4s07A3aWUhRNFqy58Z2x+2rXrUvQzAopnpbRaALpTJL2CjDIj+L/2gBJKgeIZcQYqKTyMwbfkuJYLffD940WrLD5NWVvtcH/QtKdyiuDvwKtrit5nZ4eOeKL1TQ+5VXzK3bBlcJklOoakYTDSDvdu6tPIIWem6p+FzQvfah2qY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776272519; c=relaxed/simple;
-	bh=EjpLUZD65b4tabg+yzSnnYbDXhagBAIufBacfc+cllk=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=i/IMq9kvt7vMIc/hFOz0mIx2mdRsKGZvHfyRozUYnuN3tHOK1eIjXYER6pBkuVbadMtm+1ito5p5yuuk4mzbMbRQ4HIhfCeqL0MqYJ51gdsxE4GALFiwoC7r6HFBv63JHXv0dOy+l1clyX7Rypc6p62T3+0pUJgynfe1Q1pax6A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MI6W+HGC; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=odByD+At; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1776272524; c=relaxed/simple;
+	bh=hF8GPPMCTtYMk3vi8Lxz1SJG7tR0daTJyKi+xKmaWuE=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=rT7yROcyfqBx+V6zhRqCzk2XgayfazHQDX6ivvTaekeu7f/faBrpZdtYCl+M2zRXdKD077j/IFGWoWJebTuB/SW9Wye6Uo4juKM45Tfq7qO1CbZn4g3JiPpwYp+S39swoqifX5ZsGUDNnEduDMysCuCxSpofJeJdY6jJq4cdXSY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=TetAIqfm; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ime2V8gK; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MI6W+HGC";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="odByD+At"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TetAIqfm";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ime2V8gK"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1776272516;
+	s=mimecast20190719; t=1776272520;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=H4wsvwRJbqgcLtEjgPuYkCxpD7ZHOSfOGTS4tTJGptA=;
-	b=MI6W+HGCvORXjzx1uCKETbisUvjhBg9QwFtxr59JqsVEzKug9jQjRJzl/hPXUvxAYBsFxs
-	W8TG0pfJJTS1TU391y2TIelvPe+eC927WGcRPpZIVhhLqqzZljxnVaY3b22NAFcHXiIQmL
-	+YoMwM3JWExuytvTLcAoitXZaZ7cGCM=
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
- [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=//5vy/hAvLLk2tz3ORfdr9CS0acwofxbtDJCElDQmN4=;
+	b=TetAIqfmfoHxtm8TmBsHZpbjovZ0wjRvOLtbjDkM//efHWRtTgBaGkwF87ZQbuCZw6ybFQ
+	Q+nYPq19N8faBuBJ/qwChiKSpyMJXC2EHCkMwpjAZNIf7CNCtPNW2REo+tVTT7d4DyLvpq
+	6g7sS977WloND8O4wQ/ILbKICtBmd5M=
+Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
+ [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-235-h3OJSDVTOGSDRLy4STfX7Q-1; Wed, 15 Apr 2026 13:01:55 -0400
-X-MC-Unique: h3OJSDVTOGSDRLy4STfX7Q-1
-X-Mimecast-MFC-AGG-ID: h3OJSDVTOGSDRLy4STfX7Q_1776272515
-Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-8aca6f796d5so117543786d6.0
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 10:01:55 -0700 (PDT)
+ us-mta-170-wNpd8xj6MtSKjXBxy4bwow-1; Wed, 15 Apr 2026 13:01:59 -0400
+X-MC-Unique: wNpd8xj6MtSKjXBxy4bwow-1
+X-Mimecast-MFC-AGG-ID: wNpd8xj6MtSKjXBxy4bwow_1776272518
+Received: by mail-qt1-f200.google.com with SMTP id d75a77b69052e-50d8e4c29caso177097381cf.0
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Apr 2026 10:01:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1776272514; x=1776877314; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=H4wsvwRJbqgcLtEjgPuYkCxpD7ZHOSfOGTS4tTJGptA=;
-        b=odByD+At41nheLjEeH8pyOv8YkAn6Q2ng95mjgKmXK5GiZg6Dj7aTGwPndugVz5mbG
-         IxPdJCTN3E7s1LkVIAixSCjqmBOjyaYgtmv37mmTU39DcbUtyRr1C5ooSsw/Z8Un4oz9
-         5ZSiRVZbAz0fvr3aHKsd8sJAhoTVzDtf5IsjJ7IAev0bumSG1Lt9NlZqjLyjmJkS7LGR
-         PoIVyJB/4PredtunK2jPOWPKlHF7rsnZjbcleWKXAQj4tDJu3/2Fge4bOfPTUQnWGDb2
-         FVyu4CZnzc1YP59Jknc2xEisIbQn1J78q7IrjZ5pbeDTbKJddU83Uu/rQ2b4vGJtALjq
-         Tx7A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776272514; x=1776877314;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=redhat.com; s=google; t=1776272518; x=1776877318; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=H4wsvwRJbqgcLtEjgPuYkCxpD7ZHOSfOGTS4tTJGptA=;
-        b=kt9S/qlXqiEpx1HhIzYEQ+MUhtHDdxWHORT5lc5AW/iaHTkNqKNSRcmspvbtg1WRu4
-         3RxyM9iF1h1KJSD76l8wOJOz5i4uvp8hpSuo6d/7atxtIZvGEHmjQlA93k4yZyqlx8d7
-         Gw/Wrqn/mDq6Y1+zWmc0MMkiaUBFQ5PGPZ+c8c0nqRyPR4/sTKOYapjwjcOzWSJYEkLj
-         LIqAdFVBC5ABhzVJAtApGyNa0VPAG4gEGx0yx2Gc3kgZ1pH9h1KwEYKDHYCk0+1ClXG8
-         OdKDLGJOWCsmXBjORyWmajHF38T9Lct36ueJFh/upPs2+JSoSklW3P/U7lA3N/qCvGGf
-         cC2g==
-X-Gm-Message-State: AOJu0YwagPWsYtL8tAsGQh6hMbecBrckoeYUBJ4fO2n5ZcAYnng9srkV
-	cZgECL+E/rqYzbzwtQbOadbOLbX4kJjdG/40H/MrPaD1Nkh+W7GrUmuNpPAAS6tAwX9H8YTvVG5
-	+pSFmC5uo3TaUauRfQbgP7QT/gUzhUHtN8zFkdjC9RTilGSgm5V5z8NuZ92OnIeHw18dj2ENSp5
-	YFWcBuYB6sCacMombXPPbWteqp1y5ojHccmqns0GJ6Ksi9DeMt1g==
-X-Gm-Gg: AeBDiesUVFXTQS08u38pblXUDoSR0DuSwBOVat39mCA+tGhn7V2/fHw7BSCPLoyWfJp
-	lTIgio5qo1reXx45iAPD4YoRNHAqzrM17/4sk/+kODVt6wGOhhQ61KP/JfqVaCWdYA6dpaHHqn4
-	+7CxehTbVka0/H88lY3pTsYXqug7eLdaT+CSLgmjHD86t3JbHdqL7HkgSojhauMH07CJGnk6lRQ
-	WHWZlDSqKNnxCUkBbTBd5OydHeGVSiAdtbuNqDj4m6diBufQNFdLhXcanhSFDeGomD7WY66CRns
-	Dv6lNGAFa+wB56NLceQnTDzMnfKbH+VWlqr/3UKsO980KrVg2Xlggk4Mb3Ov6AbT7Hjdq4jXf20
-	8T04aWhumyd0zKEVYaSt0hz4cB4lW52Oda5Qjz0xLlI99glOyaAXJMSpyoBhbgbZCXw==
-X-Received: by 2002:ac8:5ac4:0:b0:50d:e298:8f1c with SMTP id d75a77b69052e-50defc74506mr255466861cf.32.1776272504776;
-        Wed, 15 Apr 2026 10:01:44 -0700 (PDT)
-X-Received: by 2002:ac8:5ac4:0:b0:50d:e298:8f1c with SMTP id d75a77b69052e-50defc74506mr255421761cf.32.1776272458487;
-        Wed, 15 Apr 2026 10:00:58 -0700 (PDT)
+        bh=//5vy/hAvLLk2tz3ORfdr9CS0acwofxbtDJCElDQmN4=;
+        b=Ime2V8gK41n2xGYjzI8S+D+yKLBHbPvlmIso6HMlPBVU4aoWPMOkl4vd5NdgjGUvsN
+         CweeBrbh0Y7yplsJG9pLbbZiZvePkc9eYrE8dIb8JwSqRYneCsFnEj84DV10dat7pYAL
+         pijOgwdbf4P1xge3ObxwWiiOeiS5fwQt6UHF3cTNhBxvBXDkvzXMVr1juZttRSFfWzPu
+         OcrUZip+tWQbNiPdnQqMtFG+bAhP15zeIVzLrTJczBVrNJqouiayPqbb7bY+8ZtVFVSK
+         YGhzKdF/HucwCepFyrbkU8q9N1QsRDionnUSt6mY9WJkjwdskVE53r164QrARUcjxyFZ
+         W0rg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776272518; x=1776877318;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=//5vy/hAvLLk2tz3ORfdr9CS0acwofxbtDJCElDQmN4=;
+        b=Ev+h+XVVAPpjLrYwHHAarPnL4Yr0ld1e2U2Df/BdhC61mHQClNAx2HY83aHAa5mLZa
+         aO3EDZlbDoHF3hNHlr4QyW9qqUdytpnDTa0LzKHVrN+vthXd2U7BxScI0n77K1xvw9Kx
+         bYZRH7HViEi1eEvAdValrw0r7V3Rqw1p/I3BBds6SZ7h5h/2kwaUAsYvxJTpjYaoZb/+
+         UDSMz4DpTRSBBmuJo/eikO68YUl0B4tx2EpWKvfN4KJU7PB/wW6/+MOZxb7zz+pd6b6x
+         WXy4H+vUGiwkyOsFx938PM4zweodo7gsYCLgPup6iJJ2aECoD8CtZEikQYgra+aOsH/U
+         su7g==
+X-Gm-Message-State: AOJu0Yx80nIs19ujNAoyTo5i9baLJ9z9bqSXfohZCurcS+EA6TY9Gpdu
+	jqEMAvbNYSJsOPzdxwaD0k+v6LpEYkKQYRJX5/NuN7VuAYk0aJ5xwLAD3c+B4E1m1pBv8OHxso7
+	U/iEmUE/PfYVxVEZNHjdTA7BE1Go5ceDzirH8Bfr+5DdnK2mEbJk7DWWD1ZsuRSdJqX89yC12zy
+	nCuSNkxVcQW6x6Wahnx+cOxvnG/gGumS46LNzy+pb4fnSNQDmAgg==
+X-Gm-Gg: AeBDies1oDrhFkXjPeW1tmSU3y8TeinLRg7gFbRfv4etQa+hQ83PQCnTAEiOP8efA07
+	hwRIaVW6f7HfcAdW3eTB43u3Zsb4AD3sEeId1qpAt3X5xBmxsYrB51Oc8OUJesJaccIHZKrEEWQ
+	4JE7LMbBl7ylMx9uH8ckT4qb/hEGUSbiHvTa+8K628el0+jJurUvZyItjeJA0mgtasD6/DpuwkH
+	zFWNjRta5ZqLZpeQgussaxerl5AAArgtox9bacrdVDc9m3altsnTAzT5yVJ4rLNluV5kNSxTWMj
+	9Yfg6/tbr6faZ+BIwJwG06NlJGPMlehzdTjhnvhcy1NFHiHTSP+shXH4rTBHAkWE64qWIqwd5DL
+	wZ4jopioxlte38Txnq6cUtsfp+NHZ8t2lKB8OSlaWTtYvoXNQk/bNfJCfhBhMCgn3bA==
+X-Received: by 2002:a05:622a:9:b0:50d:7b0c:35de with SMTP id d75a77b69052e-50dd5c74756mr343039461cf.44.1776272514515;
+        Wed, 15 Apr 2026 10:01:54 -0700 (PDT)
+X-Received: by 2002:a05:622a:9:b0:50d:7b0c:35de with SMTP id d75a77b69052e-50dd5c74756mr343006191cf.44.1776272475636;
+        Wed, 15 Apr 2026 10:01:15 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50e1af9dc5fsm16817841cf.16.2026.04.15.10.00.57
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50e1af9dc5fsm16817841cf.16.2026.04.15.10.01.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Apr 2026 10:00:57 -0700 (PDT)
+        Wed, 15 Apr 2026 10:01:15 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v2 0/7] ceph: manual client session reset
-Date: Wed, 15 Apr 2026 17:00:36 +0000
-Message-Id: <20260415170043.3882912-1-amarkuze@redhat.com>
+Subject: [PATCH v2 6/7] ceph: add manual reset debugfs control and tracepoints
+Date: Wed, 15 Apr 2026 17:00:42 +0000
+Message-Id: <20260415170043.3882912-7-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260415170043.3882912-1-amarkuze@redhat.com>
+References: <20260415170043.3882912-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -92,169 +97,323 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This series adds operator-initiated manual client session reset for
-CephFS, providing a controlled escape hatch for client/MDS stalemates
-in which caps, locks, or unsafe metadata state stop making forward
-progress.
+Add the debugfs and trace plumbing used to trigger and observe
+manual client reset.
 
-Motivation
-----------
+The reset interface exposes a trigger file for operator-initiated
+reset and a status file for tracking the most recent run.  The
+tracepoints record scheduling, completion, and blocked caller
+behavior so reset progress can be diagnosed from the client side.
 
-When a CephFS client enters a stalemate with the MDS -- stuck cap
-flushes, hung file locks, or unsafe requests that cannot be journaled --
-the only current recovery options are client eviction from the MDS side
-or a full client node restart.  Both are disruptive and can cascade to
-other workloads on the same node.
+debugfs layout under /sys/kernel/debug/ceph/<client>/reset/:
+  trigger - write to initiate a manual reset
+  status  - read to see the most recent reset result
 
-Manual reset gives the operator a targeted tool: block new metadata
-work, attempt a bounded best-effort drain of dirty client state while
-sessions are still alive, then tear sessions down and let new requests
-re-open fresh sessions.  State that cannot drain (the stuck state
-causing the stalemate) is force-dropped -- that is the point of the
-reset.
+Tracepoints:
+  ceph_client_reset_schedule  - reset queued
+  ceph_client_reset_complete  - reset finished (success or failure)
+  ceph_client_reset_blocked   - caller blocked waiting for reset
+  ceph_client_reset_unblocked - caller unblocked after reset
 
-Design
-------
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+ fs/ceph/debugfs.c           | 104 ++++++++++++++++++++++++++++++++++++
+ fs/ceph/mds_client.c        |   8 +++
+ fs/ceph/super.h             |   3 ++
+ include/trace/events/ceph.h |  63 ++++++++++++++++++++++
+ 4 files changed, 178 insertions(+)
 
-The reset is triggered via debugfs:
-
-    echo "reason" > /sys/kernel/debug/ceph/<client>/reset/trigger
-    cat /sys/kernel/debug/ceph/<client>/reset/status
-
-The state machine tracks four phases:
-
-    IDLE -> QUIESCING -> DRAINING -> TEARDOWN -> IDLE
-
-QUIESCING is set synchronously by schedule_reset() before the workqueue
-item is dispatched.  This provides immediate request gating from the
-caller's context -- new metadata requests and file-lock acquisitions
-block the moment the operator triggers the reset, with no race window
-between scheduling and the work function starting.  All non-IDLE phases
-block callers on blocked_wq; the hot path adds only a single READ_ONCE
-per request.
-
-The drain phase (bounded at 5 seconds) flushes the MDS journal, dirty
-caps, and pending cap releases.  Non-stuck state drains in milliseconds;
-stuck state times out and is force-dropped during teardown.
-
-The session teardown follows the established check_new_map() forced-close
-pattern: unregister sessions under mdsc->mutex, then clean up caps and
-requests under s->s_mutex.  Reconnect is not attempted because the MDS
-only accepts CLIENT_RECONNECT during its own RECONNECT phase after
-restart, not from an active client.  A SESSION_REQUEST_CLOSE is sent to
-each MDS before local teardown so the MDS can release server-side state
-promptly rather than waiting for session_autoclose timeout.
-
-Blocked callers are released when reset completes and observe the final
-result.  The wait path verifies the phase is still IDLE under the lock
-after wakeup, looping back if a new reset was scheduled in the interim.
-
-Patch breakdown
----------------
-
-Prep / cleanup:
-
- 1. Convert all CEPH_I_* inode flags to named bit-position constants
-    and switch all flag modifications to atomic bitops (set_bit,
-    clear_bit, test_and_clear_bit).  The previous code mixed lockless
-    atomics with non-atomic read-modify-write on the same unsigned long,
-    which is a correctness hazard.  Flag reads under i_ceph_lock that
-    only test lock-serialised flags retain bitmask tests.
-
- 2. Fix a __force endian cast in reconnect_caps_cb() to use the proper
-    cpu_to_le32() macro and the new test_bit() accessor.
-
-Hardening / diagnostics:
-
- 3. Harden send_mds_reconnect() with error return, early bailout for
-    closed/rejected/unregistered sessions, state restoration on
-    transient failure.  Rewrite mds_peer_reset() to handle active-MDS
-    (past RECONNECT phase) by tearing the session down locally.
-
- 4. Convert wait_caps_flush() to a diagnostic timeout loop that
-    periodically dumps pending flush state, improving observability
-    for reset-drain stalls and existing sync/writeback hangs.
-
-Core feature:
-
- 5. Add the reset state machine, request gating, session teardown
-    work function, scheduling, and destroy-path coordination.
-
- 6. Add the debugfs trigger/status interface and four tracepoints
-    (schedule, complete, blocked, unblocked).
-
-Testing:
-
- 7. Add kselftest-integrated shell tests: stress testing with
-    concurrent I/O and random-interval reset injection, targeted
-    corner cases (overlapping resets, dirty data across reset,
-    stale locks, unmount during reset), a five-stage validation
-    wrapper with per-stage timeouts, and a post-run data integrity
-    checker.  All 5 validation stages pass on a real CephFS cluster.
-
-Changes since v1
------------------
-
- - Patch 1 now converts ALL flag modifications to atomic bitops,
-   eliminating the mixed atomic/non-atomic RMW hazard on the shared
-   i_ceph_flags field.  Removed mask defines for flags that are only
-   accessed via the _BIT form.  Fixed Co-authored-by -> Co-developed-by.
- - Rewrote mds_peer_reset() to handle active-MDS state correctly
-   instead of sending a doomed reconnect (patch 3).
- - Added state restoration in send_mds_reconnect() failure path to
-   prevent sessions stranding in RECONNECTING (patch 3).
- - Added early bailout checks in send_mds_reconnect() for
-   closed/rejected/unregistered sessions (patch 3).
- - Added diagnostic timeout loop to wait_caps_flush() (patch 4).
- - Patch 5 commit message now documents the QUIESCING phase purpose
-   (synchronous request gating before async work dispatch).
- - Fixed TOCTOU in ceph_mdsc_wait_for_reset(): the phase is now
-   re-verified under the lock after wakeup, with a deadline-based
-   retry loop if a new reset was scheduled in the interim (patch 5).
- - Added tracepoints for reset lifecycle events (patch 6).
- - Added selftest validation harness with kselftest integration
-   (patch 7).
- - Rebased onto v7.0.
-
-Alex Markuze (7):
-  ceph: convert inode flags to named bit positions and atomic bitops
-  ceph: use proper endian conversion for flock_len in reconnect
-  ceph: harden send_mds_reconnect and handle active-MDS peer reset
-  ceph: add diagnostic timeout loop to wait_caps_flush()
-  ceph: add client reset state machine and session teardown
-  ceph: add manual reset debugfs control and tracepoints
-  ceph: add manual reset selftests and validation harness
-
- MAINTAINERS                                   |   1 +
- fs/ceph/addr.c                                |  16 +-
- fs/ceph/caps.c                                |  29 +-
- fs/ceph/debugfs.c                             | 104 +++
- fs/ceph/file.c                                |  12 +-
- fs/ceph/inode.c                               |   5 +-
- fs/ceph/locks.c                               |  38 +-
- fs/ceph/mds_client.c                          | 656 ++++++++++++++++-
- fs/ceph/mds_client.h                          |  44 +-
- fs/ceph/snap.c                                |   2 +-
- fs/ceph/super.h                               |  73 +-
- fs/ceph/xattr.c                               |   2 +-
- include/trace/events/ceph.h                   |  63 ++
- tools/testing/selftests/Makefile              |   1 +
- .../selftests/filesystems/ceph/Makefile       |   7 +
- .../selftests/filesystems/ceph/README.md      |  84 +++
- .../filesystems/ceph/reset_corner_cases.sh    | 646 ++++++++++++++++
- .../filesystems/ceph/reset_stress.sh          | 694 ++++++++++++++++++
- .../filesystems/ceph/run_validation.sh        | 350 +++++++++
- .../selftests/filesystems/ceph/settings       |   1 +
- .../filesystems/ceph/validate_consistency.py  | 297 ++++++++
- 21 files changed, 3025 insertions(+), 100 deletions(-)
- create mode 100644 tools/testing/selftests/filesystems/ceph/Makefile
- create mode 100644 tools/testing/selftests/filesystems/ceph/README.md
- create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
- create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress.sh
- create mode 100755 tools/testing/selftests/filesystems/ceph/run_validation.sh
- create mode 100644 tools/testing/selftests/filesystems/ceph/settings
- create mode 100755 tools/testing/selftests/filesystems/ceph/validate_consistency.py
-
---
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 7dc307790240..d46d41ec7a86 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -9,6 +9,7 @@
+ #include <linux/seq_file.h>
+ #include <linux/math64.h>
+ #include <linux/ktime.h>
++#include <linux/uaccess.h>
+ 
+ #include <linux/ceph/libceph.h>
+ #include <linux/ceph/mon_client.h>
+@@ -360,16 +361,107 @@ static int status_show(struct seq_file *s, void *p)
+ 	return 0;
+ }
+ 
++static int reset_status_show(struct seq_file *s, void *p)
++{
++	struct ceph_fs_client *fsc = s->private;
++	struct ceph_mds_client *mdsc = fsc->mdsc;
++	struct ceph_client_reset_state *st;
++	u64 trigger = 0, success = 0, failure = 0;
++	unsigned long last_start = 0, last_finish = 0;
++	int last_errno = 0;
++	enum ceph_client_reset_phase phase = CEPH_CLIENT_RESET_IDLE;
++	bool drain_timed_out = false;
++	int sessions_reset = 0;
++	int blocked_requests = 0;
++	char reason[CEPH_CLIENT_RESET_REASON_LEN];
++
++	if (!mdsc)
++		return 0;
++
++	st = &mdsc->reset_state;
++
++	spin_lock(&st->lock);
++	trigger = st->trigger_count;
++	success = st->success_count;
++	failure = st->failure_count;
++	last_start = st->last_start;
++	last_finish = st->last_finish;
++	last_errno = st->last_errno;
++	phase = st->phase;
++	drain_timed_out = st->drain_timed_out;
++	sessions_reset = st->sessions_reset;
++	strscpy(reason, st->last_reason, sizeof(reason));
++	spin_unlock(&st->lock);
++
++	blocked_requests = atomic_read(&st->blocked_requests);
++
++	seq_printf(s, "phase: %s\n", ceph_reset_phase_name(phase));
++	seq_printf(s, "trigger_count: %llu\n", trigger);
++	seq_printf(s, "success_count: %llu\n", success);
++	seq_printf(s, "failure_count: %llu\n", failure);
++	if (last_start)
++		seq_printf(s, "last_start_ms_ago: %u\n",
++			   jiffies_to_msecs(jiffies - last_start));
++	else
++		seq_puts(s, "last_start_ms_ago: (never)\n");
++	if (last_finish)
++		seq_printf(s, "last_finish_ms_ago: %u\n",
++			   jiffies_to_msecs(jiffies - last_finish));
++	else
++		seq_puts(s, "last_finish_ms_ago: (never)\n");
++	seq_printf(s, "last_errno: %d\n", last_errno);
++	seq_printf(s, "last_reason: %s\n",
++		   reason[0] ? reason : "(none)");
++	seq_printf(s, "drain_timed_out: %s\n",
++		   drain_timed_out ? "yes" : "no");
++	seq_printf(s, "sessions_reset: %d\n", sessions_reset);
++	seq_printf(s, "blocked_requests: %d\n", blocked_requests);
++
++	return 0;
++}
++
++static ssize_t reset_trigger_write(struct file *file, const char __user *buf,
++				   size_t len, loff_t *ppos)
++{
++	struct ceph_fs_client *fsc = file->private_data;
++	struct ceph_mds_client *mdsc = fsc->mdsc;
++	char reason[CEPH_CLIENT_RESET_REASON_LEN];
++	size_t copy;
++	int ret;
++
++	if (!mdsc)
++		return -ENODEV;
++
++	copy = min_t(size_t, len, sizeof(reason) - 1);
++	if (copy && copy_from_user(reason, buf, copy))
++		return -EFAULT;
++	reason[copy] = '\0';
++	strim(reason);
++
++	ret = ceph_mdsc_schedule_reset(mdsc, reason);
++	if (ret)
++		return ret;
++
++	return len;
++}
++
+ DEFINE_SHOW_ATTRIBUTE(mdsmap);
+ DEFINE_SHOW_ATTRIBUTE(mdsc);
+ DEFINE_SHOW_ATTRIBUTE(caps);
+ DEFINE_SHOW_ATTRIBUTE(mds_sessions);
+ DEFINE_SHOW_ATTRIBUTE(status);
++DEFINE_SHOW_ATTRIBUTE(reset_status);
+ DEFINE_SHOW_ATTRIBUTE(metrics_file);
+ DEFINE_SHOW_ATTRIBUTE(metrics_latency);
+ DEFINE_SHOW_ATTRIBUTE(metrics_size);
+ DEFINE_SHOW_ATTRIBUTE(metrics_caps);
+ 
++static const struct file_operations ceph_reset_trigger_fops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.write = reset_trigger_write,
++	.llseek = noop_llseek,
++};
+ 
+ /*
+  * debugfs
+@@ -404,6 +496,7 @@ void ceph_fs_debugfs_cleanup(struct ceph_fs_client *fsc)
+ 	debugfs_remove(fsc->debugfs_caps);
+ 	debugfs_remove(fsc->debugfs_status);
+ 	debugfs_remove(fsc->debugfs_mdsc);
++	debugfs_remove_recursive(fsc->debugfs_reset_dir);
+ 	debugfs_remove_recursive(fsc->debugfs_metrics_dir);
+ 	doutc(fsc->client, "done\n");
+ }
+@@ -451,6 +544,17 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
+ 						fsc,
+ 						&caps_fops);
+ 
++	fsc->debugfs_reset_dir = debugfs_create_dir("reset",
++						    fsc->client->debugfs_dir);
++	fsc->debugfs_reset_trigger =
++		debugfs_create_file("trigger", 0200,
++				    fsc->debugfs_reset_dir, fsc,
++				    &ceph_reset_trigger_fops);
++	fsc->debugfs_reset_status =
++		debugfs_create_file("status", 0400,
++				    fsc->debugfs_reset_dir, fsc,
++				    &reset_status_fops);
++
+ 	fsc->debugfs_status = debugfs_create_file("status",
+ 						  0400,
+ 						  fsc->client->debugfs_dir,
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 7e399b0dcc55..98a882cf8b65 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -5213,6 +5213,7 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
+ 	blocked_count = atomic_inc_return(&st->blocked_requests);
+ 	doutc(cl, "request blocked during reset, %d total blocked\n",
+ 	      blocked_count);
++	trace_ceph_client_reset_blocked(mdsc, blocked_count);
+ 
+ retry:
+ 	wait_ret = wait_event_interruptible_timeout(st->blocked_wq,
+@@ -5223,10 +5224,12 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
+ 	if (wait_ret == 0) {
+ 		atomic_dec(&st->blocked_requests);
+ 		pr_warn_client(cl, "timed out waiting for reset to complete\n");
++		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
+ 		return -ETIMEDOUT;
+ 	}
+ 	if (wait_ret < 0) {
+ 		atomic_dec(&st->blocked_requests);
++		trace_ceph_client_reset_unblocked(mdsc, (int)wait_ret);
+ 		return (int)wait_ret;  /* -ERESTARTSYS */
+ 	}
+ 
+@@ -5241,12 +5244,14 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
+ 		if (time_before(jiffies, deadline))
+ 			goto retry;
+ 		atomic_dec(&st->blocked_requests);
++		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
+ 		return -ETIMEDOUT;
+ 	}
+ 	ret = st->last_errno;
+ 	spin_unlock(&st->lock);
+ 
+ 	atomic_dec(&st->blocked_requests);
++	trace_ceph_client_reset_unblocked(mdsc, ret);
+ 	return ret;
+ }
+ 
+@@ -5275,6 +5280,8 @@ static void ceph_mdsc_reset_complete(struct ceph_mds_client *mdsc, int ret)
+ 
+ 	/* Wake up all requests that were blocked waiting for reset */
+ 	wake_up_all(&st->blocked_wq);
++
++	trace_ceph_client_reset_complete(mdsc, ret);
+ }
+ 
+ static void ceph_mdsc_reset_workfn(struct work_struct *work)
+@@ -5559,6 +5566,7 @@ int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
+ 	pr_info_client(mdsc->fsc->client,
+ 		       "manual session reset scheduled (reason=\"%s\")\n",
+ 		       msg);
++	trace_ceph_client_reset_schedule(mdsc, msg);
+ 	return 0;
+ }
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 1f901b1647e6..98af0a823c81 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -179,6 +179,9 @@ struct ceph_fs_client {
+ 	struct dentry *debugfs_status;
+ 	struct dentry *debugfs_mds_sessions;
+ 	struct dentry *debugfs_metrics_dir;
++	struct dentry *debugfs_reset_dir;
++	struct dentry *debugfs_reset_trigger;
++	struct dentry *debugfs_reset_status;
+ #endif
+ 
+ #ifdef CONFIG_CEPH_FSCACHE
+diff --git a/include/trace/events/ceph.h b/include/trace/events/ceph.h
+index 08cb0659fbfc..e853c891ef71 100644
+--- a/include/trace/events/ceph.h
++++ b/include/trace/events/ceph.h
+@@ -226,6 +226,69 @@ TRACE_EVENT(ceph_handle_caps,
+ 		  __entry->mseq)
+ );
+ 
++/*
++ * Client reset tracepoints - identify the client by its monitor-
++ * assigned global_id so traces remain meaningful when kernel pointer
++ * hashing is enabled.
++ */
++TRACE_EVENT(ceph_client_reset_schedule,
++	TP_PROTO(const struct ceph_mds_client *mdsc, const char *reason),
++	TP_ARGS(mdsc, reason),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__string(reason, reason ? reason : "")
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth->global_id;
++		__assign_str(reason);
++	),
++	TP_printk("client_id=%llu reason=%s",
++		  __entry->client_id, __get_str(reason))
++);
++
++TRACE_EVENT(ceph_client_reset_complete,
++	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
++	TP_ARGS(mdsc, ret),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__field(int, ret)
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth->global_id;
++		__entry->ret = ret;
++	),
++	TP_printk("client_id=%llu ret=%d", __entry->client_id, __entry->ret)
++);
++
++TRACE_EVENT(ceph_client_reset_blocked,
++	TP_PROTO(const struct ceph_mds_client *mdsc, int blocked_count),
++	TP_ARGS(mdsc, blocked_count),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__field(int, blocked_count)
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth->global_id;
++		__entry->blocked_count = blocked_count;
++	),
++	TP_printk("client_id=%llu blocked_count=%d", __entry->client_id,
++		  __entry->blocked_count)
++);
++
++TRACE_EVENT(ceph_client_reset_unblocked,
++	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
++	TP_ARGS(mdsc, ret),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__field(int, ret)
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth->global_id;
++		__entry->ret = ret;
++	),
++	TP_printk("client_id=%llu ret=%d", __entry->client_id, __entry->ret)
++);
++
+ #undef EM
+ #undef E_
+ #endif /* _TRACE_CEPH_H */
+-- 
 2.34.1
 
