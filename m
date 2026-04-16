@@ -1,322 +1,109 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from ewsoutbound.kpnmail.nl (ewsoutbound.kpnmail.nl [195.121.94.186])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3FD83ED5D6
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2026 19:56:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36AF1331A7E
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2026 21:36:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.121.94.186
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776369371; cv=none; b=DG13aeZAeN/hTdJ+DIkKPSdBjx7ALwK7f0F14arh1xDDk46DLtj5UnuREk5QVFBV3MNncYsNM4oRi1EmH5GQjE2828gl+Ckl2IZE31Kg9Y976csnOKdsufVgCmwLz1dMMYsarMpplefukSv6CQTcL2b+4lkfAdgPFQ2dVgVBO78=
+	t=1776375397; cv=none; b=fNhVubtombck8ZLM7N9xQGdjP/U0zUyBMn1qIpFPwSzqpgiX/6/AdXOptFSYqD5u+v1/CNvCraUf02QsLF1wCtrkWzhiKj0WHJLm5PAHBATBARnWBAHzai7yl872/PQYFCiKsL9qmEtbxocswqgIRVNfK5e98xh+u2Az3c4WmHM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776369371; c=relaxed/simple;
-	bh=2irto3+zmkfBJcbk5mMEo01hqsM25MOffsgIG4dQnHM=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=BarK0cEAVuEgXCj81t8gTyyAgpqWQJ95Zkte3zk8QHy7PR6qmJXrLWyckFnxfQdecIVk7eKZ+9C7BjchI0a7zSWnyn3zi5u2PG5poKpVCOivhIvOoZDhC/HYu9Q1OyQR+7+Afv50DyRX9dOOpMkA5ZYyJPymKit/4uGCD97foRw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aBWglcSh; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=D/dbTBK7; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1776375397; c=relaxed/simple;
+	bh=jKmGfrTxgv5Nzlz5bG0/V1+paVSZPlZlHvQ4Koh/BtY=;
+	h=Date:From:To:Cc:Message-ID:In-Reply-To:References:Subject:
+	 MIME-Version:Content-Type; b=TCuRjLavNtfhZ3bpNG3e09B5urcbJImbWt1gCCZcTm23Lxf8JgCCMUTyFr9ikQAIO+nsd3bgvrdGXryZgRwb3511wR5RriSa8fvny4cBZqvLBi3KBhus4/gayVYf3WtFBlrchOVvDLkW7RXD1XVxSiV8cqTJnL9skixM6O5qctg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=xs4all.nl; spf=pass smtp.mailfrom=xs4all.nl; dkim=pass (2048-bit key) header.d=xs4all.nl header.i=@xs4all.nl header.b=mVbaoHD6; arc=none smtp.client-ip=195.121.94.186
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=xs4all.nl
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=xs4all.nl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aBWglcSh";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="D/dbTBK7"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1776369363;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=X4vEcnA6sfg/gK8PDsvUK5TVbDPDBw6vHof22O/JKcw=;
-	b=aBWglcShs8osverkbp63JWxjVbsNWhSt+ZUE1LXpgs3VFQAQOBEcSh9EUv0k0Js3GhVz4t
-	IonrJQhPmhr5H44zdBDevWbBEFCyCaYLAR0zL4vR+y0kwjkHW7LaFdz1WTRaAVUr1fejrM
-	pJmykUlSt/i5D8Jxap4rcmy/KjSU8Sw=
-Received: from mail-yw1-f197.google.com (mail-yw1-f197.google.com
- [209.85.128.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-551-YLf2wvCIOUiudCBKaT01Yw-1; Thu, 16 Apr 2026 15:56:02 -0400
-X-MC-Unique: YLf2wvCIOUiudCBKaT01Yw-1
-X-Mimecast-MFC-AGG-ID: YLf2wvCIOUiudCBKaT01Yw_1776369361
-Received: by mail-yw1-f197.google.com with SMTP id 00721157ae682-7987861595eso248565427b3.1
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Apr 2026 12:56:01 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=xs4all.nl header.i=@xs4all.nl header.b="mVbaoHD6"
+X-KPN-MessageId: 55b4a78a-39dc-11f1-89e1-00505699b430
+Received: from mta.kpnmail.nl (unknown [10.31.161.189])
+	by ewsoutbound.so.kpn.org (Halon) with ESMTPS
+	id 55b4a78a-39dc-11f1-89e1-00505699b430;
+	Thu, 16 Apr 2026 23:36:31 +0200 (CEST)
+Received: from mtaoutbound.kpnmail.nl (unknown [10.128.135.190])
+	by mta.kpnmail.nl (Halon) with ESMTP
+	id 55b55afc-39dc-11f1-b5d0-0050569981f5;
+	Thu, 16 Apr 2026 23:36:31 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1776369361; x=1776974161; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:references
-         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=X4vEcnA6sfg/gK8PDsvUK5TVbDPDBw6vHof22O/JKcw=;
-        b=D/dbTBK7OlTUr8F1pEIwpJP0jr2KTywHkw/50aayeeEh/nSTbLWaIH1lRTDv0s7fBA
-         WP3kN1YttS7Sn9eIbJU4D5CE2fXaWhakpU0CToyah7dZTZUn6u6IN3z1ycFYswyPNbHW
-         BkfVwbrnh9zHG266FFpvpb0o90zXyyASNiQuWMDspldCH4ZU4OMQGasI2MWRKTrmTA5K
-         BOIZgGSEV6yHoHA82cslwFr/76kaNlnOLxf+X71KQFflbLv6llNMH/neI4YWL4s/6d0J
-         IIAgPEliFn9noxjaS8NBnF1tDABFpoyI6Do9GNVmwxUMGsomyxJileH8n778XcU772dG
-         U7dA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776369361; x=1776974161;
-        h=mime-version:user-agent:content-transfer-encoding:references
-         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=X4vEcnA6sfg/gK8PDsvUK5TVbDPDBw6vHof22O/JKcw=;
-        b=sr3TrOCKLttK1RD+9N6TlWZUjL3H0acwYKeM+uHtgT1d3+3GeiLcYUzMG1eaHJrq6c
-         1DJ7X8nLx2HtsjCpqS0x6LghyLS+dX+MZS540sipb1kPGNMUmqWBBFUHu79NUOeqABUU
-         hAjb/GisY9kEjhLXMpQpKvhY9aTrmndZRr/Z4cEVYOoQBX0OCEBso5wcqyL2siEXI0co
-         Vw84hC/SwKF5VKjAZEQp51ELsXMxpRvsIS4gKNT2AbG6/a6whvreB8fwfrJ4Bnlw40xa
-         JHoWXKkcPOBu5aIfZAkBMa+LuwtxxsyBVzUQDp402OL5HRV2/7oho9hlTbe/0ET9TPDW
-         i/Sw==
-X-Forwarded-Encrypted: i=1; AFNElJ+sDIWcZ6FGWbkpAcU2ppGgG5QBbwWs/sH3TpDUsJCHoWFHdafJVX5/nzxQ1c4uwRgmzSv2obx1vjDX@vger.kernel.org
-X-Gm-Message-State: AOJu0YzdqIPPN18SnQi3aod2M1JvDhqlzRJQcYgvdqqZgRuJb3i8Wq8o
-	Xyw9P+o3EEjlm9O0coBr93hGCB3zJKZmhbOqRoNz7VBmxufMKJDYQkhgef+kBmvClBqFmQpiBzi
-	TbZL6i+Adxuhv5nIezpwCCCfnSRfBf8F433YmXno8qe1w1/LTUVeB2zg4wCL0v7RmtQjGj7s=
-X-Gm-Gg: AeBDiesb67gkQ/lWYxA9keh0XDMp2npYX+jQG48UyER5NwI1p8kJRaaZpykvu6/3WRw
-	ot0x5FOYlvktVIAKUiuj0zNKjt8fh4UoOPQIKZxX5qtu5akyLdtcWNiKUW4uLn2zTE1IFdh5Q37
-	ibUnXoKmgCfs14e3poKES212781e2NKAtGcMI8pg2Fgjtzp1xj3GcrzoNWk2WWuMUVtZWg9yl6F
-	i+eYwtjDq5eyUF9Bn0+4KIDsONZfSf4QOVmiwDtWIjnnBzcJxHw2uZRRksFRf4/mReb5qIeX6fA
-	DUF8t9on0HmHuXS+Ml8iV2ubBhafGWNQ6W8OP7W2Uyi2985EatFTXFwUKoY39V5Grtt1RdzBupX
-	pIhLt9xEGEEZPq3h3OwX1CpbfQ9cW+2H6RN0lwMxiz+AGLEk1i9mjO7Ndsq0k93s=
-X-Received: by 2002:a05:690c:a00d:b0:7a3:7ad3:3ecf with SMTP id 00721157ae682-7b9e453b093mr4571047b3.26.1776369360597;
-        Thu, 16 Apr 2026 12:56:00 -0700 (PDT)
-X-Received: by 2002:a05:690c:a00d:b0:7a3:7ad3:3ecf with SMTP id 00721157ae682-7b9e453b093mr4570827b3.26.1776369360133;
-        Thu, 16 Apr 2026 12:56:00 -0700 (PDT)
-Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7b768d387fasm28840937b3.30.2026.04.16.12.55.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 16 Apr 2026 12:55:58 -0700 (PDT)
-Message-ID: <d8cdfbc04a0a7ef3a2272a112c66a3bd2b3564b6.camel@redhat.com>
-Subject: Re: [EXTERNAL] [PATCH v2 4/7] ceph: add diagnostic timeout loop to
- wait_caps_flush()
-From: Viacheslav Dubeyko <vdubeyko@redhat.com>
-To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
-Date: Thu, 16 Apr 2026 12:55:57 -0700
-In-Reply-To: <20260415170043.3882912-5-amarkuze@redhat.com>
-References: <20260415170043.3882912-1-amarkuze@redhat.com>
-	 <20260415170043.3882912-5-amarkuze@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.58.3 (3.58.3-1.fc43app2) 
+	d=xs4all.nl; s=xs4all01;
+	h=content-type:mime-version:subject:message-id:to:from:date;
+	bh=A0ZJnX7li7I6jRx+BpBjuz1TE53b3BpzgUYmmyhPmRQ=;
+	b=mVbaoHD6W3jBI/UR7fZd3Uc0n+R+d0DLz3ZSMxUxJsvb4EITVIFQkms9MZL3Db9BAVLS2o8cv/dTX
+	 /5ZSDNuwqcKbl9jWqEZJLZXzVC7tZQGTVAv8mXA6NqsVs3hgV1B6CWvZrgtedjx9vkg7PP0TlAgI/t
+	 Z51GHR+tgWMurXSkBtEO3yRDNnBdJju5yn1ENwMmI56ScwZICAhLHRPNqF9ohiZPG5o4riAYEd3Jgj
+	 S0bBHoQHG7rF5RcFRoyXEL9DbphtH/AwPBVqeERfrO87unuNMKdmp0TKLrXvWzCqqCqXyy80gwB894
+	 ajuAqtQ+aQj78lhLARGjaT+dGSCt4Yw==
+X-KPN-MID: 33|7vi6wAcTxLhnlcXV5bPS/elamfhtfRWYm/UV0z2B4o2PwwULSy0l0rmaam6eAl2
+ 1cwMwFHYd61Bx4F4EKfpDODrGcPs8rxAikHNnXDUzW5s=
+X-CMASSUN: 33|3/aJ3D2OCmHajC0ZevX+EDdRCOA+SKZCNjgTYgI7wSgzIfzE+LI8baffU3Xbeyv
+ Ny3c4duY5SQnT/0aED7RZFA==
+X-KPN-VerifiedSender: Yes
+Received: from cpxoxapps-mh02 (cpxoxapps-mh02.personalcloud.so.kpn.org [10.128.135.208])
+	by mtaoutbound.kpnmail.nl (Halon) with ESMTPSA
+	id 55a756fa-39dc-11f1-b8d7-005056995d6c;
+	Thu, 16 Apr 2026 23:36:31 +0200 (CEST)
+Date: Thu, 16 Apr 2026 23:36:31 +0200 (CEST)
+From: Jori Koolstra <jkoolstra@xs4all.nl>
+To: Christian Brauner <brauner@kernel.org>
+Cc: Dorjoy Chowdhury <dorjoychy111@gmail.com>, linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
+	ceph-devel@vger.kernel.org, gfs2@lists.linux.dev,
+	linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org,
+	v9fs@lists.linux.dev, linux-kselftest@vger.kernel.org,
+	viro@zeniv.linux.org.uk, jack@suse.cz, jlayton@kernel.org,
+	chuck.lever@oracle.com, alex.aring@gmail.com, arnd@arndb.de,
+	adilger@dilger.ca, mjguzik@gmail.com, smfrench@gmail.com,
+	richard.henderson@linaro.org, mattst88@gmail.com, linmag7@gmail.com,
+	tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com,
+	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com,
+	idryomov@gmail.com, amarkuze@redhat.com, slava@dubeyko.com,
+	agruenba@redhat.com, trondmy@kernel.org, anna@kernel.org,
+	sfrench@samba.org, pc@manguebit.org, ronniesahlberg@gmail.com,
+	sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com,
+	shuah@kernel.org, miklos@szeredi.hu, hansg@kernel.org,
+	Aleksa Sarai <cyphar@cyphar.com>
+Message-ID: <850388882.378351.1776375391778@kpc.webmail.kpnmail.nl>
+In-Reply-To: <20260416-aufbau-sorgenfrei-cfa87c9ddc11@brauner>
+References: <20260328172314.45807-1-dorjoychy111@gmail.com>
+ <20260328172314.45807-2-dorjoychy111@gmail.com>
+ <aeDpIgfDaIKEaBcL@lt-jori.localdomain>
+ <CAFfO_h6pkyX=uN5uoXda6toTtT6KsahfBNBLom9i21HdZ7JOmQ@mail.gmail.com>
+ <1714293523.333222.1776351806025@kpc.webmail.kpnmail.nl>
+ <20260416-aufbau-sorgenfrei-cfa87c9ddc11@brauner>
+Subject: Re: [PATCH v6 1/4] openat2: new OPENAT2_REGULAR flag support
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Priority: 3
+Importance: Normal
 
-On Wed, 2026-04-15 at 17:00 +0000, Alex Markuze wrote:
-> Convert wait_caps_flush() from a silent indefinite wait into a diagnostic
-> wait loop that periodically dumps pending cap flush state.
->=20
-> The underlying wait semantics remain intact: callers still wait until the
-> requested cap flushes complete. The difference is that long stalls now
-> produce actionable diagnostics instead of looking like a silent hang.
->=20
-> CEPH_CAP_FLUSH_MAX_DUMP_COUNT bounds the diagnostics in two ways:
-> it limits the number of entries emitted per diagnostic dump, and it
-> limits the number of timed diagnostic dumps before the wait continues
-> silently.
->=20
-> READ_ONCE is used for the i_last_cap_flush_ack field, which is read
-> outside the inode lock domain.
->=20
-> Add a ci pointer to struct ceph_cap_flush so that the diagnostic
-> dump can identify which inode each pending flush belongs to.  The
-> new i_last_cap_flush_ack field tracks the latest acknowledged flush
-> tid per inode for diagnostic correlation.
->=20
-> This improves reset-drain observability and is also useful for
-> existing sync and writeback troubleshooting paths.
->=20
-> Signed-off-by: Alex Markuze <amarkuze@redhat.com>
-> ---
->  fs/ceph/caps.c       |  5 ++++
->  fs/ceph/inode.c      |  1 +
->  fs/ceph/mds_client.c | 56 ++++++++++++++++++++++++++++++++++++++++----
->  fs/ceph/super.h      |  6 +++++
->  4 files changed, 64 insertions(+), 4 deletions(-)
->=20
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index cb9e78b713d9..c40175dd77ae 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1648,6 +1648,7 @@ static void __ceph_flush_snaps(struct ceph_inode_in=
-fo *ci,
-> =20
->  		spin_lock(&mdsc->cap_dirty_lock);
->  		capsnap->cap_flush.tid =3D ++mdsc->last_cap_flush_tid;
-> +		capsnap->cap_flush.ci =3D ci;
->  		list_add_tail(&capsnap->cap_flush.g_list,
->  			      &mdsc->cap_flush_list);
->  		if (oldest_flush_tid =3D=3D 0)
-> @@ -1846,6 +1847,7 @@ struct ceph_cap_flush *ceph_alloc_cap_flush(void)
->  		return NULL;
-> =20
->  	cf->is_capsnap =3D false;
-> +	cf->ci =3D NULL;
->  	return cf;
->  }
-> =20
-> @@ -1931,6 +1933,7 @@ static u64 __mark_caps_flushing(struct inode *inode=
-,
->  	doutc(cl, "%p %llx.%llx now !dirty\n", inode, ceph_vinop(inode));
-> =20
->  	swap(cf, ci->i_prealloc_cap_flush);
-> +	cf->ci =3D ci;
->  	cf->caps =3D flushing;
->  	cf->wake =3D wake;
-> =20
-> @@ -3826,6 +3829,8 @@ static void handle_cap_flush_ack(struct inode *inod=
-e, u64 flush_tid,
->  	bool wake_ci =3D false;
->  	bool wake_mdsc =3D false;
-> =20
-> +	WRITE_ONCE(ci->i_last_cap_flush_ack, flush_tid);
 
-Could acks ever arrived out of order? If so, then i_last_cap_flush_ack coul=
-d
-contain not the maximum value. Do we need to use max() here?
+> Op 16-04-2026 17:15 CEST schreef Christian Brauner <brauner@kernel.org>:
+> 
+>  
+> On Thu, Apr 16, 2026 at 05:03:26PM +0200, Jori Koolstra wrote:
+> > 
+> > If I recall correctly, Aleksa has suggested we might also want to add
+> > O_EMPTYPATH to openat() instead of only allowing this for openat2().
+> > I am waiting to see what Christian thinks of this.
+> 
+> We can do that, yes. For O_EMPTYPATH that is workable.
 
-> +
->  	list_for_each_entry_safe(cf, tmp_cf, &ci->i_cap_flush_list, i_list) {
->  		/* Is this the one that was flushed? */
->  		if (cf->tid =3D=3D flush_tid)
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index f75d66760d54..de465c7e96e8 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -670,6 +670,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb=
-)
->  	INIT_LIST_HEAD(&ci->i_cap_snaps);
->  	ci->i_head_snapc =3D NULL;
->  	ci->i_snap_caps =3D 0;
-> +	ci->i_last_cap_flush_ack =3D 0;
-> =20
->  	ci->i_last_rd =3D ci->i_last_wr =3D jiffies - 3600 * HZ;
->  	for (i =3D 0; i < CEPH_FILE_MODE_BITS; i++)
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index b14ede808436..7d17332d72d7 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -27,6 +27,8 @@
->  #include <trace/events/ceph.h>
-> =20
->  #define RECONNECT_MAX_SIZE (INT_MAX - PAGE_SIZE)
-> +#define CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC 60
-> +#define CEPH_CAP_FLUSH_MAX_DUMP_COUNT 5
-> =20
->  /*
->   * A cluster of MDS (metadata server) daemons is responsible for
-> @@ -2286,19 +2288,65 @@ static int check_caps_flush(struct ceph_mds_clien=
-t *mdsc,
->  }
-> =20
->  /*
-> - * flush all dirty inode data to disk.
-> + * Dump pending cap flushes for diagnostic purposes.
->   *
-> - * returns true if we've flushed through want_flush_tid
-> + * cf->ci is safe to dereference here because the cap_dirty_lock is
-> + * held, and cap_flush entries are removed from the global
-> + * cap_flush_list under the same lock in the purge path.
-> + */
-> +static void dump_cap_flushes(struct ceph_mds_client *mdsc, u64 want_tid)
-> +{
-> +	struct ceph_client *cl =3D mdsc->fsc->client;
-> +	struct ceph_cap_flush *cf;
-> +	int dumped =3D 0;
-> +
-> +	pr_info_client(cl, "still waiting for cap flushes through %llu:\n",
-> +		       want_tid);
-> +	spin_lock(&mdsc->cap_dirty_lock);
-> +	list_for_each_entry(cf, &mdsc->cap_flush_list, g_list) {
-> +		if (cf->tid > want_tid)
-> +			break;
-> +		if (++dumped > CEPH_CAP_FLUSH_MAX_DUMP_COUNT)
-> +			break;
+All right, then I'll update the patch this weekend.
 
-We break silently if dumped is bigger than CEPH_CAP_FLUSH_MAX_DUMP_COUNT. B=
-ut we
-could have more items in the list. Should we inform that the dump is trunca=
-ted?
+> 
+> I don't mind too much if we leave OPENAT2_REGUALR in the 32-bit flag
+> space. It'll silently be ignored but the flag name should give it away.
 
-> +		if (!cf->ci) {
-
-Is it normal situation? Could we expect such condition as regular workflow?
-Maybe, we need to have WARN_ON_ONCE(!cf->ci) instead?
-
-> +			pr_info_client(cl,
-> +				       "(null ci) %s tid=3D%llu wake=3D%d%s\n",
-> +				       ceph_cap_string(cf->caps), cf->tid,
-> +				       cf->wake,
-> +				       cf->is_capsnap ? " is_capsnap" : "");
-> +			continue;
-> +		}
-> +		pr_info_client(cl,
-> +			       "%llx:%llx %s tid=3D%llu last_ack=3D%llu wake=3D%d%s\n",
-> +			       ceph_vinop(&cf->ci->netfs.inode),
-> +			       ceph_cap_string(cf->caps), cf->tid,
-> +			       READ_ONCE(cf->ci->i_last_cap_flush_ack),
-> +			       cf->wake,
-> +			       cf->is_capsnap ? " is_capsnap" : "");
-
-Multiple pr_info_client() calls happen while cap_dirty_lock is held. I thin=
-k
-it's not good at all. Could we rework it somehow?
-
-> +	}
-> +	spin_unlock(&mdsc->cap_dirty_lock);
-> +}
-> +
-> +/*
-> + * Wait for all cap flushes through @want_flush_tid to complete.
-> + * Periodically dumps pending cap flush state for diagnostics.
->   */
->  static void wait_caps_flush(struct ceph_mds_client *mdsc,
->  			    u64 want_flush_tid)
->  {
->  	struct ceph_client *cl =3D mdsc->fsc->client;
-> +	int i =3D 0;
-> +	long ret;
-> =20
->  	doutc(cl, "want %llu\n", want_flush_tid);
-> =20
-> -	wait_event(mdsc->cap_flushing_wq,
-> -		   check_caps_flush(mdsc, want_flush_tid));
-> +	do {
-> +		ret =3D wait_event_timeout(mdsc->cap_flushing_wq,
-> +			   check_caps_flush(mdsc, want_flush_tid),
-> +			   CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC * HZ);
-
-Are we safe here? Could we have overflow for CEPH_CAP_FLUSH_WAIT_TIMEOUT_SE=
-C *
-HZ calculation?
+I would also prefer to have the bits separated. Although it is unlikely
+that we will add so many O_* that we will ever run out of space, it just
+seems cleaner, and at no cost. But it's not too important.
 
 Thanks,
-Slava.=20
-
-> +		if (ret =3D=3D 0 && i++ < CEPH_CAP_FLUSH_MAX_DUMP_COUNT)
-> +			dump_cap_flushes(mdsc, want_flush_tid);
-> +	} while (ret =3D=3D 0);
-> =20
->  	doutc(cl, "ok, flushed thru %llu\n", want_flush_tid);
->  }
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index c89ad8dcc969..1f901b1647e6 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -238,6 +238,7 @@ struct ceph_cap_flush {
->  	bool is_capsnap; /* true means capsnap */
->  	struct list_head g_list; // global
->  	struct list_head i_list; // per inode
-> +	struct ceph_inode_info *ci;
->  };
-> =20
->  /*
-> @@ -443,6 +444,11 @@ struct ceph_inode_info {
->  	struct ceph_snap_context *i_head_snapc;  /* set if wr_buffer_head > 0 o=
-r
->  						    dirty|flushing caps */
->  	unsigned i_snap_caps;           /* cap bits for snapped files */
-> +	/*
-> +	 * Written under i_ceph_lock, read via READ_ONCE()
-> +	 * from diagnostic paths.
-> +	 */
-> +	u64 i_last_cap_flush_ack;
-> =20
->  	unsigned long i_last_rd;
->  	unsigned long i_last_wr;
-
+Jori.
