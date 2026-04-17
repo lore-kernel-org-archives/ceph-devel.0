@@ -1,213 +1,443 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA92E36403A;
-	Fri, 17 Apr 2026 17:48:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.156.1
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776448109; cv=fail; b=u+HUWqMHhOjQLv6viiQk+UnVLBvrF3N14q8MiqOekpRSysKXp0P/AFvvADnlQICvROysRO8S2ynR1yCkwdZLLXRwRtaLkusHhB9lsELBxOZqycp53ZESEx+qiPKRmVbNIBpgTqIM3uKk5OyrOVIixYAGBySxMZKJyTZLhKrOElM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776448109; c=relaxed/simple;
-	bh=ev4m4uMjegwlPkGFS7mICgnfKNhjnPd3g574Ug2hJkA=;
-	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=cndzRULAfRVnHEE42C5OFPngwsG7GPhfnyW3Qpn6dKxCF237BzqcmVxPFvbJkSTux5HicC63ZJQaBJ70zsBGJWcb0oN3kbOXSrRYQTM1Uebt+x6NDKtbnhOOOpZOoLEuwlc36w375BqLBAh1TOYxInHAGrbDuSVQaWQdmzIcRRI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=D9wWyws9; arc=fail smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FAFB36CDEF
+	for <ceph-devel@vger.kernel.org>; Fri, 17 Apr 2026 18:41:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776451294; cv=none; b=gE2922ojv8bJe0iKsZ7a/8Fy0BDlTeOBTOi/alEONUAOFvV+zpx5gIkAfoK1ulS7ehw3ZBz/7fSQCDNavjEUeqrR8g6tZsxbZfkoDHAredWuvCX+wJUdRXwXv2039o+jowLZDsDJfU5sIS6s4NhF6i9nYJY1IXtDgjU9atNOEkA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776451294; c=relaxed/simple;
+	bh=0PkolFDNiSJzGabLr7AF6StOXI4t48BAqgWCfl+N190=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=XU6alFLlwT2h26YOWVf+oBjF2ukG0kH70AkPFHORe4ppGQBXTCIvcBBc5PZVdanwuc1goptU0kwKQcI3wSSc1IAXz+RaucLL1AE3WPZm5cSROs/moN6TtxEAyeYXQwxS0b1kYZ8ETgL4GKqKpC0UUPjW7S7SGnhjdePseQjrqL8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XaVg6o5H; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=scz6Jyuq; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="D9wWyws9"
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 63HBWIeR1842962;
-	Fri, 17 Apr 2026 17:48:14 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=ev4m4uMjegwlPkGFS7mICgnfKNhjnPd3g574Ug2hJkA=; b=D9wWyws9
-	fB+QsHmdlnk49aH/BymbKaKUMcNdSmDic05X+Xev5Db/DCR20WYNs9uIhqTuCtss
-	Oj7+TWQo18jendzw1FBLNWsozg8tFSTaUIvHWhQI7AmDo97WcdeLTwSbXfGJMM4J
-	OwALdJV6b9bjnU0Hj0GmY5yshssRLQKg0jDNfKeCS75ff96RH/eq4HmlQdz1XYCP
-	f2Nb6IU6a99QDwdcK6PnfxKa8uWs2kDEk1tODvPfBk2FBa7y1vdIfIeiMXg7SRPw
-	cr3K03Tt8OjsMZyxdPbEvyqkVNcez4CCGvBg8TstW+Q7aZCdmjFffv2ffNMJ3IxM
-	02gapW3RaAgAEA==
-Received: from co1pr03cu002.outbound.protection.outlook.com (mail-westus2azon11010043.outbound.protection.outlook.com [52.101.46.43])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4dh89n3u4f-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Fri, 17 Apr 2026 17:48:13 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=yu3g3zH05hxyE5py+QeRJRnEec32Bi7LkvICI0zYn9qeSQmbe+CHLTIltOikOogv6FDYXuXCCuPPyp0D7XFAKVeMagpNPIe0YR9paJ9U8FDZF95USrS66FmrB6GyXSOZm1uuloEcZAkGu/lhp1LXhzMxOGbVV/P65aTg3S5YY44iTv3mYL/Sa8voMK26FK56jfbnfaEapHChPdbK5hFcHepRTRukLDo9AChJfn8WMlSiYsm23IvsNM2Yqzw6Nrw1BcUX7r7RXF+zuyvdsD+8iuMjzz1Q612VFQjNNObGANVx0NB2N5ALW6llMqem3E0HUXaw60V/sXCJuDr93D3UAQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ev4m4uMjegwlPkGFS7mICgnfKNhjnPd3g574Ug2hJkA=;
- b=s1J3XbIOWUFv7QL/7xmb8SbMDCtmRp5CXrs+Q1KoNulZaNeNtrkTzOC02RnJ+a9CjfLi3zqwtxzMLeve/wD81s8Yov8+UkxsW4kPubzvJW9eY9cF0B0ssuIzxb4LnE3R+aI9BugcabvRIP0X/NYPKqh83XbpA3RDufJVHik9ZY2wlmxQJfAwmImO+LddK2uoufGf7N+LE8HUfUOCP01K4Oo+/l0ex+Y1BnT4wnyzI+3bR06oynpJPcDvG0TXFMLp6p71oyUuZ+RtNPyPWrCh/ZDRyajVj+HVgXHeYuTaLuUDzfbG2JvqPwwYK5+9gYHavAbQZiIKXHHbDtmGcqrK1Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by SJ2PR15MB6401.namprd15.prod.outlook.com (2603:10b6:a03:56d::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9818.20; Fri, 17 Apr
- 2026 17:48:07 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.20.9818.023; Fri, 17 Apr 2026
- 17:48:07 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: "idryomov@gmail.com" <idryomov@gmail.com>,
-        "zenghongling@kylinos.cn"
-	<zenghongling@kylinos.cn>,
-        "slava@dubeyko.com" <slava@dubeyko.com>,
-        Alex
- Markuze <amarkuze@redhat.com>,
-        "brauner@kernel.org" <brauner@kernel.org>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "zhongling0719@126.com" <zhongling0719@126.com>
-Thread-Topic: [EXTERNAL] [PATCH] ceph: fix potential ERR_PTR dereference in
- ceph_submit_write()
-Thread-Index: AQHczkEcOFXTjaU97UGDP9RctIDDY7XjiC4A
-Date: Fri, 17 Apr 2026 17:48:06 +0000
-Message-ID: <494716d7aa3fe860d89e19866fa3b59755183de8.camel@ibm.com>
-References: <20260417080609.51361-1-zenghongling@kylinos.cn>
-In-Reply-To: <20260417080609.51361-1-zenghongling@kylinos.cn>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|SJ2PR15MB6401:EE_
-x-ms-office365-filtering-correlation-id: 90c5fe27-1ca0-42ae-22b3-08de9ca97b8f
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|10070799003|376014|1800799024|366016|18002099003|22082099003|56012099003|38070700021;
-x-microsoft-antispam-message-info:
- /G2+ahR9Fs9yDb8gfoU8eHl5d3XTc9b2WoY2sxrrXLAuHRyXfRbCAoEASDIflaImmIdIjB1F3jc+7U9X1ak2Ue2XmHFLT20FlC3PZk83+p//YHa338sYTC95hi2hFE9nAYjkwLeNqjO7rumRq8ZFOkVSfxgxRPUEfSEn1VK7nOKIUJSG1KAARcqdD32rlUxii8UR1z+q0Eg4xzvPTSfXFM91a1znf9jSTEJRMQdRO8bYyBmNWC9IqygmqDahQrmwgcsbDphyEUxTENx1HwEIuOP2R53PRxeWTHAEe9WJisF/g9XmaZ7GxImvVcdkGD93wjVZNzNZOXcMVcXErhdeZOcbXGZ1/RzdNc9pVUhfglE8UkQKlwpJfbyrVOt1cTQkDVh5n6LMsXF3s8JH2eY/KZ9mhVjmhPZRqK99Nyy0PZgKMja4SysdpGvipBvoKyZ/0Oc+8oYeBru29uHpTAFMRpwAOPCn8TejZWPF7h0ShNniRoL+AN6iexW4SeNLprA5Smi5NzkZrcarND8uXkUGGYwzk2MjTRb+0/3GuiDMOcnlsWr8lVN6HUilYWdzAxVoommovvYZ0r12/Cjwk9+PAR3na6BaB93Ex16IgpKoaxgOTK8Y03pp16D2ZrSHixzsnM3/Q+PqZ+0gf3DdLgo5Zlc0AJZ4SOOE9lAIcuKFxUJtyHfzPKI/4OB+37ijEJhglaJ7l6WNEcveXinsrp7hHFt3YInvIBmGhA+NnI5lSN2l17VYAhdPqzUP0VzTgJRc
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(376014)(1800799024)(366016)(18002099003)(22082099003)(56012099003)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?Q1o4UnFNblVSQmtXbWtqR0YzWnU5dGFLRUNENjRocVZGbFN2b21kck1qTUN2?=
- =?utf-8?B?ckErU0FnTElqQmxZbjE2VVNCenBoUGpTckFQRVZTazArYzBzR056Y25ML0I2?=
- =?utf-8?B?aERwYjY2ZmJ4OEMyVWxyM2Z1NzVrT2wxcHpKVjlMVlBUN3U4cWtpSkRsQ0t5?=
- =?utf-8?B?MXZJWDZNcjRIZmJJcjJuU2tuUEtwZTQ2bVoybDVKdWhTQy9hcEk5RVFEYS9h?=
- =?utf-8?B?UWJoWTYrNmIvcC9zYzdCczlDOThxczZxai9SWW5nOGJKZU1NSmRvcGIwSXNQ?=
- =?utf-8?B?TnpxRlk1a1RSTTluTHVZUTM1TTN6S0RZUmZQVC92VDVkY3FTejFEZ3F6QVl2?=
- =?utf-8?B?a0dnUWRCeDByeDRUaFZyWm5IOHQwc1hDd2o0UjVSRHRhbGJlQ0dtREdrcGpY?=
- =?utf-8?B?dnJ6VUlYamVLQ1hFcytKWk1GWm8zZ2VWcUxNM3FtZHlJOFhiRWlXaTZHa28x?=
- =?utf-8?B?OUVMYTVxNDRNQlZrUnVqeGtwS0JWL0FMWGdPclRVYnR5NW1JNVBZTk0wdzhN?=
- =?utf-8?B?SndkQ3F0UjFhVHp0M3p5SEpOT2NSREY4MjVaRWlOQktOUVFJc1ZhWlZpdW93?=
- =?utf-8?B?bGZSbmhPK2ExUkFUd29vdktvdGFpdFExdXlkOHZvcVVSQ3NQZ2hzb0FPQ0Zj?=
- =?utf-8?B?U25TMk5HUUo4UWlVTVZTclJrL1gya0x4OWlzM2NjcTNZYkdESmVIcDlvUytx?=
- =?utf-8?B?RDhNbXFFbkNNajlMMUpVRnkwMDVKUUJKdFIvZld4QW93MDk0Q2FwVW5JY21l?=
- =?utf-8?B?a1A5Tk9ONldBMGZidjNoR1A0WE5uczZqUW1vdGFBaGx4eW5DdW1OL3BmbDgy?=
- =?utf-8?B?WGhaTFU2SUF2R0ptSVhLdE8yUDhXM0FYcUVPWGs5ZjFyZnB1Mmk1aE9Mc0hJ?=
- =?utf-8?B?QzNBTFlUdUxWdUtvSEZLWnU1YmZSck1vWXZtWGNzOHlVNE94clU5RU5rOVRT?=
- =?utf-8?B?emZRY0lIWDNOc1M1YjNiU1c2ZHBsY3JxY2E0MjVQWFNjSEVtalRGS0dCam9u?=
- =?utf-8?B?cE5qODc4QmRLMTkxZXRQRUNhRnVtalJpV0VibER0QVlTTFo2NGE3Y2RsS1c1?=
- =?utf-8?B?aXcxdDlKdmkyaW9raEVNSGJkL3hjZzFIeGFLQi92TkxpZXJHSTZnVW9VdTlK?=
- =?utf-8?B?Y2xBek5ibUNMZWtZcGJpT1JLMzJOajRIcVdqVWdHTVpTQ1UwdlBTWlRlbkNv?=
- =?utf-8?B?RGwwYnBUaGtqazNYMjdzSVJua3RxKzJwbnY2OENaajlvSmx3VEJsejJ6cXBZ?=
- =?utf-8?B?VkJSQU1mNFh1QURHVmpJWEV6Tk5ueEcwei9HZlNzMUFidXdLTG1oZkVnTWpN?=
- =?utf-8?B?YjVOZlVEbWpwa1pZeldTc2V1QzlETHRKdWM3bDh5VElPZzlNMlgrNzFZQVlO?=
- =?utf-8?B?cVdrVDZVbjNTQWtCNmhYOXZTb1JwY3BOZ3FOekRjVk1zb0ViMFNaanM3VERG?=
- =?utf-8?B?TW01ODhodS8yY3NVRGlGRm1yWlp1OENnOThsbWF6N3NDYXdaMWdWTXh2Mit1?=
- =?utf-8?B?QzlUcUE0VGt0a3VvWlNjYnBIKzEzcWRwNFZrZzhJQnk5cDNua0RzNDRkSjdV?=
- =?utf-8?B?WWdHSTlIY0h5UlUrbHBZUUhuSkxQQThKMUFNcHVPc0lxdE9UMmtOZ0NFTGhN?=
- =?utf-8?B?a3VyaDFpUHZST2xDOFl0dlBqYXN6aTRhUUh2K2VjWlljR3BxQ1VkdllmckpK?=
- =?utf-8?B?R1FMa1REMlh0cjRDT0NIZ0RLa3BVRytBeUNBeGRYMTMxZ1F0amhZSUsvek9u?=
- =?utf-8?B?Lyt3cDBPNzhtSzk2bFRoTTliVElJYkVBRWpyMUJxRHN6dFIzdjVOcDVCSTZU?=
- =?utf-8?B?S3E1a0NET0c5Q1hRODA3enF2TWZ4azlpd2pEZG5DZGlGc0cvc21wWlNjSk9P?=
- =?utf-8?B?RVdSMWw4TlJyWmlVeS9rbEhuQUNvS1E0UklvdmtqS01qZy9kdVVtZUtWQ20x?=
- =?utf-8?B?c1pVOStpODAwN0hKbkNSVmMzbkpmdlRYUWoxUmQ1bWZ5N3FJZ3pibjBmK0Fn?=
- =?utf-8?B?NUVlaXlMb0VqYk5qQk1WRC9zSHg1aFZuSDIyNnR5dU45TzBqa0hsWWhyR3I0?=
- =?utf-8?B?OWdXMEFCUitsWWFFTm9UenNOK2sxOElGdmprVEdZSVl0TEJlcEo4WmlzaDUr?=
- =?utf-8?B?MjhlYzJkbjRVUFAxdXNBY3VkZDdaa0d3NTNEeEV0RHEzTS9zK2hrVytBTVJs?=
- =?utf-8?B?NDRQZ1B3VWZIZyszeSt3a3hRTkVvMExmL0pXRTVHU0JSTytxZlJuTGNhT09H?=
- =?utf-8?B?dkRGemllMFdFdnk5TGlCbEhpck5nR0pjakwyQTIxUDdaTzB5c1JoSm5aYXVP?=
- =?utf-8?B?bzVXWW1KbXI1VGdLTlBlTXFaNDhRMTNRSnA3L2dJZXRXS2NhVGlKUGpyRUZv?=
- =?utf-8?Q?xlZqWSevpA9jEo5ol8ayIJsqnbwnnO8uE7lyC?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <462A92C6568ADB48BD69477CF5A1C3FE@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XaVg6o5H";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="scz6Jyuq"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1776451291;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=UcRtbNqqeLTm/Jm1vYZ15JpEVH0qSIwekYpYsNXcp34=;
+	b=XaVg6o5HoXaJwjzSoAFq855OMYea/qUxGQ/fRayv7eSJLxQphV5hVhJWbWvOTlV2pZOY/Q
+	mfnx7+Klee77FiXfyyNnarAt4vwkgk3hZ/G8cw0S5ygWIeVQ2KbWEHwqvsf3EpW/JBqCIN
+	dRCYfbqwZEqvVquiuI81FrWvUVl4+jE=
+Received: from mail-yw1-f198.google.com (mail-yw1-f198.google.com
+ [209.85.128.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-304-TNQPKFAZP8aOlJogUHge9Q-1; Fri, 17 Apr 2026 14:41:30 -0400
+X-MC-Unique: TNQPKFAZP8aOlJogUHge9Q-1
+X-Mimecast-MFC-AGG-ID: TNQPKFAZP8aOlJogUHge9Q_1776451290
+Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-7b7e80f7a8bso23026277b3.3
+        for <ceph-devel@vger.kernel.org>; Fri, 17 Apr 2026 11:41:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1776451290; x=1777056090; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=UcRtbNqqeLTm/Jm1vYZ15JpEVH0qSIwekYpYsNXcp34=;
+        b=scz6JyuqTo3zSbs7yRW54AV+U+75t+oelwn5Jgfm7BJYRlbIXEQwVtkewJNFDVCR6g
+         bklT/3UD3MiEfIhh+BTTBDEsoCS96RSBzPjDKBUQb/NAFOdcXab7HX2Jcsjuzd220XF8
+         VavwZ0gQkyiOaWH6xVbyh2hd4WXPSPer9ycx6kqjkJ8lVXFHiFEMKXO2/bBLw49Xr0QB
+         rFR8/R3RsVUHoq7+kmjJgh4TRgT0TQI/o1+eQhDM7YzUPr8BdXd/3t2QX61ETMoKpLIy
+         FUW/mPCYGVM83mJ/jLDpTc7jtQN0+xtCcX0FunwBZs5CCZK4hJvUaUmE9DVAoc039OQf
+         iWBQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776451290; x=1777056090;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=UcRtbNqqeLTm/Jm1vYZ15JpEVH0qSIwekYpYsNXcp34=;
+        b=kbg5Syx786H9+/QkElh3xwaR9pOCXURZyEu7qhcaVjiOlFARFa7owFOHEIM+ZPVr0K
+         2WMBeQOpUVfxJY5mgQbui52Kdly3FFdd7OlZHZyNyqJ9yh4YqQOBSX8wuxL+bwA0qHw7
+         wQeKP55kQMsD8qCLfUb6jiJfG6kkd6xUBLPb9fteXcXAnlPwFajWsPjNZMAmC+IYF0cG
+         2FL4OL0Y49YSCCNIjApRnWCbiQegrbDivIx0gZ1EF8GeSx4IO3OcDWahuHAt9U3lYmQT
+         n3oFiIOKwzwVBh3jKvnc4cOIPZFXlzpskAE68R70KLN3pwkqc8NSbYn2ZibS3ujf1FGh
+         SACg==
+X-Forwarded-Encrypted: i=1; AFNElJ/7VQo9isLzk+pTCWMoLVA5qDPlFFUOOed2O9KSW+7yE7hEJfprxrvutjqXHt+hsIRyx6LSqjnUPaHb@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw322tZxZvPVOwfIRj4TJB3kTUQWtGP0z0hgv2w2DeJncF0V7mX
+	OYGsp9g/6LyFtX9ucjE0We4FYgiiaZfA9eiMS3pY7A33EixJu8Y6P3ThUQn/CiLkGQg+4dPH66K
+	Ipr3Ux6rtEBXfCOs24arzFrZEDNnso76bcKaZcjbpye9JSAkH9yCzVuiZDC6H/v8=
+X-Gm-Gg: AeBDieu2RE4Z171r9XmoG7CJE7uQJvS03Uq9EPJVUX/dc7vp71akDTGw5TpdbwGUdHx
+	NCDcTM6almjUBi5Vf5kL8wP3k5GJDS5wxzAHq03LP+jZFkmgk25PQuZGDO8UsyJNZGo2eHbrrDY
+	8k1eh/UAIYryvZPwHAUX+3nOD/svAt2C6Ze2TlNse/smzp65s+8jwFhaiAgR1bnTXjJ7CWpQHJ/
+	0Q4TmyxdP2quRE7wbJZhEOzaDZulCf1fQgxYWEmbCICrf1AgPCnEY8Iy35vngEkjlqT/mBMxQ6Z
+	5RQgdAY6bSQJEQ3k5/u8DNRoptt1oZSEXHZXmxN0tgJQi4ffu4uroKhSA2ldL5t4QGpoeMLXj4l
+	6GwRit+HWc0GRD8aafWdTuOEOPa+X+MXK72kBWtl4oSPDR9o9hLnvoGO5YtmJ5cs=
+X-Received: by 2002:a05:690c:698b:b0:7b2:dad2:5dee with SMTP id 00721157ae682-7b9ece5aeabmr43292347b3.2.1776451289657;
+        Fri, 17 Apr 2026 11:41:29 -0700 (PDT)
+X-Received: by 2002:a05:690c:698b:b0:7b2:dad2:5dee with SMTP id 00721157ae682-7b9ece5aeabmr43292067b3.2.1776451289102;
+        Fri, 17 Apr 2026 11:41:29 -0700 (PDT)
+Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7b9ee89ac50sm10065327b3.7.2026.04.17.11.41.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 17 Apr 2026 11:41:28 -0700 (PDT)
+Message-ID: <bade04c7d9d326db8b4e020f8e39bb785e7790e6.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v2 6/7] ceph: add manual reset debugfs
+ control and tracepoints
+From: Viacheslav Dubeyko <vdubeyko@redhat.com>
+To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
+Date: Fri, 17 Apr 2026 11:41:27 -0700
+In-Reply-To: <20260415170043.3882912-7-amarkuze@redhat.com>
+References: <20260415170043.3882912-1-amarkuze@redhat.com>
+	 <20260415170043.3882912-7-amarkuze@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.58.3 (3.58.3-1.fc43app2) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	lx1Z1XoAtb9PAqFe1CI7KcFUzkEyLbQWoIEMQPw8vSf03G5GnebFpM2U0lfZgMXoGBW+BbuA09hVsTC5z9cnOkFFnqzfei/tKLkvViIGWS/52OfDrJhEJ28MiXB/C9qolVuWetaCnVgmpUbK50+5s6YweD07jaG1HyvIdm3YMc94eU7D9vbch+V8jW2wxs83m0qQ9AkC3gfVzmjniXevuPP7Zc0o3HTCyWyRNsrg8JEqRlJ+Cf7g+ZZQtbkqlWTTPb67/6HgG+RE1EUF8QZJmmgUT4uxie32ZGUay9iccJsELZPoaL4xUKBI2X7xi5+rbb9eT3UhzIA41t5o8NUoNA==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 90c5fe27-1ca0-42ae-22b3-08de9ca97b8f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Apr 2026 17:48:06.9394
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 6bU5tXPEQscYe5ZkPPJJ8VpSpaL670x+FAj0VmKboNCkE7J1ha3EeXs6+vYXnO5BFQjE0v16NK/48W/iLu7+GQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ2PR15MB6401
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDE3MDE3OSBTYWx0ZWRfXzhFHB1w70JSt
- cFyzIlH/Vh1BnT0ozoNSu1BrVV+v/MWPB1TIFfr/g88J3X0x23b9+EWiqLzGU0VeLCFGb//ES9W
- 9EG3K1KU2xWdE4Ldgg8ODkvEbszZ2fikbpS3N21CzwyVHrJj3Tzh2GBcqAf0a/+Lf/d60lvh8DP
- seGAzzw0JMRK6ZZO4ID09o7kYhfheTmRMinO8VozEakVMGcrXx2eaGEOwc2zBOF/HWzZukWZZbS
- kyfDfwDijniP64GuAMSPz2ZZ+Vu7C8IWZlLd9ETN4/SPLhD2m+H2SOUGVNimMig0vTNH0aOjJTp
- bb9POyo0cWdut9YUUiEKYig8L46A0cjX2CBGuQqNBTkUgj+vJEf7MmkV7iyZ16xX1NWQjmYVHr4
- qD5NRRTGqT2RzEoGfSoQhT8gu7pYqnvy45bFLmxDcjufgP/jaHvBe2hapuFsx94x27L9yx5JOjr
- wJlnSa/OXMqZ8SFQMHQ==
-X-Authority-Analysis: v=2.4 cv=eJ4jSnp1 c=1 sm=1 tr=0 ts=69e2725d cx=c_pps
- a=BNrqkoHBqsJX0pt4tOnUqg==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=A5OVakUREuEA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=uAbxVGIbfxUO_5tXvNgY:22 a=P-IC7800AAAA:8 a=h8tivbg6t7_m8ZIcPzwA:9
- a=QEXdDO2ut3YA:10 a=d3PnA9EDa4IxuAV0gXij:22
-X-Proofpoint-GUID: yPEv3J7mH7c4oKyiMfCOombN8VqoHzTE
-X-Proofpoint-ORIG-GUID: NmBrLIrKINYQucguU6wi3EQkxEQcZP3K
-Subject: Re:  [PATCH] ceph: fix potential ERR_PTR dereference in
- ceph_submit_write()
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-04-17_01,2026-04-17_04,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 lowpriorityscore=0 adultscore=0 priorityscore=1501
- clxscore=1011 bulkscore=0 suspectscore=0 spamscore=0 impostorscore=0
- phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2604070000
- definitions=main-2604170179
 
-T24gRnJpLCAyMDI2LTA0LTE3IGF0IDE2OjA2ICswODAwLCBIb25nbGluZyBaZW5nIHdyb3RlOg0K
-PiBGaXggc21hdGNoIHdhcm5pbmc6DQo+ICBmcy9jZXBoL2FkZHIuYzoxNDg5IGNlcGhfc3VibWl0
-X3dyaXRlKCkgZXJyb3I6ICdyZXEnIGRlcmVmZXJlbmNpbmcgcG9zc2libGUgRVJSX1BUUigpDQo+
-IA0KPiBBZGQgYSBjaGVjayB0byBlbnN1cmUgcmVxIGlzIG5vdCBhbiBFUlJfUFRSIGJlZm9yZSBj
-YWxsaW5nDQo+IGNlcGhfb3NkY19wdXRfcmVxdWVzdCgpLg0KPiANCj4gRml4ZXM6IDE1NTFlYzYx
-ZGM1NSAoImNlcGg6IGltcHJvdmUgZXJyb3IgaGFuZGxpbmcgaW4gd3JpdGViYWNrIikNCj4gU2ln
-bmVkLW9mZi1ieTogSG9uZ2xpbmcgWmVuZyA8emVuZ2hvbmdsaW5nQGt5bGlub3MuY24+DQo+IC0t
-LQ0KPiAgZnMvY2VwaC9hZGRyLmMgfCAzICsrLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0
-aW9ucygrKSwgMSBkZWxldGlvbigtKQ0KPiANCj4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgvYWRkci5j
-IGIvZnMvY2VwaC9hZGRyLmMNCj4gaW5kZXggZmE0ZjI1Zjk5NDA5Li42MDkxODE4Njc0YmUgMTAw
-NjQ0DQo+IC0tLSBhL2ZzL2NlcGgvYWRkci5jDQo+ICsrKyBiL2ZzL2NlcGgvYWRkci5jDQo+IEBA
-IC0xNDY4LDcgKzE0NjgsOCBAQCBpbnQgY2VwaF9zdWJtaXRfd3JpdGUoc3RydWN0IGFkZHJlc3Nf
-c3BhY2UgKm1hcHBpbmcsDQo+ICAJCQl1bmxvY2tfcGFnZShwYWdlKTsNCj4gIAkJfQ0KPiAgDQo+
-IC0JCWNlcGhfb3NkY19wdXRfcmVxdWVzdChyZXEpOw0KPiArCQlpZiAoIUlTX0VSUihyZXEpKQ0K
-PiArCQkJY2VwaF9vc2RjX3B1dF9yZXF1ZXN0KHJlcSk7DQo+ICAJCXJldHVybiAtRUlPOw0KPiAg
-CX0NCj4gIA0KDQpJIGRvbid0IHRoaW5rIHRoYXQgdGhpcyBmaXggbWFrZXMgc2Vuc2UuIFdlIGNy
-ZWF0ZSBhbmQgY2hlY2sgdGhlIHJlcXVlc3QgaGVyZQ0KWzFdOg0KDQoJcmVxID0gY2VwaF9vc2Rj
-X25ld19yZXF1ZXN0KCZmc2MtPmNsaWVudC0+b3NkYywNCgkJCQkgICAgJmNpLT5pX2xheW91dCwg
-dmlubywNCgkJCQkgICAgb2Zmc2V0LCAmbGVuLCAwLCBjZXBoX3diYy0+bnVtX29wcywNCgkJCQkg
-ICAgQ0VQSF9PU0RfT1BfV1JJVEUsIENFUEhfT1NEX0ZMQUdfV1JJVEUsDQoJCQkJICAgIGNlcGhf
-d2JjLT5zbmFwYywgY2VwaF93YmMtPnRydW5jYXRlX3NlcSwNCgkJCQkgICAgY2VwaF93YmMtPnRy
-dW5jYXRlX3NpemUsIGZhbHNlKTsNCglpZiAoSVNfRVJSKHJlcSkpIHsNCgkJcmVxID0gY2VwaF9v
-c2RjX25ld19yZXF1ZXN0KCZmc2MtPmNsaWVudC0+b3NkYywNCgkJCQkJICAgICZjaS0+aV9sYXlv
-dXQsIHZpbm8sDQoJCQkJCSAgICBvZmZzZXQsICZsZW4sIDAsDQoJCQkJCSAgICBtaW4oY2VwaF93
-YmMtPm51bV9vcHMsDQoJCQkJCQlDRVBIX09TRF9TTEFCX09QUyksDQoJCQkJCSAgICBDRVBIX09T
-RF9PUF9XUklURSwNCgkJCQkJICAgIENFUEhfT1NEX0ZMQUdfV1JJVEUsDQoJCQkJCSAgICBjZXBo
-X3diYy0+c25hcGMsDQoJCQkJCSAgICBjZXBoX3diYy0+dHJ1bmNhdGVfc2VxLA0KCQkJCQkgICAg
-Y2VwaF93YmMtPnRydW5jYXRlX3NpemUsDQoJCQkJCSAgICB0cnVlKTsNCgkJQlVHX09OKElTX0VS
-UihyZXEpKTsNCgl9DQoNClNvLCBpdCBzaG91bGQgYmUgdGhlIHZhbGlkIHJlcXVlc3QgcG9pbnRl
-ciB3aGVuIHdlIGNhbGxlZA0KY2VwaF9vc2RjX3B1dF9yZXF1ZXN0KCkuIEFtIEkgbWlzc2luZyBz
-b21ldGhpbmc/DQoNClRoYW5rcywNClNsYXZhLg0KDQpbMV0gaHR0cHM6Ly9lbGl4aXIuYm9vdGxp
-bi5jb20vbGludXgvdjcuMC9zb3VyY2UvZnMvY2VwaC9hZGRyLmMjTDE0MjENCg==
+On Wed, 2026-04-15 at 17:00 +0000, Alex Markuze wrote:
+> Add the debugfs and trace plumbing used to trigger and observe
+> manual client reset.
+>=20
+> The reset interface exposes a trigger file for operator-initiated
+> reset and a status file for tracking the most recent run.  The
+> tracepoints record scheduling, completion, and blocked caller
+> behavior so reset progress can be diagnosed from the client side.
+>=20
+> debugfs layout under /sys/kernel/debug/ceph/<client>/reset/:
+>   trigger - write to initiate a manual reset
+>   status  - read to see the most recent reset result
+>=20
+> Tracepoints:
+>   ceph_client_reset_schedule  - reset queued
+>   ceph_client_reset_complete  - reset finished (success or failure)
+>   ceph_client_reset_blocked   - caller blocked waiting for reset
+>   ceph_client_reset_unblocked - caller unblocked after reset
+>=20
+> Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+> ---
+>  fs/ceph/debugfs.c           | 104 ++++++++++++++++++++++++++++++++++++
+>  fs/ceph/mds_client.c        |   8 +++
+>  fs/ceph/super.h             |   3 ++
+>  include/trace/events/ceph.h |  63 ++++++++++++++++++++++
+>  4 files changed, 178 insertions(+)
+>=20
+> diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+> index 7dc307790240..d46d41ec7a86 100644
+> --- a/fs/ceph/debugfs.c
+> +++ b/fs/ceph/debugfs.c
+> @@ -9,6 +9,7 @@
+>  #include <linux/seq_file.h>
+>  #include <linux/math64.h>
+>  #include <linux/ktime.h>
+> +#include <linux/uaccess.h>
+> =20
+>  #include <linux/ceph/libceph.h>
+>  #include <linux/ceph/mon_client.h>
+> @@ -360,16 +361,107 @@ static int status_show(struct seq_file *s, void *p=
+)
+>  	return 0;
+>  }
+> =20
+> +static int reset_status_show(struct seq_file *s, void *p)
+> +{
+> +	struct ceph_fs_client *fsc =3D s->private;
+> +	struct ceph_mds_client *mdsc =3D fsc->mdsc;
+> +	struct ceph_client_reset_state *st;
+> +	u64 trigger =3D 0, success =3D 0, failure =3D 0;
+> +	unsigned long last_start =3D 0, last_finish =3D 0;
+> +	int last_errno =3D 0;
+> +	enum ceph_client_reset_phase phase =3D CEPH_CLIENT_RESET_IDLE;
+> +	bool drain_timed_out =3D false;
+> +	int sessions_reset =3D 0;
+> +	int blocked_requests =3D 0;
+> +	char reason[CEPH_CLIENT_RESET_REASON_LEN];
+> +
+> +	if (!mdsc)
+> +		return 0;
+> +
+> +	st =3D &mdsc->reset_state;
+> +
+> +	spin_lock(&st->lock);
+> +	trigger =3D st->trigger_count;
+> +	success =3D st->success_count;
+> +	failure =3D st->failure_count;
+> +	last_start =3D st->last_start;
+> +	last_finish =3D st->last_finish;
+> +	last_errno =3D st->last_errno;
+> +	phase =3D st->phase;
+> +	drain_timed_out =3D st->drain_timed_out;
+> +	sessions_reset =3D st->sessions_reset;
+> +	strscpy(reason, st->last_reason, sizeof(reason));
+> +	spin_unlock(&st->lock);
+> +
+> +	blocked_requests =3D atomic_read(&st->blocked_requests);
+> +
+> +	seq_printf(s, "phase: %s\n", ceph_reset_phase_name(phase));
+> +	seq_printf(s, "trigger_count: %llu\n", trigger);
+> +	seq_printf(s, "success_count: %llu\n", success);
+> +	seq_printf(s, "failure_count: %llu\n", failure);
+> +	if (last_start)
+> +		seq_printf(s, "last_start_ms_ago: %u\n",
+> +			   jiffies_to_msecs(jiffies - last_start));
+> +	else
+> +		seq_puts(s, "last_start_ms_ago: (never)\n");
+> +	if (last_finish)
+> +		seq_printf(s, "last_finish_ms_ago: %u\n",
+> +			   jiffies_to_msecs(jiffies - last_finish));
+> +	else
+> +		seq_puts(s, "last_finish_ms_ago: (never)\n");
+> +	seq_printf(s, "last_errno: %d\n", last_errno);
+> +	seq_printf(s, "last_reason: %s\n",
+> +		   reason[0] ? reason : "(none)");
+> +	seq_printf(s, "drain_timed_out: %s\n",
+> +		   drain_timed_out ? "yes" : "no");
+> +	seq_printf(s, "sessions_reset: %d\n", sessions_reset);
+> +	seq_printf(s, "blocked_requests: %d\n", blocked_requests);
+> +
+> +	return 0;
+> +}
+> +
+> +static ssize_t reset_trigger_write(struct file *file, const char __user =
+*buf,
+> +				   size_t len, loff_t *ppos)
+> +{
+> +	struct ceph_fs_client *fsc =3D file->private_data;
+> +	struct ceph_mds_client *mdsc =3D fsc->mdsc;
+> +	char reason[CEPH_CLIENT_RESET_REASON_LEN];
+> +	size_t copy;
+> +	int ret;
+> +
+> +	if (!mdsc)
+> +		return -ENODEV;
+> +
+> +	copy =3D min_t(size_t, len, sizeof(reason) - 1);
+> +	if (copy && copy_from_user(reason, buf, copy))
+> +		return -EFAULT;
+> +	reason[copy] =3D '\0';
+> +	strim(reason);
+> +
+> +	ret =3D ceph_mdsc_schedule_reset(mdsc, reason);
+> +	if (ret)
+> +		return ret;
+> +
+> +	return len;
+> +}
+> +
+>  DEFINE_SHOW_ATTRIBUTE(mdsmap);
+>  DEFINE_SHOW_ATTRIBUTE(mdsc);
+>  DEFINE_SHOW_ATTRIBUTE(caps);
+>  DEFINE_SHOW_ATTRIBUTE(mds_sessions);
+>  DEFINE_SHOW_ATTRIBUTE(status);
+> +DEFINE_SHOW_ATTRIBUTE(reset_status);
+>  DEFINE_SHOW_ATTRIBUTE(metrics_file);
+>  DEFINE_SHOW_ATTRIBUTE(metrics_latency);
+>  DEFINE_SHOW_ATTRIBUTE(metrics_size);
+>  DEFINE_SHOW_ATTRIBUTE(metrics_caps);
+> =20
+> +static const struct file_operations ceph_reset_trigger_fops =3D {
+> +	.owner =3D THIS_MODULE,
+> +	.open =3D simple_open,
+> +	.write =3D reset_trigger_write,
+> +	.llseek =3D noop_llseek,
+> +};
+> =20
+>  /*
+>   * debugfs
+> @@ -404,6 +496,7 @@ void ceph_fs_debugfs_cleanup(struct ceph_fs_client *f=
+sc)
+>  	debugfs_remove(fsc->debugfs_caps);
+>  	debugfs_remove(fsc->debugfs_status);
+>  	debugfs_remove(fsc->debugfs_mdsc);
+> +	debugfs_remove_recursive(fsc->debugfs_reset_dir);
+>  	debugfs_remove_recursive(fsc->debugfs_metrics_dir);
+>  	doutc(fsc->client, "done\n");
+>  }
+> @@ -451,6 +544,17 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc=
+)
+>  						fsc,
+>  						&caps_fops);
+> =20
+> +	fsc->debugfs_reset_dir =3D debugfs_create_dir("reset",
+> +						    fsc->client->debugfs_dir);
+> +	fsc->debugfs_reset_trigger =3D
+> +		debugfs_create_file("trigger", 0200,
+> +				    fsc->debugfs_reset_dir, fsc,
+> +				    &ceph_reset_trigger_fops);
+> +	fsc->debugfs_reset_status =3D
+> +		debugfs_create_file("status", 0400,
+> +				    fsc->debugfs_reset_dir, fsc,
+> +				    &reset_status_fops);
+> +
+>  	fsc->debugfs_status =3D debugfs_create_file("status",
+>  						  0400,
+>  						  fsc->client->debugfs_dir,
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 7e399b0dcc55..98a882cf8b65 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -5213,6 +5213,7 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client=
+ *mdsc)
+>  	blocked_count =3D atomic_inc_return(&st->blocked_requests);
+>  	doutc(cl, "request blocked during reset, %d total blocked\n",
+>  	      blocked_count);
+> +	trace_ceph_client_reset_blocked(mdsc, blocked_count);
+> =20
+>  retry:
+>  	wait_ret =3D wait_event_interruptible_timeout(st->blocked_wq,
+> @@ -5223,10 +5224,12 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_clie=
+nt *mdsc)
+>  	if (wait_ret =3D=3D 0) {
+>  		atomic_dec(&st->blocked_requests);
+>  		pr_warn_client(cl, "timed out waiting for reset to complete\n");
+> +		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
+>  		return -ETIMEDOUT;
+>  	}
+>  	if (wait_ret < 0) {
+>  		atomic_dec(&st->blocked_requests);
+> +		trace_ceph_client_reset_unblocked(mdsc, (int)wait_ret);
+>  		return (int)wait_ret;  /* -ERESTARTSYS */
+>  	}
+> =20
+> @@ -5241,12 +5244,14 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_clie=
+nt *mdsc)
+>  		if (time_before(jiffies, deadline))
+>  			goto retry;
+>  		atomic_dec(&st->blocked_requests);
+> +		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
+>  		return -ETIMEDOUT;
+>  	}
+>  	ret =3D st->last_errno;
+>  	spin_unlock(&st->lock);
+> =20
+>  	atomic_dec(&st->blocked_requests);
+> +	trace_ceph_client_reset_unblocked(mdsc, ret);
+>  	return ret;
+>  }
+> =20
+> @@ -5275,6 +5280,8 @@ static void ceph_mdsc_reset_complete(struct ceph_md=
+s_client *mdsc, int ret)
+> =20
+>  	/* Wake up all requests that were blocked waiting for reset */
+>  	wake_up_all(&st->blocked_wq);
+> +
+> +	trace_ceph_client_reset_complete(mdsc, ret);
+>  }
+> =20
+>  static void ceph_mdsc_reset_workfn(struct work_struct *work)
+> @@ -5559,6 +5566,7 @@ int ceph_mdsc_schedule_reset(struct ceph_mds_client=
+ *mdsc,
+>  	pr_info_client(mdsc->fsc->client,
+>  		       "manual session reset scheduled (reason=3D\"%s\")\n",
+>  		       msg);
+> +	trace_ceph_client_reset_schedule(mdsc, msg);
+>  	return 0;
+>  }
+> =20
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 1f901b1647e6..98af0a823c81 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -179,6 +179,9 @@ struct ceph_fs_client {
+>  	struct dentry *debugfs_status;
+>  	struct dentry *debugfs_mds_sessions;
+>  	struct dentry *debugfs_metrics_dir;
+> +	struct dentry *debugfs_reset_dir;
+> +	struct dentry *debugfs_reset_trigger;
+> +	struct dentry *debugfs_reset_status;
+
+The debugfs_reset_trigger and debugfs_reset_status initialized in
+ceph_fs_debugfs_init() but never used in any methods. Do we really need the=
+se
+fields?
+
+>  #endif
+> =20
+>  #ifdef CONFIG_CEPH_FSCACHE
+> diff --git a/include/trace/events/ceph.h b/include/trace/events/ceph.h
+> index 08cb0659fbfc..e853c891ef71 100644
+> --- a/include/trace/events/ceph.h
+> +++ b/include/trace/events/ceph.h
+> @@ -226,6 +226,69 @@ TRACE_EVENT(ceph_handle_caps,
+>  		  __entry->mseq)
+>  );
+> =20
+> +/*
+> + * Client reset tracepoints - identify the client by its monitor-
+> + * assigned global_id so traces remain meaningful when kernel pointer
+> + * hashing is enabled.
+> + */
+> +TRACE_EVENT(ceph_client_reset_schedule,
+> +	TP_PROTO(const struct ceph_mds_client *mdsc, const char *reason),
+> +	TP_ARGS(mdsc, reason),
+> +	TP_STRUCT__entry(
+> +		__field(u64, client_id)
+> +		__string(reason, reason ? reason : "")
+> +	),
+> +	TP_fast_assign(
+> +		__entry->client_id =3D mdsc->fsc->client->monc.auth->global_id;
+
+All four tracepoints dereference mdsc->fsc->client->monc.auth->global_id. C=
+ould
+monc.auth be NULL during early client init or late teardown?
+
+Thanks,
+Slava.
+
+> +		__assign_str(reason);
+> +	),
+> +	TP_printk("client_id=3D%llu reason=3D%s",
+> +		  __entry->client_id, __get_str(reason))
+> +);
+> +
+> +TRACE_EVENT(ceph_client_reset_complete,
+> +	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
+> +	TP_ARGS(mdsc, ret),
+> +	TP_STRUCT__entry(
+> +		__field(u64, client_id)
+> +		__field(int, ret)
+> +	),
+> +	TP_fast_assign(
+> +		__entry->client_id =3D mdsc->fsc->client->monc.auth->global_id;
+> +		__entry->ret =3D ret;
+> +	),
+> +	TP_printk("client_id=3D%llu ret=3D%d", __entry->client_id, __entry->ret=
+)
+> +);
+> +
+> +TRACE_EVENT(ceph_client_reset_blocked,
+> +	TP_PROTO(const struct ceph_mds_client *mdsc, int blocked_count),
+> +	TP_ARGS(mdsc, blocked_count),
+> +	TP_STRUCT__entry(
+> +		__field(u64, client_id)
+> +		__field(int, blocked_count)
+> +	),
+> +	TP_fast_assign(
+> +		__entry->client_id =3D mdsc->fsc->client->monc.auth->global_id;
+> +		__entry->blocked_count =3D blocked_count;
+> +	),
+> +	TP_printk("client_id=3D%llu blocked_count=3D%d", __entry->client_id,
+> +		  __entry->blocked_count)
+> +);
+> +
+> +TRACE_EVENT(ceph_client_reset_unblocked,
+> +	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
+> +	TP_ARGS(mdsc, ret),
+> +	TP_STRUCT__entry(
+> +		__field(u64, client_id)
+> +		__field(int, ret)
+> +	),
+> +	TP_fast_assign(
+> +		__entry->client_id =3D mdsc->fsc->client->monc.auth->global_id;
+> +		__entry->ret =3D ret;
+> +	),
+> +	TP_printk("client_id=3D%llu ret=3D%d", __entry->client_id, __entry->ret=
+)
+> +);
+> +
+>  #undef EM
+>  #undef E_
+>  #endif /* _TRACE_CEPH_H */
+
