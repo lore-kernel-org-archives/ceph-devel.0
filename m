@@ -1,42 +1,42 @@
-Received: from bjy-spam.kuaishou.com (bjy-spam.kuaishou.com [162.219.34.252])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 1BE59271A71
-	for <ceph-devel@vger.kernel.org>; Sat, 18 Apr 2026 04:19:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=162.219.34.252
+Received: from bjy-spam.kuaishou.com (bjy-spam.kuaishou.com [61.16.102.78])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id C2D9437D12C
+	for <ceph-devel@vger.kernel.org>; Sat, 18 Apr 2026 13:39:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=61.16.102.78
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776485972; cv=none; b=fI3hQ5RJ1unzGL2VB4yNJJnc9S1VIwRul0p6DDvm/UT0jKST6Kjci2+8ItkMDa+zTvZ0mVzryTCaAm2dxCcMLpcxlYXTeMZebDoSRJzMhq1bKLFLOL4rshlZSps89/+a03P8OwJI2IVJ1PFhTo08AZiwc03m/VHGCwQiFf0G0Jk=
+	t=1776519577; cv=none; b=moJ3QJJ9XfBmvBmNFfNUni0ObixQqDSvzSr6f3qtNS4NmoMdhSiXs8MYcLG6m/4uBgz+AkzYw3PyJyXeGu+IHV2pCEMkbz4SJBQlR9Z3sXJUSqV4gaAdMwnVS0wAwLr2Sy2Te5lBkUWaeQbPbZl3g8w2M6Fdgb/tZ5zQiepitUY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776485972; c=relaxed/simple;
+	s=arc-20240116; t=1776519577; c=relaxed/simple;
 	bh=ZOFtmde80Vm0D+X+463lLcyf38eSrIEidpkIWIGatJ0=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Bleo3McwOxYGh1S+7eyOTbfSOLsvmCLoXDy8q5LLYKuYMGLcBfktyZ5yVehRJJ7wwZ7Vv893evfrJZJQdcZWFRsHQONrQ9dJPIXFurf3vRIqknaV8PYKOCk5CnXh6wQvxFbvhFYl8iuI5l4huc3DZX/GtOt81u6h93bKL5W7ZqI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kuaishou.com; spf=pass smtp.mailfrom=kuaishou.com; dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b=V43IqYzj; arc=none smtp.client-ip=162.219.34.252
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=aen5xSvwXivrz7CHiw1XzrSlKce2WpGuMJse/K6nj/FEXGq9r1KLzWr9GbXOr3MRZHcV4e3ylfn/Mn6WZ0qaGUDeFzLLgIeSUwcdlNpvTIMGklm8DVofoy91RRnVwLC0N6QmPYU2hQs4YlATOSwu2U+vcWvesfJm75ofrbrXPzI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kuaishou.com; spf=pass smtp.mailfrom=kuaishou.com; dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b=EW6IkBqz; arc=none smtp.client-ip=61.16.102.78
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kuaishou.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kuaishou.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b="V43IqYzj"
-Received: from m7-spam01.kuaishou.com (unknown [172.28.1.161])
-	by bjy-spam.kuaishou.com (Postfix) with ESMTP id 1BC172263;
-	Sat, 18 Apr 2026 12:10:21 +0800 (CST)
+	dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b="EW6IkBqz"
+Received: from xm-spam01.kuaishou.com (unknown [172.28.128.161])
+	by bjy-spam.kuaishou.com (Postfix) with ESMTP id B31CD2C000360;
+	Sat, 18 Apr 2026 21:39:32 +0800 (CST)
 Received: from bjxm-pm-mail03.kuaishou.com (unknown [172.28.128.3])
-	by m7-spam01.kuaishou.com (Postfix) with ESMTPS id 4fyJF45ZgBz1XLg2F;
-	Sat, 18 Apr 2026 12:10:16 +0800 (CST)
+	by xm-spam01.kuaishou.com (Postfix) with ESMTPS id 4fyXsr3GQgz9vBVg;
+	Sat, 18 Apr 2026 21:39:28 +0800 (CST)
 DKIM-Signature: v=1; a=rsa-sha256; d=kuaishou.com; s=dkim; c=relaxed/relaxed;
-	t=1776485416; h=from:subject:to:date:message-id;
+	t=1776519568; h=from:subject:to:date:message-id;
 	bh=TNB7LScT/Y6Fs8gfXfonsSdA9X00cOGev3H5xXA071c=;
-	b=V43IqYzjOEBVufNBKy4m4tU+/Vfjpjsr4+SdOjyG6RSlkKqXEVJfGFBztgxycgNKuPvxxy3mjyb
-	6h35Lp2BYZXwiobf2uPIsAI88gbJdbtEWLzt4vFumhQxtELZNVol+VxX1bNvdTqgX03iQexwoKLgb
-	OpZaH6a2WVFPB/6pTiI=
+	b=EW6IkBqzjFjcB/7FWYgDUcpxQNyykS8Rw1m8PtKl27nc9c+3IZrtrtn8kJfvSCve3XZzNrEGmWy
+	FRS58He4jWJwyaOQgkR3dPr0Y5k2CNMIApRuOVQoCfuGhBcIYoOzdhmrA04NZFkUBnWbvdx6ey0DZ
+	0siGZq9WgAi37xNkPS0=
 Received: from localhost.localdomain (172.28.1.32) by
  bjxm-pm-mail03.kuaishou.com (172.28.128.3) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.20; Sat, 18 Apr 2026 12:10:16 +0800
+ 15.2.1118.20; Sat, 18 Apr 2026 21:39:27 +0800
 From: Li Lei <lilei24@kuaishou.com>
 To: <idryomov@gmail.com>, <amarkuze@redhat.com>, <slava@dubeyko.com>,
-	<mchangir@redhat.com>, <xiubli@redhat.com>
+	<xiubli@redhat.com>
 CC: <ceph-devel@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<lilei24@kuaishou.com>
+	<noctis.akm@gmail.com>, <lilei24@kuaishou.com>
 Subject: [PATCH] ceph: fix potential stray locked folios during umount
-Date: Sat, 18 Apr 2026 12:10:08 +0800
-Message-ID: <20260418041008.16294-1-lilei24@kuaishou.com>
+Date: Sat, 18 Apr 2026 21:39:25 +0800
+Message-ID: <20260418133925.87125-1-lilei24@kuaishou.com>
 X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -46,7 +46,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: bjm7-pm-mail05.kuaishou.com (172.28.1.5) To
+X-ClientProxiedBy: bjm7-pm-mail02.kuaishou.com (172.28.1.2) To
  bjxm-pm-mail03.kuaishou.com (172.28.128.3)
 
 During umount, we only wait for stopping_blockers to drop to zero for
