@@ -1,152 +1,256 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7D18346FAE
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Apr 2026 18:48:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+Received: from bjy-spam.kuaishou.com (bjy-spam.kuaishou.com [61.16.102.78])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6F2381E520A
+	for <ceph-devel@vger.kernel.org>; Sat, 18 Apr 2026 04:12:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=61.16.102.78
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776451697; cv=none; b=WW1ZgWP5GbcCBpg2RekNjRoT31iy+UNPB1P9ALfk7LeQlgmESLx2nv5Le6ZcdjhE3arhWkj9HHp7Pvjmafb8+iYYJQ6I9UA/8kyc4IjrG4mgr/KOcuX1luCeoLKoqi8BhjPpdB+GyglGyl6iOdx8PxyDkMP1VC8EwTCAEWlMt2k=
+	t=1776485575; cv=none; b=c47GLoDBUPdounxixsuXYsgrVZDc0CJ9Ef04VjN0mw3Sms148msJ8Q0kbiZ/4jfO8ix7kFTyralxlYW9Nb3MEW82S3tR5W0sT3PpldCH9XOr1GYykAdfq4J9rO6XF+QF/8Qdp/rhbJxDbswK8uMeg28MBx1WyrtU0t1C4mqDDig=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776451697; c=relaxed/simple;
-	bh=XIAHu3+9MbYsMQ0Ty15looa48Romc1dmtt6+Z922YB4=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=CXHUXq45W1DFtO6AMlEU9kyiJdQVCRNGPwZRcoQtTm+RCb9qFCuWT50kba4uaC2NaymA4AXQR6ahdvfQ7yDCItb0ngPrJW20G4+LkbYLSdt4tvdtWe0g+OjU/xpY5LuW9zR8Vy9nTOsdZYQsppEx/vW3bMMBU2prFbJoT0UaKN4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bVHYfJHS; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=D2h6oABS; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1776485575; c=relaxed/simple;
+	bh=VojyUqUmks8qOD/S9FhQWubhEJDgvhm6Tsve12bLfno=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=FQhyqXi1VIothh9pBSRyVVEXBbqL8JmlFgW0BBfQxVTEho9L97XKtbGJmyw98rWJXGZv5qBqVoXKgDfYZSW1Zmmk6cC6FaDLIZ5EqsEdqcdvtOt2swQqVZChWDxRT+RwIWtojcUlllmgTCxafx6BaGqg0zi0RujU2Zx3rgadM3k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kuaishou.com; spf=pass smtp.mailfrom=kuaishou.com; dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b=gRyK1NDf; arc=none smtp.client-ip=61.16.102.78
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kuaishou.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kuaishou.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bVHYfJHS";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="D2h6oABS"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1776451695;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=3CCE+9sRGtOWBoNJsNQxVv6l/K9BhI2/XVLd6IZfIQ4=;
-	b=bVHYfJHSLNlFWi9tILA0ZiWKOaAd7Kiw3lF8JA1cZ7629Fk/ozO0O36D6A4nrbtIhbB5uK
-	Lln20OXoqT/vOubGEpvdYJyDeTDvOtOGvF/asoUxh5w/aW9laDQ0mcYNl5af2qhBGKS9VD
-	wZdFH9PuvcBXKK84oDLTFdL1yvMx0lI=
-Received: from mail-yw1-f200.google.com (mail-yw1-f200.google.com
- [209.85.128.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-435-Zol8XqXRPF2JDXBXdC_MTQ-1; Fri, 17 Apr 2026 14:48:13 -0400
-X-MC-Unique: Zol8XqXRPF2JDXBXdC_MTQ-1
-X-Mimecast-MFC-AGG-ID: Zol8XqXRPF2JDXBXdC_MTQ_1776451692
-Received: by mail-yw1-f200.google.com with SMTP id 00721157ae682-790afc07667so24767437b3.0
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Apr 2026 11:48:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1776451692; x=1777056492; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:references
-         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=3CCE+9sRGtOWBoNJsNQxVv6l/K9BhI2/XVLd6IZfIQ4=;
-        b=D2h6oABSP58p01UySldDBldN9Pehth95pfxNQhoRd1aGLEVVakSHBrDhchhMzOhawO
-         w1TPTgSek6ZvkO5kvHeQrusSaggFdU4O0m+ALJhRnlDljSKno+CHjIWmb0d9Cyz04lcR
-         7Mm3EL1h3x1TsGehM8RbT2wS0mPvOvBMMbXazMz06fs1dL+Yr1h2S7DeI+471laC3o70
-         2IsXk5YpGtjTCyuONFhOC1cmmqDc2Zr2jOWHCXuUj+Hl8G9TT2ibSitghoOJECuL/B4i
-         gmyYroBkoIZVUjId3oI0+nQRk2UAqd/537aqqXLBjhNIVd1vDAraaiUyYo3eBzsfFenF
-         rZ+Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776451692; x=1777056492;
-        h=mime-version:user-agent:content-transfer-encoding:references
-         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=3CCE+9sRGtOWBoNJsNQxVv6l/K9BhI2/XVLd6IZfIQ4=;
-        b=mm52S0PFKqeYbb7Luz6Nk4L8ijBSfxLt3Ql9E5crQlszgJ3uWZ1M2OfUCrXp5fnNDP
-         z9Yvp9rzuXNnnRAu5a8iElCdvEEn/GHHe+xbWiUe8IhPWpuVSnGy8TGWFQFJKe7ps7eP
-         KPoBCcgJ6DlIdSNInX/xa9qKcUH4N+yC431+9xXMRZHJIobabwSG0d6ewgNcYRBUtAk5
-         fEMWUdVLkzvNCubHcDmMMJvbitVbXCPpwkxdltdCKbgH/Wv2woIic2qRZa0ORtrE0C1r
-         OyJIiJPTbqSU8/r6awdAMg7u+9woqjhfmDEO1P3bIbd89sRLF91YoT0Mohyju1+Pg6PD
-         GrlQ==
-X-Forwarded-Encrypted: i=1; AFNElJ/6H5PKVQPXcaHYMQqHfu/Gt4cIqToN3N4wnSkSUYOEm5+PqTRuweK/YhOQqyryTvNhPwSTrXEmvRwk@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx9x/9NjbS6EcPK36k3Tcvgj8zzuAct9uc/BYZoiHKeWHFkn1jC
-	3Qqc29AnDmTKXPqHJQ8zj+jN/SFLyJRP9hj/2h9RePbh1fWOfwQXaB/Nr8lEuAmVAXuIodzggjC
-	4SmcgLvkNf7fWN7WnnKo11pU43ClegmcPz7mYuizk3yOULUmtYQIpR7S1CoDcqI4=
-X-Gm-Gg: AeBDieuEY6RTg9b2UNU72eZ97A/NnimgpSgdjTXQuCRP4mNrsRyK8wOKd6HS6VecSOG
-	NEkNeDweBOJUEDnJOJHdCTBDHwFh8kwqxqdWM8hJh/ywZAn+oPVNcJxelO4IIs/APHm2BPgI56D
-	igLjNYZygGHeuGUstGu7qp5VsLksgZA3u0yq2xOt9kr8BYfBTOLyMXyQRga880vKE2QDCz5UKZh
-	/3rl0MQYzF3U/M/W/PqnkjwJS317J3jyVI3Oliu95ePZqJ2gMob6xLnKOaTPxS2uSvF8U5Oe6cV
-	ImeJyFoYJ39AQpDar88gRICOYQzTenu0WE0fN9rG92sHUL/mpb3uCFsUd/jGpJz8rFWDRWiR6AD
-	WKPOuUHVOpFxH1dg+C6Fk6LwB3hBGxjC9DEDA01Ex2hmtrxMh0CrVqUxRyyr6fbk=
-X-Received: by 2002:a05:690c:56c3:b0:79e:8299:7505 with SMTP id 00721157ae682-7b9ece6d5a7mr35368727b3.6.1776451692535;
-        Fri, 17 Apr 2026 11:48:12 -0700 (PDT)
-X-Received: by 2002:a05:690c:56c3:b0:79e:8299:7505 with SMTP id 00721157ae682-7b9ece6d5a7mr35368067b3.6.1776451691555;
-        Fri, 17 Apr 2026 11:48:11 -0700 (PDT)
-Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7b9ee9b1f6fsm10013157b3.36.2026.04.17.11.48.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Apr 2026 11:48:11 -0700 (PDT)
-Message-ID: <68b2b3eb55e7e44ae574c5caa0ef910cf088ed00.camel@redhat.com>
-Subject: Re: [EXTERNAL] [PATCH v2 7/7] ceph: add manual reset selftests and
- validation harness
-From: Viacheslav Dubeyko <vdubeyko@redhat.com>
-To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
-Date: Fri, 17 Apr 2026 11:48:09 -0700
-In-Reply-To: <20260415170043.3882912-8-amarkuze@redhat.com>
-References: <20260415170043.3882912-1-amarkuze@redhat.com>
-	 <20260415170043.3882912-8-amarkuze@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.58.3 (3.58.3-1.fc43app2) 
+	dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b="gRyK1NDf"
+Received: from xm-spam01.kuaishou.com (unknown [172.28.128.161])
+	by bjy-spam.kuaishou.com (Postfix) with ESMTP id 057542C000360;
+	Sat, 18 Apr 2026 12:12:50 +0800 (CST)
+Received: from bjxm-pm-mail03.kuaishou.com (unknown [172.28.128.3])
+	by xm-spam01.kuaishou.com (Postfix) with ESMTPS id 4fyJHx5MmQz9ty3n;
+	Sat, 18 Apr 2026 12:12:45 +0800 (CST)
+DKIM-Signature: v=1; a=rsa-sha256; d=kuaishou.com; s=dkim; c=relaxed/relaxed;
+	t=1776485565; h=from:subject:to:date:message-id;
+	bh=rYRT5qEDNiatcQR2RWRgT5stC7heUrWv9EnhE8R4e2c=;
+	b=gRyK1NDf+O0ykFelzoQjNIS6pRaHtvPH+gFe4+vOmUpxV2N1FwkLMMS6RlNuMZ0blhyNftpkFiG
+	ktaYfycVYo/OMRpUZyH9BLhyd06p1gV29R65FTvnbgyxkB/8lrBmfXMgnCMazO3rh5jRyLbhuciWm
+	71QI+H0Wn1ttDcSXt6E=
+Received: from localhost.localdomain (172.28.1.32) by
+ bjxm-pm-mail03.kuaishou.com (172.28.128.3) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.20; Sat, 18 Apr 2026 12:12:45 +0800
+From: Li Lei <lilei24@kuaishou.com>
+To: <slava@dubeyko.com>, <idryomov@gmail.com>, <amarkuze@redhat.com>
+CC: <ceph-devel@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<noctis.akm@gmail.com>, Li Lei <lilei24@kuaishou.com>, Zhao Sun
+	<sunzhao03@kuaishou.com>
+Subject: [PATCH] Revert "ceph: when filling trace, call ceph_get_inode outside of mutexes"
+Date: Sat, 18 Apr 2026 12:12:41 +0800
+Message-ID: <20260418041241.17892-1-lilei24@kuaishou.com>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: bjxm-pm-mail04.kuaishou.com (172.28.128.4) To
+ bjxm-pm-mail03.kuaishou.com (172.28.128.3)
 
-On Wed, 2026-04-15 at 17:00 +0000, Alex Markuze wrote:
-> Add single-client selftests and a validation wrapper for manual
-> client reset.
->=20
-> The test set covers reset stress under concurrent metadata
-> activity together with targeted corner cases for overlap,
-> dirty-state handling, stale lock behavior, and unmount while reset
-> is active.  A validation wrapper runs the individual stages with
-> watchdog timeouts and captures the final reset status for post-run
-> checks.
->=20
-> The stress validator checks failure_count in addition to
-> last_errno so that transient mid-run reset failures are caught
-> even when a later reset succeeds.
->=20
-> Keep the test scope intentionally focused on the shipped
-> single-client reset behavior so the series includes a practical
-> regression signal for the final design.
->=20
-> Signed-off-by: Alex Markuze <amarkuze@redhat.com>
-> ---
->  MAINTAINERS                                   |   1 +
->  tools/testing/selftests/Makefile              |   1 +
->  .../selftests/filesystems/ceph/Makefile       |   7 +
->  .../selftests/filesystems/ceph/README.md      |  84 +++
->  .../filesystems/ceph/reset_corner_cases.sh    | 646 ++++++++++++++++
->  .../filesystems/ceph/reset_stress.sh          | 694 ++++++++++++++++++
->  .../filesystems/ceph/run_validation.sh        | 350 +++++++++
->  .../selftests/filesystems/ceph/settings       |   1 +
->  .../filesystems/ceph/validate_consistency.py  | 297 ++++++++
->  9 files changed, 2081 insertions(+)
->  create mode 100644 tools/testing/selftests/filesystems/ceph/Makefile
->  create mode 100644 tools/testing/selftests/filesystems/ceph/README.md
->  create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner=
-_cases.sh
->  create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress=
-.sh
->  create mode 100755 tools/testing/selftests/filesystems/ceph/run_validati=
-on.sh
->  create mode 100644 tools/testing/selftests/filesystems/ceph/settings
->  create mode 100755 tools/testing/selftests/filesystems/ceph/validate_con=
-sistency.py
->=20
+This reverts commit bca9fc14c70fcbbebc84954cc39994e463fb9468.
 
-The patch is really huge. I really like that we would like to add the selft=
-ests
-for CephFS kernel client. But it's impossible to review it. It needs to be =
-split
-on several patches.
+Deadlock detected between mdsc->snap_rwsem and the I_NEW bit in
+handle_reply().
 
-Thanks,
-Slava.=20
+- kworker/u113:1 (stat inode)
+  1) Hold a inode with I_NEW set
+  2) Request for mdsc->snap_rwsem
+- kworker/u113:2 (readdir)
+  1) Hold mdsc->snap_rwsem
+  2) Wait for inode I_NEW flag to be cleared
+
+task:kworker/u113:1  state:D stack:    0 pid:34454 ppid:     2
+flags:0x00004000
+Workqueue: ceph-msgr ceph_con_workfn [libceph]
+Call Trace:
+__schedule+0x3a9/0x8d0
+schedule+0x49/0xb0
+rwsem_down_write_slowpath+0x30a/0x5e0
+handle_reply+0x4d7/0x7f0 [ceph]
+? ceph_tcp_recvmsg+0x6f/0xa0 [libceph]
+mds_dispatch+0x10a/0x690 [ceph]
+? calc_signature+0xdf/0x110 [libceph]
+? ceph_x_check_message_signature+0x58/0xc0 [libceph]
+ceph_con_process_message+0x73/0x140 [libceph]
+ceph_con_v1_try_read+0x2f2/0x860 [libceph]
+ceph_con_workfn+0x31e/0x660 [libceph]
+process_one_work+0x1cb/0x370
+worker_thread+0x30/0x390
+? process_one_work+0x370/0x370
+kthread+0x13e/0x160
+? set_kthread_struct+0x50/0x50
+ret_from_fork+0x1f/0x30
+
+task:kworker/u113:2  state:D stack:    0 pid:54267 ppid:     2
+flags:0x00004000
+Workqueue: ceph-msgr ceph_con_workfn [libceph]
+Call Trace:
+__schedule+0x3a9/0x8d0
+? bit_wait_io+0x60/0x60
+? bit_wait_io+0x60/0x60
+schedule+0x49/0xb0
+bit_wait+0xd/0x60
+__wait_on_bit+0x2a/0x90
+? ceph_force_reconnect+0x90/0x90 [ceph]
+out_of_line_wait_on_bit+0x91/0xb0
+? bitmap_empty+0x20/0x20
+ilookup5.part.29+0x69/0x90
+? ceph_force_reconnect+0x90/0x90 [ceph]
+? ceph_ino_compare+0x30/0x30 [ceph]
+iget5_locked+0x26/0x90
+ceph_get_inode+0x45/0x130 [ceph]
+ceph_readdir_prepopulate+0x59f/0xca0 [ceph]
+handle_reply+0x78d/0x7f0 [ceph]
+? ceph_tcp_recvmsg+0x6f/0xa0 [libceph]
+mds_dispatch+0x10a/0x690 [ceph]
+? calc_signature+0xdf/0x110 [libceph]
+? ceph_x_check_message_signature+0x58/0xc0 [libceph]
+ceph_con_process_message+0x73/0x140 [libceph]
+ceph_con_v1_try_read+0x2f2/0x860 [libceph]
+ceph_con_workfn+0x31e/0x660 [libceph]
+process_one_work+0x1cb/0x370
+worker_thread+0x30/0x390
+? process_one_work+0x370/0x370
+kthread+0x13e/0x160
+? set_kthread_struct+0x50/0x50
+ret_from_fork+0x1f/0x30
+
+It's rather rear to be caught, but here's Fast Reproduce Steps
+(multiple mds is needed):
+1. Try to find 2 different directories (DIR_a DIR_b) in a cephfs cluster
+    and make sure they have different auth mds nodes. In this way, a client
+    may have chances to run handle_reply on different CPU for our test
+    (see step 5 and step 6).
+2. In DIR_b, create a hard link of DIR_a/FILE_a, namely FILE_b.
+    DIR_a/FILE_a and DIR_b/FILE_b have the same ino (123456 e.g)
+3. Save ino in code below, make it sleep for stat command.
+    ```
+    static void handle_reply(struct ceph_mds_session
+    *session, struct ceph_msg *msg)
+			   goto out_err;
+		   }
+		   req->r_target_inode = in;
+    +               if (in->i_ino == 123456) {
+    +                       pr_err("inode %lu found, ready to wait 10 seconds.\n",
+    +				in->i_ino);
+    +                       msleep(10000);
+    +               }
+    ```
+4. Execute echo 3 > /proc/sys/vm/drop_caches
+5. In a shell, do `cd DIR_a;stat DIR_a/FILE_a`, we suppose to be stuck on this shell
+    because of msleep() in handle_reply().
+6. In the other shell, do `cd DIR_b;ls DIR_b/` to trigger ceph_readdir_prepopulate()
+
+Repeat step 4-6, less than 10 times is enough to see the problem.
+
+It turns out that commit bca9fc14c70f ("ceph: when filling trace, call ceph_get_inode outside of mutexes")
+moved ceph_inode_get outside snap_rmsem and made a chance for the deadlock of ceph_inode_get()
+and snap_rwsem.
+
+After the following commit, original commit(bca9fc14c70f) can be reverted safely.
+commit 6a92b08fdad2 ("ceph: don't take s_mutex or snap_rwsem in ceph_check_caps")
+
+Signed-off-by: Zhao Sun <sunzhao03@kuaishou.com>
+Signed-off-by: Li Lei <lilei24@kuaishou.com>
+---
+ fs/ceph/inode.c      | 26 ++++++++++++++++++++++----
+ fs/ceph/mds_client.c | 29 -----------------------------
+ 2 files changed, 22 insertions(+), 33 deletions(-)
+
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index d99e12d..0c241a4 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1667,10 +1667,28 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 	}
+ 
+ 	if (rinfo->head->is_target) {
+-		/* Should be filled in by handle_reply */
+-		BUG_ON(!req->r_target_inode);
++		in = xchg(&req->r_new_inode, NULL);
++		tvino.ino  = le64_to_cpu(rinfo->targeti.in->ino);
++		tvino.snap = le64_to_cpu(rinfo->targeti.in->snapid);
++
++		/*
++		 * If we ended up opening an existing inode, discard
++		 * r_new_inode
++		 */
++		if (req->r_op == CEPH_MDS_OP_CREATE &&
++			!req->r_reply_info.has_create_ino) {
++			/* This should never happen on an async create */
++			WARN_ON_ONCE(req->r_deleg_ino);
++			iput(in);
++			in = NULL;
++		}
++
++		in = ceph_get_inode(fsc->sb, tvino, in);
++		if (IS_ERR(in)) {
++			err = PTR_ERR(in);
++			goto done;
++		}
+ 
+-		in = req->r_target_inode;
+ 		err = ceph_fill_inode(in, req->r_locked_page, &rinfo->targeti,
+ 				NULL, session,
+ 				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
+@@ -1680,13 +1698,13 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		if (err < 0) {
+ 			pr_err_client(cl, "badness %p %llx.%llx\n", in,
+ 				      ceph_vinop(in));
+-			req->r_target_inode = NULL;
+ 			if (inode_state_read_once(in) & I_NEW)
+ 				discard_new_inode(in);
+ 			else
+ 				iput(in);
+ 			goto done;
+ 		}
++		req->r_target_inode = in;
+ 		if (inode_state_read_once(in) & I_NEW)
+ 			unlock_new_inode(in);
+ 	}
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index b174627..8a27775 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -3941,36 +3941,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 				       session->s_con.peer_features);
+ 	mutex_unlock(&mdsc->mutex);
+ 
+-	/* Must find target inode outside of mutexes to avoid deadlocks */
+ 	rinfo = &req->r_reply_info;
+-	if ((err >= 0) && rinfo->head->is_target) {
+-		struct inode *in = xchg(&req->r_new_inode, NULL);
+-		struct ceph_vino tvino = {
+-			.ino  = le64_to_cpu(rinfo->targeti.in->ino),
+-			.snap = le64_to_cpu(rinfo->targeti.in->snapid)
+-		};
+-
+-		/*
+-		 * If we ended up opening an existing inode, discard
+-		 * r_new_inode
+-		 */
+-		if (req->r_op == CEPH_MDS_OP_CREATE &&
+-		    !req->r_reply_info.has_create_ino) {
+-			/* This should never happen on an async create */
+-			WARN_ON_ONCE(req->r_deleg_ino);
+-			iput(in);
+-			in = NULL;
+-		}
+-
+-		in = ceph_get_inode(mdsc->fsc->sb, tvino, in);
+-		if (IS_ERR(in)) {
+-			err = PTR_ERR(in);
+-			mutex_lock(&session->s_mutex);
+-			goto out_err;
+-		}
+-		req->r_target_inode = in;
+-	}
+-
+ 	mutex_lock(&session->s_mutex);
+ 	if (err < 0) {
+ 		pr_err_client(cl, "got corrupt reply mds%d(tid:%lld)\n",
+-- 
+1.8.3.1
 
