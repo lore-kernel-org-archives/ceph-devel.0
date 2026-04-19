@@ -1,43 +1,39 @@
-Received: from bjy-spam.kuaishou.com (bjy-spam.kuaishou.com [61.16.102.78])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id C2D9437D12C
-	for <ceph-devel@vger.kernel.org>; Sat, 18 Apr 2026 13:39:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=61.16.102.78
+Received: from mail-m155101.qiye.163.com (mail-m155101.qiye.163.com [101.71.155.101])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF0E82AF1D;
+	Sun, 19 Apr 2026 09:41:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.101
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776519577; cv=none; b=moJ3QJJ9XfBmvBmNFfNUni0ObixQqDSvzSr6f3qtNS4NmoMdhSiXs8MYcLG6m/4uBgz+AkzYw3PyJyXeGu+IHV2pCEMkbz4SJBQlR9Z3sXJUSqV4gaAdMwnVS0wAwLr2Sy2Te5lBkUWaeQbPbZl3g8w2M6Fdgb/tZ5zQiepitUY=
+	t=1776591677; cv=none; b=cl12gzwM9X2tCNoN54wBxZHewEeoXBHD2vP6o4nJPgkCS2jBfvE1UCKAYRasiBYP2y2qnHh87FA8KWYOqSd6JxvHuE8t4qPDIvP5DCf0MDepsqoyzEiwI3unJyXnu4XmzmOJ2sVmcysTSc8vaWn7m19KNPqABvVHaU+FANVx65Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776519577; c=relaxed/simple;
-	bh=ZOFtmde80Vm0D+X+463lLcyf38eSrIEidpkIWIGatJ0=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=aen5xSvwXivrz7CHiw1XzrSlKce2WpGuMJse/K6nj/FEXGq9r1KLzWr9GbXOr3MRZHcV4e3ylfn/Mn6WZ0qaGUDeFzLLgIeSUwcdlNpvTIMGklm8DVofoy91RRnVwLC0N6QmPYU2hQs4YlATOSwu2U+vcWvesfJm75ofrbrXPzI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kuaishou.com; spf=pass smtp.mailfrom=kuaishou.com; dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b=EW6IkBqz; arc=none smtp.client-ip=61.16.102.78
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kuaishou.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kuaishou.com
+	s=arc-20240116; t=1776591677; c=relaxed/simple;
+	bh=Jr5oUQiELIiQeLQa/7/t58UO5nbL6CQqy7gQ771b/lM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=KRuZmuV3V4YncJcPsmV5iyEOn7tNdI9YoQsGSRmdW4LHGjWU/opydOV48gXrZzNEAxoCLK7nO8/XMqFZk+PQhQRqgWeywm0E1cICvqcjZ7JUsr/e0MQezAz9P48ZlAAZyYWl6BvHAFqHI/nc5VqMrcgeCN5jlyBgkp+9EcYMcl4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=seu.edu.cn; spf=pass smtp.mailfrom=seu.edu.cn; dkim=pass (1024-bit key) header.d=seu.edu.cn header.i=@seu.edu.cn header.b=WvHNclLZ; arc=none smtp.client-ip=101.71.155.101
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=seu.edu.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=seu.edu.cn
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=kuaishou.com header.i=@kuaishou.com header.b="EW6IkBqz"
-Received: from xm-spam01.kuaishou.com (unknown [172.28.128.161])
-	by bjy-spam.kuaishou.com (Postfix) with ESMTP id B31CD2C000360;
-	Sat, 18 Apr 2026 21:39:32 +0800 (CST)
-Received: from bjxm-pm-mail03.kuaishou.com (unknown [172.28.128.3])
-	by xm-spam01.kuaishou.com (Postfix) with ESMTPS id 4fyXsr3GQgz9vBVg;
-	Sat, 18 Apr 2026 21:39:28 +0800 (CST)
-DKIM-Signature: v=1; a=rsa-sha256; d=kuaishou.com; s=dkim; c=relaxed/relaxed;
-	t=1776519568; h=from:subject:to:date:message-id;
-	bh=TNB7LScT/Y6Fs8gfXfonsSdA9X00cOGev3H5xXA071c=;
-	b=EW6IkBqzjFjcB/7FWYgDUcpxQNyykS8Rw1m8PtKl27nc9c+3IZrtrtn8kJfvSCve3XZzNrEGmWy
-	FRS58He4jWJwyaOQgkR3dPr0Y5k2CNMIApRuOVQoCfuGhBcIYoOzdhmrA04NZFkUBnWbvdx6ey0DZ
-	0siGZq9WgAi37xNkPS0=
-Received: from localhost.localdomain (172.28.1.32) by
- bjxm-pm-mail03.kuaishou.com (172.28.128.3) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.20; Sat, 18 Apr 2026 21:39:27 +0800
-From: Li Lei <lilei24@kuaishou.com>
-To: <idryomov@gmail.com>, <amarkuze@redhat.com>, <slava@dubeyko.com>,
-	<xiubli@redhat.com>
-CC: <ceph-devel@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<noctis.akm@gmail.com>, <lilei24@kuaishou.com>
-Subject: [PATCH] ceph: fix potential stray locked folios during umount
-Date: Sat, 18 Apr 2026 21:39:25 +0800
-Message-ID: <20260418133925.87125-1-lilei24@kuaishou.com>
-X-Mailer: git-send-email 2.50.1
+	dkim=pass (1024-bit key) header.d=seu.edu.cn header.i=@seu.edu.cn header.b="WvHNclLZ"
+Received: from DESKTOP-SUEFNF9.taila7e912.ts.net (unknown [223.112.146.162])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 3b457dc87;
+	Sun, 19 Apr 2026 17:05:31 +0800 (GMT+08:00)
+From: Dawei Feng <dawei.feng@seu.edu.cn>
+To: idryomov@gmail.com
+Cc: axboe@kernel.dk,
+	dongsheng.yang@linux.dev,
+	mcgrof@kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-block@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	jianhao.xu@seu.edu.cn,
+	Dawei Feng <dawei.feng@seu.edu.cn>,
+	stable@vger.kernel.org,
+	Zilin Guan <zilin@seu.edu.cn>
+Subject: [PATCH] rbd: fix null-ptr-deref when device_add_disk() fails
+Date: Sun, 19 Apr 2026 17:03:48 +0800
+Message-Id: <20260419090348.1817082-1-dawei.feng@seu.edu.cn>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -45,126 +41,121 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: bjm7-pm-mail02.kuaishou.com (172.28.1.2) To
- bjxm-pm-mail03.kuaishou.com (172.28.128.3)
+X-HM-Tid: 0a9da4fce98c03a2kunm56c851691d06de
+X-HM-MType: 10
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlCSB9DVh5CGkxNTUtITx8dSFYeHw5VEwETFhoSFy
+	QUDg9ZV1kYEgtZQVlJSUhVSkpJVUpPTVVKTUlZV1kWGg8SFR0UWUFZT0tIVUpLSUhOQ0NVSktLVU
+	tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=WvHNclLZKsOl2IPn9Y892RwspSmoi+WoagtbI1A35WAvFzkqdz6k3IGOiaF6EVJIWTMM+LFCFt0BIxQh4pjZm2aDmIBltUr4vii8eQNgv7UqcNIR5VwOpCxt9fKWvaxuFHqPAUzmTw5/hC2nINeADoqKF6XIigjQoUgoEZLiwTU=; s=default; c=relaxed/relaxed; d=seu.edu.cn; v=1;
+	bh=CdmJzqe0YXQQdfal4sK7CioKUZTavqi01VlJKBezrNs=;
+	h=date:mime-version:subject:message-id:from;
 
-During umount, we only wait for stopping_blockers to drop to zero for
-a certain time specified by mount_timeout, and continue the rest of
-the procedure even if there are inflight requests. This behavior may
-leave some folios locked even after the cephfs umounted, which causes
-other kernel threads to hung.
+do_rbd_add() publishes the device with device_add() before calling
+device_add_disk(). If device_add_disk() fails after device_add()
+succeeds, the error path calls rbd_free_disk() directly and then later
+falls through to rbd_dev_device_release(), which calls rbd_free_disk()
+again. This double teardown can leave blk-mq cleanup operating on
+invalid state and trigger a null-ptr-deref in
+__blk_mq_free_map_and_rqs(), reached from blk_mq_free_tag_set().
 
-Buffered read process calls filemap_update_page() and waits on
-folio_put_wait_locked() with TASK_KILLABLE flag set, which means this
-process could be killed and the filesystem could be umount successfully
-(no file opened in it). Umount calls truncate_inode_pages() and waits
-on locked pages for those inodes whose i_count == 0. In these way,
-there would be no locked folios for this filesystem left in system
-after umount exits.
+Fix this by following the normal remove ordering: call device_del()
+before rbd_dev_device_release() when device_add_disk() fails after
+device_add(). That keeps the teardown sequence consistent and avoids
+re-entering disk cleanup through the wrong path.
 
-However, things are different for cephfs. Cephfs calls ihold() and
-submits osd request for buffered read and gets folio locked. Once the
-buffered read process is killed, the inode will be skipped in
-evict_inodes(), because its i_count > 0. Forthemore, the folios are
-still locked. It can only be unlocked in netfs_unlock_read_folio().
+The bug was first flagged by an experimental analysis tool we are
+developing for kernel memory-management bugs while analyzing
+v6.13-rc1. The tool is still under development and is not yet publicly
+available.
 
-stopping_blocks should block umount from proceeding, but it only waits
-for mount_timeout (default 60s) even if there are still flying request
-out there, leaving stray locked folios. Other kthread, like kcompactd
-, could be stuck on those locked folioes forever.
+We reproduced the bug on v7.0 with a real Ceph backend and a QEMU x86_64
+guest booted with KASAN and CONFIG_FAILSLAB enabled. The reproducer
+confines failslab injections to the __add_disk() range and injects
+fail-nth while mapping an RBD image through
+/sys/bus/rbd/add_single_major.
 
-Steps to Reproduce:
-1. echo 3 > /proc/sys/vm/drop_caches.
-2. dd if=cephfs/xxx.img of=/dev/null
-    Make sure cephfs/xxx.img is big enough to make time for us to do the
-    following command
-3. execute 'systemctl stop ceph-osd@*' on the osd nodes
-    It would be great if you have a tiny cluster. Stopping all the osds
-    would be much easier.
-4. kill -9 `pidof dd`.
-    Buffered read process must be killed at that moment. But inflight
-    read requests can be observed in the /sys/kernel/debug/ceph/xxxx/osdc
-5. umount cephfs
-    Wait for 60s if you mount cephfs by using the default mount option.
+On the unpatched kernel, fail-nth=4 reliably triggered the fault:
 
-We got the warning:
-ceph: [b2c9a006-9ad8-48e9-8257-6fb1e1b91014 66562]: umount timed out, 0
-VFS: Busy inodes after unmount of ceph (ceph)
+	Oops: general protection fault, probably for non-canonical address 0xdffffc0000000000: 0000 [#1] SMP KASAN NOPTI
+	KASAN: null-ptr-deref in range [0x0000000000000000-0x0000000000000007]
+	CPU: 0 UID: 0 PID: 273 Comm: bash Not tainted 7.0.0-01247-gd60bc1401583 #6 PREEMPT(lazy)
+	Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.15.0-1 04/01/2014
+	RIP: 0010:__blk_mq_free_map_and_rqs+0x8c/0x240
+	Code: 00 00 48 8b 6b 60 41 89 f4 49 c1 e4 03 4c 01 e5 45 85 ed 0f 85 0a 01 00 00 48 b8 00 00 00 00 00 fc ff df 48 89 e9 48 c1 e9 03 <80> 3c 01 00 0f 85 31 01 00 00 4c 8b 6d 00 4d 85 ed 0f 84 e2 00 00
+	RSP: 0018:ff1100000ab0fac8 EFLAGS: 00000246
+	RAX: dffffc0000000000 RBX: ff1100000c4806a0 RCX: 0000000000000000
+	RDX: 0000000000000002 RSI: 0000000000000000 RDI: ff1100000c4806f4
+	RBP: 0000000000000000 R08: 0000000000000001 R09: ffe21c000189001b
+	R10: ff1100000c4800df R11: ff1100006cf37be0 R12: 0000000000000000
+	R13: 0000000000000000 R14: ff1100000c480700 R15: ff1100000c480004
+	FS:  00007f0fbe8fe740(0000) GS:ff110000e5851000(0000) knlGS:0000000000000000
+	CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+	CR2: 00007fe53473b2e0 CR3: 0000000012eef000 CR4: 00000000007516f0
+	PKRU: 55555554
+	Call Trace:
+	 <TASK>
+	 blk_mq_free_tag_set+0x77/0x460
+	 do_rbd_add+0x1446/0x2b80
+	 ? __pfx_do_rbd_add+0x10/0x10
+	 ? lock_acquire+0x18c/0x300
+	 ? find_held_lock+0x2b/0x80
+	 ? sysfs_file_kobj+0xb6/0x1b0
+	 ? __pfx_sysfs_kf_write+0x10/0x10
+	 kernfs_fop_write_iter+0x2f4/0x4a0
+	 vfs_write+0x98e/0x1000
+	 ? expand_files+0x51f/0x850
+	 ? __pfx_vfs_write+0x10/0x10
+	 ksys_write+0xf2/0x1d0
+	 ? __pfx_ksys_write+0x10/0x10
+	 do_syscall_64+0x115/0x690
+	 entry_SYSCALL_64_after_hwframe+0x77/0x7f
+	RIP: 0033:0x7f0fbea15907
+	Code: 10 00 f7 d8 64 89 02 48 c7 c0 ff ff ff ff eb b7 0f 1f 00 f3 0f 1e fa 64 8b 04 25 18 00 00 00 85 c0 75 10 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 51 c3 48 83 ec 28 48 89 54 24 18 48 89 74 24
+	RSP: 002b:00007ffe22346ea8 EFLAGS: 00000246 ORIG_RAX: 0000000000000001
+	RAX: ffffffffffffffda RBX: 0000000000000058 RCX: 00007f0fbea15907
+	RDX: 0000000000000058 RSI: 0000563ace6c0ef0 RDI: 0000000000000001
+	RBP: 0000563ace6c0ef0 R08: 0000563ace6c0ef0 R09: 6b6435726d694141
+	R10: 5250337279762f78 R11: 0000000000000246 R12: 0000000000000058
+	R13: 00007f0fbeb1c780 R14: ff1100000c480700 R15: ff1100000c480004
+	 </TASK>
 
-if check_data_corruption option disable, kcompactd may stuck in the
-future. If it is eanbled, we catch the bug immediately.
+With this fix applied, rerunning the reproducer over fail-nth=1..256
+yields no KASAN reports.
 
-[94543.042953] ------------[ cut here ]------------
-[94543.049391] kernel BUG at fs/super.c:654!
-[94543.054171] Oops: invalid opcode: 0000 [#1] SMP PTI
-[94543.059881] CPU: 25 UID: 0 PID: 3451674 Comm: umount Kdump: loaded Tainted: G S         OE       7.0.0-dirty #2 PREEMPTLAZY
-[94543.072678] Tainted: [S]=CPU_OUT_OF_SPEC, [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
-[94543.080918] Hardware name: Dell Inc. PowerEdge R730xd/072T6D, BIOS 2.5.5 08/16/2017
-[94543.089755] RIP: 0010:generic_shutdown_super+0x111/0x120
-[94543.095982] Code: cc cc e8 c2 1f ef ff 48 8b bb d0 00 00 00 eb db 48 8b 43 28 48 8d b3 98 03 00 00 48 c7 c7 90 09 55 8c 48 8b 10 e8 0f c3 cc ff <0f> 0b 66 66 2e 0f 1f 84 00 00 00 00 00 66 90 90 90 90 90 90 90 90
-[94543.117607] RSP: 0018:ffffce35f8c53d40 EFLAGS: 00010246
-[94543.123793] RAX: 000000000000002d RBX: ffff8ba94d0d9000 RCX: 0000000000000000
-[94543.132125] RDX: 0000000000000000 RSI: 0000000000000001 RDI: ffff8bc0df91c600
-[94543.140460] RBP: ffffffffc13b52c0 R08: 0000000000000000 R09: ffffce35f8c53be0
-[94543.148801] R10: 0000000000000001 R11: 0000000000000001 R12: ffff8ba94af0e000
-[94543.157150] R13: ffff8ba94d0d9000 R14: 0000000000000004 R15: ffff8ba946d9a000
-[94543.165505] FS:  00007fb1c607c840(0000) GS:ffff8bc1520e4000(0000) knlGS:0000000000000000
-[94543.174943] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[94543.181769] CR2: 00000000d64e5000 CR3: 000000189c9f2002 CR4: 00000000003726f0
-[94543.190160] Call Trace:
-[94543.193317]  <TASK>
-[94543.196088]  kill_anon_super+0x12/0x40
-[94543.200719]  ceph_kill_sb+0xda/0x2c0 [ceph]
-[94543.205877]  ? radix_tree_delete_item+0x68/0xd0
-[94543.211395]  deactivate_locked_super+0x31/0xb0
-[94543.216815]  cleanup_mnt+0xcb/0x110
-[94543.221169]  task_work_run+0x58/0x80
-[94543.225629]  exit_to_user_mode_loop+0x13f/0x4d0
-[94543.231163]  do_syscall_64+0x1ef/0x840
-[94543.235827]  ? do_syscall_64+0x101/0x840
-[94543.240687]  ? do_user_addr_fault+0x20e/0x6b0
-[94543.246036]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
-[94543.252166] RIP: 0033:0x7fb1c5f0ccab
-[94543.256650] Code: 73 31 0e 00 f7 d8 64 89 01 48 83 c8 ff c3 90 f3 0f 1e fa 31 f6 e9 05 00 00 00 0f 1f 44 00 00 f3 0f 1e fa b8 a6 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 05 c3 0f 1f 40 00 48 8b 15 39 31 0e 00 f7 d8
-[94543.278690] RSP: 002b:00007ffe96f80ea8 EFLAGS: 00000246 ORIG_RAX: 00000000000000a6
-[94543.287710] RAX: 0000000000000000 RBX: 00007fb1c61fb264 RCX: 00007fb1c5f0ccab
-[94543.296251] RDX: fffffffffffffe88 RSI: 0000000000000000 RDI: 000055ae9dcc6ec0
-[94543.304801] RBP: 000055ae9dcc6c90 R08: 0000000000000000 R09: 00007ffe96f7fc50
-[94543.313358] R10: 0000000000000000 R11: 0000000000000246 R12: 0000000000000000
-[94543.321922] R13: 000055ae9dcc6ec0 R14: 000055ae9dcc6da0 R15: 0000000000000000
-
-So make it wait until all the flying requests returns for clean and safe
-umount.
-
-Fixes: 1464de9f813e ("ceph: wait for OSD requests' callbacks to finish when unmounting")
-Signed-off-by: Li Lei <lilei24@kuaishou.com>
+Fixes: 27c97abc30e2 ("rbd: add add_disk() error handling")
+Cc: stable@vger.kernel.org # 5.16+
+Signed-off-by: Zilin Guan <zilin@seu.edu.cn>
+Signed-off-by: Dawei Feng <dawei.feng@seu.edu.cn>
 ---
- fs/ceph/super.c | 11 ++++-------
- 1 file changed, 4 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 2aed6b3..48e63c1 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -1569,13 +1569,10 @@ static void ceph_kill_sb(struct super_block *s)
- 	spin_unlock(&mdsc->stopping_lock);
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index e7da06200c1e..d92730d8c342 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -7165,7 +7165,7 @@ static ssize_t do_rbd_add(const char *buf, size_t count)
  
- 	if (wait && atomic_read(&mdsc->stopping_blockers)) {
--		long timeleft = wait_for_completion_killable_timeout(
--					&mdsc->stopping_waiter,
--					fsc->client->options->mount_timeout);
--		if (!timeleft) /* timed out */
--			pr_warn_client(cl, "umount timed out, %ld\n", timeleft);
--		else if (timeleft < 0) /* killed */
--			pr_warn_client(cl, "umount was killed, %ld\n", timeleft);
-+		int rc = wait_for_completion_killable(
-+					&mdsc->stopping_waiter);
-+		if (rc < 0) /* killed */
-+			pr_warn_client(cl, "umount was killed\n");
- 	}
+ 	rc = device_add_disk(&rbd_dev->dev, rbd_dev->disk, NULL);
+ 	if (rc)
+-		goto err_out_cleanup_disk;
++		goto err_out_device_del;
  
- 	mdsc->stopping = CEPH_MDSC_STOPPING_FLUSHED;
+ 	spin_lock(&rbd_dev_list_lock);
+ 	list_add_tail(&rbd_dev->node, &rbd_dev_list);
+@@ -7179,8 +7179,8 @@ static ssize_t do_rbd_add(const char *buf, size_t count)
+ 	module_put(THIS_MODULE);
+ 	return rc;
+ 
+-err_out_cleanup_disk:
+-	rbd_free_disk(rbd_dev);
++err_out_device_del:
++	device_del(&rbd_dev->dev);
+ err_out_image_lock:
+ 	rbd_dev_image_unlock(rbd_dev);
+ 	rbd_dev_device_release(rbd_dev);
 -- 
-1.8.3.1
+2.34.1
 
