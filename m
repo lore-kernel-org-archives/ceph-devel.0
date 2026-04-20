@@ -1,226 +1,272 @@
-Received: from mail-dl1-f44.google.com (mail-dl1-f44.google.com [74.125.82.44])
+Received: from mail-dl1-f41.google.com (mail-dl1-f41.google.com [74.125.82.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E2253C3C0E
-	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 20:19:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F173339DBD3
+	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 21:10:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.41
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776716379; cv=pass; b=u9skFMJwLHkHopUY7DHdhuBk0Bl9N4t27uFflpVDwBax5Sj7PgS7XgN36RrBlZM8HNIDXNG3KlxbARP/cAg4PBLq9duzciEcNcOj/KTlx7WwzVZceCrNW2ahWMDoC+d9Lkf8X+J/5CbFc/uK1yEd/WtXlBxrz2dh/WHzEP8Q4BA=
+	t=1776719418; cv=pass; b=Jyx1eTm3fIToD9QuAJvMIR+2p8s1ZIXfWw0dvASTPUhNo6Gm072UdULCw/60CWr5KH0TOBXHf+ZATvPQfhPusLIo8HnYh5AiKwbSxLanOz+pOASHVogvx5wh40fYcw2yQV+71UYLxoEvikIM/5M7kDarY5dvcy2hxVlyPMi2IZU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776716379; c=relaxed/simple;
-	bh=n6ym533tI9X4A+vTCccKlmH4/q2ObDK27zNE5dOfzKQ=;
+	s=arc-20240116; t=1776719418; c=relaxed/simple;
+	bh=KGi8qwfITO8KGEqVE1HjpFlI1Z7Qiz0/+Lnqzx4bwKI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=RpfScP7+eyWTq6qznlodsVeW3EfEKJjTqAwhGjxfINPYmJIwHEeTAc6e8ieeknIlnNn5E5RO8aWbKmIJZtrnHVX+eE3E9Oaxad6IAvP3hVpHSa5mklG9ELJuABbeG0aA2rIXd2A+HF3b586uc75qYhqfeICY8+QrI371L0ZPGK8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C7ffKQy4; arc=pass smtp.client-ip=74.125.82.44
+	 To:Cc:Content-Type; b=ZmotSyz8eivoXmW35ajdH2Gjjh+atkTyJuK2/ljCqa/pqhxNf5xlr9RmhCjKg9/1HFF9DACvfDS13fbo5F48EOXHYpfNXfXw5j0MJMZWIjrSb7+8cJi5tQHGI45UwRUasalFmfNfio0dVpOIMYAh7s2X54/wlaQSesUWe1AGXAk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gf209aCi; arc=pass smtp.client-ip=74.125.82.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C7ffKQy4"
-Received: by mail-dl1-f44.google.com with SMTP id a92af1059eb24-12c565476d7so7358702c88.1
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 13:19:37 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1776716377; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gf209aCi"
+Received: by mail-dl1-f41.google.com with SMTP id a92af1059eb24-12713e56abdso2312217c88.1
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 14:10:16 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776719416; cv=none;
         d=google.com; s=arc-20240605;
-        b=Y4eUzLVpc+xgBGZN3I80xR/5dzM9gSN5AVcHbB/nTMIZhphB4t99992Y5JThAWnzEe
-         CqV0R5MoAXX5dNyeniSkAoOY2gNyVPoZuKu4TVA5t2mjwEVuyv5PZAMNsMzMXwdvJhkb
-         VYhjnSVBLwOh7il9h+Dw2NL54paHsZbKDiTwxkatN1TqSSncwFvgXWY/xQ4To4X1dhkI
-         r3mKEcmpzi0Frf3UViQfW5NcZkNkZH4/NRdPGQliotpOgFVeBEHkX0Q3pbshNniffuQp
-         ljy0NqPo8GF4jeeqnXtmcWJ6/LepqjWSM+cO2EV1qVUaOc8bznb7rP2ySagrWJi9WsXS
-         p0eA==
+        b=CToeh7/dZawXLIdzoEAwQh0tTdlvmcotllisbBRMg4rItd73zAsOv+81/3scVDrY1+
+         p019CP8+ZPadiPtWMX3FeDte9WZygL3S6Tt/YUspRXaUQJ+QwiJxZJEaXA4TO6/Yh6+9
+         Po4FPohKFt+cngax7NsGx/4Dr3RbjjHyezrFhruhVTreHrjZ4Jbid13di5i0kBxq50qK
+         ihzND9PpdtBVrIQwFLSyxH5e7se3xwKrgOrg/TMTpxfYZbPH7D5EZ75D1REEd/1j/V4H
+         Tcl/CC8WQ3IeGuhTH5OphNwrKPqQsKb97qUYfG4SyssLSUG4Dje0PVi/Y7zP2kbgxW2G
+         bktw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=FDLi2AIEvf/8R/CKyK1q6WR933rqVLVDLFbXt/wFzeE=;
-        fh=fTo8iPluxm5Mj2f8vmgktyLRgwhsK59Gb8MrczbkuSg=;
-        b=jvX/infkCD7B1lHUApqjN2uPzzbnszdXzgihbOdDZyuwgVXzbAW3HpG6wyjNFMEMMt
-         +7VnFkORmKMEkilktBB45ifZLo3tR22UKJ7zYnkcJlaxsQZl0f33p/Tl/o+17wHCsDHC
-         pIGlEeOPqWL5YXwSdwV8BJmcEEQbKie71MJuEIpGL+jPq17vWZenA0NDdf1v2ufzFZZc
-         P3olzCjQraup4hIx4mWmPxaNSmRTTpF/gnaBwQnCqSPXTkPkAE8Pmp2WmgQ/IWuSe7tb
-         jrLOjFCp3mMNmd9rDpU2A8aAdc3wrPVRo5dykk1RT7WEGJ5oAJyH2MGPdbVg/wO65zAV
-         3hEg==;
+        bh=eeRJ46ZCFQw+/2BgWLsLfxIGW8IGkJirlSdjexBO+J8=;
+        fh=ujeYQ2GZCQ/OpGnB8O+F/T2OE7o+Jx2cMEW4T00CP+s=;
+        b=NTiTeavzx04SsWkpeaW/BVOjDkfmPenAIAe+pHb4XNOBSFIGiGcjGA2Jbt6225wRxm
+         f6JcWN5TI1xjAxdFM4xgVf0TTUtZ7JhaeDGUkSH/FjYQrWW7DqWk4Wr2RF/6Ggd6sQ4N
+         kvyAIR30ExC95LuDAt2n166wKdHldQFFaXr2xHSCJpFJ5MOjNY1MzOgD1ynxRp6vwwss
+         XA7ckzb7xyHeO3/xcrXAJ84W75E++17bZbXIkOaFcavS8MJffE2rLR5B1pjAQJexnycv
+         ortmvJ3M2EkZHY9WjD2NeQ+lZhF3CR1qIWohCS0xFpSq8cLjChxjyNtxzp72GpN3fjRd
+         MbIA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776716377; x=1777321177; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1776719416; x=1777324216; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=FDLi2AIEvf/8R/CKyK1q6WR933rqVLVDLFbXt/wFzeE=;
-        b=C7ffKQy44m4ZxbpuAU5mPeNwWgUwzmXO7L5cLcQ72XyL9K2REzPgFaZVYwBz+Imo9k
-         3kCcUZBLYZVYwZ0E9/DXoRIQelEPss6G9vbrQ70maGYmDmAV/jeFBOwO/SAWgsW2UDO3
-         KizEnyRxHU3UiW9Yl3We4RlWSoYWmOSZw9swqb7BTN6SL3t4cHziCSVHbIqA1ALwl6EQ
-         m54g8pHAwzMnBIeOfr4ncTtxDIcixXgtbyMx31gyh/9Kd6p5mNlaYIJIQAj0W2YuJpSL
-         yquBk+tn17bSblysF2CP3Rly02NFXHdrL2R1Dishkto7BK3XtjmZxKayBx1IxhdEcYWT
-         eB5A==
+        bh=eeRJ46ZCFQw+/2BgWLsLfxIGW8IGkJirlSdjexBO+J8=;
+        b=gf209aCioJm5wg9gSWQYScrh0QRauWlSoy3+ak2WkjDZkbeFAg1ypK8ujv/qXKFZtI
+         GuAuA4OYeTvfrIckhaQvrZpvDGF9NW3vDg+ebBu1L/0WbJsNpeCWFbSjJg+VCuDjjLa7
+         3WYrqDrqMcLPoWzObmEvqeCQSLLqGvTuqxUw7OD678E0A0gBEEOzdtbs0jUJuHaSYIVm
+         bvdlWhfs+NFUeNY9g5e10aQQgbAnnp+/j3MQ/xplqDwtM+UhzuRL2GmM31LMEgUKQJ2V
+         puawXR+YEScUG6bIKBZ2rEwwAmpa2BpsX9dCmAtWaSncKsk9rQp2bzm7W5MsLm3lHlgs
+         HNSw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776716377; x=1777321177;
+        d=1e100.net; s=20251104; t=1776719416; x=1777324216;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=FDLi2AIEvf/8R/CKyK1q6WR933rqVLVDLFbXt/wFzeE=;
-        b=MZh0e5/Kq4H+toRalZk2V8dGrWhH7oc4Z0W8i3z+2ZfClvUjOTb4xpmI3PpRl8Oypw
-         3Gw0WBJKz8Er8eDU7R98KBUVFqwk8QxsyHH2oc0DXkgj8Exp3z6/01cfjgw8pI3S1nXJ
-         s8WBz6mG3Y3H1NWX4IVF1Kyqb3dH8H5VegeeghUo2ejYrO1oXA0xZoVF5pZPPF6qPhCF
-         y5Ap2I5OlhPrkCxAqGxNbYB+34OHznisb9cb4Y7oh9A0yYTS3MCsCdeGIf52JDkitogc
-         cRB1cW18B1yD8nBdm+M+Emb1hJuXiOvJbYtyTPMmYEgVmp553/XAvLjRhSg6Fq+FuC8X
-         ROSA==
-X-Forwarded-Encrypted: i=1; AFNElJ9MFgoPPDvhRZnMy8WImdS0gBRBVX9jmG45RsknpweZQ+QGpFqGJLAcprDiPAdIiBUfqvQgdwfzdjf7@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywmhr8LzDT3UDXfLBFekk8fNLq0/istUiCRgBMahbHku87TbXek
-	a4ijqx/NJl9SMueeMvMc4Pc+ECFTOWhTuEbq8E95Qdf3RE+TG7E3BhiNkRxLbhORtDSyndJUSiI
-	sPngirY50cAW4rmaSU0VBe0x65NWWAvU4qkBV
-X-Gm-Gg: AeBDiesAAZbJy9NC72drjOmpW+I1xU03ClIphgdT0RBJpoC32Wq5ExB9PDtPy6/vYzv
-	ZeWkfd2IGei6hXaq9L7jp5ed5f99zPfMsKVBSVIrCFE/FH9LRk6Ssg9bLa9mtuIC/NIAeVZVTEY
-	GzBcPIDiSQ4G5xRTe44wmwWQPZog0L/j5Jk5ixVbYvG3aY7Jnyy4odI2hHdAa4PU2UvhxPylKth
-	gF8SDRsxePqsJz+LcyGzD5lC1POteAFkPMf5nSph8hyqZ1DPsu7Gr+jZAGdSVEVuaqKErBw1xEk
-	e/FSZAHA5MQEStT8cQ==
-X-Received: by 2002:a05:7022:388f:b0:123:348d:8576 with SMTP id
- a92af1059eb24-12c73f6d905mr8911688c88.6.1776716376624; Mon, 20 Apr 2026
- 13:19:36 -0700 (PDT)
+        bh=eeRJ46ZCFQw+/2BgWLsLfxIGW8IGkJirlSdjexBO+J8=;
+        b=WG7In8jHHr5QaD5qjPlfSLZIeoqQCt/ZF3tkPOqHPb3QH9BcZ6hz8eHlpqhoYKfvIb
+         I9DR6ZeN/YgCcTYqQrHTYYcTR+HOSSQYBEenzEGswICjJjSarJV9/YlY41sc6JeeISeN
+         jt8Zu57dl5seksdv/yNTkXNAQotPvStSxZfYpE11skGGzV547ruHgoo7zhZgrSiT6tCr
+         xnX8iEVTxtiMxGg3Obb8UARz21yVv5K/01MiSye6khTBlQfNwwA4snnPfOqAIN9a06Bn
+         UJ0ANCLCl5VAt+F5u/eKB27yt+uZ5aNqXVh6Ih5zmW8goMvJX/+kSbx8tcEL16dubTPy
+         jpQw==
+X-Forwarded-Encrypted: i=1; AFNElJ+pbgDRqw53G0eb1YR+C8OpFK6ks3UzTXvgUpa80hzvpr9md4ZN2o59PmuVcKwM0xG5oyJTCwsfJ3Tu@vger.kernel.org
+X-Gm-Message-State: AOJu0YxIPEnUPaXC7YWRXa21i/Bw2NY+JH5bU91Az6B1FomDjTq/50oP
+	Ets+V3Cp8Byo/TAqf8wEoMR5iLRJujx0ICHoqCvaCd+4bVqLXwtQSyqgFERe2aSL3j03i/1NZFM
+	vGAfzbUhHC9UvmaaCH0DmFFTshZFvSYy1znyV
+X-Gm-Gg: AeBDieu3sP5q8w9C6Aj3l7gM9MrvweP7tN8bxhaqWYTk+bPPFUrYgBRscjYigqVj5l0
+	BQshZzUdO7UtUqpUzotVE+242OqpvB3yz3Paxn3DIk2T/ddNen6XQeO7L15xpGfk8n/XL1R56Qw
+	QiOmscuj/hi5yyXVdUQou4GM2eaYxpAiLCrmVHx0fqs/tF4BDQIw7LKuya5EjGvR0CNfnVU7aO4
+	KCGhXbWaDyqbB0eBslzfrK3/9gBgu+NE198TBEqcLrKI79/arfN4div0MUhGH9aQjqkQouycK4r
+	szA2FfIVYZzCqkU8/g==
+X-Received: by 2002:a05:7022:fa2:b0:129:1d25:f1da with SMTP id
+ a92af1059eb24-12c73ae91a5mr7210673c88.3.1776719415953; Mon, 20 Apr 2026
+ 14:10:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260419090348.1817082-1-dawei.feng@seu.edu.cn>
-In-Reply-To: <20260419090348.1817082-1-dawei.feng@seu.edu.cn>
+References: <4f9fdcde-f5a8-43a8-9580-6ec3402c4185@tu-ilmenau.de>
+ <20260320094154.1158656-1-raphael.zimmer@tu-ilmenau.de> <0959410fbce95fb8f5ac25de6c751421834ae923.camel@ibm.com>
+ <395ea4e1-f83c-472a-b336-fba24368e5ce@tu-ilmenau.de> <9afcc984548bfb418f3fbab64dd98f5e14ed63c0.camel@ibm.com>
+ <ec4a8bda-ca80-410f-8b97-413cf64d7f39@tu-ilmenau.de>
+In-Reply-To: <ec4a8bda-ca80-410f-8b97-413cf64d7f39@tu-ilmenau.de>
 From: Ilya Dryomov <idryomov@gmail.com>
-Date: Mon, 20 Apr 2026 22:19:24 +0200
-X-Gm-Features: AQROBzDaUIcoZgaW9hqmajL0d6VdpXPApMsC-41ShvD5oOsBEcAdne8_Gp_irWE
-Message-ID: <CAOi1vP9haWQQ5UAGuz1GrtL68Yc=w_od4a9GV8gfVoqKMyVn3Q@mail.gmail.com>
-Subject: Re: [PATCH] rbd: fix null-ptr-deref when device_add_disk() fails
-To: Dawei Feng <dawei.feng@seu.edu.cn>
-Cc: axboe@kernel.dk, dongsheng.yang@linux.dev, mcgrof@kernel.org, 
-	ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, jianhao.xu@seu.edu.cn, stable@vger.kernel.org, 
-	Zilin Guan <zilin@seu.edu.cn>
+Date: Mon, 20 Apr 2026 23:10:04 +0200
+X-Gm-Features: AQROBzD2G4qrz99GmjS7T6zDG7iTtvnCJmMarcrxAq-h2saITMleLThfNmMSVvg
+Message-ID: <CAOi1vP9TMrvTXj4W4Ve2K6BmWJDYo28mu40-h7iZCZo3b7hECg@mail.gmail.com>
+Subject: Re: [PATCH] libceph: Fix slab-out-of-bounds access in auth message processing
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, Alex Markuze <amarkuze@redhat.com>, 
+	"security@kernel.org" <security@kernel.org>, 
+	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, Apr 19, 2026 at 11:05=E2=80=AFAM Dawei Feng <dawei.feng@seu.edu.cn>=
- wrote:
+On Mon, Apr 20, 2026 at 5:45=E2=80=AFPM Raphael Zimmer
+<raphael.zimmer@tu-ilmenau.de> wrote:
 >
-> do_rbd_add() publishes the device with device_add() before calling
-> device_add_disk(). If device_add_disk() fails after device_add()
-> succeeds, the error path calls rbd_free_disk() directly and then later
-> falls through to rbd_dev_device_release(), which calls rbd_free_disk()
-> again. This double teardown can leave blk-mq cleanup operating on
-> invalid state and trigger a null-ptr-deref in
-> __blk_mq_free_map_and_rqs(), reached from blk_mq_free_tag_set().
+> On 23.03.26 7:59 PM, Viacheslav Dubeyko wrote:
+> > On Mon, 2026-03-23 at 12:39 +0100, Raphael Zimmer wrote:
+> >> On 3/20/26 7:28 PM, Viacheslav Dubeyko wrote:
+> >>> cc: ceph-devel@vger.kernel.org
+> >>>
+> >>> On Fri, 2026-03-20 at 10:41 +0100, Raphael Zimmer wrote:
+> >>>> If a (potentially corrupted) message of type CEPH_MSG_AUTH_REPLY
+> >>>> contains a positive value in its result field, it is treated as an
+> >>>> error code by ceph_handle_auth_reply() and returned to
+> >>>> handle_auth_reply(). Thereafter, an attempt is made to send the
+> >>>> preallocated message of type CEPH_MSG_AUTH, where the returned value=
+ is
+> >>>> interpreted as the size of the front segment to send. If the result
+> >>>> value in the message is greater than the size of the memory buffer
+> >>>> allocated for the front segment, an out-of-bounds access occurs, and
+> >>>> the content of the memory region beyond this buffer is sent out.
+> >>>>
+> >>>> This patch fixes the issue by first adding a check that catches a
+> >>>> positive value in the result field of the message and treats it as
+> >>>> invalid, and second comparing the len parameter of
+> >>>> __send_prepared_auth_request to front_alloc_len to prevent sending t=
+he
+> >>>> message if it exceeds the bounds of the allocation.
+> >>>>
+> >>>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> >>>> ---
+> >>>>   net/ceph/auth.c       | 5 +++++
+> >>>>   net/ceph/mon_client.c | 5 +++++
+> >>>>   2 files changed, 10 insertions(+)
+> >>>>
+> >>>> diff --git a/net/ceph/auth.c b/net/ceph/auth.c
+> >>>> index 3314705e5914..555b1fab4623 100644
+> >>>> --- a/net/ceph/auth.c
+> >>>> +++ b/net/ceph/auth.c
+> >>>> @@ -215,6 +215,11 @@ int ceph_handle_auth_reply(struct ceph_auth_cli=
+ent *ac,
+> >>>>    ceph_decode_need(&p, end, sizeof(u32) * 3 + sizeof(u64), bad);
+> >>>>    protocol =3D ceph_decode_32(&p);
+> >>>>    result =3D ceph_decode_32(&p);
+> >>>> +  if (result > 0) {
+> >>>
+> >>> Frankly speaking, it's hard to follow how this is correct without pro=
+tocol
+> >>> knowledge. Do we have any declarations of result possible values? Pro=
+bably, we
+> >>> need to have some comment that explain the situation in more details =
+here?
+> >>>
+> >>
+> >> Yes, it would be good to have an exact protocol specification. From wh=
+at
+> >> I can see in the code, the result value is either 0 for success or a
+> >> negative Linux error code. Therefore, a positive value here would alwa=
+ys
+> >> indicate a malformed message. But maybe you know more?
+> >
+> > I would like to hear what Ilya can share here. :) He should know more. =
+The
+> > result > 0 looks not obvious to me. This is why I believe that, at mini=
+mum, some
+> > comments should make the code more easier to follow.
+> >
 >
-> Fix this by following the normal remove ordering: call device_del()
-> before rbd_dev_device_release() when device_add_disk() fails after
-> device_add(). That keeps the teardown sequence consistent and avoids
-> re-entering disk cleanup through the wrong path.
->
-> The bug was first flagged by an experimental analysis tool we are
-> developing for kernel memory-management bugs while analyzing
-> v6.13-rc1. The tool is still under development and is not yet publicly
-> available.
->
-> We reproduced the bug on v7.0 with a real Ceph backend and a QEMU x86_64
-> guest booted with KASAN and CONFIG_FAILSLAB enabled. The reproducer
-> confines failslab injections to the __add_disk() range and injects
-> fail-nth while mapping an RBD image through
-> /sys/bus/rbd/add_single_major.
->
-> On the unpatched kernel, fail-nth=3D4 reliably triggered the fault:
->
->         Oops: general protection fault, probably for non-canonical addres=
-s 0xdffffc0000000000: 0000 [#1] SMP KASAN NOPTI
->         KASAN: null-ptr-deref in range [0x0000000000000000-0x000000000000=
-0007]
->         CPU: 0 UID: 0 PID: 273 Comm: bash Not tainted 7.0.0-01247-gd60bc1=
-401583 #6 PREEMPT(lazy)
->         Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.15.0-1=
- 04/01/2014
->         RIP: 0010:__blk_mq_free_map_and_rqs+0x8c/0x240
->         Code: 00 00 48 8b 6b 60 41 89 f4 49 c1 e4 03 4c 01 e5 45 85 ed 0f=
- 85 0a 01 00 00 48 b8 00 00 00 00 00 fc ff df 48 89 e9 48 c1 e9 03 <80> 3c =
-01 00 0f 85 31 01 00 00 4c 8b 6d 00 4d 85 ed 0f 84 e2 00 00
->         RSP: 0018:ff1100000ab0fac8 EFLAGS: 00000246
->         RAX: dffffc0000000000 RBX: ff1100000c4806a0 RCX: 0000000000000000
->         RDX: 0000000000000002 RSI: 0000000000000000 RDI: ff1100000c4806f4
->         RBP: 0000000000000000 R08: 0000000000000001 R09: ffe21c000189001b
->         R10: ff1100000c4800df R11: ff1100006cf37be0 R12: 0000000000000000
->         R13: 0000000000000000 R14: ff1100000c480700 R15: ff1100000c480004
->         FS:  00007f0fbe8fe740(0000) GS:ff110000e5851000(0000) knlGS:00000=
-00000000000
->         CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
->         CR2: 00007fe53473b2e0 CR3: 0000000012eef000 CR4: 00000000007516f0
->         PKRU: 55555554
->         Call Trace:
->          <TASK>
->          blk_mq_free_tag_set+0x77/0x460
->          do_rbd_add+0x1446/0x2b80
->          ? __pfx_do_rbd_add+0x10/0x10
->          ? lock_acquire+0x18c/0x300
->          ? find_held_lock+0x2b/0x80
->          ? sysfs_file_kobj+0xb6/0x1b0
->          ? __pfx_sysfs_kf_write+0x10/0x10
->          kernfs_fop_write_iter+0x2f4/0x4a0
->          vfs_write+0x98e/0x1000
->          ? expand_files+0x51f/0x850
->          ? __pfx_vfs_write+0x10/0x10
->          ksys_write+0xf2/0x1d0
->          ? __pfx_ksys_write+0x10/0x10
->          do_syscall_64+0x115/0x690
->          entry_SYSCALL_64_after_hwframe+0x77/0x7f
->         RIP: 0033:0x7f0fbea15907
->         Code: 10 00 f7 d8 64 89 02 48 c7 c0 ff ff ff ff eb b7 0f 1f 00 f3=
- 0f 1e fa 64 8b 04 25 18 00 00 00 85 c0 75 10 b8 01 00 00 00 0f 05 <48> 3d =
-00 f0 ff ff 77 51 c3 48 83 ec 28 48 89 54 24 18 48 89 74 24
->         RSP: 002b:00007ffe22346ea8 EFLAGS: 00000246 ORIG_RAX: 00000000000=
-00001
->         RAX: ffffffffffffffda RBX: 0000000000000058 RCX: 00007f0fbea15907
->         RDX: 0000000000000058 RSI: 0000563ace6c0ef0 RDI: 0000000000000001
->         RBP: 0000563ace6c0ef0 R08: 0000563ace6c0ef0 R09: 6b6435726d694141
->         R10: 5250337279762f78 R11: 0000000000000246 R12: 0000000000000058
->         R13: 00007f0fbeb1c780 R14: ff1100000c480700 R15: ff1100000c480004
->          </TASK>
->
-> With this fix applied, rerunning the reproducer over fail-nth=3D1..256
-> yields no KASAN reports.
->
-> Fixes: 27c97abc30e2 ("rbd: add add_disk() error handling")
-> Cc: stable@vger.kernel.org # 5.16+
-> Signed-off-by: Zilin Guan <zilin@seu.edu.cn>
-> Signed-off-by: Dawei Feng <dawei.feng@seu.edu.cn>
-> ---
->  drivers/block/rbd.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index e7da06200c1e..d92730d8c342 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -7165,7 +7165,7 @@ static ssize_t do_rbd_add(const char *buf, size_t c=
-ount)
->
->         rc =3D device_add_disk(&rbd_dev->dev, rbd_dev->disk, NULL);
->         if (rc)
-> -               goto err_out_cleanup_disk;
-> +               goto err_out_device_del;
->
->         spin_lock(&rbd_dev_list_lock);
->         list_add_tail(&rbd_dev->node, &rbd_dev_list);
-> @@ -7179,8 +7179,8 @@ static ssize_t do_rbd_add(const char *buf, size_t c=
-ount)
->         module_put(THIS_MODULE);
->         return rc;
->
-> -err_out_cleanup_disk:
-> -       rbd_free_disk(rbd_dev);
-> +err_out_device_del:
-> +       device_del(&rbd_dev->dev);
->  err_out_image_lock:
->         rbd_dev_image_unlock(rbd_dev);
->         rbd_dev_device_release(rbd_dev);
-> --
-> 2.34.1
->
+> Hi,
+> is there any update on this by now? Did you hear anything from Ilya?
+> I don't think that it's good to have this disclosed but not fixed for a
+> long time.
 
-Applied.
+Hi Raphael,
+
+I'd actually suggest treating result > 0 the same as result =3D=3D 0 for
+consistency with CephxClientHandler::handle_response() in userspace.
+I think this would mean adjusting
+
+    if (result) {
+            pr_err("auth protocol '%s' mauth authentication failed: %d\n",
+                   ceph_auth_proto_name(ac->protocol), result);
+
+to
+
+    if (result < 0) {
+            pr_err("auth protocol '%s' mauth authentication failed: %d\n",
+                   ceph_auth_proto_name(ac->protocol), result);
+
+instead of adding a new check.
+
+For the __send_prepared_auth_request() bit, I'd go with a BUG_ON
+because all "legit" callers should respect monc->m_auth->front_alloc_len
+when composing the auth request buffer.  The only way to get there with
+len > monc->m_auth->front_alloc_len should be a memory corruption or an
+unsanitized input issue of the kind of that you have discovered and
+there is no point in trying to sweep it under the rug at that point.
 
 Thanks,
 
                 Ilya
+
+>
+> Best regards,
+> Raphael
+>
+> >>
+> >>>> +          pr_err("unexpected result code in auth msg\n");
+> >>>> +          ret =3D -EINVAL;
+> >>>> +          goto out;
+> >>>
+> >>> Maybe, do you need jump to bad?
+> >>>
+> >>
+> >> No, Ilya recently mentioned that this is intended for classic decoding
+> >> errors. Here, a more specific error message should be emitted.
+> >
+> > OK.
+> >
+> >>
+> >>>> +  }
+> >>>>    global_id =3D ceph_decode_64(&p);
+> >>>>    payload_len =3D ceph_decode_32(&p);
+> >>>>    ceph_decode_need(&p, end, payload_len, bad);
+> >>>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> >>>> index d5080530ce0c..7206db5f7695 100644
+> >>>> --- a/net/ceph/mon_client.c
+> >>>> +++ b/net/ceph/mon_client.c
+> >>>> @@ -174,6 +174,11 @@ int ceph_monmap_contains(struct ceph_monmap *m,=
+ struct ceph_entity_addr *addr)
+> >>>>    */
+> >>>>   static void __send_prepared_auth_request(struct ceph_mon_client *m=
+onc, int len)
+> >>>>   {
+> >>>> +  if (len > monc->m_auth->front_alloc_len) {
+> >>>> +          pr_err("sending auth request failed, because len: %d exce=
+eds allocation size: %d\n",
+> >>>> +                  len, monc->m_auth->front_alloc_len);
+> >>>
+> >>> Is it proper place for this check? It looks like we fail to send some=
+thing and
+> >>> execution flow has no idea that we failed. Yes, system log will recei=
+ve the
+> >>> error message but the rest of the logic will continue business as usu=
+al. Maybe,
+> >>> you are right but is it not to late to simply complain here?
+> >>>
+> >>> And if we don't send the request, then could it affect the whole func=
+tionality?
+> >>> Could we introduce a race condition or deadlock here?
+> >>>
+> >>> Thanks,
+> >>> Slava.
+> >>>
+> >>
+> >> This check should never be true. It is just a common place where a
+> >> severe data leakage can be prevented if anything went wrong before,
+> >> because m_auth->front.iov_len is modified there. This would prevent
+> >> another bug like this if the logic before was flawed. To fix the curre=
+nt
+> >> vulnerability, it is not absolutely necessary to have this.
+> >>
+> >> Maybe an assertion like a BUG_ON is also fine here. Otherwise, the
+> >> handling of this function would most likely have to be changed at
+> >> multiple places.
+> >
+> > Maybe, BUG_ON() looks like more proper solution if we should not be her=
+e for
+> > such case.
+> >
+> > Thanks,
+> > Slava.
+> >
+>
