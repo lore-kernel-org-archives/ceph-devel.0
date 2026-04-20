@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2CAE303A0A
-	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 08:37:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 09A5C38C401
+	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 08:37:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776674250; cv=none; b=pYb0LmsLhwPWw0rcxsh9JSwQ0mhGjAhJNZGFeuvtvSyRZW5EamTF0MH0QyLZjDgpnEutB3z/IW62KWZrUKtb9HlplB6Ti7/koHnB1cgYoeFUPeru9IVtUbvs3hTF2t9zhAVc/ud1b9j76qusPSpDB4MCFIxYcZPN83tc/TsNaGc=
+	t=1776674254; cv=none; b=dRsy961vtOPdIlOowvaQY4ArGszIQ4nAxGosHQ8U7t4l55+AOT1s/humx/JsJ/ErgfNknBtcgW4pR27Ya+W1jRcxwOr0Sp2O2oM3t3AsnGtxVD39BU0dBHHt+JYLCjXo8Tm4o2zELJ2ToPBJi4afJZjwreXJ+yV2xi6ylrPFMlY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776674250; c=relaxed/simple;
-	bh=JE6CsI55nIe/za2bQ2wM//e11Vro+GT7jie6/v4Wuw4=;
+	s=arc-20240116; t=1776674254; c=relaxed/simple;
+	bh=rNCuGEe+cUkbJVv0l2fZwrYWlgVSaWB6ya+QriIWRmU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=KWWtWqquWKiZuGoSWeautUG8hEA4c5ezh3F1ZZJC0dbl+qMkCiZS9/UKcgTjsjlvsZy4IpIwn9DorFkq7PqWYLAf8E5RSaNpwKqRu7K+yxsq/iX1Edb1PMGAdZUofa67Vh0VsA3zZBPYRxXUbl+/8Iz1ENlPsMyd0abGHQfaV8g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Pc24WgQj; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=pvXhi+/NEkI5fT+HTYfZHznpcmD8tAFNqt5hgddO/0NglYEV7VsQqmUBPpkBsOXCvoPlI+zsigliLBoMiTjxY4ZkyjRWGZ5f7D06ALI8Wg2z60V6zIOKmhES7AuADvRShNWM6Rar4GUltILzVOxcuHvm4gZ6lYowTxPo+NB7QuY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CjqUElnd; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Pc24WgQj"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CjqUElnd"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1776674247;
+	s=mimecast20190719; t=1776674252;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=ksxJg5s1e4rqCiU0anjwW0Drg+bXTRaHFQWcy6sTuKQ=;
-	b=Pc24WgQjc97vDbVh0toIokipkF7/8X/fmpAo8koW4cvqDUSGtoeoxN+LCYGGGftR3mhRJH
-	ObRcnBsQpyORy1F5N2QCgBkg0QD4gM01rRWQIbmkLkF+ISaPS78+b5/BJych3nEpvV7p/C
-	GxCmSamJ/0ApdxHKBwXoHmqtSL2f8f4=
-Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
+	bh=oYjLbr3bROmxtkNCAMr+RVTMxNJEUY0LOnKnAfK28Pw=;
+	b=CjqUElndoLEL3y4XPsJVNKOqOiHFIuCpmzLxcWy53va6gHoM9Bb879yUZA2K7UFGrwUCaL
+	AR4039SARiKCp7QUA3vhV5Xm3TFC47lEK4BlQcmNHutir6jEKFL/PMEDBcTBLTdGNxq7Be
+	LUUWNxmxqV8rzoQm8LAOgvHRU1iZTLc=
+Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-332-tjVoit6wNru8srkOeHIZeQ-1; Mon,
- 20 Apr 2026 04:37:21 -0400
-X-MC-Unique: tjVoit6wNru8srkOeHIZeQ-1
-X-Mimecast-MFC-AGG-ID: tjVoit6wNru8srkOeHIZeQ_1776674239
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-659-v2fYY0HbOlOf4XvvOzKBmg-1; Mon,
+ 20 Apr 2026 04:37:27 -0400
+X-MC-Unique: v2fYY0HbOlOf4XvvOzKBmg-1
+X-Mimecast-MFC-AGG-ID: v2fYY0HbOlOf4XvvOzKBmg_1776674245
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 83B9018005A8;
-	Mon, 20 Apr 2026 08:37:19 +0000 (UTC)
+	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id DBBC4180034D;
+	Mon, 20 Apr 2026 08:37:24 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.48.17])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 247B3195608E;
-	Mon, 20 Apr 2026 08:37:14 +0000 (UTC)
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 4C5973000C15;
+	Mon, 20 Apr 2026 08:37:20 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -52,11 +52,10 @@ Cc: David Howells <dhowells@redhat.com>,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	Steve French <sfrench@samba.org>,
 	Matthew Wilcox <willy@infradead.org>
-Subject: [PATCH 01/11] netfs: Fix early put of sink folio in netfs_read_gaps()
-Date: Mon, 20 Apr 2026 09:36:52 +0100
-Message-ID: <20260420083705.1009074-2-dhowells@redhat.com>
+Subject: [PATCH 02/11] netfs: Fix leak of request in netfs_write_begin() error handling
+Date: Mon, 20 Apr 2026 09:36:53 +0100
+Message-ID: <20260420083705.1009074-3-dhowells@redhat.com>
 In-Reply-To: <20260420083705.1009074-1-dhowells@redhat.com>
 References: <20260420083705.1009074-1-dhowells@redhat.com>
 Precedence: bulk
@@ -66,72 +65,33 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-Fix netfs_read_gaps() to release the sink page it uses after waiting for
-the request to complete.  The way the sink page is used is that an
-ITER_BVEC-class iterator is created that has the gaps from the target folio
-at either end, but has the sink page tiled over the middle so that a single
-read op can fill in both gaps.
+Fix netfs_write_begin() to not leak our ref on the request in the event
+that we get an error from netfs_wait_for_read().
 
-The bug was found by KASAN detecting a UAF on the generic/075 xfstest in
-the cifsd kernel thread that handles reception of data from the TCP socket:
-
- BUG: KASAN: use-after-free in _copy_to_iter+0x48a/0xa20
- Write of size 885 at addr ffff888107f92000 by task cifsd/1285
- CPU: 2 UID: 0 PID: 1285 Comm: cifsd Not tainted 7.0.0 #6 PREEMPT(lazy)
- Call Trace:
-  dump_stack_lvl+0x5d/0x80
-  print_report+0x17f/0x4f1
-  kasan_report+0x100/0x1e0
-  kasan_check_range+0x10f/0x1e0
-  __asan_memcpy+0x3c/0x60
-  _copy_to_iter+0x48a/0xa20
-  __skb_datagram_iter+0x2c9/0x430
-  skb_copy_datagram_iter+0x6e/0x160
-  tcp_recvmsg_locked+0xce0/0x1130
-  tcp_recvmsg+0xeb/0x300
-  inet_recvmsg+0xcf/0x3a0
-  sock_recvmsg+0xea/0x100
-  cifs_readv_from_socket+0x3a6/0x4d0 [cifs]
-  cifs_read_iter_from_socket+0xdd/0x130 [cifs]
-  cifs_readv_receive+0xaad/0xb10 [cifs]
-  cifs_demultiplex_thread+0x1148/0x1740 [cifs]
-  kthread+0x1cf/0x210
-
-Fixes: ee4cdf7ba857 ("netfs: Speed up buffered reading")
-Reported-by: Steve French <sfrench@samba.org>
+Fixes: 4090b31422a6 ("netfs: Add a function to consolidate beginning a read")
+Closes: https://sashiko.dev/#/patchset/20260414082004.3756080-1-dhowells%40redhat.com
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Paulo Alcantara <pc@manguebit.org>
 cc: Matthew Wilcox <willy@infradead.org>
 cc: netfs@lists.linux.dev
 cc: linux-fsdevel@vger.kernel.org
 ---
- fs/netfs/buffered_read.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ fs/netfs/buffered_read.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
-index c23173a061e8..dc50690fdd44 100644
+index dc50690fdd44..51caad535438 100644
 --- a/fs/netfs/buffered_read.c
 +++ b/fs/netfs/buffered_read.c
-@@ -459,9 +459,6 @@ static int netfs_read_gaps(struct file *file, struct folio *folio)
- 
+@@ -688,7 +688,7 @@ int netfs_write_begin(struct netfs_inode *ctx,
  	netfs_read_to_pagecache(rreq, NULL);
- 
--	if (sink)
--		folio_put(sink);
--
  	ret = netfs_wait_for_read(rreq);
- 	if (ret >= 0) {
- 		folio_detach_private(folio);
-@@ -471,6 +468,9 @@ static int netfs_read_gaps(struct file *file, struct folio *folio)
- 		flush_dcache_folio(folio);
- 		folio_mark_uptodate(folio);
- 	}
-+
-+	if (sink)
-+		folio_put(sink);
- 	folio_unlock(folio);
+ 	if (ret < 0)
+-		goto error;
++		goto error_put;
  	netfs_put_request(rreq, netfs_rreq_trace_put_return);
- 	return ret < 0 ? ret : 0;
+ 
+ have_folio:
 
