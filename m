@@ -1,170 +1,212 @@
-Received: from mail-vk1-f174.google.com (mail-vk1-f174.google.com [209.85.221.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F2D83AB289
-	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 14:31:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.174
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776695496; cv=pass; b=d5UfI0AZQBNs/wIVorVMeLYqhNn52pQjoqqfVe5aSJkLyrq8IChMotl4U2OHGAchJeahUds4cIAYEgzKuo59UFKRzDS2eoIdY758qHXIF2fDtkWmj7QZRjL2wxykM9vmI4ROIv7HAJdgVkI9ZuwgRqJAaQIxGnH4Badg10NUglA=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776695496; c=relaxed/simple;
-	bh=kqPRzU1r8Upp5TYgefpiWZ9RVnkrVKI+N7GY819VmUg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=eFXcJhOm/+2N0UBabcvd7/sAfTBRd/k5qwdc0OqN4Alot6YxDuUFpAxPkXFIkSc0SBGXUz4/iUtIpxEdbJCeOQGua9FILbK/34kR7DFaFVDJZFQ3qCDQwV2j0pS8LyI55GsjqW7YnZtlTXWxsgwosxojGH3o+DDDl2IrKLyPJR0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EhQanICp; arc=pass smtp.client-ip=209.85.221.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C26B23382DE
+	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 15:46:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776700023; cv=none; b=iXDwn2vRRKAZswMGsoEudYvf41N1r8IWaIF/xi4mJL1ecZClE4JxJyLBdnp8WyerMPwlWV/3VUukcytZiIxfAW6Xj2CxLDzkBHfGSWuP5ZlRCM6bOzkfBjpO9HGuFDit6d3BbJK16FQn4A9xkrdW0nIbRGFDk13xwDmBvunu2hg=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776700023; c=relaxed/simple;
+	bh=ACW6tz8sxKXMIV6vEgQpLcbjRoFpwTaSwJJk4RAqXjc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=kWTTyR14yjpFkEIER+oAlCs+JUH7/voInsIOR6Ml4WNVEXWK+gQQr9Ej/JMIvxlWr4HSKnyEUBQ5gDBmXxS38BOQub1hBd4isbiU7G1tGjE6suBl7pS4MIXZaCWKpzslg+HhSMVTzpu3Vk7R5xu2w9PstLxkO5MWhaNhJnYlX/M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=lXAEKHPx; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EhQanICp"
-Received: by mail-vk1-f174.google.com with SMTP id 71dfb90a1353d-5675d609621so2390905e0c.2
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 07:31:35 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1776695494; cv=none;
-        d=google.com; s=arc-20240605;
-        b=Aoacm9IcISHyF3iPY/qMESNBRCsygQF1qO16uLWdYyOk4hRP0hjBICQUOrbibzTUpJ
-         P6Xus3d3k5XMEEGeuITHd9cji29mM9kr1sVJ1az2dakrbwT4rH6WjRevxDid7S1DfNpm
-         lBvZYXhQdIO8HXHF/gNI+w/T5pauFqGe0zFea1E/NVUdSx10W7RBztc/RHB+CQGw/L6u
-         cGyNI8HGVqSn5eaX56nHKWRwVzZqSYPXjoPExqyTv4/0IQ3UywI94x89tqgbYljYdRW+
-         djkAKiQXtb2gvUFOF++HHeJlWFLlDn08x2q/O0ooGo/RCWp0ZbKtHxmOSZJIH27na6n4
-         qVpQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=4O8Xd8WCONGvKBMRsNl+HFLA/9jUjeJYvKk/a3SZv7Q=;
-        fh=a0t7O4/8KEKvuFqF/6jRKvyjqpkOvlOircN9+wIt2ks=;
-        b=FlOGCwXci+3uNYR2zamWolVmxzirfomeUoa0jQAwrrPFeWNZg2qU3jqxrEfk+6RII2
-         lDfTpNot1tNnZ2m4JO7fWxRsKKq3qhyeJfF3w9ToJWeBoI+FSQqgOtg5+pNrzHoppTKZ
-         BKZlHzx3Mo/Jhjmoqk5HEk2amXoA5Mm4Kn0jzjVCjJwd3ESpu/VXGgyFbnWVSWXcsVlP
-         SWymy1hEND3FZ08URBprVsFciSydjcHUh6K7wEyLq4CVUKyQwAxzshdWUmHOFkBsXcfZ
-         RW5VERB+Al3RiI0D0R87f9felyg5COqeTh4eoxn4qmR+5LClGVzuDUYSxb5uiHFrodCC
-         2Lww==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776695494; x=1777300294; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=4O8Xd8WCONGvKBMRsNl+HFLA/9jUjeJYvKk/a3SZv7Q=;
-        b=EhQanICpPv6wEMAT2QVDm8MgxITvcGEAYHe1m42iLSyMQj1Y0WareKAEFrCkR4fDyS
-         SPGbqqTXwePHWW8p/f+2UlF/X2ihrUtbg8fbhtFxe6Qkqi2/QsyMkbJOzqro8eqXQAMl
-         WcTOuWJXsUbOkZXsn0mFPAAJhM+mIGkIVvCxhoXQub2kbpvG2XE+6iWz+07ORoIJhtIs
-         ClD0K9/EMLGHnjeD7QhTdYd1UAPBisbBisjidOI06FRByUtkXvWoSYx8MVyVgkzYR17D
-         5S+1XoMelyZ02D7ZT3mCabthO4VIPjJuimT5uUTlee+2Q1h9TgB0nS+/3YwCJhdIarG8
-         Pp/w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776695494; x=1777300294;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=4O8Xd8WCONGvKBMRsNl+HFLA/9jUjeJYvKk/a3SZv7Q=;
-        b=d0YfWg0rscqM+bUa16jYdlos9qY1kcZeVdAVnCzi8wWj0ZFTbRfPVFyu0THnCHiJxi
-         p/un1pgjPlChC7RCXTHuNe55QCF+W4nTvqLbrI/THscqVzogPmy9Z9pMpQF+k5F6Y/oI
-         +GIisQBfN4t1CyNr8S4JTGgHk+SX1+MpAQqq9JuJuZI0AmgAozOQjPXN8aG296B0oTW4
-         QMlusQw3MoUTt+ZFDhE0yfZZHWNVwgGokYQoesyxIBVVCsMYZ2GegHKnkIaMrFJT0HeS
-         NO/LmmhHrAopQje4d7rvMmqdRrvV+PHjWXa845jT66xqvJ6+3lOkBMR+K4pI+EyPOIyf
-         Id+g==
-X-Forwarded-Encrypted: i=1; AFNElJ+8rzMrMxE+kxFdUEPOPDhVHsGycPVBg1U4RELx2Cg8+oa7B5wF5FskM5FC5LZdevJANIDXakHTO3oR@vger.kernel.org
-X-Gm-Message-State: AOJu0YwRg286vofBfgEIihXxQCmJbcfnlB9TvCBDdPlSlEovmUn8RWQb
-	wGWCQ+wetCB4eAu/3bNeWwkq56jZzzYtBWn9101ZWG0RVuNhys69Aqiqi4P65htDS4z8xVSfjPB
-	95ERuGICtGuk/HRSO8tHHbdkE91+ka9Y=
-X-Gm-Gg: AeBDieuHfLGei6CQegFJZeAkeo/Pou4DX8V+wwV6PaWrBYA7EFFQ6A57XqxhlsPuZ6S
-	HqXroOwITxqPqGofnpIlhhHfzEC3p0kjA6Sdordp+IFCm6NGO2XXx9ftXrhGr+p5EbXeKV31z4y
-	v1c6E6fJFjaMfCnJXMna5RmZ9IlsOz4voIk9houjlDqm5yFMxnxVOmKdvApbOiY0ufhTCnBNN2B
-	FJaJeFHu5EOvZM7yfozGoL4xfuJpqzY114f4h9z3MVnGwHCeggBHpoz074fNCgzxGmtFUgcSBGT
-	W2iGUYfZUzEjTsMXisCKCOt5ZT7fkaT8r+/gYZ1oPq2Z+AJrq7AW
-X-Received: by 2002:a05:6122:4d12:b0:56f:9512:145 with SMTP id
- 71dfb90a1353d-56fa5a39aa7mr6593038e0c.13.1776695494119; Mon, 20 Apr 2026
- 07:31:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="lXAEKHPx"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1776699928; h=message-id
+ : date : mime-version : subject : to : cc : references : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=ACW6tz8sxKXMIV6vEgQpLcbjRoFpwTaSwJJk4RAqXjc=;
+ b=lXAEKHPxQsasBP6b+k7vGF19pXXDNdSZ38S9xsIJbiHhb93R6s1Q2WY6nUlTiMWEP6HI+
+ pRfFAxm7FWqjFp0gaRT/gqBdDPwCx3GIya9NKfPWsc5tItAV9DSaasodREYQ07ebDRwKlwo
+ V5R729frzbzZhSt4yH6m6w1bxUmxKJqAexLwKzQVUF8mQ4pCxjG/fbtafEwv4D2crKC5Tok
+ Utug/VXrEuDwiJ5M0J4nTcWmA/0gOkoobREboeKojPqiKwzebLgGsS3eYmppLWiiPU8Oaag
+ vxaawcOYoTXHTEzzcQjdtmhS/D2LMq3dqos210SdLvDIIRIxd0NOYJd0VD+w==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 885F35FCDF;
+	Mon, 20 Apr 2026 17:45:28 +0200 (CEST)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 641C45FA96;
+	Mon, 20 Apr 2026 17:45:28 +0200 (CEST)
+Message-ID: <ec4a8bda-ca80-410f-8b97-413cf64d7f39@tu-ilmenau.de>
+Date: Mon, 20 Apr 2026 17:45:28 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260328172314.45807-1-dorjoychy111@gmail.com>
- <20260416-abgraben-seeweg-a44ce660957f@brauner> <CAFfO_h5mORm0OuK-d4thzBWWySmyvLSVeVa7phZc4Df-8D=1Cg@mail.gmail.com>
- <20260420-laufen-einzeln-4cf4bb364a5d@brauner>
-In-Reply-To: <20260420-laufen-einzeln-4cf4bb364a5d@brauner>
-From: Dorjoy Chowdhury <dorjoychy111@gmail.com>
-Date: Mon, 20 Apr 2026 20:31:23 +0600
-X-Gm-Features: AQROBzDP8Lx2bqkiL-O80tZkD0rFOUG8sjvNKKIkhcPgFqdc6FHkIJDo6D1Xn7k
-Message-ID: <CAFfO_h5FH36eqYuuoYy2eVRXGytmQHLfz5p7fLi+3wHmQN9MnA@mail.gmail.com>
-Subject: Re: [PATCH v6 0/4] OPENAT2_REGULAR flag support for openat2
-To: Christian Brauner <brauner@kernel.org>
-Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-api@vger.kernel.org, ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, 
-	linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, 
-	linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, jack@suse.cz, 
-	jlayton@kernel.org, chuck.lever@oracle.com, alex.aring@gmail.com, 
-	arnd@arndb.de, adilger@dilger.ca, mjguzik@gmail.com, smfrench@gmail.com, 
-	richard.henderson@linaro.org, mattst88@gmail.com, linmag7@gmail.com, 
-	tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com, 
-	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, idryomov@gmail.com, 
-	amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, 
-	trondmy@kernel.org, anna@kernel.org, sfrench@samba.org, pc@manguebit.org, 
-	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, 
-	bharathsm@microsoft.com, shuah@kernel.org, miklos@szeredi.hu, 
-	hansg@kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] libceph: Fix slab-out-of-bounds access in auth message
+ processing
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+ "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: "security@kernel.org" <security@kernel.org>,
+ "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+References: <4f9fdcde-f5a8-43a8-9580-6ec3402c4185@tu-ilmenau.de>
+ <20260320094154.1158656-1-raphael.zimmer@tu-ilmenau.de>
+ <0959410fbce95fb8f5ac25de6c751421834ae923.camel@ibm.com>
+ <395ea4e1-f83c-472a-b336-fba24368e5ce@tu-ilmenau.de>
+ <9afcc984548bfb418f3fbab64dd98f5e14ed63c0.camel@ibm.com>
+Content-Language: en-US
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
+ 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
+In-Reply-To: <9afcc984548bfb418f3fbab64dd98f5e14ed63c0.camel@ibm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Mon, Apr 20, 2026 at 7:20=E2=80=AFPM Christian Brauner <brauner@kernel.o=
-rg> wrote:
->
-> On Thu, Apr 16, 2026 at 09:22:03PM +0600, Dorjoy Chowdhury wrote:
-> > On Thu, Apr 16, 2026 at 7:07=E2=80=AFPM Christian Brauner <brauner@kern=
-el.org> wrote:
-> > >
-> > > On Sat, 28 Mar 2026 23:22:21 +0600, Dorjoy Chowdhury wrote:
-> > > > I came upon this "Ability to only open regular files" uapi feature =
-suggestion
-> > > > from https://uapi-group.org/kernel-features/#ability-to-only-open-r=
-egular-files
-> > > > and thought it would be something I could do as a first patch and g=
-et to
-> > > > know the kernel code a bit better.
-> > > >
-> > > > The following filesystems have been tested by building and booting =
-the kernel
-> > > > x86 bzImage in a Fedora 43 VM in QEMU. I have tested with OPENAT2_R=
-EGULAR that
-> > > > regular files can be successfully opened and non-regular files (dir=
-ectory, fifo etc)
-> > > > return -EFTYPE.
-> > > > - btrfs
-> > > > - NFS (loopback)
-> > > > - SMB (loopback)
-> > > >
-> > > > [...]
-> > >
-> > > - I've added an explanation why OPENAT2_REGULAR is only needed for so=
-me
-> > >   ->atomic_open() implementers but not others. What I don't like is t=
-hat
-> > >   we need all that custom handling in there but it's managable.
-> > >
-> > > - I dropped the topmost style conversions. They really don't belong
-> > >   there and if we switch to something better we should use (1 << <nr>=
-).
-> > >
-> > > - I split the EFTYPE errno introduction into a separate patch.
-> > >
-> > > ---
-> >
-> > Thanks for fixing up and picking this one up!
-> >
-> > >
-> > > Applied to the vfs-7.2.openat.regular branch of the vfs/vfs.git tree.
-> > > Patches in the vfs-7.2.openat.regular branch should appear in linux-n=
-ext soon.
-> > >
-> >
-> > I don't see a vfs-7.2.openat.regular branch in vfs/vfs.git tree in
-> > git.kernel.org.  Maybe this hasn't been pushed yet?
->
-> Nothing will get pushed prior to -rc1 which is due this Sunday.
+On 23.03.26 7:59 PM, Viacheslav Dubeyko wrote:
+> On Mon, 2026-03-23 at 12:39 +0100, Raphael Zimmer wrote:
+>> On 3/20/26 7:28 PM, Viacheslav Dubeyko wrote:
+>>> cc: ceph-devel@vger.kernel.org
+>>>
+>>> On Fri, 2026-03-20 at 10:41 +0100, Raphael Zimmer wrote:
+>>>> If a (potentially corrupted) message of type CEPH_MSG_AUTH_REPLY
+>>>> contains a positive value in its result field, it is treated as an
+>>>> error code by ceph_handle_auth_reply() and returned to
+>>>> handle_auth_reply(). Thereafter, an attempt is made to send the
+>>>> preallocated message of type CEPH_MSG_AUTH, where the returned value is
+>>>> interpreted as the size of the front segment to send. If the result
+>>>> value in the message is greater than the size of the memory buffer
+>>>> allocated for the front segment, an out-of-bounds access occurs, and
+>>>> the content of the memory region beyond this buffer is sent out.
+>>>>
+>>>> This patch fixes the issue by first adding a check that catches a
+>>>> positive value in the result field of the message and treats it as
+>>>> invalid, and second comparing the len parameter of
+>>>> __send_prepared_auth_request to front_alloc_len to prevent sending the
+>>>> message if it exceeds the bounds of the allocation.
+>>>>
+>>>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+>>>> ---
+>>>>   net/ceph/auth.c       | 5 +++++
+>>>>   net/ceph/mon_client.c | 5 +++++
+>>>>   2 files changed, 10 insertions(+)
+>>>>
+>>>> diff --git a/net/ceph/auth.c b/net/ceph/auth.c
+>>>> index 3314705e5914..555b1fab4623 100644
+>>>> --- a/net/ceph/auth.c
+>>>> +++ b/net/ceph/auth.c
+>>>> @@ -215,6 +215,11 @@ int ceph_handle_auth_reply(struct ceph_auth_client *ac,
+>>>>   	ceph_decode_need(&p, end, sizeof(u32) * 3 + sizeof(u64), bad);
+>>>>   	protocol = ceph_decode_32(&p);
+>>>>   	result = ceph_decode_32(&p);
+>>>> +	if (result > 0) {
+>>>
+>>> Frankly speaking, it's hard to follow how this is correct without protocol
+>>> knowledge. Do we have any declarations of result possible values? Probably, we
+>>> need to have some comment that explain the situation in more details here?
+>>>
+>>
+>> Yes, it would be good to have an exact protocol specification. From what 
+>> I can see in the code, the result value is either 0 for success or a 
+>> negative Linux error code. Therefore, a positive value here would always 
+>> indicate a malformed message. But maybe you know more?
+> 
+> I would like to hear what Ilya can share here. :) He should know more. The 
+> result > 0 looks not obvious to me. This is why I believe that, at minimum, some
+> comments should make the code more easier to follow.
+> 
 
-Understood. Thanks!
+Hi,
+is there any update on this by now? Did you hear anything from Ilya?
+I don't think that it's good to have this disclosed but not fixed for a
+long time.
 
-Regards,
-Dorjoy
+Best regards,
+Raphael
+
+>>
+>>>> +		pr_err("unexpected result code in auth msg\n");
+>>>> +		ret = -EINVAL;
+>>>> +		goto out;
+>>>
+>>> Maybe, do you need jump to bad?
+>>>
+>>
+>> No, Ilya recently mentioned that this is intended for classic decoding 
+>> errors. Here, a more specific error message should be emitted.
+> 
+> OK.
+> 
+>>
+>>>> +	}
+>>>>   	global_id = ceph_decode_64(&p);
+>>>>   	payload_len = ceph_decode_32(&p);
+>>>>   	ceph_decode_need(&p, end, payload_len, bad);
+>>>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>>>> index d5080530ce0c..7206db5f7695 100644
+>>>> --- a/net/ceph/mon_client.c
+>>>> +++ b/net/ceph/mon_client.c
+>>>> @@ -174,6 +174,11 @@ int ceph_monmap_contains(struct ceph_monmap *m, struct ceph_entity_addr *addr)
+>>>>    */
+>>>>   static void __send_prepared_auth_request(struct ceph_mon_client *monc, int len)
+>>>>   {
+>>>> +	if (len > monc->m_auth->front_alloc_len) {
+>>>> +		pr_err("sending auth request failed, because len: %d exceeds allocation size: %d\n",
+>>>> +			len, monc->m_auth->front_alloc_len);
+>>>
+>>> Is it proper place for this check? It looks like we fail to send something and
+>>> execution flow has no idea that we failed. Yes, system log will receive the
+>>> error message but the rest of the logic will continue business as usual. Maybe,
+>>> you are right but is it not to late to simply complain here?
+>>>
+>>> And if we don't send the request, then could it affect the whole functionality?
+>>> Could we introduce a race condition or deadlock here?
+>>>
+>>> Thanks,
+>>> Slava.
+>>>
+>>
+>> This check should never be true. It is just a common place where a 
+>> severe data leakage can be prevented if anything went wrong before, 
+>> because m_auth->front.iov_len is modified there. This would prevent 
+>> another bug like this if the logic before was flawed. To fix the current 
+>> vulnerability, it is not absolutely necessary to have this.
+>>
+>> Maybe an assertion like a BUG_ON is also fine here. Otherwise, the 
+>> handling of this function would most likely have to be changed at 
+>> multiple places.
+> 
+> Maybe, BUG_ON() looks like more proper solution if we should not be here for
+> such case.
+> 
+> Thanks,
+> Slava.
+> 
+
