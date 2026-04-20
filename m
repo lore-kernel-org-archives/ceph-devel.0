@@ -1,212 +1,226 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f44.google.com (mail-dl1-f44.google.com [74.125.82.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C26B23382DE
-	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 15:46:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776700023; cv=none; b=iXDwn2vRRKAZswMGsoEudYvf41N1r8IWaIF/xi4mJL1ecZClE4JxJyLBdnp8WyerMPwlWV/3VUukcytZiIxfAW6Xj2CxLDzkBHfGSWuP5ZlRCM6bOzkfBjpO9HGuFDit6d3BbJK16FQn4A9xkrdW0nIbRGFDk13xwDmBvunu2hg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776700023; c=relaxed/simple;
-	bh=ACW6tz8sxKXMIV6vEgQpLcbjRoFpwTaSwJJk4RAqXjc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kWTTyR14yjpFkEIER+oAlCs+JUH7/voInsIOR6Ml4WNVEXWK+gQQr9Ej/JMIvxlWr4HSKnyEUBQ5gDBmXxS38BOQub1hBd4isbiU7G1tGjE6suBl7pS4MIXZaCWKpzslg+HhSMVTzpu3Vk7R5xu2w9PstLxkO5MWhaNhJnYlX/M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=lXAEKHPx; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E2253C3C0E
+	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 20:19:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.44
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776716379; cv=pass; b=u9skFMJwLHkHopUY7DHdhuBk0Bl9N4t27uFflpVDwBax5Sj7PgS7XgN36RrBlZM8HNIDXNG3KlxbARP/cAg4PBLq9duzciEcNcOj/KTlx7WwzVZceCrNW2ahWMDoC+d9Lkf8X+J/5CbFc/uK1yEd/WtXlBxrz2dh/WHzEP8Q4BA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776716379; c=relaxed/simple;
+	bh=n6ym533tI9X4A+vTCccKlmH4/q2ObDK27zNE5dOfzKQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=RpfScP7+eyWTq6qznlodsVeW3EfEKJjTqAwhGjxfINPYmJIwHEeTAc6e8ieeknIlnNn5E5RO8aWbKmIJZtrnHVX+eE3E9Oaxad6IAvP3hVpHSa5mklG9ELJuABbeG0aA2rIXd2A+HF3b586uc75qYhqfeICY8+QrI371L0ZPGK8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C7ffKQy4; arc=pass smtp.client-ip=74.125.82.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="lXAEKHPx"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1776699928; h=message-id
- : date : mime-version : subject : to : cc : references : from :
- in-reply-to : content-type : content-transfer-encoding : from;
- bh=ACW6tz8sxKXMIV6vEgQpLcbjRoFpwTaSwJJk4RAqXjc=;
- b=lXAEKHPxQsasBP6b+k7vGF19pXXDNdSZ38S9xsIJbiHhb93R6s1Q2WY6nUlTiMWEP6HI+
- pRfFAxm7FWqjFp0gaRT/gqBdDPwCx3GIya9NKfPWsc5tItAV9DSaasodREYQ07ebDRwKlwo
- V5R729frzbzZhSt4yH6m6w1bxUmxKJqAexLwKzQVUF8mQ4pCxjG/fbtafEwv4D2crKC5Tok
- Utug/VXrEuDwiJ5M0J4nTcWmA/0gOkoobREboeKojPqiKwzebLgGsS3eYmppLWiiPU8Oaag
- vxaawcOYoTXHTEzzcQjdtmhS/D2LMq3dqos210SdLvDIIRIxd0NOYJd0VD+w==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 885F35FCDF;
-	Mon, 20 Apr 2026 17:45:28 +0200 (CEST)
-Received: from [141.24.212.106] (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 641C45FA96;
-	Mon, 20 Apr 2026 17:45:28 +0200 (CEST)
-Message-ID: <ec4a8bda-ca80-410f-8b97-413cf64d7f39@tu-ilmenau.de>
-Date: Mon, 20 Apr 2026 17:45:28 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C7ffKQy4"
+Received: by mail-dl1-f44.google.com with SMTP id a92af1059eb24-12c565476d7so7358702c88.1
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 13:19:37 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776716377; cv=none;
+        d=google.com; s=arc-20240605;
+        b=Y4eUzLVpc+xgBGZN3I80xR/5dzM9gSN5AVcHbB/nTMIZhphB4t99992Y5JThAWnzEe
+         CqV0R5MoAXX5dNyeniSkAoOY2gNyVPoZuKu4TVA5t2mjwEVuyv5PZAMNsMzMXwdvJhkb
+         VYhjnSVBLwOh7il9h+Dw2NL54paHsZbKDiTwxkatN1TqSSncwFvgXWY/xQ4To4X1dhkI
+         r3mKEcmpzi0Frf3UViQfW5NcZkNkZH4/NRdPGQliotpOgFVeBEHkX0Q3pbshNniffuQp
+         ljy0NqPo8GF4jeeqnXtmcWJ6/LepqjWSM+cO2EV1qVUaOc8bznb7rP2ySagrWJi9WsXS
+         p0eA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=FDLi2AIEvf/8R/CKyK1q6WR933rqVLVDLFbXt/wFzeE=;
+        fh=fTo8iPluxm5Mj2f8vmgktyLRgwhsK59Gb8MrczbkuSg=;
+        b=jvX/infkCD7B1lHUApqjN2uPzzbnszdXzgihbOdDZyuwgVXzbAW3HpG6wyjNFMEMMt
+         +7VnFkORmKMEkilktBB45ifZLo3tR22UKJ7zYnkcJlaxsQZl0f33p/Tl/o+17wHCsDHC
+         pIGlEeOPqWL5YXwSdwV8BJmcEEQbKie71MJuEIpGL+jPq17vWZenA0NDdf1v2ufzFZZc
+         P3olzCjQraup4hIx4mWmPxaNSmRTTpF/gnaBwQnCqSPXTkPkAE8Pmp2WmgQ/IWuSe7tb
+         jrLOjFCp3mMNmd9rDpU2A8aAdc3wrPVRo5dykk1RT7WEGJ5oAJyH2MGPdbVg/wO65zAV
+         3hEg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1776716377; x=1777321177; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=FDLi2AIEvf/8R/CKyK1q6WR933rqVLVDLFbXt/wFzeE=;
+        b=C7ffKQy44m4ZxbpuAU5mPeNwWgUwzmXO7L5cLcQ72XyL9K2REzPgFaZVYwBz+Imo9k
+         3kCcUZBLYZVYwZ0E9/DXoRIQelEPss6G9vbrQ70maGYmDmAV/jeFBOwO/SAWgsW2UDO3
+         KizEnyRxHU3UiW9Yl3We4RlWSoYWmOSZw9swqb7BTN6SL3t4cHziCSVHbIqA1ALwl6EQ
+         m54g8pHAwzMnBIeOfr4ncTtxDIcixXgtbyMx31gyh/9Kd6p5mNlaYIJIQAj0W2YuJpSL
+         yquBk+tn17bSblysF2CP3Rly02NFXHdrL2R1Dishkto7BK3XtjmZxKayBx1IxhdEcYWT
+         eB5A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776716377; x=1777321177;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=FDLi2AIEvf/8R/CKyK1q6WR933rqVLVDLFbXt/wFzeE=;
+        b=MZh0e5/Kq4H+toRalZk2V8dGrWhH7oc4Z0W8i3z+2ZfClvUjOTb4xpmI3PpRl8Oypw
+         3Gw0WBJKz8Er8eDU7R98KBUVFqwk8QxsyHH2oc0DXkgj8Exp3z6/01cfjgw8pI3S1nXJ
+         s8WBz6mG3Y3H1NWX4IVF1Kyqb3dH8H5VegeeghUo2ejYrO1oXA0xZoVF5pZPPF6qPhCF
+         y5Ap2I5OlhPrkCxAqGxNbYB+34OHznisb9cb4Y7oh9A0yYTS3MCsCdeGIf52JDkitogc
+         cRB1cW18B1yD8nBdm+M+Emb1hJuXiOvJbYtyTPMmYEgVmp553/XAvLjRhSg6Fq+FuC8X
+         ROSA==
+X-Forwarded-Encrypted: i=1; AFNElJ9MFgoPPDvhRZnMy8WImdS0gBRBVX9jmG45RsknpweZQ+QGpFqGJLAcprDiPAdIiBUfqvQgdwfzdjf7@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywmhr8LzDT3UDXfLBFekk8fNLq0/istUiCRgBMahbHku87TbXek
+	a4ijqx/NJl9SMueeMvMc4Pc+ECFTOWhTuEbq8E95Qdf3RE+TG7E3BhiNkRxLbhORtDSyndJUSiI
+	sPngirY50cAW4rmaSU0VBe0x65NWWAvU4qkBV
+X-Gm-Gg: AeBDiesAAZbJy9NC72drjOmpW+I1xU03ClIphgdT0RBJpoC32Wq5ExB9PDtPy6/vYzv
+	ZeWkfd2IGei6hXaq9L7jp5ed5f99zPfMsKVBSVIrCFE/FH9LRk6Ssg9bLa9mtuIC/NIAeVZVTEY
+	GzBcPIDiSQ4G5xRTe44wmwWQPZog0L/j5Jk5ixVbYvG3aY7Jnyy4odI2hHdAa4PU2UvhxPylKth
+	gF8SDRsxePqsJz+LcyGzD5lC1POteAFkPMf5nSph8hyqZ1DPsu7Gr+jZAGdSVEVuaqKErBw1xEk
+	e/FSZAHA5MQEStT8cQ==
+X-Received: by 2002:a05:7022:388f:b0:123:348d:8576 with SMTP id
+ a92af1059eb24-12c73f6d905mr8911688c88.6.1776716376624; Mon, 20 Apr 2026
+ 13:19:36 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] libceph: Fix slab-out-of-bounds access in auth message
- processing
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
- "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: "security@kernel.org" <security@kernel.org>,
- "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-References: <4f9fdcde-f5a8-43a8-9580-6ec3402c4185@tu-ilmenau.de>
- <20260320094154.1158656-1-raphael.zimmer@tu-ilmenau.de>
- <0959410fbce95fb8f5ac25de6c751421834ae923.camel@ibm.com>
- <395ea4e1-f83c-472a-b336-fba24368e5ce@tu-ilmenau.de>
- <9afcc984548bfb418f3fbab64dd98f5e14ed63c0.camel@ibm.com>
-Content-Language: en-US
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
- 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
-In-Reply-To: <9afcc984548bfb418f3fbab64dd98f5e14ed63c0.camel@ibm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20260419090348.1817082-1-dawei.feng@seu.edu.cn>
+In-Reply-To: <20260419090348.1817082-1-dawei.feng@seu.edu.cn>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Mon, 20 Apr 2026 22:19:24 +0200
+X-Gm-Features: AQROBzDaUIcoZgaW9hqmajL0d6VdpXPApMsC-41ShvD5oOsBEcAdne8_Gp_irWE
+Message-ID: <CAOi1vP9haWQQ5UAGuz1GrtL68Yc=w_od4a9GV8gfVoqKMyVn3Q@mail.gmail.com>
+Subject: Re: [PATCH] rbd: fix null-ptr-deref when device_add_disk() fails
+To: Dawei Feng <dawei.feng@seu.edu.cn>
+Cc: axboe@kernel.dk, dongsheng.yang@linux.dev, mcgrof@kernel.org, 
+	ceph-devel@vger.kernel.org, linux-block@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, jianhao.xu@seu.edu.cn, stable@vger.kernel.org, 
+	Zilin Guan <zilin@seu.edu.cn>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 23.03.26 7:59 PM, Viacheslav Dubeyko wrote:
-> On Mon, 2026-03-23 at 12:39 +0100, Raphael Zimmer wrote:
->> On 3/20/26 7:28 PM, Viacheslav Dubeyko wrote:
->>> cc: ceph-devel@vger.kernel.org
->>>
->>> On Fri, 2026-03-20 at 10:41 +0100, Raphael Zimmer wrote:
->>>> If a (potentially corrupted) message of type CEPH_MSG_AUTH_REPLY
->>>> contains a positive value in its result field, it is treated as an
->>>> error code by ceph_handle_auth_reply() and returned to
->>>> handle_auth_reply(). Thereafter, an attempt is made to send the
->>>> preallocated message of type CEPH_MSG_AUTH, where the returned value is
->>>> interpreted as the size of the front segment to send. If the result
->>>> value in the message is greater than the size of the memory buffer
->>>> allocated for the front segment, an out-of-bounds access occurs, and
->>>> the content of the memory region beyond this buffer is sent out.
->>>>
->>>> This patch fixes the issue by first adding a check that catches a
->>>> positive value in the result field of the message and treats it as
->>>> invalid, and second comparing the len parameter of
->>>> __send_prepared_auth_request to front_alloc_len to prevent sending the
->>>> message if it exceeds the bounds of the allocation.
->>>>
->>>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
->>>> ---
->>>>   net/ceph/auth.c       | 5 +++++
->>>>   net/ceph/mon_client.c | 5 +++++
->>>>   2 files changed, 10 insertions(+)
->>>>
->>>> diff --git a/net/ceph/auth.c b/net/ceph/auth.c
->>>> index 3314705e5914..555b1fab4623 100644
->>>> --- a/net/ceph/auth.c
->>>> +++ b/net/ceph/auth.c
->>>> @@ -215,6 +215,11 @@ int ceph_handle_auth_reply(struct ceph_auth_client *ac,
->>>>   	ceph_decode_need(&p, end, sizeof(u32) * 3 + sizeof(u64), bad);
->>>>   	protocol = ceph_decode_32(&p);
->>>>   	result = ceph_decode_32(&p);
->>>> +	if (result > 0) {
->>>
->>> Frankly speaking, it's hard to follow how this is correct without protocol
->>> knowledge. Do we have any declarations of result possible values? Probably, we
->>> need to have some comment that explain the situation in more details here?
->>>
->>
->> Yes, it would be good to have an exact protocol specification. From what 
->> I can see in the code, the result value is either 0 for success or a 
->> negative Linux error code. Therefore, a positive value here would always 
->> indicate a malformed message. But maybe you know more?
-> 
-> I would like to hear what Ilya can share here. :) He should know more. The 
-> result > 0 looks not obvious to me. This is why I believe that, at minimum, some
-> comments should make the code more easier to follow.
-> 
+On Sun, Apr 19, 2026 at 11:05=E2=80=AFAM Dawei Feng <dawei.feng@seu.edu.cn>=
+ wrote:
+>
+> do_rbd_add() publishes the device with device_add() before calling
+> device_add_disk(). If device_add_disk() fails after device_add()
+> succeeds, the error path calls rbd_free_disk() directly and then later
+> falls through to rbd_dev_device_release(), which calls rbd_free_disk()
+> again. This double teardown can leave blk-mq cleanup operating on
+> invalid state and trigger a null-ptr-deref in
+> __blk_mq_free_map_and_rqs(), reached from blk_mq_free_tag_set().
+>
+> Fix this by following the normal remove ordering: call device_del()
+> before rbd_dev_device_release() when device_add_disk() fails after
+> device_add(). That keeps the teardown sequence consistent and avoids
+> re-entering disk cleanup through the wrong path.
+>
+> The bug was first flagged by an experimental analysis tool we are
+> developing for kernel memory-management bugs while analyzing
+> v6.13-rc1. The tool is still under development and is not yet publicly
+> available.
+>
+> We reproduced the bug on v7.0 with a real Ceph backend and a QEMU x86_64
+> guest booted with KASAN and CONFIG_FAILSLAB enabled. The reproducer
+> confines failslab injections to the __add_disk() range and injects
+> fail-nth while mapping an RBD image through
+> /sys/bus/rbd/add_single_major.
+>
+> On the unpatched kernel, fail-nth=3D4 reliably triggered the fault:
+>
+>         Oops: general protection fault, probably for non-canonical addres=
+s 0xdffffc0000000000: 0000 [#1] SMP KASAN NOPTI
+>         KASAN: null-ptr-deref in range [0x0000000000000000-0x000000000000=
+0007]
+>         CPU: 0 UID: 0 PID: 273 Comm: bash Not tainted 7.0.0-01247-gd60bc1=
+401583 #6 PREEMPT(lazy)
+>         Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.15.0-1=
+ 04/01/2014
+>         RIP: 0010:__blk_mq_free_map_and_rqs+0x8c/0x240
+>         Code: 00 00 48 8b 6b 60 41 89 f4 49 c1 e4 03 4c 01 e5 45 85 ed 0f=
+ 85 0a 01 00 00 48 b8 00 00 00 00 00 fc ff df 48 89 e9 48 c1 e9 03 <80> 3c =
+01 00 0f 85 31 01 00 00 4c 8b 6d 00 4d 85 ed 0f 84 e2 00 00
+>         RSP: 0018:ff1100000ab0fac8 EFLAGS: 00000246
+>         RAX: dffffc0000000000 RBX: ff1100000c4806a0 RCX: 0000000000000000
+>         RDX: 0000000000000002 RSI: 0000000000000000 RDI: ff1100000c4806f4
+>         RBP: 0000000000000000 R08: 0000000000000001 R09: ffe21c000189001b
+>         R10: ff1100000c4800df R11: ff1100006cf37be0 R12: 0000000000000000
+>         R13: 0000000000000000 R14: ff1100000c480700 R15: ff1100000c480004
+>         FS:  00007f0fbe8fe740(0000) GS:ff110000e5851000(0000) knlGS:00000=
+00000000000
+>         CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>         CR2: 00007fe53473b2e0 CR3: 0000000012eef000 CR4: 00000000007516f0
+>         PKRU: 55555554
+>         Call Trace:
+>          <TASK>
+>          blk_mq_free_tag_set+0x77/0x460
+>          do_rbd_add+0x1446/0x2b80
+>          ? __pfx_do_rbd_add+0x10/0x10
+>          ? lock_acquire+0x18c/0x300
+>          ? find_held_lock+0x2b/0x80
+>          ? sysfs_file_kobj+0xb6/0x1b0
+>          ? __pfx_sysfs_kf_write+0x10/0x10
+>          kernfs_fop_write_iter+0x2f4/0x4a0
+>          vfs_write+0x98e/0x1000
+>          ? expand_files+0x51f/0x850
+>          ? __pfx_vfs_write+0x10/0x10
+>          ksys_write+0xf2/0x1d0
+>          ? __pfx_ksys_write+0x10/0x10
+>          do_syscall_64+0x115/0x690
+>          entry_SYSCALL_64_after_hwframe+0x77/0x7f
+>         RIP: 0033:0x7f0fbea15907
+>         Code: 10 00 f7 d8 64 89 02 48 c7 c0 ff ff ff ff eb b7 0f 1f 00 f3=
+ 0f 1e fa 64 8b 04 25 18 00 00 00 85 c0 75 10 b8 01 00 00 00 0f 05 <48> 3d =
+00 f0 ff ff 77 51 c3 48 83 ec 28 48 89 54 24 18 48 89 74 24
+>         RSP: 002b:00007ffe22346ea8 EFLAGS: 00000246 ORIG_RAX: 00000000000=
+00001
+>         RAX: ffffffffffffffda RBX: 0000000000000058 RCX: 00007f0fbea15907
+>         RDX: 0000000000000058 RSI: 0000563ace6c0ef0 RDI: 0000000000000001
+>         RBP: 0000563ace6c0ef0 R08: 0000563ace6c0ef0 R09: 6b6435726d694141
+>         R10: 5250337279762f78 R11: 0000000000000246 R12: 0000000000000058
+>         R13: 00007f0fbeb1c780 R14: ff1100000c480700 R15: ff1100000c480004
+>          </TASK>
+>
+> With this fix applied, rerunning the reproducer over fail-nth=3D1..256
+> yields no KASAN reports.
+>
+> Fixes: 27c97abc30e2 ("rbd: add add_disk() error handling")
+> Cc: stable@vger.kernel.org # 5.16+
+> Signed-off-by: Zilin Guan <zilin@seu.edu.cn>
+> Signed-off-by: Dawei Feng <dawei.feng@seu.edu.cn>
+> ---
+>  drivers/block/rbd.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index e7da06200c1e..d92730d8c342 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -7165,7 +7165,7 @@ static ssize_t do_rbd_add(const char *buf, size_t c=
+ount)
+>
+>         rc =3D device_add_disk(&rbd_dev->dev, rbd_dev->disk, NULL);
+>         if (rc)
+> -               goto err_out_cleanup_disk;
+> +               goto err_out_device_del;
+>
+>         spin_lock(&rbd_dev_list_lock);
+>         list_add_tail(&rbd_dev->node, &rbd_dev_list);
+> @@ -7179,8 +7179,8 @@ static ssize_t do_rbd_add(const char *buf, size_t c=
+ount)
+>         module_put(THIS_MODULE);
+>         return rc;
+>
+> -err_out_cleanup_disk:
+> -       rbd_free_disk(rbd_dev);
+> +err_out_device_del:
+> +       device_del(&rbd_dev->dev);
+>  err_out_image_lock:
+>         rbd_dev_image_unlock(rbd_dev);
+>         rbd_dev_device_release(rbd_dev);
+> --
+> 2.34.1
+>
 
-Hi,
-is there any update on this by now? Did you hear anything from Ilya?
-I don't think that it's good to have this disclosed but not fixed for a
-long time.
+Applied.
 
-Best regards,
-Raphael
+Thanks,
 
->>
->>>> +		pr_err("unexpected result code in auth msg\n");
->>>> +		ret = -EINVAL;
->>>> +		goto out;
->>>
->>> Maybe, do you need jump to bad?
->>>
->>
->> No, Ilya recently mentioned that this is intended for classic decoding 
->> errors. Here, a more specific error message should be emitted.
-> 
-> OK.
-> 
->>
->>>> +	}
->>>>   	global_id = ceph_decode_64(&p);
->>>>   	payload_len = ceph_decode_32(&p);
->>>>   	ceph_decode_need(&p, end, payload_len, bad);
->>>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
->>>> index d5080530ce0c..7206db5f7695 100644
->>>> --- a/net/ceph/mon_client.c
->>>> +++ b/net/ceph/mon_client.c
->>>> @@ -174,6 +174,11 @@ int ceph_monmap_contains(struct ceph_monmap *m, struct ceph_entity_addr *addr)
->>>>    */
->>>>   static void __send_prepared_auth_request(struct ceph_mon_client *monc, int len)
->>>>   {
->>>> +	if (len > monc->m_auth->front_alloc_len) {
->>>> +		pr_err("sending auth request failed, because len: %d exceeds allocation size: %d\n",
->>>> +			len, monc->m_auth->front_alloc_len);
->>>
->>> Is it proper place for this check? It looks like we fail to send something and
->>> execution flow has no idea that we failed. Yes, system log will receive the
->>> error message but the rest of the logic will continue business as usual. Maybe,
->>> you are right but is it not to late to simply complain here?
->>>
->>> And if we don't send the request, then could it affect the whole functionality?
->>> Could we introduce a race condition or deadlock here?
->>>
->>> Thanks,
->>> Slava.
->>>
->>
->> This check should never be true. It is just a common place where a 
->> severe data leakage can be prevented if anything went wrong before, 
->> because m_auth->front.iov_len is modified there. This would prevent 
->> another bug like this if the logic before was flawed. To fix the current 
->> vulnerability, it is not absolutely necessary to have this.
->>
->> Maybe an assertion like a BUG_ON is also fine here. Otherwise, the 
->> handling of this function would most likely have to be changed at 
->> multiple places.
-> 
-> Maybe, BUG_ON() looks like more proper solution if we should not be here for
-> such case.
-> 
-> Thanks,
-> Slava.
-> 
-
+                Ilya
