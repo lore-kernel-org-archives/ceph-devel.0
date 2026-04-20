@@ -1,124 +1,162 @@
-Received: from m16.mail.126.com (m16.mail.126.com [220.197.31.6])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11E1138236E;
-	Mon, 20 Apr 2026 06:30:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.6
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1818B38911F
+	for <ceph-devel@vger.kernel.org>; Mon, 20 Apr 2026 08:37:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776666614; cv=none; b=SQCQU5FT5AoKjXl+PQQkOqGSTP0dKqoFajQpJp+Wn/oHbDB8ddaIEkMQxS52mgQrUn0MCW4Q9gWQUdURiw5bIyH4OdvPUjYb4ycJsKlMpuF04bgrVke2TkGim5iixYXv+pqWfkZvB1Y5o05zQYHuwfVkSelcbNcfoUUvd2qzn1U=
+	t=1776674240; cv=none; b=HRT7aa+1dc4cx+GKX1M6FUwdOcruTxHfRgn34gjIfae7Bg/lUeg10llCACegglxl4v9Gm76kICzvc+5afEWc8YnYBtmLPg2vk7/0OwZilf9iEE1I22zruIBqGdRBXyInoU89vLOZB8QWMz5QEzZfINFtgBsHgvJMy3qSnP8X9wg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776666614; c=relaxed/simple;
-	bh=VldLjcwq4803Wd3UDjkxNT0hGPf6K0QO+zv2RTPaP+k=;
-	h=Message-ID:Date:From:MIME-Version:To:CC:Subject:References:
-	 In-Reply-To:Content-Type; b=qv90FiZZCMlwnneYB4z7F0Zzn0UPxHUrjoSdRE1WeKTFZJ+oW6tApf6j1w4Gp6ar4GqviR5tHq/GVkEA/ZX1A4kT2ci/nJOoIUqG9K1qYDNVr6Z7tL2UVNtvcKbCOwDMOZoZHzirGTE4Pad5qMkrCE1GajXTivNU6A4DGgEjBCk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=126.com; spf=pass smtp.mailfrom=126.com; dkim=pass (1024-bit key) header.d=126.com header.i=@126.com header.b=bn9Wi/D+; arc=none smtp.client-ip=220.197.31.6
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=126.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=126.com
+	s=arc-20240116; t=1776674240; c=relaxed/simple;
+	bh=HHzZW79uNqFYtnh17CbdC+S5FUFfAD3faFM1gcXFMIs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=r/xq1gvq66UEFQoAmTYYs0oIs8jrHe9S//uH3Qf0QMB9fcBhaibXSXDcZ2F7kwZtfyyzyYL9ojQU1CPwLQD35Y36KQv0CThZiiWGfCJ6f25KJh6Wm4HmH3FIbhEEtq2fBDB8u2I14IcJxXNETiJO9evckHGWoJ0NC6Vb/Gzk17Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JntNMLLx; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=126.com header.i=@126.com header.b="bn9Wi/D+"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=126.com;
-	s=s110527; h=Message-ID:Date:From:MIME-Version:To:Subject:
-	Content-Type; bh=/lJF0WfAFWy+64QqNE6bNXqxHb6cahtngw8tXYELF+U=;
-	b=bn9Wi/D+Vq3PAkhnaHvJsWQRUBAjykhOiIqJxSciVkPjsGdCRWl7v7s1MtKBEn
-	msskB6lmoImLgKtvKLuW3+xZL/bxmdWFhuBPyz/8EFME1fErMyz53PLEvWxPmpkg
-	nyjYLscpC+J74lliGlY9HZwWnk63ceQxQf2YCgtfF2tmo=
-Received: from localhost.localdomain (unknown [])
-	by gzga-smtp-mtada-g1-4 (Coremail) with SMTP id _____wDnt2DLx+Vpn4WuCQ--.12531S2;
-	Mon, 20 Apr 2026 14:29:31 +0800 (CST)
-Message-ID: <69E5C798.8050705@126.com>
-Date: Mon, 20 Apr 2026 14:28:40 +0800
-From: nana <zhongling0719@126.com>
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101 Thunderbird/31.2.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JntNMLLx"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1776674238;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=WfuRXW6PO7eHQomUNdqzWCM5UdKk2eW774Sgalu0km4=;
+	b=JntNMLLxznRHoeF0JEFDFsKEA5M0MUPbOqugrybbIoSI/JSE7YYsl62ycEmno/pcFwlI10
+	VbhSOKpz+PJ+ifNtcR9okfSNuW9bVa9Fz85alA28eyIZcfv6bLYCHxPl7wSnoEq/yS4sKc
+	R25ppKmFfa0bBUW5jM0uz9RppfpoO+k=
+Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-231-QXkkHxJ9MweldKo0LKm6Jw-1; Mon,
+ 20 Apr 2026 04:37:15 -0400
+X-MC-Unique: QXkkHxJ9MweldKo0LKm6Jw-1
+X-Mimecast-MFC-AGG-ID: QXkkHxJ9MweldKo0LKm6Jw_1776674234
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 695AE1800358;
+	Mon, 20 Apr 2026 08:37:13 +0000 (UTC)
+Received: from warthog.procyon.org.com (unknown [10.44.48.17])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 84BF519560AB;
+	Mon, 20 Apr 2026 08:37:09 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 00/11] netfs: Further miscellaneous fixes
+Date: Mon, 20 Apr 2026 09:36:51 +0100
+Message-ID: <20260420083705.1009074-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, 
- "idryomov@gmail.com" <idryomov@gmail.com>,
- "zenghongling@kylinos.cn" <zenghongling@kylinos.cn>, 
- "slava@dubeyko.com" <slava@dubeyko.com>,
- Alex Markuze <amarkuze@redhat.com>, 
- "brauner@kernel.org" <brauner@kernel.org>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] ceph: fix potential ERR_PTR dereference in ceph_submit_write()
-References: <20260417080609.51361-1-zenghongling@kylinos.cn> <494716d7aa3fe860d89e19866fa3b59755183de8.camel@ibm.com>
-In-Reply-To: <494716d7aa3fe860d89e19866fa3b59755183de8.camel@ibm.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:_____wDnt2DLx+Vpn4WuCQ--.12531S2
-X-Coremail-Antispam: 1Uf129KBjvJXoW7Cw1xZFykWw4UWF45GFyrtFb_yoW8ZFWUp3
-	yUKayjyF1rZa4xtFsFga4rZ3WFkrsYvryayr1rKF42kF93XFZFyFyUGr9Igw47AF4xJryk
-	tr1UAFZrXa4ayF7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07j5eOJUUUUU=
-X-CM-SenderInfo: x2kr0wpolqwiqxrzqiyswou0bp/xtbBrwz4yWnlx8xKtgAA3p
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-  Hi  Slava
-       You're correct: the fix doesn't make sense.The 
-BUG_ON(IS_ERR(req))  ensures that req is a valid pointer, There is no 
-code path that can skip the allocation code.
+Hi Christian,
 
-Thank you for your review.
+Here are some more miscellaneous fixes for netfslib, found by Sashiko.dev's
+AI review[1] in response to the previous miscellaneous fix posting[2], plus
+a repeat of another patch you haven't picked up yet:
 
-在 2026年04月18日 01:48, Viacheslav Dubeyko 写道:
-> On Fri, 2026-04-17 at 16:06 +0800, Hongling Zeng wrote:
->> Fix smatch warning:
->>   fs/ceph/addr.c:1489 ceph_submit_write() error: 'req' dereferencing possible ERR_PTR()
->>
->> Add a check to ensure req is not an ERR_PTR before calling
->> ceph_osdc_put_request().
->>
->> Fixes: 1551ec61dc55 ("ceph: improve error handling in writeback")
->> Signed-off-by: Hongling Zeng <zenghongling@kylinos.cn>
->> ---
->>   fs/ceph/addr.c | 3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
->> index fa4f25f99409..6091818674be 100644
->> --- a/fs/ceph/addr.c
->> +++ b/fs/ceph/addr.c
->> @@ -1468,7 +1468,8 @@ int ceph_submit_write(struct address_space *mapping,
->>   			unlock_page(page);
->>   		}
->>   
->> -		ceph_osdc_put_request(req);
->> +		if (!IS_ERR(req))
->> +			ceph_osdc_put_request(req);
->>   		return -EIO;
->>   	}
->>   
-> I don't think that this fix makes sense. We create and check the request here
-> [1]:
->
-> 	req = ceph_osdc_new_request(&fsc->client->osdc,
-> 				    &ci->i_layout, vino,
-> 				    offset, &len, 0, ceph_wbc->num_ops,
-> 				    CEPH_OSD_OP_WRITE, CEPH_OSD_FLAG_WRITE,
-> 				    ceph_wbc->snapc, ceph_wbc->truncate_seq,
-> 				    ceph_wbc->truncate_size, false);
-> 	if (IS_ERR(req)) {
-> 		req = ceph_osdc_new_request(&fsc->client->osdc,
-> 					    &ci->i_layout, vino,
-> 					    offset, &len, 0,
-> 					    min(ceph_wbc->num_ops,
-> 						CEPH_OSD_SLAB_OPS),
-> 					    CEPH_OSD_OP_WRITE,
-> 					    CEPH_OSD_FLAG_WRITE,
-> 					    ceph_wbc->snapc,
-> 					    ceph_wbc->truncate_seq,
-> 					    ceph_wbc->truncate_size,
-> 					    true);
-> 		BUG_ON(IS_ERR(req));
-> 	}
->
-> So, it should be the valid request pointer when we called
-> ceph_osdc_put_request(). Am I missing something?
->
-> Thanks,
-> Slava.
->
-> [1] https://elixir.bootlin.com/linux/v7.0/source/fs/ceph/addr.c#L1421
+ (1) Fix an early put of the sink page used in netfs_read_gaps(), before
+     the request has completed.
+
+ (2) Fix request leak in netfs_write_begin() error handling.
+
+ (3) Fix a potential UAF in netfs_unlock_abandoned_read_pages() due to
+     trying to check index of each folio we're abandoning to see if that
+     folio is actually owned by the caller (in which case, we're not
+     actually allowed to dereference it).
+
+ (4) Fix a potentially uninitialised error value in
+     netfs_extract_user_iter().
+
+ (5) Fix incorrect adjustment of dirty region when partially invalidating a
+     streaming write folio.
+
+ (6) Fix the trace displayed by the total overwrite of a streaming-write
+     folio.
+
+ (7) Fix the handling of folio->private in netfs_perform_write() and the
+     attached netfs_folio and/or group when a streaming write folio is
+     modified.
+
+ (8) Fix the handling of a group attached to the netfs_folio attached to
+     folio->private when netfs_read_gaps() fills out the folio.
+
+ (9) Fix the potential for 64-bit tearing on a 32-bit machine when reading
+     netfs_inode->remote_i_size and ->zero_point by using much the same
+     mechanism as is used for ->i_size.
+
+(10) Fix a comment about avoiding streaming write on O_RDWR files as that
+     bit of code is removed in vfs.fixes.  This could be folded down, but
+     makes no change of behaviour.
+
+(11) Fix netfs_read_folio() to wait on writeback first (it holds the folio
+     lock) otherwise we aren't allowed to look at the netfs_folio struct as
+     that could be modified at any time by the writeback collector.
+
+These are applied on top of your vfs.fixes branch.  Patch 6 fixes a commit
+in vfs.fixes, but would need moving before that patch rather than simply
+folding down - and as it just changes the trace output, it's probably not
+worth moving.  Patch 8 fixes a bug in one of the commits in vfs.fixes.
+Patch 10 just tidies up a comment in one of the vfs.fixes commits.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-fixes
+
+Thanks,
+David
+
+[1] https://sashiko.dev/#/patchset/20260414082004.3756080-1-dhowells%40redhat.com
+
+[2] https://lore.kernel.org/r/20260414082004.3756080-1-dhowells@redhat.com/
+
+David Howells (11):
+  netfs: Fix early put of sink folio in netfs_read_gaps()
+  netfs: Fix leak of request in netfs_write_begin() error handling
+  netfs: Fix potential UAF in netfs_unlock_abandoned_read_pages()
+  netfs: Fix potential uninitialised var in netfs_extract_user_iter()
+  netfs: Fix partial invalidation of streaming-write folio
+  netfs: Fix the trace displayed for the total overwrite of a streamed
+    write
+  netfs: Fix folio->private handling in netfs_perform_write()
+  netfs: Fix group handling in netfs_read_gaps()
+  netfs: Fix potential for tearing in ->remote_i_size and ->zero_point
+  netfs: Fix comment about write-streaming avoidance
+  netfs: Fix netfs_read_folio() to wait on writeback
+
+ fs/9p/vfs_inode.c            |   2 +-
+ fs/9p/vfs_inode_dotl.c       |   4 +-
+ fs/afs/inode.c               |   8 +-
+ fs/afs/write.c               |   2 +-
+ fs/netfs/buffered_read.c     |  25 +--
+ fs/netfs/buffered_write.c    | 100 +++++++-----
+ fs/netfs/direct_write.c      |   4 +-
+ fs/netfs/iterator.c          |   2 +-
+ fs/netfs/misc.c              |  15 +-
+ fs/netfs/read_collect.c      |   2 +-
+ fs/netfs/read_retry.c        |   2 +-
+ fs/netfs/write_collect.c     |   3 +-
+ fs/smb/client/cifsfs.c       |  24 +--
+ fs/smb/client/cifssmb.c      |   2 +-
+ fs/smb/client/file.c         |   9 +-
+ fs/smb/client/inode.c        |   9 +-
+ fs/smb/client/readdir.c      |   3 +-
+ fs/smb/client/smb2ops.c      |  16 +-
+ fs/smb/client/smb2pdu.c      |   2 +-
+ include/linux/netfs.h        | 301 +++++++++++++++++++++++++++++++++--
+ include/trace/events/netfs.h |   3 +
+ 21 files changed, 426 insertions(+), 112 deletions(-)
 
