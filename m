@@ -1,144 +1,200 @@
-Received: from mail-dl1-f44.google.com (mail-dl1-f44.google.com [74.125.82.44])
+Received: from mail-dl1-f51.google.com (mail-dl1-f51.google.com [74.125.82.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1BA13451DA
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2026 15:34:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C4CC2FD665
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2026 16:09:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.51
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776872063; cv=pass; b=KHmzHxsAxUkVIxBUJJKCvYcJdc/sO7JUibOTB5jgipH4xBROascCXWq97AHmmDrTqFMqDowuARUKeO1a/K2NMZJQZWmLMJdGvVM7v6j8SyNVHDfFpz8Ou/xEMpdaw5jwCoYvpGou+zRkNht3r+lHo2ENLVOmqWWqXW5B+Ilanm0=
+	t=1776874191; cv=pass; b=OkcODMhm1RsbsC84AQXUqIZWElyhDfNO0mAaDgyiOoy+rlwJ5DKWUQgWiQyONdrkYg+xbLYrTcxQmmcqf5pM11ImMb+5DFLxu+I99spRb1EZKOPMD9xrOL36/5Icovv/SoLz8WTusbZakOYf/gpjjvAG9rPwJMXGFz8ttfmGU2g=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776872063; c=relaxed/simple;
-	bh=S/TnKoZdkb9HNlWBiqkMsyeGAdW7oEoOobtapOUR5NY=;
+	s=arc-20240116; t=1776874191; c=relaxed/simple;
+	bh=pi0H2oiaX49EZbEtl8aifKvUOoqTXRC+DJJNcN1mGVU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UniQrNfj3P5RzWhOo40g65drIf9ZBvSezwnpMitZzq3xTUBuULGsq0xq4JpIA42fXwEWNvjZZ2iGbJja435s9DzHRBLgC1mSXqRDwR0FUhRsQb04mfgpj6xeflRyIdNn+rZifSLL8QxVDOL//mMGyI5eh0kJHwxWcdKE85TgqeI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GOB3XdnY; arc=pass smtp.client-ip=74.125.82.44
+	 To:Cc:Content-Type; b=S4EksaT0ZjmDE9VmKWg1MS79s/YZfK1J+CoCIIyw241sYJrmcVTTtIetu0OW+AB7dl7Fujq41hsjLuVIIfyg8PYbgombiVFSb8oZYrLMcObAVRSDcyM4Iuv6eszGkZK9SX9Gj1tAyyLNp3nsMG/SONMBmTNkuGSknSuhGsCoDX8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=q9WROICv; arc=pass smtp.client-ip=74.125.82.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GOB3XdnY"
-Received: by mail-dl1-f44.google.com with SMTP id a92af1059eb24-12713e56abdso3888550c88.1
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2026 08:34:21 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1776872061; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="q9WROICv"
+Received: by mail-dl1-f51.google.com with SMTP id a92af1059eb24-12dbd0f7ecaso1043624c88.0
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Apr 2026 09:09:50 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776874189; cv=none;
         d=google.com; s=arc-20240605;
-        b=Vax9AIVi4jbLbJz8nrrdK6dXhFdGZm8wBu5A0NUoxMDH4g4Yq62BQfO1IrxnB7h1Gs
-         RdGC4lEtWWNRQrz5XHlhEaoyoPEmy7lLgRFNBLfIE+qQnGcm9XT5Iw9ORtmifW09UKOC
-         9TmfxK4raHKpLHQCo6uTFd92/gyr3TcDPSAIC7wJlkyhli6qZLJRZsR0T+5HmG0tAqze
-         c4bi9IrKDE9Jb4gIr89nnkKZDyA+u4cYA/6WJ1Xc+tfyK9QXFfzcQZKB4loQsyDlOdRW
-         bS5qH+/N9k+xLeSUfl1ptAEP8bWyNWLPTGz5UfMWGbFlnLp3lv9Lo8W7/9Zc36uBUkTj
-         lo5g==
+        b=j1wIZhHnMXXtk9QBmJCjYzWeIxCp36HbFcA9nPI/JvCOE3S5gSsdpGzlK24c83stgV
+         j8uYl5s+Z/qOoU+HtpPBeVIV8V2kydecAymxNs2d9H+Nz0ldPAd+FmhrK0QldiRM2a/V
+         bb92FLpq1+t9ToZ/vEjdc2hJMXQrEwEQEugXC7QIj52nvS68dKilkvfrQoh9mA9sDw/F
+         /us0Gl7+xY0pB/98LvQiOvx3VpJD+ZzVLrNBlwzWNXUKpKR++Ky2gvWxXgMVzRl1l7oT
+         c/uIJq87msPUQiXnPXMZK03dXy5hSMj7C88e5VQyPw63BZDURQf+cLOXvAlQl8voKxxV
+         ZpOw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=J0hv8VmWlW7hTbHZjg4sIUbWzKDBkQBwU2+883ho7Cg=;
-        fh=epLnwjewX+ahN5w+zrA4VqMcZihS10wdu8hGFy5EbWA=;
-        b=f/FeKhbcLevQ83b3OMW6NhGmmZX3zs7+88R9A1VWB41FxmCV3OjlUU7AAZAtN6SWoK
-         D8UgEx94Kg71wU9RZZaFztIUnbtpDmlYGc1AoK7+JVKlJzjtD39+7mm2OFVa0hHuUE/Z
-         KuBbm5rMkxaPASFVXhEwxc/ea8Uw1tWgVOCb8gOaHwiv0J9bbJno4PQ4AGXNc+ese4nK
-         Sfby2htntOitsNjYAZa1NDm5Yq9GTOQc6sfogmnJwjhfIfLd+dPgipKbmq26OKvmf9uz
-         HWmJp6HEv0OQGHtHZsT2TNj3qS+nXzkch7b0jAQfGA1smc5vC7fP3w4DgvgeuRUc2+HP
-         FrOQ==;
+        bh=xc9T4yhhefb+DpU8HJRkhE25NJrxvdS3Q2iOtpRFUs4=;
+        fh=fp03u0zlM1gsj26g4et3UA0741ho5A8VL0VK11ehCS4=;
+        b=BYSB81DhkVebSBFqiRRja6IhNVtM6R9/5lExYlOd4KVVLrk6jmPQl3SVab/jQBhmkt
+         7ousy6eP4ARP2F9YY7/AZna19U3ozCLGK3HEIxlk9GY/3grjHcDvM5ZPDgAtb+V5mR7e
+         G9lYL+g+1q5/z3NyDSiiIBJFfJIOIJVdFGo3yEqGcXQ5NVIQaEkwXmm79qBhDEmsQpLA
+         RsKUp6e4RwZAZOLmHer5MdcjVjfJVOUuEYbtfT88BQtUjCDkSxYDm+aVddJ5B5XcfQyP
+         71IWukPYjoeM2/8Fl9Pr2/0yNuDwIALgv4H2G2TWLY1oFAsoVJifiZZ5Y3V9rVrIVVas
+         HEIw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776872061; x=1777476861; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1776874189; x=1777478989; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=J0hv8VmWlW7hTbHZjg4sIUbWzKDBkQBwU2+883ho7Cg=;
-        b=GOB3XdnYx31mBC5qNguWIQAk0h8Di1U4sjkB/fU3o5LIr28dFIE5v74G0JBtTS8C4Q
-         BJopacyy/vZzKImkUDb2PmpC2WJyXKT1ma1UCQZWuevwZ4XBr2VLHjWzeqCfVXN5z/IS
-         rDVGwswLNLhmpxHnAbCaPr9o84mIqCZBUbkzHEODXNebtIJ7BOgZr+G9r4xIjUuttpD9
-         wPaHZpUksPPouClNZyyRgMC2Xa23I9BS5XibqFHpGAh7QmIxuztU9XHOdcjPlM22y8t6
-         EAKc4d7QlzG8WR1Th4bxBT6o5YkOOyOy4ZW4owEQh5l9PP4Ay6lSjwHJLaRfoDnalb77
-         RVUA==
+        bh=xc9T4yhhefb+DpU8HJRkhE25NJrxvdS3Q2iOtpRFUs4=;
+        b=q9WROICvWMAFRyx9TQuK26P1ILpku2lEGse9xm8bthgoaoVBjjs4KrAVs2loY/42ST
+         J4a1c7+i9qTlN9HshjbD3tOvkxtMaCJ9LtoIgaoP7N0Dua4a8+JbIybRGO1emS0CrAad
+         rRxAO/BY7c+4ZbEI9nariWNivTqop3Tlt5UeKvdAeATCoUpyP0z69wbTc/6qVPu3Plo3
+         W8fMwy17Uh5mnURz1jXosvo25zt7knZtTAn86fpPa7VQWDfqRYfFFNDzgolJLsoZgbd4
+         olt5xxko4a2laQCmRX/dS/28A+Fy/B5W8urAHap5ZAOFCCwMa9tIMqT58FvaDAgoPk4D
+         aTQw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776872061; x=1777476861;
+        d=1e100.net; s=20251104; t=1776874189; x=1777478989;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=J0hv8VmWlW7hTbHZjg4sIUbWzKDBkQBwU2+883ho7Cg=;
-        b=bRONaAwt5RiUeSMJMk51g7wmx4D7qBV8Mxi/xi34Deux3hY/X92e8v61DCjb11bUEx
-         vOjzdQz+EizDl0mCbgk/qN7JrU/INfdumbamCAaFn/6Kpq+c/os+MQZrea8zZVpX6ZVT
-         vFOrucF6JiS8FURKIOPUdPNBft6OEox8EGxHU+gqEi+7JBh/QCcTmV098eknIwGbCz7z
-         EloRiMQiY/m7sQOqpVbMFvezNE1fL2tp+eLOid1cDiwisIBXT3WeRreWj9ZMrZiYPFpW
-         SsID2CN0iU5ueNQm5SkWMlsy6pWJevhMwk7IsEsxfTn8pRroDN0t+AIuRBRVCCHEAk1K
-         g+lA==
-X-Gm-Message-State: AOJu0YxAIECbmkTcC/ksUgp6vz2QpcpVjELeXmDqN9eI28XmrglLs0Xl
-	ZYKCBNu/H/6a+3Pw/D4FkeGAvkFKJY1ojUdyT6FcT5BzKXflN9cPemCqS3gGEOr0EJj8+HjcVCS
-	qVg1MgWFXj+8lC5+d7/7goKC9dcVWVI4=
-X-Gm-Gg: AeBDiescBX3iJLTAEVx8VTymBMKtQK6VEZLt+8G9gurJCacJ29XSFMuASbWV/EPTzey
-	dbDQR+g0NtQOp8j3IXTjc7/yeQpK4qEl4jAgnezb/XwuzfI4t4G8l5LXj6fiOcfI1m22nsPcDGf
-	WfAdi+rHR98IdiQJB5WiO0Huhn4BtyFf6SWBh1KyFN3mzViqegncv8jbeSpRfeQ/wBxW0B9ZSCi
-	hFUBu+bNlUPSRz+PW9Nntm6E+MBb/Cklfy9x5GyfiddMBS14OmsEQ0rjQZ4aU1OrR+kve0/WLXc
-	ut1owdULwHZ2JtMG1Q==
-X-Received: by 2002:a05:7022:fa2:b0:12c:11d4:61dd with SMTP id
- a92af1059eb24-12c73b39a41mr9850951c88.18.1776872060807; Wed, 22 Apr 2026
- 08:34:20 -0700 (PDT)
+        bh=xc9T4yhhefb+DpU8HJRkhE25NJrxvdS3Q2iOtpRFUs4=;
+        b=XIjNQOUgL6ERuCHEPNz+rvOYca+76FP6JjF4xqQ9OrKXUQmgaN2cqQcx+XQh9+D6r0
+         PRkNptVW5jnzrioUk66g1JzVSjx+hHY8Cva0Kk1l8Dp0HWnLyOTzgHg7pfCWrZltIhlV
+         fXEyWHN2jGnGV+mEArRpdhUxWok+af6xtk0jiq+UuPLYEZDChtiUA4NAIOUT0N/1FRwO
+         t25GnsLS+cm0otN4Zndz7cldqoHGx/VgCGBhcpr9lSMYJY/0gElKBaafTwmNBPsv4SMd
+         1ZNiUtwsBtDmx3OU2zeILCVZ4+eMf/6RqfmkX9fAdrpv5reNv783MBmVmKWOGHgs+ZFp
+         0axQ==
+X-Forwarded-Encrypted: i=1; AFNElJ92+zX4NPE9lsBLQ3EG20vQ3eeSGD4EA8Vkfi65I37kAIiBrV9ZjCWx9AlOrYIBWpgkNKNdmPh5cZ1e@vger.kernel.org
+X-Gm-Message-State: AOJu0YyhkkI8gz6jiYNsQE8qiRO0E46LOj8PQuB6e00rsy6/jWGLx2Ub
+	2MVXvGVoJNJl/nEnj8edBbqj83XaHqumXIPSnL6ARnyPWFAScFKLb7Z2GuqwWKyIdHCMzE5WvRn
+	a9i2TuRTKDHgXzb9vt9l/t7oG2IBEqIA=
+X-Gm-Gg: AeBDievDesPVPXAsFWaqtsKBQChcEq6g2KRrswGw3iKgaxNqLzRkySOhXeoaOoV/LwB
+	MqGK8aGUjsTzmPefFeRSh1MWC3hvalWzq6EUHHm4s6a91Zc9BGar9JO+JBMlpaJ3oYpu1O4dLKN
+	CbrfY9Eko1pUCCPCoDVNv1A1+6PJN9o/Gp18LRT0bM7zp54xbjB693AAEj5ulze9I9B8laCemoD
+	4Cqtb549B7LHwuLBUGYa3rpW5HUBcMkniHUiNrZRJFMovXXl18b2MlqiH00AkJWJXsTFVubIbiX
+	/0vfHQe2gVkri9FxBA==
+X-Received: by 2002:a05:7022:68d:b0:12a:6902:ddb8 with SMTP id
+ a92af1059eb24-12c73f683c5mr11338256c88.4.1776874189221; Wed, 22 Apr 2026
+ 09:09:49 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260409191517.318015-2-slava@dubeyko.com>
-In-Reply-To: <20260409191517.318015-2-slava@dubeyko.com>
+References: <20260422084713.472133-1-raphael.zimmer@tu-ilmenau.de>
+In-Reply-To: <20260422084713.472133-1-raphael.zimmer@tu-ilmenau.de>
 From: Ilya Dryomov <idryomov@gmail.com>
-Date: Wed, 22 Apr 2026 17:34:08 +0200
-X-Gm-Features: AQROBzCBL6n6MOVuI1650s_ve_MMIwwV6uA_md14TRV4yKcjEc5J6RafImsad-s
-Message-ID: <CAOi1vP_OFnzuJB438=L_MUS2K0m7j49en=U2K19ZrH-xYUzaLQ@mail.gmail.com>
-Subject: Re: [PATCH] libceph: switch ceph-msgr workqueue from WQ_PERCPU to WQ_UNBOUND
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
-	pdonnell@redhat.com, amarkuze@redhat.com, Slava.Dubeyko@ibm.com
+Date: Wed, 22 Apr 2026 18:09:37 +0200
+X-Gm-Features: AQROBzBXrZCL3rAZSK6hhH1ni5Z8b4Zesbd84QIBFPI8un5FZHlu1-Y1ieKAfE4
+Message-ID: <CAOi1vP804ZuKdB+X8eyU2_2ufXVkV2huRmqgfQ7F0BSXvPEtpg@mail.gmail.com>
+Subject: Re: [PATCH v3] libceph: Fix potential out-of-bounds access in crush_decode()
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Cc: Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Apr 9, 2026 at 9:15=E2=80=AFPM Viacheslav Dubeyko <slava@dubeyko.co=
-m> wrote:
+On Wed, Apr 22, 2026 at 10:48=E2=80=AFAM Raphael Zimmer
+<raphael.zimmer@tu-ilmenau.de> wrote:
 >
-> From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+> A message of type CEPH_MSG_OSD_MAP containing a crush map with at least
+> one bucket has two fields holding the bucket algorithm. If the values
+> in these two fields differ, an out-of-bounds access can occur. This is
+> the case because the first algorithm field (alg) is used to allocate
+> the correct amount of memory for a bucket of this type, while the second
+> algorithm field inside the bucket (b->alg) is used in the subsequent
+> processing.
 >
-> The ceph-msgr workqueue was changed to use WQ_PERCPU in commit
-> 27ce71e1ce81 ("net: WQ_PERCPU added to alloc_workqueue users") as part
-> of a tree-wide transition to make per-CPU workqueue binding explicit.
+> This patch fixes the issue by adding a check that compares alg and
+> b->alg and aborts the processing in case they differ. Furthermore,
+> b->alg is set to 0 in this case, because the destruction of the crush
+> map also uses this field to determine the bucket type, which can again
+> result in an out-of-bounds access when trying to free the memory pointed
+> to by the fields of the bucket. To correctly free the memory allocated
+> for the bucket in such a case, the corresponding call to kfree is moved
+> from the algorithm-specific crush_destroy_bucket functions to the
+> generic crush_destroy_bucket().
 >
-> However, ceph_con_workfn contains a while(true) loop that retries on
-> -EAGAIN from socket reads and writes, making it capable of hogging a
-> bound CPU for extended periods. This manifests at runtime as:
-
-Hi Slava,
-
-ceph_con_workfn() does have a loop, but it doesn't retry EAGAIN from
-the socket.  Both msgr1 and msgr2 munge EAGAIN from the socket to 0 to
-indicate the "socket is empty/full, need to wait" condition.  See
-do_recvmsg() and do_sendmsg() for msgr2 and ceph_tcp_*() for msgr1.
-For example:
-
-    ret =3D sock_recvmsg(sock, &msg, msg.msg_flags);
-    if (ret <=3D 0) {
-            if (ret =3D=3D -EAGAIN)
-                    ret =3D 0;
-            return ret;
-    }
-
-Ignoring opening, closing and a couple of other special cases,
-ceph_con_workfn() starts by trying to read.  When the read side of the
-socket becomes empty, it proceeds to trying to write.  When the write
-side of the socket becomes full, ceph_con_workfn() terminates.  It
-doesn't even go back to trying to read, so I fail to see the potential
-for what you have described.
-
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+>  net/ceph/crush/crush.c | 6 +-----
+>  net/ceph/osdmap.c      | 4 ++++
+>  2 files changed, 5 insertions(+), 5 deletions(-)
 >
->   workqueue: ceph_con_workfn hogged CPU for >10000us N times,
->   consider switching to WQ_UNBOUND
+> diff --git a/net/ceph/crush/crush.c b/net/ceph/crush/crush.c
+> index 254ded0b05f6..521aec1d5fc0 100644
+> --- a/net/ceph/crush/crush.c
+> +++ b/net/ceph/crush/crush.c
+> @@ -47,7 +47,6 @@ int crush_get_bucket_item_weight(const struct crush_buc=
+ket *b, int p)
+>  void crush_destroy_bucket_uniform(struct crush_bucket_uniform *b)
+>  {
+>         kfree(b->h.items);
+> -       kfree(b);
+>  }
 >
-> Switch the workqueue to WQ_UNBOUND so the scheduler can freely place
-> workers across CPUs, preventing starvation of other work items on the
-> bound CPU. The loss of cache locality is acceptable for network I/O
-> work.
+>  void crush_destroy_bucket_list(struct crush_bucket_list *b)
+> @@ -55,14 +54,12 @@ void crush_destroy_bucket_list(struct crush_bucket_li=
+st *b)
+>         kfree(b->item_weights);
+>         kfree(b->sum_weights);
+>         kfree(b->h.items);
+> -       kfree(b);
+>  }
+>
+>  void crush_destroy_bucket_tree(struct crush_bucket_tree *b)
+>  {
+>         kfree(b->h.items);
+>         kfree(b->node_weights);
+> -       kfree(b);
+>  }
+>
+>  void crush_destroy_bucket_straw(struct crush_bucket_straw *b)
+> @@ -70,14 +67,12 @@ void crush_destroy_bucket_straw(struct crush_bucket_s=
+traw *b)
+>         kfree(b->straws);
+>         kfree(b->item_weights);
+>         kfree(b->h.items);
+> -       kfree(b);
+>  }
+>
+>  void crush_destroy_bucket_straw2(struct crush_bucket_straw2 *b)
+>  {
+>         kfree(b->item_weights);
+>         kfree(b->h.items);
+> -       kfree(b);
+>  }
+>
+>  void crush_destroy_bucket(struct crush_bucket *b)
+> @@ -99,6 +94,7 @@ void crush_destroy_bucket(struct crush_bucket *b)
+>                 crush_destroy_bucket_straw2((struct crush_bucket_straw2 *=
+)b);
+>                 break;
+>         }
+> +       kfree(b);
+>  }
+>
+>  /**
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index c89e66d4fcb7..a87268058e61 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -516,6 +516,10 @@ static struct crush_map *crush_decode(void *pbyval, =
+void *end)
+>                 b->id =3D ceph_decode_32(p);
+>                 b->type =3D ceph_decode_16(p);
+>                 b->alg =3D ceph_decode_8(p);
+> +               if (b->alg !=3D alg) {
+> +                       b->alg =3D 0;
+> +                       goto bad;
+> +               }
+>                 b->hash =3D ceph_decode_8(p);
+>                 b->weight =3D ceph_decode_32(p);
+>                 b->size =3D ceph_decode_32(p);
+> --
+> 2.47.3
+>
 
-This might be true, but I'm not sure this conclusion can be made
-without at least some benchmarking.
+Applied.
 
 Thanks,
 
