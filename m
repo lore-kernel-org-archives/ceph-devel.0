@@ -1,82 +1,115 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from proxmox-new.maurer-it.com (proxmox-new.maurer-it.com [94.136.29.106])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32B322868A9;
-	Thu, 23 Apr 2026 05:52:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F191B3E1224;
+	Thu, 23 Apr 2026 10:19:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=94.136.29.106
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776923578; cv=none; b=GHw09UVK1a22UzD505X24hbJzzz4Pw9CnTq1FlhPwwCLiD1ikzgFR69kIQo6VnA0tXpHF9CspV+O0hZZXVZdxyKpyhVxEfLUNnsFniQXfkuT16vY2uxzx1bf6p3ayruZEtCCG1dXPORIkMMFityZoQbEze5HBr2XNoE6GTsMXCs=
+	t=1776939552; cv=none; b=WjxpqnuOCU4Pdn7Ctq7KhsQ8A1TBhbG5lGecZJyjyg0Y4sIb41S9LvIdJk2Gmtifefqv2t3PM44p1hEiBCHX1v+8mlhiRuuVwq+Fk70KiJAneYWT+81LNiaMcoDp8uNnzyzMkGeTPFM33XWCUEtWxQ2CfSPr7gx7KfCcsbbHiSI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776923578; c=relaxed/simple;
-	bh=IzCwPU5c6Gq1BGhh1bSpdiyTomucNDB4qIjOeZl0cpQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nJ4u6wPibtEhfoWDBWaiZjbnsoECYQ617yYyzpO/AoY/j/S0Ky6MYkTNyDWkY8Zv+i/4FD3j3+2jiBnB3uG4i9tDWSrfhX4ceOPbj2KYCWDSrmSjIhggDdxDlPYdNqeVhy1F5AJRJXeTiPpOG1LV7JAUj196cOwW5ttvLhw0SUk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=oqW5LJG9; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="oqW5LJG9"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=9rvPFEC2MVsXs7hPa8zHFKo530p+I6oXYlmvjIl2f6c=; b=oqW5LJG9fBwRuI/xBRFobENbPC
-	E2uvZY4hTPcJzshqHMNSCNbAq1dXR74jh5AhK6rjwJQopAwWdBcjljK/TRLi4yKxlGuQUND23+U8U
-	w5Zkbj04KaIgmIEimRnmZGsrkmc9AMWznDHn4iFp/gJ+S7Wu9MyD79MuzxqNJa8IhFk2I4Y9/iTJ5
-	AUSWR3mcrOicr1F20MyexfpWI0aRj2+sdb+t1QJtkJxTvNn7Uub/5MGetU1EoNeTpgEUYEx53Lf4R
-	5ndHsoHJi23cbvWDVNz5n8B0GgeU76CG/iM63b2QSXHz+1hzOM3mbKOjt0jsx3G9XerWvX2ydjtku
-	rEQfaDWw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1wFmze-0000000B5Fr-2IF8;
-	Thu, 23 Apr 2026 05:52:54 +0000
-Date: Wed, 22 Apr 2026 22:52:54 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Stefan Metzmacher <metze@samba.org>
-Cc: Christoph Hellwig <hch@infradead.org>, linux-cifs@vger.kernel.org,
-	linux-rdma@vger.kernel.org, netdev@vger.kernel.org,
-	samba-technical@lists.samba.org, Tom Talpey <tom@talpey.com>,
-	Steve French <smfrench@gmail.com>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	Namjae Jeon <linkinjeon@kernel.org>,
-	Ilya Dryomov <idryomov@gmail.com>,
+	s=arc-20240116; t=1776939552; c=relaxed/simple;
+	bh=feTfHguK6IgPbsUNExx1LIyM5T3DVA/nZsftLrgp+qg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gyn2L2I8iRAufBnQkG0cSIja6B4utUWGm58oWXKhZxBj3qlVKhzvAfqdUhZH66JgouTiL6oC0iOs8zt8YmDcf7TWdzrrZ9cxfqsw82rQbz0p0J2qGGmHD5zWcRJ8PoGMRKL+ntYB9TCHVgWmXDyUrslat0JLF38UINYkG3dyppg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com; spf=pass smtp.mailfrom=proxmox.com; arc=none smtp.client-ip=94.136.29.106
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=proxmox.com
+Received: from proxmox-new.maurer-it.com (localhost.localdomain [127.0.0.1])
+	by proxmox-new.maurer-it.com (Proxmox) with ESMTP id AE30BC5766;
+	Thu, 23 Apr 2026 12:09:14 +0200 (CEST)
+From: Kefu Chai <k.chai@proxmox.com>
+To: ceph-devel@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>,
 	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org,
-	Jeff Layton <jlayton@kernel.org>, linux-nfs@vger.kernel.org
-Subject: Re: [PATCH] smb: smbdirect: move fs/smb/common/smbdirect/ to
- fs/smb/smbdirect/
-Message-ID: <aemztk8jTqgfKu4y@infradead.org>
-References: <20260419192018.3046449-1-metze@samba.org>
- <aehrPuY60VMcYGU8@infradead.org>
- <9cb0901c-18c5-4858-941c-3b37ee112af9@samba.org>
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	linux-kernel@vger.kernel.org,
+	Kefu Chai <k.chai@proxmox.com>
+Subject: [PATCH] libceph: accept addrvecs with multiple entries of the same type
+Date: Thu, 23 Apr 2026 18:09:04 +0800
+Message-ID: <20260423100904.2336750-1-k.chai@proxmox.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <9cb0901c-18c5-4858-941c-3b37ee112af9@samba.org>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
+X-Bm-Milter-Handled: 55990f41-d878-4baa-be0a-ee34c49e34d2
+X-Bm-Transport-Timestamp: 1776938864932
 
-On Wed, Apr 22, 2026 at 10:16:41AM +0200, Stefan Metzmacher wrote:
-> > Why is this not in net/smbdirect/ or driver/infiniband/ulp/smdirect?
-> 
-> Yes, I also thought about net/smbdirect.
-> 
-> As IPPROTO_SMBDIRECT or PF_SMBDIRECT will be the next step,
-> see the open discussion here:
-> https://lore.kernel.org/linux-cifs/cover.1775571957.git.metze@samba.org/
-> (I'll follow with that discussion soon)
+ceph_decode_entity_addrvec() rejects any addrvec containing more than
+one entry that matches the requested msgr type (LEGACY or MSGR2),
+logging "another match of type N in addrvec" and returning -EINVAL.
+This breaks legitimate deployments where a daemon advertises multiple
+addresses of the same type, most notably dual-stack (IPv4 + IPv6)
+clusters and multi-subnet deployments where tooling picks one address
+per listed public_network.
 
-Seems like it is the right fit then.
+The monmap decoder fails, the client enters a reconnect loop:
 
-> I was just unsure about the consequences, e.g. would
-> the maintainer/pull request flow have to change in that case?
-> Or would Steve be able to take the changes via his trees?
-> Any I also didn't want to offend anybody, so I just took
-> what Linus proposed.
+  libceph: mon0 (1)10.10.10.15:6789 session established
+  libceph: another match of type 1 in addrvec
+  libceph: problem decoding monmap, -22
 
-You might want to ask the sunrpc or ceph maintainers as they have a
-similar split.
+Match the userspace messenger, which since Nautilus picks the first
+entry of the requested type and silently tolerates subsequent entries.
+
+Link: https://tracker.ceph.com/issues/49581
+Link: https://tracker.ceph.com/issues/64068
+Link: https://bugzilla.proxmox.com/show_bug.cgi?id=7518
+Signed-off-by: Kefu Chai <k.chai@proxmox.com>
+---
+
+Tested by reproducing the Proxmox BZ 7518 scenario against a vstart
+cluster whose mon addrvec was edited to contain two v1 + two v2 entries:
+
+    ceph mon set-addrs a \\
+        '[v2:$ip1:$p2/0,v1:$ip1:$p1/0,v2:$ip2:$p2/0,v1:$ip2:$p1/0]'
+
+A Debian VM booted with the patched kernel via 'qemu -kernel' then
+ran 'mount -t ceph ...:$p1:/ /mnt -o name=admin'.  Pre-patch kernels
+fail at monmap decode with "another match of type 1 in addrvec"
+(-EINVAL).  Post-patch, decode succeeds and the mount proceeds to
+the auth / MDS-discovery stages.
+
+Also verified the decoder logic on the monmap.bin attached to BZ 7518
+using a userspace port of ceph_decode_entity_addrvec(): the pre-patch
+form returns -EINVAL on both msgr1 and msgr2 lookups; the post-patch
+form returns 0 and picks the first matching entry.
+
+ net/ceph/decode.c | 11 +++--------
+ 1 file changed, 3 insertions(+), 8 deletions(-)
+
+diff --git a/net/ceph/decode.c b/net/ceph/decode.c
+index bc109a1a4616..b17bc082b4fc 100644
+--- a/net/ceph/decode.c
++++ b/net/ceph/decode.c
+@@ -88,7 +88,8 @@ EXPORT_SYMBOL(ceph_decode_entity_addr);
+ 
+ /*
+  * Return addr of desired type (MSGR2 or LEGACY) or error.
+- * Make sure there is only one match.
++ * If multiple entries of the desired type are present, use the
++ * first one.
+  *
+  * Assume encoding with MSG_ADDR2.
+  */
+@@ -120,13 +121,7 @@ int ceph_decode_entity_addrvec(void **p, void *end, bool msgr2,
+ 			return ret;
+ 
+ 		dout("%s i %d addr %s\n", __func__, i, ceph_pr_addr(&tmp_addr));
+-		if (tmp_addr.type == my_type) {
+-			if (found) {
+-				pr_err("another match of type %d in addrvec\n",
+-				       le32_to_cpu(my_type));
+-				return -EINVAL;
+-			}
+-
++		if (tmp_addr.type == my_type && !found) {
+ 			memcpy(addr, &tmp_addr, sizeof(*addr));
+ 			found = true;
+ 		}
+-- 
+2.47.3
+
 
