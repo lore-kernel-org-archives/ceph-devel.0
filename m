@@ -1,115 +1,129 @@
-Received: from proxmox-new.maurer-it.com (proxmox-new.maurer-it.com [94.136.29.106])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f49.google.com (mail-dl1-f49.google.com [74.125.82.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F191B3E1224;
-	Thu, 23 Apr 2026 10:19:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=94.136.29.106
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776939552; cv=none; b=WjxpqnuOCU4Pdn7Ctq7KhsQ8A1TBhbG5lGecZJyjyg0Y4sIb41S9LvIdJk2Gmtifefqv2t3PM44p1hEiBCHX1v+8mlhiRuuVwq+Fk70KiJAneYWT+81LNiaMcoDp8uNnzyzMkGeTPFM33XWCUEtWxQ2CfSPr7gx7KfCcsbbHiSI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776939552; c=relaxed/simple;
-	bh=feTfHguK6IgPbsUNExx1LIyM5T3DVA/nZsftLrgp+qg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gyn2L2I8iRAufBnQkG0cSIja6B4utUWGm58oWXKhZxBj3qlVKhzvAfqdUhZH66JgouTiL6oC0iOs8zt8YmDcf7TWdzrrZ9cxfqsw82rQbz0p0J2qGGmHD5zWcRJ8PoGMRKL+ntYB9TCHVgWmXDyUrslat0JLF38UINYkG3dyppg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com; spf=pass smtp.mailfrom=proxmox.com; arc=none smtp.client-ip=94.136.29.106
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=proxmox.com
-Received: from proxmox-new.maurer-it.com (localhost.localdomain [127.0.0.1])
-	by proxmox-new.maurer-it.com (Proxmox) with ESMTP id AE30BC5766;
-	Thu, 23 Apr 2026 12:09:14 +0200 (CEST)
-From: Kefu Chai <k.chai@proxmox.com>
-To: ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>,
-	linux-kernel@vger.kernel.org,
-	Kefu Chai <k.chai@proxmox.com>
-Subject: [PATCH] libceph: accept addrvecs with multiple entries of the same type
-Date: Thu, 23 Apr 2026 18:09:04 +0800
-Message-ID: <20260423100904.2336750-1-k.chai@proxmox.com>
-X-Mailer: git-send-email 2.47.3
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9751F23AB9D
+	for <ceph-devel@vger.kernel.org>; Thu, 23 Apr 2026 10:35:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.49
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776940518; cv=pass; b=e4i6dTnZ1CHz53rBnU/zHoi6OEeBQfwZgw8h8C5gY+RlQkKAhg++KZlxvrd9ABSpgu5vQOp02G8VZcJ44wIJwUMRQTho2b5zyQfRVBtoin3BusQfGvpQh010V4BkjAa8824ADE7r/PZ3ikPlPdw16x4KsNub2a/0ZubrjSnqAJA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776940518; c=relaxed/simple;
+	bh=BXC+LeXncZBU6bkPxvBsoOCWbiBsY5i65vLwdIrGt64=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=gh2HkSnthLMIRZURl7ilF61vOxFwsP80igaPgQ9d0zE6oKm2GIUypOlwAkGrkN9BC0WAoBXMUyUOgtW318HvJ6njK3VmJbNb9iQLB5hoQ1f2zi3Whh1HntRskwhR5i+kyfyYNlg3m9zEcuOjSRGL2uxa2ehPL7RnKNGMy0CXj2E=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FKAS4mmM; arc=pass smtp.client-ip=74.125.82.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FKAS4mmM"
+Received: by mail-dl1-f49.google.com with SMTP id a92af1059eb24-1279eced0b9so9521061c88.0
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Apr 2026 03:35:17 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776940517; cv=none;
+        d=google.com; s=arc-20240605;
+        b=G15SFSHGEWJgTRJSGyv2srPyCg+9pRxyLbWLUJIkG9TrKHb+ILJPfyeXTs/h+wHhRP
+         V/f7ps3329n+4Csw7AZ2vpJpf43HIHU0JBC0s/Co+EOrB5EXxHkTaPiw2UtytKrlNHdz
+         8n5WwUcsPj4o6qnsjdTcNgFMs0FR3Kgxmm0asAle/+vDeWE2pKEyM5DIUSTWI6aWSkLf
+         A21/Fn7aw6MWVi5u1STPP4sxyYHqt9bEs5o6jIQ4M0iy3hIYg883DFuf9JqBnxttYFZS
+         XD0HLHklY5v/7QYC6MnZOqz88G1VKtpc2D4OxOTZd6ASYozUrF6B2jbTW67NS+j+a6jC
+         mnzQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=OwiAv+9dvo63WFf0DfIy1mnFWCFx44dnSEZsCWN1fX4=;
+        fh=2H0Lt+N2MG9NlMVTXMuJxDjWjYn21cK5l1nGndtQCUo=;
+        b=YDBb2IBvfeAZB9BvRc7xZVYcTLQIIsWvNKG7MYoEmDGPHDGXRBOrDwIl2NnXQve7C5
+         HR7IhE2h07DwGpAwfDq/PVB4YJDO+MVrn09K1svsV8whRzUZbEf9oH0oNHRMVmWMF3S+
+         1V/nRCjEYiZIC1o1ypBo5orpJRoTIghbdDJ7IlJKEIIS0D95Ii5cbSmbCdTcGy/jKzkF
+         A7ZyOV2yDuEiLHeYeJKWWKb/O3owoVdLHpf1SKKQlBQqatjit2VAQJBA1bJEqE+zU1yj
+         5BhqM30zODoTor6B4+8kjwNouKsYSjgVrk5wLsdxvnXW5NJaCLNXH5A4AGHk1x1Q0O7V
+         Z94g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1776940517; x=1777545317; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=OwiAv+9dvo63WFf0DfIy1mnFWCFx44dnSEZsCWN1fX4=;
+        b=FKAS4mmM1EfoYCG90zDjOx6KYxJxuYBNdLLnCPhIJOPqkueQKneBqvHbzswgDdiKjj
+         +1wLY3mNBSo/vblDPL3bko4cw6k84zXkNwu9oWH2+u80kN/8zQ+a8GyZlStFprkYks8I
+         Fs9rpCQgDBYRv0RR3NPx4rcC17RqQNLvv/hsWzEej4+QeoXxHAm1go+YwK1uEiNT+jKX
+         G3D/seaWdzIUBmH/NLbOin4YSMCdXb+mBVk7bsN0kohRwzCO/sZWCNlTsDbpCRSWnHXE
+         au4/HraT4MQhOfDCh13uYguiQoDMuVsBFamWL7SA6Bzoj558tbHAlg/Q9KjtUPljWTkO
+         Nv2w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776940517; x=1777545317;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=OwiAv+9dvo63WFf0DfIy1mnFWCFx44dnSEZsCWN1fX4=;
+        b=CYV1b2o/AEICiFzzOihyH0SG5LwOmmYuybzrWrmUIe+jgowCC94EqXxQUPLd2rIVRa
+         KmVPFEhqhmULiuJgNyu1+RVG5IpccqmSRYHd2BxxLi4ndLGxroE82i4jtaomLYc0mVtR
+         JdfWb2ROZ/NHIOlaGWdo08KzqlstBlP40irILgNwYsyyE+gcoFIGAq/Kg63OwcOTZKfb
+         BdV0fE3YUC3OxryFd1aPshqmhhm8I81/BMu/mL1t6kwXEGqu/m7jsAXmJ6o0DxKYS4Qw
+         5l3SJa/AfHY7LNOLTmPBOdkaYssc0F2Vhk4ZtwO+cTIeMt3aXICIKdgdgtJFW2jGVNfE
+         AtMQ==
+X-Gm-Message-State: AOJu0Yz42dtlVefR0zltW6jhd7iL2Hf1IQYt8StNZFd7eHEY7ietlEbL
+	LlFfO0Q3xNqHjfouqjdOgZ55VSdsXcHKR1Q0ks0ntrUg0wn2gs6rqpCcYjTwTPwTYjp6ac3dqtl
+	Erz3oQGRZSidG0MnEJo5jQzRhY3lWu64=
+X-Gm-Gg: AeBDiesqj4Pkoi9KEodBe67+cTHUnDMPB9GSmCXz5LYi+xHgf01dQ1+Y8oKn/zA1JMB
+	dn/6lR3+LDqmWUQx9/wgViwwzNlr8B/Jl9/qS8Ysmj238OeoAtf0K30YT9O7SLttmQLHrfzoxdy
+	kXrjOKWpiKW0md5/eaWf/Qh3M1J3iKQZ4G8W5kvWBjGe6pcRlAgID1D300ci78DT/skhC9FgpAz
+	a9lDQo2UQfwuVr3PhFFyqZ0wvFfQUCImitmctkBT70DZ+g66+LOXUoKMOc/gkW2OjfPF5jNJx94
+	5rVN9KcnnoRQVH+Uiw==
+X-Received: by 2002:a05:7022:6728:b0:128:cf5c:535a with SMTP id
+ a92af1059eb24-12c73f7595emr14698985c88.11.1776940516595; Thu, 23 Apr 2026
+ 03:35:16 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Bm-Milter-Handled: 55990f41-d878-4baa-be0a-ee34c49e34d2
-X-Bm-Transport-Timestamp: 1776938864932
+References: <20260423100904.2336750-1-k.chai@proxmox.com>
+In-Reply-To: <20260423100904.2336750-1-k.chai@proxmox.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Thu, 23 Apr 2026 12:35:05 +0200
+X-Gm-Features: AQROBzAF6kmEV4gwl93pWKt8OtV-yE4bTf9dDTuyM4XdneFljqbQjcu2u89ygXM
+Message-ID: <CAOi1vP_=Z9n8aEBZtqLuedfUDka2_80xc28NKWcR5ijgZwUT0Q@mail.gmail.com>
+Subject: Re: [PATCH] libceph: accept addrvecs with multiple entries of the
+ same type
+To: Kefu Chai <k.chai@proxmox.com>
+Cc: ceph-devel@vger.kernel.org, Alex Markuze <amarkuze@redhat.com>, 
+	Viacheslav Dubeyko <slava@dubeyko.com>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-ceph_decode_entity_addrvec() rejects any addrvec containing more than
-one entry that matches the requested msgr type (LEGACY or MSGR2),
-logging "another match of type N in addrvec" and returning -EINVAL.
-This breaks legitimate deployments where a daemon advertises multiple
-addresses of the same type, most notably dual-stack (IPv4 + IPv6)
-clusters and multi-subnet deployments where tooling picks one address
-per listed public_network.
+On Thu, Apr 23, 2026 at 12:09=E2=80=AFPM Kefu Chai <k.chai@proxmox.com> wro=
+te:
+>
+> ceph_decode_entity_addrvec() rejects any addrvec containing more than
+> one entry that matches the requested msgr type (LEGACY or MSGR2),
+> logging "another match of type N in addrvec" and returning -EINVAL.
+> This breaks legitimate deployments where a daemon advertises multiple
+> addresses of the same type, most notably dual-stack (IPv4 + IPv6)
+> clusters
 
-The monmap decoder fails, the client enters a reconnect loop:
+Hi Kefu,
 
-  libceph: mon0 (1)10.10.10.15:6789 session established
-  libceph: another match of type 1 in addrvec
-  libceph: problem decoding monmap, -22
+My understanding is that dual-stack isn't supported in general:
+https://tracker.ceph.com/issues/65631.  The respective references were
+purged from the documentation with Radoslaw (offline?) ack.
 
-Match the userspace messenger, which since Nautilus picks the first
-entry of the requested type and silently tolerates subsequent entries.
+> and multi-subnet deployments where tooling picks one address
+> per listed public_network.
 
-Link: https://tracker.ceph.com/issues/49581
-Link: https://tracker.ceph.com/issues/64068
-Link: https://bugzilla.proxmox.com/show_bug.cgi?id=7518
-Signed-off-by: Kefu Chai <k.chai@proxmox.com>
----
+Can you elaborate on when such tooling kicks in, what exactly does it
+do and the use case in general?  It's not immediately obvious to me how
+having two addresses of the same type/stack and simply ignoring the
+second one is better than insisting on having a just single address.
 
-Tested by reproducing the Proxmox BZ 7518 scenario against a vstart
-cluster whose mon addrvec was edited to contain two v1 + two v2 entries:
+> Match the userspace messenger, which since Nautilus picks the first
+> entry of the requested type and silently tolerates subsequent entries.
 
-    ceph mon set-addrs a \\
-        '[v2:$ip1:$p2/0,v1:$ip1:$p1/0,v2:$ip2:$p2/0,v1:$ip2:$p1/0]'
+Do you have a reference to a specific commit?  I'm wondering if it
+isn't on that "merged more or less accidentally" list.
 
-A Debian VM booted with the patched kernel via 'qemu -kernel' then
-ran 'mount -t ceph ...:$p1:/ /mnt -o name=admin'.  Pre-patch kernels
-fail at monmap decode with "another match of type 1 in addrvec"
-(-EINVAL).  Post-patch, decode succeeds and the mount proceeds to
-the auth / MDS-discovery stages.
+Thanks,
 
-Also verified the decoder logic on the monmap.bin attached to BZ 7518
-using a userspace port of ceph_decode_entity_addrvec(): the pre-patch
-form returns -EINVAL on both msgr1 and msgr2 lookups; the post-patch
-form returns 0 and picks the first matching entry.
-
- net/ceph/decode.c | 11 +++--------
- 1 file changed, 3 insertions(+), 8 deletions(-)
-
-diff --git a/net/ceph/decode.c b/net/ceph/decode.c
-index bc109a1a4616..b17bc082b4fc 100644
---- a/net/ceph/decode.c
-+++ b/net/ceph/decode.c
-@@ -88,7 +88,8 @@ EXPORT_SYMBOL(ceph_decode_entity_addr);
- 
- /*
-  * Return addr of desired type (MSGR2 or LEGACY) or error.
-- * Make sure there is only one match.
-+ * If multiple entries of the desired type are present, use the
-+ * first one.
-  *
-  * Assume encoding with MSG_ADDR2.
-  */
-@@ -120,13 +121,7 @@ int ceph_decode_entity_addrvec(void **p, void *end, bool msgr2,
- 			return ret;
- 
- 		dout("%s i %d addr %s\n", __func__, i, ceph_pr_addr(&tmp_addr));
--		if (tmp_addr.type == my_type) {
--			if (found) {
--				pr_err("another match of type %d in addrvec\n",
--				       le32_to_cpu(my_type));
--				return -EINVAL;
--			}
--
-+		if (tmp_addr.type == my_type && !found) {
- 			memcpy(addr, &tmp_addr, sizeof(*addr));
- 			found = true;
- 		}
--- 
-2.47.3
-
-
+                Ilya
