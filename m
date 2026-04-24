@@ -1,176 +1,123 @@
-Received: from mail-dl1-f43.google.com (mail-dl1-f43.google.com [74.125.82.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22D77342523
-	for <ceph-devel@vger.kernel.org>; Fri, 24 Apr 2026 10:22:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.43
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777026140; cv=pass; b=bbQgqigXaBhg0gkjWG6829LFOyPAxzjG1wPRoV90EVFArqEKFxDvkk8OgLEdUt+nBo+6a4EE1M5K/iXGJLTHfTe2PZIDWRu7Pw7O5hbt3GVj3BeObBUszcC+tJRiUh/nugjMXL+CTuVG584TQacD3yKgQdaGyxyIbpC80stx/Ug=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777026140; c=relaxed/simple;
-	bh=qwkdZtPwPaCl3X89xMpkQSbOGgQa5R8LkAKoZCqUTeQ=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=M817OuliNZYGD1q3FJ4IVu4gOfYUN21Zu1ZkV/JMgxOvLosMAJsO9ibKuztcN9FsGPUDHVEhVg4WEaOXOMl58vNkt59IMkflTIXBt+0Jz/49W7NI0nEkciUex/sxr4qv/Vk+VTOKbIeP4KUAxBUAwP2oaAZHz+cQql82WYoKwJY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dF9Kufm9; arc=pass smtp.client-ip=74.125.82.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E28F35DA77;
+	Fri, 24 Apr 2026 10:39:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777027178; cv=none; b=sQcxsgGfR5+kGsqadnbdqVUJH2wGP/bWYYtNGMk0/GwnG8/DhYLkmn2v20eOxuzNCoMuZYMCI3mJYyGlzGD17AGkMHhAt/CJMsjkZ849Ip6Dk0FwX9VCHKubk+IG1sEycsvjwTwAzEdQfWQBNqded3gwDeyxBRqofTHifWZPb6g=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777027178; c=relaxed/simple;
+	bh=WMZAm4Rkd/G6zoxhnbgT2Z4AwiPfeM55bL2lVaTdh78=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ofGa6Bobop94m1zHoZYxO7KoV6udD/KzgmRIZah4y9IeDMQhqc5WnV1WARQtT8ZL4kxjOv7/wwhZTt4D1jhw2eA0bH8mA+Kn+9xOiw+h9d8TeAmJyvL3cm6J0adfpZQW3YpHE5piQvH9/PmLh3FubL6SZ58VdRL7JPcj50CjRro=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EQVyEK1/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dF9Kufm9"
-Received: by mail-dl1-f43.google.com with SMTP id a92af1059eb24-12c565476d7so3133840c88.1
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Apr 2026 03:22:19 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1777026138; cv=none;
-        d=google.com; s=arc-20240605;
-        b=jpyc6I9XuYGhoNcRW/wpOsgJUEComDl2roOlpfIlAsi+thj5ytBABxW14O7f94svEI
-         5tPf6b5yOTEo03wzGgMuL804/ttKYBvK6OCW95LcC44AIKPcUcQAhPHqrs8GMC9wRW+w
-         gM/VpQWQ0cq6XmC1mOmWx/yDhxdGpjNd/bBA7t4+UvAVSFUsokx/OBR0gN4hGS0HRsa1
-         B5jnS00bSKa6VAmUzXeGbuTnKW0Hz+bCmUWmijzuKTpVVjzOEV09MAFHZ1H3Wrerrt0P
-         N1o5THnSlmSzSoHcht6tPupllMWOV1UAvEGJnw4w57Lw4Qe94yw5huSsRlvHzkJnIWOv
-         XkKg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=eheeWEUfzmB0M3rbJTls4P9xIKSst+zUcfI2+fpkm+A=;
-        fh=Gj7/q5pQM8PSakwveabuaj8rkedXSNliwxjvUWb8Viw=;
-        b=Nw/nRsjDGUty3XygHbcij5HiZ/2u+Nh2IgICs/b2AW5qw2oqOTJQXjN4eoSMslwP8I
-         JiSPMNsjKMXxS6v3uNUjzoip/NRHJMIoqteHFHiOxIT2UzXGnY2YsQugDx21bPu3pkjd
-         Xafk1MZQ/zrGGmmF8edinQ/6yVEDDB/78zcP4MHUPulpDrNkHb863pvTlNGqm0wAH8NL
-         IgTQIrpoXEWppw6pSmz3PT6j2wU4gz6c9fHqpRBFf6uYQNvAt7uoX+NQPHzqIEbZHQza
-         dvNc5IOiu1iH5xkFknDCQ1Qh6PJsU7rcTnOBfE/xysVyhpGWBkY7KzXMADMdGU+eiy4Y
-         pFlQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777026138; x=1777630938; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=eheeWEUfzmB0M3rbJTls4P9xIKSst+zUcfI2+fpkm+A=;
-        b=dF9Kufm9P6JLHF1Ah/BuRdPnuFsOEcb53/f02YtPm1rNiCCnG65Yuz5h2GRIfB3f4c
-         qO8cvRSgrjkigggy00HXibJ69hh5dsfdPSHqQxaHLanPDnlTjHE3ZxD2xbe65F3cDSo8
-         13LmfRPxmhY4hBhlpZUsbIFBFj74l6debFqAr9OhPSbFn22TiRHBenTj3AXIpGpRfOgV
-         Vr/1u8BofQ+rrlt8rTgW5YHfqieKtlNb3EQyF0FfbfGyMtDImOMMVtXHDAzXVVa+/FZm
-         04phSCXmy9seUIYMy8a9lq2OlzkL34fYR5teVO8c/0nEGb8/rowUOIyRh4jlGrQSVQ2t
-         D29A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777026138; x=1777630938;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=eheeWEUfzmB0M3rbJTls4P9xIKSst+zUcfI2+fpkm+A=;
-        b=DNiP5rpAXBwltyGJixptWZI8zEZS8BOsFKOiDt/rWKnCgWf0IwK/IwdctplhIO3S7J
-         OVhpNfTF2DhvTliUn0aFx4HZfj4SNW1tiBIBrddx/3IHpiPILRdOXvcqtONojn+eiXSW
-         ykCDtHHqx/c6GQGYwt6v8NVCB6XGYZryq0qsK97hCj6Wc4cu7aSNF4UKNd+QXgSjBkaE
-         k5RpDWhobfS37YnMpirODMgjiKiG6glGEXfoiujuiuS6g6rKoo433tBj1jIfvI1zcdOm
-         WeTSyFdI0doxf8xpLXGcl2hmr0iCajDCfjPkJnskKfudk3Sb0ZVBrNR1c6Km9KOEty2p
-         w2tw==
-X-Forwarded-Encrypted: i=1; AFNElJ+T/i9S5W6AbKUDiLzrH4m+KYXOmT1TD2GBHUsMnWY0kaBmEZWUCpwtmSXZ8c6lPbVuD28JkF9OCh1D@vger.kernel.org
-X-Gm-Message-State: AOJu0YwitjF7NXlQb7a6JF+fsf/A8g3W4cIisMSBBWvIETaMLjJ8Zfwv
-	gDClKXSpBE4GKcgHUm6teXkoxEY8LabVT6xJAxjbGQMr/XkBJ05KSKeDu5ZNQN3h3FO/uH/02Yj
-	XGZPYaTJOMWRUw4xj7kVP5OCnhVN3nkQ=
-X-Gm-Gg: AeBDieuGQS8P5CHA9TTlq/uQ2ED1dFOTiMok0Ut1tCCQbZdpl/VIoaa4UfmJmn0CHbp
-	zyj20u0D/Q21o5PETmULkUaus3dffYyWuniUYKW7WR4DW4uekxJlyj5LtLaW/gItFvGbTgUnC1Y
-	y+asByZKeOW2Jq+7ULcVvYdN33lub2y0awxJQlpIcN+xwnHcai8j8QGIOSuzPIzI7foE1WfnFkD
-	uivpz+umQeGNhmitISfphzXPkzWV9xHvEZro2l+UXcoq5X2iGzt7K68Ttigczd/82r6wNUqJwgr
-	IhLOtgl/B4hN7GhIWA==
-X-Received: by 2002:a05:7022:513:b0:12a:b3c4:c3b6 with SMTP id
- a92af1059eb24-12c73f998b1mr16786993c88.21.1777026138293; Fri, 24 Apr 2026
- 03:22:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EQVyEK1/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC18CC19425;
+	Fri, 24 Apr 2026 10:39:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1777027178;
+	bh=WMZAm4Rkd/G6zoxhnbgT2Z4AwiPfeM55bL2lVaTdh78=;
+	h=From:To:Cc:Subject:Date:From;
+	b=EQVyEK1/uItUUuh5+Y9/o0f3/AC/iPssSPCn/kxSQSXYA3cZG6jGx2avMZyVzE0sv
+	 Jz+Zuhj334/MJnaAGFX7he+xF/2GhDpVe5RKLnb3G3rGCqnqLY45CaYv3P/x0lyhek
+	 3thKBDkjp9ioMcdCqm3nBQa/IYE4Ha0jLjHOt+Y/0KClVz61f+gsHCIMwr/iDtd1Fg
+	 TSUa7LWlV3MHa8oMma0trlsEru5ZGj10LTnOgs7u40G9x8NvhA3Z8h3xocraBXpWfY
+	 os1hz+Xj99U0Z70fQ9OxZNEYAjyMcerEeXY6ikZVzDqC8rumpkyW76UrSWf/gLOsG2
+	 ZFv+R6c+N0Sfw==
+Received: from johan by xi.lan with local (Exim 4.98.2)
+	(envelope-from <johan@kernel.org>)
+	id 1wGDwd-0000000AymI-3F8t;
+	Fri, 24 Apr 2026 12:39:35 +0200
+From: Johan Hovold <johan@kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Dongsheng Yang <dongsheng.yang@linux.dev>,
+	Jens Axboe <axboe@kernel.dk>,
+	ceph-devel@vger.kernel.org,
+	linux-block@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Johan Hovold <johan@kernel.org>
+Subject: [PATCH] block: rbd: switch to dynamic root device
+Date: Fri, 24 Apr 2026 12:39:31 +0200
+Message-ID: <20260424103931.2616903-1-johan@kernel.org>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260409191517.318015-2-slava@dubeyko.com> <CAOi1vP_OFnzuJB438=L_MUS2K0m7j49en=U2K19ZrH-xYUzaLQ@mail.gmail.com>
- <1a5b5d23dc54c9099643795bfad9f14705505fed.camel@ibm.com>
-In-Reply-To: <1a5b5d23dc54c9099643795bfad9f14705505fed.camel@ibm.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Fri, 24 Apr 2026 12:22:04 +0200
-X-Gm-Features: AQROBzBqIrAEqAV7UyZiBn9NAaxN5qQFbZC7UoDQrtfspODu3u6onvyUqBQd-G0
-Message-ID: <CAOi1vP95f6x5LX0TmsKxG6k57mCq3HdGBQRL5UJR7sprjHLq-Q@mail.gmail.com>
-Subject: Re: [PATCH] libceph: switch ceph-msgr workqueue from WQ_PERCPU to WQ_UNBOUND
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: "slava@dubeyko.com" <slava@dubeyko.com>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 
-	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>, 
-	Alex Markuze <amarkuze@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Thu, Apr 23, 2026 at 7:59=E2=80=AFPM Viacheslav Dubeyko
-<Slava.Dubeyko@ibm.com> wrote:
->
-> On Wed, 2026-04-22 at 17:34 +0200, Ilya Dryomov wrote:
-> > On Thu, Apr 9, 2026 at 9:15=E2=80=AFPM Viacheslav Dubeyko <slava@dubeyk=
-o.com> wrote:
-> > >
-> > > From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-> > >
-> > > The ceph-msgr workqueue was changed to use WQ_PERCPU in commit
-> > > 27ce71e1ce81 ("net: WQ_PERCPU added to alloc_workqueue users") as par=
-t
-> > > of a tree-wide transition to make per-CPU workqueue binding explicit.
-> > >
-> > > However, ceph_con_workfn contains a while(true) loop that retries on
-> > > -EAGAIN from socket reads and writes, making it capable of hogging a
-> > > bound CPU for extended periods. This manifests at runtime as:
-> >
-> > Hi Slava,
-> >
-> > ceph_con_workfn() does have a loop, but it doesn't retry EAGAIN from
-> > the socket.  Both msgr1 and msgr2 munge EAGAIN from the socket to 0 to
-> > indicate the "socket is empty/full, need to wait" condition.  See
-> > do_recvmsg() and do_sendmsg() for msgr2 and ceph_tcp_*() for msgr1.
-> > For example:
-> >
-> >     ret =3D sock_recvmsg(sock, &msg, msg.msg_flags);
-> >     if (ret <=3D 0) {
-> >             if (ret =3D=3D -EAGAIN)
-> >                     ret =3D 0;
-> >             return ret;
-> >     }
-> >
-> > Ignoring opening, closing and a couple of other special cases,
-> > ceph_con_workfn() starts by trying to read.  When the read side of the
-> > socket becomes empty, it proceeds to trying to write.  When the write
-> > side of the socket becomes full, ceph_con_workfn() terminates.  It
-> > doesn't even go back to trying to read, so I fail to see the potential
-> > for what you have described.
-> >
-> > >
-> > >   workqueue: ceph_con_workfn hogged CPU for >10000us N times,
-> > >   consider switching to WQ_UNBOUND
-> > >
-> > > Switch the workqueue to WQ_UNBOUND so the scheduler can freely place
-> > > workers across CPUs, preventing starvation of other work items on the
-> > > bound CPU. The loss of cache locality is acceptable for network I/O
-> > > work.
-> >
-> > This might be true, but I'm not sure this conclusion can be made
-> > without at least some benchmarking.
->
-> My system log is full of likewise messages "workqueue: ceph_con_workfn ho=
-gged
-> CPU for >10000us N times, consider switching to WQ_UNBOUND" when I am tes=
-ting
-> the CephFS kernel client by means of xfstests. Which particular benchmark=
-ing
-> would you like to see?
+Driver core expects devices to be dynamically allocated and will, for
+example, complain loudly when no release function has been provided.
 
-Hi Slava,
+Use root_device_register() to allocate and register the root device
+instead of open coding using a static device.
 
-What kind of a system is it?  If it's a small VM, the backing Ceph
-cluster is a vstart-style deployment co-located on the same node and
-the node itself isn't beefy, the performance profile may be very
-different from real world setups.
+Signed-off-by: Johan Hovold <johan@kernel.org>
+---
+ drivers/block/rbd.c | 23 +++++++----------------
+ 1 file changed, 7 insertions(+), 16 deletions(-)
 
-The first step would be determining the source of the hogging.  One
-thing to keep in mind is that OSD and MDS request callbacks are executed
-in-line (i.e. from ceph-msgr worker threads).  If there is evidence of
-significant lock contention or any other activity that can potentially
-hog the CPU inside of e.g. MDS client's handle_reply() that would be
-the thing to look into and fix, not the messenger.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index e7da06200c1e..ffab1b4e7c25 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -580,14 +580,7 @@ static const struct bus_type rbd_bus_type = {
+ 	.bus_groups	= rbd_bus_groups,
+ };
+ 
+-static void rbd_root_dev_release(struct device *dev)
+-{
+-}
+-
+-static struct device rbd_root_dev = {
+-	.init_name =    "rbd",
+-	.release =      rbd_root_dev_release,
+-};
++static struct device *rbd_root_dev;
+ 
+ static __printf(2, 3)
+ void rbd_warn(struct rbd_device *rbd_dev, const char *fmt, ...)
+@@ -5390,7 +5383,7 @@ static struct rbd_device *__rbd_dev_create(struct rbd_spec *spec)
+ 
+ 	rbd_dev->dev.bus = &rbd_bus_type;
+ 	rbd_dev->dev.type = &rbd_device_type;
+-	rbd_dev->dev.parent = &rbd_root_dev;
++	rbd_dev->dev.parent = rbd_root_dev;
+ 	device_initialize(&rbd_dev->dev);
+ 
+ 	return rbd_dev;
+@@ -7331,15 +7324,13 @@ static int __init rbd_sysfs_init(void)
+ {
+ 	int ret;
+ 
+-	ret = device_register(&rbd_root_dev);
+-	if (ret < 0) {
+-		put_device(&rbd_root_dev);
+-		return ret;
+-	}
++	rbd_root_dev = root_device_register("rbd");
++	if (IS_ERR(rbd_root_dev))
++		return PTR_ERR(rbd_root_dev);
+ 
+ 	ret = bus_register(&rbd_bus_type);
+ 	if (ret < 0)
+-		device_unregister(&rbd_root_dev);
++		root_device_unregister(rbd_root_dev);
+ 
+ 	return ret;
+ }
+@@ -7347,7 +7338,7 @@ static int __init rbd_sysfs_init(void)
+ static void __exit rbd_sysfs_cleanup(void)
+ {
+ 	bus_unregister(&rbd_bus_type);
+-	device_unregister(&rbd_root_dev);
++	root_device_unregister(rbd_root_dev);
+ }
+ 
+ static int __init rbd_slab_init(void)
+-- 
+2.53.0
 
-Thanks,
-
-                Ilya
