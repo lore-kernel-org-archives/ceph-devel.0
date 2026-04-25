@@ -1,732 +1,202 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from proxmox-new.maurer-it.com (proxmox-new.maurer-it.com [94.136.29.106])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19CD239D6EE
-	for <ceph-devel@vger.kernel.org>; Sat, 25 Apr 2026 12:56:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 400F634C808;
+	Sat, 25 Apr 2026 12:57:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=94.136.29.106
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777121772; cv=none; b=kAH6iw4nLhe8EPI/v73NQ9liD/zP2H7tfRpJ5+f8eVYXZgfVVYTCR6b4g+m7w1mydLARbzbZkGhx4XTjR5wjVbiELgsgvmGF03dUcmT/WpStFGLCexaRekniR5mRvnhJpfzZ/Sf/OaLJEqbE2sLW/p285aqXatR3goDIhpWrhpQ=
+	t=1777121832; cv=none; b=tcU/qlKwOlAll6Qtr3520OHEO80oUZ1ZmDHcAZ4l2+QC92OtKE5QQJyKju4I5PYOxeG/JuMCCiYHh/4OVkiq4a5Uy4e+hz4oL6au4xQguu6YU11P75MJF0ijrxxUoGlisS0h4mY8x8wDG1Y30eZZ0vw3d+cqkEkOIgy3YvqF/ec=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777121772; c=relaxed/simple;
-	bh=kw2ph8ABWMFW8tR55XpKSH31TjAqka9pQ8vYplEDMbQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=dqVRpXw6zYJlq5saMVDrByCtjjerVDGDoh5PLzO+q/jBU7N9hJLGUTgmCztQavTbwzCHJz/+R7gtkVRi3WQYjm+EUalQq8R5YLFdRVmCMcDGgIP9KhKCRBptnpHAOXKa2iQvGfe/aH2vkFEo9YDjW+XO5zZM/PuTGkKBAN6n8/Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=K4Xe0FAj; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="K4Xe0FAj"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777121769;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=IWpVZfCnfPMvlRQ9r7wWIQ56Qq3yXfMQ6qgWCReefRo=;
-	b=K4Xe0FAjVGduNg6Q+PSFs4GK+9J2CdZDXAhoY27NbOO3ZOPEN56SYWLe2+nuMFegL1SFVD
-	EY/1FLo0o+4vd8yd0yu6FQd/keLHB8/+sEqasrADMKpSSsRFTgqqVklkb6LmkbVKeRL2Kp
-	fclLPrg7dEit4jz0giP1cqV70FOLkd0=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-250-zJ_0kpNLMbqgjL8Oyj5Llw-1; Sat,
- 25 Apr 2026 08:56:07 -0400
-X-MC-Unique: zJ_0kpNLMbqgjL8Oyj5Llw-1
-X-Mimecast-MFC-AGG-ID: zJ_0kpNLMbqgjL8Oyj5Llw_1777121765
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 991C319560AF;
-	Sat, 25 Apr 2026 12:56:05 +0000 (UTC)
-Received: from warthog.procyon.org.com (unknown [10.44.48.17])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 953061944CED;
-	Sat, 25 Apr 2026 12:56:02 +0000 (UTC)
-From: David Howells <dhowells@redhat.com>
-To: Christian Brauner <christian@brauner.io>
-Cc: David Howells <dhowells@redhat.com>,
-	Paulo Alcantara <pc@manguebit.org>,
-	netfs@lists.linux.dev,
-	linux-afs@lists.infradead.org,
-	linux-cifs@vger.kernel.org,
-	ceph-devel@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Marc Dionne <marc.dionne@auristor.com>
-Subject: [PATCH v3 19/19] afs: Fix RCU handling of symlinks in RCU pathwalk
-Date: Sat, 25 Apr 2026 13:54:23 +0100
-Message-ID: <20260425125426.3855807-20-dhowells@redhat.com>
-In-Reply-To: <20260425125426.3855807-1-dhowells@redhat.com>
-References: <20260425125426.3855807-1-dhowells@redhat.com>
+	s=arc-20240116; t=1777121832; c=relaxed/simple;
+	bh=MSEBLKpwWzFw4/b4BcdpcVW9kyCUCBNlDWxMu1A7vdU=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=uGC2T7cwAGMrt8148pa48lf98swWEYRnEVL9XmQsaCx8XQHPS/9qaaOMins58JbsoWbrt2ZF/GnT9T4AVegnBuqL+vhSrJNWPM39kfXBTyXwtKUMaBXjSzZxUBRQtKiX8PcsWZAddz8KDHv/SI+Jd5bPMUaOWluiHBGiKN0rGpc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com; spf=pass smtp.mailfrom=proxmox.com; arc=none smtp.client-ip=94.136.29.106
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=proxmox.com
+Received: from proxmox-new.maurer-it.com (localhost.localdomain [127.0.0.1])
+	by proxmox-new.maurer-it.com (Proxmox) with ESMTP id DC5364A004;
+	Sat, 25 Apr 2026 14:57:06 +0200 (CEST)
+From: Kefu Chai <k.chai@proxmox.com>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Alex Markuze <amarkuze@redhat.com>,
+ Viacheslav Dubeyko <slava@dubeyko.com>, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] libceph: accept addrvecs with multiple entries of the
+ same type
+In-Reply-To: <CAOi1vP8aOtKbcJFU40W_-Os__G9oahNrkMHS4gRaEcrjs-1cNA@mail.gmail.com>
+References: <20260423100904.2336750-1-k.chai@proxmox.com>
+ <CAOi1vP_=Z9n8aEBZtqLuedfUDka2_80xc28NKWcR5ijgZwUT0Q@mail.gmail.com>
+ <87y0idhpfa.fsf@proxmox.com>
+ <CAOi1vP8aOtKbcJFU40W_-Os__G9oahNrkMHS4gRaEcrjs-1cNA@mail.gmail.com>
+Date: Sat, 25 Apr 2026 20:56:59 +0800
+Message-ID: <87tsszgpus.fsf@proxmox.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+X-Bm-Milter-Handled: 55990f41-d878-4baa-be0a-ee34c49e34d2
+X-Bm-Transport-Timestamp: 1777121733571
 
-The afs filesystem in the kernel doesn't handle RCU pathwalk of symlinks
-correctly.  The problem is twofold: firstly, it doesn't treat the buffer
-pointers as RCU pointers with the appropriate barriering; and secondly, it
-can race with another thread updating the contents of the symlink because a
-third party updated it on the server.
+Ilya Dryomov <idryomov@gmail.com> writes:
 
-Fix this by the following means:
+> On Thu, Apr 23, 2026 at 1:44=E2=80=AFPM Kefu Chai <k.chai@proxmox.com> wr=
+ote:
+>>
+>> Ilya Dryomov <idryomov@gmail.com> writes:
+>>
+>> > On Thu, Apr 23, 2026 at 12:09=E2=80=AFPM Kefu Chai <k.chai@proxmox.com=
+> wrote:
+>> >>
+>> >> ceph_decode_entity_addrvec() rejects any addrvec containing more than
+>> >> one entry that matches the requested msgr type (LEGACY or MSGR2),
+>> >> logging "another match of type N in addrvec" and returning -EINVAL.
+>> >> This breaks legitimate deployments where a daemon advertises multiple
+>> >> addresses of the same type, most notably dual-stack (IPv4 + IPv6)
+>> >> clusters
+>> >
+>> > Hi Kefu,
+>> >
+>>
+>> Hi Ilya,
+>>
+>> >
+>> > My understanding is that dual-stack isn't supported in general:
+>> > https://tracker.ceph.com/issues/65631.  The respective references were
+>> > purged from the documentation with Radoslaw (offline?) ack.
+>> >
+>>
+>> Yeah, you are right. I was overreaching. Dual-stack and
+>> heterogeneous-subnet clients are not served by multi-entry addrvecs, and
+>> the patch does not change that.
+>>
+>> >
+>> >> and multi-subnet deployments where tooling picks one address
+>> >> per listed public_network.
+>> >
+>> > Can you elaborate on when such tooling kicks in, what exactly does it
+>> > do and the use case in general?  It's not immediately obvious to me how
+>> > having two addresses of the same type/stack and simply ignoring the
+>> > second one is better than insisting on having a just single address.
+>> >
+>>
+>> Sure. The narrow case that remains is compatibility. Admin tooling built
+>> around public_addrv and ceph mon set-addrs produces addrvecs with more
+>> than one entry of the same type on the back of that behavior, and the
+>
+> Hi Kefu,
+>
+> Sorry for being dense, but can you expand on _why_ the tooling in
+> question is doing that?  With the dual-stack being explicitly not
+> supported and the userspace messenger unconditionally picking the
+> first address, what are the use cases for adding additional "dead"
+> addresses there?
+>
 
- (1) Keep a separate copy of the symlink contents with an rcu_head.  This
-     is always going to be a lot smaller than a page, so it can be
-     kmalloc'd and save quite a bit of memory.  It also needs a refcount
-     for non-RCU pathwalk.
+Hi Ilya,
 
- (2) Split the symlink read and write-to-cache routines in afs from those
-     for directories.
+Not dense at all. I went back and walked the history. Turns out there is
+no functional use case left, just a history of admin tooling producing
+this shape.
 
- (3) Discard the I/O buffer as soon as the write-to-cache completes as this
-     is a full page (plus a folio_queue).
+The tooling is `pveceph mon create`, where pveceph is the Proxmox VE CLI
+used to provision Ceph monitors on a PVE node. In 2021, we added support
+for a `public_network` setting that lists more than on CIDR. When the
+admin configure, for instance:
 
- (4) If there's no cache, discard the I/O buffer immediately after reading
-     and copying if there is no cache.
+  public_network =3D 10.0.0.0/24,10.0.1.0/24
 
-Fixes: 6698c02d64b2 ("afs: Locally initialise the contents of a new symlink on creation")
-Closes: https://sashiko.dev/#/patchset/20260326104544.509518-1-dhowells%40redhat.com
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Marc Dionne <marc.dionne@auristor.com>
-cc: linux-afs@lists.infradead.org
-cc: linux-fsdevel@vger.kernel.org
----
- fs/afs/Makefile    |   1 +
- fs/afs/dir.c       |  33 +++++--
- fs/afs/fsclient.c  |   4 +-
- fs/afs/inode.c     | 105 +-------------------
- fs/afs/internal.h  |  35 +++++--
- fs/afs/symlink.c   | 242 +++++++++++++++++++++++++++++++++++++++++++++
- fs/afs/yfsclient.c |   4 +-
- 7 files changed, 303 insertions(+), 121 deletions(-)
- create mode 100644 fs/afs/symlink.c
+`pveceph mon create` pick on local IP per listed subnet, and the tooling
+emits both a v2 and a v1 entry for each, which is what produces the
+addvecs that the previously referenced bug report [2].
 
-diff --git a/fs/afs/Makefile b/fs/afs/Makefile
-index b49b8fe682f3..0d8f1982d596 100644
---- a/fs/afs/Makefile
-+++ b/fs/afs/Makefile
-@@ -30,6 +30,7 @@ kafs-y := \
- 	server.o \
- 	server_list.o \
- 	super.o \
-+	symlink.o \
- 	validation.o \
- 	vlclient.o \
- 	vl_alias.o \
-diff --git a/fs/afs/dir.c b/fs/afs/dir.c
-index aaaa55878ffd..40f6791114ec 100644
---- a/fs/afs/dir.c
-+++ b/fs/afs/dir.c
-@@ -68,7 +68,7 @@ const struct inode_operations afs_dir_inode_operations = {
- };
- 
- const struct address_space_operations afs_dir_aops = {
--	.writepages	= afs_single_writepages,
-+	.writepages	= afs_dir_writepages,
- };
- 
- const struct dentry_operations afs_fs_dentry_operations = {
-@@ -294,7 +294,7 @@ static ssize_t afs_do_read_single(struct afs_vnode *dvnode, struct file *file)
- 	return ret;
- }
- 
--ssize_t afs_read_single(struct afs_vnode *dvnode, struct file *file)
-+static ssize_t afs_read_single(struct afs_vnode *dvnode, struct file *file)
- {
- 	ssize_t ret;
- 
-@@ -1763,13 +1763,20 @@ static int afs_link(struct dentry *from, struct inode *dir,
- 	return ret;
- }
- 
-+static void afs_symlink_put(struct afs_operation *op)
-+{
-+	kfree(op->create.symlink);
-+	op->create.symlink = NULL;
-+	afs_create_put(op);
-+}
-+
- static const struct afs_operation_ops afs_symlink_operation = {
- 	.issue_afs_rpc	= afs_fs_symlink,
- 	.issue_yfs_rpc	= yfs_fs_symlink,
- 	.success	= afs_create_success,
- 	.aborted	= afs_check_for_remote_deletion,
- 	.edit_dir	= afs_create_edit_dir,
--	.put		= afs_create_put,
-+	.put		= afs_symlink_put,
- };
- 
- /*
-@@ -1779,7 +1786,9 @@ static int afs_symlink(struct mnt_idmap *idmap, struct inode *dir,
- 		       struct dentry *dentry, const char *content)
- {
- 	struct afs_operation *op;
-+	struct afs_symlink *symlink;
- 	struct afs_vnode *dvnode = AFS_FS_I(dir);
-+	size_t clen = strlen(content);
- 	int ret;
- 
- 	_enter("{%llx:%llu},{%pd},%s",
-@@ -1791,12 +1800,20 @@ static int afs_symlink(struct mnt_idmap *idmap, struct inode *dir,
- 		goto error;
- 
- 	ret = -EINVAL;
--	if (strlen(content) >= AFSPATHMAX)
-+	if (clen >= AFSPATHMAX)
-+		goto error;
-+
-+	ret = -ENOMEM;
-+	symlink = kmalloc_flex(struct afs_symlink, content, clen + 1, GFP_KERNEL);
-+	if (!symlink)
- 		goto error;
-+	refcount_set(&symlink->ref, 1);
-+	memcpy(symlink->content, content, clen + 1);
- 
- 	op = afs_alloc_operation(NULL, dvnode->volume);
- 	if (IS_ERR(op)) {
- 		ret = PTR_ERR(op);
-+		kfree(symlink);
- 		goto error;
- 	}
- 
-@@ -1808,7 +1825,7 @@ static int afs_symlink(struct mnt_idmap *idmap, struct inode *dir,
- 	op->dentry		= dentry;
- 	op->ops			= &afs_symlink_operation;
- 	op->create.reason	= afs_edit_dir_for_symlink;
--	op->create.symlink	= content;
-+	op->create.symlink	= symlink;
- 	op->mtime		= current_time(dir);
- 	ret = afs_do_sync_operation(op);
- 	afs_dir_unuse_cookie(dvnode, ret);
-@@ -2192,10 +2209,10 @@ static int afs_rename(struct mnt_idmap *idmap, struct inode *old_dir,
- }
- 
- /*
-- * Write the file contents to the cache as a single blob.
-+ * Write the directory contents to the cache as a single blob.
-  */
--int afs_single_writepages(struct address_space *mapping,
--			  struct writeback_control *wbc)
-+int afs_dir_writepages(struct address_space *mapping,
-+		       struct writeback_control *wbc)
- {
- 	struct afs_vnode *dvnode = AFS_FS_I(mapping->host);
- 	struct iov_iter iter;
-diff --git a/fs/afs/fsclient.c b/fs/afs/fsclient.c
-index 95494d5f2b8a..a2ffd60889f8 100644
---- a/fs/afs/fsclient.c
-+++ b/fs/afs/fsclient.c
-@@ -886,7 +886,7 @@ void afs_fs_symlink(struct afs_operation *op)
- 	namesz = name->len;
- 	padsz = (4 - (namesz & 3)) & 3;
- 
--	c_namesz = strlen(op->create.symlink);
-+	c_namesz = strlen(op->create.symlink->content);
- 	c_padsz = (4 - (c_namesz & 3)) & 3;
- 
- 	reqsz = (6 * 4) + namesz + padsz + c_namesz + c_padsz + (6 * 4);
-@@ -910,7 +910,7 @@ void afs_fs_symlink(struct afs_operation *op)
- 		bp = (void *) bp + padsz;
- 	}
- 	*bp++ = htonl(c_namesz);
--	memcpy(bp, op->create.symlink, c_namesz);
-+	memcpy(bp, op->create.symlink->content, c_namesz);
- 	bp = (void *) bp + c_namesz;
- 	if (c_padsz > 0) {
- 		memset(bp, 0, c_padsz);
-diff --git a/fs/afs/inode.c b/fs/afs/inode.c
-index 5207c4a003f6..ff2b8fc7f3df 100644
---- a/fs/afs/inode.c
-+++ b/fs/afs/inode.c
-@@ -25,105 +25,6 @@
- #include "internal.h"
- #include "afs_fs.h"
- 
--void afs_init_new_symlink(struct afs_vnode *vnode, struct afs_operation *op)
--{
--	size_t size = strlen(op->create.symlink) + 1;
--	size_t dsize = 0;
--	char *p;
--
--	if (netfs_alloc_folioq_buffer(NULL, &vnode->directory, &dsize, size,
--				      mapping_gfp_mask(vnode->netfs.inode.i_mapping)) < 0)
--		return;
--
--	vnode->directory_size = dsize;
--	p = kmap_local_folio(folioq_folio(vnode->directory, 0), 0);
--	memcpy(p, op->create.symlink, size);
--	kunmap_local(p);
--	set_bit(AFS_VNODE_DIR_READ, &vnode->flags);
--	netfs_single_mark_inode_dirty(&vnode->netfs.inode);
--}
--
--static void afs_put_link(void *arg)
--{
--	struct folio *folio = virt_to_folio(arg);
--
--	kunmap_local(arg);
--	folio_put(folio);
--}
--
--const char *afs_get_link(struct dentry *dentry, struct inode *inode,
--			 struct delayed_call *callback)
--{
--	struct afs_vnode *vnode = AFS_FS_I(inode);
--	struct folio *folio;
--	char *content;
--	ssize_t ret;
--
--	if (!dentry) {
--		/* RCU pathwalk. */
--		if (!test_bit(AFS_VNODE_DIR_READ, &vnode->flags) || !afs_check_validity(vnode))
--			return ERR_PTR(-ECHILD);
--		goto good;
--	}
--
--	if (test_bit(AFS_VNODE_DIR_READ, &vnode->flags))
--		goto fetch;
--
--	ret = afs_validate(vnode, NULL);
--	if (ret < 0)
--		return ERR_PTR(ret);
--
--	if (!test_and_clear_bit(AFS_VNODE_ZAP_DATA, &vnode->flags) &&
--	    test_bit(AFS_VNODE_DIR_READ, &vnode->flags))
--		goto good;
--
--fetch:
--	if (down_write_killable(&vnode->validate_lock) < 0)
--		return ERR_PTR(-ERESTARTSYS);
--	if (test_and_clear_bit(AFS_VNODE_ZAP_DATA, &vnode->flags) ||
--	    !test_bit(AFS_VNODE_DIR_READ, &vnode->flags)) {
--		ret = afs_read_single(vnode, NULL);
--		if (ret < 0) {
--			up_write(&vnode->validate_lock);
--			return ERR_PTR(ret);
--		}
--		set_bit(AFS_VNODE_DIR_READ, &vnode->flags);
--	}
--
--	up_write(&vnode->validate_lock);
--
--good:
--	folio = folioq_folio(vnode->directory, 0);
--	folio_get(folio);
--	content = kmap_local_folio(folio, 0);
--	set_delayed_call(callback, afs_put_link, content);
--	return content;
--}
--
--int afs_readlink(struct dentry *dentry, char __user *buffer, int buflen)
--{
--	DEFINE_DELAYED_CALL(done);
--	const char *content;
--	int len;
--
--	content = afs_get_link(dentry, d_inode(dentry), &done);
--	if (IS_ERR(content)) {
--		do_delayed_call(&done);
--		return PTR_ERR(content);
--	}
--
--	len = umin(strlen(content), buflen);
--	if (copy_to_user(buffer, content, len))
--		len = -EFAULT;
--	do_delayed_call(&done);
--	return len;
--}
--
--static const struct inode_operations afs_symlink_inode_operations = {
--	.get_link	= afs_get_link,
--	.readlink	= afs_readlink,
--};
--
- static noinline void dump_vnode(struct afs_vnode *vnode, struct afs_vnode *parent_vnode)
- {
- 	static unsigned long once_only;
-@@ -223,7 +124,7 @@ static int afs_inode_init_from_status(struct afs_operation *op,
- 			inode->i_mode	= S_IFLNK | status->mode;
- 			inode->i_op	= &afs_symlink_inode_operations;
- 		}
--		inode->i_mapping->a_ops	= &afs_dir_aops;
-+		inode->i_mapping->a_ops	= &afs_symlink_aops;
- 		inode_nohighmem(inode);
- 		mapping_set_release_always(inode->i_mapping);
- 		break;
-@@ -765,12 +666,14 @@ void afs_evict_inode(struct inode *inode)
- 			.range_end = LLONG_MAX,
- 		};
- 
--		afs_single_writepages(inode->i_mapping, &wbc);
-+		inode->i_mapping->a_ops->writepages(inode->i_mapping, &wbc);
- 	}
- 
- 	netfs_wait_for_outstanding_io(inode);
- 	truncate_inode_pages_final(&inode->i_data);
- 	netfs_free_folioq_buffer(vnode->directory);
-+	if (vnode->symlink)
-+		afs_replace_symlink(vnode, NULL);
- 
- 	afs_set_cache_aux(vnode, &aux);
- 	netfs_clear_inode_writeback(inode, &aux);
-diff --git a/fs/afs/internal.h b/fs/afs/internal.h
-index 599353c33337..c7adc3677e41 100644
---- a/fs/afs/internal.h
-+++ b/fs/afs/internal.h
-@@ -710,6 +710,7 @@ struct afs_vnode {
- #define AFS_VNODE_DIR_READ	11		/* Set if we've read a dir's contents */
- 
- 	struct folio_queue	*directory;	/* Directory contents */
-+	struct afs_symlink __rcu *symlink;	/* Symlink content */
- 	struct list_head	wb_keys;	/* List of keys available for writeback */
- 	struct list_head	pending_locks;	/* locks waiting to be granted */
- 	struct list_head	granted_locks;	/* locks granted on this file */
-@@ -776,6 +777,15 @@ struct afs_permits {
- 	struct afs_permit	permits[] __counted_by(nr_permits);	/* List of permits sorted by key pointer */
- };
- 
-+/*
-+ * Copy of symlink content for normal use.
-+ */
-+struct afs_symlink {
-+	struct rcu_head		rcu;
-+	refcount_t		ref;
-+	char			content[];
-+};
-+
- /*
-  * Error prioritisation and accumulation.
-  */
-@@ -887,7 +897,7 @@ struct afs_operation {
- 		struct {
- 			int	reason;		/* enum afs_edit_dir_reason */
- 			mode_t	mode;
--			const char *symlink;
-+			struct afs_symlink *symlink;
- 		} create;
- 		struct {
- 			bool	need_rehash;
-@@ -1098,13 +1108,12 @@ extern const struct inode_operations afs_dir_inode_operations;
- extern const struct address_space_operations afs_dir_aops;
- extern const struct dentry_operations afs_fs_dentry_operations;
- 
--ssize_t afs_read_single(struct afs_vnode *dvnode, struct file *file);
- ssize_t afs_read_dir(struct afs_vnode *dvnode, struct file *file)
- 	__acquires(&dvnode->validate_lock);
- extern void afs_d_release(struct dentry *);
- extern void afs_check_for_remote_deletion(struct afs_operation *);
--int afs_single_writepages(struct address_space *mapping,
--			  struct writeback_control *wbc);
-+int afs_dir_writepages(struct address_space *mapping,
-+		       struct writeback_control *wbc);
- 
- /*
-  * dir_edit.c
-@@ -1246,10 +1255,6 @@ extern void afs_fs_probe_cleanup(struct afs_net *);
-  */
- extern const struct afs_operation_ops afs_fetch_status_operation;
- 
--void afs_init_new_symlink(struct afs_vnode *vnode, struct afs_operation *op);
--const char *afs_get_link(struct dentry *dentry, struct inode *inode,
--			 struct delayed_call *callback);
--int afs_readlink(struct dentry *dentry, char __user *buffer, int buflen);
- extern void afs_vnode_commit_status(struct afs_operation *, struct afs_vnode_param *);
- extern int afs_fetch_status(struct afs_vnode *, struct key *, bool, afs_access_t *);
- extern int afs_ilookup5_test_by_fid(struct inode *, void *);
-@@ -1599,6 +1604,20 @@ void afs_detach_volume_from_servers(struct afs_volume *volume, struct afs_server
- extern int __init afs_fs_init(void);
- extern void afs_fs_exit(void);
- 
-+/*
-+ * symlink.c
-+ */
-+extern const struct inode_operations afs_symlink_inode_operations;
-+extern const struct address_space_operations afs_symlink_aops;
-+
-+void afs_replace_symlink(struct afs_vnode *vnode, struct afs_symlink *symlink);
-+void afs_init_new_symlink(struct afs_vnode *vnode, struct afs_operation *op);
-+const char *afs_get_link(struct dentry *dentry, struct inode *inode,
-+			 struct delayed_call *callback);
-+int afs_readlink(struct dentry *dentry, char __user *buffer, int buflen);
-+int afs_symlink_writepages(struct address_space *mapping,
-+			   struct writeback_control *wbc);
-+
- /*
-  * validation.c
-  */
-diff --git a/fs/afs/symlink.c b/fs/afs/symlink.c
-new file mode 100644
-index 000000000000..8d2521c5f19d
---- /dev/null
-+++ b/fs/afs/symlink.c
-@@ -0,0 +1,242 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later
-+/* AFS filesystem symbolic link handling
-+ *
-+ * Copyright (C) 2026 Red Hat, Inc. All Rights Reserved.
-+ * Written by David Howells (dhowells@redhat.com)
-+ */
-+
-+#include <linux/kernel.h>
-+#include <linux/fs.h>
-+#include <linux/namei.h>
-+#include <linux/pagemap.h>
-+#include <linux/iov_iter.h>
-+#include "internal.h"
-+
-+static void afs_put_symlink(struct afs_symlink *symlink)
-+{
-+	if (refcount_dec_and_test(&symlink->ref))
-+		kfree_rcu(symlink, rcu);
-+}
-+
-+void afs_replace_symlink(struct afs_vnode *vnode, struct afs_symlink *symlink)
-+{
-+	struct afs_symlink *old;
-+
-+	old = rcu_replace_pointer(vnode->symlink, symlink,
-+				  lockdep_is_held(&vnode->validate_lock));
-+	if (old)
-+		afs_put_symlink(old);
-+}
-+
-+/*
-+ * Set up a locally created symlink inode for immediate write to the cache.
-+ */
-+void afs_init_new_symlink(struct afs_vnode *vnode, struct afs_operation *op)
-+{
-+	size_t dsize = 0;
-+	size_t size = strlen(op->create.symlink->content) + 1;
-+	char *p;
-+
-+	rcu_assign_pointer(vnode->symlink, op->create.symlink);
-+	op->create.symlink = NULL;
-+
-+	if (!fscache_cookie_enabled(netfs_i_cookie(&vnode->netfs)))
-+		return;
-+
-+	if (netfs_alloc_folioq_buffer(NULL, &vnode->directory, &dsize, size,
-+				      mapping_gfp_mask(vnode->netfs.inode.i_mapping)) < 0)
-+		return;
-+
-+	vnode->directory_size = dsize;
-+	p = kmap_local_folio(folioq_folio(vnode->directory, 0), 0);
-+	memcpy(p, vnode->symlink, size);
-+	kunmap_local(p);
-+	netfs_single_mark_inode_dirty(&vnode->netfs.inode);
-+}
-+
-+/*
-+ * Read a symlink in a single download.
-+ */
-+static ssize_t afs_do_read_symlink(struct afs_vnode *vnode)
-+{
-+	struct afs_symlink *symlink;
-+	struct iov_iter iter;
-+	ssize_t ret;
-+	loff_t i_size;
-+
-+	i_size = i_size_read(&vnode->netfs.inode);
-+	if (i_size > PAGE_SIZE - 1) {
-+		trace_afs_file_error(vnode, -EFBIG, afs_file_error_dir_big);
-+		return -EFBIG;
-+	}
-+
-+	if (!vnode->directory) {
-+		size_t cur_size = 0;
-+
-+		ret = netfs_alloc_folioq_buffer(NULL,
-+						&vnode->directory, &cur_size, PAGE_SIZE,
-+						mapping_gfp_mask(vnode->netfs.inode.i_mapping));
-+		vnode->directory_size = PAGE_SIZE - 1;
-+		if (ret < 0)
-+			return ret;
-+	}
-+
-+	iov_iter_folio_queue(&iter, ITER_DEST, vnode->directory, 0, 0, PAGE_SIZE);
-+
-+	/* AFS requires us to perform the read of a symlink as a single unit to
-+	 * avoid issues with the content being changed between reads.
-+	 */
-+	ret = netfs_read_single(&vnode->netfs.inode, NULL, &iter);
-+	if (ret >= 0) {
-+		i_size = i_size_read(&vnode->netfs.inode);
-+		if (i_size > PAGE_SIZE - 1) {
-+			trace_afs_file_error(vnode, -EFBIG, afs_file_error_dir_big);
-+			return -EFBIG;
-+		}
-+		vnode->directory_size = i_size;
-+
-+		/* Copy the symlink. */
-+		symlink = kmalloc_flex(struct afs_symlink, content, i_size + 1,
-+				       GFP_KERNEL);
-+		if (!symlink)
-+			return -ENOMEM;
-+
-+		refcount_set(&symlink->ref, 1);
-+		symlink->content[i_size] = 0;
-+
-+		const char *s = kmap_local_folio(folioq_folio(vnode->directory, 0), 0);
-+
-+		memcpy(symlink->content, s, i_size);
-+		kunmap_local(s);
-+
-+		afs_replace_symlink(vnode, symlink);
-+	}
-+
-+	if (!fscache_cookie_enabled(netfs_i_cookie(&vnode->netfs))) {
-+		netfs_free_folioq_buffer(vnode->directory);
-+		vnode->directory = NULL;
-+		vnode->directory_size = 0;
-+	}
-+
-+	return ret;
-+}
-+
-+static ssize_t afs_read_symlink(struct afs_vnode *vnode)
-+{
-+	ssize_t ret;
-+
-+	fscache_use_cookie(afs_vnode_cache(vnode), false);
-+	ret = afs_do_read_symlink(vnode);
-+	fscache_unuse_cookie(afs_vnode_cache(vnode), NULL, NULL);
-+	return ret;
-+}
-+
-+static void afs_put_link(void *arg)
-+{
-+	afs_put_symlink(arg);
-+}
-+
-+const char *afs_get_link(struct dentry *dentry, struct inode *inode,
-+			 struct delayed_call *callback)
-+{
-+	struct afs_symlink *symlink;
-+	struct afs_vnode *vnode = AFS_FS_I(inode);
-+	ssize_t ret;
-+
-+	if (!dentry) {
-+		/* RCU pathwalk. */
-+		if (!vnode->symlink || !afs_check_validity(vnode))
-+			return ERR_PTR(-ECHILD);
-+		set_delayed_call(callback, NULL, NULL);
-+		return rcu_dereference(vnode->symlink)->content;
-+	}
-+
-+	if (vnode->symlink) {
-+		ret = afs_validate(vnode, NULL);
-+		if (ret < 0)
-+			return ERR_PTR(ret);
-+
-+		down_read(&vnode->validate_lock);
-+		if (!test_bit(AFS_VNODE_ZAP_DATA, &vnode->flags))
-+			goto good;
-+		up_read(&vnode->validate_lock);
-+	}
-+
-+	if (down_write_killable(&vnode->validate_lock) < 0)
-+		return ERR_PTR(-ERESTARTSYS);
-+	if (!vnode->symlink ||
-+	    test_and_clear_bit(AFS_VNODE_ZAP_DATA, &vnode->flags)) {
-+		ret = afs_read_symlink(vnode);
-+		if (ret < 0) {
-+			up_write(&vnode->validate_lock);
-+			return ERR_PTR(ret);
-+		}
-+	}
-+
-+	downgrade_write(&vnode->validate_lock);
-+	
-+good:
-+	symlink = rcu_dereference_protected(vnode->symlink,
-+					    lockdep_is_held(&vnode->validate_lock));
-+	refcount_inc(&symlink->ref);
-+	up_read(&vnode->validate_lock);
-+
-+	set_delayed_call(callback, afs_put_link, symlink);
-+	return symlink->content;
-+}
-+
-+int afs_readlink(struct dentry *dentry, char __user *buffer, int buflen)
-+{
-+	DEFINE_DELAYED_CALL(done);
-+	const char *content;
-+	int len;
-+
-+	content = afs_get_link(dentry, d_inode(dentry), &done);
-+	if (IS_ERR(content)) {
-+		do_delayed_call(&done);
-+		return PTR_ERR(content);
-+	}
-+
-+	len = umin(strlen(content), buflen);
-+	if (copy_to_user(buffer, content, len))
-+		len = -EFAULT;
-+	do_delayed_call(&done);
-+	return len;
-+}
-+
-+/*
-+ * Write the symlink contents to the cache as a single blob.  We then throw
-+ * away the page we used to receive it.
-+ */
-+int afs_symlink_writepages(struct address_space *mapping,
-+			   struct writeback_control *wbc)
-+{
-+	struct afs_vnode *vnode = AFS_FS_I(mapping->host);
-+	struct iov_iter iter;
-+	int ret = 0;
-+
-+	down_write(&vnode->validate_lock);
-+
-+	if (vnode->directory &&
-+	    atomic64_read(&vnode->cb_expires_at) != AFS_NO_CB_PROMISE) {
-+		iov_iter_folio_queue(&iter, ITER_SOURCE, vnode->directory, 0, 0,
-+				     i_size_read(&vnode->netfs.inode));
-+		ret = netfs_writeback_single(mapping, wbc, &iter);
-+	}
-+
-+	netfs_free_folioq_buffer(vnode->directory);
-+	vnode->directory = NULL;
-+	vnode->directory_size = 0;
-+
-+	up_write(&vnode->validate_lock);
-+	return ret;
-+}
-+
-+const struct inode_operations afs_symlink_inode_operations = {
-+	.get_link	= afs_get_link,
-+	.readlink	= afs_readlink,
-+};
-+
-+const struct address_space_operations afs_symlink_aops = {
-+	.writepages	= afs_symlink_writepages,
-+};
-diff --git a/fs/afs/yfsclient.c b/fs/afs/yfsclient.c
-index 24fb562ebd33..d941179730a9 100644
---- a/fs/afs/yfsclient.c
-+++ b/fs/afs/yfsclient.c
-@@ -960,7 +960,7 @@ void yfs_fs_symlink(struct afs_operation *op)
- 
- 	_enter("");
- 
--	contents_sz = strlen(op->create.symlink);
-+	contents_sz = strlen(op->create.symlink->content);
- 	call = afs_alloc_flat_call(op->net, &yfs_RXYFSSymlink,
- 				   sizeof(__be32) +
- 				   sizeof(struct yfs_xdr_RPCFlags) +
-@@ -981,7 +981,7 @@ void yfs_fs_symlink(struct afs_operation *op)
- 	bp = xdr_encode_u32(bp, 0); /* RPC flags */
- 	bp = xdr_encode_YFSFid(bp, &dvp->fid);
- 	bp = xdr_encode_name(bp, name);
--	bp = xdr_encode_string(bp, op->create.symlink, contents_sz);
-+	bp = xdr_encode_string(bp, op->create.symlink->content, contents_sz);
- 	bp = xdr_encode_YFSStoreStatus(bp, &mode, &op->mtime);
- 	yfs_check_req(call, bp);
- 
+The admin's intent was multi-subnet reachability, but after auditing
+Ceph's code, I realized that nobody uses more than the first matching
+entry per msgr type.
+
+So, multi-subnet reachability has always relied on plain IP routing
+between the listed subnets, not on any addrvec-level fallback.
+
+>
+> I'm asking because Xie Xingguo's commit [1] mentions dual-stack
+> (already covered above) and in the ticket that I assume got you
+> involved [2] it seems like the user was able to implement the setup
+> they wanted without resorting to adding those "dead" addresses after
+> all.
+>
+
+Indeed. In our issue[2], the admin repaired their cluster by editing the
+monmap by hand.
+
+>
+>> kernel's strict guard rejects the whole monmap. The handshake contains()
+>> check is the one concrete reason the extra entries need to be listed in
+>> the addrvec rather than dropped at advertise time.
+>
+> Can you point me at this check?
+>
+
+
+Sure. I pointed at ProtocolV2's server_ident.addrs().contains(target_addr),=
+=20
+but after on re-reading, turns out it only requires that the address the
+client connected to (picked from the monmap) be in the server's
+announced bind addrs. So, there is no concrete reason for the extras to
+be in the addrvec.
+
+>>
+>> >
+>> >> Match the userspace messenger, which since Nautilus picks the first
+>> >> entry of the requested type and silently tolerates subsequent entries.
+>> >
+>> > Do you have a reference to a specific commit?  I'm wondering if it
+>> > isn't on that "merged more or less accidentally" list.
+>> >
+>>
+>> The pick-first selector in AsyncMessenger::create_connect() landed in
+>> Sage's commit d1a783a5f733, and Xie Xingguo's commit 50d8c8a3cce3 fixed
+>> the loop to actually honor the "pick whichever is listed first" comment.
+>> Both shipped in Nautilus.
+>>
+>> Would you be willing to take this as a compatibility fix, with the
+>> commit message and the comment in ceph_decode_entity_addrvec() rewritten
+>> to state exactly that and nothing more? If you would rather keep the
+>> strict check and handle this on the tooling side instead, I am happy to
+>> withdraw the patch. Either way, thanks for the review.
+>
+> I'm all for reducing the number of inconsistencies (whether intentional
+> or unintentional), but I would like to make sure I understand the
+> background first.  I'm worried that by accepting multiple addresses we
+> just confuse users into thinking that dual-stack is supported and then
+> they go on attempting to implement "a second subnet", etc.  AFAIK those
+> things aren't tested upstream at all.
+>
+
+Yeah, that worry is far. The remaining argument for taking this patch is
+purely backward compatibility: there are existing deployment whose
+monmap where produced by `pveceph`-like tools and hence contain extra
+multiple addresses in addvec.
+
+If you would still rather keep the strict guard and have those clusters
+repair their monmaps manually, I am happy to drop the patch.
+
+If you  would consider taking it as a pure compatibility tolerance, I
+will respin with the commit message and update the comment in
+ceph_decode_entity_addrvec() to explain the rationales -- not because of
+dual-stack or multi-subnet support.
+
+Thanks,
+Kefu
+
+>
+> [1] https://github.com/ceph/ceph/commit/50d8c8a3cce3bfbfc9be5acfa60bda165=
+d59e2bc
+> [2] https://bugzilla.proxmox.com/show_bug.cgi?id=3D7518
+>
+> Thanks,
+>
+>                 Ilya
 
