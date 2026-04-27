@@ -1,110 +1,115 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92F94211A09;
-	Mon, 27 Apr 2026 14:29:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC85A29E11D;
+	Mon, 27 Apr 2026 15:21:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777300156; cv=none; b=GHZbunpnT0wofU74BQJm0mYx79vJEwWaBiZ/+Lg0XJ07nASzWLkllpA4Wnja++ycWsI6YCagyGhvR+joakPHdh/iYq/zL+AQSfXXR6hMdSUby7BkFLciQLZwCXPxSL95NWaD/g5/B/o0LjPLbn3CtnYxk/XfgTHi22eovORUdZw=
+	t=1777303315; cv=none; b=TpM43c4QlS1qCbxVWhUtUKbIDtDq9FxBLmrxL7M7DPOV+20qEpNJzk9MTJqM6CuLtx69obE6tQfeQt8HPB2LiZH4lL2XG5x7ZnzJpt4i24lFvbcZWh7lza8/yPqDZ+zjELawshbTnmh3PrZFvEgoGhbZMjergND176+18/+utQc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777300156; c=relaxed/simple;
-	bh=IeJ6/tR47YZBKRTpElig6fYdm36HLG0LBoH4pMTb9Do=;
+	s=arc-20240116; t=1777303315; c=relaxed/simple;
+	bh=WB4zlQm9+FHX+K7g+OB4l8qgcWOrwaIHH/nk762xS9Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JmzqZYFXfXoQz+6ZOb7nZOQZ0X6QZAzNDg+el6eqWg/uzvALD5QVyojpH6wlFWOKOjX7efNXe3j5hLjhln6DtBsWWbQ/UyhkjlZxUwpmzLs36qr9ibP49NG5TdFShWy5n2XC6Jk/TgMG6QzAzhp3844Db9jKQggTxYyVtTcbtJA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gaVW7JqJ; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=gU7qI7XavlvSw918h8hOnk9JGWaGKgjkI8z7kGPZr+aqg+AnNdTEw12jYjc4cFK9K3SGeIUbXay2ecRWFphYAqGFAC5Z9Sb+14GXcjcnzXLzo/jVuYvMRYOuSr3+eja8MxuGh/TAbSBtRF6vPCaBRspn9U2Oh6sKhnwt9W2nJHg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=B1Z+QPwl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gaVW7JqJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8724C19425;
-	Mon, 27 Apr 2026 14:29:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="B1Z+QPwl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 734FBC19425;
+	Mon, 27 Apr 2026 15:21:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777300156;
-	bh=IeJ6/tR47YZBKRTpElig6fYdm36HLG0LBoH4pMTb9Do=;
+	s=k20201202; t=1777303315;
+	bh=WB4zlQm9+FHX+K7g+OB4l8qgcWOrwaIHH/nk762xS9Q=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=gaVW7JqJIhjsWuA02RrbXUpEKeg6fJmXF6/fbacFtpWNkW9wvYSePbUoq2NW3ABF6
-	 fhDez9OSFGCU+Z3afcKIJptioaH4pyvHDG6jEZ/Xrr6msoWANBUyoZ3eToGL/j87fQ
-	 PS/ePP+Y4IkrFLp4PrVmepomLIKsv/gyxmo2xcynsHgUqOnIYNBsNHvLHWfVI7EWH3
-	 n4psZS6wQ+lShVCxjogKc6xX+dTYrQf7IOQ2sLO0fVQi8biaGDNEhsY4N4tl9lbxkV
-	 +g3rV6DxqjNrShnGDPLGfHQ6iP53NrjUhUgP77FIadDMSuuyaRQ254A6sKvts12Qrx
-	 FQNtBApDmEeRA==
-Date: Mon, 27 Apr 2026 16:29:03 +0200
-From: Christian Brauner <brauner@kernel.org>
-To: Dorjoy Chowdhury <dorjoychy111@gmail.com>, 
-	Florian Weimer <fweimer@redhat.com>
-Cc: Alejandro Colomar <alx@kernel.org>, linux-fsdevel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-api@vger.kernel.org, ceph-devel@vger.kernel.org, 
-	gfs2@lists.linux.dev, linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, 
-	v9fs@lists.linux.dev, linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, 
-	jack@suse.cz, jlayton@kernel.org, chuck.lever@oracle.com, alex.aring@gmail.com, 
-	arnd@arndb.de, adilger@dilger.ca, mjguzik@gmail.com, smfrench@gmail.com, 
-	richard.henderson@linaro.org, mattst88@gmail.com, linmag7@gmail.com, tsbogend@alpha.franken.de, 
-	James.Bottomley@hansenpartnership.com, deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, 
-	idryomov@gmail.com, amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, 
-	trondmy@kernel.org, anna@kernel.org, sfrench@samba.org, pc@manguebit.org, 
-	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com, 
-	shuah@kernel.org, miklos@szeredi.hu, hansg@kernel.org
-Subject: Re: [PATCH v6 1/4] openat2: new OPENAT2_REGULAR flag support
-Message-ID: <20260427-begreifbar-sandbank-84e3990e7c37@brauner>
-References: <20260328172314.45807-1-dorjoychy111@gmail.com>
- <20260328172314.45807-2-dorjoychy111@gmail.com>
- <lhuzf2oy1me.fsf@oldenburg.str.redhat.com>
- <CAFfO_h5B=Ox9S=Xc=az2vQwowffohch-mkvSggYAfNXaVuv5GA@mail.gmail.com>
+	b=B1Z+QPwlSzm9DUFf2VXkMegOGbnMpiWlwRjD7F80talUYpO/pyKyC7SO0jHLe13kM
+	 3cmmSFDvWp2MNbCd8jSEl1LLBWs/nGaChpw115gE3SdbtA8gUAtots2MOeFHq4+NP7
+	 uHYP6WLhYs7hfrG0buM4N0/lRP9D8ZzjboSUgzxkoagKLLeoOxJLajtuMGTsh3Xs0r
+	 JkWKeWJTZS/9Ij5RPTGI7SsYgrMNvFQodBmQf02slmNQLUJQeovo0UgnQ7cZmVZZle
+	 qMjrvGXl2FHQle41b1dJu67EKEcX8EB3X6gdLP4+E+9N8ejYYYa/ARbMsIydBvHGwH
+	 GNFj1MZW7JTcg==
+Received: from johan by theta with local (Exim 4.99.1)
+	(envelope-from <johan@kernel.org>)
+	id 1wHNmR-000000004uP-410E;
+	Mon, 27 Apr 2026 17:21:51 +0200
+Date: Mon, 27 Apr 2026 17:21:51 +0200
+From: Johan Hovold <johan@kernel.org>
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Cc: "idryomov@gmail.com" <idryomov@gmail.com>,
+	"dongsheng.yang@linux.dev" <dongsheng.yang@linux.dev>,
+	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
+	"axboe@kernel.dk" <axboe@kernel.dk>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-block@vger.kernel.org" <linux-block@vger.kernel.org>
+Subject: Re: [PATCH] block: rbd: switch to dynamic root device
+Message-ID: <ae9_DzhmCX87jkQC@hovoldconsulting.com>
+References: <20260424103931.2616903-1-johan@kernel.org>
+ <ac8ef2a52e42512d17ef3e29cc94353c191c6846.camel@ibm.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAFfO_h5B=Ox9S=Xc=az2vQwowffohch-mkvSggYAfNXaVuv5GA@mail.gmail.com>
+In-Reply-To: <ac8ef2a52e42512d17ef3e29cc94353c191c6846.camel@ibm.com>
 
-On Mon, Apr 27, 2026 at 08:17:43PM +0600, Dorjoy Chowdhury wrote:
-> On Mon, Apr 27, 2026 at 7:28 PM Florian Weimer <fweimer@redhat.com> wrote:
-> >
-> > * Dorjoy Chowdhury:
-> >
-> > > diff --git a/include/uapi/asm-generic/errno.h b/include/uapi/asm-generic/errno.h
-> > > index 92e7ae493ee3..bd78e69e0a43 100644
-> > > --- a/include/uapi/asm-generic/errno.h
-> > > +++ b/include/uapi/asm-generic/errno.h
-> > > @@ -122,4 +122,6 @@
-> > >
-> > >  #define EHWPOISON    133     /* Memory page has hardware error */
-> > >
-> > > +#define EFTYPE               134     /* Wrong file type for the intended operation */
-> > > +
-> > >  #endif
-> >
-> > This is what POSIX says about EFTYPE, in the Rationale for System
-> > Interfaces:
-> >
-> > “
-> > [EFTYPE]
-> >     This error code was proposed in earlier proposals as "Inappropriate
-> >     operation for file type", meaning that the operation requested is
-> >     not appropriate for the file specified in the function call. This
-> >     code was proposed, although the same idea was covered by [ENOTTY],
-> >     because the connotations of the name would be misleading. It was
-> >     pointed out that the fcntl() function uses the error code [EINVAL]
-> >     for this notion, and hence all instances of [EFTYPE] were changed to
-> >     this code.
-> > ”
-> >
-> > So I'm not sure if reusing this name is a good idea.
-> >
-> 
-> Thanks for pointing this out. I had started out the patch series with
-> ENOTREGULAR and it was discussed that EFTYPE was a better and more
-> generic error code which is also used in BSD systems like FreeBSD[1]
-> and MacOS[2]. I also agree that EFTYPE makes sense. We can of course
-> change to something else if everyone agrees.
-> 
-> cc Christian Brauner who originally suggested EFTYPE for input on this.
-> 
-> [1]: https://man.freebsd.org/cgi/man.cgi?errno(2)
-> [2]: https://developer.apple.com/documentation/foundation/posixerror/eftype
+On Fri, Apr 24, 2026 at 06:48:32PM +0000, Viacheslav Dubeyko wrote:
+> On Fri, 2026-04-24 at 12:39 +0200, Johan Hovold wrote:
+> > Driver core expects devices to be dynamically allocated and will, for
+> > example, complain loudly when no release function has been provided.
+> > 
+> > Use root_device_register() to allocate and register the root device
+> > instead of open coding using a static device.
 
-Given that both the bsds and macos already use that is there a good
-reason to return ENOTTY for this other than a standard we ignore most of
-the time anyway? I'm honestly asking.
+> > @@ -5390,7 +5383,7 @@ static struct rbd_device *__rbd_dev_create(struct rbd_spec *spec)
+> >  
+> >  	rbd_dev->dev.bus = &rbd_bus_type;
+> >  	rbd_dev->dev.type = &rbd_device_type;
+> > -	rbd_dev->dev.parent = &rbd_root_dev;
+> > +	rbd_dev->dev.parent = rbd_root_dev;
+> >  	device_initialize(&rbd_dev->dev);
+> >  
+> >  	return rbd_dev;
+> > @@ -7331,15 +7324,13 @@ static int __init rbd_sysfs_init(void)
+> >  {
+> >  	int ret;
+> >  
+> > -	ret = device_register(&rbd_root_dev);
+> > -	if (ret < 0) {
+> > -		put_device(&rbd_root_dev);
+> > -		return ret;
+> > -	}
+> > +	rbd_root_dev = root_device_register("rbd");
+> > +	if (IS_ERR(rbd_root_dev))
+> > +		return PTR_ERR(rbd_root_dev);
+> >  
+> >  	ret = bus_register(&rbd_bus_type);
+> >  	if (ret < 0)
+> > -		device_unregister(&rbd_root_dev);
+> > +		root_device_unregister(rbd_root_dev);
+> 
+> I think we need to assign NULL here:
+> 
+> rbd_root_dev = NULL;
+
+From what I can tell these devices are only created from the bus sysfs
+attribute so this pointer will not be accessed if bus registration
+fails and there is no need to clear it (or add a sanity check to
+__rbd_dev_create()).
+
+> >  	return ret;
+> >  }
+> > @@ -7347,7 +7338,7 @@ static int __init rbd_sysfs_init(void)
+> >  static void __exit rbd_sysfs_cleanup(void)
+> >  {
+> >  	bus_unregister(&rbd_bus_type);
+> > -	device_unregister(&rbd_root_dev);
+> > +	root_device_unregister(rbd_root_dev);
+> 
+> The same issue here:
+> 
+> rbd_root_dev = NULL;
+
+So this is not needed either.
+
+Johan
