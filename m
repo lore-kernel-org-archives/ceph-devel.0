@@ -1,281 +1,315 @@
 Received: from mail-dl1-f47.google.com (mail-dl1-f47.google.com [74.125.82.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4479D374728
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 22:06:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA23240DFD6
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 22:34:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.47
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777414005; cv=pass; b=LyTMHdpvM6zzCaLVTXLC7NQiX6lN80ShpJFPXJIu5WBsXnStfLXeIgzO0u21ihaqkkFKohewYz1wjmIDt4hCcOuHDIPJQ6xiyMd9RrpGQ0G9I41qjCGngvk32SNBM7TkivIVGfeiAbpusnEMosKbOLz4UXESqWhcJ+MZANxBktc=
+	t=1777415689; cv=pass; b=sFd775xpsvnjJEHMGl9X/PcmWIHO9oV585hQ6uR9k0JEqxG8cneuctCIAV7fqgPjzQSllTYYdlnl6OAebmeBUS0yq6SZmuI95DmfKtVi+iIhOaF/1M4q+Ye6tPV7ximkvwGgRUKLB3R8clk/Rb9REass32q54DBSSK2Z5RCzPyw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777414005; c=relaxed/simple;
-	bh=WyP7nPrPtPqtyr6/URCI4Apap9WDHuW+mqDo/IlYt+8=;
+	s=arc-20240116; t=1777415689; c=relaxed/simple;
+	bh=yKoOiPmhcRtpX0I6DLS42A+1exFXEhNhbZxwynXSpRs=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Y+XBDBNv+4PyS3TbFyKy/tLVJqlcH7AnbALQDysKUHFP6bo4g+JyjKCnYYR1bBEqc61roP1bRCo4A++bJM56SzeorO4sCyHajIvisStHdkU2wYQvKxSALQz6aXGK/y9Y3mbcPL2oS4B3ZY2qz3i2+Ps+y3xo2yROULqiwk7G3u4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ci0JEUoz; arc=pass smtp.client-ip=74.125.82.47
+	 To:Cc:Content-Type; b=jS077zcuMYHCNbyOWf7HYV7orsy4FMQD0Vec7ghEIHtVWUIM68d/qddRaJoQFq+gzRW08Wfo5zc7eNVGQAHjBKbgNDZ0BYBrT8s40Ap8Fiu+4npxAoOPwkaq5GB7gANQw82zzpujMV6xF1O+w/71g7/U0X+KL010aUrPuJ19WBY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NBN14k86; arc=pass smtp.client-ip=74.125.82.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ci0JEUoz"
-Received: by mail-dl1-f47.google.com with SMTP id a92af1059eb24-12ddbe104ccso2142905c88.0
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 15:06:44 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1777414003; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NBN14k86"
+Received: by mail-dl1-f47.google.com with SMTP id a92af1059eb24-12c7212836bso3686614c88.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 15:34:47 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1777415687; cv=none;
         d=google.com; s=arc-20240605;
-        b=iiIqZvZsaEIYgStL0sBjAduU0k730TEvFyiGhWH9jqO8/dWw0w6PTSP+b+R1EIAiQE
-         zX/i03eju3otZ55qKz1lbdQxSBKaew4VMOb8KOaAHJEyRHOYin/N6xkuoCqLgr6h0WNJ
-         Ys54QJKclRypO08ha5LyINm3raG40XLP77Vfc8NoATAaOAapZN16VNMN8GDnJCrsIHJN
-         6CXCFRghmmAvolj9vhhTiEbKU2sOGx3BFivFFoiSJ5730uS4rM2mnDRXnJ1AT7+72KsE
-         vkEDLgDj74x0i2+a3JJlGTehXToXBk26mumSKMmiE4mAels9lZhivsLTUofDYv9zmLdq
-         XdnQ==
+        b=WoSVau6l0Zpr1FtswZiarBaZif51l6fWhjb0zW6q3fDrGDyMoZJXCDP08UXwvSLvN/
+         9y0ACSvCgVTeGP/gU+CIe0r/Nnkj5OTaKjr+fm7LlS6gSJMQZJRiFH2Ik7lZhDJxIh6u
+         7Xz7F/SHUGgsH9Vhz7+cKgwkwJYLrfTmCT7Y24M9XiZBw+WCsucAnh91YscOwrTLyrTn
+         SvX1txIKHeyaEohwuFFMtmoShCnPx7uIQIwKGn+sbaPb6iwWtni9I6z4OBkRH8SoHSPH
+         3O8+BrAWIl/lbiCJW7A7Kxt0pYVNiZs7xqX7tvUntc1ZAeYnllsDs+2SMG7ZbZMKTi+5
+         0yCw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=EfhhdHruc3Joy400ylQzHb0UM5HE5aa8zxWkMNyiQVw=;
-        fh=wrILRYgbbx3svagD0qz10ni+RxC4hxgaD4X/GGen/UQ=;
-        b=M745/vR8XsYZtrSW7iDR+JF/DuDpGCSbzZYL63SzL2JBSH2dbXyul1fKJJnbxWtpo1
-         gF23ux+aFpiwTx/xCq/lalbbL0nEdlqXDRn0Whx3grOt38QVV40BEs3spMh3cgGoP97b
-         1i8d/TBjtnhGI/jh04+rljpQOcFtielYdDdPJNrkzBMyQuBCOQh8Jh1E6yYEYowOUGC9
-         RYaPZpEUeNERyLKJPWnpNdy9OkdZ3cgIPI+OdOnwSiTss3T0B3WPSML+ltF3tO6buCiD
-         ottv0zSJjQ4TF5wpkanekeXbtUevIK+JgXH2baBSXjo3/z5kyPIeWur5hst3wQ730tT9
-         xomw==;
+        bh=eAmVh6YDfejT/E2URYUh9RId3WZuUlsUzlWuUv497GI=;
+        fh=eHMtetnPgul94AghKfzNEL2HvifnGH2jF7cl+tATRPo=;
+        b=kBqrQ776EXBqiGY0wKMJ2NL45c90c915DQ5PgPov97SaDD7nniHscFAU9LGmqmxyz1
+         tyNl9ecpYa1Lm+owLx9TnTGjwTkaAI6DQrZYHZWZ3QzhG1tTMab4DI+TyLO8SVnVBtOV
+         fnIhOmYXNe/y1axXqsgeZXl4WaL5eRCoNVCiNhImIJxNa5SNKy0NrEJfbbRLLWKCRRd/
+         vtPP/D11NsXYRL4UBiFq31/P2nZ1gJY6wssCRSAUT6IO3HScXO/Vmjb3gGuDoDXHIs29
+         CIRuHCjBxGRyXoZ1ZR6Duhr3a++3y7n7vklL63htqxIrJhe7g092NCN+Zkhud6QQfwPi
+         toSg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777414003; x=1778018803; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1777415687; x=1778020487; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=EfhhdHruc3Joy400ylQzHb0UM5HE5aa8zxWkMNyiQVw=;
-        b=Ci0JEUozQASDL6GwI2clm8pNcqaYU1vAdizIIYhxga5ziwjlm4xBnZK34T+wuvINCd
-         HGatM0rG3cH8ex+OU9KG/KKtB9MW8cgxNqPeTKGgvSkLT6RYBhzcgqfNoCqNkNmycfYv
-         ZtvRGY+dOAQG+zj3Y6zmbZepaQNfKenV6ZHkdsXJFI6aN3+rYFQBvSnFo5x8MZB74n4V
-         NgaffyTT52zhWh4Zl8shkadcQbR8DJmF7uDK66E8r3BrlVJ6vUWYsD1zm/9a/1kecVm7
-         QGMom+zWjVhP0k54jSMB74+T4GHV/yv87AovOSQB+KnKxoKfYE7Hg1pdAskuMvzMOfMD
-         c2GA==
+        bh=eAmVh6YDfejT/E2URYUh9RId3WZuUlsUzlWuUv497GI=;
+        b=NBN14k86u+BNzr96dt6+6B0+N0VrAfH/dC2hYY3+h5D7Ey+17cDlFYXOC8A+fbD1uK
+         krdi5fI0r+O9nz+rUgOWq9ywqv2xm76RhiPzPCGIrpjGcRrtKgTzhepGUjOsAovpWLae
+         fTXm79+xoTaiOkGi11djfHiXmoSqVnWvuq9KIagYelBWspvjEauZExtdsuJv/t5o8rae
+         t4/yWbKC1F/zhiGL2l1k5PzjW93gGZLMO6J3qaHyMLF1wJaw250rzjx/9VCiHp44RW6y
+         QXUdXbcPvCyXD6ZMAlyOaBnAco6fRx/6YsqEgNmALSGt02MD46gsK5QirDPSrfXrQZp8
+         2d7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777414003; x=1778018803;
+        d=1e100.net; s=20251104; t=1777415687; x=1778020487;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=EfhhdHruc3Joy400ylQzHb0UM5HE5aa8zxWkMNyiQVw=;
-        b=Pt6nFZV7s5f5QRM2RKYcHFq/ApPuriQlZT3NzMSQoB3Tl0ebsG3EWQguqXDj6o7/1g
-         dH9KjKJSWGzeLqAsccndy1T5Ij6YSxiAKFJJdiIxJ6OuyKxVjufIwWd489rPgHMiYq/K
-         KaToPapTvnqW6756V+QANqJle0LYfnirU69cmwYUHCif8pOLRlZD0GjlLNOJVvz9t46l
-         aYOzKab/QanX2hTRaexT+WP6mueNP5jaSrU00cFfd24FtRh8/q8cDdPxgQD9tb9nf5De
-         ZU2HkUzJMkJBTkyWU5RsPZ9StZJowDOUbk49Cpa0G9GwsmrlNHH31F46y6pNQEP/lsnI
-         prFQ==
-X-Forwarded-Encrypted: i=1; AFNElJ/sAh+9CMd6K2hWj7I5h+NzeV4WYGGgFSyLXhas/+PMhAtNzJSP5bLDLpg2hQ2DgBHTzjS2v7+dCUeX@vger.kernel.org
-X-Gm-Message-State: AOJu0YwXjKw/2tKU05p97E6vX4XpmYkV+UAZ+CELW2yJxbtk36GEYrPn
-	zfXDtootCWE07bpUR5mnjU4YlKofh0K2RIc15r1hXIRzDNHGRYI7p/KvsKVr+SG85LmqOq077QS
-	wfAfCo6Cs28NO7317HxFV3Jmv2YDGYAU=
-X-Gm-Gg: AeBDietfA4aPTPbhl2nVUTiAzJzYonH6DoWLeZQIRFbfJGOLqgG+DOmeBYI4rr0DM9c
-	w1COpu3ggOQRclj5tyIq9OuGvUcLOcvzhCuNM1kZzMDErn2/SFvfmpiIgBgYZibf84N48eCpOse
-	G/KEzpz8KO+HHPVr+z8h/rjJ2d2m2hI69BCju9yvosb/LJS6n8Zs2GXRLtIIcQhiJXYsNy1x8Qm
-	s9twqTXnx9ut5OIAwisMgFR35920BwpkU7QxZkQeOKQD9GbjKHW6tnXa5LmnOBaEtsJr5+aaTzT
-	HlIwUXBKYM0poISy/A==
-X-Received: by 2002:a05:7022:4583:b0:12a:8ea4:252 with SMTP id
- a92af1059eb24-12ddd93f1f1mr1904671c88.4.1777414003188; Tue, 28 Apr 2026
- 15:06:43 -0700 (PDT)
+        bh=eAmVh6YDfejT/E2URYUh9RId3WZuUlsUzlWuUv497GI=;
+        b=dp5abCA3jBcqycP5i/O2eqNV0yLstvtQQNcWwigLJJ+p71ESyOxyq4Rb/GR9sLiy5G
+         E2swOe2zPHhuBrcidjQQqoNCUPCnknJH3JYB5EuPcYrxOmARdISdc9rje4wlU+z1VNG6
+         /VqjhxcSfEoA/7In7+PvM+3TUK6GaOvZ5NeLaMcjGpeUpVUi2cYZayLJ4OuboDTk3ipN
+         WqsAUmTXQr0JBbNjK7A3Up5ZTDRpfG4McGdPVlRTh3hB2JOxM0HkR4ESM8T8nI2lqOSb
+         g9o9pekuy5PInVXKca+zdswJJFUE4QtkN52olIk456/z8bq/CLtxbNuqxzpt/0WNFKNh
+         I6cw==
+X-Forwarded-Encrypted: i=1; AFNElJ+TepTsTYK9FG9TqfrTsd7Q7qwgbwSdXPC0SsRYhla3732aowojkaJvjVsFpRk4agZSMs7AgbBzPOan@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy5fEPz/I2ijOp9HkiQQlaFx56YUwo6vdY4J68cGwBNBISN9mpD
+	DDWcC5ce3RgfgvzxcY6OfcK6eVJ7Dfq6X/eSKBM0PHOsnX2yhW7DerqEkGbwU/i5gAK33u3bjlf
+	WHl38JmTo8JxjreoKgctTyT/ts9F6fwY=
+X-Gm-Gg: AeBDiesRKRAOa7YuUVIdgUnr7YX0Zm8EMdGe9bAXSpLOW5Xa/+2iOhtMOkn37ahFOLB
+	PTb24o5Ei10Bc7Uljlbv0rE1+ANT9VHXIx/3tzXVy1HUCzZ2CWb4LRaA4EFfa4yIHiTJ8by74ua
+	uwadDwF8eKxBeMSjCIRFfWxrLsn7ceB7+hpJDF4Jun333jJAbW4bEopX/cWyAc23BGqDXgoty33
+	1kbxFr344m92cwkafy3nYd6t6SfnJx2/Rc3/e3knv4fQccVFNemmC2hMUdpCEzuv0uif09iL2wb
+	sR/7K5/Ec0VAT8lSRA==
+X-Received: by 2002:a05:7022:6706:b0:12d:ce34:3f92 with SMTP id
+ a92af1059eb24-12ddd9ae28dmr2409836c88.31.1777415686775; Tue, 28 Apr 2026
+ 15:34:46 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260206202757.1535351-2-slava@dubeyko.com> <CAO8a2SgqvbP-WJAMnKLn=pKmDfjdaq1f86-1MFoqeo-4iehBOg@mail.gmail.com>
-In-Reply-To: <CAO8a2SgqvbP-WJAMnKLn=pKmDfjdaq1f86-1MFoqeo-4iehBOg@mail.gmail.com>
+References: <20260226223042.2027550-1-slava@dubeyko.com> <CAO8a2ShPx3j4UUwAY404VdzG7wE8O-nGRiv5twwyLek07_RVhA@mail.gmail.com>
+ <CAO8a2Sh+=ef4mjp8tOR4HeqY9r4CaPJ7rCq1-WEmO25on7uSRA@mail.gmail.com>
+In-Reply-To: <CAO8a2Sh+=ef4mjp8tOR4HeqY9r4CaPJ7rCq1-WEmO25on7uSRA@mail.gmail.com>
 From: Ilya Dryomov <idryomov@gmail.com>
-Date: Wed, 29 Apr 2026 00:06:31 +0200
-X-Gm-Features: AVHnY4IxnYgvLO6gv2dhy5InpC4XEPsYzK5WDUnuYnkaCnYxSPnbnQvlqg7_4VY
-Message-ID: <CAOi1vP8tGqgYTmcUVHBGziCcr9njJaEvdxxEkmAv8mUVK9C_yg@mail.gmail.com>
-Subject: Re: [PATCH] ceph: fix generic/639 xfstests failure
-To: Alex Markuze <amarkuze@redhat.com>, Xiubo Li <xiubli@redhat.com>
+Date: Wed, 29 Apr 2026 00:34:34 +0200
+X-Gm-Features: AVHnY4LpsUYfIo17tkzDzwjEMMBNEEXetao_2GCk-Cw8QjStyfVLY7UzMpRZiLo
+Message-ID: <CAOi1vP9myLQWxNaqVGU__oPFO7gV=A-Jj15WShaWJ-iFd=36ww@mail.gmail.com>
+Subject: Re: [RFC PATCH] ceph: fix kernel memory exposure issue in ceph_netfs_issue_op_inline()
+To: Alex Markuze <amarkuze@redhat.com>
 Cc: Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org, pdonnell@redhat.com, Slava.Dubeyko@ibm.com
+	linux-fsdevel@vger.kernel.org, pdonnell@redhat.com, Slava.Dubeyko@ibm.com, 
+	vdubeyko@redhat.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Apr 27, 2026 at 2:20=E2=80=AFPM Alex Markuze <amarkuze@redhat.com> =
+On Mon, Apr 27, 2026 at 2:27=E2=80=AFPM Alex Markuze <amarkuze@redhat.com> =
 wrote:
 >
-> Reviewed-by: Alex Markuze <amarkuze@redhat.com>`
+> Apologies, I acked the wrong patch here.
+>
+> The Bug is real and needs fixing, but there is a problem:
 >
 >
-> On Fri, Feb 6, 2026 at 10:28=E2=80=AFPM Viacheslav Dubeyko <slava@dubeyko=
-.com> wrote:
-> >
-> > From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-> >
-> > The generic/639 xfstest fails for Ceph msgr2 protocol:
+>   1. subreq->start is silently dropped
+>
+>   The original code:
+>   len =3D min_t(size_t, iinfo->inline_len - subreq->start, subreq->len);
+>   err =3D copy_to_iter(iinfo->inline_data + subreq->start, len, &subreq->=
+io_iter);
+>
+>   The new code:
+>   len =3D min_t(size_t, iinfo->inline_len, subreq->len);
+>   err =3D copy_to_iter(iinfo->inline_data, len, &subreq->io_iter);
+>
+>   The subreq->start offset is completely removed. If subreq->start > 0
+> with valid inline data, the wrong bytes are copied (always from offset
+> 0 instead of the requested offset).
+>    While CephFS inline data is typically small and subreq->start is
+> likely 0 in practice, the fix is still semantically incorrect for the
+> general case.
+>
+>   2. -EFAULT is the wrong error code. When inline_len =3D=3D 0, the data
+> was uninlined; there's no inline payload.
+>       Returning -EFAULT signals a user-address fault, which is
+> misleading and will propagate as an I/O error instead of falling back
+> to the OSD path.
+>
+>   3. Coding style violation. The } else without braces:
+>       } else
+>           err =3D -EFAULT;
+>
+>   I suggest the following:
+>
+>   A cleaner approach would preserve the offset logic and handle the
+> edge cases properly:
+>
+>   if (iinfo->inline_len =3D=3D 0 || subreq->start >=3D iinfo->inline_len)=
+ {
+>       /* Nothing to copy; CLEAR_TAIL flag will zero-fill */
+>       len =3D 0;
+>   } else {
+>       len =3D min_t(size_t, iinfo->inline_len - subreq->start, subreq->le=
+n);
+>       err =3D copy_to_iter(iinfo->inline_data + subreq->start,
+>                          len, &subreq->io_iter);
+>       if (err =3D=3D 0)
+>           err =3D -EFAULT;
+>       else {
+>           subreq->transferred +=3D err;
+>           err =3D 0;
+>       }
+>   }
+>
+>   Or alternatively, treat inline_len =3D=3D 0 the same way as
+> inline_version =3D=3D CEPH_INLINE_NONE and return false to let the caller
+> fall back to a normal OSD read.
 
 Hi Slava, Alex,
 
-This can't be specific to msgr2 protocol, so I wouldn't emphasize it.
-
-> >
-> > Ubuntu 22.04.5 LTS (GNU/Linux 6.17.0-rc7+ x86_64)
-> >
-> > sudo mount -t ceph :/ /mnt/cephfs/ -o name=3Dadmin,fs=3Dcephfs,ms_mode=
-=3Dsecure
-> >
-> > sudo ./check generic/639
-> > FSTYP -- ceph
-> > PLATFORM -- Linux/x86_64 ceph-0005 6.17.0-rc7+ #16 SMP PREEMPT_DYNAMIC =
-Wed Nov 12 11:01:48 PST 2025
-> > MKFS_OPTIONS -- 192.168.1.213:3300:/scratch
-> > MOUNT_OPTIONS -- -o name=3Dadmin,ms_mode=3Dsecure 192.168.1.213:3300:/s=
-cratch /mnt/cephfs/scratch
-> >
-> > generic/639 - output mismatch (see /home/slavad/XFSTESTS-2/xfstests-dev=
-/results//generic/639.out.bad)
-> >
-> > The simple way to reproduce the issue simply running these steps:
-> >
-> > mount -t ceph :/ /mnt/cephfs/ -o name=3Dadmin,fs=3Dcephfs,ms_mode=3Dsec=
-ure
-> > xfs_io -f -c "pwrite -q 0 32" ./testfile251125-0004
-> > umount /mnt/cephfs/
-> > mount -t ceph :/ /mnt/cephfs/ -o name=3Dadmin,fs=3Dcephfs,ms_mode=3Dsec=
-ure
-> > xfs_io -c "pwrite -q 32 32" ./testfile251125-0004
-> >
-> > Finally, we have the unexpected content of the file:
-> >
-> > hexdump ./testfile251125-0004
-> > 0000000 0000 0000 0000 0000 0000 0000 0000 0000
-> > *
-> > 0000020 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
-> > *
-> > 0000040
-> >
-> > Initial analysis has shown that if we try to write out of
-> > end of file, then ceph_write_begin() is responsible for
-> > the issue because it calls netfs_write_begin() and we have
-> > such logic:
-> >
-> > int netfs_write_begin(struct netfs_inode *ctx,
-> >               struct file *file, struct address_space *mapping,
-> >               loff_t pos, unsigned int len, struct folio **_folio,
-> >               void **_fsdata)
-> > {
-> > <skipped>
-> >
-> >     folio =3D __filemap_get_folio(mapping, index, FGP_WRITEBEGIN,
-> >                     mapping_gfp_mask(mapping));
-> >
-> > <skipped>
-> >
-> >     if (folio_test_uptodate(folio))
-> >         goto have_folio;
-> >
-> > <skipped>
-> > }
-> >
-> > The reason of the issue that somehow we have folio in uptodate
-> > state and netfs_write_begin() simply skips the logic of
-> > reading existing file's content.
-> >
-> > Futher analysis revealed that we call ceph_fill_inode() and
-> > ceph_fill_inline_data() before ceph_write_begin().
-
-With my limited understanding of the inline data feature and its
-history (it was deprecated years ago but is still in "will likely be
-removed altogether in a future release" state?), it doesn't make sense
-that ceph_fill_inline_data() gets called on a file that is created by
-the kernel client.  The kernel client doesn't write inline data -- it
-only supports reading it (after it's written by the userspace client)
-and potentially uninlining it.
-
-> >
-> > void ceph_fill_inline_data(struct inode *inode, struct page *locked_pag=
-e,
-> >                char    *data, size_t len)
-> > {
-> > <skipped>
-> >
-> >     if (page !=3D locked_page) {
-> >         if (len < PAGE_SIZE)
-> >             zero_user_segment(page, len, PAGE_SIZE);
-> >         else
-> >             flush_dcache_page(page);
-> >
-> >         SetPageUptodate(page); <--- We set page uptodate if len =3D=3D =
-0!!!!
-
-How does a small file that has a non-zero size but no data (e.g.
-"truncate -s 32 testfile") is supposed to look when the inline data
-feature is enabled?
-
-I'm asking because I'm not sure I see anything wrong with this call
-given the surrounding code.  In case of len =3D=3D 0 zero_user_segment() is
-called to zero out the entire page.  This call to SetPageUptodate()
-follows that and seems to be on point: if the page isn't going to be
-marked uptodate, the whole sequence of looking up, locking, zeroing and
-unlocking it is pointless.
-
-IMO the actual root cause of the issue here is ceph_fill_inline_data()
-getting called in the first place.  ci->i_inline_version for the file
-in question should be 1 and according to commit 4849077604f0 ("ceph:
-don't get the inline data for new creating files") that is equivalent
-to "no inline data".  That commit changed how fill_inline is assigned
-in ceph_fill_inode() but not in handle_cap_grant() -- I think that was
-an unintended omission and adding Xiubo to confirm.
-
-If handle_cap_grant() gets changed to use ceph_has_inline_data()
-instead of checking for CEPH_INLINE_NONE directly, the issue should
-go away.
+I'd suggest digging into why ceph_netfs_issue_op_inline() got invoked
+in the first place instead, in a vein similar to my comments on
+"[PATCH] ceph: fix generic/639 xfstests failure".  The call appears to
+be conditioned on ceph_has_inline_data() so it won't be exactly the
+same root cause but there is _got_ to be something else going on here.
+I don't see how a file created by generic/013 (i.e. fsstress) on top of
+the kernel client can legitimately have ceph_has_inline_data() return
+false.
 
 Thanks,
 
                 Ilya
 
-> >         unlock_page(page);
-> >         put_page(page);
-> >     }
-> > }
+>
+>  Alex
+>
+> On Mon, Apr 27, 2026 at 3:16=E2=80=AFPM Alex Markuze <amarkuze@redhat.com=
+> wrote:
 > >
-> > This patch fixes the issue by checking the len argument and
-> > setting memory page uptodate only if len > 0.
+> > Reviewed-by: Alex Markuze <amarkuze@redhat.com>
 > >
-> > sudo ./check generic/639
-> > FSTYP         -- ceph
-> > PLATFORM      -- Linux/x86_64 ceph-0005 6.19.0-rc5+ #2 SMP PREEMPT_DYNA=
-MIC Thu Feb  5 15:43:51 PST 2026
-> > MKFS_OPTIONS  -- 192.168.1.213:3300:/scratch
-> > MOUNT_OPTIONS -- -o name=3Dadmin,ms_mode=3Dsecure 192.168.1.213:3300:/s=
-cratch /mnt/cephfs/scratch
-> >
-> > generic/639 6s ...  6s
-> > Ran: generic/639
-> > Passed all 1 tests
-> >
-> > [1] https://tracker.ceph.com/issues/73829
-> >
-> > Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-> > cc: Alex Markuze <amarkuze@redhat.com>
-> > cc: Ilya Dryomov <idryomov@gmail.com>
-> > cc: Patrick Donnelly <pdonnell@redhat.com>
-> > cc: Ceph Development <ceph-devel@vger.kernel.org>
-> > ---
-> >  fs/ceph/addr.c | 4 +++-
-> >  1 file changed, 3 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> > index 63b75d214210..436a287fd311 100644
-> > --- a/fs/ceph/addr.c
-> > +++ b/fs/ceph/addr.c
-> > @@ -2184,7 +2184,9 @@ void ceph_fill_inline_data(struct inode *inode, s=
-truct page *locked_page,
-> >                 else
-> >                         flush_dcache_page(page);
-> >
-> > -               SetPageUptodate(page);
-> > +               if (len > 0)
-> > +                       SetPageUptodate(page);
-> > +
-> >                 unlock_page(page);
-> >                 put_page(page);
-> >         }
-> > --
-> > 2.53.0
-> >
+> > On Fri, Feb 27, 2026 at 12:30=E2=80=AFAM Viacheslav Dubeyko <slava@dube=
+yko.com> wrote:
+> > >
+> > > From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+> > >
+> > > Repeatable running of generic/013 test has revealed
+> > > the kernel memory exposure attempt for 6.19.0-rc8+ in
+> > > ceph_netfs_issue_op_inline():
+> > >
+> > > while true; do
+> > >   sudo ./check generic/013
+> > > done
+> > >
+> > > [17660.888303] ceph: ceph_netfs_issue_op_inline():317 iinfo->inline_d=
+ata ffff8881000b0112,
+> > > iinfo->inline_len 0, subreq->start 328187904, subreq->len 4096, len 0
+> > > [17660.891728] usercopy: Kernel memory exposure attempt detected from=
+ SLUB object 'kmemleak_object' (offset 274, size 4096)!
+> > > [17660.893370] ------------[ cut here ]------------
+> > > [17660.893377] kernel BUG at mm/usercopy.c:102!
+> > > [17660.894426] Oops: invalid opcode: 0000 [#1] SMP KASAN NOPTI
+> > > [17660.895749] CPU: 1 UID: 0 PID: 150873 Comm: fsstress Not tainted 6=
+.19.0-rc8+ #13 PREEMPT(voluntary)
+> > > [17660.896823] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996),=
+ BIOS 1.17.0-9.fc43 06/10/2025
+> > > [17660.897891] RIP: 0010:usercopy_abort+0x7a/0x7c
+> > > [17660.898575] Code: 48 c7 c6 80 bb 3e 8c eb 0e 48 c7 c7 c0 bb 3e 8c =
+48 c7 c6 00 bc 3e 8c 52
+> > > 48 89 fa 48 c7 c7 40 bc 3e 8c 50 41 52 e8 e6 00 fb ff <0f> 0b e8 ef 0=
+e fb 00 4d 89 e0 31 c9 44 89 f2 48 c7 c6 c0 bd 3e 8c
+> > > [17660.901225] RSP: 0018:ffff888179fbf340 EFLAGS: 00010246
+> > > [17660.901762] RAX: 000000000000006d RBX: ffff8881139ac112 RCX: 00000=
+00000000000
+> > > [17660.902295] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 00000=
+00000000000
+> > > [17660.902813] RBP: ffff888179fbf358 R08: 0000000000000000 R09: 00000=
+00000000000
+> > > [17660.903317] R10: 0000000000000000 R11: 0000000000000000 R12: 00000=
+00000001000
+> > > [17660.903820] R13: ffff8881139ad112 R14: 0000000000000001 R15: ffff8=
+88119da8bb0
+> > > [17660.904283] FS:  0000747714d62740(0000) GS:ffff888266112000(0000) =
+knlGS:0000000000000000
+> > > [17660.904719] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> > > [17660.905122] CR2: 00007477143ffff0 CR3: 00000001014f9005 CR4: 00000=
+00000772ef0
+> > > [17660.905555] PKRU: 55555554
+> > > [17660.905743] Call Trace:
+> > > [17660.905902]  <TASK>
+> > > [17660.906042]  __check_heap_object+0xf1/0x130
+> > > [17660.906372]  ? __virt_addr_valid+0x26b/0x510
+> > > [17660.906667]  __check_object_size+0x401/0x700
+> > > [17660.906959]  ceph_netfs_issue_read.cold+0x295/0x2f1
+> > > [17660.907322]  ? __pfx_ceph_netfs_issue_read+0x10/0x10
+> > > [17660.907657]  ? __kasan_check_write+0x14/0x30
+> > > [17660.907940]  ? kvm_sched_clock_read+0x11/0x20
+> > > [17660.908268]  ? sched_clock_noinstr+0x9/0x10
+> > > [17660.908531]  ? local_clock_noinstr+0xf/0x120
+> > > [17660.908817]  netfs_read_to_pagecache+0x45a/0x10f0
+> > > [17660.909168]  ? netfs_read_to_pagecache+0x45a/0x10f0
+> > > [17660.909482]  netfs_write_begin+0x589/0xfc0
+> > > [17660.909761]  ? __kasan_check_read+0x11/0x20
+> > > [17660.910019]  ? __pfx_netfs_write_begin+0x10/0x10
+> > > [17660.910340]  ? mark_held_locks+0x46/0x90
+> > > [17660.910629]  ? inode_set_ctime_current+0x3d0/0x520
+> > > [17660.910965]  ceph_write_begin+0x8c/0x1c0
+> > > [17660.911237]  generic_perform_write+0x391/0x8f0
+> > >
+> > > The reason of the issue is located in this code:
+> > >
+> > > err =3D copy_to_iter(iinfo->inline_data + subreq->start,
+> > >                    len, &subreq->io_iter);
+> > >
+> > > We have valid pointer iinfo->inline_data ffff8881000b0112.
+> > > The iinfo->inline_len has 0 size in bytes. However, subreq->start
+> > > has really big value 328187904. Finally, the sum of iinfo->inline_dat=
+a
+> > > and subreq->start results in the pointer that is out of available
+> > > memory area.
+> > >
+> > > This patch checks the iinfo->inline_len value. If it has zero value,
+> > > then -EFAULT code error will be return. Otherwise, the copy_to_iter()
+> > > logic will be executed.
+> > >
+> > > Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+> > > cc: Alex Markuze <amarkuze@redhat.com>
+> > > cc: Ilya Dryomov <idryomov@gmail.com>
+> > > cc: Patrick Donnelly <pdonnell@redhat.com>
+> > > cc: Ceph Development <ceph-devel@vger.kernel.org>
+> > > ---
+> > >  fs/ceph/addr.c | 18 +++++++++++-------
+> > >  1 file changed, 11 insertions(+), 7 deletions(-)
+> > >
+> > > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> > > index e87b3bb94ee8..426121e38f3f 100644
+> > > --- a/fs/ceph/addr.c
+> > > +++ b/fs/ceph/addr.c
+> > > @@ -314,14 +314,18 @@ static bool ceph_netfs_issue_op_inline(struct n=
+etfs_io_subrequest *subreq)
+> > >                 return false;
+> > >         }
+> > >
+> > > -       len =3D min_t(size_t, iinfo->inline_len - subreq->start, subr=
+eq->len);
+> > > -       err =3D copy_to_iter(iinfo->inline_data + subreq->start, len,=
+ &subreq->io_iter);
+> > > -       if (err =3D=3D 0) {
+> > > +       if (iinfo->inline_len > 0) {
+> > > +               len =3D min_t(size_t, iinfo->inline_len, subreq->len)=
+;
+> > > +
+> > > +               err =3D copy_to_iter(iinfo->inline_data, len, &subreq=
+->io_iter);
+> > > +               if (err =3D=3D 0) {
+> > > +                       err =3D -EFAULT;
+> > > +               } else {
+> > > +                       subreq->transferred +=3D err;
+> > > +                       err =3D 0;
+> > > +               }
+> > > +       } else
+> > >                 err =3D -EFAULT;
+> > > -       } else {
+> > > -               subreq->transferred +=3D err;
+> > > -               err =3D 0;
+> > > -       }
+> > >
+> > >         ceph_mdsc_put_request(req);
+> > >  out:
+> > > --
+> > > 2.53.0
+> > >
 >
