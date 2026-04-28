@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86AE947884E
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 13:19:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5C8548096D
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 13:19:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777382391; cv=none; b=R+QlVBveyoyKWuyZ5fXb7aZgo+rQPV3dCvSWvFff3tJFejw9lyd0XtjWpsX5ES81JaanP2MV2n/Iukxhw/VDwEY/0tTtiGaTvsHOK/woEEp5utEOW3VEbDy3KIi9IF/xT4/YZ6x6ym8bPtzMlKMTqzzPeeo0F0ekcVxX4h4HfjE=
+	t=1777382393; cv=none; b=eJlKrozZ4UnkhX3PDg0FYBVqXkJq8LVzxtl2YxjhmojRg6cYiMDUTjr2ieKL6lch/2YVF+mLTIVogQnk4ING3NXuNXQ0xokm2gKChhOKm+zZg57RVCzc5FoeajY1aD0XWp5dZ4ZZATTooQ5csBiDzHzmhEbNhCGFMggCqCfeFKc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777382391; c=relaxed/simple;
-	bh=SrENox9QMrVI+/91R6omN9IfnXfzBhr5V2WP6gv3vV0=;
+	s=arc-20240116; t=1777382393; c=relaxed/simple;
+	bh=oHKOxR6cBnJ7QN9TFzFAQLpYiRnGb+9i2FzlffHCgJo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=B9NpJVQrTLi499mLTCPyDBfEOPqxB0dnysazUo0ujX+w0cxnDhDoKtrHibNoTLXz0aNq7mnAF/5ZYVA7AgVrCTWS6WfMrpA/ZBwprA4VbaeXK0fJ2V2E27+pMEZCpoId72lNZz2SnLeMqaOnjQKnviOBn06YwZOWnwzmYRw5t30=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bvTfu5Pn; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=RIwcW2bCcKo8sniBeL5OI+tVGyZyq7lJlkZYdC1wMnNNKNHQ0bONAGjjlKTDJOyrrDJWci5+3B9Zsda0V2YNBpp/6fgSnLbZ4gSwqk/tJTiwxVTIJDT27lIpmVf7wVsGC3Qm/QakpPv5ZrrL1OHv5YFCKsW2kcz+B/md64oD0T8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UIqL9pat; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bvTfu5Pn"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UIqL9pat"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777382388;
+	s=mimecast20190719; t=1777382390;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=zM9/5VMpPNkYtZBpulQv1ZMjXnFjfbGB90wD/QTCvo0=;
-	b=bvTfu5PnihSIpVNuU0ZG693Y3k4njlJ1vg0VJMrG1NX4HNp3tBEQCNDGLJrVEjcNrGdVl6
-	AuqPiWYVQdcOTWKdJh6vNSwwkYa517ZsB+XeXOmEjOCBe5icHNU5LBS84y07WkAxXJopHA
-	nnEuS+rSyl+c72h4EAsyxQCuuuuUvHY=
+	bh=WsvT1qZykLKhwF9QKeRj3MdcS5DVtfuhNsY2H0K61Go=;
+	b=UIqL9patf5NCo79x27Anr9geZ85LSuL5nDyqxfa50K7EDKlpWtwxWfp2kaFZz78ho0ZXKr
+	3NaxTeQ6u71Gw+OxAGFEYd/jbT3iJKM0B14JsOYL5uEx9+5TO3i2nPj0xNiNZmYAQLDl5D
+	FN3qrbrTfQ+alH/KAeZYr4p/ZEu29xg=
 Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-479-Hm7vc0ESPOWdLCKrRKKyHQ-1; Tue,
- 28 Apr 2026 09:19:45 -0400
-X-MC-Unique: Hm7vc0ESPOWdLCKrRKKyHQ-1
-X-Mimecast-MFC-AGG-ID: Hm7vc0ESPOWdLCKrRKKyHQ_1777382383
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-116-3q8oDHzfNESJUrV9iTspfQ-1; Tue,
+ 28 Apr 2026 09:19:47 -0400
+X-MC-Unique: 3q8oDHzfNESJUrV9iTspfQ-1
+X-Mimecast-MFC-AGG-ID: 3q8oDHzfNESJUrV9iTspfQ_1777382386
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3821319774E1;
-	Tue, 28 Apr 2026 13:19:39 +0000 (UTC)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id B7F5B1944B0B;
+	Tue, 28 Apr 2026 13:19:43 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.32.126])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 063C1195608E;
-	Tue, 28 Apr 2026 13:19:35 +0000 (UTC)
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id CA3511800664;
+	Tue, 28 Apr 2026 13:19:40 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -53,9 +53,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Matthew Wilcox <willy@infradead.org>
-Subject: [PATCH v5 20/24] netfs: Fix partial invalidation of streaming-write folio
-Date: Tue, 28 Apr 2026 14:17:50 +0100
-Message-ID: <20260428131756.922303-21-dhowells@redhat.com>
+Subject: [PATCH v5 21/24] netfs: Fix folio->private handling in netfs_perform_write()
+Date: Tue, 28 Apr 2026 14:17:51 +0100
+Message-ID: <20260428131756.922303-22-dhowells@redhat.com>
 In-Reply-To: <20260428131756.922303-1-dhowells@redhat.com>
 References: <20260428131756.922303-1-dhowells@redhat.com>
 Precedence: bulk
@@ -65,19 +65,29 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
-In netfs_invalidate_folio(), if the region of a partial invalidation
-overlaps the front (but not all) of a dirty write cached in a streaming
-write page (dirty, but not uptodate, with the dirty region tracked by a
-netfs_folio struct), the function modifies the dirty region - but
-incorrectly as it moves the region forward by setting the start to the
-start, not the end, of the invalidation region.
+Under some circumstances, netfs_perform_write() doesn't correctly
+manipulate folio->private between NULL, NETFS_FOLIO_COPY_TO_CACHE, pointing
+to a group and pointing to a netfs_folio struct, leading to potential
+multiple attachments of private data with associated folio ref leaks and
+also leaks of netfs_folio structs or netfs_group refs.
 
-Fix this by setting finfo->dirty_offset to the end of the invalidation
-region (iend).
+Fix this by consolidating the place at which a folio is marked uptodate in
+one place and having that look at what's attached to folio->private and
+decide how to clean it up and then set the new group.  Also, the content
+shouldn't be flushed if group is NULL, even if a group is specified in the
+netfs_group parameter, as that would be the case for a new folio.  A
+filesystem should always specify netfs_group or never specify netfs_group.
 
-Fixes: cce6bfa6ca0e ("netfs: Fix trimming of streaming-write folios in netfs_inval_folio()")
+The Sashiko auto-review tool noted that it was theoretically possible that
+the fpos >= ctx->zero_point section might leak if it modified a streaming
+write folio.  This is unlikely, but with a network filesystem, third party
+changes can happen.  It also pointed out that __netfs_set_group() would
+leak if called multiple times on the same folio from the "whole folio
+modify section".
+
+Fixes: 8f52de0077ba ("netfs: Reduce number of conditional branches in netfs_perform_write()")
 Closes: https://sashiko.dev/#/patchset/20260414082004.3756080-1-dhowells%40redhat.com
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Paulo Alcantara <pc@manguebit.org>
@@ -85,20 +95,241 @@ cc: Matthew Wilcox <willy@infradead.org>
 cc: netfs@lists.linux.dev
 cc: linux-fsdevel@vger.kernel.org
 ---
- fs/netfs/misc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ fs/netfs/buffered_write.c    | 113 ++++++++++++++++++++---------------
+ include/trace/events/netfs.h |   1 +
+ 2 files changed, 66 insertions(+), 48 deletions(-)
 
-diff --git a/fs/netfs/misc.c b/fs/netfs/misc.c
-index 9fd41a97f83d..14565719b6a2 100644
---- a/fs/netfs/misc.c
-+++ b/fs/netfs/misc.c
-@@ -255,7 +255,7 @@ void netfs_invalidate_folio(struct folio *folio, size_t offset, size_t length)
- 				goto erase_completely;
- 			/* Move the start of the data. */
- 			finfo->dirty_len = fend - iend;
--			finfo->dirty_offset = offset;
-+			finfo->dirty_offset = iend;
- 			trace_netfs_folio(folio, netfs_folio_trace_invalidate_front);
- 			return;
+diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
+index 11a8f64b1177..1ae745c2c643 100644
+--- a/fs/netfs/buffered_write.c
++++ b/fs/netfs/buffered_write.c
+@@ -12,24 +12,6 @@
+ #include <linux/slab.h>
+ #include "internal.h"
+ 
+-static void __netfs_set_group(struct folio *folio, struct netfs_group *netfs_group)
+-{
+-	if (netfs_group)
+-		folio_attach_private(folio, netfs_get_group(netfs_group));
+-}
+-
+-static void netfs_set_group(struct folio *folio, struct netfs_group *netfs_group)
+-{
+-	void *priv = folio_get_private(folio);
+-
+-	if (unlikely(priv != netfs_group)) {
+-		if (netfs_group && (!priv || priv == NETFS_FOLIO_COPY_TO_CACHE))
+-			folio_attach_private(folio, netfs_get_group(netfs_group));
+-		else if (!netfs_group && priv == NETFS_FOLIO_COPY_TO_CACHE)
+-			folio_detach_private(folio);
+-	}
+-}
+-
+ /*
+  * Grab a folio for writing and lock it.  Attempt to allocate as large a folio
+  * as possible to hold as much of the remaining length as possible in one go.
+@@ -157,6 +139,7 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 		size_t offset;	/* Offset into pagecache folio */
+ 		size_t part;	/* Bytes to write to folio */
+ 		size_t copied;	/* Bytes copied from user */
++		void *priv;
+ 
+ 		offset = pos & (max_chunk - 1);
+ 		part = min(max_chunk - offset, iov_iter_count(iter));
+@@ -212,8 +195,9 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 		finfo = netfs_folio_info(folio);
+ 		group = netfs_folio_group(folio);
+ 
+-		if (unlikely(group != netfs_group) &&
+-		    group != NETFS_FOLIO_COPY_TO_CACHE)
++		if (unlikely(group) &&
++		    group != NETFS_FOLIO_COPY_TO_CACHE &&
++		    group != netfs_group)
+ 			goto flush_content;
+ 
+ 		if (folio_test_uptodate(folio)) {
+@@ -222,9 +206,8 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			copied = copy_folio_from_iter_atomic(folio, offset, part, iter);
+ 			if (unlikely(copied == 0))
+ 				goto copy_failed;
+-			netfs_set_group(folio, netfs_group);
+ 			trace = netfs_folio_is_uptodate;
+-			goto copied;
++			goto copied_uptodate;
  		}
+ 
+ 		/* If the page is above the zero-point then we assume that the
+@@ -237,24 +220,22 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			if (unlikely(copied == 0))
+ 				goto copy_failed;
+ 			folio_zero_segment(folio, offset + copied, flen);
+-			__netfs_set_group(folio, netfs_group);
+-			folio_mark_uptodate(folio);
+-			trace = netfs_modify_and_clear;
+-			goto copied;
++			if (finfo)
++				trace = netfs_modify_and_clear_rm_finfo;
++			else
++				trace = netfs_modify_and_clear;
++			goto mark_uptodate;
+ 		}
+ 
+ 		/* See if we can write a whole folio in one go. */
+ 		if (!maybe_trouble && offset == 0 && part >= flen) {
+ 			copied = copy_folio_from_iter_atomic(folio, offset, part, iter);
+ 			if (likely(copied == part)) {
+-				if (finfo) {
++				if (finfo)
+ 					trace = netfs_whole_folio_modify_filled;
+-					goto folio_now_filled;
+-				}
+-				__netfs_set_group(folio, netfs_group);
+-				folio_mark_uptodate(folio);
+-				trace = netfs_whole_folio_modify;
+-				goto copied;
++				else
++					trace = netfs_whole_folio_modify;
++				goto mark_uptodate;
+ 			}
+ 			if (copied == 0)
+ 				goto copy_failed;
+@@ -272,7 +253,7 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			finfo->dirty_len += finfo->dirty_offset;
+ 			if (finfo->dirty_len == flen) {
+ 				trace = netfs_whole_folio_modify_filled_efault;
+-				goto folio_now_filled;
++				goto mark_uptodate;
+ 			}
+ 			if (copied > finfo->dirty_len)
+ 				finfo->dirty_len = copied;
+@@ -300,11 +281,11 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			copied = copy_folio_from_iter_atomic(folio, offset, part, iter);
+ 			if (unlikely(copied == 0))
+ 				goto copy_failed;
+-			netfs_set_group(folio, netfs_group);
+ 			trace = netfs_just_prefetch;
+-			goto copied;
++			goto copied_uptodate;
+ 		}
+ 
++		/* Do a streaming write on a folio that has nothing in it yet. */
+ 		if (!finfo) {
+ 			ret = -EIO;
+ 			if (WARN_ON(folio_get_private(folio)))
+@@ -313,10 +294,8 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			if (unlikely(copied == 0))
+ 				goto copy_failed;
+ 			if (offset == 0 && copied == flen) {
+-				__netfs_set_group(folio, netfs_group);
+-				folio_mark_uptodate(folio);
+ 				trace = netfs_streaming_filled_page;
+-				goto copied;
++				goto mark_uptodate;
+ 			}
+ 
+ 			finfo = kzalloc_obj(*finfo);
+@@ -345,7 +324,7 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			finfo->dirty_len += copied;
+ 			if (finfo->dirty_offset == 0 && finfo->dirty_len == flen) {
+ 				trace = netfs_streaming_cont_filled_page;
+-				goto folio_now_filled;
++				goto mark_uptodate;
+ 			}
+ 			trace = netfs_streaming_write_cont;
+ 			goto copied;
+@@ -361,13 +340,36 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 			goto out;
+ 		continue;
+ 
+-	folio_now_filled:
+-		if (finfo->netfs_group)
+-			folio_change_private(folio, finfo->netfs_group);
+-		else
+-			folio_detach_private(folio);
++		/* Mark a folio as being up to data when we've filled it
++		 * completely.  If the folio has a group attached, then it must
++		 * be the same group, otherwise we should have flushed it out
++		 * above.  We have to get rid of the netfs_folio struct if
++		 * there was one.
++		 */
++	mark_uptodate:
+ 		folio_mark_uptodate(folio);
+-		kfree(finfo);
++
++	copied_uptodate:
++		priv = folio_get_private(folio);
++		if (likely(priv == netfs_group)) {
++			/* Already set correctly; no change required. */
++		} else if (priv == NETFS_FOLIO_COPY_TO_CACHE) {
++			if (!netfs_group)
++				folio_detach_private(folio);
++			else
++				folio_change_private(folio, netfs_get_group(netfs_group));
++		} else if (!priv) {
++			folio_attach_private(folio, netfs_get_group(netfs_group));
++		} else {
++			WARN_ON_ONCE(!finfo);
++			if (netfs_group)
++				/* finfo->netfs_group has a ref */
++				folio_change_private(folio, netfs_group);
++			else
++				folio_detach_private(folio);
++			kfree(finfo);
++		}
++
+ 	copied:
+ 		trace_netfs_folio(folio, trace);
+ 		flush_dcache_folio(folio);
+@@ -530,6 +532,7 @@ vm_fault_t netfs_page_mkwrite(struct vm_fault *vmf, struct netfs_group *netfs_gr
+ 	struct inode *inode = file_inode(file);
+ 	struct netfs_inode *ictx = netfs_inode(inode);
+ 	vm_fault_t ret = VM_FAULT_NOPAGE;
++	void *priv;
+ 	int err;
+ 
+ 	_enter("%lx", folio->index);
+@@ -550,7 +553,9 @@ vm_fault_t netfs_page_mkwrite(struct vm_fault *vmf, struct netfs_group *netfs_gr
+ 	}
+ 
+ 	group = netfs_folio_group(folio);
+-	if (group != netfs_group && group != NETFS_FOLIO_COPY_TO_CACHE) {
++	if (group &&
++	    group != netfs_group &&
++	    group != NETFS_FOLIO_COPY_TO_CACHE) {
+ 		folio_unlock(folio);
+ 		err = filemap_fdatawrite_range(mapping,
+ 					       folio_pos(folio),
+@@ -572,7 +577,19 @@ vm_fault_t netfs_page_mkwrite(struct vm_fault *vmf, struct netfs_group *netfs_gr
+ 		trace_netfs_folio(folio, netfs_folio_trace_mkwrite_plus);
+ 	else
+ 		trace_netfs_folio(folio, netfs_folio_trace_mkwrite);
+-	netfs_set_group(folio, netfs_group);
++
++	priv = folio_get_private(folio);
++	if (priv != netfs_group) {
++		if (!netfs_group && priv == NETFS_FOLIO_COPY_TO_CACHE)
++			folio_detach_private(folio);
++		else if (netfs_group && priv == NETFS_FOLIO_COPY_TO_CACHE)
++			folio_change_private(folio, netfs_get_group(netfs_group));
++		else if (netfs_group && !priv)
++			folio_attach_private(folio, netfs_get_group(netfs_group));
++		else
++			WARN_ON_ONCE(1);
++	}
++
+ 	file_update_time(file);
+ 	set_bit(NETFS_ICTX_MODIFIED_ATTR, &ictx->flags);
+ 	if (ictx->ops->post_modify)
+diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
+index aa9940ba307b..082cb03c6131 100644
+--- a/include/trace/events/netfs.h
++++ b/include/trace/events/netfs.h
+@@ -181,6 +181,7 @@
+ 	EM(netfs_whole_folio_modify_filled,	"mod-whole-f+")	\
+ 	EM(netfs_whole_folio_modify_filled_efault, "mod-whole-f+!") \
+ 	EM(netfs_modify_and_clear,		"mod-n-clear")	\
++	EM(netfs_modify_and_clear_rm_finfo,	"mod-n-clear+")	\
+ 	EM(netfs_streaming_write,		"mod-streamw")	\
+ 	EM(netfs_streaming_write_cont,		"mod-streamw+")	\
+ 	EM(netfs_flush_content,			"flush")	\
 
