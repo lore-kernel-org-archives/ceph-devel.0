@@ -1,46 +1,62 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BA063F54B7
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 12:16:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 927D64508F8
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 13:18:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777378581; cv=none; b=XDbtnA1pYosFJ2XdRx6QYGZOBY2krXdN4gb94aQVFYwnpGRPnhljhWrAOhLqNdLfGlL3BOmbu5BkRHEj/UzbYs3mEegQiYXFccB36Z1jE8V9QJNudG1d88XTe9EL1GwraSICeVNm9tAqsAlkyKFKC02iLGv2DRzHSeYzFCrg2Wc=
+	t=1777382328; cv=none; b=P39t/8DbvgLAuGmbB2Ht7b/do3bG3mP4KI368GrnX2ujTQjOZLhx+gt1QZA83LQuUxNbvo9/vP0sxfUHxaaFrKgSAL3Sy3SfbQY0rv87Mw+eyNA23TgU3KbS/bOOUZHEmCs4iEWR+n+v8n9tsa1Ey7xALxNdfjp1ToAAQBS0kJc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777378581; c=relaxed/simple;
-	bh=O8XHAT3dWQ0z8jq5u398ag3ZtEdW/cIKFUsiBgEAozQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fh6atxpAZbqlmSY8kVX84N+hq1eQBu0yAQBWsWrxv4DRoeD4vmfHYSPmH1t3M9goGeEcgyipTbYLl3vc1wIaDzfvczGBdDb59JoKcEnIVMUCPc6B7nRggLb+ktDbDdE0DNOnapp83GGS35gV0vKP5v1iZdUKfcPgUQMoxSUCJig=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=YuZSuy5k; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1777382328; c=relaxed/simple;
+	bh=PCEywMo+0ucWp3/WX+0dExm5VhO3M/QAe8pTFnnhHEE=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=J0z2ZPbOowC+GBK00rj82fVXx8haVvn1jb0U6swWvddc1o7PJheUacTRgWIfHktINI/D43Dw83omXwIMUPzNC+2Z5SmBDRq2QKtBDB/6A9XpTNLagvJI3uZg/9Mnf3EUCc4Vb1NW4BltpzE0RPGxEYSYT3POjEAd3ppW1yCRGqY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CMfoZw+G; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="YuZSuy5k"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1777378574; h=from : to
- : cc : subject : date : message-id : mime-version :
- content-transfer-encoding : from;
- bh=O8XHAT3dWQ0z8jq5u398ag3ZtEdW/cIKFUsiBgEAozQ=;
- b=YuZSuy5kC/Y8Pm7NEhH+8mPiANyhXr5HkvZ0MRknThB/HsqtgZmZ0MCZtOzoiH7WGQnoV
- VlFj6f7J1p5XkWI5Lh1zwBeW0zwIEIiDFaLElIV9aItEyFcoBmOzLLfyLj3auIly5pH8vRp
- Ok3n9Yp3gFQgubKgARALIJcE/n4Bs2UDsOdRKfuHVcH19n0n5nFpllxkg3WY1J55B5G1zLC
- pvYHro/Ymuslqm0ypbH1U6MaXVa8Ei2/eyXeCOyUbA1Ix3+g48q7fm7gE5kBq27NJUV/W6Y
- MvvmjDRcdrzflJt4qHZxRSKgfzKuyqG9cM/C4w3pt46BWDrh38yrkcnrvdcg==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 359525FCDF;
-	Tue, 28 Apr 2026 14:16:14 +0200 (CEST)
-Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 1295B5FA9C;
-	Tue, 28 Apr 2026 14:16:14 +0200 (CEST)
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Subject: [PATCH v2] libceph: Fix potential out-of-bounds access in __ceph_x_decrypt()
-Date: Tue, 28 Apr 2026 14:15:46 +0200
-Message-ID: <20260428121546.148369-1-raphael.zimmer@tu-ilmenau.de>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CMfoZw+G"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1777382325;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Uhi8kKMsF6kc+1iDdDV2ShwjmP4JKPaFHP00k+w/m/Q=;
+	b=CMfoZw+Gjv2F4ZAlJVCyaL/56mQJ2HiX5PnbAn1m3a5JWxWDSDQ3ji20Fq+kt38NxLigJO
+	4+moM0cz5h1bAGTkYpvY3uAMR1UkV2fkm8eXHNTkYd9QlHm3gteOUQ5jNV4tOxLQ97P/Sa
+	tjUWYoKPX5uKtqor7a5ubU4Cn2dangA=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-122-4-4frwHBOLyANWMlho6SWw-1; Tue,
+ 28 Apr 2026 09:18:40 -0400
+X-MC-Unique: 4-4frwHBOLyANWMlho6SWw-1
+X-Mimecast-MFC-AGG-ID: 4-4frwHBOLyANWMlho6SWw_1777382319
+Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 8774E191FE8F;
+	Tue, 28 Apr 2026 13:18:07 +0000 (UTC)
+Received: from warthog.procyon.org.com (unknown [10.44.32.126])
+	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 81D681800348;
+	Tue, 28 Apr 2026 13:18:04 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v5 01/24] netfs: Fix cancellation of a DIO and single read subrequests
+Date: Tue, 28 Apr 2026 14:17:31 +0100
+Message-ID: <20260428131756.922303-2-dhowells@redhat.com>
+In-Reply-To: <20260428131756.922303-1-dhowells@redhat.com>
+References: <20260428131756.922303-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -48,43 +64,326 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
 
-In __ceph_x_decrypt(), a part of the buffer p is interpreted as a
-ceph_x_encrypt_header, and the magic field of this struct is accessed.
-This happens without any guarantee that the buffer is large enough to
-hold this struct. The function parameter ciphertext_len represents the
-length of the ciphertext to decrypt and is guaranteed to be at most the
-remaining size of the allocated buffer p. However, this value is not
-necessarily greater than sizeof(ceph_x_encrypt_header). E.g., a message
-frame of type FRAME_TAG_AUTH_REPLY_MORE, that is just as long to hold
-the ciphertext at its end with a ciphertext_len of 8 or less, can
-trigger an out-of-bounds memory access when accessing hdr->magic.
+When the preparation of a new subrequest for a read fails, if the
+subrequest has already been added to the stream->subrequests list, it can't
+simply be put and abandoned as the collector may see it.  Also, if it
+hasn't been queued yet, it has two outstanding refs that both need to be
+put.  Both DIO read and single-read dispatch fail at this; further, both
+differ in the order they do things to the way buffered read works.
 
-This patch fixes the issue by adding a check to ensure that the
-decrypted plaintext in the buffer is large enough to represent at least
-the ceph_x_encrypt_header.
+Fix cancellation of both DIO-read and single-read subrequests that failed
+preparation by the following steps:
 
-Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+ (1) Harmonise all three reads (buffered, dio, single) to queue the subreq
+     before prepping it.
+
+ (2) Make all three call netfs_queue_read() to do the queuing.
+
+ (3) Set NETFS_RREQ_ALL_QUEUED independently of the queuing as we don't
+     know the length of the subreq at this point.
+
+ (4) In all cases, set the error and NETFS_SREQ_FAILED flag on the subreq
+     and then call netfs_read_subreq_terminated() to deal with it.  This
+     will pass responsibility off to the collector for dealing with it.
+
+Fixes: e2d46f2ec332 ("netfs: Change the read result collector to only use one work item")
+Closes: https://sashiko.dev/#/patchset/20260425125426.3855807-1-dhowells%40redhat.com
+Signed-off-by: David Howells <dhowells@redhat.com>
+cc: Paulo Alcantara <pc@manguebit.org>
+cc: netfs@lists.linux.dev
+cc: linux-fsdevel@vger.kernel.org
 ---
- net/ceph/auth_x.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ fs/netfs/buffered_read.c | 33 ++++++++++++-------------------
+ fs/netfs/direct_read.c   | 42 +++++++++++++---------------------------
+ fs/netfs/internal.h      |  3 +++
+ fs/netfs/read_collect.c  | 11 +++++++++++
+ fs/netfs/read_single.c   | 23 ++++++++++------------
+ 5 files changed, 49 insertions(+), 63 deletions(-)
 
-diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index 692e0b868822..9e64e82d0b63 100644
---- a/net/ceph/auth_x.c
-+++ b/net/ceph/auth_x.c
-@@ -115,6 +115,11 @@ static int __ceph_x_decrypt(const struct ceph_crypto_key *key, int usage_slot,
- 	if (ret)
- 		return ret;
+diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
+index a8c0d86118c5..286c93fc681e 100644
+--- a/fs/netfs/buffered_read.c
++++ b/fs/netfs/buffered_read.c
+@@ -156,9 +156,8 @@ static void netfs_read_cache_to_pagecache(struct netfs_io_request *rreq,
+ 			netfs_cache_read_terminated, subreq);
+ }
  
-+	if (plaintext_len < sizeof(*hdr)) {
-+		pr_err("%s plaintext too small %d\n", __func__, plaintext_len);
-+		return -EINVAL;
-+	}
+-static void netfs_queue_read(struct netfs_io_request *rreq,
+-			     struct netfs_io_subrequest *subreq,
+-			     bool last_subreq)
++void netfs_queue_read(struct netfs_io_request *rreq,
++		      struct netfs_io_subrequest *subreq)
+ {
+ 	struct netfs_io_stream *stream = &rreq->io_streams[0];
+ 
+@@ -178,11 +177,6 @@ static void netfs_queue_read(struct netfs_io_request *rreq,
+ 		}
+ 	}
+ 
+-	if (last_subreq) {
+-		smp_wmb(); /* Write lists before ALL_QUEUED. */
+-		set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
+-	}
+-
+ 	spin_unlock(&rreq->lock);
+ }
+ 
+@@ -233,6 +227,8 @@ static void netfs_read_to_pagecache(struct netfs_io_request *rreq,
+ 		subreq->start	= start;
+ 		subreq->len	= size;
+ 
++		netfs_queue_read(rreq, subreq);
 +
- 	hdr = p + ceph_crypt_data_offset(key);
- 	if (le64_to_cpu(hdr->magic) != CEPHX_ENC_MAGIC) {
- 		pr_err("%s bad magic\n", __func__);
--- 
-2.47.3
+ 		source = netfs_cache_prepare_read(rreq, subreq, rreq->i_size);
+ 		subreq->source = source;
+ 		if (source == NETFS_DOWNLOAD_FROM_SERVER) {
+@@ -253,6 +249,7 @@ static void netfs_read_to_pagecache(struct netfs_io_request *rreq,
+ 				       rreq->debug_id, subreq->debug_index,
+ 				       subreq->len, size,
+ 				       subreq->start, ictx->zero_point, rreq->i_size);
++				netfs_cancel_read(subreq, ret);
+ 				break;
+ 			}
+ 			subreq->len = len;
+@@ -261,12 +258,7 @@ static void netfs_read_to_pagecache(struct netfs_io_request *rreq,
+ 			if (rreq->netfs_ops->prepare_read) {
+ 				ret = rreq->netfs_ops->prepare_read(subreq);
+ 				if (ret < 0) {
+-					subreq->error = ret;
+-					/* Not queued - release both refs. */
+-					netfs_put_subrequest(subreq,
+-							     netfs_sreq_trace_put_cancel);
+-					netfs_put_subrequest(subreq,
+-							     netfs_sreq_trace_put_cancel);
++					netfs_cancel_read(subreq, ret);
+ 					break;
+ 				}
+ 				trace_netfs_sreq(subreq, netfs_sreq_trace_prepare);
+@@ -295,17 +287,16 @@ static void netfs_read_to_pagecache(struct netfs_io_request *rreq,
+ 		slice = netfs_prepare_read_iterator(subreq, ractl);
+ 		if (slice < 0) {
+ 			ret = slice;
+-			subreq->error = ret;
+-			trace_netfs_sreq(subreq, netfs_sreq_trace_cancel);
+-			/* Not queued - release both refs. */
+-			netfs_put_subrequest(subreq, netfs_sreq_trace_put_cancel);
+-			netfs_put_subrequest(subreq, netfs_sreq_trace_put_cancel);
++			netfs_cancel_read(subreq, ret);
+ 			break;
+ 		}
+-		size -= slice;
+ 		start += slice;
++		size -= slice;
++		if (size <= 0) {
++			smp_wmb(); /* Write lists before ALL_QUEUED. */
++			set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
++		}
+ 
+-		netfs_queue_read(rreq, subreq, size <= 0);
+ 		netfs_issue_read(rreq, subreq);
+ 		cond_resched();
+ 	} while (size > 0);
+diff --git a/fs/netfs/direct_read.c b/fs/netfs/direct_read.c
+index f72e6da88cca..6a8fb0d55e04 100644
+--- a/fs/netfs/direct_read.c
++++ b/fs/netfs/direct_read.c
+@@ -45,12 +45,11 @@ static void netfs_prepare_dio_read_iterator(struct netfs_io_subrequest *subreq)
+  * Perform a read to a buffer from the server, slicing up the region to be read
+  * according to the network rsize.
+  */
+-static int netfs_dispatch_unbuffered_reads(struct netfs_io_request *rreq)
++static void netfs_dispatch_unbuffered_reads(struct netfs_io_request *rreq)
+ {
+-	struct netfs_io_stream *stream = &rreq->io_streams[0];
+ 	unsigned long long start = rreq->start;
+ 	ssize_t size = rreq->len;
+-	int ret = 0;
++	int ret;
+ 
+ 	do {
+ 		struct netfs_io_subrequest *subreq;
+@@ -58,7 +57,10 @@ static int netfs_dispatch_unbuffered_reads(struct netfs_io_request *rreq)
+ 
+ 		subreq = netfs_alloc_subrequest(rreq);
+ 		if (!subreq) {
+-			ret = -ENOMEM;
++			/* Stash the error in the request if there's not
++			 * already an error set.
++			 */
++			cmpxchg(&rreq->error, 0, -ENOMEM);
+ 			break;
+ 		}
+ 
+@@ -66,25 +68,13 @@ static int netfs_dispatch_unbuffered_reads(struct netfs_io_request *rreq)
+ 		subreq->start	= start;
+ 		subreq->len	= size;
+ 
+-		__set_bit(NETFS_SREQ_IN_PROGRESS, &subreq->flags);
+-
+-		spin_lock(&rreq->lock);
+-		list_add_tail(&subreq->rreq_link, &stream->subrequests);
+-		if (list_is_first(&subreq->rreq_link, &stream->subrequests)) {
+-			if (!stream->active) {
+-				stream->collected_to = subreq->start;
+-				/* Store list pointers before active flag */
+-				smp_store_release(&stream->active, true);
+-			}
+-		}
+-		trace_netfs_sreq(subreq, netfs_sreq_trace_added);
+-		spin_unlock(&rreq->lock);
++		netfs_queue_read(rreq, subreq);
+ 
+ 		netfs_stat(&netfs_n_rh_download);
+ 		if (rreq->netfs_ops->prepare_read) {
+ 			ret = rreq->netfs_ops->prepare_read(subreq);
+ 			if (ret < 0) {
+-				netfs_put_subrequest(subreq, netfs_sreq_trace_put_cancel);
++				netfs_cancel_read(subreq, ret);
+ 				break;
+ 			}
+ 		}
+@@ -113,8 +103,6 @@ static int netfs_dispatch_unbuffered_reads(struct netfs_io_request *rreq)
+ 		set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
+ 		netfs_wake_collector(rreq);
+ 	}
+-
+-	return ret;
+ }
+ 
+ /*
+@@ -137,21 +125,17 @@ static ssize_t netfs_unbuffered_read(struct netfs_io_request *rreq, bool sync)
+ 	// TODO: Use bounce buffer if requested
+ 
+ 	inode_dio_begin(rreq->inode);
++	netfs_dispatch_unbuffered_reads(rreq);
+ 
+-	ret = netfs_dispatch_unbuffered_reads(rreq);
+-
+-	if (!rreq->submitted) {
+-		netfs_put_request(rreq, netfs_rreq_trace_put_no_submit);
+-		inode_dio_end(rreq->inode);
+-		ret = 0;
+-		goto out;
+-	}
++	/* The collector will get run, even if we don't manage to submit any
++	 * subreqs, so we shouldn't call inode_dio_end() here.
++	 */
+ 
+ 	if (sync)
+ 		ret = netfs_wait_for_read(rreq);
+ 	else
+ 		ret = -EIOCBQUEUED;
+-out:
++
+ 	_leave(" = %zd", ret);
+ 	return ret;
+ }
+diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
+index d436e20d3418..645996ecfc80 100644
+--- a/fs/netfs/internal.h
++++ b/fs/netfs/internal.h
+@@ -23,6 +23,8 @@
+ /*
+  * buffered_read.c
+  */
++void netfs_queue_read(struct netfs_io_request *rreq,
++		      struct netfs_io_subrequest *subreq);
+ void netfs_cache_read_terminated(void *priv, ssize_t transferred_or_error);
+ int netfs_prefetch_for_write(struct file *file, struct folio *folio,
+ 			     size_t offset, size_t len);
+@@ -108,6 +110,7 @@ static inline void netfs_see_subrequest(struct netfs_io_subrequest *subreq,
+  */
+ bool netfs_read_collection(struct netfs_io_request *rreq);
+ void netfs_read_collection_worker(struct work_struct *work);
++void netfs_cancel_read(struct netfs_io_subrequest *subreq, int error);
+ void netfs_cache_read_terminated(void *priv, ssize_t transferred_or_error);
+ 
+ /*
+diff --git a/fs/netfs/read_collect.c b/fs/netfs/read_collect.c
+index e5f6665b3341..d2d902f46627 100644
+--- a/fs/netfs/read_collect.c
++++ b/fs/netfs/read_collect.c
+@@ -575,6 +575,17 @@ void netfs_read_subreq_terminated(struct netfs_io_subrequest *subreq)
+ }
+ EXPORT_SYMBOL(netfs_read_subreq_terminated);
+ 
++/*
++ * Cancel a read subrequest due to preparation failure.
++ */
++void netfs_cancel_read(struct netfs_io_subrequest *subreq, int error)
++{
++	trace_netfs_sreq(subreq, netfs_sreq_trace_cancel);
++	subreq->error = error;
++	__set_bit(NETFS_SREQ_FAILED, &subreq->flags);
++	netfs_read_subreq_terminated(subreq);
++}
++
+ /*
+  * Handle termination of a read from the cache.
+  */
+diff --git a/fs/netfs/read_single.c b/fs/netfs/read_single.c
+index d0e23bc42445..8833550d2eb6 100644
+--- a/fs/netfs/read_single.c
++++ b/fs/netfs/read_single.c
+@@ -89,7 +89,6 @@ static void netfs_single_read_cache(struct netfs_io_request *rreq,
+  */
+ static int netfs_single_dispatch_read(struct netfs_io_request *rreq)
+ {
+-	struct netfs_io_stream *stream = &rreq->io_streams[0];
+ 	struct netfs_io_subrequest *subreq;
+ 	int ret = 0;
+ 
+@@ -102,14 +101,7 @@ static int netfs_single_dispatch_read(struct netfs_io_request *rreq)
+ 	subreq->len	= rreq->len;
+ 	subreq->io_iter	= rreq->buffer.iter;
+ 
+-	__set_bit(NETFS_SREQ_IN_PROGRESS, &subreq->flags);
+-
+-	spin_lock(&rreq->lock);
+-	list_add_tail(&subreq->rreq_link, &stream->subrequests);
+-	trace_netfs_sreq(subreq, netfs_sreq_trace_added);
+-	/* Store list pointers before active flag */
+-	smp_store_release(&stream->active, true);
+-	spin_unlock(&rreq->lock);
++	netfs_queue_read(rreq, subreq);
+ 
+ 	netfs_single_cache_prepare_read(rreq, subreq);
+ 	switch (subreq->source) {
+@@ -121,10 +113,14 @@ static int netfs_single_dispatch_read(struct netfs_io_request *rreq)
+ 				goto cancel;
+ 		}
+ 
++		smp_wmb(); /* Write lists before ALL_QUEUED. */
++		set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
+ 		rreq->netfs_ops->issue_read(subreq);
+ 		rreq->submitted += subreq->len;
+ 		break;
+ 	case NETFS_READ_FROM_CACHE:
++		smp_wmb(); /* Write lists before ALL_QUEUED. */
++		set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
+ 		trace_netfs_sreq(subreq, netfs_sreq_trace_submit);
+ 		netfs_single_read_cache(rreq, subreq);
+ 		rreq->submitted += subreq->len;
+@@ -134,14 +130,15 @@ static int netfs_single_dispatch_read(struct netfs_io_request *rreq)
+ 		pr_warn("Unexpected single-read source %u\n", subreq->source);
+ 		WARN_ON_ONCE(true);
+ 		ret = -EIO;
+-		break;
++		goto cancel;
+ 	}
+ 
+-	smp_wmb(); /* Write lists before ALL_QUEUED. */
+-	set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
+ 	return ret;
+ cancel:
+-	netfs_put_subrequest(subreq, netfs_sreq_trace_put_cancel);
++	netfs_cancel_read(subreq, ret);
++	smp_wmb(); /* Write lists before ALL_QUEUED. */
++	set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
++	netfs_wake_collector(rreq);
+ 	return ret;
+ }
+ 
 
