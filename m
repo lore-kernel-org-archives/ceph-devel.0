@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FCA7472764
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 13:19:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E697C47276A
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 13:19:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777382347; cv=none; b=AGVWoViND1UWIjE7YeNpTvavQwHZcw/+OMYgmng6lfg6fekKO1xNlycC1OtQ87XzgxWSPzT302vDEJ8nNYfpmziL8YFtpeS7uPt9FvE4JLGIfQP3CGSfRNYuvBqOIwFpZyZZuyuRo5sDLYENzA3WwpoF7uZNCtWtJTpKNG5X3KQ=
+	t=1777382350; cv=none; b=omcY46Ffp7DFG5O/oCqoNGcgHzsQMam/dQGc+kmJjtCClh9x6USUQRsIAZXOn8r3LltFn2fwj2JyVzaS70dgIIYUQfzs/J2D7isDB4M2M59403sLoo+w+6gfWC6kk1ASYdRwxZrwJz/Gt7hEC5dxReguhvpfY6L1XEVuu84xfTo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777382347; c=relaxed/simple;
-	bh=xt/VtEfH0gIsDmidCvLtu7xSES7YK7i6BHGIB3e+zRY=;
+	s=arc-20240116; t=1777382350; c=relaxed/simple;
+	bh=xKMwK6XyTR2S1NYi1ll51KBolxqfDxdt7e/1pyWESn8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=AAMt6qWM8R7Ly1vO5Qr1LzTA3z4Ju3LhEi2cM0Cxg8XS/oT0V80tqJjvTxH22thkoJqIwMNjsAzBk0N0vYJlMSTtgTOX6CLV9638NPF0NKOkGmqlqfkt0GOWNX4xlPifc1zCY+Fo3Zehx9BAiTfswupSNemz56g26fFrOqwFCTs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=M9w39q59; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=FkRuPWQtALSC6b2Bt2BDkCSYwbxtEvhBu7HYeP3Qeamt6xHqzzqup1m5EomYnYH6keQapfVGo+DbElyMPqX3BqB60FTp5UL42ZWfsTJ/+G9+i8sbdNDFCuskVqDb0u32zl7n7bRFZJ3pM1FMJzI5aDK2iMISayVHXaFf1alkUhE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=T/imkzqk; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M9w39q59"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T/imkzqk"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777382345;
+	s=mimecast20190719; t=1777382347;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=NNTWy1b19ZoNmt6S5T/uvk5jPsS1NSlNmD1y6ywnbBw=;
-	b=M9w39q59zH5GsfY27fpVTnGr952CpjegrHDyXFwYg6Vq8JZkkvMra+lPhBApOOb2UM7RBc
-	bl+jCKvvUP6NpxdvF9pgUzqKkSG5k1WjfZSEp0n+nytHMzQY2L/2lYk+iV9UtGYZM50Pu4
-	YM8pnbLpcbxcpeVbS+cyfSH2HdQaaTQ=
-Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
+	bh=I9C1Tq0bWPjxQKHy18dUxRo+Gdg144k5WV4DnkH5buY=;
+	b=T/imkzqkyy5zP/GYl/WuNWpp4oPh2V2jGH5of0WcCQ9uC4KiHSAwxbtMiOwUs1i+nbsDCv
+	0XAz3MICcp+Lb/bdY4R44ImTyYUFYDuMfrO70LG720IUDpRO9CNFEY2ucp77qqy/u0ypq3
+	qiwqBQBao8Za9sxraQVbCTYhNyoFBF8=
+Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-132-7zCkveG9NRmxk-gbMKgZjA-1; Tue,
- 28 Apr 2026 09:19:02 -0400
-X-MC-Unique: 7zCkveG9NRmxk-gbMKgZjA-1
-X-Mimecast-MFC-AGG-ID: 7zCkveG9NRmxk-gbMKgZjA_1777382338
-Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-341-53Ejn19wPNSPVfWSlsUvmQ-1; Tue,
+ 28 Apr 2026 09:19:03 -0400
+X-MC-Unique: 53Ejn19wPNSPVfWSlsUvmQ-1
+X-Mimecast-MFC-AGG-ID: 53Ejn19wPNSPVfWSlsUvmQ_1777382341
+Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id CAA8B186B1A4;
-	Tue, 28 Apr 2026 13:18:21 +0000 (UTC)
+	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id AC63E18B7CE3;
+	Tue, 28 Apr 2026 13:18:12 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.32.126])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 1A22719560AB;
-	Tue, 28 Apr 2026 13:18:18 +0000 (UTC)
+	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 6E3771800348;
+	Tue, 28 Apr 2026 13:18:08 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -52,9 +52,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v5 04/24] netfs: Fix netfs_read_to_pagecache() to pause on subreq failure
-Date: Tue, 28 Apr 2026 14:17:34 +0100
-Message-ID: <20260428131756.922303-5-dhowells@redhat.com>
+Subject: [PATCH v5 02/24] netfs: Fix missing locking around retry adding new subreqs
+Date: Tue, 28 Apr 2026 14:17:32 +0100
+Message-ID: <20260428131756.922303-3-dhowells@redhat.com>
 In-Reply-To: <20260428131756.922303-1-dhowells@redhat.com>
 References: <20260428131756.922303-1-dhowells@redhat.com>
 Precedence: bulk
@@ -64,35 +64,74 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
 
-Fix netfs_read_to_pagecache() so that it pauses the generation of new
-subrequests if an already-issued subrequest fails.
+Fix netfs_retry_read_subrequests() and netfs_retry_write_stream() to take
+the appropriate lock when adding extra subrequests into
+stream->subrequests.
 
-Fixes: ee4cdf7ba857 ("netfs: Speed up buffered reading")
+Fixes: e2d46f2ec332 ("netfs: Change the read result collector to only use one work item")
+Fixes: 288ace2f57c9 ("netfs: New writeback implementation")
 Closes: https://sashiko.dev/#/patchset/20260425125426.3855807-1-dhowells%40redhat.com
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Paulo Alcantara <pc@manguebit.org>
 cc: netfs@lists.linux.dev
 cc: linux-fsdevel@vger.kernel.org
 ---
- fs/netfs/buffered_read.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ fs/netfs/read_retry.c  | 6 +++++-
+ fs/netfs/write_retry.c | 6 +++++-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
-index 7ec11893552d..228d058bf1a2 100644
---- a/fs/netfs/buffered_read.c
-+++ b/fs/netfs/buffered_read.c
-@@ -299,6 +299,11 @@ static void netfs_read_to_pagecache(struct netfs_io_request *rreq,
- 		}
+diff --git a/fs/netfs/read_retry.c b/fs/netfs/read_retry.c
+index cca9ac43c077..5ec548b996d6 100644
+--- a/fs/netfs/read_retry.c
++++ b/fs/netfs/read_retry.c
+@@ -175,7 +175,9 @@ static void netfs_retry_read_subrequests(struct netfs_io_request *rreq)
+ 			list_for_each_entry_safe_from(subreq, tmp,
+ 						      &stream->subrequests, rreq_link) {
+ 				trace_netfs_sreq(subreq, netfs_sreq_trace_superfluous);
++				spin_lock(&rreq->lock);
+ 				list_del(&subreq->rreq_link);
++				spin_unlock(&rreq->lock);
+ 				netfs_put_subrequest(subreq, netfs_sreq_trace_put_done);
+ 				if (subreq == to)
+ 					break;
+@@ -203,8 +205,10 @@ static void netfs_retry_read_subrequests(struct netfs_io_request *rreq)
+ 					     refcount_read(&subreq->ref),
+ 					     netfs_sreq_trace_new);
  
- 		netfs_issue_read(rreq, subreq);
-+
-+		if (test_bit(NETFS_RREQ_PAUSE, &rreq->flags))
-+			netfs_wait_for_paused_read(rreq);
-+		if (test_bit(NETFS_RREQ_FAILED, &rreq->flags))
-+			break;
- 		cond_resched();
- 	} while (size > 0);
++			spin_lock(&rreq->lock);
+ 			list_add(&subreq->rreq_link, &to->rreq_link);
+-			to = list_next_entry(to, rreq_link);
++			spin_unlock(&rreq->lock);
++			to = subreq;
+ 			trace_netfs_sreq(subreq, netfs_sreq_trace_retry);
  
+ 			stream->sreq_max_len	= umin(len, rreq->rsize);
+diff --git a/fs/netfs/write_retry.c b/fs/netfs/write_retry.c
+index 29489a23a220..32735abfa03f 100644
+--- a/fs/netfs/write_retry.c
++++ b/fs/netfs/write_retry.c
+@@ -130,7 +130,9 @@ static void netfs_retry_write_stream(struct netfs_io_request *wreq,
+ 			list_for_each_entry_safe_from(subreq, tmp,
+ 						      &stream->subrequests, rreq_link) {
+ 				trace_netfs_sreq(subreq, netfs_sreq_trace_discard);
++				spin_lock(&wreq->lock);
+ 				list_del(&subreq->rreq_link);
++				spin_unlock(&wreq->lock);
+ 				netfs_put_subrequest(subreq, netfs_sreq_trace_put_done);
+ 				if (subreq == to)
+ 					break;
+@@ -153,8 +155,10 @@ static void netfs_retry_write_stream(struct netfs_io_request *wreq,
+ 					     netfs_sreq_trace_new);
+ 			trace_netfs_sreq(subreq, netfs_sreq_trace_split);
+ 
++			spin_lock(&wreq->lock);
+ 			list_add(&subreq->rreq_link, &to->rreq_link);
+-			to = list_next_entry(to, rreq_link);
++			spin_unlock(&wreq->lock);
++			to = subreq;
+ 			trace_netfs_sreq(subreq, netfs_sreq_trace_retry);
+ 
+ 			stream->sreq_max_len	= len;
 
