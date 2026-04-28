@@ -1,98 +1,90 @@
-Received: from mail-qv1-f45.google.com (mail-qv1-f45.google.com [209.85.219.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6113B2BF006
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 11:41:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BA063F54B7
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 12:16:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777376473; cv=none; b=uMnjKL6Wh6PO8zGZ2XxW2VbAW4mCyUsFanfr4kNHp6BclQ+gQ5rVvq1gkpiF5vH+NpX8FPZAA8hsl96fy7wzlmXVxwILX7q6XIU5O8CleZ3xI6H6i76vnH6HUGo5uzjzNJ+JCy0X5am4SWJaeYIyMXCiLoLVQvCreGJlBDaHdRE=
+	t=1777378581; cv=none; b=XDbtnA1pYosFJ2XdRx6QYGZOBY2krXdN4gb94aQVFYwnpGRPnhljhWrAOhLqNdLfGlL3BOmbu5BkRHEj/UzbYs3mEegQiYXFccB36Z1jE8V9QJNudG1d88XTe9EL1GwraSICeVNm9tAqsAlkyKFKC02iLGv2DRzHSeYzFCrg2Wc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777376473; c=relaxed/simple;
-	bh=N0BNPTBKn8tkPzSxOqAu78EhsMGa/E+5kYRZ3EZjg5I=;
-	h=Message-ID:From:To:Subject:Date:MIME-Version:Content-Type; b=c/xrFWzPiqHWiqMgWiDncUnunV6Wk8np8vcYdew6oNcplKAhEEsSZrzCeqWFhJerANACZqvsYQ0rfO61Z40o8jN8ZnCOdxr/LfNlGru4SbeqK/Pph6cvR4W8n/Jc3NFl8onEQUOcP9766TZHRd0xMZVKMwyXwag5vUxxjfc97jE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=reframesparkle.com; spf=pass smtp.mailfrom=reframesparkle.com; dkim=pass (2048-bit key) header.d=reframesparkle.com header.i=@reframesparkle.com header.b=Ut6AD/nK; arc=none smtp.client-ip=209.85.219.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=reframesparkle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=reframesparkle.com
+	s=arc-20240116; t=1777378581; c=relaxed/simple;
+	bh=O8XHAT3dWQ0z8jq5u398ag3ZtEdW/cIKFUsiBgEAozQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fh6atxpAZbqlmSY8kVX84N+hq1eQBu0yAQBWsWrxv4DRoeD4vmfHYSPmH1t3M9goGeEcgyipTbYLl3vc1wIaDzfvczGBdDb59JoKcEnIVMUCPc6B7nRggLb+ktDbDdE0DNOnapp83GGS35gV0vKP5v1iZdUKfcPgUQMoxSUCJig=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=YuZSuy5k; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=reframesparkle.com header.i=@reframesparkle.com header.b="Ut6AD/nK"
-Received: by mail-qv1-f45.google.com with SMTP id 6a1803df08f44-8aca6bd57cfso104774796d6.0
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 04:41:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=reframesparkle.com; s=google; t=1777376471; x=1777981271; darn=vger.kernel.org;
-        h=mime-version:date:content-transfer-encoding:subject:to:from
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=N0BNPTBKn8tkPzSxOqAu78EhsMGa/E+5kYRZ3EZjg5I=;
-        b=Ut6AD/nKEdomCU7hm2qOZfTbvjykzGmTrCKdG+hS2KegsFfkmXDOYNeoH0zF2r+HiS
-         TRBAaKE8eLwh5vDcyO9Jx5yFyOnPml3dv8heTdeY24eZe25HVFsCy8am7tjfsoEGQnro
-         XrVNYcg0p0/9BSbg2EMbKZoABmhKGorkc+NI/El31WLpzo/nSW08GkF+VwKhfkIZID57
-         seZRvu0NyMowD6aV7ZfMP3AygKtM1sORnNg/TfgSURB12+jNh+YbaVWG5pzGqJbt/uLo
-         hpS8Ck2eF8hHCju8JA3dsxr7ZaywE2N440kJLQURSfhdoJZd16gUibnAEkkj0E6PipSJ
-         HVYA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777376471; x=1777981271;
-        h=mime-version:date:content-transfer-encoding:subject:to:from
-         :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=N0BNPTBKn8tkPzSxOqAu78EhsMGa/E+5kYRZ3EZjg5I=;
-        b=DHIusMqBkntLE2DsQt3IDQ4fJhGDVRZjc8lnOCDWQrAJnKcVou36E6rJS/PdvezpAh
-         WJMjdKeE3KZQZP6dBKYoG5v/nVYWYuPj1SpKuoKfLznYXENZ8WO1LFvIc/2VWEbost0D
-         kYdqjl8WbPxOl/+Vk07thUiKvODCH92KebBWdIC//J2Laem9bwfq+ZQP/vOaD66UlSo4
-         3S6qWkxYgmfIfAW2qfb59CcmYmX6gZqklEDjMh4J4sdv5ytxZsrzkwikvhP+aS8/2Ioe
-         HcH5HPfPL16IdEh4e7fW4BUgyVj1XEVr0q/GqtM7xswmNV4fYnJ4PSaNevZzyjdpLhuM
-         Am3Q==
-X-Gm-Message-State: AOJu0YxjDVYX5z3jxRNUQkGox4yKh008B+ahrH3m5k8JRLYuM5ntEq+g
-	b0x3jhVu4fpMTd0u1EKAzDizegGpt/lHDgOgtuSivVQddAzh57cfB8w7Gv4eF4JcyG260MRUWXc
-	NY8ZCHKE1
-X-Gm-Gg: AeBDiev1Dm1J3Wk0Z2c0sPEeih2oKgbRMe2tg8ALT8mbpMXalVryoddLtsNiyxwVzk+
-	FJImBShlbMqQsNif+ywxGj1cXYblM/su/Rd+vV61a1sNkJ1v5M6ScSovQC4K4Ctn8Xrfyp+VhgE
-	CevwcSuAeZJvRovzRh3AjGzuw8zadLcab7mJdz3QZH2aQx9IeA5OSUsYvxgb6ufng2mN6PsUNfa
-	xd3wBWp9n7vcN1dFnlzVAn+94+XQ+Lq+Q/dTvR5B6UVOg/Y80OnC3xgLZbDldSnnWXs8MSYWuKc
-	bMpM8JzFas9t3bk+qDqLlN0R3j24DksTuQXcsdNUNjlnajz3hpG3W/DJRWzC2fC7+Mtax+SBJY8
-	8ak2bcFK2Q4OPAO/ISxM+ossiMk9re6qTAVnQA+gvYLot1bTuxi8rPI4ZR5MH5e3OjmEwSzusZv
-	f5s3hDYogysmTcjQ6XqmS/u73nDewVVPCCKXNGOiXwQlYI0sQHQ4Dp/orfUN8FfjtiWnomwuQ3H
-	xaeP6dOeues2nG2hqTkc+TUhX6klQyqVf761sSilWmv1XMr+kWYp/CKpjdq2DmMKBchnqyxBg==
-X-Received: by 2002:a0c:f11b:0:b0:8ae:680c:81d2 with SMTP id 6a1803df08f44-8b3e31ca2cfmr32014386d6.47.1777376471170;
-        Tue, 28 Apr 2026 04:41:11 -0700 (PDT)
-Received: from 019dd3df-3f9a-782e-ac1b-d3784da5ee64.local (ec2-3-149-4-118.us-east-2.compute.amazonaws.com. [3.149.4.118])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8b3e28623dasm18191616d6.19.2026.04.28.04.41.10
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Apr 2026 04:41:10 -0700 (PDT)
-Message-ID: <019dd3df-3f9a-782e-ac1b-d3784da5ee64@reframesparkle.com>
-X-Mail-Abuse-Inquiries:
- https://app.instantly.ai/privacy/report-abuse/019dd3df-3f9a-782e-ac1b-d3784da5ee64
-From: Richard Jones <richard@reframesparkle.com>
-To: ceph-devel@vger.kernel.org
-Subject: Just added 1TB of proxies to this email
-Content-Transfer-Encoding: quoted-printable
-Date: Tue, 28 Apr 2026 11:41:10 +0000
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="YuZSuy5k"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1777378574; h=from : to
+ : cc : subject : date : message-id : mime-version :
+ content-transfer-encoding : from;
+ bh=O8XHAT3dWQ0z8jq5u398ag3ZtEdW/cIKFUsiBgEAozQ=;
+ b=YuZSuy5kC/Y8Pm7NEhH+8mPiANyhXr5HkvZ0MRknThB/HsqtgZmZ0MCZtOzoiH7WGQnoV
+ VlFj6f7J1p5XkWI5Lh1zwBeW0zwIEIiDFaLElIV9aItEyFcoBmOzLLfyLj3auIly5pH8vRp
+ Ok3n9Yp3gFQgubKgARALIJcE/n4Bs2UDsOdRKfuHVcH19n0n5nFpllxkg3WY1J55B5G1zLC
+ pvYHro/Ymuslqm0ypbH1U6MaXVa8Ei2/eyXeCOyUbA1Ix3+g48q7fm7gE5kBq27NJUV/W6Y
+ MvvmjDRcdrzflJt4qHZxRSKgfzKuyqG9cM/C4w3pt46BWDrh38yrkcnrvdcg==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 359525FCDF;
+	Tue, 28 Apr 2026 14:16:14 +0200 (CEST)
+Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 1295B5FA9C;
+	Tue, 28 Apr 2026 14:16:14 +0200 (CEST)
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org,
+	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Subject: [PATCH v2] libceph: Fix potential out-of-bounds access in __ceph_x_decrypt()
+Date: Tue, 28 Apr 2026 14:15:46 +0200
+Message-ID: <20260428121546.148369-1-raphael.zimmer@tu-ilmenau.de>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 
-Hey,
+In __ceph_x_decrypt(), a part of the buffer p is interpreted as a
+ceph_x_encrypt_header, and the magic field of this struct is accessed.
+This happens without any guarantee that the buffer is large enough to
+hold this struct. The function parameter ciphertext_len represents the
+length of the ciphertext to decrypt and is guaranteed to be at most the
+remaining size of the allocated buffer p. However, this value is not
+necessarily greater than sizeof(ceph_x_encrypt_header). E.g., a message
+frame of type FRAME_TAG_AUTH_REPLY_MORE, that is just as long to hold
+the ciphertext at its end with a ciphertext_len of 8 or less, can
+trigger an out-of-bounds memory access when accessing hdr->magic.
 
-I just added 1tb of premium resi proxies to this email. just create =
-an account at Geonode Proxies and you'll see it (promise this is real, =
-check first if possible!)
+This patch fixes the issue by adding a check to ensure that the
+decrypted plaintext in the buffer is large enough to represent at least
+the ceph_x_encrypt_header.
 
-We power proxies for about 10k teams running =
-scrapy, playwright, , httpx, that sort of thing. figured PyPI maintainers =
-would know what to do with it.
+Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+---
+ net/ceph/auth_x.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-No CC needed, 7 days to stress test it on =
-your actual workload (countdown's on the dashboard after you log in).
+diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
+index 692e0b868822..9e64e82d0b63 100644
+--- a/net/ceph/auth_x.c
++++ b/net/ceph/auth_x.c
+@@ -115,6 +115,11 @@ static int __ceph_x_decrypt(const struct ceph_crypto_key *key, int usage_slot,
+ 	if (ret)
+ 		return ret;
+ 
++	if (plaintext_len < sizeof(*hdr)) {
++		pr_err("%s plaintext too small %d\n", __func__, plaintext_len);
++		return -EINVAL;
++	}
++
+ 	hdr = p + ceph_crypt_data_offset(key);
+ 	if (le64_to_cpu(hdr->magic) != CEPHX_ENC_MAGIC) {
+ 		pr_err("%s bad magic\n", __func__);
+-- 
+2.47.3
 
-2.6M owned IPs, not shared pools. Same infra our paying customers use.
-
-if you'd prefer another email just tell me and I'll handle it.
-
-ps. sending from a weird mailbox because our marketing platform had an =
-issue - promise it's legit, just sign up and you'll see the 1tb
-
-Cheers,
-Richard
