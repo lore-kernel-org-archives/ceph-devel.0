@@ -1,91 +1,91 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E34A03FFAA6
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67D143FB7E7
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777467159; cv=none; b=YAI0Eq6Mm7fc4GY+QXE/SjneRCC6WGbu7ofuuU9NvUN9dHuztHrVzzsy2Z4L52R+SNMnT27FGt+7Vk2YXLpxrK/HF6YuIUZbd3RJv9md+YYK2Is38ZNBwE8MSRtVX12Xx8CWvMAIaL4TBKZJVWUK4Pt3mW8m7ga2UV1sePZjlBQ=
+	t=1777467160; cv=none; b=L+RTBb2uuuIqQOqz9NdpeSRTZQy5S8nX00KF8Cv0Wf8sK3bQNvBwkKUTsnwDtd3APJaiUdcaKsI63U7ENErDr+B8UKIEGNLuXxozes5u/gq0sNraO1G7QZud6u3aBdSk85kZNxTcUrKXggYLUL3kHm6uhPal+gKdSVUVMoyE24M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777467159; c=relaxed/simple;
-	bh=MifFNiC+TKC8lDQyt2PtDrVcrjsIyIRVXqCVpmvmps4=;
+	s=arc-20240116; t=1777467160; c=relaxed/simple;
+	bh=tn7xy5Ayn+zIa11ASIUS5cpHLtLo4gvFlZuKOLg8ggQ=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=MdVMTn/xg30gBPA/tfGVdq5lw/rPWQOkLeW+PwEG0Ys5OLREZe4VXB4DMp84gBmRQLVkHnytgkdxVD3H7PTyu9/c4x/8Ub95JYn97gebcwt5VAvqpyO1VfhJ8gkZ6BXX9z0GouV53b6e6MLH2bf90LkA1wsXeGt4CKapuLO9ork=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FhmI8M7U; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=KfAtBdkF; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=R2mgRx3AeYu4LXzTN2nYVooIyGcghawpzi/ZfYpYdTpD5A5btKxPjQxC8Ijotf+jfAKWI6B9UbWw87fGqMe1twn9VdF129Vuslnq/bXXpgSSotp9iRT0ZIET8yFKmOkwy2GGnoZhYgHSv0EMhh35zPW4NC+PmcAP38n4qbSC1i4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EQ7Z0brD; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=pOliXWP/; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FhmI8M7U";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="KfAtBdkF"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EQ7Z0brD";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="pOliXWP/"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777467155;
+	s=mimecast20190719; t=1777467156;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=848yXqrWfV86+DAaUBiE05fWjJwwzyvaF5Dj6MZA6OU=;
-	b=FhmI8M7U84qhyBB4OVG1Kz84YVmqU7BkP45NgD6Px4cR9Eo40nPLzXYbPrJn+lkCXkCsVX
-	XluhKADjn5R1eBS6rb1SfuotMrepd8E25D6n7R52KtrL+OMzMy95QfCuPUpYovi+X3OLY1
-	0xd+UViMkAgIqXlEfLOkZ5eR0fFGXLM=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=0K6M5C2sXobTuSTLF/q+6rql2ekW3akwO+6JwZKqbME=;
+	b=EQ7Z0brDhQuyT6dqs8vkUj/DZYZHumj1TSG+FZIPPHXajnyEZL/cb3lScO/cnYoPHFYLDr
+	6BjC/ctADQjcbxsjgPz4WlYE9HIyzIrYg1coWzpS1OsJQHqZ9B23LBTPMxubRRmvWJkhPU
+	BWJw/DcFFtL8ysQuYpdnxmBiYtVwuVc=
+Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
+ [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-12-K91QhEJ6M7WaD4NNpjAZyw-1; Wed, 29 Apr 2026 08:52:33 -0400
-X-MC-Unique: K91QhEJ6M7WaD4NNpjAZyw-1
-X-Mimecast-MFC-AGG-ID: K91QhEJ6M7WaD4NNpjAZyw_1777467153
-Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-67145c205acso6787781a12.3
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:33 -0700 (PDT)
+ us-mta-320-eM6lVt2TMQGt_jT--D_usA-1; Wed, 29 Apr 2026 08:52:35 -0400
+X-MC-Unique: eM6lVt2TMQGt_jT--D_usA-1
+X-Mimecast-MFC-AGG-ID: eM6lVt2TMQGt_jT--D_usA_1777467154
+Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-66bb7305ae7so10754439a12.2
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1777467152; x=1778071952; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1777467153; x=1778071953; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=848yXqrWfV86+DAaUBiE05fWjJwwzyvaF5Dj6MZA6OU=;
-        b=KfAtBdkFgvBBg6EwfZhUU6QadFmc+C8TN2b/Csu70qLImESpAYtAfce9LQw/iaboDG
-         kSC7XG1nQ341Qp4+dEWX37OpL664kzpblDszYaw9aW7kzZ2YlxrQuQvB11rblEwIbAqX
-         Y08nVZw9PcHH/ZdH5mXoy5K2a7SRg4sugtiZ79IexvpnRvV7RoD2WIDYnxfzwN70HTe6
-         S9oTvtJIIEsHuMV5xxVhtmhtFFgHVVaE0pTXBOZbkhfUHuBDPhrJBhPukyd0i7JeMrX8
-         Q+eObemGnotjnGM3hyAbVRSZi/icObf7iEfOv+h++2Bp3jEdUAyJsXvNsTxXj0+0ln4H
-         mepg==
+        bh=0K6M5C2sXobTuSTLF/q+6rql2ekW3akwO+6JwZKqbME=;
+        b=pOliXWP/WLjz8rH+JLNU702DxinieMQnJzHondJ1LCeUt6mOy1/JLODhKAGUiUzUrh
+         7W+w0RzpkDvbHzedypG5mt1tYeI8Z6XM73vI1YphKdsOGOsA+E3n2hTiXHo7+/v3ruDQ
+         NVgUjZ5HMZbpDFYNFcQeSQnP9ZeWvh/fastgsZFx/XIqFyfDciv64rC0NMynE3v8Brvw
+         LhB9C+/6P7MOob6ZvjQg2O9KYjzxDLpQ2xISdjTRzqFz9uKDRFVGz4Sip4uPgdJpVRfr
+         DKYIPxNdOV1ipmxdktLlOWqrIx55BTBSiZfXi5hr72ntpXmnBnEiPjx7k2LdT0IcnehQ
+         tAWA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777467152; x=1778071952;
+        d=1e100.net; s=20251104; t=1777467153; x=1778071953;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=848yXqrWfV86+DAaUBiE05fWjJwwzyvaF5Dj6MZA6OU=;
-        b=DA0aJf/b1zbP1rbZRweSvuG6yXmptvDI2jM0zSRo111FKWeq1S5kjZPcqlvq3BcfHr
-         wuKBmk2K3B8iw8oMklCaoQRgtp4WjH+YMbq4V5cD85NBB3Tgo3CSrvBDaV/RZwf7nXKZ
-         L5o4rQdsTR8VtVloi57ODBUXcywayvzcZAQBHh1EszVwdR5JsllNrz2wIqDYG8YnvGH6
-         uImwguFV8rRb9R0PIPo6yfmKMF5jMF13hoYpYMnPMl+oSTRHjFLoxyrAdCH2aOI+sIQ+
-         Aq25wMFwNTpbyUWrfLH/kN91dLwgYkDnrf50AK/aKR/QlPKASmi01eWj8v1prIJeKh9q
-         yx1A==
-X-Gm-Message-State: AOJu0Yz2FvMiGyxr++i3SeRS0PCvFWetp2mXWzbwGMDrcpLi6hoRkq3S
-	sYuEF+J4uJoj2k85i0c1Nt1719eTQFmkTjNQJEY9Kkq4v14cktwBj239cuJmb8t8NIVkvnJ4MkX
-	0NvU0dVcxSFg/j7ykpLlQgrCdr1xN8t7hpZBlglULzVIGCPZwY76MYSOEnDRfi3mZZesfUtqDu+
-	8FXwfz7sz+zKgYQ4J//OjCW2tyngAXufeo1szIMzvF+wCMM8K4vQ==
-X-Gm-Gg: AeBDievWhFudCPhuCF2bEmnmD68ek/Db7imFkfWRD6u9US3kA1J22b0Mc8MazeU6PAU
-	1/xZ4BAOJuKZKnFha/bOG6eLT0CbRvB/fQnldrGgzCCqwdQlV/xC/83wMhdfiADHl/jYEPu7Ilo
-	Ii6Ehkqa5wDmmYhV6cQnK+AZeR+zy/pWy9D2kmVFDiwIUSnYVbWrvjflMra+BD3W1qED33yaC0C
-	bCBpS84O6y9wFnIIfvqjnsVLagJez1Doq65BJRrWpY7Oa1NvCvSuftftTM0vYIo3LacepdvEZ6d
-	llCHRgeooKXIKFxeDIrL4FKsAYGoQDAX5XJN/Fq75mULLeI+4ytyuG+fhsGoha8Dn3YyPL7nmbV
-	yCXVA1+W/5sa/7RFoZ4YK+e3hXIWR/uZ9GQRr/AV/LSEpdulOk4rHv2X3kA2gI0WroA==
-X-Received: by 2002:a05:6402:5484:b0:678:93eb:ca06 with SMTP id 4fb4d7f45d1cf-67b1fd96320mr2272596a12.7.1777467151837;
-        Wed, 29 Apr 2026 05:52:31 -0700 (PDT)
-X-Received: by 2002:a05:6402:5484:b0:678:93eb:ca06 with SMTP id 4fb4d7f45d1cf-67b1fd96320mr2272572a12.7.1777467151026;
-        Wed, 29 Apr 2026 05:52:31 -0700 (PDT)
+        bh=0K6M5C2sXobTuSTLF/q+6rql2ekW3akwO+6JwZKqbME=;
+        b=NMlYp1/C3QH9wLLD3X7M/J/W2m2rcKpqXgMUYM6gS+NK3w7DFeK9MdPEHSkKzXSwV/
+         fjfjSKqnBEXTZCR38ekXk1bFhKowQAZYq/KucUM1KFiwzC6Gyz9zi0B2nHZ0V5DnzMrg
+         KTyvgL0rnNytB3l0ZvcSUJ0iZ07V3dlflYpTjqIUD0X/1ClnA6Oiu2hs4YJhsOKZkaPD
+         cr47cdnETbJ0jd4NXCtq4LuK5pYNMLpvXNWDGWuzgXbEXwb4eZLdGWfz8Ra0zs0Madg1
+         OzOfiZ1fnaAiuAd17/9UZL89qUsNTdAGTYkTlOdo3cCo+6IdiYBY6ODcCACDWJe6/jcT
+         CxrQ==
+X-Gm-Message-State: AOJu0YxUTU1n2GFsDDcnRamUlCXfeo6vJnJvn9G2GAhmoWLnihgjUFb0
+	QOqcWzP2+3RBiQCFd66OauKDknSkBaXx9rZc5ZKIBOOwAdyNyxSbutqOUF0ROKbleGUKXIzX/Mz
+	gru3lmTVE563W85AmgYynKgrxgz0oGooTk4INVvCwTVu7Wy3FnuXD8NlZpF4bP/q4aTRomv+cQt
+	onrnTFSI+b3rutRTmCBKox/SWXUJtU7NKbQVPLkrBJUyPtJUVQxA==
+X-Gm-Gg: AeBDieuT+uCIr9ccbJYAaBEUJVQdXIyMHiF9c9YZmbD21MVFe6WIvujiXlIIGIQdGU8
+	v+h53u4R0/uugD6buCBFInaklFvVd/OuxfkRdvzLv5o4OIfvSnVqL79BSQgu0eKgPsKuSBNJ1WN
+	qg6HD/hEqCHqUHHljOrqpLW3ZDV8fbLZkeEmkaFWkYky2S/DErI8iaoZzNxRnaKz/OR8uDgnabv
+	FrfrafIOMXlcbnkacVxQT1hKS0jDJ2913s5rcOeoXPEOypqe0LDL00XmwsKkH15GlFZxRrkIPOF
+	UKQb0KtzRiwSGLBOnH6pwidptn/4qN5fSIO1HwTJGk+jaHY83uv+y2kfu02a/BSh12ywyKWfR+2
+	yYmTZOFQXmZFp+oP4dOAZErOxb8ZQVcR3Zicvav0inGxANSJhQ71AW4ULPFnt3AFRZw==
+X-Received: by 2002:a05:6402:1f89:b0:679:1fb6:5c71 with SMTP id 4fb4d7f45d1cf-679bb0969f7mr3816269a12.22.1777467153209;
+        Wed, 29 Apr 2026 05:52:33 -0700 (PDT)
+X-Received: by 2002:a05:6402:1f89:b0:679:1fb6:5c71 with SMTP id 4fb4d7f45d1cf-679bb0969f7mr3816243a12.22.1777467152450;
+        Wed, 29 Apr 2026 05:52:32 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.29
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2026 05:52:30 -0700 (PDT)
+        Wed, 29 Apr 2026 05:52:31 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v3 09/11] selftests: ceph: add reset corner-case tests
-Date: Wed, 29 Apr 2026 12:52:04 +0000
-Message-Id: <20260429125206.1512203-10-amarkuze@redhat.com>
+Subject: [PATCH v3 10/11] selftests: ceph: add validation harness
+Date: Wed, 29 Apr 2026 12:52:05 +0000
+Message-Id: <20260429125206.1512203-11-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260429125206.1512203-1-amarkuze@redhat.com>
 References: <20260429125206.1512203-1-amarkuze@redhat.com>
@@ -97,40 +97,53 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add targeted corner-case tests for the CephFS manual session reset
-feature.  Four sequential tests cover:
+Add a one-shot validation wrapper that orchestrates the full reset
+test suite with per-stage watchdog timeouts and a final status check.
 
-  [1/4] ebusy_rejection       - second reset rejected while first in-flight
-  [2/4] dirty_caps_at_reset   - reset with unflushed dirty caps
-  [3/4] flock_after_reset     - stale lock EIO + fresh lock after holder exit
-  [4/4] unmount_during_reset  - umount during active reset (destroy-path wakeup)
-
-Requires: mounted CephFS, debugfs access (root), flock(1) utility.
+The harness runs five stages: baseline (no resets), corner cases,
+moderate stress, aggressive stress, and a post-run status validation.
+Each stage runs with an independent timeout so a hang in one stage
+does not block the entire run.
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- .../filesystems/ceph/reset_corner_cases.sh    | 646 ++++++++++++++++++
- 1 file changed, 646 insertions(+)
- create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
+ .../filesystems/ceph/run_validation.sh        | 350 ++++++++++++++++++
+ 1 file changed, 350 insertions(+)
+ create mode 100755 tools/testing/selftests/filesystems/ceph/run_validation.sh
 
-diff --git a/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh b/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
+diff --git a/tools/testing/selftests/filesystems/ceph/run_validation.sh b/tools/testing/selftests/filesystems/ceph/run_validation.sh
 new file mode 100755
-index 000000000000..a6dae84a616d
+index 000000000000..5d521e4f9e9b
 --- /dev/null
-+++ b/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
-@@ -0,0 +1,646 @@
++++ b/tools/testing/selftests/filesystems/ceph/run_validation.sh
+@@ -0,0 +1,350 @@
 +#!/bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +#
-+# CephFS client reset corner case tests.
-+# Runs a checklist of targeted tests that exercise specific reset
-+# code paths not covered by the stress tests.
++# CephFS client reset - single-command validation.
++# Runs all test stages in sequence with per-stage timeouts.
++# If any stage hangs (filesystem stuck, process blocked), the
++# timeout kills it and reports failure.
 +#
-+# Requires: mounted CephFS, debugfs access (root), flock(1) utility.
++# Usage:
++#   sudo ./run_validation.sh --mount-point /mnt/mycephfs
++#
++# Expected output on success:
++#
++#   === CephFS Client Reset Validation ===
++#   [stage 1/5] baseline         PASS  (60s, no resets)
++#   [stage 2/5] corner_cases     PASS  (4/4 passed)
++#   [stage 3/5] moderate         PASS  (120s, resets every 5-15s)
++#   [stage 4/5] aggressive       PASS  (120s, resets every 1-5s)
++#   [stage 5/5] status_check     PASS  (phase=idle, last_errno=0)
++#
++#   RESULT: 5/5 stages passed
++#   Artifacts: /tmp/ceph_reset_validation_<timestamp>
 +
 +set -uo pipefail
 +
 +KSFT_SKIP=4
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 +
 +# kselftest auto-detect: when invoked with no arguments (e.g. by
 +# "make run_tests"), find a CephFS mount automatically or skip.
@@ -144,627 +157,316 @@ index 000000000000..a6dae84a616d
 +fi
 +
 +MOUNT_POINT=""
++CLIENT_ID=""
++declare -a CLIENT_ARGS=()
++declare -a DEBUGFS_ARGS=()
++RUN_ID="$(date +%Y%m%d-%H%M%S)"
++OUT_DIR="/tmp/ceph_reset_validation_${RUN_ID}"
 +DEBUGFS_ROOT="/sys/kernel/debug/ceph"
-+DEBUGFS_CLIENT=""
-+TRIGGER_PATH=""
-+STATUS_PATH=""
-+TEMP_MNT=""
 +
-+PASS_COUNT=0
-+FAIL_COUNT=0
-+SKIP_COUNT=0
-+TOTAL=4
-+
-+log()
-+{
-+	printf '[%s] %s\n' "$(date -u +%H:%M:%S)" "$1"
-+}
-+
-+result()
-+{
-+	local num="$1"
-+	local name="$2"
-+	local status="$3"
-+	local detail="${4:-}"
-+
-+	case "$status" in
-+	PASS) PASS_COUNT=$((PASS_COUNT + 1)) ;;
-+	FAIL) FAIL_COUNT=$((FAIL_COUNT + 1)) ;;
-+	SKIP) SKIP_COUNT=$((SKIP_COUNT + 1)) ;;
-+	esac
-+
-+	if [[ -n "$detail" ]]; then
-+		printf '[%d/%d] %-30s %s  (%s)\n' "$num" "$TOTAL" "$name" "$status" "$detail"
-+	else
-+		printf '[%d/%d] %-30s %s\n' "$num" "$TOTAL" "$name" "$status"
-+	fi
-+}
-+
-+read_status_field()
-+{
-+	local field="$1"
-+	awk -F': ' -v key="$field" '$1 == key {print $2}' "$STATUS_PATH" 2>/dev/null
-+}
-+
-+wait_reset_done()
-+{
-+	local timeout="${1:-30}"
-+	local elapsed=0
-+
-+	while [[ "$(read_status_field "phase")" != "idle" ]]; do
-+		sleep 1
-+		elapsed=$((elapsed + 1))
-+		if [[ "$elapsed" -ge "$timeout" ]]; then
-+			return 1
-+		fi
-+	done
-+	return 0
-+}
-+
-+list_reset_clients()
-+{
-+	local entry
-+
-+	for entry in "$DEBUGFS_ROOT"/*/; do
-+		entry="$(basename "$entry")"
-+		[[ -d "$DEBUGFS_ROOT/$entry/reset" ]] || continue
-+		[[ -w "$DEBUGFS_ROOT/$entry/reset/trigger" ]] || continue
-+		printf '%s\n' "$entry"
-+	done
-+}
-+
-+wait_status_nonidle()
-+{
-+	local status_path="$1"
-+	local timeout="${2:-10}"
-+	local polls=$((timeout * 10))
-+	local phase
-+
-+	while [[ "$polls" -gt 0 ]]; do
-+		phase="$(awk -F': ' '$1 == "phase" {print $2}' "$status_path" 2>/dev/null)"
-+		if [[ -n "$phase" && "$phase" != "idle" ]]; then
-+			return 0
-+		fi
-+		sleep 0.1
-+		polls=$((polls - 1))
-+	done
-+
-+	return 1
-+}
-+
-+discover_debugfs()
-+{
-+	local candidates=()
-+	local entry
-+
-+	if [[ -n "$DEBUGFS_CLIENT" ]]; then
-+		if [[ ! -d "$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset" ]]; then
-+			echo "SKIP: reset debugfs not found for $DEBUGFS_CLIENT" >&2
-+			exit "$KSFT_SKIP"
-+		fi
-+		return 0
-+	fi
-+
-+	for entry in "$DEBUGFS_ROOT"/*/; do
-+		entry="$(basename "$entry")"
-+		[[ -d "$DEBUGFS_ROOT/$entry/reset" ]] || continue
-+		[[ -w "$DEBUGFS_ROOT/$entry/reset/trigger" ]] || continue
-+		candidates+=("$entry")
-+	done
-+
-+	if [[ ${#candidates[@]} -eq 0 ]]; then
-+		echo "SKIP: No writable Ceph reset interface found under $DEBUGFS_ROOT" >&2
-+		exit "$KSFT_SKIP"
-+	fi
-+
-+	if [[ ${#candidates[@]} -gt 1 ]]; then
-+		echo "SKIP: Multiple Ceph clients found: ${candidates[*]}. Use --client-id." >&2
-+		exit "$KSFT_SKIP"
-+	fi
-+
-+	DEBUGFS_CLIENT="${candidates[0]}"
-+}
-+
-+# --- Test 1: ebusy_rejection ------------------------------------------------
-+#
-+# Trigger a reset while another is guaranteed in-flight.  Creates
-+# dirty state so the first reset enters DRAINING (which takes
-+# measurable time), then polls until phase != idle and issues the
-+# second trigger.  The second trigger must fail (the kernel returns
-+# -EBUSY), and only one reset must be counted in the accounting.
-+
-+test_ebusy_rejection()
-+{
-+	local num=1
-+	local name="ebusy_rejection"
-+	local testfile="$MOUNT_POINT/.reset_corner_ebusy_$$"
-+	local tc_before tc_after sc_before sc_after second_rc phase elapsed
-+
-+	tc_before="$(read_status_field "trigger_count")"
-+	sc_before="$(read_status_field "success_count")"
-+
-+	# Create dirty state so the first reset enters DRAINING
-+	echo "ebusy_dirty_data" > "$testfile"
-+	sync "$testfile"
-+
-+	python3 -c "
-+import os, sys
-+fd = os.open('$testfile', os.O_WRONLY | os.O_APPEND)
-+os.write(fd, b'dirty_for_ebusy_test\n')
-+sys.stdout.write('written')
-+" 2>/dev/null || {
-+		result "$num" "$name" FAIL "dirty write failed"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	# Trigger the first reset -- it will drain dirty state
-+	echo "ebusy_first" > "$TRIGGER_PATH" 2>/dev/null || {
-+		result "$num" "$name" FAIL "first trigger failed"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	# Poll until phase is non-idle (quiescing or draining)
-+	elapsed=0
-+	while true; do
-+		phase="$(read_status_field "phase")"
-+		if [[ "$phase" != "idle" ]]; then
-+			break
-+		fi
-+		sleep 0.1
-+		elapsed=$((elapsed + 1))
-+		if [[ "$elapsed" -ge 50 ]]; then
-+			result "$num" "$name" SKIP \
-+				"first reset completed before overlap could be tested"
-+			rm -f "$testfile" 2>/dev/null
-+			return
-+		fi
-+	done
-+
-+	# Issue the second trigger -- should be rejected with EBUSY
-+	second_rc=0
-+	echo "ebusy_second" > "$TRIGGER_PATH" 2>/dev/null && second_rc=0 || second_rc=$?
-+
-+	if ! wait_reset_done 30; then
-+		result "$num" "$name" FAIL "first reset never completed"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	tc_after="$(read_status_field "trigger_count")"
-+	sc_after="$(read_status_field "success_count")"
-+
-+	if [[ "$((tc_after - tc_before))" -ne 1 ]]; then
-+		result "$num" "$name" FAIL "trigger_count +$((tc_after - tc_before)), expected +1"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	if [[ "$((sc_after - sc_before))" -ne 1 ]]; then
-+		result "$num" "$name" FAIL "success_count +$((sc_after - sc_before)), expected +1"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	if [[ "$second_rc" -eq 0 ]]; then
-+		result "$num" "$name" FAIL "second trigger did not return error"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	rm -f "$testfile" 2>/dev/null
-+	result "$num" "$name" PASS
-+}
-+
-+# --- Test 2: dirty_caps_at_reset --------------------------------------------
-+#
-+# Write to a file without fsync (dirty caps), trigger reset, then
-+# verify the file is not corrupt.  Manual reset drains dirty caps
-+# before teardown (best-effort, 5s timeout).  For a non-stuck cap
-+# the dirty write should be flushed during drain and persist.
-+# If the drain window is too short, only the synced first line
-+# persists -- that is acceptable (data loss is documented for
-+# unflushed writes).
-+
-+test_dirty_caps_at_reset()
-+{
-+	local num=2
-+	local name="dirty_caps_at_reset"
-+	local testfile="$MOUNT_POINT/.reset_corner_dirty_caps_$$"
-+	local content_after line_count sc_before sc_after le
-+
-+	sc_before="$(read_status_field "success_count")"
-+
-+	echo "line_1_before_dirty_write" > "$testfile"
-+	sync "$testfile"
-+
-+	python3 -c "
-+import os, sys
-+fd = os.open('$testfile', os.O_WRONLY | os.O_APPEND)
-+os.write(fd, b'line_2_dirty_no_fsync\n')
-+# deliberately no fsync -- leave caps dirty
-+sys.stdout.write('written')
-+" 2>/dev/null || {
-+		result "$num" "$name" FAIL "dirty write failed"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	echo "dirty_caps_test" > "$TRIGGER_PATH" 2>/dev/null || {
-+		result "$num" "$name" FAIL "reset trigger failed"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	if ! wait_reset_done 30; then
-+		result "$num" "$name" FAIL "reset did not complete"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	sc_after="$(read_status_field "success_count")"
-+	if [[ "$sc_after" -le "$sc_before" ]]; then
-+		result "$num" "$name" FAIL "success_count did not increment (reset not exercised)"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	sync "$testfile" 2>/dev/null || true
-+	content_after="$(cat "$testfile" 2>/dev/null)" || {
-+		result "$num" "$name" FAIL "cannot read file after reset"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	if [[ -z "$content_after" ]]; then
-+		result "$num" "$name" FAIL "file is empty after reset"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	line_count="$(echo "$content_after" | wc -l)"
-+	if [[ "$line_count" -lt 1 ]]; then
-+		result "$num" "$name" FAIL "file has $line_count lines, expected >= 1"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	echo "$content_after" | head -1 | grep -q "line_1_before_dirty_write" || {
-+		result "$num" "$name" FAIL "first line corrupted"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	le="$(read_status_field "last_errno")"
-+	if [[ "$le" != "0" ]]; then
-+		result "$num" "$name" FAIL "last_errno=$le, expected 0"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	rm -f "$testfile"
-+	result "$num" "$name" PASS "file intact ($line_count lines)"
-+}
-+
-+# --- Test 3: flock_after_reset ----------------------------------------------
-+#
-+# Take an exclusive flock, trigger reset, verify stale lock state is
-+# marked with CEPH_I_ERROR_FILELOCK (same-client flock attempt returns
-+# EIO).  After the original holder exits (releasing the local lock
-+# reference and clearing the error flag), a fresh lock can be acquired.
-+#
-+# The lock holder uses the fd-based flock form with exec, so killing
-+# $lock_pid closes the lock fd immediately (no orphaned child with an
-+# inherited fd copy that would prevent the VFS flock release).
-+
-+test_flock_after_reset()
-+{
-+	local num=3
-+	local name="flock_after_reset"
-+	local testfile="$MOUNT_POINT/.reset_corner_flock_$$"
-+	local lock_pid probe_rc sc_before sc_after
-+
-+	sc_before="$(read_status_field "success_count")"
-+
-+	echo "flock_test_content" > "$testfile"
-+	sync "$testfile"
-+
-+	# Hold lock via fd in a subshell; exec ensures killing $lock_pid
-+	# closes the lock fd directly (no fork/child fd inheritance).
-+	(
-+		exec 9<"$testfile"
-+		flock --exclusive --nonblock 9 || exit 1
-+		exec sleep 300
-+	) &
-+	lock_pid=$!
-+	sleep 0.5
-+
-+	if ! kill -0 "$lock_pid" 2>/dev/null; then
-+		result "$num" "$name" FAIL "flock holder died immediately"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	echo "flock_after_reset_test" > "$TRIGGER_PATH" 2>/dev/null || {
-+		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
-+		result "$num" "$name" FAIL "reset trigger failed"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	if ! wait_reset_done 30; then
-+		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
-+		result "$num" "$name" FAIL "reset did not complete"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	sc_after="$(read_status_field "success_count")"
-+	if [[ "$sc_after" -le "$sc_before" ]]; then
-+		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
-+		result "$num" "$name" FAIL "success_count did not increment"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	# After teardown, CEPH_I_ERROR_FILELOCK is set on the inode.
-+	# A same-client lock attempt should fail (EIO), NOT succeed.
-+	probe_rc=0
-+	flock --exclusive --nonblock "$testfile" true 2>/dev/null && probe_rc=0 || probe_rc=$?
-+	if [[ "$probe_rc" -eq 0 ]]; then
-+		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
-+		result "$num" "$name" FAIL \
-+			"same-client probe succeeded, expected EIO from stale lock state"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	# Kill the holder -- the exec'd sleep IS $lock_pid, so killing it
-+	# closes fd 9 directly.  VFS flock release fires ceph_fl_release_lock(),
-+	# which decrements i_filelock_ref to 0 and clears CEPH_I_ERROR_FILELOCK.
-+	kill "$lock_pid" 2>/dev/null
-+	wait "$lock_pid" 2>/dev/null
-+
-+	# After the holder exits, a fresh lock should be acquirable.
-+	# The reset teardown sends SESSION_REQUEST_CLOSE so the MDS
-+	# releases locks promptly, but retry briefly in case the
-+	# message races with the connection close.
-+	local attempt
-+	probe_rc=1
-+	for attempt in 1 2 3 4 5; do
-+		probe_rc=0
-+		flock --exclusive --nonblock "$testfile" true 2>/dev/null \
-+			&& probe_rc=0 || probe_rc=$?
-+		[[ "$probe_rc" -eq 0 ]] && break
-+		sleep 1
-+	done
-+	if [[ "$probe_rc" -ne 0 ]]; then
-+		result "$num" "$name" FAIL \
-+			"cannot acquire fresh lock after holder exit (rc=$probe_rc, ${attempt} attempts)"
-+		rm -f "$testfile"
-+		return
-+	fi
-+
-+	# Verify file content survived
-+	grep -q "flock_test_content" "$testfile" 2>/dev/null || {
-+		result "$num" "$name" FAIL "file content corrupted after reset"
-+		rm -f "$testfile"
-+		return
-+	}
-+
-+	rm -f "$testfile"
-+	result "$num" "$name" PASS "stale lock detected, fresh lock acquired after holder exit"
-+}
-+
-+# --- Test 4: unmount_during_reset -------------------------------------------
-+#
-+# Mount a fresh CephFS, trigger reset, immediately unmount. The
-+# ceph_mdsc_destroy() path must wake blocked waiters with -ESHUTDOWN
-+# and not hang.
-+
-+test_unmount_during_reset()
-+{
-+	local num=4
-+	local name="unmount_during_reset"
-+	local temp_mnt="/tmp/ceph_corner_mnt_$$"
-+	local mount_opts=""
-+	local mount_src=""
-+	local temp_trigger=""
-+	local temp_status=""
-+	local temp_client=""
-+	local temp_file="$temp_mnt/.reset_corner_umount_$$"
-+	local phase=""
-+	local trigger_ok=0
-+	local attempt
-+	local -a new_clients=()
-+	declare -A existing_clients=()
-+
-+	mount_src="$(awk -v mp="$MOUNT_POINT" '$2 == mp && $3 == "ceph" {print $1; exit}' /proc/mounts 2>/dev/null)"
-+	mount_opts="$(awk -v mp="$MOUNT_POINT" '$2 == mp && $3 == "ceph" {print $4; exit}' /proc/mounts 2>/dev/null)"
-+
-+	if [[ -z "$mount_src" ]]; then
-+		result "$num" "$name" SKIP "cannot determine mount source from /proc/mounts"
-+		return
-+	fi
-+
-+	while IFS= read -r existing; do
-+		[[ -n "$existing" ]] || continue
-+		existing_clients["$existing"]=1
-+	done < <(list_reset_clients)
-+
-+	mkdir -p "$temp_mnt"
-+
-+	if ! mount -t ceph "$mount_src" "$temp_mnt" -o "$mount_opts" 2>/dev/null; then
-+		result "$num" "$name" SKIP "cannot mount additional CephFS instance"
-+		rmdir "$temp_mnt" 2>/dev/null
-+		return
-+	fi
-+
-+	ls "$temp_mnt" > /dev/null 2>&1
-+	sync
-+	sleep 1
-+
-+	for attempt in $(seq 1 50); do
-+		new_clients=()
-+		while IFS= read -r entry; do
-+			[[ -n "$entry" ]] || continue
-+			if [[ -n "${existing_clients[$entry]+x}" ]]; then
-+				continue
-+			fi
-+			new_clients+=("$entry")
-+		done < <(list_reset_clients)
-+
-+		if [[ "${#new_clients[@]}" -eq 1 ]]; then
-+			temp_client="${new_clients[0]}"
-+			break
-+		fi
-+
-+		if [[ "${#new_clients[@]}" -gt 1 ]]; then
-+			break
-+		fi
-+
-+		sleep 0.1
-+	done
-+
-+	if [[ -z "$temp_client" ]]; then
-+		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
-+		rmdir "$temp_mnt" 2>/dev/null
-+		result "$num" "$name" SKIP "cannot identify debugfs client for temp mount"
-+		return
-+	fi
-+
-+	if [[ "${#new_clients[@]}" -gt 1 ]]; then
-+		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
-+		rmdir "$temp_mnt" 2>/dev/null
-+		result "$num" "$name" SKIP "multiple new debugfs clients appeared"
-+		return
-+	fi
-+
-+	temp_trigger="$DEBUGFS_ROOT/$temp_client/reset/trigger"
-+	temp_status="$DEBUGFS_ROOT/$temp_client/reset/status"
-+
-+	echo "umount_dirty_seed" > "$temp_file" 2>/dev/null || {
-+		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
-+		rmdir "$temp_mnt" 2>/dev/null
-+		result "$num" "$name" FAIL "cannot create dirty state on temp mount"
-+		return
-+	}
-+	sync "$temp_file"
-+	python3 -c "
-+import os, sys
-+fd = os.open('$temp_file', os.O_WRONLY | os.O_APPEND)
-+os.write(fd, b'dirty_for_umount_test\\n')
-+os.close(fd)
-+" 2>/dev/null || {
-+		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
-+		rmdir "$temp_mnt" 2>/dev/null
-+		result "$num" "$name" FAIL "cannot dirty temp mount for reset overlap"
-+		return
-+	}
-+
-+	echo "unmount_test" > "$temp_trigger" 2>/dev/null && trigger_ok=1 || trigger_ok=0
-+	if [[ "$trigger_ok" -ne 1 ]]; then
-+		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
-+		rmdir "$temp_mnt" 2>/dev/null
-+		result "$num" "$name" FAIL "cannot trigger reset on temp mount"
-+		return
-+	fi
-+
-+	if ! wait_status_nonidle "$temp_status" 10; then
-+		phase="$(awk -F': ' '$1 == "phase" {print $2}' "$temp_status" 2>/dev/null)"
-+		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
-+		rmdir "$temp_mnt" 2>/dev/null
-+		result "$num" "$name" FAIL \
-+			"reset never became active before umount (phase=${phase:-unknown})"
-+		return
-+	fi
-+
-+	local umount_ok=0
-+	timeout 30 umount "$temp_mnt" 2>/dev/null && umount_ok=1
-+
-+	if [[ "$umount_ok" -ne 1 ]]; then
-+		umount -l "$temp_mnt" 2>/dev/null || true
-+		rmdir "$temp_mnt" 2>/dev/null
-+		result "$num" "$name" FAIL "umount hung for >30s"
-+		return
-+	fi
-+
-+	rmdir "$temp_mnt" 2>/dev/null
-+
-+	ls "$MOUNT_POINT" > /dev/null 2>&1 || {
-+		result "$num" "$name" FAIL "original mount unhealthy after test"
-+		return
-+	}
-+
-+	result "$num" "$name" PASS
-+}
-+
-+# --- Main --------------------------------------------------------------------
++# Timeout margins: stage runtime + cooldown + validation + safety buffer
++STAGE1_TIMEOUT=120    # 60s run + 20s cooldown + 40s buffer
++STAGE2_TIMEOUT=300    # 4 corner cases, 30s each worst case + buffer
++STAGE3_TIMEOUT=240    # 120s run + 20s cooldown + 100s buffer
++STAGE4_TIMEOUT=240    # 120s run + 20s cooldown + 100s buffer
++STAGE5_TIMEOUT=10     # just reading debugfs
++
++PASS=0
++FAIL=0
++TOTAL=5
 +
 +usage()
 +{
 +	cat <<EOF
-+Usage: $0 --mount-point <path> [--client-id <id>] [--debugfs-root <path>]
++Usage: $0 --mount-point <cephfs_mount> [options]
 +
-+Runs targeted corner-case tests for the CephFS client reset feature.
-+Requires root (debugfs access) and a mounted CephFS filesystem.
++Required:
++  --mount-point PATH    CephFS mount point
 +
 +Options:
-+  --mount-point PATH     CephFS mount point (required)
-+  --client-id ID         Ceph debugfs client id (auto-detect if one client)
-+  --debugfs-root PATH    Debugfs ceph root (default: /sys/kernel/debug/ceph)
-+  --help                 Show this message
++  --out-dir PATH        Artifact directory (default: /tmp/ceph_reset_validation_<ts>)
++  --client-id ID        Ceph debugfs client id (optional)
++  --debugfs-root PATH   Debugfs Ceph root (default: /sys/kernel/debug/ceph)
++  --help                Show this message
 +EOF
 +}
 +
-+main()
++stage_result()
 +{
-+	while [[ $# -gt 0 ]]; do
-+		case "$1" in
-+		--mount-point)   MOUNT_POINT="$2"; shift 2 ;;
-+		--client-id)     DEBUGFS_CLIENT="$2"; shift 2 ;;
-+		--debugfs-root)  DEBUGFS_ROOT="$2"; shift 2 ;;
-+		--help|-h)       usage; exit 0 ;;
-+		*)               echo "Unknown option: $1" >&2; usage; exit 2 ;;
-+		esac
-+	done
++	local num="$1"
++	local name="$2"
++	local status="$3"
++	local detail="$4"
 +
-+	if [[ -z "$MOUNT_POINT" ]]; then
-+		echo "--mount-point is required" >&2
-+		usage
-+		exit 2
++	if [[ "$status" == "PASS" ]]; then
++		PASS=$((PASS + 1))
++	else
++		FAIL=$((FAIL + 1))
 +	fi
-+
-+	if [[ ! -d "$MOUNT_POINT" ]]; then
-+		echo "SKIP: Mount point does not exist: $MOUNT_POINT" >&2
-+		exit "$KSFT_SKIP"
-+	fi
-+
-+	discover_debugfs
-+	TRIGGER_PATH="$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset/trigger"
-+	STATUS_PATH="$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset/status"
-+
-+	log "CephFS client reset corner case tests"
-+	log "Mount: $MOUNT_POINT"
-+	log "Client: $DEBUGFS_CLIENT"
-+	echo ""
-+
-+	test_ebusy_rejection
-+	test_dirty_caps_at_reset
-+	test_flock_after_reset
-+	test_unmount_during_reset
-+
-+	echo ""
-+	echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed, $SKIP_COUNT skipped (of $TOTAL)"
-+
-+	if [[ "$FAIL_COUNT" -gt 0 ]]; then
-+		exit 1
-+	fi
-+	exit 0
++	printf '[stage %d/%d] %-16s %s  (%s)\n' "$num" "$TOTAL" "$name" "$status" "$detail"
 +}
 +
-+main "$@"
++# Run a command with a timeout. Returns 0 on success, 1 on failure/timeout.
++# Sets RUN_TIMED_OUT=1 if killed by timeout.
++#
++# The stage command runs in its own session/process group (via setsid).
++# On timeout the entire process group is killed, not just the top-level
++# script PID.  This is required because stage scripts (reset_stress.sh,
++# reset_corner_cases.sh) spawn child processes - I/O workers, rename
++# workers, reset injectors, samplers - that would otherwise survive the
++# timeout and bleed into later stages, invalidating results.
++RUN_TIMED_OUT=0
++
++run_with_timeout()
++{
++	local timeout_sec="$1"
++	local logfile="$2"
++	shift 2
++
++	RUN_TIMED_OUT=0
++
++	# Start the stage in its own session via setsid so all descendant
++	# processes share a process group that we can kill atomically.
++	# In a non-interactive script, background children are not process
++	# group leaders, so setsid(1) calls setsid(2) directly (no extra
++	# fork) and the PID we capture IS the group leader.
++	setsid "$@" > "$logfile" 2>&1 &
++	local pid=$!
++
++	# Watchdog: on timeout, kill the entire process group
++	(
++		sleep "$timeout_sec"
++		if kill -0 "$pid" 2>/dev/null; then
++			echo "TIMEOUT: stage exceeded ${timeout_sec}s, killing process group $pid" >> "$logfile"
++			kill -TERM -- -"$pid" 2>/dev/null
++			sleep 2
++			kill -KILL -- -"$pid" 2>/dev/null
++		fi
++	) &
++	local watchdog_pid=$!
++
++	# Wait for the stage command
++	wait "$pid" 2>/dev/null
++	local rc=$?
++
++	# Kill the watchdog if it's still running
++	kill "$watchdog_pid" 2>/dev/null
++	wait "$watchdog_pid" 2>/dev/null
++
++	# Check if it was killed by timeout
++	if grep -q "^TIMEOUT:" "$logfile" 2>/dev/null; then
++		RUN_TIMED_OUT=1
++		return 1
++	fi
++
++	return "$rc"
++}
++
++find_status_path()
++{
++	local entry
++
++	if [[ -n "$CLIENT_ID" ]]; then
++		if [[ -r "$DEBUGFS_ROOT/$CLIENT_ID/reset/status" ]]; then
++			echo "$DEBUGFS_ROOT/$CLIENT_ID/reset/status"
++			return 0
++		fi
++		return 1
++	fi
++
++	for entry in "$DEBUGFS_ROOT"/*/; do
++		if [[ -r "${entry}reset/status" ]]; then
++			echo "${entry}reset/status"
++			return 0
++		fi
++	done
++	return 1
++}
++
++read_status_field()
++{
++	local status_path="$1"
++	local field="$2"
++	awk -F': ' -v key="$field" '$1 == key {print $2}' "$status_path" 2>/dev/null
++}
++
++# --- Parse arguments -------------------------------------------------------
++
++while [[ $# -gt 0 ]]; do
++	case "$1" in
++	--mount-point)  MOUNT_POINT="$2"; shift 2 ;;
++	--out-dir)      OUT_DIR="$2"; shift 2 ;;
++	--client-id)    CLIENT_ID="$2"; shift 2 ;;
++	--debugfs-root) DEBUGFS_ROOT="$2"; shift 2 ;;
++	--help|-h)      usage; exit 0 ;;
++	*)              echo "Unknown option: $1" >&2; usage; exit 2 ;;
++	esac
++done
++
++if [[ -z "$MOUNT_POINT" ]]; then
++	echo "SKIP: --mount-point is required" >&2
++	usage
++	exit "$KSFT_SKIP"
++fi
++
++if [[ ! -d "$MOUNT_POINT" ]]; then
++	echo "SKIP: Mount point does not exist: $MOUNT_POINT" >&2
++	exit "$KSFT_SKIP"
++fi
++
++# Auto-detect client id when not specified, so all stages (including
++# stage 5 status check) use the same client consistently.
++if [[ -z "$CLIENT_ID" ]]; then
++	candidates=()
++	for entry in "$DEBUGFS_ROOT"/*/; do
++		name="$(basename "$entry")"
++		if [[ -r "${entry}reset/status" ]]; then
++			candidates+=("$name")
++		fi
++	done
++	if [[ ${#candidates[@]} -eq 1 ]]; then
++		CLIENT_ID="${candidates[0]}"
++	elif [[ ${#candidates[@]} -gt 1 ]]; then
++		echo "SKIP: Multiple Ceph clients found (${candidates[*]}). Use --client-id." >&2
++		exit "$KSFT_SKIP"
++	fi
++fi
++
++if [[ -n "$CLIENT_ID" ]]; then
++	CLIENT_ARGS=(--client-id "$CLIENT_ID")
++fi
++DEBUGFS_ARGS=(--debugfs-root "$DEBUGFS_ROOT")
++
++# Quick sanity: can we write to the mount?
++if ! touch "$MOUNT_POINT/.validation_probe_$$" 2>/dev/null; then
++	echo "SKIP: Mount point is not writable: $MOUNT_POINT" >&2
++	exit "$KSFT_SKIP"
++fi
++rm -f "$MOUNT_POINT/.validation_probe_$$"
++
++mkdir -p "$OUT_DIR"
++
++echo ""
++echo "=== CephFS Client Reset Validation ==="
++echo ""
++
++# --- Stage 1: Baseline (no resets) -----------------------------------------
++
++stage1_out="$OUT_DIR/stage1_baseline"
++if run_with_timeout "$STAGE1_TIMEOUT" "$stage1_out.log" \
++	"$SCRIPT_DIR/reset_stress.sh" \
++	--mount-point "$MOUNT_POINT" \
++	--profile baseline \
++	--no-reset \
++	--duration-sec 60 \
++	"${CLIENT_ARGS[@]}" \
++	"${DEBUGFS_ARGS[@]}" \
++	--out-dir "$stage1_out"; then
++	stage_result 1 "baseline" "PASS" "60s, no resets"
++elif [[ "$RUN_TIMED_OUT" -eq 1 ]]; then
++	stage_result 1 "baseline" "FAIL" "HUNG: killed after ${STAGE1_TIMEOUT}s"
++else
++	stage_result 1 "baseline" "FAIL" "see $stage1_out.log"
++fi
++
++# --- Stage 2: Corner cases -------------------------------------------------
++
++stage2_out="$OUT_DIR/stage2_corner_cases"
++mkdir -p "$stage2_out"
++if run_with_timeout "$STAGE2_TIMEOUT" "$stage2_out/output.log" \
++	"$SCRIPT_DIR/reset_corner_cases.sh" \
++	"${CLIENT_ARGS[@]}" \
++	"${DEBUGFS_ARGS[@]}" \
++	--mount-point "$MOUNT_POINT"; then
++	pass_line=$(grep -Eo '[0-9]+ passed, [0-9]+ failed, [0-9]+ skipped' "$stage2_out/output.log" | tail -1)
++	stage_result 2 "corner_cases" "PASS" "${pass_line:-all tests passed}"
++elif [[ "$RUN_TIMED_OUT" -eq 1 ]]; then
++	stage_result 2 "corner_cases" "FAIL" "HUNG: killed after ${STAGE2_TIMEOUT}s"
++else
++	fail_line=$(grep -c 'FAIL' "$stage2_out/output.log" 2>/dev/null || echo "?")
++	stage_result 2 "corner_cases" "FAIL" "${fail_line} failures, see $stage2_out/output.log"
++fi
++
++# --- Stage 3: Moderate resets -----------------------------------------------
++
++stage3_out="$OUT_DIR/stage3_moderate"
++if run_with_timeout "$STAGE3_TIMEOUT" "$stage3_out.log" \
++	"$SCRIPT_DIR/reset_stress.sh" \
++	--mount-point "$MOUNT_POINT" \
++	--profile moderate \
++	--duration-sec 120 \
++	"${CLIENT_ARGS[@]}" \
++	"${DEBUGFS_ARGS[@]}" \
++	--out-dir "$stage3_out"; then
++	stage_result 3 "moderate" "PASS" "120s, resets every 5-15s"
++elif [[ "$RUN_TIMED_OUT" -eq 1 ]]; then
++	stage_result 3 "moderate" "FAIL" "HUNG: killed after ${STAGE3_TIMEOUT}s"
++else
++	stage_result 3 "moderate" "FAIL" "see $stage3_out.log"
++fi
++
++# --- Stage 4: Aggressive resets ---------------------------------------------
++
++stage4_out="$OUT_DIR/stage4_aggressive"
++if run_with_timeout "$STAGE4_TIMEOUT" "$stage4_out.log" \
++	"$SCRIPT_DIR/reset_stress.sh" \
++	--mount-point "$MOUNT_POINT" \
++	--profile aggressive \
++	--duration-sec 120 \
++	"${CLIENT_ARGS[@]}" \
++	"${DEBUGFS_ARGS[@]}" \
++	--out-dir "$stage4_out"; then
++	stage_result 4 "aggressive" "PASS" "120s, resets every 1-5s"
++elif [[ "$RUN_TIMED_OUT" -eq 1 ]]; then
++	stage_result 4 "aggressive" "FAIL" "HUNG: killed after ${STAGE4_TIMEOUT}s"
++else
++	stage_result 4 "aggressive" "FAIL" "see $stage4_out.log"
++fi
++
++# --- Stage 5: Post-run status check ----------------------------------------
++
++status_path=""
++if status_path=$(find_status_path); then
++	phase=$(read_status_field "$status_path" "phase")
++	last_errno=$(read_status_field "$status_path" "last_errno")
++	failure_count=$(read_status_field "$status_path" "failure_count")
++	drain_timed_out=$(read_status_field "$status_path" "drain_timed_out")
++	sessions_reset=$(read_status_field "$status_path" "sessions_reset")
++	blocked=$(read_status_field "$status_path" "blocked_requests")
++
++	# Save full status
++	cat "$status_path" > "$OUT_DIR/final_status.txt" 2>/dev/null
++
++	errors=""
++	[[ "$phase" != "idle" ]] && errors="${errors}phase=$phase "
++	[[ "$last_errno" != "0" ]] && errors="${errors}last_errno=$last_errno "
++	[[ "$failure_count" != "0" && -n "$failure_count" ]] && errors="${errors}failure_count=$failure_count "
++	[[ "$blocked" != "0" ]] && errors="${errors}blocked_requests=$blocked "
++
++	if [[ -z "$errors" ]]; then
++		detail="phase=$phase, last_errno=$last_errno, failure_count=${failure_count:-0}"
++		[[ "$drain_timed_out" == "yes" ]] && detail="$detail, drain_timed_out=yes"
++		[[ -n "$sessions_reset" ]] && detail="$detail, sessions_reset=$sessions_reset"
++		stage_result 5 "status_check" "PASS" "$detail"
++	else
++		stage_result 5 "status_check" "FAIL" "$errors"
++	fi
++else
++	stage_result 5 "status_check" "FAIL" "cannot read reset/status"
++fi
++
++# --- Summary ----------------------------------------------------------------
++
++echo ""
++if [[ "$FAIL" -eq 0 ]]; then
++	echo "RESULT: $PASS/$TOTAL stages passed"
++else
++	echo "RESULT: $PASS/$TOTAL stages passed, $FAIL FAILED"
++fi
++echo "Artifacts: $OUT_DIR"
++echo ""
++
++exit "$FAIL"
 -- 
 2.34.1
 
