@@ -1,91 +1,91 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 218FB3FB075
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFE603FB7C8
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777467147; cv=none; b=gDnLgfe4dDb9ppDiseywg6l6h9KMc1R+NoRphzXesmqIKY42EH4+9TKW5urpVpykQTgp89c5rSa2ozeMumPRhn8PoyKsjxMVj1b0Kzw/0NYWPFCKAZyAbwXTsHGp0Lm6LfwMCJ3qhKPWTtj2k38xE+z5tdNhiQi0n1nHQtWD1wY=
+	t=1777467148; cv=none; b=i7hjSz8lJqCIBPfiCOnWTrv4v+KQD9qnbRPxMsrF+AxlgZwAWVCEUMagRNu7FsGFSiBhwvrxATZOrLaO6B7bzGaPCi0I2T9vag71Ysvai2IckcLAksN6f5yyTbh8V2Dq/2XD4AZSt3HY70QZIBtViWCRu7HAtsCLiiI+5DR0NYA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777467147; c=relaxed/simple;
-	bh=bQZvJHvY7h8CiLeg0LuJ3PDTucKruNwf0pSG4a0QHAU=;
+	s=arc-20240116; t=1777467148; c=relaxed/simple;
+	bh=tnPqC8BgXfwg4wC768hD+ltUOyxbS9+OmAJECaBh87g=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=ScrPpoS/iPlWbKMCc9/u4AuLY4bdBHi12+vzGGGufMEEilK6CdfDNgYE+o2QXRLCFhTy1snHUb+gImZtgsFttK7T5jzFLk7sjZVTluq4INm6s3ZnyTZbML9j7Q9btGvwJm33tQYb0ho+fXSKDva/5pciIaXKwjzvccsgzpyXNiw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OkcaPgfU; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=s8bmW+dP; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=dtWIJ27FMb6UaaAImELNP1jw+eTq7isq4eEu37taai7qM97KjZiG3dP7GWzID6yeacHhIVXJJPXv1WmUnt7ZWasoJ4tqp4EAr4uR0eNBmggSjQH/h4qpOFuXaIdubkfY8KUGib9Mqfs0dr5xga4X61qsZEiVZy2g2rQXo+gDnQ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Q+GdHX3S; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=qzD3sXpY; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OkcaPgfU";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="s8bmW+dP"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Q+GdHX3S";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="qzD3sXpY"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777467139;
+	s=mimecast20190719; t=1777467144;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=wXLUrx6pg+td5LUoEiI8ndSrVAlCTiqcgH/61RABzys=;
-	b=OkcaPgfUcEsazHGSD8iEdYROywCZKmLc4toF9BSpwmPjGdH2WgfQowJD6ZKU/ELzV/nVUi
-	2ZwYAgAyE9LMj8hFOoGBunYXiaN0yyKdGg02gM/Vo7dPe13o8s0lgptfuA+YTRmC3ayrTw
-	OZP0feNYdIkJxzUuS2gacoD3yoSRuBM=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=asL+rz7v2ijvPcwX3iOzgMmiTXf19M9ZSCghMhBcDBY=;
+	b=Q+GdHX3SOAInII97d0BU5HS0joBgvrc+63mZTwsubckDZfh3XukR50Kw5cBKW/5hfqK/8p
+	6oRV6JBqai1rIZhTg1R805nOKJXKShSAVaok5FntvAKQkLtb8LBioB9HLMH+o0wzLBnd2F
+	qmSzMCYaIoR74w8kVazisfzrdL8qDtk=
+Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com
+ [209.85.208.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-510-IYAySkq7Ogi4FFlRkb1Ffw-1; Wed, 29 Apr 2026 08:52:18 -0400
-X-MC-Unique: IYAySkq7Ogi4FFlRkb1Ffw-1
-X-Mimecast-MFC-AGG-ID: IYAySkq7Ogi4FFlRkb1Ffw_1777467137
-Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-678aad8ed0fso5426650a12.0
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:18 -0700 (PDT)
+ us-mta-407-pG56_cWSN2aJBNf4eemqFQ-1; Wed, 29 Apr 2026 08:52:22 -0400
+X-MC-Unique: pG56_cWSN2aJBNf4eemqFQ-1
+X-Mimecast-MFC-AGG-ID: pG56_cWSN2aJBNf4eemqFQ_1777467141
+Received: by mail-ed1-f71.google.com with SMTP id 4fb4d7f45d1cf-678ad5bfc8cso5321176a12.2
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1777467137; x=1778071937; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1777467141; x=1778071941; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=wXLUrx6pg+td5LUoEiI8ndSrVAlCTiqcgH/61RABzys=;
-        b=s8bmW+dPb8EacpZJIUK1JpOTxQDH9LhDM5lJdxOQ6eZKTlJFtiPixrJsARCnf0PoMv
-         YgURvuqgKJIGi3laDTUkm/lFgObg1r4HGoDEqpJdr6nC3tYnaqMWpmwBFW6mkllNKv8P
-         AZgnlBIld95n9M2NWgA6dL/Bxoi9vpAb/UCcuiyrxk5WLHn0n1cwr+181MMew8R6PUxx
-         m2x5+VXDxAOqHEGkZSh7eXazAiVFA0u/Wk0QV5MKBJD0xqoNGddzxrB0GSf08KlMhEuD
-         nqTpV4INs0gvMyRV5W9rzMu1FUwnReapF9e8TNPdpniDUNhz00C0VvkBfG+79nOEijQt
-         ppGQ==
+        bh=asL+rz7v2ijvPcwX3iOzgMmiTXf19M9ZSCghMhBcDBY=;
+        b=qzD3sXpYJkTk0r+9Aibj99YooNllQzd0qMze9quKcul7ItPYsqs/Pjd24J4jcyNNd6
+         ls3gTMj0hc6bzTGEhq3ninlQB9ZCxMAMuYPEd7v9Nft9SATKzjVJ4sL5cd877Gspz1CH
+         TYqLe+IhldrLshoycnEwZMj6wKBHwrdU3aFOkItXJ2o1O8axGQW5C588Lm1hEjNeAAnW
+         8KL5BVHTAipA+m8sKAtCfDRp2ZvkXxI67zAZSkqUsvddZFyjuzbApAXsCMpYze2wNN1T
+         8sBRMpPjf9qeu4tfQSTdpBmOIW75/tCjfhpHc5BjPgztc8AceBA3FL/vI9l/QVN6EaiS
+         xW/Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777467137; x=1778071937;
+        d=1e100.net; s=20251104; t=1777467141; x=1778071941;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=wXLUrx6pg+td5LUoEiI8ndSrVAlCTiqcgH/61RABzys=;
-        b=NzDujI0Dhokyu0rrXGa2Tu9bK3RnElijIVEyyr+1gKWMb+3Q//cZisiyfo91o38twz
-         AIAqaGwDDDHniA8RbGmanSnELnii2+Ds8invf3NBgJ8d6OLJF9IyUqtqBvdsGk5oH6mI
-         69wwHiHruQ0VYkO4trCXQeYRPB9u33/6Fp+qwFyRoEwAUomq/H1ioDK1gq4Yqv3wt3C/
-         7peprjhGVfoEiy+g6JU0jRQv6VE5yy+mIcSsAllXxMLzytI61ErrKJBRUZdm0AUZyPb3
-         V79KE47KE365if6NY4xLp8rXCpft6egA83ip4ucJMcmitvKMuRODz7ZgHtrX+k7LHplP
-         /y+w==
-X-Gm-Message-State: AOJu0YxZGyWnf0XlbK2H6fwDezA63e1K2nDGqsshUmgunaPJgBGL53iT
-	b1hlBhdfuRIekoYBWDEwUJ0m74zEHj5uopAXzkPIu7oaizkXMJpdm8l6rTDQFNptTgFIhbHosen
-	iFduBwfCwZAFTkjXEUGxEtUtGAJFJTOI97gSoxL4BuVaiqDFKV26zaTv+mgkGuroBGpD2TqWkME
-	tQnYohU3KBSCEKtJTojlnqxwknMGYP7hbhVlllR+qSOk0cFP5znA==
-X-Gm-Gg: AeBDieusSktMI4ZHMP1a88A4p9PLe0PdzVWRPMlsaLB+rJw+UqtC0ZSrgUQoMUo10dI
-	yAZeqZSN7IWPjPNoGvSXEqkZ//0PiDOpwRLHBWFwgzljR0ax8qjVXLiw6yMNbbXPcfwGE8vi0k1
-	FMXMsJTEXbtXOwPwChFVeoEIhE7DPYF6+n4sjm6nt1rJEVJB35Xk61ZlkXIy9/Qn0HUXMVfuE1g
-	SachvolSODDNqCKFjUauWylBquRu43DnRQAXUdb9/beWJ9AtQy03TTSb7xzDBrXYi5plevFJX6T
-	QwCYgQKVPZc+Ihk3JYeTn5V3RFh3pYrxfXtwlHG8TYahjFOt092PZMydE5yzpZfkoqhsxopP1qP
-	59FTcaeH2jXAKQYTHwSWQDbsXQ8Leph0Xd8DvUPgnSza/VvjXp7rz1xBZdIkOCNkmeA==
-X-Received: by 2002:a05:6402:358a:b0:670:ef2a:217e with SMTP id 4fb4d7f45d1cf-679bafde393mr3845049a12.0.1777467136374;
-        Wed, 29 Apr 2026 05:52:16 -0700 (PDT)
-X-Received: by 2002:a05:6402:358a:b0:670:ef2a:217e with SMTP id 4fb4d7f45d1cf-679bafde393mr3845020a12.0.1777467135610;
-        Wed, 29 Apr 2026 05:52:15 -0700 (PDT)
+        bh=asL+rz7v2ijvPcwX3iOzgMmiTXf19M9ZSCghMhBcDBY=;
+        b=WJQ6URhD58ObJ1XwyT9lG/Gu7AYaV41bdON7RP8wG24zQDwV49QKoftkqJi+eXdL50
+         ArpWFsCEmudT5IlRx7CYOIJnIEeTAl5XFce8cImAdc6JXzF946weX4C6+vYtkKjiTxaX
+         TXycYG+1I1vbi5hplVsnqhgqNibBPLQ8vIOhpYG22tqWtfTxgPvUg6xZxXvGkE8yvGwc
+         UMiN573vekAFWrndQrbS5G/n5WolZYmKNGY26nx6TR1+YaTJeJx7qrOO/B+qvCgMe+u0
+         zLRozc3FHqn/ZxY8jMieOqSecFGKOgcoOZ0vG8VTQ4Jn7RrJ1ZizuKmZopvS5XO2o4pE
+         B7Vw==
+X-Gm-Message-State: AOJu0Ywm1zSnviUC1gqiIpolq3KxeDp/V37apD1LN0r1tZdOb0jTd0Sp
+	Txp9OVDFGpBHfM5C5lcG4VkXrrGnLQJGJfTU5mySo0GwWB+S4U+wuDPnHd/W2xqsRGbaPccGZRI
+	O4yI//L2e+mBCpniFUwo9h2R9AbufhS58Kkp0CT+sXfQo+WMxIG9q/LHo6l1b4OtLt1iWkHFi1+
+	p3R0d9QF3Sb5sfodiYsKFIk1BsaKLkjapiyApRXR5IBR6w87y4hA==
+X-Gm-Gg: AeBDieuzbp2f4sX7ls6mEx58S3opK4FH0SKO2ta4jLuElKqyBFfF4an7nhPZ6uVrMU8
+	IWeNpITvjztxptodxK8sWAvPNVsekagCr4KT+v+I44Dwaljq7ZhaVWtvloZO8eZSNf9qu/ulHOn
+	5yBluTOdfucJ5gvu6OBFaoT2q9i2NUNwTbdXPrv8iY85McyvO4quu36q+y9dMa4b3tm4z6rJWGF
+	vdM8ij95+bJaAL1BDYMOoZ+sSafxBmJusAXLPc2Jemc6UBQo/p28D8CNV1+i7nElJ3yqWMmgFst
+	D9DCSMhf9kwzN3cb6h6QMh/QYsFkLhZGA7GKIIytTBy5SrgCyH5Zi3bE4tE/Vm8Dw/L577XI68H
+	6k2pVWd9s1QyrZm0qppJoH+fDWw9J4cv4kF1EMsca1p00ABG6yx1fNmQk36YISIg7Vg==
+X-Received: by 2002:a05:6402:5057:b0:676:98a0:1c8d with SMTP id 4fb4d7f45d1cf-679bb04a803mr2891184a12.1.1777467140557;
+        Wed, 29 Apr 2026 05:52:20 -0700 (PDT)
+X-Received: by 2002:a05:6402:5057:b0:676:98a0:1c8d with SMTP id 4fb4d7f45d1cf-679bb04a803mr2891167a12.1.1777467139847;
+        Wed, 29 Apr 2026 05:52:19 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.13
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2026 05:52:15 -0700 (PDT)
+        Wed, 29 Apr 2026 05:52:19 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v3 01/11] ceph: convert inode flags to named bit positions and atomic bitops
-Date: Wed, 29 Apr 2026 12:51:56 +0000
-Message-Id: <20260429125206.1512203-2-amarkuze@redhat.com>
+Subject: [PATCH v3 03/11] ceph: harden send_mds_reconnect and handle active-MDS peer reset
+Date: Wed, 29 Apr 2026 12:51:58 +0000
+Message-Id: <20260429125206.1512203-4-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260429125206.1512203-1-amarkuze@redhat.com>
 References: <20260429125206.1512203-1-amarkuze@redhat.com>
@@ -97,471 +97,320 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Define named bit-position constants for all CEPH_I_* inode flags and
-derive the bitmask values from them.  This gives every flag a named
-_BIT constant usable with the test_bit/set_bit/clear_bit family.
-The intentionally unused bit position 1 is documented inline.
+Change send_mds_reconnect() to return an error code so callers can detect
+and report reconnect failures instead of silently ignoring them. Add early
+bailout checks for sessions that are already closed, rejected, or
+unregistered, which avoids sending reconnect messages for sessions that
+can no longer be recovered.
 
-Convert all flag modifications to use atomic bitops (set_bit,
-clear_bit, test_and_clear_bit).  The previous code mixed lockless
-atomic ops on some flags (ERROR_WRITE, ODIRECT) with non-atomic
-read-modify-write (|= / &= ~) on other flags sharing the same
-unsigned long.  A concurrent non-atomic RMW can clobber an
-adjacent lockless atomic update -- for example, a lockless
-clear_bit(ERROR_WRITE) could be silently resurrected by a
-concurrent ci->i_ceph_flags |= CEPH_I_FLUSH under the spinlock.
-Using atomic bitops for all modifications eliminates this class
-of race entirely.
+The early -ESTALE and -ENOENT bailouts use a separate fail_return label
+that skips the pr_err_client diagnostic, since these codes indicate
+expected concurrent-teardown races rather than genuine reconnect build
+failures.
 
-Flags whose only users are now the _BIT form (ERROR_WRITE,
-ASYNC_CHECK_CAPS) have their old mask defines removed to document
-that callers must use the _BIT constant with the set_bit/test_bit
-family.  ERROR_FILELOCK and SHUTDOWN retain their mask defines
-because they are still used via bitmask tests in lockless readers
-(ceph_inode_is_shutdown, reconnect_caps_cb).
+Move the "reconnect start" log after the early-bailout checks so it
+only appears for sessions that actually proceed with reconnect.
 
-Flag reads under i_ceph_lock continue to use bitmask tests where
-the tested flag is only modified under the same lock; this is safe
-because the lock serialises both the read and the write.  The
-remaining flags continue to use non-atomic bitmask operations under
-i_ceph_lock, which is correct and unchanged.
+Save the prior session state before transitioning to RECONNECTING,
+and restore it in the failure path.  Without this, a transient
+build or encoding failure (-ENOMEM, -ENOSPC) strands the session
+in RECONNECTING indefinitely because check_new_map() only retries
+sessions in RESTARTING state.
 
-The lockless reader ceph_inode_is_shutdown() retains the READ_ONCE()
-snapshot plus bitmask test pattern -- the single atomic load into a
-local variable is correct and avoids a second memory access that
-test_bit() would require.  It now uses the named CEPH_I_SHUTDOWN
-mask constant instead of an inline BIT().
+Rewrite mds_peer_reset() to handle the case where the MDS is past its
+RECONNECT phase (i.e. active). An active MDS rejects CLIENT_RECONNECT
+messages because it only accepts them during its own RECONNECT window
+after restart. Previously, the client would send a doomed reconnect
+that the MDS would reject or ignore. Now, the client tears the session
+down locally and lets new requests re-open a fresh session, which is
+the correct recovery for this scenario. The RECONNECTING state is
+handled on the same teardown path, since the MDS will reject reconnect
+attempts from an active client regardless of the session's local state.
 
-The direct assignment in ceph_finish_async_create() is converted
-from i_ceph_flags = CEPH_I_ASYNC_CREATE to set_bit().  This
-inode is I_NEW at this point -- still invisible to other threads
-and guaranteed to have zero flags from alloc_inode -- so either
-form is safe, but set_bit() keeps the conversion uniform.
+Add explicit cases for CLOSED and REJECTED session states in
+mds_peer_reset() since these are terminal states where a connection
+drop is expected behavior.
 
-The only remaining direct assignment (alloc_inode zeroing) operates
-on an inode that is not yet visible to other threads, so it is safe
-without atomic ops.
+The session teardown path in mds_peer_reset() follows the established
+drop-and-reacquire locking pattern from check_new_map(): take
+mdsc->mutex for session unregistration, release it, then take s->s_mutex
+separately for cleanup. This avoids introducing a new simultaneous lock
+nesting pattern.
 
-The dead precomputed flags variable in ceph_pool_perm_check() is
-removed; the check: loop re-reads flags from i_ceph_flags after
-the set_bit() calls, keeping a single source of truth.
+Log reconnect failures from check_new_map() and mds_peer_reset() at
+pr_warn level rather than pr_err, since return codes like -ESTALE
+(closed/rejected session) and -ENOENT (unregistered session) are
+expected during concurrent teardown. Log dropped messages for
+unregistered sessions via doutc() (dynamic debug) rather than
+pr_info, as post-reset message arrival is routine and does not
+warrant unconditional logging.
 
-Co-developed-by: Viacheslav Dubeyko <vdubeyko@redhat.com>
-Signed-off-by: Viacheslav Dubeyko <vdubeyko@redhat.com>
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- fs/ceph/addr.c       | 17 ++++++------
- fs/ceph/caps.c       | 24 ++++++++---------
- fs/ceph/file.c       | 13 ++++-----
- fs/ceph/inode.c      |  4 +--
- fs/ceph/locks.c      | 22 ++++-----------
- fs/ceph/mds_client.c |  3 ++-
- fs/ceph/mds_client.h |  2 +-
- fs/ceph/snap.c       |  2 +-
- fs/ceph/super.h      | 64 +++++++++++++++++++++++---------------------
- fs/ceph/xattr.c      |  2 +-
- 10 files changed, 72 insertions(+), 81 deletions(-)
+ fs/ceph/mds_client.c | 169 +++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 155 insertions(+), 14 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 2090fc78529c..35c5fdb5a448 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -2583,20 +2583,19 @@ int ceph_pool_perm_check(struct inode *inode, int need)
- 	if (ret < 0)
- 		return ret;
- 
--	flags = CEPH_I_POOL_PERM;
--	if (ret & POOL_READ)
--		flags |= CEPH_I_POOL_RD;
--	if (ret & POOL_WRITE)
--		flags |= CEPH_I_POOL_WR;
--
- 	spin_lock(&ci->i_ceph_lock);
- 	if (pool == ci->i_layout.pool_id &&
- 	    pool_ns == rcu_dereference_raw(ci->i_layout.pool_ns)) {
--		ci->i_ceph_flags |= flags;
--        } else {
-+		set_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
-+		if (ret & POOL_READ)
-+			set_bit(CEPH_I_POOL_RD_BIT, &ci->i_ceph_flags);
-+		if (ret & POOL_WRITE)
-+			set_bit(CEPH_I_POOL_WR_BIT, &ci->i_ceph_flags);
-+	} else {
- 		pool = ci->i_layout.pool_id;
--		flags = ci->i_ceph_flags;
- 	}
-+	/* Re-read flags under the lock so check: sees the updated bits. */
-+	flags = ci->i_ceph_flags;
- 	spin_unlock(&ci->i_ceph_lock);
- 	goto check;
- }
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d51454e995a8..cb9e78b713d9 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -549,7 +549,7 @@ static void __cap_delay_requeue_front(struct ceph_mds_client *mdsc,
- 
- 	doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
- 	spin_lock(&mdsc->cap_delay_lock);
--	ci->i_ceph_flags |= CEPH_I_FLUSH;
-+	set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
- 	if (!list_empty(&ci->i_cap_delay_list))
- 		list_del_init(&ci->i_cap_delay_list);
- 	list_add(&ci->i_cap_delay_list, &mdsc->cap_delay_list);
-@@ -1409,7 +1409,7 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 	      ceph_cap_string(revoking));
- 	BUG_ON((retain & CEPH_CAP_PIN) == 0);
- 
--	ci->i_ceph_flags &= ~CEPH_I_FLUSH;
-+	clear_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
- 
- 	cap->issued &= retain;  /* drop bits we don't want */
- 	/*
-@@ -1666,7 +1666,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
- 		last_tid = capsnap->cap_flush.tid;
- 	}
- 
--	ci->i_ceph_flags &= ~CEPH_I_FLUSH_SNAPS;
-+	clear_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 
- 	while (first_tid <= last_tid) {
- 		struct ceph_cap *cap = ci->i_auth_cap;
-@@ -2026,7 +2026,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
- 
- 	spin_lock(&ci->i_ceph_lock);
- 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
--		ci->i_ceph_flags |= CEPH_I_ASYNC_CHECK_CAPS;
-+		set_bit(CEPH_I_ASYNC_CHECK_CAPS_BIT, &ci->i_ceph_flags);
- 
- 		/* Don't send messages until we get async create reply */
- 		spin_unlock(&ci->i_ceph_lock);
-@@ -2577,7 +2577,7 @@ static void __kick_flushing_caps(struct ceph_mds_client *mdsc,
- 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE)
- 		return;
- 
--	ci->i_ceph_flags &= ~CEPH_I_KICK_FLUSH;
-+	clear_bit(CEPH_I_KICK_FLUSH_BIT, &ci->i_ceph_flags);
- 
- 	list_for_each_entry_reverse(cf, &ci->i_cap_flush_list, i_list) {
- 		if (cf->is_capsnap) {
-@@ -2686,7 +2686,7 @@ void ceph_early_kick_flushing_caps(struct ceph_mds_client *mdsc,
- 			__kick_flushing_caps(mdsc, session, ci,
- 					     oldest_flush_tid);
- 		} else {
--			ci->i_ceph_flags |= CEPH_I_KICK_FLUSH;
-+			set_bit(CEPH_I_KICK_FLUSH_BIT, &ci->i_ceph_flags);
- 		}
- 
- 		spin_unlock(&ci->i_ceph_lock);
-@@ -2829,7 +2829,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 	spin_lock(&ci->i_ceph_lock);
- 
- 	if ((flags & CHECK_FILELOCK) &&
--	    (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK)) {
-+	    test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		doutc(cl, "%p %llx.%llx error filelock\n", inode,
- 		      ceph_vinop(inode));
- 		ret = -EIO;
-@@ -3207,7 +3207,7 @@ static int ceph_try_drop_cap_snap(struct ceph_inode_info *ci,
- 		BUG_ON(capsnap->cap_flush.tid > 0);
- 		ceph_put_snap_context(capsnap->context);
- 		if (!list_is_last(&capsnap->ci_item, &ci->i_cap_snaps))
--			ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
-+			set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 
- 		list_del(&capsnap->ci_item);
- 		ceph_put_cap_snap(capsnap);
-@@ -3396,7 +3396,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
- 				if (ceph_try_drop_cap_snap(ci, capsnap)) {
- 					put++;
- 				} else {
--					ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
-+					set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 					flush_snaps = true;
- 				}
- 			}
-@@ -3648,7 +3648,7 @@ static void handle_cap_grant(struct inode *inode,
- 
- 		if (ci->i_layout.pool_id != old_pool ||
- 		    extra_info->pool_ns != old_ns)
--			ci->i_ceph_flags &= ~CEPH_I_POOL_PERM;
-+			clear_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
- 
- 		extra_info->pool_ns = old_ns;
- 
-@@ -4815,7 +4815,7 @@ int ceph_drop_caps_for_unlink(struct inode *inode)
- 			doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode,
- 			      ceph_vinop(inode));
- 			spin_lock(&mdsc->cap_delay_lock);
--			ci->i_ceph_flags |= CEPH_I_FLUSH;
-+			set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
- 			if (!list_empty(&ci->i_cap_delay_list))
- 				list_del_init(&ci->i_cap_delay_list);
- 			list_add_tail(&ci->i_cap_delay_list,
-@@ -5080,7 +5080,7 @@ int ceph_purge_inode_cap(struct inode *inode, struct ceph_cap *cap, bool *invali
- 
- 		if (atomic_read(&ci->i_filelock_ref) > 0) {
- 			/* make further file lock syscall return -EIO */
--			ci->i_ceph_flags |= CEPH_I_ERROR_FILELOCK;
-+			set_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
- 			pr_warn_ratelimited_client(cl,
- 				" dropping file locks for %p %llx.%llx\n",
- 				inode, ceph_vinop(inode));
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 5e7c73a29aa3..e2622f1cfbff 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -579,12 +579,12 @@ static void wake_async_create_waiters(struct inode *inode,
- 
- 	spin_lock(&ci->i_ceph_lock);
- 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
--		clear_and_wake_up_bit(CEPH_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
-+		/* Serialized by i_ceph_lock; the two ops touch different bits. */
-+		clear_and_wake_up_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
- 
--		if (ci->i_ceph_flags & CEPH_I_ASYNC_CHECK_CAPS) {
--			ci->i_ceph_flags &= ~CEPH_I_ASYNC_CHECK_CAPS;
-+		if (test_and_clear_bit(CEPH_I_ASYNC_CHECK_CAPS_BIT,
-+				      &ci->i_ceph_flags))
- 			check_cap = true;
--		}
- 	}
- 	ceph_kick_flushing_inode_caps(session, ci);
- 	spin_unlock(&ci->i_ceph_lock);
-@@ -747,7 +747,8 @@ static int ceph_finish_async_create(struct inode *dir, struct inode *inode,
- 			 * that point and don't worry about setting
- 			 * CEPH_I_ASYNC_CREATE.
- 			 */
--			ceph_inode(inode)->i_ceph_flags = CEPH_I_ASYNC_CREATE;
-+			set_bit(CEPH_I_ASYNC_CREATE_BIT,
-+				&ceph_inode(inode)->i_ceph_flags);
- 			unlock_new_inode(inode);
- 		}
- 		if (d_in_lookup(dentry) || d_really_is_negative(dentry)) {
-@@ -2422,7 +2423,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 
- 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
- 	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
--	    (ci->i_ceph_flags & CEPH_I_ERROR_WRITE)) {
-+	    test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
- 		struct ceph_snap_context *snapc;
- 		struct iov_iter data;
- 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index d99e12d1100b..f75d66760d54 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1142,7 +1142,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		rcu_assign_pointer(ci->i_layout.pool_ns, pool_ns);
- 
- 		if (ci->i_layout.pool_id != old_pool || pool_ns != old_ns)
--			ci->i_ceph_flags &= ~CEPH_I_POOL_PERM;
-+			clear_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
- 
- 		pool_ns = old_ns;
- 
-@@ -3199,7 +3199,7 @@ void ceph_inode_shutdown(struct inode *inode)
- 	bool invalidate = false;
- 
- 	spin_lock(&ci->i_ceph_lock);
--	ci->i_ceph_flags |= CEPH_I_SHUTDOWN;
-+	set_bit(CEPH_I_SHUTDOWN_BIT, &ci->i_ceph_flags);
- 	p = rb_first(&ci->i_caps);
- 	while (p) {
- 		struct ceph_cap *cap = rb_entry(p, struct ceph_cap, ci_node);
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index dd764f9c64b9..c4ff2266bb94 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -57,9 +57,7 @@ static void ceph_fl_release_lock(struct file_lock *fl)
- 	ci = ceph_inode(inode);
- 	if (atomic_dec_and_test(&ci->i_filelock_ref)) {
- 		/* clear error when all locks are released */
--		spin_lock(&ci->i_ceph_lock);
--		ci->i_ceph_flags &= ~CEPH_I_ERROR_FILELOCK;
--		spin_unlock(&ci->i_ceph_lock);
-+		clear_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
- 	}
- 	fl->fl_u.ceph.inode = NULL;
- 	iput(inode);
-@@ -271,15 +269,10 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- 	else if (IS_SETLKW(cmd))
- 		wait = 1;
- 
--	spin_lock(&ci->i_ceph_lock);
--	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
--		err = -EIO;
--	}
--	spin_unlock(&ci->i_ceph_lock);
--	if (err < 0) {
-+	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		if (op == CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(fl))
- 			posix_lock_file(file, fl, NULL);
--		return err;
-+		return -EIO;
- 	}
- 
- 	if (lock_is_read(fl))
-@@ -331,15 +324,10 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
- 
- 	doutc(cl, "fl_file: %p\n", fl->c.flc_file);
- 
--	spin_lock(&ci->i_ceph_lock);
--	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
--		err = -EIO;
--	}
--	spin_unlock(&ci->i_ceph_lock);
--	if (err < 0) {
-+	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		if (lock_is_unlock(fl))
- 			locks_lock_file_wait(file, fl);
--		return err;
-+		return -EIO;
- 	}
- 
- 	if (IS_SETLKW(cmd))
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index b1746273f186..ccf0d53dde2b 100644
+index 871f0eef468d..b62abae72c4c 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -3613,7 +3613,8 @@ static void __do_request(struct ceph_mds_client *mdsc,
+@@ -4416,9 +4416,14 @@ static void handle_session(struct ceph_mds_session *session,
+ 		break;
  
- 		spin_lock(&ci->i_ceph_lock);
- 		cap = ci->i_auth_cap;
--		if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE && mds != cap->mds) {
-+		if (test_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags) &&
-+		    mds != cap->mds) {
- 			doutc(cl, "session changed for auth cap %d -> %d\n",
- 			      cap->session->s_mds, session->s_mds);
+ 	case CEPH_SESSION_REJECT:
+-		WARN_ON(session->s_state != CEPH_MDS_SESSION_OPENING);
+-		pr_info_client(cl, "mds%d rejected session\n",
+-			       session->s_mds);
++		WARN_ON(session->s_state != CEPH_MDS_SESSION_OPENING &&
++			session->s_state != CEPH_MDS_SESSION_RECONNECTING);
++		if (session->s_state == CEPH_MDS_SESSION_RECONNECTING)
++			pr_info_client(cl, "mds%d reconnect rejected\n",
++				       session->s_mds);
++		else
++			pr_info_client(cl, "mds%d rejected session\n",
++				       session->s_mds);
+ 		session->s_state = CEPH_MDS_SESSION_REJECTED;
+ 		cleanup_session_requests(mdsc, session);
+ 		remove_session_caps(session);
+@@ -4678,6 +4683,14 @@ static int reconnect_caps_cb(struct inode *inode, int mds, void *arg)
+ 	cap->mseq = 0;       /* and migrate_seq */
+ 	cap->cap_gen = atomic_read(&cap->session->s_cap_gen);
  
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 0428a5eaf28c..e91a199d56fd 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -658,7 +658,7 @@ static inline int ceph_wait_on_async_create(struct inode *inode)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 
--	return wait_on_bit(&ci->i_ceph_flags, CEPH_ASYNC_CREATE_BIT,
-+	return wait_on_bit(&ci->i_ceph_flags, CEPH_I_ASYNC_CREATE_BIT,
- 			   TASK_KILLABLE);
- }
- 
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 52b4c2684f92..9b79a5eaca93 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -700,7 +700,7 @@ int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
- 		return 0;
- 	}
- 
--	ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
-+	set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 	doutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s s=%llu\n",
- 	      inode, ceph_vinop(inode), capsnap, capsnap->context,
- 	      capsnap->context->seq, ceph_cap_string(capsnap->dirty),
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 29a980e22dc2..66b047606d65 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -655,23 +655,34 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- /*
-  * Ceph inode.
-  */
--#define CEPH_I_DIR_ORDERED	(1 << 0)  /* dentries in dir are ordered */
--#define CEPH_I_FLUSH		(1 << 2)  /* do not delay flush of dirty metadata */
--#define CEPH_I_POOL_PERM	(1 << 3)  /* pool rd/wr bits are valid */
--#define CEPH_I_POOL_RD		(1 << 4)  /* can read from pool */
--#define CEPH_I_POOL_WR		(1 << 5)  /* can write to pool */
--#define CEPH_I_SEC_INITED	(1 << 6)  /* security initialized */
--#define CEPH_I_KICK_FLUSH	(1 << 7)  /* kick flushing caps */
--#define CEPH_I_FLUSH_SNAPS	(1 << 8)  /* need flush snapss */
--#define CEPH_I_ERROR_WRITE	(1 << 9) /* have seen write errors */
--#define CEPH_I_ERROR_FILELOCK	(1 << 10) /* have seen file lock errors */
--#define CEPH_I_ODIRECT_BIT	(11) /* inode in direct I/O mode */
--#define CEPH_I_ODIRECT		(1 << CEPH_I_ODIRECT_BIT)
--#define CEPH_ASYNC_CREATE_BIT	(12)	  /* async create in flight for this */
--#define CEPH_I_ASYNC_CREATE	(1 << CEPH_ASYNC_CREATE_BIT)
--#define CEPH_I_SHUTDOWN		(1 << 13) /* inode is no longer usable */
--#define CEPH_I_ASYNC_CHECK_CAPS	(1 << 14) /* check caps immediately after async
--					     creating finishes */
-+#define CEPH_I_DIR_ORDERED_BIT		(0)  /* dentries in dir are ordered */
-+					     /* bit 1 historically unused */
-+#define CEPH_I_FLUSH_BIT		(2)  /* do not delay flush of dirty metadata */
-+#define CEPH_I_POOL_PERM_BIT		(3)  /* pool rd/wr bits are valid */
-+#define CEPH_I_POOL_RD_BIT		(4)  /* can read from pool */
-+#define CEPH_I_POOL_WR_BIT		(5)  /* can write to pool */
-+#define CEPH_I_SEC_INITED_BIT		(6)  /* security initialized */
-+#define CEPH_I_KICK_FLUSH_BIT		(7)  /* kick flushing caps */
-+#define CEPH_I_FLUSH_SNAPS_BIT		(8)  /* need flush snaps */
-+#define CEPH_I_ERROR_WRITE_BIT		(9)  /* have seen write errors */
-+#define CEPH_I_ERROR_FILELOCK_BIT	(10) /* have seen file lock errors */
-+#define CEPH_I_ODIRECT_BIT		(11) /* inode in direct I/O mode */
-+#define CEPH_I_ASYNC_CREATE_BIT		(12) /* async create in flight for this */
-+#define CEPH_I_SHUTDOWN_BIT		(13) /* inode is no longer usable */
-+#define CEPH_I_ASYNC_CHECK_CAPS_BIT	(14) /* check caps after async creating finishes */
++	/*
++	 * Note: CEPH_I_ERROR_FILELOCK is not set during reconnect.
++	 * Instead, locks are submitted for best-effort MDS reclaim
++	 * via the flock_len field below.  If reclaim fails (e.g.,
++	 * another client grabbed a conflicting lock), future lock
++	 * operations will fail and set the error flag at that point.
++	 */
 +
-+#define CEPH_I_DIR_ORDERED		(1 << CEPH_I_DIR_ORDERED_BIT)
-+#define CEPH_I_FLUSH			(1 << CEPH_I_FLUSH_BIT)
-+#define CEPH_I_POOL_PERM		(1 << CEPH_I_POOL_PERM_BIT)
-+#define CEPH_I_POOL_RD			(1 << CEPH_I_POOL_RD_BIT)
-+#define CEPH_I_POOL_WR			(1 << CEPH_I_POOL_WR_BIT)
-+#define CEPH_I_SEC_INITED		(1 << CEPH_I_SEC_INITED_BIT)
-+#define CEPH_I_KICK_FLUSH		(1 << CEPH_I_KICK_FLUSH_BIT)
-+#define CEPH_I_FLUSH_SNAPS		(1 << CEPH_I_FLUSH_SNAPS_BIT)
-+#define CEPH_I_ODIRECT			(1 << CEPH_I_ODIRECT_BIT)
-+#define CEPH_I_ASYNC_CREATE		(1 << CEPH_I_ASYNC_CREATE_BIT)
-+#define CEPH_I_ERROR_FILELOCK		(1 << CEPH_I_ERROR_FILELOCK_BIT)
-+#define CEPH_I_SHUTDOWN			(1 << CEPH_I_SHUTDOWN_BIT)
- 
- /*
-  * Masks of ceph inode work.
-@@ -684,27 +695,18 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- 
- /*
-  * We set the ERROR_WRITE bit when we start seeing write errors on an inode
-- * and then clear it when they start succeeding. Note that we do a lockless
-- * check first, and only take the lock if it looks like it needs to be changed.
-- * The write submission code just takes this as a hint, so we're not too
-- * worried if a few slip through in either direction.
-+ * and then clear it when they start succeeding. The write submission code
-+ * just takes this as a hint, so we're not too worried if a few slip through
-+ * in either direction.
+ 	/* These are lost when the session goes away */
+ 	if (S_ISDIR(inode->i_mode)) {
+ 		if (cap->issued & CEPH_CAP_DIR_CREATE) {
+@@ -4892,20 +4905,19 @@ static int encode_snap_realms(struct ceph_mds_client *mdsc,
+  *
+  * This is a relatively heavyweight operation, but it's rare.
   */
- static inline void ceph_set_error_write(struct ceph_inode_info *ci)
+-static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+-			       struct ceph_mds_session *session)
++static int send_mds_reconnect(struct ceph_mds_client *mdsc,
++			      struct ceph_mds_session *session)
  {
--	if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
--		spin_lock(&ci->i_ceph_lock);
--		ci->i_ceph_flags |= CEPH_I_ERROR_WRITE;
--		spin_unlock(&ci->i_ceph_lock);
--	}
-+	set_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	struct ceph_msg *reply;
+ 	int mds = session->s_mds;
+ 	int err = -ENOMEM;
++	int old_state;
+ 	struct ceph_reconnect_state recon_state = {
+ 		.session = session,
+ 	};
+ 	LIST_HEAD(dispose);
+ 
+-	pr_info_client(cl, "mds%d reconnect start\n", mds);
+-
+ 	recon_state.pagelist = ceph_pagelist_alloc(GFP_NOFS);
+ 	if (!recon_state.pagelist)
+ 		goto fail_nopagelist;
+@@ -4917,6 +4929,32 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+ 	xa_destroy(&session->s_delegated_inos);
+ 
+ 	mutex_lock(&session->s_mutex);
++	if (session->s_state == CEPH_MDS_SESSION_CLOSED ||
++	    session->s_state == CEPH_MDS_SESSION_REJECTED) {
++		pr_info_client(cl, "mds%d skipping reconnect, session %s\n",
++			       mds,
++			       ceph_session_state_name(session->s_state));
++		mutex_unlock(&session->s_mutex);
++		ceph_msg_put(reply);
++		err = -ESTALE;
++		goto fail_return;
++	}
++
++	mutex_lock(&mdsc->mutex);
++	if (mds >= mdsc->max_sessions || mdsc->sessions[mds] != session) {
++		mutex_unlock(&mdsc->mutex);
++		pr_info_client(cl,
++			       "mds%d skipping reconnect, session unregistered\n",
++			       mds);
++		mutex_unlock(&session->s_mutex);
++		ceph_msg_put(reply);
++		err = -ENOENT;
++		goto fail_return;
++	}
++	mutex_unlock(&mdsc->mutex);
++
++	pr_info_client(cl, "mds%d reconnect start\n", mds);
++	old_state = session->s_state;
+ 	session->s_state = CEPH_MDS_SESSION_RECONNECTING;
+ 	session->s_seq = 0;
+ 
+@@ -5046,18 +5084,34 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+ 
+ 	up_read(&mdsc->snap_rwsem);
+ 	ceph_pagelist_release(recon_state.pagelist);
+-	return;
++	return 0;
+ 
+ fail:
+ 	ceph_msg_put(reply);
+ 	up_read(&mdsc->snap_rwsem);
++	/*
++	 * Restore prior session state so map-driven reconnect logic
++	 * (check_new_map) can retry.  Without this, a transient build
++	 * failure strands the session in RECONNECTING indefinitely.
++	 */
++	session->s_state = old_state;
+ 	mutex_unlock(&session->s_mutex);
+ fail_nomsg:
+ 	ceph_pagelist_release(recon_state.pagelist);
+ fail_nopagelist:
+ 	pr_err_client(cl, "error %d preparing reconnect for mds%d\n",
+ 		      err, mds);
+-	return;
++	return err;
++
++fail_return:
++	/*
++	 * Early-exit path for expected concurrent-teardown races
++	 * (-ESTALE for closed/rejected sessions, -ENOENT for
++	 * unregistered sessions).  Skip the pr_err_client diagnostic
++	 * since these are not genuine reconnect build failures.
++	 */
++	ceph_pagelist_release(recon_state.pagelist);
++	return err;
  }
  
- static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
+ 
+@@ -5138,9 +5192,15 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+ 		 */
+ 		if (s->s_state == CEPH_MDS_SESSION_RESTARTING &&
+ 		    newstate >= CEPH_MDS_STATE_RECONNECT) {
++			int rc;
++
+ 			mutex_unlock(&mdsc->mutex);
+ 			clear_bit(i, targets);
+-			send_mds_reconnect(mdsc, s);
++			rc = send_mds_reconnect(mdsc, s);
++			if (rc)
++				pr_warn_client(cl,
++					       "mds%d reconnect failed: %d\n",
++					       i, rc);
+ 			mutex_lock(&mdsc->mutex);
+ 		}
+ 
+@@ -5204,7 +5264,11 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+ 		}
+ 		doutc(cl, "send reconnect to export target mds.%d\n", i);
+ 		mutex_unlock(&mdsc->mutex);
+-		send_mds_reconnect(mdsc, s);
++		err = send_mds_reconnect(mdsc, s);
++		if (err)
++			pr_warn_client(cl,
++				       "mds%d export target reconnect failed: %d\n",
++				       i, err);
+ 		ceph_put_mds_session(s);
+ 		mutex_lock(&mdsc->mutex);
+ 	}
+@@ -6284,12 +6348,87 @@ static void mds_peer_reset(struct ceph_connection *con)
  {
--	if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
--		spin_lock(&ci->i_ceph_lock);
--		ci->i_ceph_flags &= ~CEPH_I_ERROR_WRITE;
--		spin_unlock(&ci->i_ceph_lock);
--	}
-+	clear_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
+ 	struct ceph_mds_session *s = con->private;
+ 	struct ceph_mds_client *mdsc = s->s_mdsc;
++	int session_state;
+ 
+ 	pr_warn_client(mdsc->fsc->client, "mds%d closed our session\n",
+ 		       s->s_mds);
+-	if (READ_ONCE(mdsc->fsc->mount_state) != CEPH_MOUNT_FENCE_IO &&
+-	    ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) >= CEPH_MDS_STATE_RECONNECT)
+-		send_mds_reconnect(mdsc, s);
++
++	if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_FENCE_IO ||
++	    ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) < CEPH_MDS_STATE_RECONNECT)
++		return;
++
++	if (ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) == CEPH_MDS_STATE_RECONNECT) {
++		int rc = send_mds_reconnect(mdsc, s);
++
++		if (rc)
++			pr_warn_client(mdsc->fsc->client,
++				       "mds%d reconnect failed: %d\n",
++				       s->s_mds, rc);
++		return;
++	}
++
++	/*
++	 * MDS is active (past RECONNECT).  It will not accept a
++	 * CLIENT_RECONNECT from us, so tear the session down locally
++	 * and let new requests re-open a fresh session.
++	 *
++	 * Snapshot session state with READ_ONCE, then revalidate under
++	 * mdsc->mutex before acting.  The subsequent mdsc->mutex
++	 * section rechecks s_state to catch concurrent transitions, so
++	 * the lockless snapshot here is safe.  s->s_mutex is taken
++	 * separately for cleanup after unregistration, which avoids
++	 * introducing a new s->s_mutex + mdsc->mutex nesting.
++	 */
++	session_state = READ_ONCE(s->s_state);
++
++	switch (session_state) {
++	case CEPH_MDS_SESSION_RESTARTING:
++	case CEPH_MDS_SESSION_RECONNECTING:
++	case CEPH_MDS_SESSION_CLOSING:
++	case CEPH_MDS_SESSION_OPEN:
++	case CEPH_MDS_SESSION_HUNG:
++	case CEPH_MDS_SESSION_OPENING:
++		mutex_lock(&mdsc->mutex);
++		if (s->s_mds >= mdsc->max_sessions ||
++		    mdsc->sessions[s->s_mds] != s ||
++		    s->s_state != session_state) {
++			pr_info_client(mdsc->fsc->client,
++				       "mds%d state changed to %s during peer reset\n",
++				       s->s_mds,
++				       ceph_session_state_name(s->s_state));
++			mutex_unlock(&mdsc->mutex);
++			return;
++		}
++
++		ceph_get_mds_session(s);
++		s->s_state = CEPH_MDS_SESSION_CLOSED;
++		__unregister_session(mdsc, s);
++		__wake_requests(mdsc, &s->s_waiting);
++		mutex_unlock(&mdsc->mutex);
++
++		mutex_lock(&s->s_mutex);
++		cleanup_session_requests(mdsc, s);
++		remove_session_caps(s);
++		mutex_unlock(&s->s_mutex);
++
++		wake_up_all(&mdsc->session_close_wq);
++
++		mutex_lock(&mdsc->mutex);
++		kick_requests(mdsc, s->s_mds);
++		mutex_unlock(&mdsc->mutex);
++
++		ceph_put_mds_session(s);
++		break;
++	case CEPH_MDS_SESSION_CLOSED:
++	case CEPH_MDS_SESSION_REJECTED:
++		break;
++	default:
++		pr_warn_client(mdsc->fsc->client,
++			       "mds%d peer reset in unexpected state %s\n",
++			       s->s_mds,
++			       ceph_session_state_name(session_state));
++		break;
++	}
  }
  
- static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 5f87f62091a1..7cf9e908c2fe 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -1054,7 +1054,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 	if (current->journal_info &&
- 	    !strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) &&
- 	    security_ismaclabel(name + XATTR_SECURITY_PREFIX_LEN))
--		ci->i_ceph_flags |= CEPH_I_SEC_INITED;
-+		set_bit(CEPH_I_SEC_INITED_BIT, &ci->i_ceph_flags);
- out:
- 	spin_unlock(&ci->i_ceph_lock);
- 	return err;
+ static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+@@ -6301,6 +6440,8 @@ static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+ 
+ 	mutex_lock(&mdsc->mutex);
+ 	if (__verify_registered_session(mdsc, s) < 0) {
++		doutc(cl, "dropping tid %llu from unregistered session %d\n",
++		      le64_to_cpu(msg->hdr.tid), s->s_mds);
+ 		mutex_unlock(&mdsc->mutex);
+ 		goto out;
+ 	}
 -- 
 2.34.1
 
