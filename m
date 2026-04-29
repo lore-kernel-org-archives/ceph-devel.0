@@ -1,91 +1,91 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CB173FB071
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2672C3FE66B
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777467155; cv=none; b=Xe6mb6QDRCKyQrz0Xu0gdQOK3VPA5p/W0b14HYWgCj/XmjThiNTbDZ/8wTsTny5GOyhAXd/L+GdsZKfPOa077INDhimpALw1uOnYRVzfyJlVqphzf1nQxunoULFSL0yk50ZjhD5PDFpGXbKYaDO+f43rOdwMDgqR6uNl8nlcotM=
+	t=1777467156; cv=none; b=mmEOkq/wCyeGqKYdOgyZlBnIn2sEtNWyzPKRAWTrIBryraZs/BEJXTvwrdF6CIo273HgMAamlL9tYZbWDy2WG0lMKjqHxVu7Wfk8Vyb7GFFGaKVgW06BFDx+le/Mn2cz/oiYw/S0+uEmicuJzSFrILvQZ13nj7Te8Vca1x60cd4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777467155; c=relaxed/simple;
-	bh=T3SYwNAcawA/E2EIqbZFX+vNF+vMw0ueYcTwcN8x72o=;
+	s=arc-20240116; t=1777467156; c=relaxed/simple;
+	bh=VSfRPwYNnPEUZikZoNm4zMsHgJWcrfVAtA2TiNYyoJg=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Ux9aHKy74xwuWCfPRhv72qPLn4bCX4cw+qeKrLL8fW6Wi48fiubMtsCny/0JBWf72A8CV1MKgEmaxnHgSgRKMzTlaecpl0ybY3c+nnIOSWV3h8+3LYPvKDwYgWf+/Qicz17s7I5mW05sjO6p6mwtANJtRg0khuOkYTDuoJVeFGk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RuOjxjw9; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=G9Vpmb2q; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=i/XF6SDzQ/t3lFQxFR4nJ+HFj4gjfLFZGvwPVabGSxlTyDb4eVQvE7HRCh7LnP+fw/Wt2T8jh+G7yPlNXWwJq/ixMWbBEaWXZxDhkyhwW6UGnYu04hEZAJF92st+HubefZ8hbIR+QWBW+vzyJKd+y6sWROBeffmH6u2egKtQs7g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hbyuSWKC; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=EoNUeUjm; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RuOjxjw9";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="G9Vpmb2q"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hbyuSWKC";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="EoNUeUjm"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777467152;
+	s=mimecast20190719; t=1777467150;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=kH1rfK/xXKO/jWZH3nIhV338I1U55E10FikanWCJaSM=;
-	b=RuOjxjw96VxubTz56RyncLqk8eJHEkR6uQC+XCHce4MXjQxpN738zhKWj3QxLhrJMCia0N
-	1mNxew6ySPWYmrPTuuWuIppDg6bPSZdLE1geUx2exnibshfhEbTwTz+VxiPeqr3OAiYBbP
-	DrfOs0p2OF/Hcpg0VP2V38Ey1vsK3zw=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=FUBqP/w3kgWKoRXQ2dx3j370SnRMMM6PxY6RhRVFM9Q=;
+	b=hbyuSWKCJT2mBREuzRSh0y8ybviubYIM94ES9GGsoUagzDd8ZMTqCy/tm07M08zs9Pi+3c
+	WTpjALqzy2RuYTK3zL0GLaLIybJKXRjbz9RpnJ1CTzCZNSnLcSP37RjX/8dyQ2x2AeWj7c
+	RZNPZ0RHr0tr8rr6VhS1ebE9m9JM1Iw=
+Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
+ [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-130-94os-fJ9OWa-JXYzZ0sOPw-1; Wed, 29 Apr 2026 08:52:30 -0400
-X-MC-Unique: 94os-fJ9OWa-JXYzZ0sOPw-1
-X-Mimecast-MFC-AGG-ID: 94os-fJ9OWa-JXYzZ0sOPw_1777467149
-Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-b9bfd3b1c92so1221727766b.1
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:30 -0700 (PDT)
+ us-mta-466-tjtDslK8OLqvLYHFdUeo-A-1; Wed, 29 Apr 2026 08:52:26 -0400
+X-MC-Unique: tjtDslK8OLqvLYHFdUeo-A-1
+X-Mimecast-MFC-AGG-ID: tjtDslK8OLqvLYHFdUeo-A_1777467145
+Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-678a526f24aso6420733a12.3
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1777467149; x=1778071949; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1777467145; x=1778071945; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kH1rfK/xXKO/jWZH3nIhV338I1U55E10FikanWCJaSM=;
-        b=G9Vpmb2qpnvTPfl7Xhf4xlEaVK+GTjrPSHG0WzVbnFRzo6i13QGERUQyNy4RvySyEm
-         nvX0mko1bNEZ99eVyLk69esYMvluhzIexOJiBDxHavzq0tUwQnGlOlWR9AhIenqsmKBN
-         JCPpawhUR+zakEursQBAUMUp3fLFv5vb8emAMX7+nXu2Z81AHFiKszbqmpqwYxb2aDP2
-         ENjjjDQIIxAMJsQbM/6phrT9uLOwmY6ZeAj8CZO1EnArcuVr3JITKKFCOmMuGwV8nX8b
-         Q9Q36kLNwxz3ga1bahkCb/mtPj/vaX3N9yNS5dCrEk63rOaPhVkKGV/AiwbPpQ/PZQSF
-         XSAA==
+        bh=FUBqP/w3kgWKoRXQ2dx3j370SnRMMM6PxY6RhRVFM9Q=;
+        b=EoNUeUjmk6+tUR7uMWuTR0xEiqW2vR1qTu3BYTEWpjQNtf9aeXo3f/e9Rmo+WuLKQT
+         F5un6nzRP1KfrROx4BCG3RNhdIFkRu+J9HSZWxW/mA+TJtITtrq3BBfD9+0GQlj3A9B1
+         agrjuuSPXr++uLAdpAx32CyUqjI/5A4427e540ZKkBsTEs8cwF+NjvxZ33ctiVIwBmKD
+         7tW055H71akt5VonFmWCoZIGIn2TH9xfOh5BQPw4xzBytbrT4JXP3TernkwjRmd6GLD+
+         luVNG8gWB/e3cO0QPLF9st7lmll2mXpiYF1mKeAT3sC0v26vwMpuX1KgZRGCe/Cnjoiy
+         WM4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777467149; x=1778071949;
+        d=1e100.net; s=20251104; t=1777467145; x=1778071945;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=kH1rfK/xXKO/jWZH3nIhV338I1U55E10FikanWCJaSM=;
-        b=X8C73xezsdMCMO4XpfrPh2y3MfkTP3r+N7UulQCrdyK3PLBJUhEdHS8YNc6daQ40Lr
-         8Ov9Ya14qmWygxz8iclsQLnHPvvgVzWJ5OZEarS1W1ayfeD0ORVjAx21YeAAGQ75euLw
-         NW77G+/1zIHIWqGCFcDaK+5z8onOJL5LwYv4lkE7jB9voAEwxz70Ws0kd+zj+v+8ad80
-         g/quPsF0sOZbFc5iA73DDas/83Qx8PE/dGlWxNZ5ZQ+xEklwcBtPqoTjn45BakwK3ef7
-         mYyKRbqfu6UAPZaPvU6n6oxCGkAyV0DIZfNhYj0OKOniZ6g4NDnqv82CRuNH29KsftMQ
-         JseQ==
-X-Gm-Message-State: AOJu0YwHb3NfR+O6cFcM/wxT60kSr4eavB4OUUE0i15nRVP2jcM+pKD7
-	j7BoALAwqhVvbPAoNxPL/reXlhKSOYjo2ssnB2UR6gTjpHXWuXrs5sA8WpeXzUZIZQ1LvF1s2Vp
-	zH1yIknwS2fZ6kSA2lxvEcJTPFGVV7Tef/IyhlSKk5Iygs4adkCL7aN8CctxI4tGyNSVX7yzC/l
-	qD1Ewp+9QmThNSUhXOszf8ewOr7HHzkgsU4qg+JUWEpU80NBFUeg==
-X-Gm-Gg: AeBDiev3DAKq6Lrs+lXFMugT0wFzyUiIp8me5BfyTneOdd1gsfnlOSDOkHzdeqk+d8L
-	OLy8r8/tMUsOI9bAKwLoBt0uEJUakB7LfuyJJacDRkuzq9Bi7hgUGxHZNdMOa/1incFvKPzRw+Z
-	CnBwnLS7qg4ZX+ZLT2sGW/f6Yq4wzgC+OSNmbU4YB3dU2F/R1SbyrMO/4s1XvlGjdEruZxlQpEc
-	qZXxkaN4sAhbLch86o7GotGtKi7xC2knVpV2ggz71MplSSQskolzuSvKDgJ3uhK95bBNUxRBxkH
-	XKOw6K8pJISORDmkHjxwKctovk0IpUF9oGveKjwm6qZAmG5KmiTspQbxnUDmPuNnY0nakH4WFhl
-	lpTQNmCp4rkfLarc+wmS9mFnsSQWcsX0Ahbsr0hw12edW2YX4zgZRKi3bE48i2sb8Vw==
-X-Received: by 2002:a17:907:e118:b0:b9d:8697:73b8 with SMTP id a640c23a62f3a-bb801dd4214mr311171666b.22.1777467148756;
-        Wed, 29 Apr 2026 05:52:28 -0700 (PDT)
-X-Received: by 2002:a17:907:e118:b0:b9d:8697:73b8 with SMTP id a640c23a62f3a-bb801dd4214mr311169566b.22.1777467148074;
-        Wed, 29 Apr 2026 05:52:28 -0700 (PDT)
+        bh=FUBqP/w3kgWKoRXQ2dx3j370SnRMMM6PxY6RhRVFM9Q=;
+        b=AYF1OKm4+Ca0sm3OtAaAnbwdNmSc62MoUADpYXZLhu3VDbXJirebsUhYPYRCf5l0by
+         Rw1XebqoI0c5izGVftx1UyPDxgmMAfKo1nq+7fEW3zw8pJ383gl54mUulH1dPpGbLlPd
+         HKnEdv8YK+xz+gQLP2tNdAsYk7sMXGDz11+9Moe6iali5GrS5U7lMDO/NXz7U+kBaCVU
+         G+8QlS0V+ZN7OmBkXs2FU/ujDxQxMPNb1AECB8OjIj5FWfPa0D2YS24Hjh2k0wGOoe0i
+         rXgzmj/X+wJuHI1gwwJhdNHguXuTJnG6Z/scGpHgyQxqElTsrKNrQMwmtkqEPCBRpBmg
+         sRlw==
+X-Gm-Message-State: AOJu0YyG2UN3FCmHAtQqWeA3fnt4bwODtlXLDiSSCQmgIBmbfSppep9P
+	HtzBeT4fpj7ijMJcIMGTgOK2soXGa7kAEf1svfMzTXNElKhx9Oo7owbmKb6exrGiI7zvfXf2WwB
+	bfkOQGMLGgWvKD86CmrhvSjL13bMAyytcx9ezkLTzpsczigqqwbZ/8IiONX1uJ8Iv5RezySLQcT
+	1ZjCGm96gurAuz3mUVL0EliB+PlCVS+coqano38q77OuKdKOqv+g==
+X-Gm-Gg: AeBDiesMTRCMChnbUub7zXfZFOTF6H5t4qyBdId3vFEcxeQtpmbaU3e1khYd/ycHAAK
+	G5frAZzbGz4nPPkwST7Z4SvGU1rgxOnfiDFWLEn7iTtYkOZebFfczokLRE/HlMN/GbjfrunClbH
+	tZ/ZwROUu2S7mXHuLDs+23EzQXWLLclQ1aY8bdl1fWjhiRFl+S3BZ+NUs9TdhnRh8RafG4yM5l4
+	T1q/62OhGyUz+xWY36Wnt7sHoQ4wvoOH9hy6WjuhXgAimX6K1tOQNPVXXU3wHts4XK87aEOQMII
+	NuMpGEg6lgswqyzJiyPaOnYJmkdu/KaTO6WzL59K37NUEbC4327FZ4MpE/x8OTrb0ohNNkYcKSh
+	zGSL3t6zmF4Ze2+q+DAYt7tAzCgP45YqLn0hB0YKgvQHcNiv1NzfCFC7qDa8ZNxn0+Q==
+X-Received: by 2002:a17:907:3e9b:b0:b9d:e301:20db with SMTP id a640c23a62f3a-bb80472800emr505171466b.25.1777467144391;
+        Wed, 29 Apr 2026 05:52:24 -0700 (PDT)
+X-Received: by 2002:a17:907:3e9b:b0:b9d:e301:20db with SMTP id a640c23a62f3a-bb80472800emr505167866b.25.1777467143689;
+        Wed, 29 Apr 2026 05:52:23 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.26
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2026 05:52:27 -0700 (PDT)
+        Wed, 29 Apr 2026 05:52:22 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v3 07/11] selftests: ceph: add reset consistency checker
-Date: Wed, 29 Apr 2026 12:52:02 +0000
-Message-Id: <20260429125206.1512203-8-amarkuze@redhat.com>
+Subject: [PATCH v3 05/11] ceph: add client reset state machine and session teardown
+Date: Wed, 29 Apr 2026 12:52:00 +0000
+Message-Id: <20260429125206.1512203-6-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260429125206.1512203-1-amarkuze@redhat.com>
 References: <20260429125206.1512203-1-amarkuze@redhat.com>
@@ -97,323 +97,683 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add a Python post-run validator for the CephFS client reset stress
-test.  The script reads data files written by the stress runner and
-checks that every file was either written completely or is missing,
-with no partial or corrupted content.
+Add the client-side reset state machine, request gating, and manual
+session teardown implementation.
 
-This is a prerequisite for the stress test script which invokes it
-after each run.
+Manual reset is an operator-triggered escape hatch for client/MDS
+stalemates in which caps, locks, or unsafe metadata state stop making
+forward progress.  The reset blocks new metadata work, attempts a
+bounded best-effort drain of dirty client state while sessions are
+still alive, and finally asks the MDS to close sessions before tearing
+local session state down directly.
+
+The reset state machine tracks four phases: IDLE -> QUIESCING ->
+DRAINING -> TEARDOWN -> IDLE.  QUIESCING is set synchronously by
+schedule_reset() before the workqueue item is dispatched, so that new
+metadata requests and file-lock acquisitions are gated immediately --
+even before the work function begins running.  All non-IDLE phases
+block callers on blocked_wq, preventing races with session teardown.
+
+The drain phase flushes mdlog state, dirty caps, and pending cap
+releases for a bounded interval.  State that still cannot make progress
+within that interval is discarded during teardown, which is the point
+of the reset: break the stalemate and allow fresh sessions to rebuild
+clean state.
+
+The session teardown follows the established check_new_map()
+forced-close pattern: unregister sessions under mdsc->mutex, then clean
+up caps and requests under s->s_mutex.  Reconnect is not attempted
+because the MDS only accepts reconnects during its own RECONNECT phase
+after restart, not from an active client.
+
+Blocked callers are released when reset completes and observe the final
+result via -EIO (reset failed) or 0 (success).  Internal work-function
+errors such as -ENOMEM are not propagated to unrelated callers like
+open() or flock(); the detailed error remains in debugfs and
+tracepoints.
+
+The work function checks st->shutdown before each phase transition
+(DRAINING, TEARDOWN) so that a concurrent ceph_mdsc_destroy() is not
+overwritten.  If destroy already took ownership, the work function
+releases session references and returns without touching the state.
+
+The timeout calculation for blocked-request waiters uses max_t() to
+prevent jiffies underflow when the deadline has already passed.
+
+The close-grace sleep before teardown is a best-effort nudge to let
+queued REQUEST_CLOSE messages egress; it is not a correctness
+requirement since the MDS still has session_autoclose as a fallback.
+
+The destroy path marks reset as failed and wakes blocked waiters before
+cancel_work_sync() so unmount does not stall.
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- .../filesystems/ceph/validate_consistency.py  | 297 ++++++++++++++++++
- 1 file changed, 297 insertions(+)
- create mode 100755 tools/testing/selftests/filesystems/ceph/validate_consistency.py
+ fs/ceph/locks.c      |  16 ++
+ fs/ceph/mds_client.c | 455 +++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/mds_client.h |  42 ++++
+ 3 files changed, 513 insertions(+)
 
-diff --git a/tools/testing/selftests/filesystems/ceph/validate_consistency.py b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
-new file mode 100755
-index 000000000000..c230a59bdb3a
---- /dev/null
-+++ b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
-@@ -0,0 +1,297 @@
-+#!/usr/bin/env python3
-+# SPDX-License-Identifier: GPL-2.0
+diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+index c4ff2266bb94..677221bd64e0 100644
+--- a/fs/ceph/locks.c
++++ b/fs/ceph/locks.c
+@@ -249,6 +249,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
+ {
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	int err = 0;
+ 	u16 op = CEPH_MDS_OP_SETFILELOCK;
+@@ -275,6 +276,13 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
+ 		return -EIO;
+ 	}
+ 
++	/* Wait for reset to complete before acquiring new locks */
++	if (op == CEPH_MDS_OP_SETFILELOCK && !lock_is_unlock(fl)) {
++		err = ceph_mdsc_wait_for_reset(mdsc);
++		if (err)
++			return err;
++	}
 +
-+import argparse
-+import bisect
-+import hashlib
-+import json
-+import os
-+from pathlib import Path
+ 	if (lock_is_read(fl))
+ 		lock_cmd = CEPH_LOCK_SHARED;
+ 	else if (lock_is_write(fl))
+@@ -311,6 +319,7 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
+ {
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
++	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	int err = 0;
+ 	u8 wait = 0;
+@@ -330,6 +339,13 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
+ 		return -EIO;
+ 	}
+ 
++	/* Wait for reset to complete before acquiring new locks */
++	if (!lock_is_unlock(fl)) {
++		err = ceph_mdsc_wait_for_reset(mdsc);
++		if (err)
++			return err;
++	}
 +
+ 	if (IS_SETLKW(cmd))
+ 		wait = 1;
+ 
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index d83003acfb06..777af51ec8d8 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -6,6 +6,7 @@
+ #include <linux/slab.h>
+ #include <linux/gfp.h>
+ #include <linux/sched.h>
++#include <linux/delay.h>
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
+ #include <linux/ratelimit.h>
+@@ -67,6 +68,7 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
+ 			    struct list_head *head);
+ static void ceph_cap_release_work(struct work_struct *work);
+ static void ceph_cap_reclaim_work(struct work_struct *work);
++static void ceph_mdsc_reset_workfn(struct work_struct *work);
+ 
+ static const struct ceph_connection_operations mds_con_ops;
+ 
+@@ -3797,6 +3799,22 @@ int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc, struct inode *dir,
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	int err = 0;
+ 
++	/*
++	 * If a reset is in progress, wait for it to complete.
++	 *
++	 * This is best-effort: a request can pass this check just
++	 * before the phase leaves IDLE and proceed concurrently with
++	 * reset.  That is acceptable because (a) such requests will
++	 * either complete normally or fail and be retried by the
++	 * caller, and (b) adding lock serialization here would
++	 * penalize every request for a rare manual operation.
++	 */
++	err = ceph_mdsc_wait_for_reset(mdsc);
++	if (err) {
++		doutc(cl, "wait_for_reset failed: %d\n", err);
++		return err;
++	}
 +
-+def sha256_file(path: Path) -> str:
-+    digest = hashlib.sha256()
-+    with path.open("rb") as handle:
-+        while True:
-+            chunk = handle.read(1 << 20)
-+            if not chunk:
-+                break
-+            digest.update(chunk)
-+    return digest.hexdigest()
+ 	/* take CAP_PIN refs for r_inode, r_parent, r_old_dentry */
+ 	if (req->r_inode)
+ 		ceph_get_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
+@@ -5203,6 +5221,421 @@ static int send_mds_reconnect(struct ceph_mds_client *mdsc,
+ 	return err;
+ }
+ 
++const char *ceph_reset_phase_name(enum ceph_client_reset_phase phase)
++{
++	switch (phase) {
++	case CEPH_CLIENT_RESET_IDLE:	  return "idle";
++	case CEPH_CLIENT_RESET_QUIESCING: return "quiescing";
++	case CEPH_CLIENT_RESET_DRAINING:  return "draining";
++	case CEPH_CLIENT_RESET_TEARDOWN:  return "teardown";
++	default:			  return "unknown";
++	}
++}
 +
++/**
++ * ceph_mdsc_wait_for_reset - wait for an active reset to complete
++ * @mdsc: MDS client
++ *
++ * Returns 0 if reset completed successfully or no reset was active.
++ * Returns -EIO if reset completed with an error.
++ * Returns -ETIMEDOUT if we timed out waiting.
++ * Returns -ERESTARTSYS if interrupted by signal.
++ *
++ * Internal work-function errors (e.g. -ENOMEM) are not propagated
++ * to callers; they are mapped to -EIO.  The detailed error is
++ * available via debugfs status and tracepoints.
++ */
++int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
++{
++	struct ceph_client_reset_state *st = &mdsc->reset_state;
++	struct ceph_client *cl = mdsc->fsc->client;
++	unsigned long deadline = jiffies + CEPH_CLIENT_RESET_WAIT_TIMEOUT_SEC * HZ;
++	int blocked_count;
++	long remaining;
++	long wait_ret;
++	int ret;
 +
-+def parse_io_log(path: Path):
-+    records = []
-+    if not path.exists():
-+        return records
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line_no, line in enumerate(handle, 1):
-+            line = line.strip()
-+            if not line:
-+                continue
-+            parts = line.split(",")
-+            if len(parts) != 5:
-+                raise ValueError(f"io log line {line_no}: expected 5 columns, got {len(parts)}")
-+            ts_ms, seq, logical_id, relpath, digest = parts
-+            records.append(
-+                {
-+                    "ts_ms": int(ts_ms),
-+                    "seq": int(seq),
-+                    "logical_id": int(logical_id),
-+                    "relpath": relpath,
-+                    "digest": digest,
-+                }
-+            )
-+    return records
++	if (READ_ONCE(st->phase) == CEPH_CLIENT_RESET_IDLE)
++		return 0;
 +
++	blocked_count = atomic_inc_return(&st->blocked_requests);
++	doutc(cl, "request blocked during reset, %d total blocked\n",
++	      blocked_count);
 +
-+def parse_rename_log(path: Path):
-+    records = []
-+    if not path.exists():
-+        return records
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line_no, line in enumerate(handle, 1):
-+            line = line.strip()
-+            if not line:
-+                continue
-+            parts = line.split(",")
-+            if len(parts) == 6:
-+                ts_ms, seq, logical_id, src_rel, dst_rel, rc = parts
-+            elif len(parts) == 7:
-+                ts_ms, worker_id, seq, logical_id, src_rel, dst_rel, rc = parts
-+                _ = worker_id  # worker id is informational only
-+            else:
-+                raise ValueError(
-+                    f"rename log line {line_no}: expected 6 or 7 columns, got {len(parts)}"
-+                )
-+            records.append(
-+                {
-+                    "ts_ms": int(ts_ms),
-+                    "seq": int(seq),
-+                    "logical_id": int(logical_id),
-+                    "src_rel": src_rel,
-+                    "dst_rel": dst_rel,
-+                    "rc": int(rc),
-+                }
-+            )
-+    return records
++retry:
++	remaining = max_t(long, deadline - jiffies, 1);
++	wait_ret = wait_event_interruptible_timeout(st->blocked_wq,
++						    READ_ONCE(st->phase) ==
++						     CEPH_CLIENT_RESET_IDLE,
++						    remaining);
 +
++	if (wait_ret == 0) {
++		atomic_dec(&st->blocked_requests);
++		pr_warn_client(cl, "timed out waiting for reset to complete\n");
++		return -ETIMEDOUT;
++	}
++	if (wait_ret < 0) {
++		atomic_dec(&st->blocked_requests);
++		return (int)wait_ret;  /* -ERESTARTSYS */
++	}
 +
-+def parse_reset_log(path: Path):
-+    records = []
-+    if not path.exists():
-+        return records
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line_no, line in enumerate(handle, 1):
-+            line = line.strip()
-+            if not line:
-+                continue
-+            parts = line.split(",")
-+            if len(parts) != 4:
-+                raise ValueError(f"reset log line {line_no}: expected 4 columns, got {len(parts)}")
-+            ts_ms, seq, reason, rc = parts
-+            records.append(
-+                {
-+                    "ts_ms": int(ts_ms),
-+                    "seq": int(seq),
-+                    "reason": reason,
-+                    "rc": int(rc),
-+                }
-+            )
-+    return records
++	/*
++	 * Verify phase is still IDLE under the lock.  If another reset
++	 * was scheduled between the wake-up and this check, loop back
++	 * and wait for it to finish rather than returning a stale result.
++	 */
++	spin_lock(&st->lock);
++	if (st->phase != CEPH_CLIENT_RESET_IDLE) {
++		spin_unlock(&st->lock);
++		if (time_before(jiffies, deadline))
++			goto retry;
++		atomic_dec(&st->blocked_requests);
++		return -ETIMEDOUT;
++	}
++	ret = st->last_errno;
++	spin_unlock(&st->lock);
 +
++	atomic_dec(&st->blocked_requests);
++	return ret ? -EIO : 0;
++}
 +
-+def parse_status_file(path: Path):
-+    status = {}
-+    if not path.exists():
-+        return status
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line in handle:
-+            line = line.strip()
-+            if not line or ":" not in line:
-+                continue
-+            key, value = line.split(":", 1)
-+            status[key.strip()] = value.strip()
-+    return status
++static void ceph_mdsc_reset_complete(struct ceph_mds_client *mdsc, int ret)
++{
++	struct ceph_client_reset_state *st = &mdsc->reset_state;
 +
++	spin_lock(&st->lock);
++	/*
++	 * If destroy already marked us as shut down, it owns the
++	 * final bookkeeping and waiter wakeup.  Just bail so we
++	 * don't overwrite its state.
++	 */
++	if (st->shutdown) {
++		spin_unlock(&st->lock);
++		return;
++	}
++	st->last_finish = jiffies;
++	st->last_errno = ret;
++	st->phase = CEPH_CLIENT_RESET_IDLE;
++	if (ret)
++		st->failure_count++;
++	else
++		st->success_count++;
++	spin_unlock(&st->lock);
 +
-+def to_int(value: str, default: int = 0):
-+    try:
-+        return int(value)
-+    except Exception:
-+        return default
++	/* Wake up all requests that were blocked waiting for reset */
++	wake_up_all(&st->blocked_wq);
++}
 +
++static void ceph_mdsc_reset_workfn(struct work_struct *work)
++{
++	struct ceph_mds_client *mdsc =
++		container_of(work, struct ceph_mds_client, reset_work);
++	struct ceph_client_reset_state *st = &mdsc->reset_state;
++	struct ceph_client *cl = mdsc->fsc->client;
++	struct ceph_mds_session **sessions = NULL;
++	char reason[CEPH_CLIENT_RESET_REASON_LEN];
++	int max_sessions, i, n = 0, torn_down = 0;
++	int ret = 0;
 +
-+def validate_namespace(data_dir: Path, file_count: int, issues):
-+    actual_locations = {}
-+    actual_paths = {}
-+    for logical_id in range(file_count):
-+        name = f"file_{logical_id:05d}"
-+        found = []
-+        for subdir in ("A", "B"):
-+            candidate = data_dir / subdir / name
-+            if candidate.exists():
-+                found.append((subdir, candidate))
-+        if len(found) != 1:
-+            issues.append(
-+                f"namespace invariant failed for logical_id={logical_id:05d}: expected exactly one file in A/B, found {len(found)}"
-+            )
-+            continue
-+        actual_locations[logical_id] = found[0][0]
-+        actual_paths[logical_id] = found[0][1]
-+    return actual_locations, actual_paths
++	spin_lock(&st->lock);
++	strscpy(reason, st->last_reason, sizeof(reason));
++	spin_unlock(&st->lock);
 +
++	mutex_lock(&mdsc->mutex);
++	max_sessions = mdsc->max_sessions;
++	if (max_sessions <= 0) {
++		mutex_unlock(&mdsc->mutex);
++		goto out_complete;
++	}
 +
-+def validate_rename_invariant(rename_records, actual_locations, issues):
-+    expected_locations = {}
-+    for rec in rename_records:
-+        if rec["rc"] != 0:
-+            continue
-+        dst = rec["dst_rel"]
-+        if "/" not in dst:
-+            continue
-+        expected_locations[rec["logical_id"]] = dst.split("/", 1)[0]
++	sessions = kcalloc(max_sessions, sizeof(*sessions), GFP_KERNEL);
++	if (!sessions) {
++		mutex_unlock(&mdsc->mutex);
++		ret = -ENOMEM;
++		pr_err_client(cl,
++			      "manual session reset failed to allocate session array\n");
++		ceph_mdsc_reset_complete(mdsc, ret);
++		return;
++	}
 +
-+    for logical_id, expected in expected_locations.items():
-+        actual = actual_locations.get(logical_id)
-+        if actual is None:
-+            continue
-+        if actual != expected:
-+            issues.append(
-+                f"rename invariant failed for logical_id={logical_id:05d}: expected location={expected}, actual={actual}"
-+            )
++	for (i = 0; i < max_sessions; i++) {
++		struct ceph_mds_session *session = mdsc->sessions[i];
 +
++		if (!session)
++			continue;
 +
-+def validate_data_invariant(io_records, actual_paths, issues):
-+    expected_hash = {}
-+    for rec in io_records:
-+        digest = rec["digest"]
-+        if not digest:
-+            continue
-+        expected_hash[rec["logical_id"]] = digest
++		/*
++		 * Read session state without s_mutex to avoid nesting
++		 * mdsc->mutex -> s_mutex, which would invert the
++		 * s_mutex -> mdsc->mutex order used by
++		 * cleanup_session_requests().  s_state is an int
++		 * so loads are atomic; the teardown loop below
++		 * handles races with concurrent state transitions.
++		 */
++		switch (READ_ONCE(session->s_state)) {
++		case CEPH_MDS_SESSION_OPEN:
++		case CEPH_MDS_SESSION_HUNG:
++		case CEPH_MDS_SESSION_OPENING:
++		case CEPH_MDS_SESSION_RESTARTING:
++		case CEPH_MDS_SESSION_RECONNECTING:
++		case CEPH_MDS_SESSION_CLOSING:
++			sessions[n++] = ceph_get_mds_session(session);
++			break;
++		default:
++			pr_info_client(cl,
++				       "mds%d in state %s, skipping reset\n",
++				       session->s_mds,
++				       ceph_session_state_name(session->s_state));
++			break;
++		}
++	}
++	mutex_unlock(&mdsc->mutex);
 +
-+    for logical_id, digest in expected_hash.items():
-+        path = actual_paths.get(logical_id)
-+        if path is None:
-+            continue
-+        actual_digest = sha256_file(path)
-+        if digest != actual_digest:
-+            issues.append(
-+                f"data invariant failed for logical_id={logical_id:05d}: expected digest={digest}, actual digest={actual_digest}"
-+            )
++	pr_info_client(cl,
++		       "manual session reset executing (sessions=%d, reason=\"%s\")\n",
++		       n, reason);
 +
++	if (n == 0) {
++		kfree(sessions);
++		goto out_complete;
++	}
 +
-+def validate_reset_and_slo(args, reset_records, io_records, rename_records, status, issues):
-+    if not args.expect_reset:
-+        return
++	spin_lock(&st->lock);
++	if (st->shutdown) {
++		spin_unlock(&st->lock);
++		goto out_sessions;
++	}
++	st->phase = CEPH_CLIENT_RESET_DRAINING;
++	spin_unlock(&st->lock);
 +
-+    successful_reset_times = [rec["ts_ms"] for rec in reset_records if rec["rc"] == 0]
-+    if not successful_reset_times:
-+        issues.append("expected reset activity but no successful reset trigger was observed")
++	/*
++	 * Best-effort drain: flush dirty state while sessions are still
++	 * alive.  New requests are blocked while phase != IDLE.
++	 * The sessions are functional, so non-stuck state drains normally.
++	 * Stuck state (the cause of the stalemate the operator is trying
++	 * to break) will not drain -- that is expected, and we proceed to
++	 * forced teardown after the timeout.
++	 *
++	 * Three things are kicked off:
++	 *  1. MDS journal -- send_flush_mdlog asks each MDS to journal
++	 *     pending unsafe operations (creates, renames, setattrs).
++	 *     This is best-effort: we do not wait for individual unsafe
++	 *     requests to reach safe status.  Non-stuck ops typically
++	 *     complete within the bounded wait window below; stuck ops
++	 *     will not, and are force-dropped during teardown.
++	 *  2. Dirty caps -- ceph_flush_dirty_caps triggers cap flush on
++	 *     all sessions.  Non-stuck caps flush in milliseconds.
++	 *  3. Cap releases -- push pending cap release messages.
++	 *
++	 * The cap-flush wait below provides the bounded drain window
++	 * during which all three categories can make progress.
++	 */
++	for (i = 0; i < n; i++)
++		send_flush_mdlog(sessions[i]);
 +
-+    phase = status.get("phase")
-+    blocked_requests = to_int(status.get("blocked_requests", "0"), default=-1)
-+    last_errno = to_int(status.get("last_errno", "0"), default=1)
-+    failure_count = to_int(status.get("failure_count", "0"), default=-1)
++	ceph_flush_dirty_caps(mdsc);
++	ceph_flush_cap_releases(mdsc);
 +
-+    if phase is None:
-+        issues.append("missing final reset status file or phase field")
-+    elif phase.lower() != "idle":
-+        issues.append(f"recovery invariant failed: phase={phase}, expected idle")
++	spin_lock(&mdsc->cap_dirty_lock);
++	if (!list_empty(&mdsc->cap_flush_list)) {
++		struct ceph_cap_flush *cf =
++			list_last_entry(&mdsc->cap_flush_list,
++					struct ceph_cap_flush, g_list);
++		u64 want_flush = mdsc->last_cap_flush_tid;
++		long drain_ret;
 +
-+    if blocked_requests != 0:
-+        issues.append(f"recovery invariant failed: blocked_requests={blocked_requests}, expected 0")
-+    if last_errno != 0:
-+        issues.append(f"recovery invariant failed: last_errno={last_errno}, expected 0")
-+    if failure_count > 0:
-+        issues.append(
-+            f"recovery invariant failed: failure_count={failure_count}, "
-+            "one or more resets failed during the run"
-+        )
++		/*
++		 * Setting wake on the last entry is sufficient: flush
++		 * entries complete in order, so when this entry finishes
++		 * all earlier ones are already done.
++		 */
++		cf->wake = true;
++		spin_unlock(&mdsc->cap_dirty_lock);
++		pr_info_client(cl,
++			       "draining (want_flush=%llu, %d sessions)\n",
++			       want_flush, n);
++		drain_ret = wait_event_timeout(mdsc->cap_flushing_wq,
++					       check_caps_flush(mdsc,
++								want_flush),
++					       CEPH_CLIENT_RESET_DRAIN_SEC * HZ);
++		if (drain_ret == 0) {
++			pr_info_client(cl,
++				       "drain timed out, proceeding with forced teardown\n");
++			spin_lock(&st->lock);
++			st->drain_timed_out = true;
++			spin_unlock(&st->lock);
++		} else {
++			pr_info_client(cl, "drain completed successfully\n");
++			spin_lock(&st->lock);
++			st->drain_timed_out = false;
++			spin_unlock(&st->lock);
++		}
++	} else {
++		spin_unlock(&mdsc->cap_dirty_lock);
++		spin_lock(&st->lock);
++		st->drain_timed_out = false;
++		spin_unlock(&st->lock);
++	}
 +
-+    op_times = [rec["ts_ms"] for rec in io_records]
-+    op_times.extend(rec["ts_ms"] for rec in rename_records if rec["rc"] == 0)
-+    op_times.sort()
++	spin_lock(&st->lock);
++	if (st->shutdown) {
++		spin_unlock(&st->lock);
++		goto out_sessions;
++	}
++	st->phase = CEPH_CLIENT_RESET_TEARDOWN;
++	spin_unlock(&st->lock);
 +
-+    if successful_reset_times and not op_times:
-+        issues.append("recovery SLO failed: no workload completion events were recorded")
-+        return
++	/*
++	 * Ask each MDS to close the session before we tear it down
++	 * locally.  Without this the MDS sees only a connection drop and
++	 * waits for the client to reconnect (up to session_autoclose
++	 * seconds) before evicting the session and releasing locks.
++	 *
++	 * Reuse the normal close machinery so the session state/sequence
++	 * snapshot is serialized under s_mutex and a racing s_seq bump
++	 * retransmits REQUEST_CLOSE while the session remains CLOSING.
++	 * We send all close requests first, then yield briefly to let the
++	 * network stack transmit them before __unregister_session()
++	 * closes the connections.
++	 */
++	for (i = 0; i < n; i++) {
++		int err;
 +
-+    slo_ms = args.slo_seconds * 1000
-+    for ts in successful_reset_times:
-+        idx = bisect.bisect_left(op_times, ts)
-+        if idx >= len(op_times):
-+            issues.append(f"recovery SLO failed: no operation completion observed after reset at ts_ms={ts}")
-+            continue
-+        delta = op_times[idx] - ts
-+        if delta > slo_ms:
-+            issues.append(
-+                f"recovery SLO failed: first post-reset completion at {delta}ms exceeds threshold {slo_ms}ms (reset ts_ms={ts})"
-+            )
++		mutex_lock(&sessions[i]->s_mutex);
++		err = __close_session(mdsc, sessions[i]);
++		mutex_unlock(&sessions[i]->s_mutex);
++		if (err < 0)
++			pr_warn_client(cl,
++				       "mds%d failed to queue close request before reset: %d\n",
++				       sessions[i]->s_mds, err);
++	}
++	/*
++	 * Best-effort grace period: yield briefly so the network stack
++	 * can transmit the queued REQUEST_CLOSE messages before we tear
++	 * down connections.  Not a correctness requirement -- the MDS
++	 * will still evict via session_autoclose if it never receives
++	 * the close request.
++	 */
++	if (n > 0)
++		msleep(CEPH_CLIENT_RESET_CLOSE_GRACE_MS);
 +
++	/*
++	 * Tear down each session: close the connection, remove all
++	 * caps, clean up requests, then kick pending requests so they
++	 * re-open a fresh session on the next attempt.
++	 *
++	 * This is modeled on the check_new_map() forced-close path
++	 * for stopped MDS ranks - a proven pattern for hard session
++	 * teardown.  We do NOT attempt send_mds_reconnect() because
++	 * the MDS only accepts reconnects during its own RECONNECT
++	 * phase (after MDS restart), not from an active client.
++	 *
++	 * Any state that did not drain (caps that didn't flush, unsafe
++	 * requests that the MDS didn't journal) is force-dropped here.
++	 * This is intentional: that state is stuck and is the reason
++	 * the operator triggered the reset.
++	 */
++	for (i = 0; i < n; i++) {
++		int mds = sessions[i]->s_mds;
 +
-+def main():
-+    parser = argparse.ArgumentParser(description="Validate Ceph reset stress artifacts")
-+    parser.add_argument("--data-dir", required=True)
-+    parser.add_argument("--file-count", required=True, type=int)
-+    parser.add_argument("--io-log", required=True)
-+    parser.add_argument("--rename-log", required=True)
-+    parser.add_argument("--reset-log", required=True)
-+    parser.add_argument("--status-final", required=False, default="")
-+    parser.add_argument("--slo-seconds", required=False, type=int, default=30)
-+    parser.add_argument("--expect-reset", action="store_true")
-+    parser.add_argument("--report-json", required=False, default="")
-+    args = parser.parse_args()
++		pr_info_client(cl, "mds%d resetting session\n", mds);
 +
-+    data_dir = Path(args.data_dir)
-+    io_log = Path(args.io_log)
-+    rename_log = Path(args.rename_log)
-+    reset_log = Path(args.reset_log)
-+    status_final = Path(args.status_final) if args.status_final else Path("__missing_status__")
++		mutex_lock(&mdsc->mutex);
++		if (mds >= mdsc->max_sessions ||
++		    mdsc->sessions[mds] != sessions[i]) {
++			pr_info_client(cl,
++				       "mds%d session already torn down, skipping\n",
++				       mds);
++			mutex_unlock(&mdsc->mutex);
++			ceph_put_mds_session(sessions[i]);
++			continue;
++		}
++		sessions[i]->s_state = CEPH_MDS_SESSION_CLOSED;
++		__unregister_session(mdsc, sessions[i]);
++		__wake_requests(mdsc, &sessions[i]->s_waiting);
++		mutex_unlock(&mdsc->mutex);
 +
-+    issues = []
++		mutex_lock(&sessions[i]->s_mutex);
++		cleanup_session_requests(mdsc, sessions[i]);
++		remove_session_caps(sessions[i]);
++		mutex_unlock(&sessions[i]->s_mutex);
 +
-+    if not data_dir.exists():
-+        issues.append(f"data directory is missing: {data_dir}")
++		wake_up_all(&mdsc->session_close_wq);
 +
-+    try:
-+        io_records = parse_io_log(io_log)
-+        rename_records = parse_rename_log(rename_log)
-+        reset_records = parse_reset_log(reset_log)
-+    except Exception as exc:
-+        issues.append(f"log parsing failed: {exc}")
-+        io_records = []
-+        rename_records = []
-+        reset_records = []
++		ceph_put_mds_session(sessions[i]);
 +
-+    status = parse_status_file(status_final)
++		mutex_lock(&mdsc->mutex);
++		kick_requests(mdsc, mds);
++		mutex_unlock(&mdsc->mutex);
 +
-+    actual_locations, actual_paths = validate_namespace(data_dir, args.file_count, issues)
-+    validate_rename_invariant(rename_records, actual_locations, issues)
-+    validate_data_invariant(io_records, actual_paths, issues)
-+    validate_reset_and_slo(args, reset_records, io_records, rename_records, status, issues)
++		torn_down++;
++		pr_info_client(cl, "mds%d session reset complete\n", mds);
++	}
 +
-+    report = {
-+        "file_count": args.file_count,
-+        "io_records": len(io_records),
-+        "rename_records": len(rename_records),
-+        "reset_records": len(reset_records),
-+        "expect_reset": args.expect_reset,
-+        "issues": issues,
-+    }
++	kfree(sessions);
 +
-+    if args.report_json:
-+        report_path = Path(args.report_json)
-+        report_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
++	spin_lock(&st->lock);
++	st->sessions_reset = torn_down;
++	spin_unlock(&st->lock);
 +
-+    if issues:
-+        print("FAIL: consistency validation found issues")
-+        for issue in issues:
-+            print(f"  - {issue}")
-+        raise SystemExit(1)
++out_complete:
++	ceph_mdsc_reset_complete(mdsc, ret);
++	return;
 +
-+    print("PASS: consistency validation succeeded")
++out_sessions:
++	for (i = 0; i < n; i++)
++		ceph_put_mds_session(sessions[i]);
++	kfree(sessions);
++}
 +
++int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
++			     const char *reason)
++{
++	struct ceph_client_reset_state *st = &mdsc->reset_state;
++	struct ceph_fs_client *fsc = mdsc->fsc;
++	const char *msg = (reason && reason[0]) ? reason : "manual";
++	int mount_state;
 +
-+if __name__ == "__main__":
-+    main()
++	mount_state = READ_ONCE(fsc->mount_state);
++	if (mount_state != CEPH_MOUNT_MOUNTED) {
++		pr_warn_client(fsc->client,
++			       "reset rejected: mount_state=%d (not mounted)\n",
++			       mount_state);
++		return -EINVAL;
++	}
++
++	spin_lock(&st->lock);
++	if (st->phase != CEPH_CLIENT_RESET_IDLE) {
++		spin_unlock(&st->lock);
++		return -EBUSY;
++	}
++
++	st->phase = CEPH_CLIENT_RESET_QUIESCING;
++	st->last_start = jiffies;
++	st->last_errno = 0;
++	st->drain_timed_out = false;
++	st->sessions_reset = 0;
++	st->trigger_count++;
++	strscpy(st->last_reason, msg, sizeof(st->last_reason));
++	spin_unlock(&st->lock);
++
++	if (WARN_ON_ONCE(!queue_work(system_unbound_wq, &mdsc->reset_work))) {
++		spin_lock(&st->lock);
++		st->phase = CEPH_CLIENT_RESET_IDLE;
++		st->last_errno = -EALREADY;
++		st->last_finish = jiffies;
++		st->failure_count++;
++		spin_unlock(&st->lock);
++		wake_up_all(&st->blocked_wq);
++		return -EALREADY;
++	}
++
++	pr_info_client(mdsc->fsc->client,
++		       "manual session reset scheduled (reason=\"%s\")\n",
++		       msg);
++	return 0;
++}
++
+ 
+ /*
+  * compare old and new mdsmaps, kicking requests
+@@ -5742,6 +6175,11 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 	INIT_LIST_HEAD(&mdsc->dentry_leases);
+ 	INIT_LIST_HEAD(&mdsc->dentry_dir_leases);
+ 
++	spin_lock_init(&mdsc->reset_state.lock);
++	init_waitqueue_head(&mdsc->reset_state.blocked_wq);
++	atomic_set(&mdsc->reset_state.blocked_requests, 0);
++	INIT_WORK(&mdsc->reset_work, ceph_mdsc_reset_workfn);
++
+ 	ceph_caps_init(mdsc);
+ 	ceph_adjust_caps_max_min(mdsc, fsc->mount_options);
+ 
+@@ -6267,6 +6705,23 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
+ 	/* flush out any connection work with references to us */
+ 	ceph_msgr_flush();
+ 
++	/*
++	 * Mark reset as failed and wake any blocked waiters before
++	 * cancelling, so unmount doesn't stall on blocked_wq timeout
++	 * if cancel_work_sync() prevents the work from running.
++	 */
++	spin_lock(&mdsc->reset_state.lock);
++	mdsc->reset_state.shutdown = true;
++	if (mdsc->reset_state.phase != CEPH_CLIENT_RESET_IDLE) {
++		mdsc->reset_state.phase = CEPH_CLIENT_RESET_IDLE;
++		mdsc->reset_state.last_errno = -ESHUTDOWN;
++		mdsc->reset_state.last_finish = jiffies;
++		mdsc->reset_state.failure_count++;
++	}
++	spin_unlock(&mdsc->reset_state.lock);
++	wake_up_all(&mdsc->reset_state.blocked_wq);
++
++	cancel_work_sync(&mdsc->reset_work);
+ 	ceph_mdsc_stop(mdsc);
+ 
+ 	ceph_metric_destroy(&mdsc->metric);
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index e91a199d56fd..afc08b0abbd5 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -74,6 +74,42 @@ struct ceph_fs_client;
+ struct ceph_cap;
+ 
+ #define MDS_AUTH_UID_ANY -1
++#define CEPH_CLIENT_RESET_REASON_LEN	64
++#define CEPH_CLIENT_RESET_DRAIN_SEC	5
++#define CEPH_CLIENT_RESET_CLOSE_GRACE_MS 100
++#define CEPH_CLIENT_RESET_WAIT_TIMEOUT_SEC 120
++
++enum ceph_client_reset_phase {
++	CEPH_CLIENT_RESET_IDLE = 0,
++	/*
++	 * QUIESCING is set synchronously by schedule_reset() before the
++	 * workqueue item is dispatched.  It gates new requests (any
++	 * phase != IDLE blocks callers) during the window between
++	 * scheduling and the work function's transition to DRAINING.
++	 */
++	CEPH_CLIENT_RESET_QUIESCING,
++	CEPH_CLIENT_RESET_DRAINING,
++	CEPH_CLIENT_RESET_TEARDOWN,
++};
++
++struct ceph_client_reset_state {
++	spinlock_t lock;
++	u64 trigger_count;
++	u64 success_count;
++	u64 failure_count;
++	unsigned long last_start;
++	unsigned long last_finish;
++	int last_errno;
++	enum ceph_client_reset_phase phase;
++	bool drain_timed_out;
++	bool shutdown;
++	int sessions_reset;
++	char last_reason[CEPH_CLIENT_RESET_REASON_LEN];
++
++	/* Request blocking during reset */
++	wait_queue_head_t blocked_wq;
++	atomic_t blocked_requests;
++};
+ 
+ struct ceph_mds_cap_match {
+ 	s64 uid;  /* default to MDS_AUTH_UID_ANY */
+@@ -536,6 +572,8 @@ struct ceph_mds_client {
+ 	struct list_head  dentry_dir_leases; /* lru list */
+ 
+ 	struct ceph_client_metric metric;
++	struct work_struct	reset_work;
++	struct ceph_client_reset_state reset_state;
+ 
+ 	spinlock_t		snapid_map_lock;
+ 	struct rb_root		snapid_map_tree;
+@@ -559,10 +597,14 @@ extern struct ceph_mds_session *
+ __ceph_lookup_mds_session(struct ceph_mds_client *, int mds);
+ 
+ extern const char *ceph_session_state_name(int s);
++extern const char *ceph_reset_phase_name(enum ceph_client_reset_phase phase);
+ 
+ extern struct ceph_mds_session *
+ ceph_get_mds_session(struct ceph_mds_session *s);
+ extern void ceph_put_mds_session(struct ceph_mds_session *s);
++int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
++			     const char *reason);
++int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc);
+ 
+ extern int ceph_mdsc_init(struct ceph_fs_client *fsc);
+ extern void ceph_mdsc_close_sessions(struct ceph_mds_client *mdsc);
 -- 
 2.34.1
 
