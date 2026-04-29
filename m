@@ -1,92 +1,92 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DC3F335081
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 21:41:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 106153DB63F
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 22:29:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777498882; cv=none; b=DUr2loS8NdmmQ/CcfpWKsvfFI9SC/JcHFvSGVu5fRqhcTR1Qfx5lyoquEhL2z8+oYk9FUWYivA1/bk5kcZo5JL0ij97DNgDTI4KRd4HSkAHCHj4i8QueIu22myNnJKSmEkdkHGU0m2zHb4xfJRYVKCwNaq9ccbBiYXE3s/JYrls=
+	t=1777501749; cv=none; b=GFXv7oZbHVNeDM2x7dqpRnWO/lHHEJ/WBZ6zgYYnrlqaPoOnr2ijZbpZDTMHq5PrTPiN9kERB12/LG+WNplHar1cZ/9/GtcXP5RhN2xqyxvgrrX4pkTtISAAZQP/PyIEqVSj/cgHgfGuuwCTCDclV3VqXAxfRZwfxx2N9wJUBHk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777498882; c=relaxed/simple;
-	bh=4gUaXrl3UskpCY1b73BcQ4+kOBSY0Bzr3MSGnd1pJyE=;
+	s=arc-20240116; t=1777501749; c=relaxed/simple;
+	bh=jI/B9zoCoPXmGHvvjs0M+S2APkRIFpW47w0JbYJ6WYc=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=UG/uwEBv6Um2wi4y6CwAsLd0k0ReRoYiaGQpZtMBSJPuvZwzTfC5+KV01V7c/9NHLZQP44rf6bgMxFxSmUk2nEllfJXY6n+i0b9gU4wDdw1WLERESJbMtFeyM9SbhvGUF1LY6VKQ93MV2K5UbT+x7bWi1unQqXjxq3APAtxuOVs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=T5YSFEjf; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Kp/T2NjR; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:MIME-Version; b=nYk40ZThOBfDhTVjmhxLJEexbRKPsB6FEJBRT8nVLyDaaXybhEA5S3+zKjCQzGMIf3/tf2bVgROAnJgKsHcbk/J9AaxVNlOenIXvGcypwcDY6OlasrDYoKnQhCfu/jC7Y3858OIsF9WUyCNSWZq9vpHTjqKG8QQPJ24J5roPjKQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=A/IqiYkV; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=dAVgYQ8b; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T5YSFEjf";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Kp/T2NjR"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="A/IqiYkV";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="dAVgYQ8b"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777498879;
+	s=mimecast20190719; t=1777501745;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Sl0xewYyqSp8d6vH3PwbkZbfKrRKC9g4HXpzaFf4dVg=;
-	b=T5YSFEjfe+H06EJople0TkLgEiis/BdFfEUnbHXfP2guXzbVCm5XBWu/6PQFRTVngs2c96
-	oZpZ9dYBuiKh5d6ad72eMetFUWfH8sU787l4DDMwD2NY80O8u4B9HTp9GQ/oQpfNq9PMpw
-	p/AbiScmDAFWGWjxOV+D9CtTDhoXqLU=
-Received: from mail-yw1-f200.google.com (mail-yw1-f200.google.com
- [209.85.128.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=YMn4oIUuLG2bxWSN5SG8gkc/YATeLxg4A35BBe/pa3s=;
+	b=A/IqiYkVz/HW13IhP+ETcRbIOepBs1NKO1ToNZRdkHFFRYPbSgNV9N/orC2ZXtxzU1X5md
+	2y8TY8ly9eJd9O5qshrccASqIiXtakwyIlFNJPuFyUxhSSaKYSQLCw+mvZFRvUiDsciUu9
+	23uo8jTYUAXiHXppb60ZyoPeqf2m28g=
+Received: from mail-yw1-f198.google.com (mail-yw1-f198.google.com
+ [209.85.128.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-459-jx6xKEKkOw-ByJ6LKT482g-1; Wed, 29 Apr 2026 17:41:18 -0400
-X-MC-Unique: jx6xKEKkOw-ByJ6LKT482g-1
-X-Mimecast-MFC-AGG-ID: jx6xKEKkOw-ByJ6LKT482g_1777498877
-Received: by mail-yw1-f200.google.com with SMTP id 00721157ae682-79a670a6032so6215427b3.0
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 14:41:17 -0700 (PDT)
+ us-mta-497-ad-INMKONfKc_NAg0k7o7A-1; Wed, 29 Apr 2026 18:29:03 -0400
+X-MC-Unique: ad-INMKONfKc_NAg0k7o7A-1
+X-Mimecast-MFC-AGG-ID: ad-INMKONfKc_NAg0k7o7A_1777501743
+Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-7b3e41a97f0so5533927b3.0
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 15:29:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1777498877; x=1778103677; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1777501743; x=1778106543; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=Sl0xewYyqSp8d6vH3PwbkZbfKrRKC9g4HXpzaFf4dVg=;
-        b=Kp/T2NjRS169WMW6k6xG940SGcQAfdcgeDwgbTQOkkJGp4PzL4sNq5KgeVFJTSZs/6
-         FEMYLy+46ADb8O+8BgPCe82axwFjEDH5KsvOsKuITMoSe9YStf113k3yHLLR6M0vXQYn
-         fUbcOn5xkoexaJYXdSmPycxE0kKYuRhSg/XpV3wvJDnIx5MmoeU+uLuljDWwZzhbAhhM
-         nTdg7yqaGTJCUfxXEbfJrdLxnP0Dz6CStD0CeNSfu9HuTxAyuLMpLSgiYErTvgLrdixa
-         QJIO8GTUaoDUtIyDDukfXTJvDnodknarIocbGJuKpWmjSKSN7oqioEcKXFyaSXNO8Nen
-         GZuQ==
+        bh=YMn4oIUuLG2bxWSN5SG8gkc/YATeLxg4A35BBe/pa3s=;
+        b=dAVgYQ8brWuNgUiWnSQexzUOmEhXTtPcAC+Q9maRiavi8mvoo58v9XmdR3XQgmPlcS
+         yxJ2pnX/7iotvegQ4o0ROzacXfHzaHLYyQCew7Q1ZndjrA8SNWcNS72BKC+8BQ+VJRRb
+         rKGNcLHi/dMXcOGVX81TRJy0uO16Xc3svi2Xot1zTeNz6IvYXoX00mhk4MeUSMJFpZ1A
+         cTr0ZLHTNxdHTrP4Vz0MuFEqaLvDPnKg3uwuQXoDL+T+U+b/z98dXS89IrWeA81pMAy/
+         1u4T/b8mXio34enqk/uCdFngiScOAeZdsPGADQZPHnadLn+lCnO7QUMIkC73WYGG+3b7
+         mUEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777498877; x=1778103677;
+        d=1e100.net; s=20251104; t=1777501743; x=1778106543;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Sl0xewYyqSp8d6vH3PwbkZbfKrRKC9g4HXpzaFf4dVg=;
-        b=nmkp5wh7V/R1VNsOnVm9IjbyBmchFhz+bejBDG89LGHvRRbEuwBIBzI6ITeEdLU3/Y
-         a8qK65X28jKLtzFzcXiasw6CcBCS8609JpGQheVmqwfEkXsVDJ/v+q/BMnXrufB2Zlhs
-         W2freN/33GBF/pLWIShGsrjwT2yJdAEzRG/Fm25pRv9hLb4FDS9z7n5LKEVUf1h6XyNt
-         7V33GBVC3wMkNU9u3jGRrqZQpk161N135mEiD0j6Y8DexZ7Eg9v48Ixzmitzu8/oxq2N
-         WAKQ1zt5bOm4ON6UszdzcALeCzS6ZXcE5LxzcDko8A+RSUpkMlHm7CPhDrwNzaevmC6l
-         3wrA==
-X-Forwarded-Encrypted: i=1; AFNElJ9ZMBwjTqEvzKLjTv/PFZliAP9ETUwjYhrtm5/HCOIkU9mukuc68nBl8GGKeRbx88aauFqKC1NRt9RP@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzd146pAceEwAlD5T88RxKXZLZmbYY3NEIAASS1luFWZClzWg1/
-	YwZBqUlx2UpZEskojtbEWFesZn66QbvPAKM7gyjNLT2yy4S+YptahOZcVauQHOHWrsHkOT1dupf
-	8r2NnE5xdSu7xw9jONyDVado5X2cT4xxsGCPm53EVPbvROZKwzEJR7LGvdPE9dwg=
-X-Gm-Gg: AeBDievMaJeqLUxz4vH57PytOF8efy7O3iV5k7vUC8Z57rTq7OFII63SbdsuontPn3R
-	gcuggqB2m00ntzkR3L7QixmhG3C0EiZyRCJBpDDluw6zsy/pt6Ai1RYkPYrQHQNUg/gjXzhoQB+
-	dfo45TvJBSwvnyfe1QNww/z1SydMgNd+Vl0Kwh+esCJ3hSEveZMZPqMAwIyjRGsEdc4+dKOpiw4
-	67gEoNvXrTMvt2pQNy4Xw+0RaphlGxbzdcCFiIVapdcjiWKeJhKFVc3D4Rl8ubBzWNadmz5DWsU
-	GkvCrBccZg3lhDxcr2axXuZC4OMFdGloTdKu7lDsaNtiKZ1hA/bwWpHrwWg1/PW/vot+TlLsSNs
-	Rv5/au4ibmCEDqlNBLYRmWK+zMsTWIgiC8C+ptoieqEobP1hIP8q4xGBl+uVsoyU=
-X-Received: by 2002:a05:690c:6e87:b0:7b2:dad2:5def with SMTP id 00721157ae682-7bd52ac34e8mr5523467b3.48.1777498877230;
-        Wed, 29 Apr 2026 14:41:17 -0700 (PDT)
-X-Received: by 2002:a05:690c:6e87:b0:7b2:dad2:5def with SMTP id 00721157ae682-7bd52ac34e8mr5523197b3.48.1777498876727;
-        Wed, 29 Apr 2026 14:41:16 -0700 (PDT)
+        bh=YMn4oIUuLG2bxWSN5SG8gkc/YATeLxg4A35BBe/pa3s=;
+        b=onSqE+klgwdzdW0U6Kq/xU4NDwIKbbhA2EkZUDkdqZCEQyIm/YVYNbBUsl76ozX7QC
+         FHQh/+tSb9zArLmLjFE9UIsj7oz9YSbS8AP+0nA7KSQPg6qc515h+HZ0ScywuB7hdIwH
+         0tD70JP5KpsWG38Vw6XWUCiidg7kN1DusRNAozaVz1XWgCkrZ9N60FdwpEQwoW/f8aD1
+         qXmwJwq+/gRUYpWZaEq+fypNfRE4/3VBn45V3XqERLPYmxp6Z0lHVvoxG6FZrgSQaKpk
+         G+LdmLFgBNKRzk1+eNdWVvyMdb2qpNawb6jiVN5zL1oap4IxlH/SZvb8XNTw02Q9tOUb
+         jsuA==
+X-Forwarded-Encrypted: i=1; AFNElJ+teSfE5ygjTE08E5Daxflmhcny54sUwJvpNcfEoCXpbo7nv0tgsUg32cUvLkYzSgNKcerpxJ0NOvgH@vger.kernel.org
+X-Gm-Message-State: AOJu0YwEkLRmNlKqJ2voj1b37x4Jx+u1tzQaqbwI4XCBmbsNCc7iRRgX
+	wHEh4oCclR4oAvA+Xhi38Hoi0KKr17XNGzFPYQY+kuTiW9q5kesrVbgfBQXvTuVttj0eKqnBhtP
+	K6ChHnfVVs6kPwJXANTdM3x+nMy65zq8D2PcjWtACuX/optzvow/eVHJJPVL88bE=
+X-Gm-Gg: AeBDiesmub3yOBAMdTKenaZuttDu8VyObnQCmEs6ad249vUh2f9ZNKno3QTQ2I4aImt
+	5BLN6d8GOJ665BkyPnQ7zOM0mSonUeN8ghRaTsICbYctFSDcMvCBRPQ0WIy5WqqiBjCOhgMltBn
+	5YyGLVAFw4ubZk+mzzxzQTCoV/flHfY3TLg5zcs6O68tD+0y4vi+/CD+Ei2hNqRim/ApRAYRjxH
+	JjJCWluAQPUMvLFKC3HUxBD5f7m4x5UtT9t8+0tnKsBxtKap/h4GSbxl3U5hL4RFDOE6cnM1l+8
+	f2U08EPUUe99IKDeqoKED6f/w1blxwsSxW1wIOlv21Miz1GP/2Dd9QSXhbsR38x8xttS3YBgg2X
+	yAqV5mb34zXE8LO0H0mLVnUHrcz+GwFnIHDCSltb8tKPWG/K4oLmktGyuqM4d8n8=
+X-Received: by 2002:a05:690c:a004:b0:7b8:9418:7605 with SMTP id 00721157ae682-7bd52a759c9mr6000577b3.38.1777501742609;
+        Wed, 29 Apr 2026 15:29:02 -0700 (PDT)
+X-Received: by 2002:a05:690c:a004:b0:7b8:9418:7605 with SMTP id 00721157ae682-7bd52a759c9mr6000357b3.38.1777501741987;
+        Wed, 29 Apr 2026 15:29:01 -0700 (PDT)
 Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd54b00f3csm330847b3.7.2026.04.29.14.41.15
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd5512b04csm456437b3.34.2026.04.29.15.29.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2026 14:41:16 -0700 (PDT)
-Message-ID: <fbab16663ba7c8b0a1970de7301ae85ea8cb0ca4.camel@redhat.com>
-Subject: Re: [EXTERNAL] [PATCH v3 04/11] ceph: add diagnostic timeout loop
- to wait_caps_flush()
+        Wed, 29 Apr 2026 15:29:01 -0700 (PDT)
+Message-ID: <eaec3781eb6034d87a0fb4cbf011c3dbe6d73eb4.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v3 05/11] ceph: add client reset state
+ machine and session teardown
 From: Viacheslav Dubeyko <vdubeyko@redhat.com>
 To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
-Date: Wed, 29 Apr 2026 14:41:15 -0700
-In-Reply-To: <20260429125206.1512203-5-amarkuze@redhat.com>
+Date: Wed, 29 Apr 2026 15:29:00 -0700
+In-Reply-To: <20260429125206.1512203-6-amarkuze@redhat.com>
 References: <20260429125206.1512203-1-amarkuze@redhat.com>
-	 <20260429125206.1512203-5-amarkuze@redhat.com>
+	 <20260429125206.1512203-6-amarkuze@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.60.0 (3.60.0-1.fc44app2) 
@@ -97,285 +97,747 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Wed, 2026-04-29 at 12:51 +0000, Alex Markuze wrote:
-> Convert wait_caps_flush() from a silent indefinite wait into a diagnostic
-> wait loop that periodically dumps pending cap flush state.
+On Wed, 2026-04-29 at 12:52 +0000, Alex Markuze wrote:
+> Add the client-side reset state machine, request gating, and manual
+> session teardown implementation.
 >=20
-> The underlying wait semantics remain intact: callers still wait until the
-> requested cap flushes complete. The difference is that long stalls now
-> produce actionable diagnostics instead of looking like a silent hang.
+> Manual reset is an operator-triggered escape hatch for client/MDS
+> stalemates in which caps, locks, or unsafe metadata state stop making
+> forward progress.  The reset blocks new metadata work, attempts a
+> bounded best-effort drain of dirty client state while sessions are
+> still alive, and finally asks the MDS to close sessions before tearing
+> local session state down directly.
 >=20
-> CEPH_CAP_FLUSH_MAX_DUMP_COUNT bounds the diagnostics in two ways:
-> it limits the number of entries emitted per diagnostic dump, and it
-> limits the number of timed diagnostic dumps before the wait continues
-> silently. When more entries exist than the per-dump limit, a truncation
-> count is reported. When the dump iteration limit is reached, a final
-> suppression message is emitted so the transition to silence is explicit.
+> The reset state machine tracks four phases: IDLE -> QUIESCING ->
+> DRAINING -> TEARDOWN -> IDLE.  QUIESCING is set synchronously by
+> schedule_reset() before the workqueue item is dispatched, so that new
+> metadata requests and file-lock acquisitions are gated immediately --
+> even before the work function begins running.  All non-IDLE phases
+> block callers on blocked_wq, preventing races with session teardown.
 >=20
-> The diagnostic dump collects flush entry data under cap_dirty_lock into
-> a bounded on-stack array, then prints after releasing the lock.  This
-> avoids holding the spinlock across printk calls.
+> The drain phase flushes mdlog state, dirty caps, and pending cap
+> releases for a bounded interval.  State that still cannot make progress
+> within that interval is discarded during teardown, which is the point
+> of the reset: break the stalemate and allow fresh sessions to rebuild
+> clean state.
 >=20
-> A null cf->ci on the global flush list indicates a bug since all
-> cap_flush entries are initialized with a valid ci before being added.
-> Signal this with WARN_ON_ONCE while still printing enough context for
-> debugging.
+> The session teardown follows the established check_new_map()
+> forced-close pattern: unregister sessions under mdsc->mutex, then clean
+> up caps and requests under s->s_mutex.  Reconnect is not attempted
+> because the MDS only accepts reconnects during its own RECONNECT phase
+> after restart, not from an active client.
 >=20
-> READ_ONCE is used for the i_last_cap_flush_ack field, which is read
-> outside the inode lock domain. Flush tids are monotonically increasing
-> and acks are processed in order under i_ceph_lock, so the latest ack
-> tid is always the most recently written value.
+> Blocked callers are released when reset completes and observe the final
+> result via -EIO (reset failed) or 0 (success).  Internal work-function
+> errors such as -ENOMEM are not propagated to unrelated callers like
+> open() or flock(); the detailed error remains in debugfs and
+> tracepoints.
 >=20
-> Add a ci pointer to struct ceph_cap_flush so that the diagnostic
-> dump can identify which inode each pending flush belongs to.  The
-> new i_last_cap_flush_ack field tracks the latest acknowledged flush
-> tid per inode for diagnostic correlation.
+> The work function checks st->shutdown before each phase transition
+> (DRAINING, TEARDOWN) so that a concurrent ceph_mdsc_destroy() is not
+> overwritten.  If destroy already took ownership, the work function
+> releases session references and returns without touching the state.
 >=20
-> This improves reset-drain observability and is also useful for
-> existing sync and writeback troubleshooting paths.
+> The timeout calculation for blocked-request waiters uses max_t() to
+> prevent jiffies underflow when the deadline has already passed.
+>=20
+> The close-grace sleep before teardown is a best-effort nudge to let
+> queued REQUEST_CLOSE messages egress; it is not a correctness
+> requirement since the MDS still has session_autoclose as a fallback.
+>=20
+> The destroy path marks reset as failed and wakes blocked waiters before
+> cancel_work_sync() so unmount does not stall.
 >=20
 > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 > ---
->  fs/ceph/caps.c       | 10 +++++
->  fs/ceph/inode.c      |  1 +
->  fs/ceph/mds_client.c | 97 ++++++++++++++++++++++++++++++++++++++++++--
->  fs/ceph/super.h      |  6 +++
->  4 files changed, 110 insertions(+), 4 deletions(-)
+>  fs/ceph/locks.c      |  16 ++
+>  fs/ceph/mds_client.c | 455 +++++++++++++++++++++++++++++++++++++++++++
+>  fs/ceph/mds_client.h |  42 ++++
+>  3 files changed, 513 insertions(+)
 >=20
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index cb9e78b713d9..4b37d9ffdf7f 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1648,6 +1648,7 @@ static void __ceph_flush_snaps(struct ceph_inode_in=
-fo *ci,
+> diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+> index c4ff2266bb94..677221bd64e0 100644
+> --- a/fs/ceph/locks.c
+> +++ b/fs/ceph/locks.c
+> @@ -249,6 +249,7 @@ int ceph_lock(struct file *file, int cmd, struct file=
+_lock *fl)
+>  {
+>  	struct inode *inode =3D file_inode(file);
+>  	struct ceph_inode_info *ci =3D ceph_inode(inode);
+> +	struct ceph_mds_client *mdsc =3D ceph_sb_to_mdsc(inode->i_sb);
+>  	struct ceph_client *cl =3D ceph_inode_to_client(inode);
+>  	int err =3D 0;
+>  	u16 op =3D CEPH_MDS_OP_SETFILELOCK;
+> @@ -275,6 +276,13 @@ int ceph_lock(struct file *file, int cmd, struct fil=
+e_lock *fl)
+>  		return -EIO;
+>  	}
 > =20
->  		spin_lock(&mdsc->cap_dirty_lock);
->  		capsnap->cap_flush.tid =3D ++mdsc->last_cap_flush_tid;
-> +		capsnap->cap_flush.ci =3D ci;
->  		list_add_tail(&capsnap->cap_flush.g_list,
->  			      &mdsc->cap_flush_list);
->  		if (oldest_flush_tid =3D=3D 0)
-> @@ -1846,6 +1847,7 @@ struct ceph_cap_flush *ceph_alloc_cap_flush(void)
->  		return NULL;
-> =20
->  	cf->is_capsnap =3D false;
-> +	cf->ci =3D NULL;
->  	return cf;
->  }
-> =20
-> @@ -1931,6 +1933,7 @@ static u64 __mark_caps_flushing(struct inode *inode=
-,
->  	doutc(cl, "%p %llx.%llx now !dirty\n", inode, ceph_vinop(inode));
-> =20
->  	swap(cf, ci->i_prealloc_cap_flush);
-> +	cf->ci =3D ci;
->  	cf->caps =3D flushing;
->  	cf->wake =3D wake;
-> =20
-> @@ -3826,6 +3829,13 @@ static void handle_cap_flush_ack(struct inode *ino=
-de, u64 flush_tid,
->  	bool wake_ci =3D false;
->  	bool wake_mdsc =3D false;
-> =20
-> +	/*
-> +	 * Flush tids are monotonically increasing and acks arrive in
-> +	 * order under i_ceph_lock, so this is always the latest tid.
-> +	 * Diagnostic readers use READ_ONCE() without holding the lock.
-> +	 */
-> +	WRITE_ONCE(ci->i_last_cap_flush_ack, flush_tid);
+> +	/* Wait for reset to complete before acquiring new locks */
+> +	if (op =3D=3D CEPH_MDS_OP_SETFILELOCK && !lock_is_unlock(fl)) {
+> +		err =3D ceph_mdsc_wait_for_reset(mdsc);
+> +		if (err)
+> +			return err;
+> +	}
 > +
->  	list_for_each_entry_safe(cf, tmp_cf, &ci->i_cap_flush_list, i_list) {
->  		/* Is this the one that was flushed? */
->  		if (cf->tid =3D=3D flush_tid)
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index f75d66760d54..de465c7e96e8 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -670,6 +670,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb=
-)
->  	INIT_LIST_HEAD(&ci->i_cap_snaps);
->  	ci->i_head_snapc =3D NULL;
->  	ci->i_snap_caps =3D 0;
-> +	ci->i_last_cap_flush_ack =3D 0;
+>  	if (lock_is_read(fl))
+>  		lock_cmd =3D CEPH_LOCK_SHARED;
+>  	else if (lock_is_write(fl))
+> @@ -311,6 +319,7 @@ int ceph_flock(struct file *file, int cmd, struct fil=
+e_lock *fl)
+>  {
+>  	struct inode *inode =3D file_inode(file);
+>  	struct ceph_inode_info *ci =3D ceph_inode(inode);
+> +	struct ceph_mds_client *mdsc =3D ceph_sb_to_mdsc(inode->i_sb);
+>  	struct ceph_client *cl =3D ceph_inode_to_client(inode);
+>  	int err =3D 0;
+>  	u8 wait =3D 0;
+> @@ -330,6 +339,13 @@ int ceph_flock(struct file *file, int cmd, struct fi=
+le_lock *fl)
+>  		return -EIO;
+>  	}
 > =20
->  	ci->i_last_rd =3D ci->i_last_wr =3D jiffies - 3600 * HZ;
->  	for (i =3D 0; i < CEPH_FILE_MODE_BITS; i++)
+> +	/* Wait for reset to complete before acquiring new locks */
+> +	if (!lock_is_unlock(fl)) {
+> +		err =3D ceph_mdsc_wait_for_reset(mdsc);
+> +		if (err)
+> +			return err;
+> +	}
+> +
+>  	if (IS_SETLKW(cmd))
+>  		wait =3D 1;
+> =20
 > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index b62abae72c4c..d83003acfb06 100644
+> index d83003acfb06..777af51ec8d8 100644
 > --- a/fs/ceph/mds_client.c
 > +++ b/fs/ceph/mds_client.c
-> @@ -27,6 +27,8 @@
->  #include <trace/events/ceph.h>
+> @@ -6,6 +6,7 @@
+>  #include <linux/slab.h>
+>  #include <linux/gfp.h>
+>  #include <linux/sched.h>
+> +#include <linux/delay.h>
+>  #include <linux/debugfs.h>
+>  #include <linux/seq_file.h>
+>  #include <linux/ratelimit.h>
+> @@ -67,6 +68,7 @@ static void __wake_requests(struct ceph_mds_client *mds=
+c,
+>  			    struct list_head *head);
+>  static void ceph_cap_release_work(struct work_struct *work);
+>  static void ceph_cap_reclaim_work(struct work_struct *work);
+> +static void ceph_mdsc_reset_workfn(struct work_struct *work);
 > =20
->  #define RECONNECT_MAX_SIZE (INT_MAX - PAGE_SIZE)
-> +#define CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC 60
-> +#define CEPH_CAP_FLUSH_MAX_DUMP_COUNT 5
-
-I see the point to collect all timeout declarations in one place. What abou=
-t to
-place this declarations here [1]?
-
-The CEPH_CAP_FLUSH_MAX_DUMP_COUNT controls two unrelated limits: the number=
- of
-entries printed per dump, and the number of timed diagnostic dumps before
-suppression. I think we need to have two separate constants with distinct n=
-ames.
-
+>  static const struct ceph_connection_operations mds_con_ops;
 > =20
->  /*
->   * A cluster of MDS (metadata server) daemons is responsible for
-> @@ -2286,19 +2288,106 @@ static int check_caps_flush(struct ceph_mds_clie=
-nt *mdsc,
+> @@ -3797,6 +3799,22 @@ int ceph_mdsc_submit_request(struct ceph_mds_clien=
+t *mdsc, struct inode *dir,
+>  	struct ceph_client *cl =3D mdsc->fsc->client;
+>  	int err =3D 0;
+> =20
+> +	/*
+> +	 * If a reset is in progress, wait for it to complete.
+> +	 *
+> +	 * This is best-effort: a request can pass this check just
+> +	 * before the phase leaves IDLE and proceed concurrently with
+> +	 * reset.  That is acceptable because (a) such requests will
+> +	 * either complete normally or fail and be retried by the
+> +	 * caller, and (b) adding lock serialization here would
+> +	 * penalize every request for a rare manual operation.
+> +	 */
+> +	err =3D ceph_mdsc_wait_for_reset(mdsc);
+> +	if (err) {
+> +		doutc(cl, "wait_for_reset failed: %d\n", err);
+> +		return err;
+> +	}
+> +
+>  	/* take CAP_PIN refs for r_inode, r_parent, r_old_dentry */
+>  	if (req->r_inode)
+>  		ceph_get_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
+> @@ -5203,6 +5221,421 @@ static int send_mds_reconnect(struct ceph_mds_cli=
+ent *mdsc,
+>  	return err;
 >  }
 > =20
->  /*
-> - * flush all dirty inode data to disk.
-> + * Dump pending cap flushes for diagnostic purposes.
->   *
-> - * returns true if we've flushed through want_flush_tid
-> + * cf->ci is safe to dereference here: cap_flush entries hold a
-> + * reference on the inode (via the cap), and entries are removed from
-> + * cap_flush_list under cap_dirty_lock before the cap (and thus the
-> + * inode reference) is released.  Holding cap_dirty_lock therefore
-> + * guarantees the inode remains valid for the lifetime of the scan.
-> + */
-
-This commenting looks very strange and confusing. I think we need to have
-comment for the function and comment for the structure. Especially, it's re=
-ally
-important to have comment for all fields of the structure.
-
-> +struct flush_dump_entry {
-> +	u64 ino;
-> +	u64 snap;
-> +	int caps;
-> +	u64 tid;
-> +	u64 last_ack;
-> +	bool wake;
-> +	bool is_capsnap;
-> +	bool ci_null;
-> +};
-> +
-> +static void dump_cap_flushes(struct ceph_mds_client *mdsc, u64 want_tid)
+> +const char *ceph_reset_phase_name(enum ceph_client_reset_phase phase)
 > +{
-> +	struct ceph_client *cl =3D mdsc->fsc->client;
-> +	struct flush_dump_entry entries[CEPH_CAP_FLUSH_MAX_DUMP_COUNT];
-> +	struct ceph_cap_flush *cf;
-> +	int n =3D 0, remaining =3D 0;
-> +
-> +	spin_lock(&mdsc->cap_dirty_lock);
-> +	list_for_each_entry(cf, &mdsc->cap_flush_list, g_list) {
-> +		if (cf->tid > want_tid)
-> +			break;
-> +		if (n < CEPH_CAP_FLUSH_MAX_DUMP_COUNT) {
-> +			struct flush_dump_entry *e =3D &entries[n++];
-> +
-> +			e->ci_null =3D WARN_ON_ONCE(!cf->ci);
-> +			if (!e->ci_null) {
-> +				e->ino =3D ceph_ino(&cf->ci->netfs.inode);
-> +				e->snap =3D ceph_snap(&cf->ci->netfs.inode);
-> +				e->last_ack =3D READ_ONCE(cf->ci->i_last_cap_flush_ack);
-> +			}
-> +			e->caps =3D cf->caps;
-> +			e->tid =3D cf->tid;
-> +			e->wake =3D cf->wake;
-> +			e->is_capsnap =3D cf->is_capsnap;
-> +		} else {
-> +			remaining++;
-> +		}
+> +	switch (phase) {
+> +	case CEPH_CLIENT_RESET_IDLE:	  return "idle";
+> +	case CEPH_CLIENT_RESET_QUIESCING: return "quiescing";
+> +	case CEPH_CLIENT_RESET_DRAINING:  return "draining";
+> +	case CEPH_CLIENT_RESET_TEARDOWN:  return "teardown";
+> +	default:			  return "unknown";
 > +	}
-> +	spin_unlock(&mdsc->cap_dirty_lock);
-> +
-> +	pr_info_client(cl, "still waiting for cap flushes through %llu:\n",
-> +		       want_tid);
-> +	for (int i =3D 0; i < n; i++) {
-> +		struct flush_dump_entry *e =3D &entries[i];
-> +
-> +		if (e->ci_null)
-> +			pr_info_client(cl,
-> +				       "  (null ci) %s tid=3D%llu wake=3D%d%s\n",
-> +				       ceph_cap_string(e->caps), e->tid,
-> +				       e->wake,
-> +				       e->is_capsnap ? " is_capsnap" : "");
-> +		else
-> +			pr_info_client(cl,
-> +				       "  %llx.%llx %s tid=3D%llu last_ack=3D%llu wake=3D%d%s\n",
-> +				       e->ino, e->snap,
-> +				       ceph_cap_string(e->caps), e->tid,
-> +				       e->last_ack, e->wake,
-> +				       e->is_capsnap ? " is_capsnap" : "");
-> +	}
-> +	if (remaining)
-> +		pr_info_client(cl, "  ... and %d more pending flushes\n",
-> +			       remaining);
 > +}
 > +
-> +/*
-> + * Wait for all cap flushes through @want_flush_tid to complete.
-> + * Periodically dumps pending cap flush state for diagnostics.
->   */
->  static void wait_caps_flush(struct ceph_mds_client *mdsc,
->  			    u64 want_flush_tid)
->  {
->  	struct ceph_client *cl =3D mdsc->fsc->client;
-> +	int i =3D 0;
+> +/**
+> + * ceph_mdsc_wait_for_reset - wait for an active reset to complete
+> + * @mdsc: MDS client
+> + *
+> + * Returns 0 if reset completed successfully or no reset was active.
+> + * Returns -EIO if reset completed with an error.
+> + * Returns -ETIMEDOUT if we timed out waiting.
+> + * Returns -ERESTARTSYS if interrupted by signal.
+> + *
+> + * Internal work-function errors (e.g. -ENOMEM) are not propagated
+> + * to callers; they are mapped to -EIO.  The detailed error is
+> + * available via debugfs status and tracepoints.
+> + */
+> +int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
+> +{
+> +	struct ceph_client_reset_state *st =3D &mdsc->reset_state;
+> +	struct ceph_client *cl =3D mdsc->fsc->client;
+> +	unsigned long deadline =3D jiffies + CEPH_CLIENT_RESET_WAIT_TIMEOUT_SEC=
+ * HZ;
+> +	int blocked_count;
+> +	long remaining;
+> +	long wait_ret;
+> +	int ret;
+> +
+> +	if (READ_ONCE(st->phase) =3D=3D CEPH_CLIENT_RESET_IDLE)
+> +		return 0;
+> +
+> +	blocked_count =3D atomic_inc_return(&st->blocked_requests);
+> +	doutc(cl, "request blocked during reset, %d total blocked\n",
+> +	      blocked_count);
+> +
+> +retry:
+> +	remaining =3D max_t(long, deadline - jiffies, 1);
+> +	wait_ret =3D wait_event_interruptible_timeout(st->blocked_wq,
+> +						    READ_ONCE(st->phase) =3D=3D
+> +						     CEPH_CLIENT_RESET_IDLE,
 
-Is integer type could be enough here? Could we overflow the i value?
+Maybe, static inline function for this check?
+
+> +						    remaining);
+> +
+> +	if (wait_ret =3D=3D 0) {
+> +		atomic_dec(&st->blocked_requests);
+> +		pr_warn_client(cl, "timed out waiting for reset to complete\n");
+> +		return -ETIMEDOUT;
+> +	}
+> +	if (wait_ret < 0) {
+> +		atomic_dec(&st->blocked_requests);
+> +		return (int)wait_ret;  /* -ERESTARTSYS */
+> +	}
+> +
+> +	/*
+> +	 * Verify phase is still IDLE under the lock.  If another reset
+> +	 * was scheduled between the wake-up and this check, loop back
+> +	 * and wait for it to finish rather than returning a stale result.
+> +	 */
+> +	spin_lock(&st->lock);
+> +	if (st->phase !=3D CEPH_CLIENT_RESET_IDLE) {
+> +		spin_unlock(&st->lock);
+> +		if (time_before(jiffies, deadline))
+> +			goto retry;
+> +		atomic_dec(&st->blocked_requests);
+> +		return -ETIMEDOUT;
+> +	}
+> +	ret =3D st->last_errno;
+> +	spin_unlock(&st->lock);
+> +
+> +	atomic_dec(&st->blocked_requests);
+> +	return ret ? -EIO : 0;
+
+The ceph_mdsc_wait_for_reset() maps all non-zero last_errno to -EIO. Any
+internal failure gets silently mapped to -EIO. Callers seeing -EIO from ope=
+n()
+or flock() won't be able to distinguish "reset failed" from "session lost".
+
+> +}
+> +
+> +static void ceph_mdsc_reset_complete(struct ceph_mds_client *mdsc, int r=
+et)
+> +{
+> +	struct ceph_client_reset_state *st =3D &mdsc->reset_state;
+> +
+> +	spin_lock(&st->lock);
+> +	/*
+> +	 * If destroy already marked us as shut down, it owns the
+> +	 * final bookkeeping and waiter wakeup.  Just bail so we
+> +	 * don't overwrite its state.
+> +	 */
+> +	if (st->shutdown) {
+> +		spin_unlock(&st->lock);
+> +		return;
+> +	}
+> +	st->last_finish =3D jiffies;
+> +	st->last_errno =3D ret;
+> +	st->phase =3D CEPH_CLIENT_RESET_IDLE;
+> +	if (ret)
+> +		st->failure_count++;
+> +	else
+> +		st->success_count++;
+> +	spin_unlock(&st->lock);
+> +
+> +	/* Wake up all requests that were blocked waiting for reset */
+> +	wake_up_all(&st->blocked_wq);
+> +}
+> +
+> +static void ceph_mdsc_reset_workfn(struct work_struct *work)
+> +{
+> +	struct ceph_mds_client *mdsc =3D
+> +		container_of(work, struct ceph_mds_client, reset_work);
+> +	struct ceph_client_reset_state *st =3D &mdsc->reset_state;
+> +	struct ceph_client *cl =3D mdsc->fsc->client;
+> +	struct ceph_mds_session **sessions =3D NULL;
+> +	char reason[CEPH_CLIENT_RESET_REASON_LEN];
+> +	int max_sessions, i, n =3D 0, torn_down =3D 0;
+> +	int ret =3D 0;
+> +
+> +	spin_lock(&st->lock);
+> +	strscpy(reason, st->last_reason, sizeof(reason));
+> +	spin_unlock(&st->lock);
+> +
+> +	mutex_lock(&mdsc->mutex);
+> +	max_sessions =3D mdsc->max_sessions;
+> +	if (max_sessions <=3D 0) {
+> +		mutex_unlock(&mdsc->mutex);
+> +		goto out_complete;
+> +	}
+> +
+> +	sessions =3D kcalloc(max_sessions, sizeof(*sessions), GFP_KERNEL);
+> +	if (!sessions) {
+> +		mutex_unlock(&mdsc->mutex);
+> +		ret =3D -ENOMEM;
+> +		pr_err_client(cl,
+> +			      "manual session reset failed to allocate session array\n");
+> +		ceph_mdsc_reset_complete(mdsc, ret);
+> +		return;
+> +	}
+> +
+> +	for (i =3D 0; i < max_sessions; i++) {
+> +		struct ceph_mds_session *session =3D mdsc->sessions[i];
+> +
+> +		if (!session)
+> +			continue;
+> +
+> +		/*
+> +		 * Read session state without s_mutex to avoid nesting
+> +		 * mdsc->mutex -> s_mutex, which would invert the
+> +		 * s_mutex -> mdsc->mutex order used by
+> +		 * cleanup_session_requests().  s_state is an int
+> +		 * so loads are atomic; the teardown loop below
+> +		 * handles races with concurrent state transitions.
+> +		 */
+> +		switch (READ_ONCE(session->s_state)) {
+> +		case CEPH_MDS_SESSION_OPEN:
+> +		case CEPH_MDS_SESSION_HUNG:
+> +		case CEPH_MDS_SESSION_OPENING:
+> +		case CEPH_MDS_SESSION_RESTARTING:
+> +		case CEPH_MDS_SESSION_RECONNECTING:
+> +		case CEPH_MDS_SESSION_CLOSING:
+> +			sessions[n++] =3D ceph_get_mds_session(session);
+> +			break;
+> +		default:
+> +			pr_info_client(cl,
+> +				       "mds%d in state %s, skipping reset\n",
+> +				       session->s_mds,
+> +				       ceph_session_state_name(session->s_state));
+> +			break;
+> +		}
+> +	}
+> +	mutex_unlock(&mdsc->mutex);
+> +
+> +	pr_info_client(cl,
+> +		       "manual session reset executing (sessions=3D%d, reason=3D\"%s\"=
+)\n",
+> +		       n, reason);
+> +
+> +	if (n =3D=3D 0) {
+> +		kfree(sessions);
+> +		goto out_complete;
+> +	}
+> +
+> +	spin_lock(&st->lock);
+> +	if (st->shutdown) {
+> +		spin_unlock(&st->lock);
+> +		goto out_sessions;
+
+The out_sessions silently skips ceph_mdsc_reset_complete(). Is it always co=
+rrect
+logic?
+
+> +	}
+> +	st->phase =3D CEPH_CLIENT_RESET_DRAINING;
+> +	spin_unlock(&st->lock);
+> +
+> +	/*
+> +	 * Best-effort drain: flush dirty state while sessions are still
+> +	 * alive.  New requests are blocked while phase !=3D IDLE.
+> +	 * The sessions are functional, so non-stuck state drains normally.
+> +	 * Stuck state (the cause of the stalemate the operator is trying
+> +	 * to break) will not drain -- that is expected, and we proceed to
+> +	 * forced teardown after the timeout.
+> +	 *
+> +	 * Three things are kicked off:
+> +	 *  1. MDS journal -- send_flush_mdlog asks each MDS to journal
+> +	 *     pending unsafe operations (creates, renames, setattrs).
+> +	 *     This is best-effort: we do not wait for individual unsafe
+> +	 *     requests to reach safe status.  Non-stuck ops typically
+> +	 *     complete within the bounded wait window below; stuck ops
+> +	 *     will not, and are force-dropped during teardown.
+> +	 *  2. Dirty caps -- ceph_flush_dirty_caps triggers cap flush on
+> +	 *     all sessions.  Non-stuck caps flush in milliseconds.
+> +	 *  3. Cap releases -- push pending cap release messages.
+> +	 *
+> +	 * The cap-flush wait below provides the bounded drain window
+> +	 * during which all three categories can make progress.
+> +	 */
+> +	for (i =3D 0; i < n; i++)
+> +		send_flush_mdlog(sessions[i]);
+> +
+> +	ceph_flush_dirty_caps(mdsc);
+> +	ceph_flush_cap_releases(mdsc);
+> +
+> +	spin_lock(&mdsc->cap_dirty_lock);
+> +	if (!list_empty(&mdsc->cap_flush_list)) {
+> +		struct ceph_cap_flush *cf =3D
+
+Why not declare variable on one line and then assign on another line?
+
+> +			list_last_entry(&mdsc->cap_flush_list,
+> +					struct ceph_cap_flush, g_list);
+> +		u64 want_flush =3D mdsc->last_cap_flush_tid;
+> +		long drain_ret;
+> +
+> +		/*
+> +		 * Setting wake on the last entry is sufficient: flush
+> +		 * entries complete in order, so when this entry finishes
+> +		 * all earlier ones are already done.
+> +		 */
+> +		cf->wake =3D true;
+> +		spin_unlock(&mdsc->cap_dirty_lock);
+> +		pr_info_client(cl,
+> +			       "draining (want_flush=3D%llu, %d sessions)\n",
+> +			       want_flush, n);
+> +		drain_ret =3D wait_event_timeout(mdsc->cap_flushing_wq,
+> +					       check_caps_flush(mdsc,
+> +								want_flush),
+> +					       CEPH_CLIENT_RESET_DRAIN_SEC * HZ);
+> +		if (drain_ret =3D=3D 0) {
+> +			pr_info_client(cl,
+> +				       "drain timed out, proceeding with forced teardown\n");
+> +			spin_lock(&st->lock);
+> +			st->drain_timed_out =3D true;
+
+Do we really need to use spin_lock() here? Could WRITE_ONCE() be enough for
+changing one field?
+
+> +			spin_unlock(&st->lock);
+> +		} else {
+> +			pr_info_client(cl, "drain completed successfully\n");
+> +			spin_lock(&st->lock);
+> +			st->drain_timed_out =3D false;
+
+Ditto.
+
+> +			spin_unlock(&st->lock);
+> +		}
+> +	} else {
+> +		spin_unlock(&mdsc->cap_dirty_lock);
+> +		spin_lock(&st->lock);
+> +		st->drain_timed_out =3D false;
+
+Ditto.
+
+> +		spin_unlock(&st->lock);
+> +	}
+> +
+> +	spin_lock(&st->lock);
+> +	if (st->shutdown) {
+> +		spin_unlock(&st->lock);
+> +		goto out_sessions;
+> +	}
+> +	st->phase =3D CEPH_CLIENT_RESET_TEARDOWN;
+> +	spin_unlock(&st->lock);
+> +
+> +	/*
+> +	 * Ask each MDS to close the session before we tear it down
+> +	 * locally.  Without this the MDS sees only a connection drop and
+> +	 * waits for the client to reconnect (up to session_autoclose
+> +	 * seconds) before evicting the session and releasing locks.
+> +	 *
+> +	 * Reuse the normal close machinery so the session state/sequence
+> +	 * snapshot is serialized under s_mutex and a racing s_seq bump
+> +	 * retransmits REQUEST_CLOSE while the session remains CLOSING.
+> +	 * We send all close requests first, then yield briefly to let the
+> +	 * network stack transmit them before __unregister_session()
+> +	 * closes the connections.
+> +	 */
+> +	for (i =3D 0; i < n; i++) {
+> +		int err;
+> +
+> +		mutex_lock(&sessions[i]->s_mutex);
+> +		err =3D __close_session(mdsc, sessions[i]);
+> +		mutex_unlock(&sessions[i]->s_mutex);
+> +		if (err < 0)
+> +			pr_warn_client(cl,
+> +				       "mds%d failed to queue close request before reset: %d\n",
+> +				       sessions[i]->s_mds, err);
+> +	}
+> +	/*
+> +	 * Best-effort grace period: yield briefly so the network stack
+> +	 * can transmit the queued REQUEST_CLOSE messages before we tear
+> +	 * down connections.  Not a correctness requirement -- the MDS
+> +	 * will still evict via session_autoclose if it never receives
+> +	 * the close request.
+> +	 */
+> +	if (n > 0)
+> +		msleep(CEPH_CLIENT_RESET_CLOSE_GRACE_MS);
+
+I don't like to use the msleep(). Can we use of waiting some event instead?
+
+> +
+> +	/*
+> +	 * Tear down each session: close the connection, remove all
+> +	 * caps, clean up requests, then kick pending requests so they
+> +	 * re-open a fresh session on the next attempt.
+> +	 *
+> +	 * This is modeled on the check_new_map() forced-close path
+> +	 * for stopped MDS ranks - a proven pattern for hard session
+> +	 * teardown.  We do NOT attempt send_mds_reconnect() because
+> +	 * the MDS only accepts reconnects during its own RECONNECT
+> +	 * phase (after MDS restart), not from an active client.
+> +	 *
+> +	 * Any state that did not drain (caps that didn't flush, unsafe
+> +	 * requests that the MDS didn't journal) is force-dropped here.
+> +	 * This is intentional: that state is stuck and is the reason
+> +	 * the operator triggered the reset.
+> +	 */
+> +	for (i =3D 0; i < n; i++) {
+> +		int mds =3D sessions[i]->s_mds;
+> +
+> +		pr_info_client(cl, "mds%d resetting session\n", mds);
+> +
+> +		mutex_lock(&mdsc->mutex);
+> +		if (mds >=3D mdsc->max_sessions ||
+> +		    mdsc->sessions[mds] !=3D sessions[i]) {
+> +			pr_info_client(cl,
+> +				       "mds%d session already torn down, skipping\n",
+> +				       mds);
+> +			mutex_unlock(&mdsc->mutex);
+> +			ceph_put_mds_session(sessions[i]);
+
+If I understood correctly, ceph_put_mds_session() could free pointer on
+sessions. Could we have use-after-free issue here? Should we do sessions[i]=
+ =3D
+NULL here?
+
+> +			continue;
+> +		}
+> +		sessions[i]->s_state =3D CEPH_MDS_SESSION_CLOSED;
+> +		__unregister_session(mdsc, sessions[i]);
+> +		__wake_requests(mdsc, &sessions[i]->s_waiting);
+> +		mutex_unlock(&mdsc->mutex);
+> +
+> +		mutex_lock(&sessions[i]->s_mutex);
+> +		cleanup_session_requests(mdsc, sessions[i]);
+> +		remove_session_caps(sessions[i]);
+> +		mutex_unlock(&sessions[i]->s_mutex);
+> +
+> +		wake_up_all(&mdsc->session_close_wq);
+> +
+> +		ceph_put_mds_session(sessions[i]);
+> +
+> +		mutex_lock(&mdsc->mutex);
+> +		kick_requests(mdsc, mds);
+> +		mutex_unlock(&mdsc->mutex);
+> +
+> +		torn_down++;
+> +		pr_info_client(cl, "mds%d session reset complete\n", mds);
+> +	}
+> +
+> +	kfree(sessions);
+> +
+> +	spin_lock(&st->lock);
+> +	st->sessions_reset =3D torn_down;
+> +	spin_unlock(&st->lock);
+> +
+> +out_complete:
+> +	ceph_mdsc_reset_complete(mdsc, ret);
+> +	return;
+> +
+> +out_sessions:
+> +	for (i =3D 0; i < n; i++)
+> +		ceph_put_mds_session(sessions[i]);
+> +	kfree(sessions);
+> +}
+> +
+> +int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
+> +			     const char *reason)
+> +{
+> +	struct ceph_client_reset_state *st =3D &mdsc->reset_state;
+> +	struct ceph_fs_client *fsc =3D mdsc->fsc;
+> +	const char *msg =3D (reason && reason[0]) ? reason : "manual";
+> +	int mount_state;
+> +
+> +	mount_state =3D READ_ONCE(fsc->mount_state);
+> +	if (mount_state !=3D CEPH_MOUNT_MOUNTED) {
+> +		pr_warn_client(fsc->client,
+> +			       "reset rejected: mount_state=3D%d (not mounted)\n",
+> +			       mount_state);
+> +		return -EINVAL;
+> +	}
+> +
+> +	spin_lock(&st->lock);
+> +	if (st->phase !=3D CEPH_CLIENT_RESET_IDLE) {
+> +		spin_unlock(&st->lock);
+> +		return -EBUSY;
+> +	}
+> +
+> +	st->phase =3D CEPH_CLIENT_RESET_QUIESCING;
+> +	st->last_start =3D jiffies;
+> +	st->last_errno =3D 0;
+> +	st->drain_timed_out =3D false;
+> +	st->sessions_reset =3D 0;
+> +	st->trigger_count++;
+> +	strscpy(st->last_reason, msg, sizeof(st->last_reason));
+> +	spin_unlock(&st->lock);
+> +
+> +	if (WARN_ON_ONCE(!queue_work(system_unbound_wq, &mdsc->reset_work))) {
+> +		spin_lock(&st->lock);
+> +		st->phase =3D CEPH_CLIENT_RESET_IDLE;
+> +		st->last_errno =3D -EALREADY;
+> +		st->last_finish =3D jiffies;
+> +		st->failure_count++;
+> +		spin_unlock(&st->lock);
+> +		wake_up_all(&st->blocked_wq);
+> +		return -EALREADY;
+> +	}
+> +
+> +	pr_info_client(mdsc->fsc->client,
+> +		       "manual session reset scheduled (reason=3D\"%s\")\n",
+> +		       msg);
+> +	return 0;
+> +}
+> +
+> =20
+>  /*
+>   * compare old and new mdsmaps, kicking requests
+> @@ -5742,6 +6175,11 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+>  	INIT_LIST_HEAD(&mdsc->dentry_leases);
+>  	INIT_LIST_HEAD(&mdsc->dentry_dir_leases);
+> =20
+> +	spin_lock_init(&mdsc->reset_state.lock);
+> +	init_waitqueue_head(&mdsc->reset_state.blocked_wq);
+> +	atomic_set(&mdsc->reset_state.blocked_requests, 0);
+> +	INIT_WORK(&mdsc->reset_work, ceph_mdsc_reset_workfn);
+> +
+>  	ceph_caps_init(mdsc);
+>  	ceph_adjust_caps_max_min(mdsc, fsc->mount_options);
+> =20
+> @@ -6267,6 +6705,23 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
+>  	/* flush out any connection work with references to us */
+>  	ceph_msgr_flush();
+> =20
+> +	/*
+> +	 * Mark reset as failed and wake any blocked waiters before
+> +	 * cancelling, so unmount doesn't stall on blocked_wq timeout
+> +	 * if cancel_work_sync() prevents the work from running.
+> +	 */
+> +	spin_lock(&mdsc->reset_state.lock);
+> +	mdsc->reset_state.shutdown =3D true;
+> +	if (mdsc->reset_state.phase !=3D CEPH_CLIENT_RESET_IDLE) {
+> +		mdsc->reset_state.phase =3D CEPH_CLIENT_RESET_IDLE;
+> +		mdsc->reset_state.last_errno =3D -ESHUTDOWN;
+> +		mdsc->reset_state.last_finish =3D jiffies;
+> +		mdsc->reset_state.failure_count++;
+> +	}
+> +	spin_unlock(&mdsc->reset_state.lock);
+> +	wake_up_all(&mdsc->reset_state.blocked_wq);
+> +
+> +	cancel_work_sync(&mdsc->reset_work);
+>  	ceph_mdsc_stop(mdsc);
+> =20
+>  	ceph_metric_destroy(&mdsc->metric);
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index e91a199d56fd..afc08b0abbd5 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -74,6 +74,42 @@ struct ceph_fs_client;
+>  struct ceph_cap;
+> =20
+>  #define MDS_AUTH_UID_ANY -1
+> +#define CEPH_CLIENT_RESET_REASON_LEN	64
+> +#define CEPH_CLIENT_RESET_DRAIN_SEC	5
+
+Probably, this value could be short for production. 5 seconds to flush dirt=
+y
+caps across sessions under any meaningful write load is very tight. The exi=
+sting
+wait_caps_flush() has no timeout at all. Maybe, 30=E2=80=9360 seconds would=
+ be more
+useful?
+
+> +#define CEPH_CLIENT_RESET_CLOSE_GRACE_MS 100
+> +#define CEPH_CLIENT_RESET_WAIT_TIMEOUT_SEC 120
+
+I think we need to collect all timeout declarations in one place.
+
+> +
+> +enum ceph_client_reset_phase {
+> +	CEPH_CLIENT_RESET_IDLE =3D 0,
+> +	/*
+> +	 * QUIESCING is set synchronously by schedule_reset() before the
+> +	 * workqueue item is dispatched.  It gates new requests (any
+> +	 * phase !=3D IDLE blocks callers) during the window between
+> +	 * scheduling and the work function's transition to DRAINING.
+> +	 */
+> +	CEPH_CLIENT_RESET_QUIESCING,
+> +	CEPH_CLIENT_RESET_DRAINING,
+> +	CEPH_CLIENT_RESET_TEARDOWN,
+> +};
+> +
+> +struct ceph_client_reset_state {
+> +	spinlock_t lock;
+> +	u64 trigger_count;
+> +	u64 success_count;
+> +	u64 failure_count;
+> +	unsigned long last_start;
+> +	unsigned long last_finish;
+> +	int last_errno;
+> +	enum ceph_client_reset_phase phase;
+> +	bool drain_timed_out;
+> +	bool shutdown;
+> +	int sessions_reset;
+> +	char last_reason[CEPH_CLIENT_RESET_REASON_LEN];
+> +
+> +	/* Request blocking during reset */
+> +	wait_queue_head_t blocked_wq;
+> +	atomic_t blocked_requests;
+> +};
+
+It's big enough structure and it requires the commenting of all fields.
 
 Thanks,
 Slava.
 
-> +	long ret;
 > =20
->  	doutc(cl, "want %llu\n", want_flush_tid);
+>  struct ceph_mds_cap_match {
+>  	s64 uid;  /* default to MDS_AUTH_UID_ANY */
+> @@ -536,6 +572,8 @@ struct ceph_mds_client {
+>  	struct list_head  dentry_dir_leases; /* lru list */
 > =20
-> -	wait_event(mdsc->cap_flushing_wq,
-> -		   check_caps_flush(mdsc, want_flush_tid));
-> +	do {
-> +		/* 60 * HZ fits in a long on all supported architectures. */
-> +		ret =3D wait_event_timeout(mdsc->cap_flushing_wq,
-> +			   check_caps_flush(mdsc, want_flush_tid),
-> +			   CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC * HZ);
-> +		if (ret =3D=3D 0) {
-> +			if (i < CEPH_CAP_FLUSH_MAX_DUMP_COUNT)
-> +				dump_cap_flushes(mdsc, want_flush_tid);
-> +			else if (i =3D=3D CEPH_CAP_FLUSH_MAX_DUMP_COUNT)
-> +				pr_info_client(cl,
-> +					       "still waiting for cap flushes; suppressing further dumps\n"=
-);
-> +			i++;
-> +		}
-> +	} while (ret =3D=3D 0);
+>  	struct ceph_client_metric metric;
+> +	struct work_struct	reset_work;
+> +	struct ceph_client_reset_state reset_state;
 > =20
->  	doutc(cl, "ok, flushed thru %llu\n", want_flush_tid);
->  }
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 30911ccf961e..9aca42c89ea0 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -238,6 +238,7 @@ struct ceph_cap_flush {
->  	bool is_capsnap; /* true means capsnap */
->  	struct list_head g_list; // global
->  	struct list_head i_list; // per inode
-> +	struct ceph_inode_info *ci;
->  };
+>  	spinlock_t		snapid_map_lock;
+>  	struct rb_root		snapid_map_tree;
+> @@ -559,10 +597,14 @@ extern struct ceph_mds_session *
+>  __ceph_lookup_mds_session(struct ceph_mds_client *, int mds);
 > =20
->  /*
-> @@ -443,6 +444,11 @@ struct ceph_inode_info {
->  	struct ceph_snap_context *i_head_snapc;  /* set if wr_buffer_head > 0 o=
-r
->  						    dirty|flushing caps */
->  	unsigned i_snap_caps;           /* cap bits for snapped files */
-> +	/*
-> +	 * Written under i_ceph_lock, read via READ_ONCE()
-> +	 * from diagnostic paths.
-> +	 */
-> +	u64 i_last_cap_flush_ack;
+>  extern const char *ceph_session_state_name(int s);
+> +extern const char *ceph_reset_phase_name(enum ceph_client_reset_phase ph=
+ase);
 > =20
->  	unsigned long i_last_rd;
->  	unsigned long i_last_wr;
-
-[1]
-https://elixir.bootlin.com/linux/v7.0.1/source/include/linux/ceph/libceph.h=
-#L72
+>  extern struct ceph_mds_session *
+>  ceph_get_mds_session(struct ceph_mds_session *s);
+>  extern void ceph_put_mds_session(struct ceph_mds_session *s);
+> +int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
+> +			     const char *reason);
+> +int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc);
+> =20
+>  extern int ceph_mdsc_init(struct ceph_fs_client *fsc);
+>  extern void ceph_mdsc_close_sessions(struct ceph_mds_client *mdsc);
 
