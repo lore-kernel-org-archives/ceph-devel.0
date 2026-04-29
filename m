@@ -1,163 +1,154 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DB2615B135
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 00:51:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777423909; cv=none; b=btV7xq5LKD0aSsTfISjKSJSwMaWQYlCFhrUd7VAk25kN7ok6omTwVPfy1orOPWVXN6nZaaCGwABslUFqwCBYyUiNBti4l8x811JnZynFHDq10t+Af1Wt2wPuKHnY33zAVsEbWW1AnYumym9qKBjjPsHF1k8YXDuNCepUK0LVtwg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777423909; c=relaxed/simple;
-	bh=AdePDjX4sfbhq7tLSTu8Am9kCDJUZREBYbOVytdFS5M=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=hrdXk/QsE1vT0ng78L6BV/fOesEWuR/C0IRZW7ELI+Gna01+wWXhR2kFZUyhzk+s3MdUI6+HTB4qBEsNjgzRX+lZoHiEHsSbqwKVdSD5ecxEbuRqSX6vvHQXUaseyy6itCpjWJvJpbZgm8DkgG+4Z9qCH9bLsoXUpZ75Dp6fGac=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hU2RpJ5p; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=lwqEDXBZ; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5FB453845AC
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 04:28:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.50
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777436887; cv=pass; b=bWy4CqKcPRoqtumfQj4O44x3OhvbjvayZIc1u2e3dPqM8lnqu7s08NHa4HnucV5Awb9N2NpZgeayP0pF7J2Ni/o/6nJFBMtfDBIxpE/HuL5YqLWX8v/aHECqXPSgxhxYyu70qXffTTAG6BWE+T0y8bRFEEkC0vIn007j8Z+E8Xc=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777436887; c=relaxed/simple;
+	bh=72+7CylRj1EOV6kfHwAZAuBZhDPTYvm9NqEzFA4Av7g=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=MwgNfhS/vSe21wVUdbCTsngRucQ4wKSJcpDV/X358+a9VP7oe6JGNtK1PZZiyITgI6IL9/IyEB+GzZy0qzx4aNTskgQxJwsGh7iDUCCyZdcPhtPqX+TCTyGLl+8l0KVqTTqVGMYO/x9NeGBSZl3NrDYzXHGnxIWwzwnl64cS66Q=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=QPOCbFHL; arc=pass smtp.client-ip=209.85.218.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hU2RpJ5p";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="lwqEDXBZ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777423906;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=4S2sZcVVH4w8tWT5RUEftCmv62e2CdhaVi7wThP/XwQ=;
-	b=hU2RpJ5pat/ojlEE0U9dEJb2Ede7NaIV5fBngi8tNVmWw1JeJRxNQhPDGf1lBjgHPZz9bV
-	JIesnl/jOHT697YjQSPa0v9r9HGriUo4DB7nZhoPSxg/Y/dVkUgLelPRu/ZQbSSdz4prmH
-	fHSf7cNfMAT8xTDLYzrCx9i98Dgjdzk=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-694-fRpR-4KtOsSGjyOst4a1lg-1; Tue, 28 Apr 2026 20:51:44 -0400
-X-MC-Unique: fRpR-4KtOsSGjyOst4a1lg-1
-X-Mimecast-MFC-AGG-ID: fRpR-4KtOsSGjyOst4a1lg_1777423903
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2b458add85aso28053455ad.2
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 17:51:44 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="QPOCbFHL"
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-b936331786dso1587679466b.3
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Apr 2026 21:28:05 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1777436884; cv=none;
+        d=google.com; s=arc-20240605;
+        b=UVWIVhkcryp1boykGCoaHezMZYMFFkb9xc9dDRYYyQPm1SX29szEdIv0qGVZRvIKNd
+         RqGtXym1x183exdys1O1XmSA7wAKWSdIcuMu+8Xt4VAT0BUMMyQWJh2jJ6s02V9vOmpW
+         T4kz7IGZR+nvZ8m9urdezsirx48q14KqkFg1sy78a+DCGr2A6ZWkdSicX1PkuYl9vFB9
+         jO67omeJyj45ae5Kzzg7qggH0Uk1RKfNTKj/YIZKd/Wsjql3HRLzzGU7FKgPi/K+m67G
+         hAVkE0r+jK7wT3SiU8jVguMRnWtoOpBeF8Fs96H/Hhsgz2ZzmaLny6nYYzoWZ717RIwm
+         X6Hg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=tCgZRNaYmJSPykbMYrzfut5EXQOeSzWA5g56k7ae8hM=;
+        fh=1Ym4w/+XfwuTABTzL9Sz7FEV6/H+TaCuzGdoOFuIhxY=;
+        b=V5PASQGaehBgcJ2I/Mwd5sWFHgg1VM6Jy622DqdqMs1XfBHORWGnaB8Zc2lXPHLBDr
+         DMATUDslV+3lmp7JUBAKchUM4ZRrxAl8DZtN4hlVw5XJ8z/QdpxHmTbn3MlmMakSfeWE
+         g28eGHEG+PKBUdNo0lq6nozC6j3nMvN918XIxEmQmzXcj5CJzTaT2qnrKTeGd3t6Kqk9
+         o7POY/27cy4NChBzsV09VfqO9qMqW/jgak43TiTs4Lj/m9XnRc30J+JqhL+bCzKTFs7Y
+         lYHXxKzwmhirQiNgJK8h44wxGHqPkuJMN19k6QwMAjamo28czh56FQ/Hl4mbiMq6oCIy
+         Sv/A==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1777423903; x=1778028703; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=4S2sZcVVH4w8tWT5RUEftCmv62e2CdhaVi7wThP/XwQ=;
-        b=lwqEDXBZP+qPfZTc18o5Lg3h8RGGb+Oh/JNov/3U4A0pvrX0EeG6I6cUVuhyifCC6j
-         3xY5yQMKXVWZbqEEQ0JDam1/TdetrJjJyACgo7+0GPoliV7K2hOS7okhNJ4x+MxcC2HC
-         i0B72AYeJysh0deBdcWG138A0HI2zDnbGHaNnr1fahrzgM8aTNyFqRO6VKNw6UBFv5at
-         xmpQxg9YG5jLPLSiAv/YnEHJgc/0K6T2PbRAio/lCaid7H1rj8LIAOvM1EenCp/yC6km
-         nPp2FIVs7lUlA8zPcokU3IWyq4TIq7Wf+G1TQP0uusZenc5FAt06d1AVXmmaSM9vJ2Ef
-         9CFw==
+        d=ionos.com; s=google; t=1777436884; x=1778041684; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=tCgZRNaYmJSPykbMYrzfut5EXQOeSzWA5g56k7ae8hM=;
+        b=QPOCbFHL+hCKbFJZZzmvsJWBKOQ9HleIL/ikkGKNCELU6xE+PZHvziq9KjcV3LFG2A
+         aIG6Q934jpq0WizSVeJ9a7/vrOhlG/9fiXSZlzLgKuYEYdCDiO7yUrnklQd3wdH5uxml
+         9d0/idR01MevpqPVgSdwNrZV+vlswZADkUfGivAmjUKiOf2dFHu9i0cFBIobFdbXstE0
+         Dm89OB85c1SCGJuKLJi2olsIV819inldUC/uXRKdbWfzdUg44lWciH/zp8f2CNS+4X0V
+         IIxddkIi/O/zelAERV1THgyxl7vn5oZXpql2RrIXHmM81KOBE9Dq76vkMkAXT5jiKDzD
+         sgNQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777423903; x=1778028703;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=4S2sZcVVH4w8tWT5RUEftCmv62e2CdhaVi7wThP/XwQ=;
-        b=A8XrtTrP8rfQlDSubG+j1qvaqw/kOtfbSCVrs5r+s9ACy6GWGf3BJ4fx7auZk1n+YI
-         YmpCW2t1JmGhzKd2Z2k/XwYq7myBdLDb6Z9FnMcjoWLF8hfFU2ZkCs4gLQMNdQtoVjSJ
-         U4YLBJqDh+TY/tFEHrTHF9DJFLTe/WDvBjiGM4YLE8VYDfBj2UdEJwshWgzGOb8r/HhQ
-         AnIj1jGXFU0ROS+XlW59xmRrB0GfSKXy6REuApHx1L7jugWQSAsSq4YYnRjB1KANb+8O
-         59ipdDuY+7zE14ExSkVb7+9OoEmPus4zRV4U3q6ntqsMPeeGSQTDOct2XZiotmw448YT
-         y66g==
-X-Gm-Message-State: AOJu0YzjK6l0BqQAjBm1f7A2kEnIQufJwzk3wJa/iaTscXrNVBvtjwyb
-	MTkDj6aJtKCHyjVdoni3Yn/c2E20x0Vf6tMh0oXG9QgiBINcdOedL/d4TY3zlZNcjA1xrMpDma+
-	Ddt49D2bm3W0nJ/bUlItsMgwHADNEK0+qX/ejiVSBJBpSE0Q/5fuJnb/8lTxM4Q4=
-X-Gm-Gg: AeBDiesGe+MFY2aIzrkIUs/q6R+gP33q5DVFitdmF+XrxczInYpbM7qkorLjADnReM/
-	Iwi9yIDuZnclncVbxKdH6s3S1DHlZmoayd0bl1AbQlIdnOReSi665gZS0YJ9DEj9gGRVppRtBzA
-	siRkJhf+hycJ2TKYN55Cr9wFFhtStQXTd4dLhjueNDf6ayZwyd7QZknwTBbW+64vBjZFgiel3wy
-	B7ITluxKb7Tek/vG0rf7cpqmFempjdvTfnn/tk6PY11FFc7E+xJruwyMFYtXFww/mkrSOpZjSv9
-	qhb8eL8o7oMK1ZiaEAgPnreUhdu69HakJ/h4lfblpzA+oTV50h01XyuzANNIRyVTA5oeYiX0XBz
-	iMtaFQeS8lH24zhFHMCYdYlgRxRw2uPp0cg==
-X-Received: by 2002:a17:903:b83:b0:2b7:ab8e:53b7 with SMTP id d9443c01a7336-2b9874078a2mr15263755ad.20.1777423903350;
-        Tue, 28 Apr 2026 17:51:43 -0700 (PDT)
-X-Received: by 2002:a17:903:b83:b0:2b7:ab8e:53b7 with SMTP id d9443c01a7336-2b9874078a2mr15263445ad.20.1777423902853;
-        Tue, 28 Apr 2026 17:51:42 -0700 (PDT)
-Received: from [10.72.112.70] ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b988772cb6sm4193885ad.4.2026.04.28.17.51.40
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 28 Apr 2026 17:51:42 -0700 (PDT)
-Message-ID: <58f52c8a-54ae-4982-ba68-a9a9d138f484@redhat.com>
-Date: Wed, 29 Apr 2026 08:51:37 +0800
+        d=1e100.net; s=20251104; t=1777436884; x=1778041684;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=tCgZRNaYmJSPykbMYrzfut5EXQOeSzWA5g56k7ae8hM=;
+        b=afHlvW1GqMe0hndeZhVxrybN4vJSNOWc7SKk2BY4qWEgRbe0O4O/7xIZQTdJZuSk19
+         Stbt9xjgWg/fIQImHDse17oswTU19Oh9G56dSnjiTwr1nuvETvWOy86BN2jtwuyInXUd
+         bGaUSMz6ddUUUvizn7o+UfNM4QcVACK25AdHZLKr3VyX8fZYqflJlBiIvep6UpdNcYRk
+         dV4+Z8DyU03DbIvBBiFMqkWctv6kpdhzh3QMtXSdWV5bITCe7Z02a5iDy08kaIifGiuF
+         q+H6a8KFeyacDXcv2T2fM4w9CZf1h0O93joNdAI0OqWHc8woefkLqtpGQl8vUbbPd1V4
+         A4Tg==
+X-Forwarded-Encrypted: i=1; AFNElJ8DOUsa7ieCV7pMVPs4B1o0V8wXuID63KY3sdGyPlgxxycrpJ/EOXdx5DxoDK59wxK7nVYe65GBZraC@vger.kernel.org
+X-Gm-Message-State: AOJu0YzxCNMx6RFcg3T1pcDPwNdWikkaPNGxtuuhN+y+MkXV6cwRibho
+	5n/jt0Mt7Z7IB9aVFGHkD+QuKUDl6j1v4kKAGdEa+NOkrr9Gbj7zJ5gH5lgUO73/+z9/m3jCiba
+	8XpRXJLvVARDiiFdFF2u/Nfu4727N37Kyh1e7MeC8hw==
+X-Gm-Gg: AeBDietqR2MLrFv6FLVwDrGhuBsWoM32UsWyDnTcHjfOtVeHQd/+y7VC4tVgk0kHIBM
+	Xj64Rdzh8BDxYwJzze9+JalpJAKwtgnSh9wB0kNE2p8b8PsbTBV/YO8ZFF2MQmzhAc6CKNTiff8
+	Wfw1SQxAE5pKQleMromDNgLhsBCU2GjcIdags+AQ2jySxW/PkCqSjFD24/fSub4t3S299p9lixT
+	WgA6l4qItDyE+SOwZT3poa1eydKPHA9Ie0jz2RmHu76dDCcFgG4I355SnJ8D3EnAq9BnsgGPAP/
+	jshT3dQMU7KXTXRY5zsa9js/jzxmU4chaWqmrNpfDY666PA=
+X-Received: by 2002:a17:907:c012:b0:bb7:47cc:1341 with SMTP id
+ a640c23a62f3a-bb8022c2be8mr360275766b.14.1777436883779; Tue, 28 Apr 2026
+ 21:28:03 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] libceph: Fix potential out-of-bounds access in
- __ceph_x_decrypt()
-To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>,
- Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org
-References: <20260428121546.148369-1-raphael.zimmer@tu-ilmenau.de>
-Content-Language: en-US
-From: Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20260428121546.148369-1-raphael.zimmer@tu-ilmenau.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+References: <20260427155813.2561935-1-max.kellermann@ionos.com> <b7827e38e2e4b87aa92261e1f02a7b7340f8d0e0.camel@ibm.com>
+In-Reply-To: <b7827e38e2e4b87aa92261e1f02a7b7340f8d0e0.camel@ibm.com>
+From: Max Kellermann <max.kellermann@ionos.com>
+Date: Wed, 29 Apr 2026 06:27:52 +0200
+X-Gm-Features: AVHnY4ImG3SgvI4nLDqhi9ljovV8DFkO-2VusdikC_-9zaWiQed6HkWfv8K2t2s
+Message-ID: <CAKPOu+8Yumexe=Athx_fjtoNbTBgP2ENQrXx=idmkNeUwE9v4w@mail.gmail.com>
+Subject: Re: [PATCH] ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Cc: "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 
+	"stable@vger.kernel.org" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Raphael,
-
-On 4/28/26 20:15, Raphael Zimmer wrote:
-> In __ceph_x_decrypt(), a part of the buffer p is interpreted as a
-> ceph_x_encrypt_header, and the magic field of this struct is accessed.
-> This happens without any guarantee that the buffer is large enough to
-> hold this struct. The function parameter ciphertext_len represents the
-> length of the ciphertext to decrypt and is guaranteed to be at most the
-> remaining size of the allocated buffer p. However, this value is not
-> necessarily greater than sizeof(ceph_x_encrypt_header). E.g., a message
-> frame of type FRAME_TAG_AUTH_REPLY_MORE, that is just as long to hold
-> the ciphertext at its end with a ciphertext_len of 8 or less, can
-> trigger an out-of-bounds memory access when accessing hdr->magic.
+On Tue, Apr 28, 2026 at 8:46=E2=80=AFPM Viacheslav Dubeyko
+<Slava.Dubeyko@ibm.com> wrote:
+> >                       flags |=3D NON_BLOCKING;
+> >                       while (!(ret =3D try_get_cap_refs(inode, need, wa=
+nt,
+> >                                                       endoff, flags, &_=
+got))) {
+> > +                             static const unsigned long wait_timeout =
+=3D 5 * HZ;
 >
-> This patch fixes the issue by adding a check to ensure that the
-> decrypted plaintext in the buffer is large enough to represent at least
-> the ceph_x_encrypt_header.
+> Why exactly 5 * HZ? What is the basis for this timeout? Could we re-use a=
+ny
+> available timeouts in CephFS declarations?
+
+It is an arbitrary timeout, long enough to avoid unnecessary wakeups
+in regular situations where we're really waiting for a capability, but
+short enough to avoid disrupting the service. If you prefer another
+number, say it, and I'll change it.
+
+On our servers, this hang bug occurs very rarely. Sometimes, weeks go
+by without a hang, and sometimes twice a day, but no more. When it
+happens, I thought it's fine to wait 5 seconds before attempting to
+recover.
+
+Note that this is still a minimal workaround, not a proper fix, as I
+wrote. The proper fix would be much more intrusive (and of course go
+without any hard-coded timeouts and arbitrary wakeups).
+
+> >                       if (ret =3D=3D -EUCLEAN) {
+> > -                             /* session was killed, try renew caps */
+> > -                             ret =3D ceph_renew_caps(inode, flags);
+> > +                             /* session was killed or a waited cap
+> > +                              * request needs a retry */
+> > +                             ret =3D ceph_renew_caps(inode, flags & CE=
+PH_FILE_MODE_MASK);
 >
-> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-> ---
->   net/ceph/auth_x.c | 5 +++++
->   1 file changed, 5 insertions(+)
->
-> diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-> index 692e0b868822..9e64e82d0b63 100644
-> --- a/net/ceph/auth_x.c
-> +++ b/net/ceph/auth_x.c
-> @@ -115,6 +115,11 @@ static int __ceph_x_decrypt(const struct ceph_crypto_key *key, int usage_slot,
->   	if (ret)
->   		return ret;
->   
-> +	if (plaintext_len < sizeof(*hdr)) {
-> +		pr_err("%s plaintext too small %d\n", __func__, plaintext_len);
-> +		return -EINVAL;
-> +	}
-> +
+> Frankly speaking, I don't quite follow why do we need to add flags &
+> CEPH_FILE_MODE_MASK?
 
-You just check the AES/NONE case, which the plaintext_len >= 0 + 
-sizeof(struct ceph_x_encrypt_header). While for AES256KRB5 the 
-plaintext_len >= 16 + sizeof(struct ceph_x_encrypt_header).
+Oh, this is an unrelated fix.  This "flags" variable contains internal
+flags that are not understood by ceph_renew_caps() (i.e.
+CHECK_FILELOCK and NON_BLOCKING) and shouldn't really be passed there.
 
-I think we should also check the AES256KRB5 case ?
+I'll remove that change from the patch for v2 because while I believe
+it's correct, it has nothing to do with this bug.  I'll post v2 when
+we agree on the rest of the patch.
 
-Possible it should be :
+--=20
+Max Kellermann
+Principal Architect
+Hosting Technology
 
-   if (plaintext_len < ceph_crypt_data_offset(key) + sizeof(*hdr)) {
-       pr_err("%s plaintext too small %d, need at least %d\n",
-              __func__, plaintext_len,
-              (int)(ceph_crypt_data_offset(key) + sizeof(*hdr)));
-       return -EINVAL;
-   }
-
-
-Thanks
-
-- Xiubo
-
-
->   	hdr = p + ceph_crypt_data_offset(key);
->   	if (le64_to_cpu(hdr->magic) != CEPHX_ENC_MAGIC) {
->   		pr_err("%s bad magic\n", __func__);
-
+cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
+General information about the company can be found here:
+https://www.cm4all.com/impressum
+A member of the IONOS Group
