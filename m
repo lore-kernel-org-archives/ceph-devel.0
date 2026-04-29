@@ -1,91 +1,91 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCE433FB7EE
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86FAE3FE657
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 12:52:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777467150; cv=none; b=XoIOA8CAx7sQwXdzT2xXoxTRzspOa5/DfiiVRtcNNTzJYhr7l42ZGBBHfaB43J8StuN9eLuoos7Unsdp0uwAy03ruLSmAHsENK57C7byKFWX+M5Dv9f8Wq4lmQYYm8iXyfsDGwMqRqtTmuCTc1lUR5Il9MCGK3AfilYbVyuUdPg=
+	t=1777467154; cv=none; b=ZBz9SxX22RwAniu4S2PG2m8/gXCawb/+AbY9Nf4aaRZntS5s038xQ1TCYCjzJ3AMSB/ZJ551fhBrATfJVB1TFsxFESaDi1FqLb+xmQpYZozYQKNgEOF2oFu1zjAah5XbAWe9V+nW/XSD+dgYX17iplISsQ9GdzsHhD4I3qzmcO0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777467150; c=relaxed/simple;
-	bh=XaOHlWWecmtb7BYdDb8myZ0lZCrnWCXCsZx1AwzhgEM=;
+	s=arc-20240116; t=1777467154; c=relaxed/simple;
+	bh=+BN8CG8/6Huyk/ldf4iRS8CZs2L9Jd4Vqs8JTyQYUc8=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=IjtIh4cKRGMd0K6+ld6lJ4RGnRCRSbvy8pQweYJbtYwnS13FuKb3PvbDRyQ9gczYfMj49cX1ddiVWBf8qZj3sKVH0HAmpOMvM14zxbTp7Ji8kHjhbK85+gAFHPffxSWmXvX1NAcz5QLgijGPbDR3p7wmS826LDNfvR8F+lR1gvs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QSUCk/s0; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=CQZ29sps; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=pgViA3aYu4BiWrFA8v/6gymH9jip+KVeJiJrLKZ5FdaDc+8OAxx9/6Myp1mWV9uqTCI1rjoEmzn9xyBuCzhkxTsO8/z7MiISWLjZMfEqBoH2WitTFabVaazgQYRPQ+zb5kGlUMaeBz1kpB6rNchduq4TCjcfM9qrcwzLuYheLH4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FE+EXqgb; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=pRCxMVEl; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QSUCk/s0";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="CQZ29sps"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FE+EXqgb";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="pRCxMVEl"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777467146;
+	s=mimecast20190719; t=1777467150;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=u+WWAgsIXWVgVMWDVgyTjAWpE9gW2mZV06D7tfpFocs=;
-	b=QSUCk/s0H9BLd+953iZ3QNJ/avF63kZhNVuhTxQqKUQkMs6VNOicmurO0Y1n4BLcqJX44x
-	tO18bWtEb1jMdRxvFP9aUNqFWxJpI4oPenMoQokDfwsCSUVyuwP4WzID/bBtd+ViiS6RKe
-	UL9xxO8W4/OUMgVpDOlGDh97S9tANho=
-Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
- [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=PGujJ4ac8Vzv3QrLWGifn3d8agUct8OsMz9/77yTtWw=;
+	b=FE+EXqgbTH2/TjUg8WKQo+xPyvxPfg3606kl2/n8AR/Gxx6LpRs1U92PXU1I9kiLljTUyq
+	WDZHPJF+Q+jrGJxPjtNwkud8aMI3wO4PvCZ2GV2fWemcxX08lffXOUmjsAE0gv8wb2N273
+	Ys44Rdg8QPo/hHtdSTIcL8X47ZQXsxM=
+Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
+ [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-635-4wXoNc4QMhWTbOQK1iOIKA-1; Wed, 29 Apr 2026 08:52:24 -0400
-X-MC-Unique: 4wXoNc4QMhWTbOQK1iOIKA-1
-X-Mimecast-MFC-AGG-ID: 4wXoNc4QMhWTbOQK1iOIKA_1777467142
-Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-6771df2b5easo6293593a12.0
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:23 -0700 (PDT)
+ us-mta-344-GUqOwTrXPne9CQEc9jOo1g-1; Wed, 29 Apr 2026 08:52:28 -0400
+X-MC-Unique: GUqOwTrXPne9CQEc9jOo1g-1
+X-Mimecast-MFC-AGG-ID: GUqOwTrXPne9CQEc9jOo1g_1777467147
+Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-66c1806dd5fso11200766a12.3
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Apr 2026 05:52:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1777467142; x=1778071942; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1777467147; x=1778071947; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=u+WWAgsIXWVgVMWDVgyTjAWpE9gW2mZV06D7tfpFocs=;
-        b=CQZ29spsrJSpWHpUlgJxSR8DTk86YZcSihZ3qz5QnspoAudmeXAfON55FzyLJfmqqK
-         n/pfeELfCpAyxDVoag7V3hWpFGPzQ8M5y/EqIqn2bmvAvgm+VN4CfGqM6RaSv1t6f5II
-         PDiwE54GYjFCB9Xy3xiF7sW7fGQYL9hlB0vHq8saOtuZndRFrfKkO5Z3NKSREyYeLWQ6
-         1fvmXh5L+a0Hg8KCYjPcSUP/fNC2Oe+nnSIUjODUAK8o/tvF0WsJ4mrOp28mF2CTlisU
-         kt8ncMVgvgPZHIIqeXnEnS+xMkIVWnpguwVrr/xrC4PBaaWD6hLhLWiihJ5h5FN5uLRk
-         EAEQ==
+        bh=PGujJ4ac8Vzv3QrLWGifn3d8agUct8OsMz9/77yTtWw=;
+        b=pRCxMVElkt1D2HjWD+tMCWsSp7gVa6h+FI8xgHAB9zcHiw86uSG7TG//SeKYV1QPd5
+         ezwqz8qTkJPPGN4XBYV2qC67ZlsqesE1gjeNMcBdatJUJbP/uGzJnc3RrxLat32gnqmt
+         0uFHzYLSv8fuEDhIGHkJkstAR3HSIMAjKcdJR3negS8gKkvlHBRjNJchU7qGAhKAnRc6
+         6Ncfmr2jGZClGLHOgfhIm1zs4x6tnUPNdoxNUAdLmE4RcyLt0Kv9coStVZwPr2Xt96xK
+         OXY88bqceKfG68sv3dy8dS9SJeeAXPFjHFncqP8QH4v48wi3XRnJuqIgX4pPPdEg4JPU
+         qOBA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777467142; x=1778071942;
+        d=1e100.net; s=20251104; t=1777467147; x=1778071947;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=u+WWAgsIXWVgVMWDVgyTjAWpE9gW2mZV06D7tfpFocs=;
-        b=OnN34jWOtyvmNNIXpK651AXOvAw/FUd+jfiLc0M9eI7/p279peZCMuqsTICnta5S+3
-         KrLFR7ifvtFNMKxOm39jrYKZhIJONKktOB2MXMLZ2ThtAK01YzusjbCx/Csu+S3WEkGT
-         wIYu85kML3Nzx7iOuazmIqXb6SszaG2tK37JyyEI7gn2NNv+tNEr16AGUt2d5cVpWyI4
-         Gj9fdpKzjb6g9VmZexns1sxTYOUHUFyRz/eKK6gGL/GUaNfCtHRqF7+n7vgVVmp0bFqe
-         zpYVvBeAkrX4RN+hBgUkDF4tYe98ffHs5YPcoBJA9EkRya0U1y2PB/Y9iNcJfQyx5iv3
-         FF1Q==
-X-Gm-Message-State: AOJu0YxhnfCbGvq3JwZ+U+tJXK8rSr5f2zO/dVsoRUQiPpIrAGoRANZH
-	wBy/5CKSlDkzd+r5pNVFobi6ip2k7hh76yR3ke3AphNpICV4UJvIQS+xGZu6WzMoNcyU2pvZVcV
-	pjIvxgfREc7/0VmF0Fjhsp+CFcBE4TQj7Rnv1LYyGcPuW4ejehyGZvMlUA6ngYJnJjZrM5WJKh7
-	358ONMN+DwJLJrqgLyGVAUyMudM46mZe0sUnO514YhMztlXWccBQ==
-X-Gm-Gg: AeBDietGsY2lKE45cAXSqC6nU+jlsoeC4wBzLvfLeQUR+2f0tCk54lJxv7ft8AMyXa6
-	el1naNDK7I2sbAen3w+1uaTdDi6Cz7TPopCxfyo2v+4BtkNpB9l49KD1sbEGXyjCsRQ1Fi3SjLg
-	Gn+Nhaneffdj0RiPnyBizIAH8uSqdZG0q+ZjU5HrTm2CEliqd3VjwRPyr4oRspdkF8qKP3fwVZ/
-	nqMbqL4BkA8HZ+6O+UkWWRHsh3EBmV53Qc5xCrCPfKZtzmtEPxsVIHhrMuqJR6pflxRUYSc9z+T
-	Qv/Nf3Bey70NhH0ZXuhY6+UhyzJQlsmmYtJvKb1R3e9QRaApXX1WhJAAlOIhdgUb4JPa4JBCiwP
-	7L+uDV0CJXCLwLF9qQ4Rru94SOaHIrJvG3INbKvZaz48acz/51PmKl2h4siyjIVSVJQ==
-X-Received: by 2002:a05:6402:324b:b0:679:223c:d195 with SMTP id 4fb4d7f45d1cf-679bb087506mr3036751a12.14.1777467141775;
-        Wed, 29 Apr 2026 05:52:21 -0700 (PDT)
-X-Received: by 2002:a05:6402:324b:b0:679:223c:d195 with SMTP id 4fb4d7f45d1cf-679bb087506mr3036730a12.14.1777467141038;
-        Wed, 29 Apr 2026 05:52:21 -0700 (PDT)
+        bh=PGujJ4ac8Vzv3QrLWGifn3d8agUct8OsMz9/77yTtWw=;
+        b=eevX65PptNsIAeHoSX99PDucilWfNxwFNyagb4I6Ocsrkzo5qcqgM1wyck9U4D2a0P
+         VYifjNPiqH2GLqv/aD/62fk7g7X4giLn0f0dCNKq9/AxABp0oooDoq09eufdhULOqPfZ
+         RCRWWrNdS3sxKlrcT3doK1XiCc5d55EHS3foWmfxE1dDc3M0A2M9wsUk7cJVgokuB3Vv
+         dMkkJiKqJk7CZV6bqBXE8AjQHNe3ZTrVZO1FUE9kVLYreZOKUOVus3st1uCZKloM6DyN
+         N65xPMN1NKhNOAtdBib4Ef5120g9j22uhRZLZHhyV1xQyqtaWfkROG5pc3zLbeFE8ZI4
+         JAzQ==
+X-Gm-Message-State: AOJu0YyjBXQ4hw1FYy5YedJYvP+mDc5mT5+A0xR1gpImPDU/UUkbXxPR
+	JQFgnNHk1p7YshmwzWEMuz0DEt5GLSQRRKq8ae/Gw/6LSYvWijmq+EMQEwGq2ufNX0GIAsLw2cK
+	rshQob8GE8K+CuP/+QkmvAi5dcmmC26TmsM4OdwvlD4AxhTRkuHg9L+MkqdzhP24LOJHWx8zDcJ
+	aTIzNch12TrjzhhqFp7VLj9ywfT88UxPZARZtBUSyLGq7GITzfyQ==
+X-Gm-Gg: AeBDiev6jyVaRN/zc+a5LrGpeO3yE77ULPP2LPKV+cIDKB2uwtLgbu5eD79BsY/FllG
+	ryXcmSrPBqhAAJVwbhdIeiJRQ1aBVuJfHUfvFKoAassarc8zHUW5BDCxAQzAe/LX27y41+fIxse
+	Obb2SF8jsOLeDTAo1EAdaTXC2RPEx6eNmCDPKfYBGVT3hNftqmcAyPxQ8nTHbBziOdUzKrttI8x
+	7Fowi8VvV3vHHTgMuuGxrVp66+4TRb2z6i/9+cZazrQr5g8u3G5UducLY6UDcIE2JyZidGRIxDT
+	whZlsPxXoYrwg6qY6Y+MrWtBVYxmcUfWHCwLJ2bglFxvmYs5u/FhexeyGFvWPPp5ZFIHOClFrI9
+	mLQoz6uBkeRMkIZfCmMZM2yWu0iZhdVAM2B61ACDGUzf7dPN287ZpZ+/M/0vB+sbWIA==
+X-Received: by 2002:a05:6402:2b98:b0:66e:4372:7518 with SMTP id 4fb4d7f45d1cf-679bb04e627mr4030796a12.2.1777467146835;
+        Wed, 29 Apr 2026 05:52:26 -0700 (PDT)
+X-Received: by 2002:a05:6402:2b98:b0:66e:4372:7518 with SMTP id 4fb4d7f45d1cf-679bb04e627mr4030752a12.2.1777467146035;
+        Wed, 29 Apr 2026 05:52:26 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.19
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-67b22166a6esm680526a12.25.2026.04.29.05.52.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2026 05:52:20 -0700 (PDT)
+        Wed, 29 Apr 2026 05:52:25 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v3 04/11] ceph: add diagnostic timeout loop to wait_caps_flush()
-Date: Wed, 29 Apr 2026 12:51:59 +0000
-Message-Id: <20260429125206.1512203-5-amarkuze@redhat.com>
+Subject: [PATCH v3 06/11] ceph: add manual reset debugfs control and tracepoints
+Date: Wed, 29 Apr 2026 12:52:01 +0000
+Message-Id: <20260429125206.1512203-7-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260429125206.1512203-1-amarkuze@redhat.com>
 References: <20260429125206.1512203-1-amarkuze@redhat.com>
@@ -97,252 +97,329 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Convert wait_caps_flush() from a silent indefinite wait into a diagnostic
-wait loop that periodically dumps pending cap flush state.
+Add the debugfs and trace plumbing used to trigger and observe
+manual client reset.
 
-The underlying wait semantics remain intact: callers still wait until the
-requested cap flushes complete. The difference is that long stalls now
-produce actionable diagnostics instead of looking like a silent hang.
+The reset interface exposes a trigger file for operator-initiated
+reset and a status file for tracking the most recent run.  The
+tracepoints record scheduling, completion, and blocked caller
+behavior so reset progress can be diagnosed from the client side.
 
-CEPH_CAP_FLUSH_MAX_DUMP_COUNT bounds the diagnostics in two ways:
-it limits the number of entries emitted per diagnostic dump, and it
-limits the number of timed diagnostic dumps before the wait continues
-silently. When more entries exist than the per-dump limit, a truncation
-count is reported. When the dump iteration limit is reached, a final
-suppression message is emitted so the transition to silence is explicit.
+debugfs layout under /sys/kernel/debug/ceph/<client>/reset/:
+  trigger - write to initiate a manual reset
+  status  - read to see the most recent reset result
 
-The diagnostic dump collects flush entry data under cap_dirty_lock into
-a bounded on-stack array, then prints after releasing the lock.  This
-avoids holding the spinlock across printk calls.
+The reset directory is cleaned up via debugfs_remove_recursive()
+on the parent, so individual file dentries are not stored.
 
-A null cf->ci on the global flush list indicates a bug since all
-cap_flush entries are initialized with a valid ci before being added.
-Signal this with WARN_ON_ONCE while still printing enough context for
-debugging.
+Tracepoints:
+  ceph_client_reset_schedule  - reset queued
+  ceph_client_reset_complete  - reset finished (success or failure)
+  ceph_client_reset_blocked   - caller blocked waiting for reset
+  ceph_client_reset_unblocked - caller unblocked after reset
 
-READ_ONCE is used for the i_last_cap_flush_ack field, which is read
-outside the inode lock domain. Flush tids are monotonically increasing
-and acks are processed in order under i_ceph_lock, so the latest ack
-tid is always the most recently written value.
-
-Add a ci pointer to struct ceph_cap_flush so that the diagnostic
-dump can identify which inode each pending flush belongs to.  The
-new i_last_cap_flush_ack field tracks the latest acknowledged flush
-tid per inode for diagnostic correlation.
-
-This improves reset-drain observability and is also useful for
-existing sync and writeback troubleshooting paths.
+All tracepoints use a null-safe access for monc.auth->global_id
+to guard against early-init or late-teardown edge cases.
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- fs/ceph/caps.c       | 10 +++++
- fs/ceph/inode.c      |  1 +
- fs/ceph/mds_client.c | 97 ++++++++++++++++++++++++++++++++++++++++++--
- fs/ceph/super.h      |  6 +++
- 4 files changed, 110 insertions(+), 4 deletions(-)
+ fs/ceph/debugfs.c           | 102 ++++++++++++++++++++++++++++++++++++
+ fs/ceph/mds_client.c        |   8 +++
+ fs/ceph/super.h             |   1 +
+ include/trace/events/ceph.h |  67 +++++++++++++++++++++++
+ 4 files changed, 178 insertions(+)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index cb9e78b713d9..4b37d9ffdf7f 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1648,6 +1648,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 7dc307790240..beee4cfe8b18 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -9,6 +9,7 @@
+ #include <linux/seq_file.h>
+ #include <linux/math64.h>
+ #include <linux/ktime.h>
++#include <linux/uaccess.h>
  
- 		spin_lock(&mdsc->cap_dirty_lock);
- 		capsnap->cap_flush.tid = ++mdsc->last_cap_flush_tid;
-+		capsnap->cap_flush.ci = ci;
- 		list_add_tail(&capsnap->cap_flush.g_list,
- 			      &mdsc->cap_flush_list);
- 		if (oldest_flush_tid == 0)
-@@ -1846,6 +1847,7 @@ struct ceph_cap_flush *ceph_alloc_cap_flush(void)
- 		return NULL;
- 
- 	cf->is_capsnap = false;
-+	cf->ci = NULL;
- 	return cf;
+ #include <linux/ceph/libceph.h>
+ #include <linux/ceph/mon_client.h>
+@@ -360,16 +361,107 @@ static int status_show(struct seq_file *s, void *p)
+ 	return 0;
  }
  
-@@ -1931,6 +1933,7 @@ static u64 __mark_caps_flushing(struct inode *inode,
- 	doutc(cl, "%p %llx.%llx now !dirty\n", inode, ceph_vinop(inode));
- 
- 	swap(cf, ci->i_prealloc_cap_flush);
-+	cf->ci = ci;
- 	cf->caps = flushing;
- 	cf->wake = wake;
- 
-@@ -3826,6 +3829,13 @@ static void handle_cap_flush_ack(struct inode *inode, u64 flush_tid,
- 	bool wake_ci = false;
- 	bool wake_mdsc = false;
- 
-+	/*
-+	 * Flush tids are monotonically increasing and acks arrive in
-+	 * order under i_ceph_lock, so this is always the latest tid.
-+	 * Diagnostic readers use READ_ONCE() without holding the lock.
-+	 */
-+	WRITE_ONCE(ci->i_last_cap_flush_ack, flush_tid);
-+
- 	list_for_each_entry_safe(cf, tmp_cf, &ci->i_cap_flush_list, i_list) {
- 		/* Is this the one that was flushed? */
- 		if (cf->tid == flush_tid)
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index f75d66760d54..de465c7e96e8 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -670,6 +670,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
- 	INIT_LIST_HEAD(&ci->i_cap_snaps);
- 	ci->i_head_snapc = NULL;
- 	ci->i_snap_caps = 0;
-+	ci->i_last_cap_flush_ack = 0;
- 
- 	ci->i_last_rd = ci->i_last_wr = jiffies - 3600 * HZ;
- 	for (i = 0; i < CEPH_FILE_MODE_BITS; i++)
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index b62abae72c4c..d83003acfb06 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -27,6 +27,8 @@
- #include <trace/events/ceph.h>
- 
- #define RECONNECT_MAX_SIZE (INT_MAX - PAGE_SIZE)
-+#define CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC 60
-+#define CEPH_CAP_FLUSH_MAX_DUMP_COUNT 5
- 
- /*
-  * A cluster of MDS (metadata server) daemons is responsible for
-@@ -2286,19 +2288,106 @@ static int check_caps_flush(struct ceph_mds_client *mdsc,
- }
- 
- /*
-- * flush all dirty inode data to disk.
-+ * Dump pending cap flushes for diagnostic purposes.
-  *
-- * returns true if we've flushed through want_flush_tid
-+ * cf->ci is safe to dereference here: cap_flush entries hold a
-+ * reference on the inode (via the cap), and entries are removed from
-+ * cap_flush_list under cap_dirty_lock before the cap (and thus the
-+ * inode reference) is released.  Holding cap_dirty_lock therefore
-+ * guarantees the inode remains valid for the lifetime of the scan.
-+ */
-+struct flush_dump_entry {
-+	u64 ino;
-+	u64 snap;
-+	int caps;
-+	u64 tid;
-+	u64 last_ack;
-+	bool wake;
-+	bool is_capsnap;
-+	bool ci_null;
-+};
-+
-+static void dump_cap_flushes(struct ceph_mds_client *mdsc, u64 want_tid)
++static int reset_status_show(struct seq_file *s, void *p)
 +{
-+	struct ceph_client *cl = mdsc->fsc->client;
-+	struct flush_dump_entry entries[CEPH_CAP_FLUSH_MAX_DUMP_COUNT];
-+	struct ceph_cap_flush *cf;
-+	int n = 0, remaining = 0;
++	struct ceph_fs_client *fsc = s->private;
++	struct ceph_mds_client *mdsc = fsc->mdsc;
++	struct ceph_client_reset_state *st;
++	u64 trigger = 0, success = 0, failure = 0;
++	unsigned long last_start = 0, last_finish = 0;
++	int last_errno = 0;
++	enum ceph_client_reset_phase phase = CEPH_CLIENT_RESET_IDLE;
++	bool drain_timed_out = false;
++	int sessions_reset = 0;
++	int blocked_requests = 0;
++	char reason[CEPH_CLIENT_RESET_REASON_LEN];
 +
-+	spin_lock(&mdsc->cap_dirty_lock);
-+	list_for_each_entry(cf, &mdsc->cap_flush_list, g_list) {
-+		if (cf->tid > want_tid)
-+			break;
-+		if (n < CEPH_CAP_FLUSH_MAX_DUMP_COUNT) {
-+			struct flush_dump_entry *e = &entries[n++];
++	if (!mdsc)
++		return 0;
 +
-+			e->ci_null = WARN_ON_ONCE(!cf->ci);
-+			if (!e->ci_null) {
-+				e->ino = ceph_ino(&cf->ci->netfs.inode);
-+				e->snap = ceph_snap(&cf->ci->netfs.inode);
-+				e->last_ack = READ_ONCE(cf->ci->i_last_cap_flush_ack);
-+			}
-+			e->caps = cf->caps;
-+			e->tid = cf->tid;
-+			e->wake = cf->wake;
-+			e->is_capsnap = cf->is_capsnap;
-+		} else {
-+			remaining++;
-+		}
-+	}
-+	spin_unlock(&mdsc->cap_dirty_lock);
++	st = &mdsc->reset_state;
 +
-+	pr_info_client(cl, "still waiting for cap flushes through %llu:\n",
-+		       want_tid);
-+	for (int i = 0; i < n; i++) {
-+		struct flush_dump_entry *e = &entries[i];
++	spin_lock(&st->lock);
++	trigger = st->trigger_count;
++	success = st->success_count;
++	failure = st->failure_count;
++	last_start = st->last_start;
++	last_finish = st->last_finish;
++	last_errno = st->last_errno;
++	phase = st->phase;
++	drain_timed_out = st->drain_timed_out;
++	sessions_reset = st->sessions_reset;
++	strscpy(reason, st->last_reason, sizeof(reason));
++	spin_unlock(&st->lock);
 +
-+		if (e->ci_null)
-+			pr_info_client(cl,
-+				       "  (null ci) %s tid=%llu wake=%d%s\n",
-+				       ceph_cap_string(e->caps), e->tid,
-+				       e->wake,
-+				       e->is_capsnap ? " is_capsnap" : "");
-+		else
-+			pr_info_client(cl,
-+				       "  %llx.%llx %s tid=%llu last_ack=%llu wake=%d%s\n",
-+				       e->ino, e->snap,
-+				       ceph_cap_string(e->caps), e->tid,
-+				       e->last_ack, e->wake,
-+				       e->is_capsnap ? " is_capsnap" : "");
-+	}
-+	if (remaining)
-+		pr_info_client(cl, "  ... and %d more pending flushes\n",
-+			       remaining);
++	blocked_requests = atomic_read(&st->blocked_requests);
++
++	seq_printf(s, "phase: %s\n", ceph_reset_phase_name(phase));
++	seq_printf(s, "trigger_count: %llu\n", trigger);
++	seq_printf(s, "success_count: %llu\n", success);
++	seq_printf(s, "failure_count: %llu\n", failure);
++	if (last_start)
++		seq_printf(s, "last_start_ms_ago: %u\n",
++			   jiffies_to_msecs(jiffies - last_start));
++	else
++		seq_puts(s, "last_start_ms_ago: (never)\n");
++	if (last_finish)
++		seq_printf(s, "last_finish_ms_ago: %u\n",
++			   jiffies_to_msecs(jiffies - last_finish));
++	else
++		seq_puts(s, "last_finish_ms_ago: (never)\n");
++	seq_printf(s, "last_errno: %d\n", last_errno);
++	seq_printf(s, "last_reason: %s\n",
++		   reason[0] ? reason : "(none)");
++	seq_printf(s, "drain_timed_out: %s\n",
++		   drain_timed_out ? "yes" : "no");
++	seq_printf(s, "sessions_reset: %d\n", sessions_reset);
++	seq_printf(s, "blocked_requests: %d\n", blocked_requests);
++
++	return 0;
 +}
 +
-+/*
-+ * Wait for all cap flushes through @want_flush_tid to complete.
-+ * Periodically dumps pending cap flush state for diagnostics.
-  */
- static void wait_caps_flush(struct ceph_mds_client *mdsc,
- 			    u64 want_flush_tid)
- {
- 	struct ceph_client *cl = mdsc->fsc->client;
-+	int i = 0;
-+	long ret;
++static ssize_t reset_trigger_write(struct file *file, const char __user *buf,
++				   size_t len, loff_t *ppos)
++{
++	struct ceph_fs_client *fsc = file->private_data;
++	struct ceph_mds_client *mdsc = fsc->mdsc;
++	char reason[CEPH_CLIENT_RESET_REASON_LEN];
++	size_t copy;
++	int ret;
++
++	if (!mdsc)
++		return -ENODEV;
++
++	copy = min_t(size_t, len, sizeof(reason) - 1);
++	if (copy && copy_from_user(reason, buf, copy))
++		return -EFAULT;
++	reason[copy] = '\0';
++	strim(reason);
++
++	ret = ceph_mdsc_schedule_reset(mdsc, reason);
++	if (ret)
++		return ret;
++
++	return len;
++}
++
+ DEFINE_SHOW_ATTRIBUTE(mdsmap);
+ DEFINE_SHOW_ATTRIBUTE(mdsc);
+ DEFINE_SHOW_ATTRIBUTE(caps);
+ DEFINE_SHOW_ATTRIBUTE(mds_sessions);
+ DEFINE_SHOW_ATTRIBUTE(status);
++DEFINE_SHOW_ATTRIBUTE(reset_status);
+ DEFINE_SHOW_ATTRIBUTE(metrics_file);
+ DEFINE_SHOW_ATTRIBUTE(metrics_latency);
+ DEFINE_SHOW_ATTRIBUTE(metrics_size);
+ DEFINE_SHOW_ATTRIBUTE(metrics_caps);
  
- 	doutc(cl, "want %llu\n", want_flush_tid);
- 
--	wait_event(mdsc->cap_flushing_wq,
--		   check_caps_flush(mdsc, want_flush_tid));
-+	do {
-+		/* 60 * HZ fits in a long on all supported architectures. */
-+		ret = wait_event_timeout(mdsc->cap_flushing_wq,
-+			   check_caps_flush(mdsc, want_flush_tid),
-+			   CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC * HZ);
-+		if (ret == 0) {
-+			if (i < CEPH_CAP_FLUSH_MAX_DUMP_COUNT)
-+				dump_cap_flushes(mdsc, want_flush_tid);
-+			else if (i == CEPH_CAP_FLUSH_MAX_DUMP_COUNT)
-+				pr_info_client(cl,
-+					       "still waiting for cap flushes; suppressing further dumps\n");
-+			i++;
-+		}
-+	} while (ret == 0);
- 
- 	doutc(cl, "ok, flushed thru %llu\n", want_flush_tid);
- }
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 30911ccf961e..9aca42c89ea0 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -238,6 +238,7 @@ struct ceph_cap_flush {
- 	bool is_capsnap; /* true means capsnap */
- 	struct list_head g_list; // global
- 	struct list_head i_list; // per inode
-+	struct ceph_inode_info *ci;
- };
++static const struct file_operations ceph_reset_trigger_fops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.write = reset_trigger_write,
++	.llseek = noop_llseek,
++};
  
  /*
-@@ -443,6 +444,11 @@ struct ceph_inode_info {
- 	struct ceph_snap_context *i_head_snapc;  /* set if wr_buffer_head > 0 or
- 						    dirty|flushing caps */
- 	unsigned i_snap_caps;           /* cap bits for snapped files */
-+	/*
-+	 * Written under i_ceph_lock, read via READ_ONCE()
-+	 * from diagnostic paths.
-+	 */
-+	u64 i_last_cap_flush_ack;
+  * debugfs
+@@ -404,6 +496,7 @@ void ceph_fs_debugfs_cleanup(struct ceph_fs_client *fsc)
+ 	debugfs_remove(fsc->debugfs_caps);
+ 	debugfs_remove(fsc->debugfs_status);
+ 	debugfs_remove(fsc->debugfs_mdsc);
++	debugfs_remove_recursive(fsc->debugfs_reset_dir);
+ 	debugfs_remove_recursive(fsc->debugfs_metrics_dir);
+ 	doutc(fsc->client, "done\n");
+ }
+@@ -451,6 +544,15 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
+ 						fsc,
+ 						&caps_fops);
  
- 	unsigned long i_last_rd;
- 	unsigned long i_last_wr;
++	fsc->debugfs_reset_dir = debugfs_create_dir("reset",
++						    fsc->client->debugfs_dir);
++	debugfs_create_file("trigger", 0200,
++			    fsc->debugfs_reset_dir, fsc,
++			    &ceph_reset_trigger_fops);
++	debugfs_create_file("status", 0400,
++			    fsc->debugfs_reset_dir, fsc,
++			    &reset_status_fops);
++
+ 	fsc->debugfs_status = debugfs_create_file("status",
+ 						  0400,
+ 						  fsc->client->debugfs_dir,
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 777af51ec8d8..8339c2c72f9a 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -5261,6 +5261,7 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
+ 	blocked_count = atomic_inc_return(&st->blocked_requests);
+ 	doutc(cl, "request blocked during reset, %d total blocked\n",
+ 	      blocked_count);
++	trace_ceph_client_reset_blocked(mdsc, blocked_count);
+ 
+ retry:
+ 	remaining = max_t(long, deadline - jiffies, 1);
+@@ -5272,10 +5273,12 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
+ 	if (wait_ret == 0) {
+ 		atomic_dec(&st->blocked_requests);
+ 		pr_warn_client(cl, "timed out waiting for reset to complete\n");
++		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
+ 		return -ETIMEDOUT;
+ 	}
+ 	if (wait_ret < 0) {
+ 		atomic_dec(&st->blocked_requests);
++		trace_ceph_client_reset_unblocked(mdsc, (int)wait_ret);
+ 		return (int)wait_ret;  /* -ERESTARTSYS */
+ 	}
+ 
+@@ -5290,12 +5293,14 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
+ 		if (time_before(jiffies, deadline))
+ 			goto retry;
+ 		atomic_dec(&st->blocked_requests);
++		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
+ 		return -ETIMEDOUT;
+ 	}
+ 	ret = st->last_errno;
+ 	spin_unlock(&st->lock);
+ 
+ 	atomic_dec(&st->blocked_requests);
++	trace_ceph_client_reset_unblocked(mdsc, ret);
+ 	return ret ? -EIO : 0;
+ }
+ 
+@@ -5324,6 +5329,8 @@ static void ceph_mdsc_reset_complete(struct ceph_mds_client *mdsc, int ret)
+ 
+ 	/* Wake up all requests that were blocked waiting for reset */
+ 	wake_up_all(&st->blocked_wq);
++
++	trace_ceph_client_reset_complete(mdsc, ret);
+ }
+ 
+ static void ceph_mdsc_reset_workfn(struct work_struct *work)
+@@ -5633,6 +5640,7 @@ int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
+ 	pr_info_client(mdsc->fsc->client,
+ 		       "manual session reset scheduled (reason=\"%s\")\n",
+ 		       msg);
++	trace_ceph_client_reset_schedule(mdsc, msg);
+ 	return 0;
+ }
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 9aca42c89ea0..5bf976b6c4fe 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -179,6 +179,7 @@ struct ceph_fs_client {
+ 	struct dentry *debugfs_status;
+ 	struct dentry *debugfs_mds_sessions;
+ 	struct dentry *debugfs_metrics_dir;
++	struct dentry *debugfs_reset_dir;
+ #endif
+ 
+ #ifdef CONFIG_CEPH_FSCACHE
+diff --git a/include/trace/events/ceph.h b/include/trace/events/ceph.h
+index 08cb0659fbfc..1b990632f62b 100644
+--- a/include/trace/events/ceph.h
++++ b/include/trace/events/ceph.h
+@@ -226,6 +226,73 @@ TRACE_EVENT(ceph_handle_caps,
+ 		  __entry->mseq)
+ );
+ 
++/*
++ * Client reset tracepoints - identify the client by its monitor-
++ * assigned global_id so traces remain meaningful when kernel pointer
++ * hashing is enabled.
++ */
++TRACE_EVENT(ceph_client_reset_schedule,
++	TP_PROTO(const struct ceph_mds_client *mdsc, const char *reason),
++	TP_ARGS(mdsc, reason),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__string(reason, reason ? reason : "")
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth ?
++			mdsc->fsc->client->monc.auth->global_id : 0;
++		__assign_str(reason);
++	),
++	TP_printk("client_id=%llu reason=%s",
++		  __entry->client_id, __get_str(reason))
++);
++
++TRACE_EVENT(ceph_client_reset_complete,
++	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
++	TP_ARGS(mdsc, ret),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__field(int, ret)
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth ?
++			mdsc->fsc->client->monc.auth->global_id : 0;
++		__entry->ret = ret;
++	),
++	TP_printk("client_id=%llu ret=%d", __entry->client_id, __entry->ret)
++);
++
++TRACE_EVENT(ceph_client_reset_blocked,
++	TP_PROTO(const struct ceph_mds_client *mdsc, int blocked_count),
++	TP_ARGS(mdsc, blocked_count),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__field(int, blocked_count)
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth ?
++			mdsc->fsc->client->monc.auth->global_id : 0;
++		__entry->blocked_count = blocked_count;
++	),
++	TP_printk("client_id=%llu blocked_count=%d", __entry->client_id,
++		  __entry->blocked_count)
++);
++
++TRACE_EVENT(ceph_client_reset_unblocked,
++	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
++	TP_ARGS(mdsc, ret),
++	TP_STRUCT__entry(
++		__field(u64, client_id)
++		__field(int, ret)
++	),
++	TP_fast_assign(
++		__entry->client_id = mdsc->fsc->client->monc.auth ?
++			mdsc->fsc->client->monc.auth->global_id : 0;
++		__entry->ret = ret;
++	),
++	TP_printk("client_id=%llu ret=%d", __entry->client_id, __entry->ret)
++);
++
+ #undef EM
+ #undef E_
+ #endif /* _TRACE_CEPH_H */
 -- 
 2.34.1
 
