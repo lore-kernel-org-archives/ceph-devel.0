@@ -1,79 +1,81 @@
-Received: from mail-yx1-f43.google.com (mail-yx1-f43.google.com [74.125.224.43])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8946C9463
-	for <ceph-devel@vger.kernel.org>; Fri,  1 May 2026 17:03:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B48A3093C1
+	for <ceph-devel@vger.kernel.org>; Fri,  1 May 2026 18:11:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777654994; cv=none; b=tNtoNJyPss7aKrkI4qxu6f4UATDLkb2Ks0NZfiY9S4NgOVtUpPBPDrwnkbyDXrMXIWHLyq89yJmFqEoaYKeHK5IKNWk/vc2OlG/aI4rtl+uUyUdnNQXKa1Gyiwzbuuh4I7ES2+lN8J5/6g/v0LDK1DGhgkeJupm/cMfjHyLC0Dg=
+	t=1777659111; cv=none; b=o9uXeaqIEuFC5C+bdTikhp7wJeZa3q8+valR2300+h94RE64/p0ZR75btOm6lAk0TXsQ4y86P0Ads5tC9UrBcgV1/NeTA4+yga4BLor6RYFJjs5rU585ZarPQa2ncmqHGY7QboedwnggpIbIfWjoK2JanAUCEDEtuekk2MliMoQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777654994; c=relaxed/simple;
-	bh=R9Zpj5UoXr6b3dEgaHj8wSPGBB2EXcFoP5SMtHv9Aq4=;
+	s=arc-20240116; t=1777659111; c=relaxed/simple;
+	bh=YpyUviP3isZKt9JroCZjvCHPJSXii8406daT7SwG1D4=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=lNyJga+JgAfhicdd/40p/zO8MTvq7J1aOWfEAUbLrmLcvkGJPi1ewyYuJw/WCBaX9p1SJpevIA8WwEME/0niTAy8BvfV5HVT5Rke9EIZJFy8qSQ76bmdyohgq8W9sbq2h7g2fmDYpOJPci0l8kCJv6WXd73lbJiE7AFd3hma/JI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=0wzOIpvo; arc=none smtp.client-ip=74.125.224.43
+	 Content-Type:MIME-Version; b=Z2HO+znmxPeTl5H1h4XsEoCoQRYJdTXAIRUA+lAitXWc6pJjjYaeAuUgXzrittZ+frMXCdfM0hpSr9YChCzqSfPh2KRs+ufQFtw4cFAx7U5Toyb9+g5wbPyz6C28MmZptKiT8eTvwoXUG2/qa9tlfkv7P5MSXVgwUa6nuyR6jqE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=G+6uRZQx; arc=none smtp.client-ip=209.85.128.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="0wzOIpvo"
-Received: by mail-yx1-f43.google.com with SMTP id 956f58d0204a3-6587cee8b57so2341200d50.2
-        for <ceph-devel@vger.kernel.org>; Fri, 01 May 2026 10:03:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="G+6uRZQx"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-7bb0d18c7f9so23448647b3.0
+        for <ceph-devel@vger.kernel.org>; Fri, 01 May 2026 11:11:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1777654991; x=1778259791; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1777659107; x=1778263907; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=R9Zpj5UoXr6b3dEgaHj8wSPGBB2EXcFoP5SMtHv9Aq4=;
-        b=0wzOIpvoUCLapy7MGyhgj4ABtjBGBdfzEjq/h1Koa+DMcXhakMyOh4oxqB4lpIGERz
-         i1OLv1ok5XCUdzZJMQBLHAXEvG+LFXXkumItROjUeppIoZeoFflrWpukErufKCF+roiM
-         7USt4Q7lQveeO2kdIJcU4hvT1ham8ekzZGQgc5/7TsSeEJKLCmxZCazpAJ+ney8bYvcx
-         W+D0ss24p9dbPDzy/NoYjZVWenus8/T6xmFJDcYIeiu1c1v214VN69Uan9Z52VleLweI
-         lY6lKQbiESHv3a5q0FNja8tD9K3yEWnW5odRPyUwtpvJWROAcf1Aiqiw3j/6Qn20sA5y
-         jPfg==
+        bh=YpyUviP3isZKt9JroCZjvCHPJSXii8406daT7SwG1D4=;
+        b=G+6uRZQxEwyfeM+d/U9sMLBJuXbNXE3Nq9LYevbiGlyUOLyDWGwpMBUNchFmPLVxQ8
+         LbJ/HfhkoADCWD7Xrma8g5hu8q/dNZQ6n9WyXYKWnwLdG15TcDjJX8kXMt/fVCbMKuav
+         TtlLhTWVdC2ZMQFyNaIFpvx4/WKS2vN5xROG6qDNeqRGaXzPAPqd1y0UiP7oDwXMUtbW
+         uO0cEEQC7Ng06gn6KlYsvzJGj8Uuk44zQY4eARKjMXj+N9+G5DKvlxuQbOJzaHcwGfvq
+         0qt1DS0g2oCkaOMNqwa1vqCK0b4aRah3ISwWZYrSwbjgfnuEpzAZMwhT+RSWNYJX9Wt5
+         RCJQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777654991; x=1778259791;
+        d=1e100.net; s=20251104; t=1777659107; x=1778263907;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=R9Zpj5UoXr6b3dEgaHj8wSPGBB2EXcFoP5SMtHv9Aq4=;
-        b=j2UdPPtX63ClfmFrmqHYS0TEP0v1/2Rt8E3Ts/idtgjjUqRUAFVLkGLzSScn7vX6az
-         0I2dD61xx0x9sWYWp7qjeO7nEBEfU4DQ9aMlEX7bEpjcmmflNQzthGJN2TEO82pve0bM
-         JSYFgvuGMEHlmdWQDBa9pJ7Zp9UzNKk6QUO/p2+Fbz3BNxP2hQu8J+bTvKBtfuwxn/5f
-         UNWi11YniGEF2fsr90GfYdwKmaKPF5m05CumLRRmdn3p+OM1KmotkD476toQMUOjqKDe
-         eM2AoB0YmuijA1PyUdqZ4YNP5v3gsFGCwYSA5WcKg3iegAzpW/XjqOTiVr6eJzy/BiNc
-         QW5g==
-X-Forwarded-Encrypted: i=1; AFNElJ/1J1Z4Yq9cBBo2/k0uJpXnDgwRGWOImW1bjgNAxD/LOE3mzIMcC5X5iZncrOXWex31PghAjxzwY1Cf@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz0MIjjuthdreGBTdBnwNeTyCUzP7lYydEy8mJZbKnpyODJgQtK
-	cxnt2G5VZ1frQPSxLF54KhwR3Rx93qNUtI6O8SCuhYrISBiXkxjEasF7rSwtF96gmwk=
-X-Gm-Gg: AeBDietjwkTrKGow2qddj1hapeQHDJJwxucuLl369FzkXlXyUQEOPBDmz0OjlFEU81w
-	rxzlY+1KCt/eHzdfu99BuQKUBcDERsC38V/XG4xHvcHsXjU+1IJU4fXcGQd+CkjhBuCBj1BHXBz
-	+MLSVmUhZ6h0R9tnK9BvG/qXxoYclC4PJoHYVPwJgB6JwMbcc/dKMsTNULmlgaa4lBSvw+9IoEl
-	OS/ZvaNgmnQpx+BFNKXqWkayrqZ7Atiiwx4eAHHAx8nj9Of2/LS3kZy1wk6T8rs6CAE8h9917qG
-	ABzPrb2QWLLoRmV8BS1EgxnMdXv8dWr/K73DZNRJreZJp1nuDGBSG/tC86Xk8cWTfZhK6QzD7oM
-	/9k/WZ6gohpkGQwnvoUirQtTTL7Kj0dovNULg22aga989CGH++bphp8hH/jGY2s6WYTAafoeBKx
-	lzIvs98tErOfhbXO01dqt0XOkUkijZGrM/8x9oeSDJr/i7MOVqJZuXLZYXI7d4CoPi2bXzw7N0p
-	ExsG0LQ7oI4+wOq7IyfFXxB07dmMtBOekrefFIjDqfBZL8ZP06kHkAkjhKakAp5lmull0dBhkOr
-	pYA2dA==
-X-Received: by 2002:a05:690c:e4f0:b0:7ba:a726:58da with SMTP id 00721157ae682-7bd771049dfmr1680067b3.24.1777654991597;
-        Fri, 01 May 2026 10:03:11 -0700 (PDT)
-Received: from ?IPv6:2600:1700:6476:1430:5426:cf79:65d3:bfd0? ([2600:1700:6476:1430:5426:cf79:65d3:bfd0])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd6655d954sm13323647b3.18.2026.05.01.10.03.10
+        bh=YpyUviP3isZKt9JroCZjvCHPJSXii8406daT7SwG1D4=;
+        b=FtbWgE/EU2hrxtMNMA4kh6F8vKudvCgjuFIw/fNkn3iREG/UdkXUcyHug4YVuTYHpu
+         5rqbo7G9x0ct581SWYMoX1yCWKnbmipWTmdDXtI1TjzjFY67HGIDUwtoqAH6bJynHHJL
+         0kmfJ5hQfGcA9zd43D1HfJRWHcMnR12kbkVNu7jx2vKPlOa+SmOXs2c4piBabCQnn3LL
+         vi1OEOnuaNx0P1BjaNRrXVkSaiJnzeOnmdojaRKJY5MwiE7IreNRYKoQLArxTw+S3DqC
+         tEbjBLUYUNPpJzsM+Kl36PoZgw+OgRu/os+LbiKLS6gMRF3v41rz4DmCm2GSddU1/90/
+         OSLQ==
+X-Forwarded-Encrypted: i=1; AFNElJ9faqfhZmdU+X6vaNKl2G1RpvpPrt8OlyH+dZor059uLJzwUyu1ONiD7+zsvZxlLprigSnSjsBnca31@vger.kernel.org
+X-Gm-Message-State: AOJu0YwLFL2GJT6FNI2fyILK2sVn2pFOqWW/7K+xZJZOp0TWvJKtMWAu
+	VOtKtZ8g0YRXu4B8iWupk1BwFscX81F2iOQTQMVlkixYRU7gSQ7yrNTCWhAGfRL5RLQ=
+X-Gm-Gg: AeBDieuCstIwNzXnrc9nKVtdURvswMeketvMRzsmEqzo0wgXOh+97Ad12iLScRxXP4d
+	k+F9aqaG4oCthrqKLASmy7m9lGFj0WJaj8Gnf62bSnzhIok5Qvemw02nlxa/70njPTvE5D2zbAJ
+	eAcZmbeW+ECQvFIrSQCiVPuEeQuOM6Wf9ZO8MxXm9f6uemULkrccArpMhy7lxASXjD9DJYeDyo6
+	7+wckVHP9A7XAG4us8nLcm0rwXeXmG0aTwiP9w4+EZrFG5XkwY930zZpZBELdorxTYF8jRFks3H
+	7i5/eCPTs5J6O3xmL25IcRd1lRHcr+mXrwvijuJNgALyXUOiSwzr+TtCe0bIDQ2m4wdHit0/Pyn
+	md3z/f41WrLylbEvnS0UuvKRWqvdcLtuvrhyv8G9RkY/rqVTJlqTLXJWtVWG5DjLyXoX904g2Rl
+	UbED8xWMc6CIJ8sGMl4uXeJeZK4RKRaldZrmPy6IDpYWegstqUoQJLfgAJWc0tr8Q1Y8KMSlFKD
+	LRG3+ogrsn4A3bA+8J+A7l7zoCEGZwwk8OJznC4ipt3lHgl2/AKmacbJKkzZyhK2e/w6qkE
+X-Received: by 2002:a05:690c:10c:b0:7bd:7039:f2e8 with SMTP id 00721157ae682-7bd77128336mr4877307b3.42.1777659106745;
+        Fri, 01 May 2026 11:11:46 -0700 (PDT)
+Received: from [10.0.0.3] (162-197-212-70.lightspeed.sntcca.sbcglobal.net. [162.197.212.70])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd66838851sm14092737b3.23.2026.05.01.11.11.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 May 2026 10:03:11 -0700 (PDT)
-Message-ID: <2a70150e66ab67106ec9196eb7cd2ccbebe771a7.camel@dubeyko.com>
+        Fri, 01 May 2026 11:11:45 -0700 (PDT)
+Message-ID: <c247520dd5bfe49e22b29d221967d0fd569c2e6a.camel@dubeyko.com>
 Subject: Re: [SECURITY] ceph: msgr2 monitor data_len mismatch can trigger
  client kernel panic
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Willy Tarreau <w@1wt.eu>, Dhiraj Mishra <mishra.dhiraj95@gmail.com>
-Cc: Greg KH <gregkh@linuxfoundation.org>, idryomov@gmail.com, 
-	amarkuze@redhat.com, security@kernel.org, ceph-devel@vger.kernel.org
-Date: Fri, 01 May 2026 10:03:09 -0700
-In-Reply-To: <afRoFf4QVANv3i-T@1wt.eu>
+To: Dhiraj Mishra <mishra.dhiraj95@gmail.com>
+Cc: Willy Tarreau <w@1wt.eu>, Greg KH <gregkh@linuxfoundation.org>, 
+	idryomov@gmail.com, amarkuze@redhat.com, security@kernel.org, 
+	ceph-devel@vger.kernel.org
+Date: Fri, 01 May 2026 11:11:44 -0700
+In-Reply-To: <CAG8b5tTm6XMXOW3gycj13PU4=jRvsvYtNKYzMzg7mQO2h+E85g@mail.gmail.com>
 References: 
 	<CAG8b5tT0cqjS3D-q6Z=ufv73W69ZXfRA0FTm85uf9OEL34=-GQ@mail.gmail.com>
 	 <2026050111-comprised-unreal-7b2a@gregkh>
 	 <CAG8b5tSZX4OtkwLDgBCtWJPhWSoQgh9rHDzxW3bja9GkrciG0A@mail.gmail.com>
 	 <afRoFf4QVANv3i-T@1wt.eu>
+	 <2a70150e66ab67106ec9196eb7cd2ccbebe771a7.camel@dubeyko.com>
+	 <CAG8b5tTm6XMXOW3gycj13PU4=jRvsvYtNKYzMzg7mQO2h+E85g@mail.gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -128,34 +130,124 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-Hi Dhiraj,
+On Fri, 2026-05-01 at 21:53 +0400, Dhiraj Mishra wrote:
+> Sure noted, here is the patch.
+>=20
+> From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00
+> 2001
+> From: Dhiraj Mishra
+> Date: Fri, 1 May 2026 12:45:00 +0400
+> Subject: [PATCH] libceph: reject monitor replies with oversized data
+> segment
+>=20
+> Monitor messages can be allocated from preallocated reply messages or
+> with ceph_msg_new(), both of which may provide only front-buffer
+> storage
+> and no data items.=C2=A0 The messenger receive path copies the wire heade=
+r
+> into the selected ceph_msg and later uses hdr.data_len to decide
+> whether
+> to initialize a data cursor.
+>=20
+> If a malicious or compromised monitor advertises a non-zero data
+> segment
+> for one of these front-only replies, the receive path can call
+> ceph_msg_data_cursor_init() with length greater than msg->data_length
+> and
+> hit its BUG_ON() checks, crashing the client kernel.
+>=20
+> I verified the issue against v7.1-rc1-123-ge75a43c7cec4.=C2=A0 The msgr2
+> trigger path is present since commit cd1a677cad99 ("libceph, ceph:
+> implement msgr2.1 protocol (crc and secure modes)"), which is
+> contained
+> in v5.11-rc1 and later.=C2=A0 The monitor allocator pattern is older, but
+> I
+> have not tested older msgr1-only kernels.
+>=20
+> A concrete trigger is a monitor connection over msgr2 after
+> CEPH_CON_S_OPEN
+> where a FRAME_TAG_MESSAGE contains a monitor reply type handled by
+> mon_alloc_msg(), a valid front_len for that message type and data_len
+> =3D 1.
+> CEPH_MSG_MON_MAP is one such example: the message is allocated with
+> ceph_msg_new(), leaving msg->data_length and msg->num_data_items as
+> zero.
+>=20
+> Reject monitor replies whose wire data segment is larger than the
+> data
+> backing allocated for the selected ceph_msg, mirroring the existing
+> OSD
+> reply hardening.
+>=20
+> Signed-off-by: Dhiraj Mishra
+> ---
+> =C2=A0net/ceph/mon_client.c | 21 +++++++++++++++++++++
+> =C2=A01 file changed, 21 insertions(+)
+>=20
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index d2cdc8ee3155..7f2293122bba 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -712,6 +712,7 @@ static struct ceph_msg *get_generic_reply(struct
+> ceph_connection *con,
+> =C2=A0 struct ceph_mon_client *monc =3D con->private;
+> =C2=A0 struct ceph_mon_generic_request *req;
+> =C2=A0 u64 tid =3D le64_to_cpu(hdr->tid);
+> + u32 data_len =3D le32_to_cpu(hdr->data_len);
+> =C2=A0 struct ceph_msg *m;
+> =C2=A0
+> =C2=A0 mutex_lock(&monc->mutex);
+> @@ -720,6 +721,16 @@ static struct ceph_msg *get_generic_reply(struct
+> ceph_connection *con,
+> =C2=A0 dout("get_generic_reply %lld dne\n", tid);
+> =C2=A0 *skip =3D 1;
+> =C2=A0 m =3D NULL;
+> + } else if (!req->reply) {
+> + pr_warn("%s tid %llu missing reply buffer, skipping\n",
+> + __func__, tid);
+> + *skip =3D 1;
+> + m =3D NULL;
+> + } else if (data_len > req->reply->data_length) {
+> + pr_warn("%s tid %llu data %u > preallocated %zu, skipping\n",
+> + __func__, tid, data_len, req->reply->data_length);
+> + *skip =3D 1;
+> + m =3D NULL;
+> =C2=A0 } else {
+> =C2=A0 dout("get_generic_reply %lld got %p\n", tid, req->reply);
+> =C2=A0 *skip =3D 0;
+> @@ -1499,6 +1510,7 @@ static struct ceph_msg *mon_alloc_msg(struct
+> ceph_connection *con,
+> =C2=A0 struct ceph_mon_client *monc =3D con->private;
+> =C2=A0 int type =3D le16_to_cpu(hdr->type);
+> =C2=A0 int front_len =3D le32_to_cpu(hdr->front_len);
+> + u32 data_len =3D le32_to_cpu(hdr->data_len);
+> =C2=A0 struct ceph_msg *m =3D NULL;
+> =C2=A0
+> =C2=A0 *skip =3D 0;
+> @@ -1544,6 +1556,15 @@ static struct ceph_msg *mon_alloc_msg(struct
+> ceph_connection *con,
+> =C2=A0 ceph_msg_put(m);
+> =C2=A0 m =3D ceph_msg_new(type, front_len, GFP_NOFS, false);
+> =C2=A0 }
+> + if (m && data_len > m->data_length) {
+> + pr_warn("%s data %u > prealloc %zu (%u#%llu), skipping\n",
+> + __func__, data_len, m->data_length,
+> + (unsigned int)con->peer_name.type,
+> + le64_to_cpu(con->peer_name.num));
+> + ceph_msg_put(m);
+> + m =3D NULL;
+> + *skip =3D 1;
+> + }
+> =C2=A0
+> =C2=A0 return m;
+> =C2=A0}
 
-Could you please send your patches not as attachment? And, please,
-don't forget ceph-devel@vger.kernel.org. I never review the
-attachments.
+
+I assume that the email has been sent not in plain text and
+ceph-devel@vger.kernel.org simply rejected the email. Could you please
+follow to the common practice of sending patches [1]?
 
 Thanks,
 Slava.
 
-On Fri, 2026-05-01 at 10:45 +0200, Willy Tarreau wrote:
-> On Fri, May 01, 2026 at 12:39:58PM +0400, Dhiraj Mishra wrote:
-> > Thank you, for the guidance; This is my first time here.
-> >=20
-> > I have attached the text file and the patch; let me know if any
-> > further
-> > information is required.
->=20
-> Thank your for the fast turn-around. Let's leave time for the
-> maintainers
-> to take note of it. There's one point though, the sign-off in your
-> patch
-> lacks your e-mail address: "Signed-off-by: Dhiraj Mishra". So if the
-> patch
-> is valid, maintainers will not be able to apply it. I think it's OK
-> to wait
-> for them to review it before updating it, as there might be other
-> comments
-> anyway.
->=20
-> Thank you!
-> Willy
+[1] https://docs.kernel.org/process/submitting-patches.html
