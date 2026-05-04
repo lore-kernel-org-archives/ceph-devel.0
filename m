@@ -1,81 +1,52 @@
-Received: from mail-lj1-f176.google.com (mail-lj1-f176.google.com [209.85.208.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from a1-bg02.venev.name (a1-bg02.venev.name [213.240.239.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2948C37648D
-	for <ceph-devel@vger.kernel.org>; Mon,  4 May 2026 09:16:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA8F63E1CE5
+	for <ceph-devel@vger.kernel.org>; Mon,  4 May 2026 16:55:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.240.239.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777886212; cv=none; b=bmYN5pHbx89WaK5obtYunCpjnYr5Ew0ShHqkSE+EpH7aXFhFTjkLOaSxFF6T0+yzku/L30u0PnPtT6F1bVpevCn3XHRwuocWr5bfxGgYjsFhtscqeyUgmVkDCrqs/P72yvTt2+/APfXzYsKXOeTSqmPA32Ev86rmKqIJdPrVYCs=
+	t=1777913710; cv=none; b=soa9g+yyaMk+RW/5KhL+5R7IYe7V2pC9JQZkB/4Kk6Ig2PaOS099N/+l2d3uXa5BLZpCRIJV5Dc6MiGlak7mWr5CmqCIe0oqIi4jKE43BbZMCMQPqcSqKkT++Z4b4Ws2v/fBdONzZjSyaXov7oKHknTqqkTGfWCl3ex2WBU2KRQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777886212; c=relaxed/simple;
-	bh=bjp9+6ZHh5kA2wJX5YbiN76yptloXxxSyjk/HkLLCC4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=bGrBq05YeUED5k9He+EGnz++O+DZb2gBqnf3jOkX2cgkAQJhIJGmd+vW3dXqT2/BevDuXV9eqxYTYL5VDAuosqgP4npKYglQFdLCPdlEeiDxAcRnMaMY/TXO4ylS+v7AChxaE+6vMOAc0g36kJWuK8/k+fogjHMB4c8muNpscfo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C1Oe0GeI; arc=none smtp.client-ip=209.85.208.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1777913710; c=relaxed/simple;
+	bh=hr6dyPeJhPjx8lhsSe6EXUYh3+Uu2Qq3IZt53Huk+4g=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=u1GXeaRU0cpoEBQJgnGqWdlD9kYa61YOCVbw8JB7pjyAJ6mWWjGNwafvH0nVNr+IsehrHpOzD0oQi2BIU2rBMSrrrpD2NJTXUW5XNOsDIhC9/ZxqdE9FhJ9C4bLogPoMTPzmDcEwkNwTxV2STF6sowszdac33BKvTbhr7DQqGB0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=venev.name; spf=pass smtp.mailfrom=venev.name; dkim=pass (4096-bit key) header.d=venev.name header.i=@venev.name header.b=em40ZXuO; arc=none smtp.client-ip=213.240.239.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=venev.name
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=venev.name
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C1Oe0GeI"
-Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-393a49d2e5eso4284031fa.2
-        for <ceph-devel@vger.kernel.org>; Mon, 04 May 2026 02:16:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777886209; x=1778491009; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=t9ZzvHzMTTp2n6bNSS7kPEE/1daWHQcLfOR7eCRpzzs=;
-        b=C1Oe0GeIWEd25D2EkWJUNgWMOiDmWIQTjsxrm8FRziuyT4mDNliB/G5qX7yCPuvBZw
-         9EgS+NuGr3j7VJ17+BmJYlNVFBzw0DiYpchPZ+cO3ZGoKSi8y/h8IEyqaD2gHfsCrP/D
-         CBxMhzeF3j5fNQtPBQWSXtk05RsXc0gEiVziHogxolCOOmF45hZMY7yqOmR+ozEvYJea
-         lWJ9jbMyQcKlQJZg/H0r3V2R1oTnNoS1rNN+jzcSipLXaTIWXWEPpubaA07A3Tnb//nl
-         51nxHdAayYC04hSeyE19TRlu56q6EOhtyJqQM36k9ytJNDQjekc1o2wGq0BPMksPf547
-         aJwA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777886209; x=1778491009;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=t9ZzvHzMTTp2n6bNSS7kPEE/1daWHQcLfOR7eCRpzzs=;
-        b=Sd8S9FMGPW5nH6EkwocnI6JWKI9tjOYpjcGUFCJiwQdlmTH5Ui+9UMaMtPRb0U021F
-         DzL+G3+bg6esJAq9M0PkjJkrR8MTkUJNkxYs6qo1Z3Awqt0/VUl0Z75HETtJw+Xn/k6I
-         gn2hkvghLEBk7KDLnS5U57kLb4K6uK0KdZFTOLj6yTl+lAdoS5mODmmEgMUlKw/H0Jn/
-         N5mpZsDPzhFnvxh4JielylorELvSA/E8N7P8ugofSqG1htqHPKLYOBYCfGGA41/PvpD3
-         tipRizrl7prATtZbOshzWVTHqBgy77XUkmd9xbvn+FaDRw0hYjQJdB0ygKHSwNZiTQRI
-         Bcjw==
-X-Forwarded-Encrypted: i=1; AFNElJ8szTBjSmzvkFK0KEMSyoQ50d7gtJ6mUstwk2ac6Af3DUDWclVB6kQQ36sYaQfCuSZv1eUSZS+r1QtM@vger.kernel.org
-X-Gm-Message-State: AOJu0YzbSn7c6Pd7HwdaP375EvawtHauZ+687exMjUAgcr2Vvfj/H+iB
-	xRTv4Eu4ayMixsdH29qx/Sy2sj5MhYqaIiGUjdb/If7twCblS7JGQ8vI
-X-Gm-Gg: AeBDievK58uSlsgEhch8ZCDytMB3K0F1HoTFHhZ9Kds7WXqLG8mK3viTBtrKzePZ+WP
-	V02ujOJ/3UDU9fh7t2LdE7CIR2ZtXW3HWpgHM5Nem1nKA58LYEUqa85GDUdGEsI7qK56cuj2vGR
-	f/e8T4vfDkbeQgkVNH5G6a9t0ahPaanTlRLOWGT1iWowyTFYK7TQ6bVcnHI7REkhL/n7uR9hI8r
-	rn+NzAipyHJ8KBDQbhVmAzS89ScCH1pYr1Oik8nVZo8lYxYpYtpD3OhpNt9RH5FOdKaUnsrvTGU
-	i7FulBjLgt7m5cm4Xp8lGGNH5HuCt3DZ7bucE4ah5uEFLoNk+EtEH53sTMpoKne3eKNkEfeZesP
-	mVTjK/zasMvFI7Q1+j/EW828m5m3iukvf0otiPi7PiaxasyTTgGH5Mp95zCmrA6azSTutCin7KZ
-	hY74n0vrY9HFEZnP3wYOZAv3nxm+eK+CT6OLxKuIt3Nx+yaJBolu3RQoSuvjLS7v1g/CtlK1qNx
-	+qdPBcClUYTm8x+HeAsXiD2oSNE22oV9ve2S2pUSg==
-X-Received: by 2002:a05:6512:3ba4:b0:5a7:42e2:db4 with SMTP id 2adb3069b0e04-5a862fbd93fmr2848737e87.15.1777886208914;
-        Mon, 04 May 2026 02:16:48 -0700 (PDT)
-Received: from localhost.localdomain ([94.204.104.200])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5a86c7a1698sm1377703e87.3.2026.05.04.02.16.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 04 May 2026 02:16:48 -0700 (PDT)
-From: Dhiraj Mishra <mishra.dhiraj95@gmail.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>,
+	dkim=pass (4096-bit key) header.d=venev.name header.i=@venev.name header.b="em40ZXuO"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=venev.name;
+	s=default; h=Content-Transfer-Encoding:Message-ID:Date:Subject:To:From:
+	Content-Type:Reply-To:Sender; bh=VgDjbsjBR33jiccEW7OlvFDeOgOtO4REdws9wLY9dzk=
+	; b=em40ZXuOkcmmytrPRXJ/Hi3IDqIINqwpAl6LrLiv4ETekiakx5zN9mnhyca1GXMhxKS90SdL/
+	kK+4QKypmw9xnpZtzqAlrYzpaZWbBYgdGQo6UBzfTm3HBeoe1D2MNRRqkM/iiHc8aAPuNOUPp2jtF
+	of1cAW73sqnF9AWxAaSLq0zA+fm2DkYvdIcSZl9E791iQQVAu2cPTFXn9BwTQBDqHIVv82wLJL8ya
+	V2MVvPhzKdWHes4F2xwMDu3I0ANZi+ZOKz3HpbCs57ovvsgk6yeMy+EYyFp/7dP99tOU52trhpKB7
+	nT+Sfjbsrau1ZBpLsFxbA2X28a8rp0zRl8if7HNnwSudkXjmfAQOMTt4zTe6EBsCbPUQsS//o8Z9u
+	1b0qvUDBOk8octLNazvFxqqf8U+Jy6TNp+qrIxGTASJJ5N60+JsSghUS+Vb9HASIvaPGtpbf3jec8
+	f14g66mwpKG1+DtLg+YsXHQuXJWYL1bGccOko7YvwH0EM4yZhbXkVEKwGdT2UahrV9RAgZZxXVC/U
+	xmdsmBtvE8kocuDd0MI55TeiCOido3hZ7dJliIvrIrDleIbLD3r04TbflOpOevw9cY3qjXKqk3kw4
+	4J2vTscnnsqm+VAyR7y+lQQn+bMeri6O3eDyMnkgKrkhOMDny4GPVBh8lCHcQaEXr8i4bg0=;
+Received: from a1-bg02.venev.name ([213.240.239.49] helo=pmx1.venev.name)
+	by a1-bg02.venev.name with esmtps
+	id 1wJvdW-00000007wPv-0kor
+	(TLS1.3:TLS_AES_256_GCM_SHA384:256)
+	(envelope-from <hristo@venev.name>);
+	Mon, 04 May 2026 15:55:10 +0000
+Received: from venev.name ([213.240.239.49])
+	by pmx1.venev.name with ESMTPSA
+	id +UVRD13B+Gn04RwAT9YxdQ
+	(envelope-from <hristo@venev.name>); Mon, 04 May 2026 15:55:10 +0000
+From: Hristo Venev <hristo@venev.name>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: Alex Markuze <amarkuze@redhat.com>,
+	Ilya Dryomov <idryomov@gmail.com>,
 	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Willy Tarreau <w@1wt.eu>,
-	security@kernel.org,
-	Dhiraj Mishra <mishra.dhiraj95@gmail.com>
-Subject: [PATCH v4] libceph, ceph: reject oversized mon and MDS data segments
-Date: Mon,  4 May 2026 13:16:35 +0400
-Message-ID: <20260504091635.17215-1-mishra.dhiraj95@gmail.com>
+	Hristo Venev <hristo@venev.name>
+Subject: [PATCH] ceph: put folios not suitable for writeback
+Date: Mon,  4 May 2026 18:54:45 +0300
+Message-ID: <20260504155450.1892761-1-hristo@venev.name>
 X-Mailer: git-send-email 2.54.0
-In-Reply-To: <3fb2610b-5240-41ff-a5d9-699a445dffd3@tu-ilmenau.de>
-References: <3fb2610b-5240-41ff-a5d9-699a445dffd3@tu-ilmenau.de>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -84,139 +55,37 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Monitor and MDS messages can be allocated with only front-buffer storage
-and no data items.  The messenger receive path copies the wire header
-into the selected ceph_msg and later uses hdr.data_len to decide whether
-to initialize a data cursor.
+The batch holds references to the folios (see `filemap_get_folios`,
+`folio_batch_release`), so we need to `folio_put` the folios we remove.
 
-If a malicious or compromised peer advertises a non-zero data segment for
-one of these front-only messages, the receive path can call
-ceph_msg_data_cursor_init() with length greater than msg->data_length and
-hit its BUG_ON() checks, crashing the client kernel.
+Tested on v6.18.
 
-I verified the monitor issue against v7.1-rc1-123-ge75a43c7cec4.  The
-msgr2 trigger path is present since commit cd1a677cad99 ("libceph,
-ceph: implement msgr2.1 protocol (crc and secure modes)"), which is
-contained in v5.11-rc1 and later.  The allocator patterns are older, but
-I have not tested older msgr1-only kernels.
-
-A concrete monitor trigger is a monitor connection over msgr2 after
-CEPH_CON_S_OPEN where a FRAME_TAG_MESSAGE contains a monitor reply type
-handled by mon_alloc_msg(), a valid front_len for that message type and
-data_len = 1.  CEPH_MSG_MON_MAP is one such example: the message is
-allocated with ceph_msg_new(), leaving msg->data_length and
-msg->num_data_items as zero.
-
-The MDS allocation path has the same issue: mds_alloc_msg() allocates the
-incoming message with ceph_msg_new(type, front_len, GFP_NOFS, false),
-leaving msg->data_length as zero for a front-only message selected from
-an attacker-controlled wire header.
-
-Reject monitor and MDS messages whose wire data segment is larger than
-the data backing allocated for the selected ceph_msg, mirroring the
-existing OSD reply hardening.
-
-Fixes: 53ded495c6ac ("libceph: define mds_alloc_msg() method")
-Fixes: cd1a677cad99 ("libceph, ceph: implement msgr2.1 protocol (crc and secure modes)")
-Signed-off-by: Dhiraj Mishra <mishra.dhiraj95@gmail.com>
+Link: https://tracker.ceph.com/issues/74156
+Signed-off-by: Hristo Venev <hristo@venev.name>
 ---
-v4:
-  - Add the same oversized data_len guard to the MDS allocation path.
+ fs/ceph/addr.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-v3:
-  - Remove the impossible !req->reply check for generic requests.
-  - Use pr_warn_ratelimited() for malicious-monitor log spam resistance.
-  - Avoid adding __func__ to the new mon_client warnings.
-  - Add a blank line between the front_len and data_len checks.
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 1454760332ff..0a86f672cc09 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1336,6 +1336,7 @@ void ceph_process_folio_batch(struct address_space *mapping,
+ 						  ceph_wbc, folio);
+ 		if (rc == -ENODATA) {
+ 			folio_unlock(folio);
++			folio_put(folio);
+ 			ceph_wbc->fbatch.folios[i] = NULL;
+ 			continue;
+ 		} else if (rc == -E2BIG) {
+@@ -1346,6 +1347,7 @@ void ceph_process_folio_batch(struct address_space *mapping,
+ 		if (!folio_clear_dirty_for_io(folio)) {
+ 			doutc(cl, "%p !folio_clear_dirty_for_io\n", folio);
+ 			folio_unlock(folio);
++			folio_put(folio);
+ 			ceph_wbc->fbatch.folios[i] = NULL;
+ 			continue;
+ 		}
+-- 
+2.54.0
 
-v2:
-  - Resend as an inline plain-text patch.
-  - Add full email address to the From and Signed-off-by identities.
-  - Add ceph-devel and LKML to the recipient list when sending.
-
- fs/ceph/mds_client.c  | 13 +++++++++++++
- net/ceph/mon_client.c | 17 +++++++++++++++++
- 2 files changed, 30 insertions(+)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index ed17e0023705..3b92d37983d1 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -6543,9 +6543,12 @@ static int mds_handle_auth_bad_method(struct ceph_connection *con,
- static struct ceph_msg *mds_alloc_msg(struct ceph_connection *con,
- 				struct ceph_msg_header *hdr, int *skip)
- {
-+	struct ceph_mds_session *s = con->private;
-+	struct ceph_client *cl = s->s_mdsc->fsc->client;
- 	struct ceph_msg *msg;
- 	int type = (int) le16_to_cpu(hdr->type);
- 	int front_len = (int) le32_to_cpu(hdr->front_len);
-+	u32 data_len = le32_to_cpu(hdr->data_len);
- 
- 	if (con->in_msg)
- 		return con->in_msg;
-@@ -6558,6 +6561,16 @@ static struct ceph_msg *mds_alloc_msg(struct ceph_connection *con,
- 		return NULL;
- 	}
- 
-+	if (data_len > msg->data_length) {
-+		pr_warn_ratelimited_client(cl,
-+					   "mds%d message data %u > prealloc %zu, skipping\n",
-+					   s->s_mds, data_len,
-+					   msg->data_length);
-+		ceph_msg_put(msg);
-+		*skip = 1;
-+		return NULL;
-+	}
-+
- 	return msg;
- }
- 
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index d2cdc8ee3155..9f1c7ca42f36 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -712,6 +712,7 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
- 	struct ceph_mon_client *monc = con->private;
- 	struct ceph_mon_generic_request *req;
- 	u64 tid = le64_to_cpu(hdr->tid);
-+	u32 data_len = le32_to_cpu(hdr->data_len);
- 	struct ceph_msg *m;
- 
- 	mutex_lock(&monc->mutex);
-@@ -720,6 +721,11 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
- 		dout("get_generic_reply %lld dne\n", tid);
- 		*skip = 1;
- 		m = NULL;
-+	} else if (data_len > req->reply->data_length) {
-+		pr_warn_ratelimited("mon generic reply tid %llu data %u > preallocated %zu, skipping\n",
-+				    tid, data_len, req->reply->data_length);
-+		*skip = 1;
-+		m = NULL;
- 	} else {
- 		dout("get_generic_reply %lld got %p\n", tid, req->reply);
- 		*skip = 0;
-@@ -1499,6 +1505,7 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
- 	struct ceph_mon_client *monc = con->private;
- 	int type = le16_to_cpu(hdr->type);
- 	int front_len = le32_to_cpu(hdr->front_len);
-+	u32 data_len = le32_to_cpu(hdr->data_len);
- 	struct ceph_msg *m = NULL;
- 
- 	*skip = 0;
-@@ -1545,5 +1552,15 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
- 		m = ceph_msg_new(type, front_len, GFP_NOFS, false);
- 	}
- 
-+	if (m && data_len > m->data_length) {
-+		pr_warn_ratelimited("mon message data %u > prealloc %zu (%u#%llu), skipping\n",
-+				    data_len, m->data_length,
-+				    (unsigned int)con->peer_name.type,
-+				    le64_to_cpu(con->peer_name.num));
-+		ceph_msg_put(m);
-+		m = NULL;
-+		*skip = 1;
-+	}
-+
- 	return m;
- }
