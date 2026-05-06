@@ -1,204 +1,546 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 789C4391822
-	for <ceph-devel@vger.kernel.org>; Tue,  5 May 2026 18:55:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C25F342B759
+	for <ceph-devel@vger.kernel.org>; Wed,  6 May 2026 11:32:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.129.124
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778007336; cv=fail; b=pOcEwIelMNbEOoci6RKNqmnXbc8rz2H98aO/Mpc8LEvRAFTZNJx7u/8/5bznV9MQLaTD8AjJ6w5BbCt9QvaZfGUsXsn7dFIMmH/SHsL2ELuMLxTNJIEAMfCdVZxQvEHqhjAKj8YTKETlbm5gztraMstLaWbuhEX0EWCeyfJUIDY=
+	t=1778067173; cv=pass; b=uQ0hC76cN9evZ/ZdoKkh08A2yTjJLJ0jteuZ7s/b9kpdI1lf03XF37n0eVDL/DeFc8s2Wqddm2hVcvVFwgHmwGPpGaxf6bXWkjNoRJuKRxVhwIUbDjfR3rYeWlblLeZc+WyX+xPKJGMesMYKn2i7bqrOjvZhET8bAIKOOb5iGeM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778007336; c=relaxed/simple;
-	bh=TvfWtQTF4eDGqRWmHUT3RsG6JKrKn/ldVxbx984VyJY=;
-	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=FRRrsMGwxidbFLY9S5/ddaZcoQtHN53SZUkf49AYOC3T06niq2zb3tRD6c0d0Fpaoub/BVdup9911h7VFHCPRNtbmcRuV5cz4edZWzYoW2OdyhxKzPZtPF/8x2RLTBpC7hwpfJWZv8Jw6OqAw8CNGw9mH+STUswKBFfeW/dzYO4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=m+zCuae7; arc=fail smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	s=arc-20240116; t=1778067173; c=relaxed/simple;
+	bh=GtPI6hrIfcNUTMZOYONpsobLj3QHc/UpYc1x8sGMdY0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=rU7x//XaxbaX0qtuSDT3WLVafpufDW/CRJzR5q/rsTtIXhiPXQIp9dYFvPeufUqQkpiU5LHgVB+jA6/O1bFrD3nhVtBx1Bp56JtKILPXEhvrlbdhsDXXN6TnXJPBQuTV18XTWLKs2bYPPOlD82Nug7sy3vZPKNeApEEPVzOdDYo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cFPhDapW; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZEcmcTSR; arc=pass smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="m+zCuae7"
-Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 645E48uO1311914;
-	Tue, 5 May 2026 18:55:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=TvfWtQTF4eDGqRWmHUT3RsG6JKrKn/ldVxbx984VyJY=; b=m+zCuae7
-	2RO+BcSTjDeRUJX+9jDao9+h5FLaSbcMPOu3cklQFyQxWcQXw0Fg6xLHkjWBvKoQ
-	YdXMxbixjuqWVDWu2gIrHo2ej4jXI+qiPD+NHKVoO3QSZkTy2/CwKl69t1sQvKPZ
-	NGLXp6OrfT+q39AimogIDx+l40/0yuDGtgyTx2UHT6X491pt4J8p/2k3YRr8GnnK
-	B3OaZ0rVN3gbTqpvEOByDT9SptRBLSc/HW0buA8QfXJKcGwTKQnGTJcAldls4cjl
-	AxpcBQBz8mN729XObO+BRq+TqhaOjH3Zltjit6fAHOmYn3QRzeZELKpUcB8hUJE4
-	BuaLYwni9GgSKg==
-Received: from bl2pr02cu003.outbound.protection.outlook.com (mail-eastusazon11011029.outbound.protection.outlook.com [52.101.52.29])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4dw9y4mx6e-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Tue, 05 May 2026 18:55:17 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=IpS/oekB2jXbZhI3nWTDl1Px70eLYfyouZ0YH8+y4l+PbY6h8tDbqiRrZ+/3C1vDiOLvpYcRwVPM3Yfhm2vEr4uvEvDy0dOspSlcf2iWM7wUw+s9oXL0rNKWwT9SF9ge6UPAMhTTAg9X2t4t3i4J7CBHvSMMyN2KyBd+zVSWZrk91VT8J2tsAgJgqO2n/sNb156R0+/2bBeoskPf6gwsS3xEZGTOU85WzxIoSxcntKITZnOFLlt4MPF0PwsdVy0KPse2gsoCQii1K46Blmyy7E6PjBGjMAoiqkNvOfiihs+TJSmJAzgWUblF0jokykXPoM28rKtctXhKEyBMfjZlZg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=TvfWtQTF4eDGqRWmHUT3RsG6JKrKn/ldVxbx984VyJY=;
- b=W+B5eS5nGvzjjSaCN//s1ugdBehtIxf5db9r5s4Puhx41ShfIoIde+UxWSwH6YsB09f3Xezb2+aLthbof8YwBgJb0HpBxubkmeQ3xtDrC2MrW+57fkTARSo0nqUIJHJNk2R6gJZuw9uKpWwv1ftV0qpTaRTv2vs3A72HxbUUnm+A7S/IdJrrEsuf1WsCUpDHSxnUMhe1qe3/Llag5Pdzf3O23DUYR9UWadjoyyPKxY+9VlwlBUE8nkw+pVDi2ZyY36WX+Ja6JHyYyBFdOSu5WWEAsI6I7ESp0uaOh63lp3nuZHXTaXO60shnmuh3aIGhiRsvvcW5jKp4sThbIJDCVQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by SA3PR15MB6171.namprd15.prod.outlook.com (2603:10b6:806:2f3::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9870.25; Tue, 5 May
- 2026 18:55:14 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.20.9870.023; Tue, 5 May 2026
- 18:55:14 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: "raphael.zimmer@tu-ilmenau.de" <raphael.zimmer@tu-ilmenau.de>,
-        "idryomov@gmail.com" <idryomov@gmail.com>,
-        Alex Markuze
-	<amarkuze@redhat.com>,
-        "slava@dubeyko.com" <slava@dubeyko.com>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Thread-Topic: [EXTERNAL] [PATCH] libceph: Fix potential out-of-bounds access
- in osdmap_decode()
-Thread-Index: AQHc3HAZqAACOBxmfUGpwKCeIJvigbX/yIcA
-Date: Tue, 5 May 2026 18:55:14 +0000
-Message-ID: <ba35c81180e74517613e3dad41e5f5a938be4137.camel@ibm.com>
-References: <20260505090812.500588-1-raphael.zimmer@tu-ilmenau.de>
-In-Reply-To: <20260505090812.500588-1-raphael.zimmer@tu-ilmenau.de>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|SA3PR15MB6171:EE_
-x-ms-office365-filtering-correlation-id: f0ceba61-f390-41ce-b1d0-08deaad7d779
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|376014|366016|10070799003|22082099003|18002099003|38070700021|56012099003;
-x-microsoft-antispam-message-info:
- 4faIEkph+EMiIYjiJ2tIg3dHYH+KKP0TQm9F94HXRd5IkpZrMh/48b7t3xiBiVo+26lQ8rMP0s1I5TkFbUs5JS5XDNJ3UHuAf5RveWbqYhFSHsrRf2Nx5IkybMbs8hnSMQcWqNFYvVHaTHJgZWfUPy+eZfc+b7BvXn1pRyY+/FdDZAeS7OQn+x/p1txqKgeQIu6FG+HMLL44o7fgC6MFtuXVb/DDa/KFjgKy7oj1veHIXufAHh5PsWGcLT67X5xbE9//JrAtlc03uegHTEFETemapxVihG09zFZRwwGtStUa5BvzMzbh8HNlkYvQtY9oT61hpwvtBdXE5pCqeYMfX2+SNoraxqkecW9cvZQliFFXWCVmwbOD7ijGsht4EZlsOe62puLG09v0ebQkKsXuftzD17JONpmeIio7VRWNhX9wu4Vi55oAoNhXPI11Ep2hNfFc9blpPnAH38xhmkv0WamklgKz5dbGn8RF9rKKgbQTkM9dAJcHUwlxFcxhHD/DMXYBg63iM2bVeZJYakFOWphOaU4sGn1m/hIUxUWuPRvhcqvBX0sAdfqn9tj50JvUR5f+R+fVvernAaghh8fDljcxZ0KosLphArEZqOOv3Mej1iaudRNW4MELasrXFuiOp0T6RgERCoFy1NTg6xTQfKFMNbf31riBMNihY1WUouSqq5R7FJTjZhQVW9O6pa4k1/7/sBtYO/89Ilcci7rx0/XR+dwZ1SobWjk0IYHyXuOh2X3mimycbuTRyfUygmTQ
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016)(10070799003)(22082099003)(18002099003)(38070700021)(56012099003);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?TWhUbDM3a1lsTFgzRHJqbHlSQjNEazdoRHhqTWRCaUxkN2wxZGhXY3drRSto?=
- =?utf-8?B?dVFRMWt1N3dUQzdVK3RRK2lSZithOC95SlF2TmVRVFo3ZFMzeWJHSEp5Q1BD?=
- =?utf-8?B?Z2NHTnVNRzdPWHRIYk1HdWVXRTM3aUsrRTFzK3g5OXMwMkxLWHNJRTk3d1p3?=
- =?utf-8?B?UWp1SDB6YTNYSzIzYU00K2crK1JRa3FHTkQ1U3ZRTVFjSTdtbjFRT1JFdG1E?=
- =?utf-8?B?cGRUdU5tRElZTjAzNGdkQndjK0xHKzFxWWlTaWdKS2ZuTHJjUnl1Q0JiS1p6?=
- =?utf-8?B?Uzg2akxickZIVGpMUmM0dk11VURaemhDREhXaldtSm5SWDRmbWxNQXFaczlQ?=
- =?utf-8?B?dnpHdytlSmNyVjlXbW5mb1BxbWd5QXg1TmVidHBQWURWRFR5QVViNlY4VUFY?=
- =?utf-8?B?ZGVrR0lkVnptU3JqV25xSzhxYlhVWHgrdWdBNXdaeTdSajdvendGcHNubGIz?=
- =?utf-8?B?bTdHUURDQnVKbEo3eEZTZWhwU0JXWFkyQ05sUnpFYWJHUkZibjJRaHJUdkc4?=
- =?utf-8?B?MENyQXZ0dW5Xam1FQzJhcHJoSDlxbzM3QmozOVdRM1p2NWhWK3F4clByellS?=
- =?utf-8?B?QXFxbTlaOWxNUzNpLzVrNnRkUk9WWUd6dEo5WHNRUWt0REdOOHhtZ0hUd1Ev?=
- =?utf-8?B?ZGNMMzBua2FsSzFsK3hQUTVoSWdRWnByUE51Yk1ORjRWQ1lDc1NsMjI5Mmpw?=
- =?utf-8?B?bWl2d0FvZFdnYVJBOTRyM0RPd01IaGtEWUlSWEt0Zldxb3Z5V2FOQXVDMkxE?=
- =?utf-8?B?WUpEd1EwZ25LWnVVQmNWMUlGOFhnTUs0WU8zbWE2N09acVQ5UHh2dHBid0hX?=
- =?utf-8?B?VTZGQnpBV25XMHNHVGNpc21EMWFBQS8yQzgyTUp3MTVkb2xoSE0ycitXbHVr?=
- =?utf-8?B?alJuVE5leExlNHV5RDhQZFJuRHp6SElTSy9KY2pDK3NhYjVCS21LWmZyVU5j?=
- =?utf-8?B?MHB1UGVuMGpXN3dFSFRqdXlHUHpwelVjOGlZNElvbURSYkJOR0hhMFNZMUJY?=
- =?utf-8?B?SnNxNEsyOFEvM3lpeStSNDk0ZVRkc01rVjFuSHFFVHVNZ3Q1bmUvSVRUTGI0?=
- =?utf-8?B?cWFOUmZNN2NFM3V6a3pLbnhrZEpHaXVJMDNCV1RhZldsTlM5SXBEbkhDekdn?=
- =?utf-8?B?KzhwUVNiVVRZdWxHV0RKa3ppRWJsbndJVEo1bTFQQ1U4ZEs3SU1pVk53V3lu?=
- =?utf-8?B?SHgxbjJTMk01MDNTQlJNd21DSlRJNTFFdXRIbFp5ZzJ4bWE0NEF4azFMV2RP?=
- =?utf-8?B?d1BNck9rSk55WjJnWmxZbGNMLzZlcXpUT0pkNWJQZXVPMytQUndtN1ppeEU4?=
- =?utf-8?B?VzVhemZEcUhuSXR0by9IMlV5SlRKQW9UTDFLVnNlNDNRMWdCSXlkajMzYWZr?=
- =?utf-8?B?eHRFVnFSYWNJWXNjZjMzbGgxamRocS9Lck9NUnN6OHJlUDkralJ4VmFsRXBT?=
- =?utf-8?B?Skx5UWxvbTBQYVVwazhnZytrSWt5YXVqZ25IZVlyZFJzR3dQVWxuTDVpUjVv?=
- =?utf-8?B?Qi8vUFN1T2VmSGJRMUF0YUhmVU52QzVhRHVBQXd0WFVPTlhTdlpGbUdhR0pP?=
- =?utf-8?B?cnhodmVpR1orelVHeFpINFB6Tk5RdEo3NlZUTkhrcjBWNGI5WWVOVTM1cjRX?=
- =?utf-8?B?VmVmV0dWZkt6RkJvSmpxcEdiT3VyU1l5QXFKUFAzUi9EUldBNDlTSmpCYzQv?=
- =?utf-8?B?bHFleUJOVTRWTmE5KzJ0eUVqT2VsNzlwK1UrUi9QcDJkY0JwUFBnT0daTmJW?=
- =?utf-8?B?aS9oMHN1R1RSclpGcEdtdERZS3hJemRtaTRwbkxwOXpwak5uM3Y5VW04U0dM?=
- =?utf-8?B?WlUreko5N2JITzJxM0ZKRW1JeGFodlp0Q2FORFlvMCs1dHBWc1drVnd5YUxr?=
- =?utf-8?B?ZUdhQVRwbjFaNzQ0NDRGd3pFd2dnNFF3RU56VktQdlhIUUFCMWVtcllDUXhR?=
- =?utf-8?B?U1FLTWNkcVkyRUN2bElGMWJRTzV4TzZQa0htSFA5eGN4ZGhBMWY4Sk9NbTB3?=
- =?utf-8?B?Vm9velVWVzBkSWEycGRvZUJCSDAvUXhrUWR2TmhvcnpFQU1tbnRCMkRhd1Zh?=
- =?utf-8?B?Qko0d2JTNmF2L0d0cnVsblZ3d0E5aGxHaUtNdnpLdE9ESE9RYUthUHNtYjBZ?=
- =?utf-8?B?U0pKYVJaRjlmSDNyaWJGY3ZJV3diOUtPVVRVRVRSN1RuNTZXb1VraGZJeWxN?=
- =?utf-8?B?bUg1RG50eDBGOVcwcHBsRFBEa0phdFd2U2F6WFRTVGpRK3hSYm4vTVpTWFlS?=
- =?utf-8?B?NkQ5TDZZNzRrV1V6ZlJQdndEbS9CYXFRNnlrYk40dzRJbVFSQWlsUjBOWDF0?=
- =?utf-8?B?YXdFWEtoTm8xdTI1ajhKMEdXL0JZTDR5Y2c0RDNicWJGcXFreDdTTU5PM1FI?=
- =?utf-8?Q?+wZrn+DaeDr1PXcBzYZkRrQK+QdHgt7n8t6Wn?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <AC4EEA0623DD1E49A524C7346E53D3AF@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cFPhDapW";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZEcmcTSR"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1778067171;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=m/aMPERyrd8ex/Ch7fYnCpSTn7vCQyWn980+FCKltjQ=;
+	b=cFPhDapW5P9jCd9Igyn/P9jcy/zqGQ51fI9t7iUSPTuZr29sKfNVZJ/1+PU+Bfm4adUUy2
+	FO2nQbMiwWj9xWhOsrPk57Tujjeiy/5GWmsUGP8Q3JAMATRr2Or+QvnW8Krg5GcIymJPJD
+	J/8BihHJb9jBmUPLAlw9PYfaLji9gNA=
+Received: from mail-vk1-f199.google.com (mail-vk1-f199.google.com
+ [209.85.221.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-635-kn2rUqxtPLK1LoJS38WpJA-1; Wed, 06 May 2026 07:32:47 -0400
+X-MC-Unique: kn2rUqxtPLK1LoJS38WpJA-1
+X-Mimecast-MFC-AGG-ID: kn2rUqxtPLK1LoJS38WpJA_1778067167
+Received: by mail-vk1-f199.google.com with SMTP id 71dfb90a1353d-57539d5391dso6354867e0c.1
+        for <ceph-devel@vger.kernel.org>; Wed, 06 May 2026 04:32:47 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778067167; cv=none;
+        d=google.com; s=arc-20240605;
+        b=LDd0ppmpBWaZJuVgq9MM/KyXJpvEFqI7kWtlAGF+itrL+LlLylKtba16csqREQDj0K
+         i40a6t58lgC2pSI/P114RKm3OgR7K5dKb53VIly5VGUZbY/d8/Sf3wrfiu/6CznOn4/N
+         F8eIhx5JJxLcWcGb5Le8T10mYeiPn8GVSxUTCQ75f+Z/wRG2S8d4hiDDlGigciCIlMcw
+         W6ts5TVuHQo6H/pOS4ImHGmICaMABF/2jb06+n6MnZgAtQs7KhkMKHpeO1NM/6Er4jYa
+         VmPbPtrefQxmMVRJAgGcqWpoSWhpUK0a+dEW6wh7JeFM9NbSpAX6Ho42GM/c+U/2AsFH
+         LVvw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=m/aMPERyrd8ex/Ch7fYnCpSTn7vCQyWn980+FCKltjQ=;
+        fh=xMFqqtn3nOTgdN7AQgUPD8+FjUga8wgyYxyudv/dmC0=;
+        b=lcigYDjeY+RVlZGaZnkPAP+2iZTFKjcpb+qejtfDaO8EduNXi2aOLLug5Xgoe4jWz6
+         vJVPqPz3yZ4efg7ZnSwY+ZNNe7cKQUE9CUkbVfhMLAs1n4zM1822TtABOtPQPGoxL7vJ
+         0DippMvJqdhGAN6yHOotWePPnrwwa/p8L9lH8/Yc9ccZFiHZzV6xa/iQU988+or51B3d
+         8n1M01Gf8dTDtg5ZKkyY8HtWq8L5EJ+mdVvUSgA9fop8kFLG+EQ2MtdZJQCld3b8KM12
+         NCVMKLzpQzAH61jTtJaGefuy9nGvDk/kkGjqgonbO3iG9J36hQ67a3eE6U4hrSkUmaai
+         ngmg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1778067167; x=1778671967; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=m/aMPERyrd8ex/Ch7fYnCpSTn7vCQyWn980+FCKltjQ=;
+        b=ZEcmcTSR+pnkH9t6+rkY8EQQmRGdjGVSMl/+vgSto5PF2ma6T/wSlCj0Xcmeb6ZPU6
+         59rvgJ4egVkyeIExUNYW5IWsvkS8bi8tQkWvCSdBLENhVYx7CyPaMfoJElnPpoe5dMV0
+         Pb1QhR+7ZuI3ttaJZJTZ1WAEfc16IT56Ly62ZkItDFrwVR4hl4IL8ECnCLj1VHelhoFV
+         42DRREAXP2wfG7Fb0XMWe75n1nseO31CSzUhdHRmefArmxb0KsEZWXbrVHFO61o8NVr4
+         LHPINUgiCL1mRoOFMv1Eo/Ib702rB5NglOzx0mBSOYNYY5KKGRxxA94Cdhy3xF9EW9WU
+         hx3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778067167; x=1778671967;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=m/aMPERyrd8ex/Ch7fYnCpSTn7vCQyWn980+FCKltjQ=;
+        b=VbBInjZgPC6hU0+Bn9Qw5WtAg+0ZBPsEv6UVgNhJ/kFbKSvrjGqNy1dXtiGafLNAfz
+         z+/gPbUa9FaW1wpN+J5iHJ9Cl5JJz7nS25EuFwf8PE2K6KqEm8tpw2jX76S1gix/psgh
+         FgS0/QlC2dObYJuDGwWGhbi2Bx9hwHtxo+XZkEyAj18REwkWq0MIIVYM+E+6T4yxQUpU
+         LZpDqURUD4wlmWYeD/gC68nINulfhYC+87YrLwO/khWN6YPdwEQmpToih89O65iVrVea
+         XJUD0xwv+8au/3ce6K4finYOZ8KQzC3VQCwqLACPM3MD0ZC2VJ37vhSpkOQMZVwB5ok8
+         ApFg==
+X-Gm-Message-State: AOJu0YxgeKUVb4PqRC5w06LhCo1pzgttJPGEc3I1uREmV39Dym8yQ1eJ
+	7ySSn9dTq4P/kQYn275fmVURBNXWYUsXrlJOVSb/ryKrHaHiolg2X/dSdYAeGq9yxO+biUaSJPC
+	GIkvZPRYp4INCJ+noKgagS6ukm3brOFGODcusp+OK6AY3d2bBpbq7XYiwFAr9ufo2Di3sPQLgsd
+	e8VXGKG4APArGNaOtqOCW1+d6aHOTBPFmj3Q9oEA==
+X-Gm-Gg: AeBDieubeGxPaofWcpE2C2ORsvCC7yG9g+MPHRSzlXYlZDxRdquB7J5munex5VKFOLL
+	rrzKJ/48UBrNJn3SJ5ulanvKlgmi4SKAUR8psVeHzPBqe8tI7O5kmX/oIQVsU9vVZpBFCKwoFqS
+	rBDhWvKrEjs9QgnGb48K4kIWN5lePtk8kl4hPe8qSSh9q6CTWEvWbkvHUzfYLosm7qll17yi38D
+	C7ubM8W+Wr3B4A7
+X-Received: by 2002:a05:6102:605a:b0:62f:2d6f:cc11 with SMTP id ada2fe7eead31-630f8e764afmr918458137.2.1778067167109;
+        Wed, 06 May 2026 04:32:47 -0700 (PDT)
+X-Received: by 2002:a05:6102:605a:b0:62f:2d6f:cc11 with SMTP id
+ ada2fe7eead31-630f8e764afmr918449137.2.1778067166525; Wed, 06 May 2026
+ 04:32:46 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	IVJjiSYUId93AROfxFoykH+oaWlVFZCFIhJgC9qMoKNcLJmTPmGmLLgGpZwQ/a5Ovbfb2CD++HuZ4lUsVsq+QfTgUoy9RnNcuWahXPGZUHWWjmN8clbIW+w3LM9aadXDuT0n0qbRgLHB9n2KZ/oXBmIGbRbEzk3Os1+vEiQnHnx0tHxVeposVAsBRq0JLuaQaGBiP2U73fHn46lqHw7heXfI3crN4R/5w71Ws3/pttRtYygF0HeaE/Xdyi7SApKTY5Okjq4dcTjVm5NFZA2nSgzZ7fwNKMGR9X8vEPf+Ul+dR4XTD7lT0yg210BSl8iWOxx6glPUidFhenpj4poxbQ==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f0ceba61-f390-41ce-b1d0-08deaad7d779
-X-MS-Exchange-CrossTenant-originalarrivaltime: 05 May 2026 18:55:14.2926
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Cc/77NmMIPoZgQYQLlzbQxvqWNqpx33TlXegPcFpF4a7S9VJmqaTLnXnHqeRz6Z/sk2XAbNQEYBO+It+EnQTzw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA3PR15MB6171
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTA1MDE4MSBTYWx0ZWRfXxXD7JqgKq7CQ
- hix4AoJdQmxoacRZfUdFymyNTKmUy0nFdl76LvuoUGfLcRlD4ql6T4XTiHSS9nyPkXKGaEvQzAU
- Y6L/YGQurZfwHGpNp0i1NNDaiQTxmuLJ8BLPdLVB+5Ik/jPFR2+0flK1IPRKgpV5XaMKqxOrClQ
- c2HAv/IQsRVdAmekYgW1uPmchJsQkqpTtIJfYUE82bG5Md0AmDz0PfEs35pJrj0cHTQ3aytUKSZ
- 7aosz5snpJkhLpPjDm3UYE1Iqg9TzRP7yJnFVfMTN05LVftYIvbD/45LhNsuQgQErz5SSFYN8K0
- Ens6ECRqu8fRYBVGBxicy+dWWAhaPVP1UAEPjuPSapr2mzdZIDaoBk1zJvoUdVNgFzxc93GrIUn
- 0z4yMUxuQEFxgpfjt56KPb6+PwZv8Zfu1bKv/623LbGC2YW5HYJvH9MY3MIRtxVsEwQQUMaG/T4
- YRck/VD8IdEZVn/tqqw==
-X-Authority-Analysis: v=2.4 cv=J4GaKgnS c=1 sm=1 tr=0 ts=69fa3d16 cx=c_pps
- a=Z+ESqgFbrcYkgT1kPBc/rQ==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=NGcC8JguVDcA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=RzCfie-kr_QcCd8fBx8p:22 a=cCJFDH82_4lKpW8F4BoA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-GUID: q7bN4dtzKZwBVj75JCeNG1Ch59LMS_E3
-X-Proofpoint-ORIG-GUID: 592Yj8AuxG-IwxaYyCMozS34sYSpEI27
-Subject: Re:  [PATCH] libceph: Fix potential out-of-bounds access in
- osdmap_decode()
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-05_02,2026-04-30_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 clxscore=1015 malwarescore=0 bulkscore=0 suspectscore=0
- priorityscore=1501 spamscore=0 phishscore=0 adultscore=0 lowpriorityscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2604200000 definitions=main-2605050181
+References: <20260429125206.1512203-1-amarkuze@redhat.com> <20260429125206.1512203-4-amarkuze@redhat.com>
+ <f3ff03de8cadd533fbe71f271f61890e856f3b06.camel@redhat.com>
+In-Reply-To: <f3ff03de8cadd533fbe71f271f61890e856f3b06.camel@redhat.com>
+From: Alex Markuze <amarkuze@redhat.com>
+Date: Wed, 6 May 2026 14:32:34 +0300
+X-Gm-Features: AVHnY4Jxh3Z6dk4HIjyXT5wdwrdZFyYdBHOBWDctAtLPJ0l0Pqaqiia3OCW8NCQ
+Message-ID: <CAO8a2SgwD2TomAVZEyQNugrZSRec=R4uPDp3cv_VQZyfSpoahg@mail.gmail.com>
+Subject: Re: [EXTERNAL] [PATCH v3 03/11] ceph: harden send_mds_reconnect and
+ handle active-MDS peer reset
+To: Viacheslav Dubeyko <vdubeyko@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	idryomov@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-T24gVHVlLCAyMDI2LTA1LTA1IGF0IDExOjA4ICswMjAwLCBSYXBoYWVsIFppbW1lciB3cm90ZToN
-Cj4gV2hlbiBkZWNvZGluZyBvc2Rfc3RhdGUgYW5kIG9zZF93ZWlnaHQgZnJvbSBhbiBpbmNvbWlu
-ZyBvc2RtYXAgaW4NCj4gb3NkbWFwX2RlY29kZSgpLCBib3RoIGFyZSBkZWNvZGVkIGZvciBlYWNo
-IG9zZCwgaS5lLiwgbWFwLT5tYXhfb3NkDQo+IHRpbWVzLiBUaGUgY2VwaF9kZWNvZGVfbmVlZCgp
-IGNoZWNrIG9ubHkgYWNjb3VudHMgZm9yDQo+IHNpemVvZigqbWFwLT5vc2Rfd2VpZ2h0KSBvbmNl
-LiBUaGlzIGNhbiBwb3RlbnRpYWxseSByZXN1bHQgaW4gYW4NCj4gb3V0LW9mLWJvdW5kcyBtZW1v
-cnkgYWNjZXNzIGlmIHRoZSBpbmNvbWluZyBtZXNzYWdlIGlzIGNvcnJ1cHRlZCBzdWNoDQo+IHRo
-YXQgdGhlIG1heF9vc2QgdmFsdWUgZXhjZWVkcyB0aGUgYWN0dWFsIGNvbnRlbnQgb2YgdGhlIG9z
-ZG1hcCBtZXNzYWdlLg0KPiANCj4gVGhpcyBwYXRjaCBmaXhlcyB0aGUgaXNzdWUgYnkgY2hhbmdp
-bmcgdGhlIGNvcnJlc3BvbmRpbmcgcGFydCBpbiB0aGUNCj4gY2VwaF9kZWNvZGVfbmVlZCgpIGNo
-ZWNrIHRvIGFjY291bnQgZm9yDQo+IG1hcC0+bWF4X29zZCpzaXplb2YoKm1hcC0+b3NkX3dlaWdo
-dCkuDQo+IA0KPiBTaWduZWQtb2ZmLWJ5OiBSYXBoYWVsIFppbW1lciA8cmFwaGFlbC56aW1tZXJA
-dHUtaWxtZW5hdS5kZT4NCj4gLS0tDQo+ICBuZXQvY2VwaC9vc2RtYXAuYyB8IDIgKy0NCj4gIDEg
-ZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQ0KPiANCj4gZGlmZiAt
-LWdpdCBhL25ldC9jZXBoL29zZG1hcC5jIGIvbmV0L2NlcGgvb3NkbWFwLmMNCj4gaW5kZXggNjY5
-MzQ4ZDg4M2YwLi4yMDk1ZTczY2NmNmMgMTAwNjQ0DQo+IC0tLSBhL25ldC9jZXBoL29zZG1hcC5j
-DQo+ICsrKyBiL25ldC9jZXBoL29zZG1hcC5jDQo+IEBAIC0xNzA1LDcgKzE3MDUsNyBAQCBzdGF0
-aWMgaW50IG9zZG1hcF9kZWNvZGUodm9pZCAqKnAsIHZvaWQgKmVuZCwgYm9vbCBtc2dyMiwNCj4g
-IAljZXBoX2RlY29kZV9uZWVkKHAsIGVuZCwgMypzaXplb2YodTMyKSArDQo+ICAJCQkgbWFwLT5t
-YXhfb3NkKihzdHJ1Y3RfdiA+PSA1ID8gc2l6ZW9mKHUzMikgOg0KPiAgCQkJCQkJICAgICAgIHNp
-emVvZih1OCkpICsNCj4gLQkJCQkgICAgICAgc2l6ZW9mKCptYXAtPm9zZF93ZWlnaHQpLCBlX2lu
-dmFsKTsNCj4gKwkJCSBtYXAtPm1heF9vc2Qqc2l6ZW9mKCptYXAtPm9zZF93ZWlnaHQpLCBlX2lu
-dmFsKTsNCg0KSXQncyB0b28gY29tcGxpY2F0ZWQgY29tcHV0YXRpb24gZm9yIG9uZSBzdHJpbmcs
-IGZyb20gbXkgcG9pbnQgb2Ygdmlldy4gSSB0aGluaw0Kd2UgbmVlZCB0byBpbnRyb2R1Y2UgYSBz
-dGF0aWMgaW5saW5lIGZ1bmN0aW9uIHdoaWNoIHdpbGwgaW5jbHVkZSB0aGlzDQpjb21wdXRhdGlv
-bi4gQWxzbywgMypzaXplb2YodTMyKSBsb29rcyB2ZXJ5IGJhZCBmb3IgbXkgdGFzdGUuIFdlIG5l
-ZWQgdG8gaGF2ZQ0Kc29tZSBuYW1lZCBjb25zdGFudCBoZXJlLg0KDQpUaGFua3MsDQpTbGF2YS4N
-Cg0KPiAgCWlmIChjZXBoX2RlY29kZV8zMihwKSAhPSBtYXAtPm1heF9vc2QpDQo+ICAJCWdvdG8g
-ZV9pbnZhbDsNCj4gIA0K
+ Hi Slava,
+
+  Thanks for the careful review. Let me address the questions that
+need some discussion.
+
+  xa_destroy() thread safety
+
+  Good question. At this point in send_mds_reconnect() the session is
+transitioning to RECONNECTING; async creates belong to the prior
+session epoch and cannot start new ones once we enter reconnect. The
+delegated ino list is stale after a
+  session reset since the MDS will not honor those delegations.
+  That said, I want to ensure I'm not missing a window you're seeing.
+
+  Could you describe the specific scenario you have in mind? Is it a
+case where ceph_get_deleg_ino() is called from a path that doesn't
+hold s_mutex?
+
+  mutex_lock(&mdsc->mutex) under session->s_mutex
+
+  The nesting here is s_mutex -> mdsc->mutex, which is the same order
+used by cleanup_session_requests() and other existing paths.
+  The inverted order (mdsc->mutex -> s_mutex) appears in
+check_new_map() but there it drops mdsc->mutex before taking s_mutex.
+  So this should not introduce a new lock inversion.
+
+  If you see a path where the opposite nesting can happen
+concurrently, please point it out so I can understand it?
+
+  MDS state check narrowed from >=3D to =3D=3D
+
+  This is intentional. When the MDS is past RECONNECT (i.e. in REJOIN,
+CLIENTREPLAY, or ACTIVE), it will reject CLIENT_RECONNECT messages
+because it only accepts them during its own RECONNECT window. The old
+code sent a doomed reconnect that
+  the MDS would reject or ignore. The new behavior tears the session
+down locally and lets new requests re-open a fresh session, which is
+the correct recovery for a connection drop against an active MDS.
+
+  That said, I understand the concern about changing established
+behavior. If you think there are scenarios where sending a reconnect
+to an MDS in REJOIN or CLIENTREPLAY could still succeed, I'd be
+interested to hear them. My understanding
+  from the MDS side is that it won't accept them outside the RECONNECT phas=
+e.
+
+  Thanks,
+  Alex
+
+On Thu, Apr 30, 2026 at 12:23=E2=80=AFAM Viacheslav Dubeyko <vdubeyko@redha=
+t.com> wrote:
+>
+> On Wed, 2026-04-29 at 12:51 +0000, Alex Markuze wrote:
+> > Change send_mds_reconnect() to return an error code so callers can dete=
+ct
+> > and report reconnect failures instead of silently ignoring them. Add ea=
+rly
+> > bailout checks for sessions that are already closed, rejected, or
+> > unregistered, which avoids sending reconnect messages for sessions that
+> > can no longer be recovered.
+> >
+> > The early -ESTALE and -ENOENT bailouts use a separate fail_return label
+> > that skips the pr_err_client diagnostic, since these codes indicate
+> > expected concurrent-teardown races rather than genuine reconnect build
+> > failures.
+> >
+> > Move the "reconnect start" log after the early-bailout checks so it
+> > only appears for sessions that actually proceed with reconnect.
+> >
+> > Save the prior session state before transitioning to RECONNECTING,
+> > and restore it in the failure path.  Without this, a transient
+> > build or encoding failure (-ENOMEM, -ENOSPC) strands the session
+> > in RECONNECTING indefinitely because check_new_map() only retries
+> > sessions in RESTARTING state.
+> >
+> > Rewrite mds_peer_reset() to handle the case where the MDS is past its
+> > RECONNECT phase (i.e. active). An active MDS rejects CLIENT_RECONNECT
+> > messages because it only accepts them during its own RECONNECT window
+> > after restart. Previously, the client would send a doomed reconnect
+> > that the MDS would reject or ignore. Now, the client tears the session
+> > down locally and lets new requests re-open a fresh session, which is
+> > the correct recovery for this scenario. The RECONNECTING state is
+> > handled on the same teardown path, since the MDS will reject reconnect
+> > attempts from an active client regardless of the session's local state.
+> >
+> > Add explicit cases for CLOSED and REJECTED session states in
+> > mds_peer_reset() since these are terminal states where a connection
+> > drop is expected behavior.
+> >
+> > The session teardown path in mds_peer_reset() follows the established
+> > drop-and-reacquire locking pattern from check_new_map(): take
+> > mdsc->mutex for session unregistration, release it, then take s->s_mute=
+x
+> > separately for cleanup. This avoids introducing a new simultaneous lock
+> > nesting pattern.
+> >
+> > Log reconnect failures from check_new_map() and mds_peer_reset() at
+> > pr_warn level rather than pr_err, since return codes like -ESTALE
+> > (closed/rejected session) and -ENOENT (unregistered session) are
+> > expected during concurrent teardown. Log dropped messages for
+> > unregistered sessions via doutc() (dynamic debug) rather than
+> > pr_info, as post-reset message arrival is routine and does not
+> > warrant unconditional logging.
+> >
+> > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+> > ---
+> >  fs/ceph/mds_client.c | 169 +++++++++++++++++++++++++++++++++++++++----
+> >  1 file changed, 155 insertions(+), 14 deletions(-)
+> >
+> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > index 871f0eef468d..b62abae72c4c 100644
+> > --- a/fs/ceph/mds_client.c
+> > +++ b/fs/ceph/mds_client.c
+> > @@ -4416,9 +4416,14 @@ static void handle_session(struct ceph_mds_sessi=
+on *session,
+> >               break;
+> >
+> >       case CEPH_SESSION_REJECT:
+> > -             WARN_ON(session->s_state !=3D CEPH_MDS_SESSION_OPENING);
+> > -             pr_info_client(cl, "mds%d rejected session\n",
+> > -                            session->s_mds);
+> > +             WARN_ON(session->s_state !=3D CEPH_MDS_SESSION_OPENING &&
+> > +                     session->s_state !=3D CEPH_MDS_SESSION_RECONNECTI=
+NG);
+> > +             if (session->s_state =3D=3D CEPH_MDS_SESSION_RECONNECTING=
+)
+> > +                     pr_info_client(cl, "mds%d reconnect rejected\n",
+> > +                                    session->s_mds);
+> > +             else
+> > +                     pr_info_client(cl, "mds%d rejected session\n",
+> > +                                    session->s_mds);
+> >               session->s_state =3D CEPH_MDS_SESSION_REJECTED;
+> >               cleanup_session_requests(mdsc, session);
+> >               remove_session_caps(session);
+> > @@ -4678,6 +4683,14 @@ static int reconnect_caps_cb(struct inode *inode=
+, int mds, void *arg)
+> >       cap->mseq =3D 0;       /* and migrate_seq */
+> >       cap->cap_gen =3D atomic_read(&cap->session->s_cap_gen);
+> >
+> > +     /*
+> > +      * Note: CEPH_I_ERROR_FILELOCK is not set during reconnect.
+> > +      * Instead, locks are submitted for best-effort MDS reclaim
+> > +      * via the flock_len field below.  If reclaim fails (e.g.,
+> > +      * another client grabbed a conflicting lock), future lock
+> > +      * operations will fail and set the error flag at that point.
+> > +      */
+> > +
+> >       /* These are lost when the session goes away */
+> >       if (S_ISDIR(inode->i_mode)) {
+> >               if (cap->issued & CEPH_CAP_DIR_CREATE) {
+> > @@ -4892,20 +4905,19 @@ static int encode_snap_realms(struct ceph_mds_c=
+lient *mdsc,
+> >   *
+> >   * This is a relatively heavyweight operation, but it's rare.
+> >   */
+> > -static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+> > -                            struct ceph_mds_session *session)
+> > +static int send_mds_reconnect(struct ceph_mds_client *mdsc,
+> > +                           struct ceph_mds_session *session)
+> >  {
+> >       struct ceph_client *cl =3D mdsc->fsc->client;
+> >       struct ceph_msg *reply;
+> >       int mds =3D session->s_mds;
+> >       int err =3D -ENOMEM;
+> > +     int old_state;
+> >       struct ceph_reconnect_state recon_state =3D {
+> >               .session =3D session,
+> >       };
+> >       LIST_HEAD(dispose);
+> >
+> > -     pr_info_client(cl, "mds%d reconnect start\n", mds);
+> > -
+> >       recon_state.pagelist =3D ceph_pagelist_alloc(GFP_NOFS);
+> >       if (!recon_state.pagelist)
+> >               goto fail_nopagelist;
+> > @@ -4917,6 +4929,32 @@ static void send_mds_reconnect(struct ceph_mds_c=
+lient *mdsc,
+> >       xa_destroy(&session->s_delegated_inos);
+>
+> Is xa_destroy(&session->s_delegated_inos) thread safe now? If an in-fligh=
+t async
+> create is mid-way through ceph_get_deleg_ino (which does xa_for_each + xa=
+_erase)
+> while xa_destroy runs on the same XArray from a different thread, that is
+> unsafe. What do you think?
+>
+> >
+> >       mutex_lock(&session->s_mutex);
+> > +     if (session->s_state =3D=3D CEPH_MDS_SESSION_CLOSED ||
+> > +         session->s_state =3D=3D CEPH_MDS_SESSION_REJECTED) {
+> > +             pr_info_client(cl, "mds%d skipping reconnect, session %s\=
+n",
+> > +                            mds,
+> > +                            ceph_session_state_name(session->s_state))=
+;
+> > +             mutex_unlock(&session->s_mutex);
+> > +             ceph_msg_put(reply);
+> > +             err =3D -ESTALE;
+> > +             goto fail_return;
+> > +     }
+> > +
+> > +     mutex_lock(&mdsc->mutex);
+>
+> I started to guess is it safe to call mutex_lock(&mdsc->mutex) under sess=
+ion-
+> >s_mutex lock? Could we introduce potential deadlock here?
+>
+> > +     if (mds >=3D mdsc->max_sessions || mdsc->sessions[mds] !=3D sessi=
+on) {
+> > +             mutex_unlock(&mdsc->mutex);
+> > +             pr_info_client(cl,
+> > +                            "mds%d skipping reconnect, session unregis=
+tered\n",
+> > +                            mds);
+> > +             mutex_unlock(&session->s_mutex);
+> > +             ceph_msg_put(reply);
+> > +             err =3D -ENOENT;
+> > +             goto fail_return;
+> > +     }
+> > +     mutex_unlock(&mdsc->mutex);
+> > +
+> > +     pr_info_client(cl, "mds%d reconnect start\n", mds);
+> > +     old_state =3D session->s_state;
+> >       session->s_state =3D CEPH_MDS_SESSION_RECONNECTING;
+> >       session->s_seq =3D 0;
+> >
+> > @@ -5046,18 +5084,34 @@ static void send_mds_reconnect(struct ceph_mds_=
+client *mdsc,
+> >
+> >       up_read(&mdsc->snap_rwsem);
+> >       ceph_pagelist_release(recon_state.pagelist);
+> > -     return;
+> > +     return 0;
+> >
+> >  fail:
+> >       ceph_msg_put(reply);
+> >       up_read(&mdsc->snap_rwsem);
+> > +     /*
+> > +      * Restore prior session state so map-driven reconnect logic
+> > +      * (check_new_map) can retry.  Without this, a transient build
+> > +      * failure strands the session in RECONNECTING indefinitely.
+> > +      */
+> > +     session->s_state =3D old_state;
+> >       mutex_unlock(&session->s_mutex);
+> >  fail_nomsg:
+> >       ceph_pagelist_release(recon_state.pagelist);
+> >  fail_nopagelist:
+> >       pr_err_client(cl, "error %d preparing reconnect for mds%d\n",
+> >                     err, mds);
+> > -     return;
+> > +     return err;
+> > +
+> > +fail_return:
+> > +     /*
+> > +      * Early-exit path for expected concurrent-teardown races
+> > +      * (-ESTALE for closed/rejected sessions, -ENOENT for
+> > +      * unregistered sessions).  Skip the pr_err_client diagnostic
+> > +      * since these are not genuine reconnect build failures.
+> > +      */
+> > +     ceph_pagelist_release(recon_state.pagelist);
+> > +     return err;
+> >  }
+> >
+> >
+> > @@ -5138,9 +5192,15 @@ static void check_new_map(struct ceph_mds_client=
+ *mdsc,
+> >                */
+> >               if (s->s_state =3D=3D CEPH_MDS_SESSION_RESTARTING &&
+> >                   newstate >=3D CEPH_MDS_STATE_RECONNECT) {
+> > +                     int rc;
+> > +
+> >                       mutex_unlock(&mdsc->mutex);
+> >                       clear_bit(i, targets);
+> > -                     send_mds_reconnect(mdsc, s);
+> > +                     rc =3D send_mds_reconnect(mdsc, s);
+> > +                     if (rc)
+> > +                             pr_warn_client(cl,
+> > +                                            "mds%d reconnect failed: %=
+d\n",
+> > +                                            i, rc);
+> >                       mutex_lock(&mdsc->mutex);
+> >               }
+> >
+> > @@ -5204,7 +5264,11 @@ static void check_new_map(struct ceph_mds_client=
+ *mdsc,
+> >               }
+> >               doutc(cl, "send reconnect to export target mds.%d\n", i);
+> >               mutex_unlock(&mdsc->mutex);
+> > -             send_mds_reconnect(mdsc, s);
+> > +             err =3D send_mds_reconnect(mdsc, s);
+> > +             if (err)
+> > +                     pr_warn_client(cl,
+> > +                                    "mds%d export target reconnect fai=
+led: %d\n",
+> > +                                    i, err);
+> >               ceph_put_mds_session(s);
+> >               mutex_lock(&mdsc->mutex);
+> >       }
+> > @@ -6284,12 +6348,87 @@ static void mds_peer_reset(struct ceph_connecti=
+on *con)
+> >  {
+> >       struct ceph_mds_session *s =3D con->private;
+> >       struct ceph_mds_client *mdsc =3D s->s_mdsc;
+> > +     int session_state;
+> >
+> >       pr_warn_client(mdsc->fsc->client, "mds%d closed our session\n",
+> >                      s->s_mds);
+> > -     if (READ_ONCE(mdsc->fsc->mount_state) !=3D CEPH_MOUNT_FENCE_IO &&
+> > -         ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) >=3D CEPH_MDS_S=
+TATE_RECONNECT)
+> > -             send_mds_reconnect(mdsc, s);
+> > +
+> > +     if (READ_ONCE(mdsc->fsc->mount_state) =3D=3D CEPH_MOUNT_FENCE_IO =
+||
+> > +         ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) < CEPH_MDS_STAT=
+E_RECONNECT)
+> > +             return;
+> > +
+> > +     if (ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) =3D=3D CEPH_MDS=
+_STATE_RECONNECT) {
+>
+> We had >=3D CEPH_MDS_STATE_RECONNECT before. When an MDS restarts, it mov=
+es
+> through these states in order:
+>
+>   RECONNECT    (10)  -> waits for clients to reconnect
+>   REJOIN       (11)  -> rejoins the distributed MDS cache
+>   CLIENTREPLAY (12)  -> replays in-flight client operations
+>   ACTIVE       (13)  -> fully operational
+>
+> If the connection dropped and the MDS was in any of those four states, th=
+e
+> client sent a CLIENT_RECONNECT message. REJOIN (11) and CLIENTREPLAY (12)=
+ now
+> fall through to the teardown path, not the reconnect path.
+>
+> Thanks,
+> Slava.
+>
+> > +             int rc =3D send_mds_reconnect(mdsc, s);
+> > +
+> > +             if (rc)
+> > +                     pr_warn_client(mdsc->fsc->client,
+> > +                                    "mds%d reconnect failed: %d\n",
+> > +                                    s->s_mds, rc);
+> > +             return;
+> > +     }
+> > +
+> > +     /*
+> > +      * MDS is active (past RECONNECT).  It will not accept a
+> > +      * CLIENT_RECONNECT from us, so tear the session down locally
+> > +      * and let new requests re-open a fresh session.
+> > +      *
+> > +      * Snapshot session state with READ_ONCE, then revalidate under
+> > +      * mdsc->mutex before acting.  The subsequent mdsc->mutex
+> > +      * section rechecks s_state to catch concurrent transitions, so
+> > +      * the lockless snapshot here is safe.  s->s_mutex is taken
+> > +      * separately for cleanup after unregistration, which avoids
+> > +      * introducing a new s->s_mutex + mdsc->mutex nesting.
+> > +      */
+> > +     session_state =3D READ_ONCE(s->s_state);
+> > +
+> > +     switch (session_state) {
+> > +     case CEPH_MDS_SESSION_RESTARTING:
+> > +     case CEPH_MDS_SESSION_RECONNECTING:
+> > +     case CEPH_MDS_SESSION_CLOSING:
+> > +     case CEPH_MDS_SESSION_OPEN:
+> > +     case CEPH_MDS_SESSION_HUNG:
+> > +     case CEPH_MDS_SESSION_OPENING:
+> > +             mutex_lock(&mdsc->mutex);
+> > +             if (s->s_mds >=3D mdsc->max_sessions ||
+> > +                 mdsc->sessions[s->s_mds] !=3D s ||
+> > +                 s->s_state !=3D session_state) {
+> > +                     pr_info_client(mdsc->fsc->client,
+> > +                                    "mds%d state changed to %s during =
+peer reset\n",
+> > +                                    s->s_mds,
+> > +                                    ceph_session_state_name(s->s_state=
+));
+> > +                     mutex_unlock(&mdsc->mutex);
+> > +                     return;
+> > +             }
+> > +
+> > +             ceph_get_mds_session(s);
+> > +             s->s_state =3D CEPH_MDS_SESSION_CLOSED;
+> > +             __unregister_session(mdsc, s);
+> > +             __wake_requests(mdsc, &s->s_waiting);
+> > +             mutex_unlock(&mdsc->mutex);
+> > +
+> > +             mutex_lock(&s->s_mutex);
+> > +             cleanup_session_requests(mdsc, s);
+> > +             remove_session_caps(s);
+> > +             mutex_unlock(&s->s_mutex);
+> > +
+> > +             wake_up_all(&mdsc->session_close_wq);
+> > +
+> > +             mutex_lock(&mdsc->mutex);
+> > +             kick_requests(mdsc, s->s_mds);
+> > +             mutex_unlock(&mdsc->mutex);
+> > +
+> > +             ceph_put_mds_session(s);
+> > +             break;
+> > +     case CEPH_MDS_SESSION_CLOSED:
+> > +     case CEPH_MDS_SESSION_REJECTED:
+> > +             break;
+> > +     default:
+> > +             pr_warn_client(mdsc->fsc->client,
+> > +                            "mds%d peer reset in unexpected state %s\n=
+",
+> > +                            s->s_mds,
+> > +                            ceph_session_state_name(session_state));
+> > +             break;
+> > +     }
+> >  }
+> >
+> >  static void mds_dispatch(struct ceph_connection *con, struct ceph_msg =
+*msg)
+> > @@ -6301,6 +6440,8 @@ static void mds_dispatch(struct ceph_connection *=
+con, struct ceph_msg *msg)
+> >
+> >       mutex_lock(&mdsc->mutex);
+> >       if (__verify_registered_session(mdsc, s) < 0) {
+> > +             doutc(cl, "dropping tid %llu from unregistered session %d=
+\n",
+> > +                   le64_to_cpu(msg->hdr.tid), s->s_mds);
+> >               mutex_unlock(&mdsc->mutex);
+> >               goto out;
+> >       }
+>
+
