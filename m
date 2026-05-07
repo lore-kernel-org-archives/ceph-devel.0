@@ -1,92 +1,92 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 597EF3C2761
-	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 18:43:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD8D3199931
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 19:01:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778179418; cv=none; b=b0Mi+jnIq7i61ghaFWE1uEwn7s63Km7nR4DhA2adw96DVS009IuNjLxXIQi1Hq3e22nOR8oOwEXOMmZDq99ST8DZkaorBtaN/giAMTa5NC3dwYR9JnbRZa/hILXCh8/Zcq6FcavMofCJOmou8ZRUOqaW3QGmCpI7rtOixgviARs=
+	t=1778180483; cv=none; b=N2BvNX7PuopVfKrkJuGmm5xUeu/27ULBLE+qsDraY7dT+cCt6fKFvEowzga+Uv4n9/Q7NCoqURN/BGDblxdLDLUC4FMAkM27BWu7xyu5TfFD5kkBtX0XG3ikH/7Zy1TvElnR+yKvoAZ4HvGnNfab5aEA64w99L/MyHEAvicBix8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778179418; c=relaxed/simple;
-	bh=KSBXFHDbCJbfKMv6RGLqylbRYWyMQHdVE787ngyXHMI=;
+	s=arc-20240116; t=1778180483; c=relaxed/simple;
+	bh=lFTZ/jFD5sqxmIIDESQgZMhYwz1XrhpC3zn+Yo/2khw=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=Vvh9/eaf8T6/JelcAeXmRQcU1tvTyQX2/aUvSmCkPcABXctFYAVNaBeX29iiXS/giblRvWYnMwXRfW3Mb+XRV9fjYRQSwyGE7cmw9xrMY6zebE6Vojoe3QIEGkIqIAwWgp7M1dqo5hyj1KuPbtzU4WHRv6Ch21OGO4DleMnP2Ec=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SGoTpdBl; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=SzfisqOP; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:MIME-Version; b=goYtTGnwUSZqyXBxSCZHQYEBQ7TJ7e0cs9wA2idbO5adrd/r9R8j7Bd23xyWz44r1qiWawk6inV2Yz+F3wfMi8O9lzxej0xh9BA/gX56THCDmMMnN5ZAK/CF7XAoo6jDDuqC867PWDdfAyM1iZgMVoCM/GPL2E6Fkvpp79jNj/Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=P8OrjxG8; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=EUHxvmbq; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SGoTpdBl";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="SzfisqOP"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="P8OrjxG8";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="EUHxvmbq"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778179415;
+	s=mimecast20190719; t=1778180480;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=lncWYBc0spi8cvF4zW0Ybg0AzF3GoMiippbuzqynaBE=;
-	b=SGoTpdBlaRtLJNj5rmbOoknvpENnzoX/JQ/Hx080l5RnNn7ZwIzQKp8bbb6QSU3xXh8ulb
-	UL4HM+q0FngR2egyTh/oTPTsdFmhDHMwRispW7KYcB+CMrFU8lPGkjWjmrgrP3FcBMTBou
-	UEpne1v9pkP1M3gXGoEJMYk1GUBoR1U=
-Received: from mail-yw1-f198.google.com (mail-yw1-f198.google.com
- [209.85.128.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=dSNjWxyHawtQvbQl2o4WeIV83oSSkzsu+iVTyFGdvTI=;
+	b=P8OrjxG8nQJK5qQSp8JUtQIRPW0z40Td3cLM/TOtHxIxyfJQ1godQVeVuLmKYTJ/czVXS8
+	m8QsJ/MP5C1DYgAAIEoPY7aGbCOaaCIsn2I9mehjSZtUveWDMTsVv3OkxPQ9F/44+ojSj9
+	JLKG0HTeGyE2wfqlSH4vwErA/jwNo1Q=
+Received: from mail-yx1-f69.google.com (mail-yx1-f69.google.com
+ [74.125.224.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-259-dvDdFSrwPYaYP2yQJQAvZQ-1; Thu, 07 May 2026 14:43:34 -0400
-X-MC-Unique: dvDdFSrwPYaYP2yQJQAvZQ-1
-X-Mimecast-MFC-AGG-ID: dvDdFSrwPYaYP2yQJQAvZQ_1778179413
-Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-79064868702so34778907b3.3
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 11:43:34 -0700 (PDT)
+ us-mta-615-eNlYDPCbPYSX8yDWSFOELA-1; Thu, 07 May 2026 15:01:13 -0400
+X-MC-Unique: eNlYDPCbPYSX8yDWSFOELA-1
+X-Mimecast-MFC-AGG-ID: eNlYDPCbPYSX8yDWSFOELA_1778180473
+Received: by mail-yx1-f69.google.com with SMTP id 956f58d0204a3-65c223da702so2512450d50.1
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 12:01:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1778179413; x=1778784213; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1778180472; x=1778785272; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=lncWYBc0spi8cvF4zW0Ybg0AzF3GoMiippbuzqynaBE=;
-        b=SzfisqOPw9xM66frY502hjUhNfrrIPofgTP0IBWND6DQCSF0JKy7SY8f3NfzhJhjmy
-         YRgpyjShFmfdxM91EL6oLPPQfFMnK9q0H9GdImDqoPVUYoLlaxzfX5jXx8jw08kNrdUx
-         W2q9qDBgp2kz2LY5L6XgOKQXUVizNpYKrppPHUYD2ScE36BVKAzDZXE2N04UWdymo1Z6
-         763fRSeg2x7LT2rvPsleakchEp9sYZq1NYpZk6xkPOQjaVLZmE/tPBk8ULGoqFAhMJ7K
-         tNUMjCU5O0Pi+J0MEh9K2vw9BexKvyOE9hiCxJ7mVZpo3hAtqzL2lzeSkkaTlrLuERsT
-         l1vA==
+        bh=dSNjWxyHawtQvbQl2o4WeIV83oSSkzsu+iVTyFGdvTI=;
+        b=EUHxvmbqZxmt/FWwpNUpqtegQF056b3jcVWsieZRzgm82UVJ6VK/4G48Z+LPWoLDiv
+         wut005bA905oQdcIIs1UBRSYHwtrzoORuihimkX4lLhclt3YNqaoe8YYNJ6ftWYOHRGa
+         h7JUsUMeqL2t9QBNAbfnyImBoZrbtmwzr8UQDGhBIfrFdrYffKvH5udJLR9uF6wJT+Fh
+         +qYzmZ1ruTlVG0A1+jWgm1U8ZOhLLflaIw+gDIJhVTt1Iy1ChDt8psrlNsSTQWLYlgBf
+         wRVdKv29gwDXRjFXLv+3lXzz/5TZQyy2Bq2fTPwUVQej0LxfffNwAluliBJp9A004Fnu
+         JPUA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778179413; x=1778784213;
+        d=1e100.net; s=20251104; t=1778180472; x=1778785272;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=lncWYBc0spi8cvF4zW0Ybg0AzF3GoMiippbuzqynaBE=;
-        b=Ck/LXN1iCUh3CTfDCNt5FYU/QUMKfZr2JqlLIHMrPE0cNdVAwF5AJ4tV2ivhg9fV7N
-         IMoTGJeD9atneUEfWIUlOrYUhAW9w5veAfsoo4hXps0LvPOAXA8aIDik5gewJgrnvQv+
-         Tcj1fXzu+F+hxLDe3D9jNyD2OaH7maMzYckqDwlJfWoxl+Q1EfYZzdaDanZpavHODmUx
-         W6FuY71ObtYcS0eRRCe6qN75HammvqTlpJJGeNz27j4g2YyQP8AAhB+7xadJnT58Ws2m
-         6ZezDDBhMM29vVXH+pLWlzXy0QEeZfwZjfGZSOLMxVZD9xeGkc8S9rqk5K855nYOMA2G
-         xDkQ==
-X-Forwarded-Encrypted: i=1; AFNElJ+znSNW4xukuZhVdaLijNpYjBUKDss8ZtQvF7RXF2wOt+Mpueb1FML7XhtGYNTKKJjewOPVHi7rCVjH@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywsow1VEVU2hezAY/ET1RTZKbvk9Vr3DKsH/PU7fx7vFT0KnT24
-	fOQPsuxS02QaOU2haG3nQpoBjxXWe057cm6Ke8ghnN9xyU7j0Ln8vksHUATy8KpNK1go+lna1ou
-	/ln0pJp9cqzwKJZjmpS9TDerv4femVKzp8teHK2jh2kG8dAvECFo2rsE1/zuwE/IlDGwh8Tc=
-X-Gm-Gg: Acq92OHUQ/1LNZip2eaRrRYfO0xiANq8+iNtA72NX3JALxjJ92QVOFhJgMiJ+ghPpV4
-	9vJhu+anL8i7nugqj3Fq5z8lyxJ0jldhrUd0qSNMf59spzDPbLpmmpX830pEtDtebQUPLdNVuvo
-	wsqZdHWDWdkGlUCAFpKjjvzKbNlBMx/vWF67fpJ8OHYZPMl8o/RILmt6Z+KjHpgXXbizhHqEulf
-	WUpa3LDsvsUvKWg0luCySfBeFXZikvw/iJ/KMV5NI+Q8KpcDDJYUf+yfI3XcgNfGYzlzE7lMBAV
-	7ID19jcCznJvy5De3xp5QVAbKXPNQuUhMprR150EJhgIUsbggf6zl5BqYDz3M5rm1gxMy9lFXVI
-	9gHZq5wiVy2yL3kdC/5Cr3buS7LQJLVMe+QWTVsxZHYn2y3bhLbyI
-X-Received: by 2002:a05:690c:360a:b0:7ba:ee75:f115 with SMTP id 00721157ae682-7bdf5d8d6eamr109600787b3.4.1778179412852;
-        Thu, 07 May 2026 11:43:32 -0700 (PDT)
-X-Received: by 2002:a05:690c:360a:b0:7ba:ee75:f115 with SMTP id 00721157ae682-7bdf5d8d6eamr109600497b3.4.1778179412188;
-        Thu, 07 May 2026 11:43:32 -0700 (PDT)
+        bh=dSNjWxyHawtQvbQl2o4WeIV83oSSkzsu+iVTyFGdvTI=;
+        b=sZVZwC9dHJda00gfEG4zzX8G3brS9SWpi8y19K4dIhKXm1YTryRaCy1Y5mNWDKmu2r
+         J2K42GZERhCQkn/x2iGVwtbQa3h9AE3r69p00Bv6ZXvNaSt4imFzxD7dAR98iVMuGrgk
+         zdzRjp9UgIHA/1djbNcxEoC7RVEDw61sqbg1tWkOULy3jtXFC+Q0OwQQ925lehMuqKTz
+         w7WoUuvKZN124Ie9pPPE31pii0FocHyJEG4suVm1IoGwbHPHzhRV+xEHNj3yvRBnZdLR
+         lUSNKcONWlI28gWSxlp+XXwX/sperrVQGM0F1yh9fOHywQc6zdQ//BXm1vdKd9CG5Jr5
+         Cn1A==
+X-Forwarded-Encrypted: i=1; AFNElJ9aO/41zfS3hPNn7JTSbi26cQGjhL3XzzRBhr0jGscp+OWP4VPiytYzAUv6RMvgQWn6wwRQxmhTl4EA@vger.kernel.org
+X-Gm-Message-State: AOJu0YztuLikzK+Gs/cYsSYONPF+qYbmet8J2uNwBUxPx5A4IJ6cEuCs
+	rqiGDQZbVoSkx0fjsjVYDyu1d2RWV2CgYzQeL9kDPFwpzN1oX8sSCZe1aoMykkNWgzgIF903fXc
+	0+3UXPEvuQ65pSrZm09RdN0XGexbbMfCjQHaHcnS8QryH96ZEw2p9S3LNRo6U3u7ZCxp7MfY=
+X-Gm-Gg: Acq92OGJmp/loafJ44B5uiDugCW6zwr9LyiiE6PzEMG3rIzydZp66VyfoJJ/3NCehtK
+	aBuojo8w9wXHG96RDxSPFq2+7xku5Urorh30NrlenKPEJ+FfxIyNiFUKoT879oN4CZBumso2DfL
+	NcqM9IbMhImEszuKbHmdU8yb5fZeTLy75ancmrYBngADuXZNpsV274cEB2GwEtwKdaos4MBti2p
+	RapkzUtyiW3ZEpvbQjcaRt9eZGrxmyAhBSuJV33FaT0CxzINIc8gC1Mx+QLyPeuYndtGEjx9q4/
+	8LVRzlVmRTQKL8zu12rE7LtWwW2L0KFo1dfC59T/3lmgXsLBYvDCSdb8+FdsE02PR55TDhaeX0v
+	hoXfGNsLVGMNd9ykxGccEsxLjlyscFAdGdLWBFCrikr1ZPw/uTnYN
+X-Received: by 2002:a05:690c:d94:b0:7b0:4bc1:d700 with SMTP id 00721157ae682-7bdf5ec8733mr101971097b3.36.1778180470573;
+        Thu, 07 May 2026 12:01:10 -0700 (PDT)
+X-Received: by 2002:a05:690c:d94:b0:7b0:4bc1:d700 with SMTP id 00721157ae682-7bdf5ec8733mr101969627b3.36.1778180469509;
+        Thu, 07 May 2026 12:01:09 -0700 (PDT)
 Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd6652742csm94988847b3.9.2026.05.07.11.43.31
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd7d849afesm78481267b3.49.2026.05.07.12.01.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 May 2026 11:43:31 -0700 (PDT)
-Message-ID: <bf9683e2e3b14139d0faf66ca8ea124611044cfb.camel@redhat.com>
-Subject: Re: [EXTERNAL] [PATCH v4 03/11] ceph: harden send_mds_reconnect and
- handle active-MDS peer reset
+        Thu, 07 May 2026 12:01:09 -0700 (PDT)
+Message-ID: <2ec3b7c8d69c7a5daae26918075247593009accf.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v4 04/11] ceph: add diagnostic timeout loop
+ to wait_caps_flush()
 From: Viacheslav Dubeyko <vdubeyko@redhat.com>
 To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
-Date: Thu, 07 May 2026 11:43:30 -0700
-In-Reply-To: <20260507122737.2804094-4-amarkuze@redhat.com>
+Date: Thu, 07 May 2026 12:01:07 -0700
+In-Reply-To: <20260507122737.2804094-5-amarkuze@redhat.com>
 References: <20260507122737.2804094-1-amarkuze@redhat.com>
-	 <20260507122737.2804094-4-amarkuze@redhat.com>
+	 <20260507122737.2804094-5-amarkuze@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.60.0 (3.60.0-1.fc44app2) 
@@ -98,349 +98,280 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Thu, 2026-05-07 at 12:27 +0000, Alex Markuze wrote:
-> Change send_mds_reconnect() to return an error code so callers can detect
-> and report reconnect failures instead of silently ignoring them. Add earl=
-y
-> bailout checks for sessions that are already closed, rejected, or
-> unregistered, which avoids sending reconnect messages for sessions that
-> can no longer be recovered.
+> Convert wait_caps_flush() from a silent indefinite wait into a diagnostic
+> wait loop that periodically dumps pending cap flush state.
 >=20
-> The early -ESTALE and -ENOENT bailouts use a separate fail_return label
-> that skips the pr_err_client diagnostic, since these codes indicate
-> expected concurrent-teardown races rather than genuine reconnect build
-> failures.
+> The underlying wait semantics remain intact: callers still wait until the
+> requested cap flushes complete. The difference is that long stalls now
+> produce actionable diagnostics instead of looking like a silent hang.
 >=20
-> Move the "reconnect start" log after the early-bailout checks so it
-> only appears for sessions that actually proceed with reconnect.
+> CEPH_CAP_FLUSH_MAX_DUMP_ENTRIES limits the number of entries
+> emitted per diagnostic dump, and CEPH_CAP_FLUSH_MAX_DUMP_ITERS
+> limits the number of timed diagnostic dumps before the wait
+> continues silently.  When more entries exist than the per-dump
+> limit, a truncation count is reported.  When the dump iteration
+> limit is reached, a final suppression message is emitted so the
+> transition to silence is explicit.
 >=20
-> Save the prior session state before transitioning to RECONNECTING,
-> and restore it in the failure path.  Without this, a transient
-> build or encoding failure (-ENOMEM, -ENOSPC) strands the session
-> in RECONNECTING indefinitely because check_new_map() only retries
-> sessions in RESTARTING state.
+> The diagnostic dump collects flush entry data under cap_dirty_lock into
+> a bounded on-stack array, then prints after releasing the lock.  This
+> avoids holding the spinlock across printk calls.
 >=20
-> Rewrite mds_peer_reset() to handle the case where the MDS is past its
-> RECONNECT phase (i.e. active). An active MDS rejects CLIENT_RECONNECT
-> messages because it only accepts them during its own RECONNECT window
-> after restart. Previously, the client would send a doomed reconnect
-> that the MDS would reject or ignore. Now, the client tears the session
-> down locally and lets new requests re-open a fresh session, which is
-> the correct recovery for this scenario. The RECONNECTING state is
-> handled on the same teardown path, since the MDS will reject reconnect
-> attempts from an active client regardless of the session's local state.
+> A null cf->ci on the global flush list indicates a bug since all
+> cap_flush entries are initialized with a valid ci before being added.
+> Signal this with WARN_ON_ONCE while still printing enough context for
+> debugging.
 >=20
-> Add explicit cases for CLOSED and REJECTED session states in
-> mds_peer_reset() since these are terminal states where a connection
-> drop is expected behavior.
+> READ_ONCE is used for the i_last_cap_flush_ack field, which is read
+> outside the inode lock domain. Flush tids are monotonically increasing
+> and acks are processed in order under i_ceph_lock, so the latest ack
+> tid is always the most recently written value.
 >=20
-> The session teardown path in mds_peer_reset() follows the established
-> drop-and-reacquire locking pattern from check_new_map(): take
-> mdsc->mutex for session unregistration, release it, then take s->s_mutex
-> separately for cleanup. This avoids introducing a new simultaneous lock
-> nesting pattern.
+> Add a ci pointer to struct ceph_cap_flush so that the diagnostic
+> dump can identify which inode each pending flush belongs to.  The
+> new i_last_cap_flush_ack field tracks the latest acknowledged flush
+> tid per inode for diagnostic correlation.
 >=20
-> Log reconnect failures from check_new_map() and mds_peer_reset() at
-> pr_warn level rather than pr_err, since return codes like -ESTALE
-> (closed/rejected session) and -ENOENT (unregistered session) are
-> expected during concurrent teardown. Log dropped messages for
-> unregistered sessions via doutc() (dynamic debug) rather than
-> pr_info, as post-reset message arrival is routine and does not
-> warrant unconditional logging.
+> This improves reset-drain observability and is also useful for
+> existing sync and writeback troubleshooting paths.
 >=20
 > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 > ---
->  fs/ceph/mds_client.c | 178 +++++++++++++++++++++++++++++++++++++++----
->  1 file changed, 163 insertions(+), 15 deletions(-)
+>  fs/ceph/caps.c       |  10 +++++
+>  fs/ceph/inode.c      |   1 +
+>  fs/ceph/mds_client.c | 100 +++++++++++++++++++++++++++++++++++++++++--
+>  fs/ceph/mds_client.h |   3 ++
+>  fs/ceph/super.h      |   6 +++
+>  5 files changed, 116 insertions(+), 4 deletions(-)
 >=20
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index cb9e78b713d9..4b37d9ffdf7f 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -1648,6 +1648,7 @@ static void __ceph_flush_snaps(struct ceph_inode_in=
+fo *ci,
+> =20
+>  		spin_lock(&mdsc->cap_dirty_lock);
+>  		capsnap->cap_flush.tid =3D ++mdsc->last_cap_flush_tid;
+> +		capsnap->cap_flush.ci =3D ci;
+>  		list_add_tail(&capsnap->cap_flush.g_list,
+>  			      &mdsc->cap_flush_list);
+>  		if (oldest_flush_tid =3D=3D 0)
+> @@ -1846,6 +1847,7 @@ struct ceph_cap_flush *ceph_alloc_cap_flush(void)
+>  		return NULL;
+> =20
+>  	cf->is_capsnap =3D false;
+> +	cf->ci =3D NULL;
+>  	return cf;
+>  }
+> =20
+> @@ -1931,6 +1933,7 @@ static u64 __mark_caps_flushing(struct inode *inode=
+,
+>  	doutc(cl, "%p %llx.%llx now !dirty\n", inode, ceph_vinop(inode));
+> =20
+>  	swap(cf, ci->i_prealloc_cap_flush);
+> +	cf->ci =3D ci;
+>  	cf->caps =3D flushing;
+>  	cf->wake =3D wake;
+> =20
+> @@ -3826,6 +3829,13 @@ static void handle_cap_flush_ack(struct inode *ino=
+de, u64 flush_tid,
+>  	bool wake_ci =3D false;
+>  	bool wake_mdsc =3D false;
+> =20
+> +	/*
+> +	 * Flush tids are monotonically increasing and acks arrive in
+> +	 * order under i_ceph_lock, so this is always the latest tid.
+> +	 * Diagnostic readers use READ_ONCE() without holding the lock.
+> +	 */
+> +	WRITE_ONCE(ci->i_last_cap_flush_ack, flush_tid);
+> +
+>  	list_for_each_entry_safe(cf, tmp_cf, &ci->i_cap_flush_list, i_list) {
+>  		/* Is this the one that was flushed? */
+>  		if (cf->tid =3D=3D flush_tid)
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 4871d7ab2730..61d7c0b8161f 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -671,6 +671,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb=
+)
+>  	INIT_LIST_HEAD(&ci->i_cap_snaps);
+>  	ci->i_head_snapc =3D NULL;
+>  	ci->i_snap_caps =3D 0;
+> +	ci->i_last_cap_flush_ack =3D 0;
+> =20
+>  	ci->i_last_rd =3D ci->i_last_wr =3D jiffies - 3600 * HZ;
+>  	for (i =3D 0; i < CEPH_FILE_MODE_BITS; i++)
 > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index d9543399b129..249419c17d3c 100644
+> index 249419c17d3c..6ab5031e697a 100644
 > --- a/fs/ceph/mds_client.c
 > +++ b/fs/ceph/mds_client.c
-> @@ -4470,9 +4470,14 @@ static void handle_session(struct ceph_mds_session=
- *session,
->  		break;
+> @@ -2330,19 +2330,111 @@ static int check_caps_flush(struct ceph_mds_clie=
+nt *mdsc,
+>  }
 > =20
->  	case CEPH_SESSION_REJECT:
-> -		WARN_ON(session->s_state !=3D CEPH_MDS_SESSION_OPENING);
-> -		pr_info_client(cl, "mds%d rejected session\n",
-> -			       session->s_mds);
-> +		WARN_ON(session->s_state !=3D CEPH_MDS_SESSION_OPENING &&
-> +			session->s_state !=3D CEPH_MDS_SESSION_RECONNECTING);
-> +		if (session->s_state =3D=3D CEPH_MDS_SESSION_RECONNECTING)
-> +			pr_info_client(cl, "mds%d reconnect rejected\n",
-> +				       session->s_mds);
-> +		else
-> +			pr_info_client(cl, "mds%d rejected session\n",
-> +				       session->s_mds);
->  		session->s_state =3D CEPH_MDS_SESSION_REJECTED;
->  		cleanup_session_requests(mdsc, session);
->  		remove_session_caps(session);
-> @@ -4732,6 +4737,14 @@ static int reconnect_caps_cb(struct inode *inode, =
-int mds, void *arg)
->  	cap->mseq =3D 0;       /* and migrate_seq */
->  	cap->cap_gen =3D atomic_read(&cap->session->s_cap_gen);
-> =20
-> +	/*
-> +	 * Note: CEPH_I_ERROR_FILELOCK is not set during reconnect.
-> +	 * Instead, locks are submitted for best-effort MDS reclaim
-> +	 * via the flock_len field below.  If reclaim fails (e.g.,
-> +	 * another client grabbed a conflicting lock), future lock
-> +	 * operations will fail and set the error flag at that point.
-> +	 */
+>  /*
+> - * flush all dirty inode data to disk.
+> + * Snapshot of a single cap_flush entry for diagnostic dump.
+> + * Collected under cap_dirty_lock, printed after releasing it.
+> + */
+> +struct flush_dump_entry {
+> +	u64 ino;		/* inode number */
+> +	u64 snap;		/* snap id */
+> +	int caps;		/* dirty cap bits */
+> +	u64 tid;		/* flush transaction id */
+> +	u64 last_ack;		/* most recent ack tid for this inode */
+> +	bool wake;		/* whether completion was requested */
+> +	bool is_capsnap;	/* true if this is a cap snap flush */
+> +	bool ci_null;		/* true if cf->ci was unexpectedly NULL */
+> +};
 > +
->  	/* These are lost when the session goes away */
->  	if (S_ISDIR(inode->i_mode)) {
->  		if (cap->issued & CEPH_CAP_DIR_CREATE) {
-> @@ -4946,20 +4959,19 @@ static int encode_snap_realms(struct ceph_mds_cli=
-ent *mdsc,
+> +/*
+> + * Dump pending cap flushes for diagnostic purposes.
 >   *
->   * This is a relatively heavyweight operation, but it's rare.
+> - * returns true if we've flushed through want_flush_tid
+> + * cf->ci is safe to dereference here: cap_flush entries hold a
+> + * reference on the inode (via the cap), and entries are removed from
+> + * cap_flush_list under cap_dirty_lock before the cap (and thus the
+> + * inode reference) is released.  Holding cap_dirty_lock therefore
+> + * guarantees the inode remains valid for the lifetime of the scan.
+> + */
+> +
+> +static void dump_cap_flushes(struct ceph_mds_client *mdsc, u64 want_tid)
+> +{
+> +	struct ceph_client *cl =3D mdsc->fsc->client;
+> +	struct flush_dump_entry entries[CEPH_CAP_FLUSH_MAX_DUMP_ENTRIES];
+> +	struct ceph_cap_flush *cf;
+> +	int n =3D 0, remaining =3D 0;
+> +
+> +	spin_lock(&mdsc->cap_dirty_lock);
+> +	list_for_each_entry(cf, &mdsc->cap_flush_list, g_list) {
+> +		if (cf->tid > want_tid)
+> +			break;
+> +		if (n < CEPH_CAP_FLUSH_MAX_DUMP_ENTRIES) {
+> +			struct flush_dump_entry *e =3D &entries[n++];
+> +
+> +			e->ci_null =3D WARN_ON_ONCE(!cf->ci);
+> +			if (!e->ci_null) {
+> +				e->ino =3D ceph_ino(&cf->ci->netfs.inode);
+> +				e->snap =3D ceph_snap(&cf->ci->netfs.inode);
+> +				e->last_ack =3D READ_ONCE(cf->ci->i_last_cap_flush_ack);
+> +			}
+> +			e->caps =3D cf->caps;
+> +			e->tid =3D cf->tid;
+> +			e->wake =3D cf->wake;
+> +			e->is_capsnap =3D cf->is_capsnap;
+> +		} else {
+> +			remaining++;
+> +		}
+
+We don't need brackets here. :)
+
+> +	}
+> +	spin_unlock(&mdsc->cap_dirty_lock);
+> +
+> +	pr_info_client(cl, "still waiting for cap flushes through %llu:\n",
+> +		       want_tid);
+> +	for (int i =3D 0; i < n; i++) {
+
+I am slightly worried that we could have warnings because of this declarati=
+on.
+
+> +		struct flush_dump_entry *e =3D &entries[i];
+> +
+> +		if (e->ci_null)
+> +			pr_info_client(cl,
+> +				       "  (null ci) %s tid=3D%llu wake=3D%d%s\n",
+> +				       ceph_cap_string(e->caps), e->tid,
+> +				       e->wake,
+> +				       e->is_capsnap ? " is_capsnap" : "");
+> +		else
+> +			pr_info_client(cl,
+> +				       "  %llx.%llx %s tid=3D%llu last_ack=3D%llu wake=3D%d%s\n",
+> +				       e->ino, e->snap,
+> +				       ceph_cap_string(e->caps), e->tid,
+> +				       e->last_ack, e->wake,
+> +				       e->is_capsnap ? " is_capsnap" : "");
+> +	}
+> +	if (remaining)
+> +		pr_info_client(cl, "  ... and %d more pending flushes\n",
+> +			       remaining);
+> +}
+> +
+> +/*
+> + * Wait for all cap flushes through @want_flush_tid to complete.
+> + * Periodically dumps pending cap flush state for diagnostics.
 >   */
-> -static void send_mds_reconnect(struct ceph_mds_client *mdsc,
-> -			       struct ceph_mds_session *session)
-> +static int send_mds_reconnect(struct ceph_mds_client *mdsc,
-> +			      struct ceph_mds_session *session)
+>  static void wait_caps_flush(struct ceph_mds_client *mdsc,
+>  			    u64 want_flush_tid)
 >  {
 >  	struct ceph_client *cl =3D mdsc->fsc->client;
->  	struct ceph_msg *reply;
->  	int mds =3D session->s_mds;
->  	int err =3D -ENOMEM;
-> +	int old_state;
->  	struct ceph_reconnect_state recon_state =3D {
->  		.session =3D session,
->  	};
->  	LIST_HEAD(dispose);
+> +	int i =3D 0;
+> +	long ret;
 > =20
-> -	pr_info_client(cl, "mds%d reconnect start\n", mds);
-> -
->  	recon_state.pagelist =3D ceph_pagelist_alloc(GFP_NOFS);
->  	if (!recon_state.pagelist)
->  		goto fail_nopagelist;
-> @@ -4968,9 +4980,37 @@ static void send_mds_reconnect(struct ceph_mds_cli=
-ent *mdsc,
->  	if (!reply)
->  		goto fail_nomsg;
+>  	doutc(cl, "want %llu\n", want_flush_tid);
 > =20
-> +	mutex_lock(&session->s_mutex);
-> +
-> +	/* Serialized by s_mutex against concurrent ceph_get_deleg_ino(). */
->  	xa_destroy(&session->s_delegated_inos);
-> +	if (session->s_state =3D=3D CEPH_MDS_SESSION_CLOSED ||
-> +	    session->s_state =3D=3D CEPH_MDS_SESSION_REJECTED) {
-> +		pr_info_client(cl, "mds%d skipping reconnect, session %s\n",
-> +			       mds,
-> +			       ceph_session_state_name(session->s_state));
-> +		mutex_unlock(&session->s_mutex);
-> +		ceph_msg_put(reply);
-> +		err =3D -ESTALE;
-> +		goto fail_return;
-> +	}
-> =20
-> -	mutex_lock(&session->s_mutex);
-> +	/* s_mutex -> mdsc->mutex matches cleanup_session_requests() order. */
-> +	mutex_lock(&mdsc->mutex);
-> +	if (mds >=3D mdsc->max_sessions || mdsc->sessions[mds] !=3D session) {
-> +		mutex_unlock(&mdsc->mutex);
-> +		pr_info_client(cl,
-> +			       "mds%d skipping reconnect, session unregistered\n",
-> +			       mds);
-> +		mutex_unlock(&session->s_mutex);
-> +		ceph_msg_put(reply);
-> +		err =3D -ENOENT;
-> +		goto fail_return;
-> +	}
-> +	mutex_unlock(&mdsc->mutex);
-> +
-> +	pr_info_client(cl, "mds%d reconnect start\n", mds);
-> +	old_state =3D session->s_state;
->  	session->s_state =3D CEPH_MDS_SESSION_RECONNECTING;
->  	session->s_seq =3D 0;
-> =20
-> @@ -5100,7 +5140,7 @@ static void send_mds_reconnect(struct ceph_mds_clie=
-nt *mdsc,
-> =20
->  	up_read(&mdsc->snap_rwsem);
->  	ceph_pagelist_release(recon_state.pagelist);
-> -	return;
-> +	return 0;
-> =20
->  fail_clear_cap_reconnect:
->  	spin_lock(&session->s_cap_lock);
-> @@ -5109,13 +5149,29 @@ static void send_mds_reconnect(struct ceph_mds_cl=
-ient *mdsc,
->  fail:
->  	ceph_msg_put(reply);
->  	up_read(&mdsc->snap_rwsem);
-> +	/*
-> +	 * Restore prior session state so map-driven reconnect logic
-> +	 * (check_new_map) can retry.  Without this, a transient build
-> +	 * failure strands the session in RECONNECTING indefinitely.
-> +	 */
-> +	session->s_state =3D old_state;
->  	mutex_unlock(&session->s_mutex);
->  fail_nomsg:
->  	ceph_pagelist_release(recon_state.pagelist);
->  fail_nopagelist:
->  	pr_err_client(cl, "error %d preparing reconnect for mds%d\n",
->  		      err, mds);
-> -	return;
-> +	return err;
-> +
-> +fail_return:
-> +	/*
-> +	 * Early-exit path for expected concurrent-teardown races
-> +	 * (-ESTALE for closed/rejected sessions, -ENOENT for
-> +	 * unregistered sessions).  Skip the pr_err_client diagnostic
-> +	 * since these are not genuine reconnect build failures.
-> +	 */
-> +	ceph_pagelist_release(recon_state.pagelist);
-> +	return err;
->  }
-> =20
-> =20
-> @@ -5196,9 +5252,15 @@ static void check_new_map(struct ceph_mds_client *=
-mdsc,
->  		 */
->  		if (s->s_state =3D=3D CEPH_MDS_SESSION_RESTARTING &&
->  		    newstate >=3D CEPH_MDS_STATE_RECONNECT) {
-> +			int rc;
-> +
->  			mutex_unlock(&mdsc->mutex);
->  			clear_bit(i, targets);
-> -			send_mds_reconnect(mdsc, s);
-> +			rc =3D send_mds_reconnect(mdsc, s);
-> +			if (rc)
-> +				pr_warn_client(cl,
-> +					       "mds%d reconnect failed: %d\n",
-> +					       i, rc);
->  			mutex_lock(&mdsc->mutex);
->  		}
-> =20
-> @@ -5262,7 +5324,11 @@ static void check_new_map(struct ceph_mds_client *=
-mdsc,
->  		}
->  		doutc(cl, "send reconnect to export target mds.%d\n", i);
->  		mutex_unlock(&mdsc->mutex);
-> -		send_mds_reconnect(mdsc, s);
-> +		err =3D send_mds_reconnect(mdsc, s);
-> +		if (err)
-> +			pr_warn_client(cl,
-> +				       "mds%d export target reconnect failed: %d\n",
-> +				       i, err);
->  		ceph_put_mds_session(s);
->  		mutex_lock(&mdsc->mutex);
->  	}
-> @@ -6350,12 +6416,92 @@ static void mds_peer_reset(struct ceph_connection=
- *con)
->  {
->  	struct ceph_mds_session *s =3D con->private;
->  	struct ceph_mds_client *mdsc =3D s->s_mdsc;
-> +	int session_state;
-> =20
->  	pr_warn_client(mdsc->fsc->client, "mds%d closed our session\n",
->  		       s->s_mds);
-> -	if (READ_ONCE(mdsc->fsc->mount_state) !=3D CEPH_MOUNT_FENCE_IO &&
-> -	    ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) >=3D CEPH_MDS_STATE_R=
-ECONNECT)
-> -		send_mds_reconnect(mdsc, s);
-> +
-> +	if (READ_ONCE(mdsc->fsc->mount_state) =3D=3D CEPH_MOUNT_FENCE_IO ||
-> +	    ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) < CEPH_MDS_STATE_RECO=
-NNECT)
-> +		return;
-> +
-> +	/*
-> +	 * Only reconnect if MDS is in its RECONNECT phase.  An MDS past
-> +	 * RECONNECT (REJOIN, CLIENTREPLAY, ACTIVE) will reject reconnect
-> +	 * attempts, so those states fall through to session teardown below.
-> +	 */
-> +	if (ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) =3D=3D CEPH_MDS_STATE=
-_RECONNECT) {
-> +		int rc =3D send_mds_reconnect(mdsc, s);
-> +
-> +		if (rc)
-> +			pr_warn_client(mdsc->fsc->client,
-> +				       "mds%d reconnect failed: %d\n",
-> +				       s->s_mds, rc);
-> +		return;
-> +	}
-> +
-> +	/*
-> +	 * MDS is active (past RECONNECT).  It will not accept a
-> +	 * CLIENT_RECONNECT from us, so tear the session down locally
-> +	 * and let new requests re-open a fresh session.
-> +	 *
-> +	 * Snapshot session state with READ_ONCE, then revalidate under
-> +	 * mdsc->mutex before acting.  The subsequent mdsc->mutex
-> +	 * section rechecks s_state to catch concurrent transitions, so
-> +	 * the lockless snapshot here is safe.  s->s_mutex is taken
-> +	 * separately for cleanup after unregistration, which avoids
-> +	 * introducing a new s->s_mutex + mdsc->mutex nesting.
-> +	 */
-> +	session_state =3D READ_ONCE(s->s_state);
-> +
-> +	switch (session_state) {
-> +	case CEPH_MDS_SESSION_RESTARTING:
-> +	case CEPH_MDS_SESSION_RECONNECTING:
-> +	case CEPH_MDS_SESSION_CLOSING:
-> +	case CEPH_MDS_SESSION_OPEN:
-> +	case CEPH_MDS_SESSION_HUNG:
-> +	case CEPH_MDS_SESSION_OPENING:
-> +		mutex_lock(&mdsc->mutex);
-> +		if (s->s_mds >=3D mdsc->max_sessions ||
-> +		    mdsc->sessions[s->s_mds] !=3D s ||
-> +		    s->s_state !=3D session_state) {
-> +			pr_info_client(mdsc->fsc->client,
-> +				       "mds%d state changed to %s during peer reset\n",
-> +				       s->s_mds,
-> +				       ceph_session_state_name(s->s_state));
-> +			mutex_unlock(&mdsc->mutex);
-> +			return;
+> -	wait_event(mdsc->cap_flushing_wq,
+> -		   check_caps_flush(mdsc, want_flush_tid));
+> +	do {
+> +		/* 60 * HZ fits in a long on all supported architectures. */
+> +		ret =3D wait_event_timeout(mdsc->cap_flushing_wq,
+> +			   check_caps_flush(mdsc, want_flush_tid),
+> +			   CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC * HZ);
+> +		if (ret =3D=3D 0) {
+> +			if (i < CEPH_CAP_FLUSH_MAX_DUMP_ITERS)
+> +				dump_cap_flushes(mdsc, want_flush_tid);
+> +			else if (i =3D=3D CEPH_CAP_FLUSH_MAX_DUMP_ITERS)
+> +				pr_info_client(cl,
+> +					       "still waiting for cap flushes; suppressing further dumps\n"=
+);
+> +			i++;
 > +		}
-> +
-> +		ceph_get_mds_session(s);
-> +		s->s_state =3D CEPH_MDS_SESSION_CLOSED;
-> +		__unregister_session(mdsc, s);
-> +		__wake_requests(mdsc, &s->s_waiting);
-> +		mutex_unlock(&mdsc->mutex);
-> +
-> +		mutex_lock(&s->s_mutex);
-> +		cleanup_session_requests(mdsc, s);
-> +		remove_session_caps(s);
-> +		mutex_unlock(&s->s_mutex);
-> +
-> +		wake_up_all(&mdsc->session_close_wq);
-> +
-> +		mutex_lock(&mdsc->mutex);
-> +		kick_requests(mdsc, s->s_mds);
-> +		mutex_unlock(&mdsc->mutex);
-> +
-> +		ceph_put_mds_session(s);
-> +		break;
-> +	case CEPH_MDS_SESSION_CLOSED:
-> +	case CEPH_MDS_SESSION_REJECTED:
-> +		break;
-> +	default:
-> +		pr_warn_client(mdsc->fsc->client,
-> +			       "mds%d peer reset in unexpected state %s\n",
-> +			       s->s_mds,
-> +			       ceph_session_state_name(session_state));
-> +		break;
-> +	}
+> +	} while (ret =3D=3D 0);
+> =20
+>  	doutc(cl, "ok, flushed thru %llu\n", want_flush_tid);
 >  }
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index d873e784b025..8208fdf02efe 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -77,6 +77,9 @@ struct ceph_fs_client;
+>  struct ceph_cap;
 > =20
->  static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *m=
-sg)
-> @@ -6367,6 +6513,8 @@ static void mds_dispatch(struct ceph_connection *co=
-n, struct ceph_msg *msg)
+>  #define MDS_AUTH_UID_ANY -1
+> +#define CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC 60
+> +#define CEPH_CAP_FLUSH_MAX_DUMP_ENTRIES 5
+> +#define CEPH_CAP_FLUSH_MAX_DUMP_ITERS 5
 > =20
->  	mutex_lock(&mdsc->mutex);
->  	if (__verify_registered_session(mdsc, s) < 0) {
-> +		doutc(cl, "dropping tid %llu from unregistered session %d\n",
-> +		      le64_to_cpu(msg->hdr.tid), s->s_mds);
->  		mutex_unlock(&mdsc->mutex);
->  		goto out;
->  	}
+>  struct ceph_mds_cap_match {
+>  	s64 uid;  /* default to MDS_AUTH_UID_ANY */
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 8afc6f3a10da..a4993644d543 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -239,6 +239,7 @@ struct ceph_cap_flush {
+>  	bool is_capsnap; /* true means capsnap */
+>  	struct list_head g_list; // global
+>  	struct list_head i_list; // per inode
+> +	struct ceph_inode_info *ci;
+>  };
+> =20
+>  /*
+> @@ -453,6 +454,11 @@ struct ceph_inode_info {
+>  	struct ceph_snap_context *i_head_snapc;  /* set if wr_buffer_head > 0 o=
+r
+>  						    dirty|flushing caps */
+>  	unsigned i_snap_caps;           /* cap bits for snapped files */
+> +	/*
+> +	 * Written under i_ceph_lock, read via READ_ONCE()
+> +	 * from diagnostic paths.
+> +	 */
+> +	u64 i_last_cap_flush_ack;
+> =20
+>  	unsigned long i_last_rd;
+>  	unsigned long i_last_wr;
+
+I have two minor remarks. The rest looks good.
 
 Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
