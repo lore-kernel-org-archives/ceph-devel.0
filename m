@@ -1,92 +1,92 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D218F41325E
-	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 19:22:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D67083E92AC
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 19:24:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778181757; cv=none; b=A3LxNEWVA/gmtjJGsBcbJoAlzsokAuPKnlsyEC5tG9bfFj+Gzft7s9ELvl3PvGgukOeYzYToiqVb/4aJZ0eE8Mp/2RlSMUsvCT2bKbQ0xa1imr/1c8h6efE2i93K99GStK3Ep+uAlI/NSW6fc2RUHthI0Jce5tqPUh4/RSP95BY=
+	t=1778181877; cv=none; b=ZzNB5bAHTbluIv8ib4wxSO0WVMCZYZaI62EFY2BDyKX/YWFZzZlwru3D23JMsRBlYdBwoeIdYFMZXV5in2gZlSZl9y+bgo9Jg05YVoXmBXrpk3oaVkRtGbqiWYLwSavzizReuXP03CL8po9fxzVaJzcFzUsxtziu/1gN+Gk504w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778181757; c=relaxed/simple;
-	bh=k0K4eI3+VYC8Gl8VXesM4PGtvx02DQtPwHozfFSXxCc=;
+	s=arc-20240116; t=1778181877; c=relaxed/simple;
+	bh=Ldcy+NfeCKQL4gdHy6jOYRlm7dqkx4JsUXfsmQ7fkyE=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=f2v2mPfTeHTRvfj+kPEBitJUY1zLilqSOMEFfHZvr84/uyEc8jOgq7lu0sEID/un0NnqSyRqGUmjhhk3I620FQDiz/gWiM2dd/j+dESzofwI6g7i5NEybo9nb+9alemsC+xNlX8KyG46dxDvU8zDpo7tzhJ+cw4fWp7i34g8lw4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Q1YQ7ZJN; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZHaqWWA7; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:MIME-Version; b=m+J3Z+eplrI2z2216MFPeVVVqzIpxJ28R3XLUklw3bjyrecujdrsfNTi0FcVVyNUKImWzfHeLj5i27CD8ViLkbxhwR/g/KdvLakpi9oZ1kF/v4liL3WWfSDFqY1WLglY/FMqTBZzFEvvvdv3jjhedssYbUZs+EOOLRP4Wf7DjtQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CAolMxtH; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=GwjP0Xlq; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Q1YQ7ZJN";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZHaqWWA7"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CAolMxtH";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="GwjP0Xlq"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778181754;
+	s=mimecast20190719; t=1778181874;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=UV7cJTsfQAhuvMWUxthMUvI3jp0Ay7yW6iBG9vehno0=;
-	b=Q1YQ7ZJN+n6iifWCSWWZkYXeD2eNR6sFnW9JV/qRmX2CNBb+x/LhZ88uFb2xeuTMTsIsdo
-	x4U5vUFx57ONi1wrzTOGpKaxzyAfVqrNBJ30edHl1B7iu+ggPmG42vBtupMo3FdtVCgu9q
-	L4Zn8QF9jDc7smkdfWjEfaEZYuwq0f8=
-Received: from mail-yw1-f200.google.com (mail-yw1-f200.google.com
- [209.85.128.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=eJas2sGqLwB+vZWX5Y6mMjONuOkT/m3kcsxZweoSdiM=;
+	b=CAolMxtHN47Sg+kbhLQw2qp98+bCqHmyFza2pjdQCFhqQQPSynnTMwmW435QEAnQMOUSxw
+	ZvK2lrlxUMLDAULFWLt0JOHs1rzGytt4TaFONs1dzqbxUFJZTJ1OuFHAx8RG/rkDBkoTdf
+	TsGxvT1kSApvKXJZIxFyybO3oKlVFng=
+Received: from mail-yx1-f70.google.com (mail-yx1-f70.google.com
+ [74.125.224.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-206-TfJW6lhDObeGpU-mm3pJ8w-1; Thu, 07 May 2026 15:22:30 -0400
-X-MC-Unique: TfJW6lhDObeGpU-mm3pJ8w-1
-X-Mimecast-MFC-AGG-ID: TfJW6lhDObeGpU-mm3pJ8w_1778181750
-Received: by mail-yw1-f200.google.com with SMTP id 00721157ae682-7bd5c9e2e4aso31008027b3.2
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 12:22:30 -0700 (PDT)
+ us-mta-402-UnPZ28CfPBCcZhznLE_X2A-1; Thu, 07 May 2026 15:24:33 -0400
+X-MC-Unique: UnPZ28CfPBCcZhznLE_X2A-1
+X-Mimecast-MFC-AGG-ID: UnPZ28CfPBCcZhznLE_X2A_1778181873
+Received: by mail-yx1-f70.google.com with SMTP id 956f58d0204a3-65c223da702so2647139d50.1
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 12:24:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1778181750; x=1778786550; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1778181873; x=1778786673; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=UV7cJTsfQAhuvMWUxthMUvI3jp0Ay7yW6iBG9vehno0=;
-        b=ZHaqWWA7FLC2la61DScpAcM3mvBuZ/+oHcVwYY/JUcnWYKTiREQ6dFPijM0x01306r
-         8w57qI7NwOmptytGPQljarx5jb949p+MCntgOA/1robrCBTxqajCx72iR4HTgwOkM4qf
-         7FSUWq7RhGGtFpIC/H6A8a0g06/eDx9B3D2IqXtz2K5rKV1BZJxFXHGlKeotDMirBl+y
-         tNJSjmbpa6bBG/NgnzwD1DSvem1XP/Hb9guquxbUhPloyK7nXmP4SNFMP30IQN7j1jW/
-         l1eohUsKtt7nhEr28I1NfoF7OAO8tjqtnbGFXKz0iA4W4JuR8vhiQZdSStvJXhrvp3+U
-         JVmg==
+        bh=eJas2sGqLwB+vZWX5Y6mMjONuOkT/m3kcsxZweoSdiM=;
+        b=GwjP0XlqJh6XXpLvqEBjvQ+LIomHQZFIQvFWw1x6ojH0CRmSA27Rp5KekHwwb6HSBM
+         WchnH/0ICUu8kRP8XfGXFwj8uvIrLDjw7lqSkj2OaIQabvFwU5CwIsTfRBeZqL4fTHMA
+         lwxmnz9LSh7Gknj1ONYKrvY1e1HE3ogexjovw42GbnfrRAlb5oTfv7P0dH0T0MQNw5/f
+         LnhqE9fcc06z4bBUnzqUtBK4L6MTJGrYRjaGoUq9Qu5KTQ+BIWkKlc8wnFLI0Yp7/9zP
+         ZZaVQfOMuSy+N8AHsMWoXwCpR6uCw3LgADjkQG2D3CFVXfpRom/CTwxneBwBNX/BcR+L
+         FuCA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778181750; x=1778786550;
+        d=1e100.net; s=20251104; t=1778181873; x=1778786673;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=UV7cJTsfQAhuvMWUxthMUvI3jp0Ay7yW6iBG9vehno0=;
-        b=coZmtLUIIdUe8Q5li9wkkiUfUbf3O8xDZRVaj57cWT65mp8mJm8Z/sx1vrjzv6tReH
-         3zvTt3+QHVaKYdG8CZDklSRcJwa72kAnlWtH/3195kWWosES1X3rSiiqWw+qWcu90Q6Y
-         Y1SejSDiw62FF+TbK95r4lfB3068rQofNLlFzjbHxyVR5hSMLWmnDaG4QxAkh/1j/5uI
-         9AcKv6r3/ZWwcWArpW3XESlU634ujO00eUEJmiYnNg0koeL9RtNa8OJ5wPV5GEvf5Nw7
-         o/OczyOvTbIMxCj7szNsOc5w9/FMWBonwY1UI4zgsufwvGx0IKTlxZLTT1SmOaXIDxWk
-         Mr1g==
-X-Forwarded-Encrypted: i=1; AFNElJ8u0K28lg3ZDH6VtTszOgbnnUNMEqfrXAYHinHdajM+VNbS0dVsGvIs+eF9ViOi8+Wt+oczviX/yh3q@vger.kernel.org
-X-Gm-Message-State: AOJu0YzIlHxoRP0Pu2No6C0yTsMc2A++B35ILG34I4IxURn40KnXkNHD
-	IMiC92x23jDrh0mB2eXTfk4BhLgbAwQpzaXt0Dn2lp2YnWWCabvHdXXc4lkAV31UeeiHLd2QKPL
-	HJFyy/uW9SrprrDhxaDSIMpTDd4YuGo0auyX33ehgDh9Z5qqtvFpJvRl+5XgzL1U=
-X-Gm-Gg: Acq92OFPrzJ7mIo484AL+BsAEhZfzJe4LYk8rZx+F/Brod/+dX3Jjik7YFbw49NDSvy
-	MCc9KN1w+pitUftGDdBwUYvSeDjNAhfvXNzM7RdoLtWr4QTgSSoIeKxyNSeu1klwtHNyzmrWh0S
-	z6mywTbTgWURoAb+b1l9s88Qx+JnzfF1NX86qPRiZBh9nLsU5OKQNps1jqWAoGS328r79mOyfTf
-	YQpSmHiFlM+7/Q8DYSiitXQeJwREvUgjj02XiXcuUQWRX/BoWr4XkybAzR1SS28hjFQfkSXR6je
-	T8EeWPeBBnSQOjLbnsUetgrzKWxJ89uNiHo4BUXaiFjsbC4hUkEVS3pVBYnyp7uMttnOZE79ylB
-	gPISvJV0mkLofkF1KxIaQp/MCjjSvgnaDUB99KNLWHSgVfEiXwSyH
-X-Received: by 2002:a05:690c:6e85:b0:79a:5fb9:62ad with SMTP id 00721157ae682-7bdf5eeea02mr100854237b3.43.1778181749859;
-        Thu, 07 May 2026 12:22:29 -0700 (PDT)
-X-Received: by 2002:a05:690c:6e85:b0:79a:5fb9:62ad with SMTP id 00721157ae682-7bdf5eeea02mr100853877b3.43.1778181749211;
-        Thu, 07 May 2026 12:22:29 -0700 (PDT)
+        bh=eJas2sGqLwB+vZWX5Y6mMjONuOkT/m3kcsxZweoSdiM=;
+        b=s3U4KPRmH8Lc+YMu13apK9ws8QGaemyG5Zt1G1cJLWT9EqqVgsegqCapKQeAbAMP+Y
+         krhWfCg6kr/u9GlVgWW5EEt36VqqtjN12dneh5uzst7RVbW6kZVIrEeMqGBuuvv1N4hN
+         1veqpY0g4kP03WbKjEDsh2K4crsFyileY7L0BQd1UwwO4gnZvd1K9ujygFIMZ20ibl5i
+         /gNII3dyilktU5PT04o3VWjJdClNmPlUwjCpMMuOgPsKzvgrRAX3GtFe7mBkpFY6ThIz
+         qvBVFa7EwPf0EcyWe6tNDA6bCTuMZ73s+Nxj3XxhZtJk3cwKwd7t7UlqQ6/4ASYNrjjX
+         RA/Q==
+X-Forwarded-Encrypted: i=1; AFNElJ/Hm0ET4asUiuKWoBO0MZf3LrZDH/ZtCiIab35BWftFdNBoTziugWnpUzdL5XUDdg0G0eTE2c+ExN7U@vger.kernel.org
+X-Gm-Message-State: AOJu0YwLRmUpOnK19sh6XlyzABTtq1ap6AxU8hfHm0EJnMj/aCXR/1h/
+	j7vKDsjNiMSDzo0hXubLcIkqoh81Dhn8WycU3/X4UGQAUHUHZGanUTNgP9PtztkJUFyYHCNlpzV
+	9dw+I7TOLftFF7to/o+DKaFY21xCXHa51HaPw5zGj3VV6KBm0fE36XR3zN/A/CgA=
+X-Gm-Gg: Acq92OFlkLemD0Cfv/WidMUju8/2cFO3lbeZn/B5S1sx61u7tk8iSSqUX8WufJNGSmt
+	64aGf0X348uHCH/2ytM8hM87yQxDpuhQDLLk3Dz5ZDv6n7DSksrW2Eqs4Z5zRPJUVR70ZgmUns8
+	6/xowAobdCz2aSv6+UgS6a9VHLQRAM60MXjs2NHIy7wdwJGAUAhWM+l8Etf30EfTvAFCe1OF7OV
+	Qwk66KMTrmWt3TXovW6ACxTjxVwIY+HwLLLOGElruPzUP4op63vxEZYvgSUPbYolziQDTqypLoo
+	bs7jSROeABXttlWU68Bt2ES7AXWYRPouiLpxjQTAVM+XccptIWtwSzx9u6ClvWuuEgaEVl/Uu6G
+	tN22UFtF/qBMb3/jabh8L2Ncr0VAOUujvcLoSw4sP3gQTU6kjqtqK
+X-Received: by 2002:a05:690e:480a:b0:650:3952:3d2a with SMTP id 956f58d0204a3-65c79877bf0mr7764023d50.8.1778181872765;
+        Thu, 07 May 2026 12:24:32 -0700 (PDT)
+X-Received: by 2002:a05:690e:480a:b0:650:3952:3d2a with SMTP id 956f58d0204a3-65c79877bf0mr7763998d50.8.1778181872192;
+        Thu, 07 May 2026 12:24:32 -0700 (PDT)
 Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd6656542bsm97141627b3.20.2026.05.07.12.22.27
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-65d935f47eesm78722d50.18.2026.05.07.12.24.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 May 2026 12:22:28 -0700 (PDT)
-Message-ID: <114b76303a6f0246878eb986fce509833a5091c2.camel@redhat.com>
-Subject: Re: [EXTERNAL] [PATCH v4 06/11] ceph: add manual reset debugfs
- control and tracepoints
+        Thu, 07 May 2026 12:24:31 -0700 (PDT)
+Message-ID: <c7ec42b9399464cfc0c4f7707df810e07e4a2630.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v4 07/11] selftests: ceph: add reset
+ consistency checker
 From: Viacheslav Dubeyko <vdubeyko@redhat.com>
 To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
-Date: Thu, 07 May 2026 12:22:27 -0700
-In-Reply-To: <20260507122737.2804094-7-amarkuze@redhat.com>
+Date: Thu, 07 May 2026 12:24:30 -0700
+In-Reply-To: <20260507122737.2804094-8-amarkuze@redhat.com>
 References: <20260507122737.2804094-1-amarkuze@redhat.com>
-	 <20260507122737.2804094-7-amarkuze@redhat.com>
+	 <20260507122737.2804094-8-amarkuze@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.60.0 (3.60.0-1.fc44app2) 
@@ -98,344 +98,352 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Thu, 2026-05-07 at 12:27 +0000, Alex Markuze wrote:
-> Add the debugfs and trace plumbing used to trigger and observe
-> manual client reset.
+> Add a Python post-run validator for the CephFS client reset stress
+> test.  The script reads data files written by the stress runner and
+> checks that every file was either written completely or is missing,
+> with no partial or corrupted content.
 >=20
-> The reset interface exposes a trigger file for operator-initiated
-> reset and a status file for tracking the most recent run.  The
-> tracepoints record scheduling, completion, and blocked caller
-> behavior so reset progress can be diagnosed from the client side.
->=20
-> debugfs layout under /sys/kernel/debug/ceph/<client>/reset/:
->   trigger - write to initiate a manual reset
->   status  - read to see the most recent reset result
->=20
-> The reset directory is cleaned up via debugfs_remove_recursive()
-> on the parent, so individual file dentries are not stored.
->=20
-> Tracepoints:
->   ceph_client_reset_schedule  - reset queued
->   ceph_client_reset_complete  - reset finished (success or failure)
->   ceph_client_reset_blocked   - caller blocked waiting for reset
->   ceph_client_reset_unblocked - caller unblocked after reset
->=20
-> All tracepoints use a null-safe access for monc.auth->global_id
-> to guard against early-init or late-teardown edge cases.
+> This is a prerequisite for the stress test script which invokes it
+> after each run.
 >=20
 > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 > ---
->  fs/ceph/debugfs.c           | 103 ++++++++++++++++++++++++++++++++++++
->  fs/ceph/mds_client.c        |   7 +++
->  fs/ceph/super.h             |   1 +
->  include/trace/events/ceph.h |  67 +++++++++++++++++++++++
->  4 files changed, 178 insertions(+)
+>  .../filesystems/ceph/validate_consistency.py  | 297 ++++++++++++++++++
+>  1 file changed, 297 insertions(+)
+>  create mode 100755 tools/testing/selftests/filesystems/ceph/validate_con=
+sistency.py
 >=20
-> diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-> index e2463f93cf6b..18eb5da03411 100644
-> --- a/fs/ceph/debugfs.c
-> +++ b/fs/ceph/debugfs.c
-> @@ -9,6 +9,7 @@
->  #include <linux/seq_file.h>
->  #include <linux/math64.h>
->  #include <linux/ktime.h>
-> +#include <linux/uaccess.h>
->  #include <linux/atomic.h>
-> =20
->  #include <linux/ceph/libceph.h>
-> @@ -392,6 +393,90 @@ static int status_show(struct seq_file *s, void *p)
->  	return 0;
->  }
-> =20
-> +static int reset_status_show(struct seq_file *s, void *p)
-> +{
-> +	struct ceph_fs_client *fsc =3D s->private;
-> +	struct ceph_mds_client *mdsc =3D fsc->mdsc;
-> +	struct ceph_client_reset_state *st;
-> +	u64 trigger =3D 0, success =3D 0, failure =3D 0;
-> +	unsigned long last_start =3D 0, last_finish =3D 0;
-> +	int last_errno =3D 0;
-> +	enum ceph_client_reset_phase phase =3D CEPH_CLIENT_RESET_IDLE;
-> +	bool drain_timed_out =3D false;
-> +	int sessions_reset =3D 0;
-> +	int blocked_requests =3D 0;
-> +	char reason[CEPH_CLIENT_RESET_REASON_LEN];
+> diff --git a/tools/testing/selftests/filesystems/ceph/validate_consistenc=
+y.py b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
+> new file mode 100755
+> index 000000000000..c230a59bdb3a
+> --- /dev/null
+> +++ b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
+> @@ -0,0 +1,297 @@
+> +#!/usr/bin/env python3
+> +# SPDX-License-Identifier: GPL-2.0
 > +
-> +	if (!mdsc)
-> +		return 0;
+> +import argparse
+> +import bisect
+> +import hashlib
+> +import json
+> +import os
+> +from pathlib import Path
 > +
-> +	st =3D &mdsc->reset_state;
 > +
-> +	spin_lock(&st->lock);
-> +	trigger =3D st->trigger_count;
-> +	success =3D st->success_count;
-> +	failure =3D st->failure_count;
-> +	last_start =3D st->last_start;
-> +	last_finish =3D st->last_finish;
-> +	last_errno =3D st->last_errno;
-> +	phase =3D st->phase;
-> +	drain_timed_out =3D st->drain_timed_out;
-> +	sessions_reset =3D st->sessions_reset;
-> +	strscpy(reason, st->last_reason, sizeof(reason));
-> +	spin_unlock(&st->lock);
+> +def sha256_file(path: Path) -> str:
+> +    digest =3D hashlib.sha256()
+> +    with path.open("rb") as handle:
+> +        while True:
+> +            chunk =3D handle.read(1 << 20)
+> +            if not chunk:
+> +                break
+> +            digest.update(chunk)
+> +    return digest.hexdigest()
 > +
-> +	blocked_requests =3D atomic_read(&st->blocked_requests);
 > +
-> +	seq_printf(s, "phase: %s\n", ceph_reset_phase_name(phase));
-> +	seq_printf(s, "trigger_count: %llu\n", trigger);
-> +	seq_printf(s, "success_count: %llu\n", success);
-> +	seq_printf(s, "failure_count: %llu\n", failure);
-> +	if (last_start)
-> +		seq_printf(s, "last_start_ms_ago: %u\n",
-> +			   jiffies_to_msecs(jiffies - last_start));
-> +	else
-> +		seq_puts(s, "last_start_ms_ago: (never)\n");
-> +	if (last_finish)
-> +		seq_printf(s, "last_finish_ms_ago: %u\n",
-> +			   jiffies_to_msecs(jiffies - last_finish));
-> +	else
-> +		seq_puts(s, "last_finish_ms_ago: (never)\n");
-> +	seq_printf(s, "last_errno: %d\n", last_errno);
-> +	seq_printf(s, "last_reason: %s\n",
-> +		   reason[0] ? reason : "(none)");
-> +	seq_printf(s, "drain_timed_out: %s\n",
-> +		   drain_timed_out ? "yes" : "no");
-> +	seq_printf(s, "sessions_reset: %d\n", sessions_reset);
-> +	seq_printf(s, "blocked_requests: %d\n", blocked_requests);
+> +def parse_io_log(path: Path):
+> +    records =3D []
+> +    if not path.exists():
+> +        return records
+> +    with path.open("r", encoding=3D"utf-8") as handle:
+> +        for line_no, line in enumerate(handle, 1):
+> +            line =3D line.strip()
+> +            if not line:
+> +                continue
+> +            parts =3D line.split(",")
+> +            if len(parts) !=3D 5:
+> +                raise ValueError(f"io log line {line_no}: expected 5 col=
+umns, got {len(parts)}")
+> +            ts_ms, seq, logical_id, relpath, digest =3D parts
+> +            records.append(
+> +                {
+> +                    "ts_ms": int(ts_ms),
+> +                    "seq": int(seq),
+> +                    "logical_id": int(logical_id),
+> +                    "relpath": relpath,
+> +                    "digest": digest,
+> +                }
+> +            )
+> +    return records
 > +
-> +	return 0;
-> +}
 > +
-> +static ssize_t reset_trigger_write(struct file *file, const char __user =
-*buf,
-> +				   size_t len, loff_t *ppos)
-> +{
-> +	struct ceph_fs_client *fsc =3D file->private_data;
-> +	struct ceph_mds_client *mdsc =3D fsc->mdsc;
-> +	char reason[CEPH_CLIENT_RESET_REASON_LEN];
-> +	size_t copy;
-> +	int ret;
+> +def parse_rename_log(path: Path):
+> +    records =3D []
+> +    if not path.exists():
+> +        return records
+> +    with path.open("r", encoding=3D"utf-8") as handle:
+> +        for line_no, line in enumerate(handle, 1):
+> +            line =3D line.strip()
+> +            if not line:
+> +                continue
+> +            parts =3D line.split(",")
+> +            if len(parts) =3D=3D 6:
+> +                ts_ms, seq, logical_id, src_rel, dst_rel, rc =3D parts
+> +            elif len(parts) =3D=3D 7:
+> +                ts_ms, worker_id, seq, logical_id, src_rel, dst_rel, rc =
+=3D parts
+> +                _ =3D worker_id  # worker id is informational only
+> +            else:
+> +                raise ValueError(
+> +                    f"rename log line {line_no}: expected 6 or 7 columns=
+, got {len(parts)}"
+> +                )
+> +            records.append(
+> +                {
+> +                    "ts_ms": int(ts_ms),
+> +                    "seq": int(seq),
+> +                    "logical_id": int(logical_id),
+> +                    "src_rel": src_rel,
+> +                    "dst_rel": dst_rel,
+> +                    "rc": int(rc),
+> +                }
+> +            )
+> +    return records
 > +
-> +	if (!mdsc)
-> +		return -ENODEV;
 > +
-> +	copy =3D min_t(size_t, len, sizeof(reason) - 1);
-> +	if (copy && copy_from_user(reason, buf, copy))
-> +		return -EFAULT;
-> +	reason[copy] =3D '\0';
-> +	strim(reason);
+> +def parse_reset_log(path: Path):
+> +    records =3D []
+> +    if not path.exists():
+> +        return records
+> +    with path.open("r", encoding=3D"utf-8") as handle:
+> +        for line_no, line in enumerate(handle, 1):
+> +            line =3D line.strip()
+> +            if not line:
+> +                continue
+> +            parts =3D line.split(",")
+> +            if len(parts) !=3D 4:
+> +                raise ValueError(f"reset log line {line_no}: expected 4 =
+columns, got {len(parts)}")
+> +            ts_ms, seq, reason, rc =3D parts
+> +            records.append(
+> +                {
+> +                    "ts_ms": int(ts_ms),
+> +                    "seq": int(seq),
+> +                    "reason": reason,
+> +                    "rc": int(rc),
+> +                }
+> +            )
+> +    return records
 > +
-> +	ret =3D ceph_mdsc_schedule_reset(mdsc, reason);
-> +	if (ret)
-> +		return ret;
 > +
-> +	return len;
-> +}
+> +def parse_status_file(path: Path):
+> +    status =3D {}
+> +    if not path.exists():
+> +        return status
+> +    with path.open("r", encoding=3D"utf-8") as handle:
+> +        for line in handle:
+> +            line =3D line.strip()
+> +            if not line or ":" not in line:
+> +                continue
+> +            key, value =3D line.split(":", 1)
+> +            status[key.strip()] =3D value.strip()
+> +    return status
 > +
->  static int subvolume_metrics_show(struct seq_file *s, void *p)
->  {
->  	struct ceph_fs_client *fsc =3D s->private;
-> @@ -450,6 +535,7 @@ DEFINE_SHOW_ATTRIBUTE(mdsc);
->  DEFINE_SHOW_ATTRIBUTE(caps);
->  DEFINE_SHOW_ATTRIBUTE(mds_sessions);
->  DEFINE_SHOW_ATTRIBUTE(status);
-> +DEFINE_SHOW_ATTRIBUTE(reset_status);
->  DEFINE_SHOW_ATTRIBUTE(metrics_file);
->  DEFINE_SHOW_ATTRIBUTE(metrics_latency);
->  DEFINE_SHOW_ATTRIBUTE(metrics_size);
-> @@ -521,6 +607,13 @@ static int metric_features_show(struct seq_file *s, =
-void *p)
-> =20
->  DEFINE_SHOW_ATTRIBUTE(metric_features);
-> =20
-> +static const struct file_operations ceph_reset_trigger_fops =3D {
-> +	.owner =3D THIS_MODULE,
-> +	.open =3D simple_open,
-> +	.write =3D reset_trigger_write,
-> +	.llseek =3D noop_llseek,
-> +};
 > +
->  /*
->   * debugfs
->   */
-> @@ -554,6 +647,7 @@ void ceph_fs_debugfs_cleanup(struct ceph_fs_client *f=
-sc)
->  	debugfs_remove(fsc->debugfs_caps);
->  	debugfs_remove(fsc->debugfs_status);
->  	debugfs_remove(fsc->debugfs_mdsc);
-> +	debugfs_remove_recursive(fsc->debugfs_reset_dir);
->  	debugfs_remove(fsc->debugfs_subvolume_metrics);
->  	debugfs_remove_recursive(fsc->debugfs_metrics_dir);
->  	doutc(fsc->client, "done\n");
-> @@ -602,6 +696,15 @@ void ceph_fs_debugfs_init(struct ceph_fs_client *fsc=
+> +def to_int(value: str, default: int =3D 0):
+> +    try:
+> +        return int(value)
+> +    except Exception:
+> +        return default
+> +
+> +
+> +def validate_namespace(data_dir: Path, file_count: int, issues):
+> +    actual_locations =3D {}
+> +    actual_paths =3D {}
+> +    for logical_id in range(file_count):
+> +        name =3D f"file_{logical_id:05d}"
+> +        found =3D []
+> +        for subdir in ("A", "B"):
+> +            candidate =3D data_dir / subdir / name
+> +            if candidate.exists():
+> +                found.append((subdir, candidate))
+> +        if len(found) !=3D 1:
+> +            issues.append(
+> +                f"namespace invariant failed for logical_id=3D{logical_i=
+d:05d}: expected exactly one file in A/B, found {len(found)}"
+> +            )
+> +            continue
+> +        actual_locations[logical_id] =3D found[0][0]
+> +        actual_paths[logical_id] =3D found[0][1]
+> +    return actual_locations, actual_paths
+> +
+> +
+> +def validate_rename_invariant(rename_records, actual_locations, issues):
+> +    expected_locations =3D {}
+> +    for rec in rename_records:
+> +        if rec["rc"] !=3D 0:
+> +            continue
+> +        dst =3D rec["dst_rel"]
+> +        if "/" not in dst:
+> +            continue
+> +        expected_locations[rec["logical_id"]] =3D dst.split("/", 1)[0]
+> +
+> +    for logical_id, expected in expected_locations.items():
+> +        actual =3D actual_locations.get(logical_id)
+> +        if actual is None:
+> +            continue
+> +        if actual !=3D expected:
+> +            issues.append(
+> +                f"rename invariant failed for logical_id=3D{logical_id:0=
+5d}: expected location=3D{expected}, actual=3D{actual}"
+> +            )
+> +
+> +
+> +def validate_data_invariant(io_records, actual_paths, issues):
+> +    expected_hash =3D {}
+> +    for rec in io_records:
+> +        digest =3D rec["digest"]
+> +        if not digest:
+> +            continue
+> +        expected_hash[rec["logical_id"]] =3D digest
+> +
+> +    for logical_id, digest in expected_hash.items():
+> +        path =3D actual_paths.get(logical_id)
+> +        if path is None:
+> +            continue
+> +        actual_digest =3D sha256_file(path)
+> +        if digest !=3D actual_digest:
+> +            issues.append(
+> +                f"data invariant failed for logical_id=3D{logical_id:05d=
+}: expected digest=3D{digest}, actual digest=3D{actual_digest}"
+> +            )
+> +
+> +
+> +def validate_reset_and_slo(args, reset_records, io_records, rename_recor=
+ds, status, issues):
+> +    if not args.expect_reset:
+> +        return
+> +
+> +    successful_reset_times =3D [rec["ts_ms"] for rec in reset_records if=
+ rec["rc"] =3D=3D 0]
+> +    if not successful_reset_times:
+> +        issues.append("expected reset activity but no successful reset t=
+rigger was observed")
+> +
+> +    phase =3D status.get("phase")
+> +    blocked_requests =3D to_int(status.get("blocked_requests", "0"), def=
+ault=3D-1)
+> +    last_errno =3D to_int(status.get("last_errno", "0"), default=3D1)
+> +    failure_count =3D to_int(status.get("failure_count", "0"), default=
+=3D-1)
+> +
+> +    if phase is None:
+> +        issues.append("missing final reset status file or phase field")
+> +    elif phase.lower() !=3D "idle":
+> +        issues.append(f"recovery invariant failed: phase=3D{phase}, expe=
+cted idle")
+> +
+> +    if blocked_requests !=3D 0:
+> +        issues.append(f"recovery invariant failed: blocked_requests=3D{b=
+locked_requests}, expected 0")
+> +    if last_errno !=3D 0:
+> +        issues.append(f"recovery invariant failed: last_errno=3D{last_er=
+rno}, expected 0")
+> +    if failure_count > 0:
+> +        issues.append(
+> +            f"recovery invariant failed: failure_count=3D{failure_count}=
+, "
+> +            "one or more resets failed during the run"
+> +        )
+> +
+> +    op_times =3D [rec["ts_ms"] for rec in io_records]
+> +    op_times.extend(rec["ts_ms"] for rec in rename_records if rec["rc"] =
+=3D=3D 0)
+> +    op_times.sort()
+> +
+> +    if successful_reset_times and not op_times:
+> +        issues.append("recovery SLO failed: no workload completion event=
+s were recorded")
+> +        return
+> +
+> +    slo_ms =3D args.slo_seconds * 1000
+> +    for ts in successful_reset_times:
+> +        idx =3D bisect.bisect_left(op_times, ts)
+> +        if idx >=3D len(op_times):
+> +            issues.append(f"recovery SLO failed: no operation completion=
+ observed after reset at ts_ms=3D{ts}")
+> +            continue
+> +        delta =3D op_times[idx] - ts
+> +        if delta > slo_ms:
+> +            issues.append(
+> +                f"recovery SLO failed: first post-reset completion at {d=
+elta}ms exceeds threshold {slo_ms}ms (reset ts_ms=3D{ts})"
+> +            )
+> +
+> +
+> +def main():
+> +    parser =3D argparse.ArgumentParser(description=3D"Validate Ceph rese=
+t stress artifacts")
+> +    parser.add_argument("--data-dir", required=3DTrue)
+> +    parser.add_argument("--file-count", required=3DTrue, type=3Dint)
+> +    parser.add_argument("--io-log", required=3DTrue)
+> +    parser.add_argument("--rename-log", required=3DTrue)
+> +    parser.add_argument("--reset-log", required=3DTrue)
+> +    parser.add_argument("--status-final", required=3DFalse, default=3D""=
 )
->  						fsc,
->  						&caps_fops);
-> =20
-> +	fsc->debugfs_reset_dir =3D debugfs_create_dir("reset",
-> +						    fsc->client->debugfs_dir);
-> +	debugfs_create_file("trigger", 0200,
-> +			    fsc->debugfs_reset_dir, fsc,
-> +			    &ceph_reset_trigger_fops);
-> +	debugfs_create_file("status", 0400,
-> +			    fsc->debugfs_reset_dir, fsc,
-> +			    &reset_status_fops);
+> +    parser.add_argument("--slo-seconds", required=3DFalse, type=3Dint, d=
+efault=3D30)
+> +    parser.add_argument("--expect-reset", action=3D"store_true")
+> +    parser.add_argument("--report-json", required=3DFalse, default=3D"")
+> +    args =3D parser.parse_args()
 > +
->  	fsc->debugfs_status =3D debugfs_create_file("status",
->  						  0400,
->  						  fsc->client->debugfs_dir,
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index ce773b1095da..b16638ebff7f 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -5324,6 +5324,7 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_client=
- *mdsc)
->  	blocked_count =3D atomic_inc_return(&st->blocked_requests);
->  	doutc(cl, "request blocked during reset, %d total blocked\n",
->  	      blocked_count);
-> +	trace_ceph_client_reset_blocked(mdsc, blocked_count);
-> =20
->  retry:
->  	remaining =3D max_t(long, deadline - jiffies, 1);
-> @@ -5334,10 +5335,12 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_clie=
-nt *mdsc)
->  	if (wait_ret =3D=3D 0) {
->  		atomic_dec(&st->blocked_requests);
->  		pr_warn_client(cl, "timed out waiting for reset to complete\n");
-> +		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
->  		return -ETIMEDOUT;
->  	}
->  	if (wait_ret < 0) {
->  		atomic_dec(&st->blocked_requests);
-> +		trace_ceph_client_reset_unblocked(mdsc, (int)wait_ret);
->  		return (int)wait_ret;  /* -ERESTARTSYS */
->  	}
-> =20
-> @@ -5352,12 +5355,14 @@ int ceph_mdsc_wait_for_reset(struct ceph_mds_clie=
-nt *mdsc)
->  		if (time_before(jiffies, deadline))
->  			goto retry;
->  		atomic_dec(&st->blocked_requests);
-> +		trace_ceph_client_reset_unblocked(mdsc, -ETIMEDOUT);
->  		return -ETIMEDOUT;
->  	}
->  	ret =3D st->last_errno;
->  	spin_unlock(&st->lock);
-> =20
->  	atomic_dec(&st->blocked_requests);
-> +	trace_ceph_client_reset_unblocked(mdsc, ret);
->  	return ret ? -EAGAIN : 0;
->  }
-> =20
-> @@ -5387,6 +5392,7 @@ static void ceph_mdsc_reset_complete(struct ceph_md=
-s_client *mdsc, int ret)
->  	/* Wake up all requests that were blocked waiting for reset */
->  	wake_up_all(&st->blocked_wq);
-> =20
-> +	trace_ceph_client_reset_complete(mdsc, ret);
->  }
-> =20
->  static void ceph_mdsc_reset_workfn(struct work_struct *work)
-> @@ -5749,6 +5755,7 @@ int ceph_mdsc_schedule_reset(struct ceph_mds_client=
- *mdsc,
->  	pr_info_client(mdsc->fsc->client,
->  		       "manual session reset scheduled (reason=3D\"%s\")\n",
->  		       msg);
-> +	trace_ceph_client_reset_schedule(mdsc, msg);
->  	return 0;
->  }
-> =20
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index a4993644d543..1d6aab060780 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -179,6 +179,7 @@ struct ceph_fs_client {
->  	struct dentry *debugfs_status;
->  	struct dentry *debugfs_mds_sessions;
->  	struct dentry *debugfs_metrics_dir;
-> +	struct dentry *debugfs_reset_dir;
->  	struct dentry *debugfs_subvolume_metrics;
->  #endif
-> =20
-> diff --git a/include/trace/events/ceph.h b/include/trace/events/ceph.h
-> index 08cb0659fbfc..1b990632f62b 100644
-> --- a/include/trace/events/ceph.h
-> +++ b/include/trace/events/ceph.h
-> @@ -226,6 +226,73 @@ TRACE_EVENT(ceph_handle_caps,
->  		  __entry->mseq)
->  );
-> =20
-> +/*
-> + * Client reset tracepoints - identify the client by its monitor-
-> + * assigned global_id so traces remain meaningful when kernel pointer
-> + * hashing is enabled.
-> + */
-> +TRACE_EVENT(ceph_client_reset_schedule,
-> +	TP_PROTO(const struct ceph_mds_client *mdsc, const char *reason),
-> +	TP_ARGS(mdsc, reason),
-> +	TP_STRUCT__entry(
-> +		__field(u64, client_id)
-> +		__string(reason, reason ? reason : "")
-> +	),
-> +	TP_fast_assign(
-> +		__entry->client_id =3D mdsc->fsc->client->monc.auth ?
-> +			mdsc->fsc->client->monc.auth->global_id : 0;
-> +		__assign_str(reason);
-> +	),
-> +	TP_printk("client_id=3D%llu reason=3D%s",
-> +		  __entry->client_id, __get_str(reason))
-> +);
+> +    data_dir =3D Path(args.data_dir)
+> +    io_log =3D Path(args.io_log)
+> +    rename_log =3D Path(args.rename_log)
+> +    reset_log =3D Path(args.reset_log)
+> +    status_final =3D Path(args.status_final) if args.status_final else P=
+ath("__missing_status__")
 > +
-> +TRACE_EVENT(ceph_client_reset_complete,
-> +	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
-> +	TP_ARGS(mdsc, ret),
-> +	TP_STRUCT__entry(
-> +		__field(u64, client_id)
-> +		__field(int, ret)
-> +	),
-> +	TP_fast_assign(
-> +		__entry->client_id =3D mdsc->fsc->client->monc.auth ?
-> +			mdsc->fsc->client->monc.auth->global_id : 0;
-> +		__entry->ret =3D ret;
-> +	),
-> +	TP_printk("client_id=3D%llu ret=3D%d", __entry->client_id, __entry->ret=
-)
-> +);
+> +    issues =3D []
 > +
-> +TRACE_EVENT(ceph_client_reset_blocked,
-> +	TP_PROTO(const struct ceph_mds_client *mdsc, int blocked_count),
-> +	TP_ARGS(mdsc, blocked_count),
-> +	TP_STRUCT__entry(
-> +		__field(u64, client_id)
-> +		__field(int, blocked_count)
-> +	),
-> +	TP_fast_assign(
-> +		__entry->client_id =3D mdsc->fsc->client->monc.auth ?
-> +			mdsc->fsc->client->monc.auth->global_id : 0;
-> +		__entry->blocked_count =3D blocked_count;
-> +	),
-> +	TP_printk("client_id=3D%llu blocked_count=3D%d", __entry->client_id,
-> +		  __entry->blocked_count)
-> +);
+> +    if not data_dir.exists():
+> +        issues.append(f"data directory is missing: {data_dir}")
 > +
-> +TRACE_EVENT(ceph_client_reset_unblocked,
-> +	TP_PROTO(const struct ceph_mds_client *mdsc, int ret),
-> +	TP_ARGS(mdsc, ret),
-> +	TP_STRUCT__entry(
-> +		__field(u64, client_id)
-> +		__field(int, ret)
-> +	),
-> +	TP_fast_assign(
-> +		__entry->client_id =3D mdsc->fsc->client->monc.auth ?
-> +			mdsc->fsc->client->monc.auth->global_id : 0;
-> +		__entry->ret =3D ret;
-> +	),
-> +	TP_printk("client_id=3D%llu ret=3D%d", __entry->client_id, __entry->ret=
-)
-> +);
+> +    try:
+> +        io_records =3D parse_io_log(io_log)
+> +        rename_records =3D parse_rename_log(rename_log)
+> +        reset_records =3D parse_reset_log(reset_log)
+> +    except Exception as exc:
+> +        issues.append(f"log parsing failed: {exc}")
+> +        io_records =3D []
+> +        rename_records =3D []
+> +        reset_records =3D []
 > +
->  #undef EM
->  #undef E_
->  #endif /* _TRACE_CEPH_H */
+> +    status =3D parse_status_file(status_final)
+> +
+> +    actual_locations, actual_paths =3D validate_namespace(data_dir, args=
+.file_count, issues)
+> +    validate_rename_invariant(rename_records, actual_locations, issues)
+> +    validate_data_invariant(io_records, actual_paths, issues)
+> +    validate_reset_and_slo(args, reset_records, io_records, rename_recor=
+ds, status, issues)
+> +
+> +    report =3D {
+> +        "file_count": args.file_count,
+> +        "io_records": len(io_records),
+> +        "rename_records": len(rename_records),
+> +        "reset_records": len(reset_records),
+> +        "expect_reset": args.expect_reset,
+> +        "issues": issues,
+> +    }
+> +
+> +    if args.report_json:
+> +        report_path =3D Path(args.report_json)
+> +        report_path.write_text(json.dumps(report, indent=3D2, sort_keys=
+=3DTrue), encoding=3D"utf-8")
+> +
+> +    if issues:
+> +        print("FAIL: consistency validation found issues")
+> +        for issue in issues:
+> +            print(f"  - {issue}")
+> +        raise SystemExit(1)
+> +
+> +    print("PASS: consistency validation succeeded")
+> +
+> +
+> +if __name__ =3D=3D "__main__":
+> +    main()
 
 Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
