@@ -1,522 +1,449 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B9D336AF6;
-	Thu,  7 May 2026 18:35:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.156.1
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778178912; cv=fail; b=KXJ0c6JN7KGfWPnzmc/TH7xgrViiV7zeQhHbrwOiBR9sslQYaeypjdiJiYVc8pv62GyyY1B3TnGbq1JXU/MrV1+X4sGtC5uXBOcTIHneBjD/PWUYFw7ym7FqDJtriDY5ginFL5qtnu7RrqZEczVC3f8/KUX2nU/IIeLuor8qKqg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778178912; c=relaxed/simple;
-	bh=pnCv4yqyB+aZgFdEI37UVaoqLAhT2X+YoW0bF34VtrA=;
-	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=uHLo/f4g7LZYTYIfOBOncciHcVLltOm8apVbiilkU5CiWXJ+HMV+iMSGY4Nr3+I9hMpHio/zOSsf1wmoPrEQWX2orjJEwSl5BX9LLNIStSnREgltDQM2zm0AjVJTSxg+BDyFFZRiVZuAthiWVgkfzGK7IhAe23qoFgIAO95KUc0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=NFYKMLvn; arc=fail smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 597EF3C2761
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 18:43:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1778179418; cv=none; b=b0Mi+jnIq7i61ghaFWE1uEwn7s63Km7nR4DhA2adw96DVS009IuNjLxXIQi1Hq3e22nOR8oOwEXOMmZDq99ST8DZkaorBtaN/giAMTa5NC3dwYR9JnbRZa/hILXCh8/Zcq6FcavMofCJOmou8ZRUOqaW3QGmCpI7rtOixgviARs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1778179418; c=relaxed/simple;
+	bh=KSBXFHDbCJbfKMv6RGLqylbRYWyMQHdVE787ngyXHMI=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=Vvh9/eaf8T6/JelcAeXmRQcU1tvTyQX2/aUvSmCkPcABXctFYAVNaBeX29iiXS/giblRvWYnMwXRfW3Mb+XRV9fjYRQSwyGE7cmw9xrMY6zebE6Vojoe3QIEGkIqIAwWgp7M1dqo5hyj1KuPbtzU4WHRv6Ch21OGO4DleMnP2Ec=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SGoTpdBl; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=SzfisqOP; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="NFYKMLvn"
-Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 647CZewe2245623;
-	Thu, 7 May 2026 18:35:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=pnCv4yqyB+aZgFdEI37UVaoqLAhT2X+YoW0bF34VtrA=; b=NFYKMLvn
-	NH+gYdnD+qerVynIlbUyannI4V9Sk/2w/F0a4S8HRF5hsPbt/YpE2rslWyqiB4ar
-	rdmtBlPwh98q6QK6AMddVrvIw1oGnHumC0J8XLbBvwk1+q+eKBKrVT2GlpM2f7fe
-	bvmE1AnRPXbhdjynfAh2hVquVJCoaFla8jn8mExJDmoakQ+gLUkq3VTF6zEPony1
-	TGTshyH678OmMJbfGmxGIPZquiDHTZobpIzYuVnrulBE9SUBXnaE2ac0uUJ9MPAa
-	TA2VOs8hqgQQIjGzjHtBwVunbYcGPDfcddwK9SZmemS9836eG+vAFXlYd/vmGIzt
-	rj4O+JrZvh+vew==
-Received: from dm1pr04cu001.outbound.protection.outlook.com (mail-centralusazon11010056.outbound.protection.outlook.com [52.101.61.56])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4dw9y1r87p-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Thu, 07 May 2026 18:35:06 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Hz5AzNKO+mUa9WL4gmN/G2+q3DxLyg2638FO6zjtBClgTwxL/ycDxMf5SGpm7X7ekJdjXoautnWQxSE0iQFrbmkowcg26YIegSeeV1wrWwBtdLavcyAfKHRZW2P9DCnNF1BHp6rvaf/pWgk9Mm0MC5hO4chX1ruA2PMHDJ8iJmYVbcyptF6hbG+n0HDeMPcgoxjSt9cDjFYgfDtMOPKYhh8dXoxAHLdULMQagcGaRd5jTUU5jIRJkTdDUg9Bre4vhNATKTd3t/YfoBKJaqqP0oU5GR6c/xucFtnqVwOK/NxmCfPdkEfYG8AGlDA3/QP0fBi6AbVmbALrsuT/x/jknQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=pnCv4yqyB+aZgFdEI37UVaoqLAhT2X+YoW0bF34VtrA=;
- b=g44lr+w4ISjpUS9hPgaSMnAyV2mGbd27JUJoweX0og+pc52x0faWFyAqjks9EnDZ0nkKzsnuQuR/3Mv60ciSVNstByN4PtXVtieApFuFj0WcaiAZTSpwp6Qhs9nWICvhn5Ull5lL9SbGrYnA74lU0BX3P/SsMqhpec91jArJhvfYuZ0LI3sT6UgHgHEgxoF0e1w/H6drydfmoZ1xR8q+uSaMSVfBtmjcJa20ikCUcbO/eQHwjkOtdG1kZsv0REQM0neh93BfqKMmp3ST6S43WksDzKMAnA/LxBPFQ5dfL7Kb/BckbVOjY7fTGt6v7Uc79ysUo5IiEY1t6f8KpI0LNA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by LV8PR15MB6733.namprd15.prod.outlook.com (2603:10b6:408:25a::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9891.17; Thu, 7 May
- 2026 18:35:03 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.20.9891.008; Thu, 7 May 2026
- 18:35:01 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: Alex Markuze <amarkuze@redhat.com>,
-        "ceph-devel@vger.kernel.org"
-	<ceph-devel@vger.kernel.org>
-CC: "idryomov@gmail.com" <idryomov@gmail.com>,
-        "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>
-Thread-Topic: [EXTERNAL] [PATCH v4 01/11] ceph: convert inode flags to named
- bit positions and atomic bitops
-Thread-Index: AQHc3hz0ptP14/C3wUGU8gDgsmGa07YC5DIA
-Date: Thu, 7 May 2026 18:35:01 +0000
-Message-ID: <794826a245482e1e5ab4187f880439ec615ac04e.camel@ibm.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SGoTpdBl";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="SzfisqOP"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1778179415;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=lncWYBc0spi8cvF4zW0Ybg0AzF3GoMiippbuzqynaBE=;
+	b=SGoTpdBlaRtLJNj5rmbOoknvpENnzoX/JQ/Hx080l5RnNn7ZwIzQKp8bbb6QSU3xXh8ulb
+	UL4HM+q0FngR2egyTh/oTPTsdFmhDHMwRispW7KYcB+CMrFU8lPGkjWjmrgrP3FcBMTBou
+	UEpne1v9pkP1M3gXGoEJMYk1GUBoR1U=
+Received: from mail-yw1-f198.google.com (mail-yw1-f198.google.com
+ [209.85.128.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-259-dvDdFSrwPYaYP2yQJQAvZQ-1; Thu, 07 May 2026 14:43:34 -0400
+X-MC-Unique: dvDdFSrwPYaYP2yQJQAvZQ-1
+X-Mimecast-MFC-AGG-ID: dvDdFSrwPYaYP2yQJQAvZQ_1778179413
+Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-79064868702so34778907b3.3
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 11:43:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1778179413; x=1778784213; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=lncWYBc0spi8cvF4zW0Ybg0AzF3GoMiippbuzqynaBE=;
+        b=SzfisqOPw9xM66frY502hjUhNfrrIPofgTP0IBWND6DQCSF0JKy7SY8f3NfzhJhjmy
+         YRgpyjShFmfdxM91EL6oLPPQfFMnK9q0H9GdImDqoPVUYoLlaxzfX5jXx8jw08kNrdUx
+         W2q9qDBgp2kz2LY5L6XgOKQXUVizNpYKrppPHUYD2ScE36BVKAzDZXE2N04UWdymo1Z6
+         763fRSeg2x7LT2rvPsleakchEp9sYZq1NYpZk6xkPOQjaVLZmE/tPBk8ULGoqFAhMJ7K
+         tNUMjCU5O0Pi+J0MEh9K2vw9BexKvyOE9hiCxJ7mVZpo3hAtqzL2lzeSkkaTlrLuERsT
+         l1vA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778179413; x=1778784213;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=lncWYBc0spi8cvF4zW0Ybg0AzF3GoMiippbuzqynaBE=;
+        b=Ck/LXN1iCUh3CTfDCNt5FYU/QUMKfZr2JqlLIHMrPE0cNdVAwF5AJ4tV2ivhg9fV7N
+         IMoTGJeD9atneUEfWIUlOrYUhAW9w5veAfsoo4hXps0LvPOAXA8aIDik5gewJgrnvQv+
+         Tcj1fXzu+F+hxLDe3D9jNyD2OaH7maMzYckqDwlJfWoxl+Q1EfYZzdaDanZpavHODmUx
+         W6FuY71ObtYcS0eRRCe6qN75HammvqTlpJJGeNz27j4g2YyQP8AAhB+7xadJnT58Ws2m
+         6ZezDDBhMM29vVXH+pLWlzXy0QEeZfwZjfGZSOLMxVZD9xeGkc8S9rqk5K855nYOMA2G
+         xDkQ==
+X-Forwarded-Encrypted: i=1; AFNElJ+znSNW4xukuZhVdaLijNpYjBUKDss8ZtQvF7RXF2wOt+Mpueb1FML7XhtGYNTKKJjewOPVHi7rCVjH@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywsow1VEVU2hezAY/ET1RTZKbvk9Vr3DKsH/PU7fx7vFT0KnT24
+	fOQPsuxS02QaOU2haG3nQpoBjxXWe057cm6Ke8ghnN9xyU7j0Ln8vksHUATy8KpNK1go+lna1ou
+	/ln0pJp9cqzwKJZjmpS9TDerv4femVKzp8teHK2jh2kG8dAvECFo2rsE1/zuwE/IlDGwh8Tc=
+X-Gm-Gg: Acq92OHUQ/1LNZip2eaRrRYfO0xiANq8+iNtA72NX3JALxjJ92QVOFhJgMiJ+ghPpV4
+	9vJhu+anL8i7nugqj3Fq5z8lyxJ0jldhrUd0qSNMf59spzDPbLpmmpX830pEtDtebQUPLdNVuvo
+	wsqZdHWDWdkGlUCAFpKjjvzKbNlBMx/vWF67fpJ8OHYZPMl8o/RILmt6Z+KjHpgXXbizhHqEulf
+	WUpa3LDsvsUvKWg0luCySfBeFXZikvw/iJ/KMV5NI+Q8KpcDDJYUf+yfI3XcgNfGYzlzE7lMBAV
+	7ID19jcCznJvy5De3xp5QVAbKXPNQuUhMprR150EJhgIUsbggf6zl5BqYDz3M5rm1gxMy9lFXVI
+	9gHZq5wiVy2yL3kdC/5Cr3buS7LQJLVMe+QWTVsxZHYn2y3bhLbyI
+X-Received: by 2002:a05:690c:360a:b0:7ba:ee75:f115 with SMTP id 00721157ae682-7bdf5d8d6eamr109600787b3.4.1778179412852;
+        Thu, 07 May 2026 11:43:32 -0700 (PDT)
+X-Received: by 2002:a05:690c:360a:b0:7ba:ee75:f115 with SMTP id 00721157ae682-7bdf5d8d6eamr109600497b3.4.1778179412188;
+        Thu, 07 May 2026 11:43:32 -0700 (PDT)
+Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd6652742csm94988847b3.9.2026.05.07.11.43.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 07 May 2026 11:43:31 -0700 (PDT)
+Message-ID: <bf9683e2e3b14139d0faf66ca8ea124611044cfb.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v4 03/11] ceph: harden send_mds_reconnect and
+ handle active-MDS peer reset
+From: Viacheslav Dubeyko <vdubeyko@redhat.com>
+To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
+Date: Thu, 07 May 2026 11:43:30 -0700
+In-Reply-To: <20260507122737.2804094-4-amarkuze@redhat.com>
 References: <20260507122737.2804094-1-amarkuze@redhat.com>
-	 <20260507122737.2804094-2-amarkuze@redhat.com>
-In-Reply-To: <20260507122737.2804094-2-amarkuze@redhat.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|LV8PR15MB6733:EE_
-x-ms-office365-filtering-correlation-id: c1a5e7e2-c3d6-4414-38ec-08deac67595d
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|10070799003|376014|1800799024|366016|22082099003|38070700021|18002099003|56012099003;
-x-microsoft-antispam-message-info:
- ADpfjTFDUmKrQcRidsp+bfo8cQi27B62Mm1PdMIpGaWP1++zb/uxOp579BMni5JQwhmJuCE9NxQ8z/jsO3q3cXR/xfvRDFwQ3JC75l3JGqp5N+XqbYoJ1y/AmGEmmRayxA3s6bNYUDMDCTs5MIET5v+Bna3Yz11zEpoBPlCoOw7TEIzSBlbGbQvIZxyL1l4jUh/fFo9OltU4KwVXf/Dn8EarJBzaNQKHER/9GugjFFX6TiOjvuBupNiYSbdaSwFnlAwKbht/PQG94tC7XzECW3usRfAju+pnHerrWfMfyIr2gSZeR+hqIFjjsh2fsqw87z1UP2d+JnPXfgsPZUP68Y17//3ZzczJ8DA8RMrcV0PvDJJ9j1HCh+hLJG5erjDe0G7EHy+5gLEjrRnqfIa2GGmb1sZbiNoFqX7l68FCgaZQsyRhU29YeRyM+5912DDxhzWS90NTnllOKzNi8xDi7p/KsR5PosApS5GVX/lQEoWOqkxpQd0l+QN1IS/tjHEugBSbdKMV3nmcejpRhfPhtnDqOcQukHtiR5SJVkijgj5AqtUbXQAq6a4hUgOdVDNDO8eMFoxhSifhnOvQdCLCA2hkG8Wmm8gKezWPNGYZJcCX9mkhuY6P/Ty8yZlRhQ4Y6hYQrV4xq3JO3NoLWB5stNPYsz7Zi+J9bELIQsl4TdLpMItQOVa+vngydmrF4XFGIyiETYugpIwDrk0v+U/xoYiaOSZWbucBRyUapCLxrLiMOeLm3ZKyucIprU+RByxS
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(376014)(1800799024)(366016)(22082099003)(38070700021)(18002099003)(56012099003);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?TzYzSkJDZEsxbWV5Rk1aUzFJSnJKZkN0cGw0SDBhV0FXRXd6TnhHTjVObGNQ?=
- =?utf-8?B?VkpPN2YvdEs2Zm9XN2h1ei9LZ3haZ2RVQzl1ME03czBOYm9ZcmhpUFl6UWdo?=
- =?utf-8?B?cXBUTklJTlhBYU1wcHo1UVdvbnBmTy9raWZQaHNkODlBY2NydjZTbExKemYr?=
- =?utf-8?B?Q1dBQklDNnN6TDYvWmd4b3N4cVJtaU52UjBwQnhTaElDZHpYdy9QbE1qM0lT?=
- =?utf-8?B?TlhJM0V0SU9HbGFFdzhOdzVwVDdDMTdheFV6MENSSm1sZ3hRUGxYRW1jM2FH?=
- =?utf-8?B?aE1sS09BK29Ia0EvNVdBOUhkM3RUV0Y4OEpjMHpvSWJMR3JFbWV2eWZuM1p6?=
- =?utf-8?B?OWNCK0FxUTJlZXFJNXRZVVM5TGVWSnFLVUNrbzUveU5sY3g0aXhuWENYQ1VX?=
- =?utf-8?B?dWM0TVVQTU5ZNDlVK2lTT1YwaURQdlhpWkJtTE1hRUdTY0Ira3Y4VkhrakE5?=
- =?utf-8?B?eE5GSEdwVW53a3ZaMnd2QTNEU2dTZFkxbjZ0b09hbDluUExoZjJESlhzeDJJ?=
- =?utf-8?B?VFlnWXY0b2FDRWxIKyt4L1lmR2pJUmJCZUkrN0VvdnE0WHpYQVhScGc4TmpX?=
- =?utf-8?B?ZC8yN1NYbUdwUkh3WS9uTHhDKysyNTRiYUg5OGw3bkRkWWdtZEpSQ3VtZHBj?=
- =?utf-8?B?d3FzY294Y21heHhEZlR6NldHenAwQ0RNMDI5blpsKzRSMzVMSUxNQnd0cUxx?=
- =?utf-8?B?ZjR6R2kvL1B4OFMyUExRcW9IWmQvRjNNay92WlRWVXZQd0NocWpzeVU0RjVs?=
- =?utf-8?B?K0FuV3hQeTVOZ1lVbTM4bnZvSkJBOWVZSjBBV3JZSmt0U3ozaHdSVEIwRkZt?=
- =?utf-8?B?Q3JCaUUzcGVyUDdJK1BLdDBkRjdiR1c5MmJPMUVjejl2NGtkZ1krYmVsWlRD?=
- =?utf-8?B?VUVFRFFUcS9DdFhSeWVKc2RxY3dwcTNPUWF2RW1JbEpaVkVnSCtwVXlHZGFT?=
- =?utf-8?B?aGtIaU00VzViMm4vRzVaTnJ4azMrWTcyN1dJbkluaUZOeFFOUENKRGlqVFBv?=
- =?utf-8?B?MnNha1ZSSXJrQmhTdjlwdklNY2FySEcvbUtqRHY2azlyb2tSK3duVExpS0xr?=
- =?utf-8?B?anhaVndNSnVNdmFFck5xaHBnVlJiMHNnSGlrb3Z5MmJ6Rkx5WjJNc0txWmZY?=
- =?utf-8?B?MU9Renp4cEV6VVZYTWVwaXV1dCtsY2JMK2U3Z2UraUozejNLc1krMkh1VEI3?=
- =?utf-8?B?d0RsTng2WFgrbC9EQnpFdE1aSkt0VnFBajZETlh1TTFwdU9SVGY5YTVzaW0x?=
- =?utf-8?B?eGk4ejFhNXdheHd5S2pIT0MrS0ZKNnlkbkV4cG5VWjNNTVdmeDVtdnl0dHE0?=
- =?utf-8?B?UkhjOXJDM3k5NzY4YWlMMWlwdXBZSGZzT1pBd2E1MEZOT2ZqcEpTbnJtamhR?=
- =?utf-8?B?VUFmcnUzbjV6QVZmd2JMQUZCZ0VXS3RoVW9xYnowYzQ0VEZaYlRZMlRHdzF3?=
- =?utf-8?B?UHkxSTUzN0hHODdPVVk2WjI2T3NrVGF3T1U1NEUyd2J3QUZGcllhZzJ3Rkk4?=
- =?utf-8?B?aStlZkpBY2ZjTEtaWW1zWWNqZ2ZMaDI2ZVhiZGtnWXVwc1FWa01lYTVEdkox?=
- =?utf-8?B?MHE0dmhVaDhLMHgrZWw4ZVV2aU9wd05rbzdON3VOUjNIR0lVODlMSDBpSTRy?=
- =?utf-8?B?WjhJVkRsM00vdzROSzd2Q2t0OGtCdDY4STliN1pLMTNpSTJPVkNrMklRWXBG?=
- =?utf-8?B?TDBNcEQ3ZW5jV3lrSHRsUUVHTG5keXZ0di9NQjA1RkhhTGlGRTRnSW9SVWtM?=
- =?utf-8?B?ZXNPOFJJUVhSYm1ocTYwOVQ2K2RIZXZKRGRsYmczVHdlRW5RcDZNbDh0Y3o0?=
- =?utf-8?B?ak9JTjREdmJMZEVtTnE0dCtyaWFSR3lib0o1TWFYRVNhZ1JKQm8zTnhiUEdi?=
- =?utf-8?B?VEc4SzUzZjRRcCtDMWVPRG1lL0RpMjdROWdsR3p4aGNJM0laRzFHb25EbDg0?=
- =?utf-8?B?blVCdWkzMVlDd0ZVNEVxR0NFRGtKZFU3dWE3Sy9Ra2R2aWI5TC9pRDNxY2g2?=
- =?utf-8?B?b2l4OE1EQ3d6bWpuUUlpNTl2NkxkMGlUaXNjamNVRUp4blpvblpkTkF4Mjl3?=
- =?utf-8?B?VjVQNjQzSEV5WmluaE5NSDRoemp6dmV1MC9HL3U5cldCdEp1Y1FkQXh1eHhT?=
- =?utf-8?B?Ukt1VFAva28yeC9UbTZZN2hyZGhyUE00WHdYNVkwdm1QWTRaTUxpYnZoTGdz?=
- =?utf-8?B?emc4cXllRXViOGtPREtDOStWRk5EbkNJeWZTTzJ6WUE1ZjVlQXkyRFVaTDV5?=
- =?utf-8?B?Q1lnbUR1TE1vNWQ5alp0aVhQczV6SjNvUlZqR2dWRGdjYnBQb1Y2RCtHc1Ft?=
- =?utf-8?B?elVIRkQzZk5lcGRoWmFvcG1OVnRMMG56dStGRVgvY1ZYbTJ2eWZoY255bHlS?=
- =?utf-8?Q?ZJQ/ogU4EGJGsdEbK4WQPpK3ifunWi9u9tA4B?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <9A5533BA2395AC4FA4D9A8629FF83512@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	 <20260507122737.2804094-4-amarkuze@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.60.0 (3.60.0-1.fc44app2) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	s54FLfjISw6VXoZr6cGOJETwgz4OSYdV17jVv1wsQekD0ix0UHIDdljrRe6fdJxJMQLkPBLhO89GuKGe8FzcjhJibzauxn2djJv5Qh9+uoZCy+Q4aTHKk4VspwrGNgCdROP941JUctG55BKrCvze1D3qcvs630YqlCuydZ21z6pNts9tal4WDmUCTDGLMD7FC5fTrWyGO+Nm3Y9WG1YySHXO2rRPPi2NujVs+Rqx7b0rdCAWl/fGeDQCJxKrjQ0qQLkUF9cKVCprRumZZ0pYKKdIUo2d2AXLjgzcYpzFfgJ5MUaKETFBNEeD79aaidfFVc1sBQHzJ0qKBm8NQXxBCA==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c1a5e7e2-c3d6-4414-38ec-08deac67595d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 May 2026 18:35:01.3954
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: lBEo69nc2Pc+PQ5hkGZI7/V0doo0mIs8GxYQUcLYjihQf75MKVs7ZCtiCIyhqXrIdjUh7gILO3DcBk4V6YxGWA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV8PR15MB6733
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-ORIG-GUID: NL26EmqC4aM6dL9msUayc-UpENko8kb3
-X-Proofpoint-GUID: bIu23c43c-2RHeMAympTkQCwuJUUhe96
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTA3MDE4MiBTYWx0ZWRfXzKCkOsUR8G3o
- U71r2p4nu1eF+6ZH9M1m6OezXVOpcpTFuSxolEU1UlMsxS+Ps7/A2d6Z2/hgauvpkTb7T1NSOGB
- WWqeS2uJlB+f9bu2UnKCQxei3GxlvKz3F/DVDO4fdLnqEsfXe98Jvsh68auQgi7VShszuWJGxsv
- sVt0zOcdz72xjAJ/jQvlcJGDEw1Yyd57Zdvod7S5jTEMJ9EmwnqCAOSmuGdqMkQLC5XBFIEUZE6
- aSTewTrW5YzcUOugXtYCjBRY6rnOyarA3eXYxpI/nS8fW+UltKt2hA6Ivnt5/RiY4R1NMO5N+Zv
- QtvxO5IjF49GDQxkNb4x8Qk9SWUJWoBmx5lxWeQeR4zP95NfeKi7tU+iCRSOu7ccMLkhrwzQyzc
- yjvH0iaEzbYN5kXYWxXu4fG9HQz3wxl0Vo1WFQ30hzeNBi1d/qWsmb1Fu3LpDTXmPGvsds1BZMr
- 9mOhA9u3vxYQloHJQbw==
-X-Authority-Analysis: v=2.4 cv=UbFhjqSN c=1 sm=1 tr=0 ts=69fcdb5b cx=c_pps
- a=PxsVn2hUj41VgPYomOKOQg==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=NGcC8JguVDcA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=U7nrCbtTmkRpXpFmAIza:22 a=20KFwNOVAAAA:8 a=VnNF1IyMAAAA:8
- a=JiVxUMGhC36oK8vMO7cA:9 a=QEXdDO2ut3YA:10
-Subject: Re:  [PATCH v4 01/11] ceph: convert inode flags to named bit
- positions and atomic bitops
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-07_02,2026-05-06_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 spamscore=0 lowpriorityscore=0 malwarescore=0 suspectscore=0
- adultscore=0 priorityscore=1501 bulkscore=0 phishscore=0 impostorscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2604200000 definitions=main-2605070182
 
-T24gVGh1LCAyMDI2LTA1LTA3IGF0IDEyOjI3ICswMDAwLCBBbGV4IE1hcmt1emUgd3JvdGU6DQo+
-IERlZmluZSBuYW1lZCBiaXQtcG9zaXRpb24gY29uc3RhbnRzIGZvciBhbGwgQ0VQSF9JXyogaW5v
-ZGUgZmxhZ3MgYW5kDQo+IGRlcml2ZSB0aGUgYml0bWFzayB2YWx1ZXMgZnJvbSB0aGVtLiAgVGhp
-cyBnaXZlcyBldmVyeSBmbGFnIGEgbmFtZWQNCj4gX0JJVCBjb25zdGFudCB1c2FibGUgd2l0aCB0
-aGUgdGVzdF9iaXQvc2V0X2JpdC9jbGVhcl9iaXQgZmFtaWx5Lg0KPiBUaGUgaW50ZW50aW9uYWxs
-eSB1bnVzZWQgYml0IHBvc2l0aW9uIDEgaXMgZG9jdW1lbnRlZCBpbmxpbmUuDQo+IA0KPiBDb252
-ZXJ0IGFsbCBmbGFnIG1vZGlmaWNhdGlvbnMgdG8gdXNlIGF0b21pYyBiaXRvcHMgKHNldF9iaXQs
-DQo+IGNsZWFyX2JpdCwgdGVzdF9hbmRfY2xlYXJfYml0KS4gIFRoZSBwcmV2aW91cyBjb2RlIG1p
-eGVkIGxvY2tsZXNzDQo+IGF0b21pYyBvcHMgb24gc29tZSBmbGFncyAoRVJST1JfV1JJVEUsIE9E
-SVJFQ1QpIHdpdGggbm9uLWF0b21pYw0KPiByZWFkLW1vZGlmeS13cml0ZSAofD0gLyAmPSB+KSBv
-biBvdGhlciBmbGFncyBzaGFyaW5nIHRoZSBzYW1lDQo+IHVuc2lnbmVkIGxvbmcuICBBIGNvbmN1
-cnJlbnQgbm9uLWF0b21pYyBSTVcgY2FuIGNsb2JiZXIgYW4NCj4gYWRqYWNlbnQgbG9ja2xlc3Mg
-YXRvbWljIHVwZGF0ZSAtLSBmb3IgZXhhbXBsZSwgYSBsb2NrbGVzcw0KPiBjbGVhcl9iaXQoRVJS
-T1JfV1JJVEUpIGNvdWxkIGJlIHNpbGVudGx5IHJlc3VycmVjdGVkIGJ5IGENCj4gY29uY3VycmVu
-dCBjaS0+aV9jZXBoX2ZsYWdzIHw9IENFUEhfSV9GTFVTSCB1bmRlciB0aGUgc3BpbmxvY2suDQo+
-IFVzaW5nIGF0b21pYyBiaXRvcHMgZm9yIGFsbCBtb2RpZmljYXRpb25zIGVsaW1pbmF0ZXMgdGhp
-cyBjbGFzcw0KPiBvZiByYWNlIGVudGlyZWx5Lg0KPiANCj4gRmxhZ3Mgd2hvc2Ugb25seSB1c2Vy
-cyBhcmUgbm93IHRoZSBfQklUIGZvcm0gKEVSUk9SX1dSSVRFLA0KPiBBU1lOQ19DSEVDS19DQVBT
-KSBoYXZlIHRoZWlyIG9sZCBtYXNrIGRlZmluZXMgcmVtb3ZlZCB0byBkb2N1bWVudA0KPiB0aGF0
-IGNhbGxlcnMgbXVzdCB1c2UgdGhlIF9CSVQgY29uc3RhbnQgd2l0aCB0aGUgc2V0X2JpdC90ZXN0
-X2JpdA0KPiBmYW1pbHkuICBFUlJPUl9GSUxFTE9DSyBhbmQgU0hVVERPV04gcmV0YWluIHRoZWly
-IG1hc2sgZGVmaW5lcw0KPiBiZWNhdXNlIHRoZXkgYXJlIHN0aWxsIHVzZWQgdmlhIGJpdG1hc2sg
-dGVzdHMgaW4gbG9ja2xlc3MgcmVhZGVycw0KPiAoY2VwaF9pbm9kZV9pc19zaHV0ZG93biwgcmVj
-b25uZWN0X2NhcHNfY2IpLg0KPiANCj4gVGhlIGRpcmVjdCBhc3NpZ25tZW50IGluIGNlcGhfZmlu
-aXNoX2FzeW5jX2NyZWF0ZSgpIGlzIGNvbnZlcnRlZA0KPiBmcm9tIGlfY2VwaF9mbGFncyA9IENF
-UEhfSV9BU1lOQ19DUkVBVEUgdG8gc2V0X2JpdCgpLiAgVGhpcw0KPiBpbm9kZSBpcyBJX05FVyBh
-dCB0aGlzIHBvaW50IC0tIHN0aWxsIGludmlzaWJsZSB0byBvdGhlciB0aHJlYWRzDQo+IGFuZCBn
-dWFyYW50ZWVkIHRvIGhhdmUgemVybyBmbGFncyBmcm9tIGFsbG9jX2lub2RlIC0tIHNvIGVpdGhl
-cg0KPiBmb3JtIGlzIHNhZmUsIGJ1dCBzZXRfYml0KCkga2VlcHMgdGhlIGNvbnZlcnNpb24gdW5p
-Zm9ybS4NCj4gDQo+IENvLWRldmVsb3BlZC1ieTogVmlhY2hlc2xhdiBEdWJleWtvIDx2ZHViZXlr
-b0ByZWRoYXQuY29tPg0KPiBTaWduZWQtb2ZmLWJ5OiBWaWFjaGVzbGF2IER1YmV5a28gPHZkdWJl
-eWtvQHJlZGhhdC5jb20+DQo+IFNpZ25lZC1vZmYtYnk6IEFsZXggTWFya3V6ZSA8YW1hcmt1emVA
-cmVkaGF0LmNvbT4NCj4gLS0tDQo+ICBmcy9jZXBoL2FkZHIuYyAgICAgICB8IDIwICsrKysrKyst
-LS0tLS0tDQo+ICBmcy9jZXBoL2NhcHMuYyAgICAgICB8IDI0ICsrKysrKysrLS0tLS0tLS0tDQo+
-ICBmcy9jZXBoL2ZpbGUuYyAgICAgICB8IDEzICsrKystLS0tLQ0KPiAgZnMvY2VwaC9pbm9kZS5j
-ICAgICAgfCAgNCArLS0NCj4gIGZzL2NlcGgvbG9ja3MuYyAgICAgIHwgMjIgKysrKy0tLS0tLS0t
-LS0tDQo+ICBmcy9jZXBoL21kc19jbGllbnQuYyB8ICAzICsrLQ0KPiAgZnMvY2VwaC9tZHNfY2xp
-ZW50LmggfCAgMiArLQ0KPiAgZnMvY2VwaC9zbmFwLmMgICAgICAgfCAgMiArLQ0KPiAgZnMvY2Vw
-aC9zdXBlci5oICAgICAgfCA2NCArKysrKysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0t
-LS0tLS0tLQ0KPiAgZnMvY2VwaC94YXR0ci5jICAgICAgfCAgMiArLQ0KPiAgMTAgZmlsZXMgY2hh
-bmdlZCwgNzQgaW5zZXJ0aW9ucygrKSwgODIgZGVsZXRpb25zKC0pDQo+IA0KPiBkaWZmIC0tZ2l0
-IGEvZnMvY2VwaC9hZGRyLmMgYi9mcy9jZXBoL2FkZHIuYw0KPiBpbmRleCA5NGZmYTEyN2IxZDMu
-LjE4NTlhMGM5MmQ2NiAxMDA2NDQNCj4gLS0tIGEvZnMvY2VwaC9hZGRyLmMNCj4gKysrIGIvZnMv
-Y2VwaC9hZGRyLmMNCj4gQEAgLTI1NjMsNyArMjU2Myw4IEBAIGludCBjZXBoX3Bvb2xfcGVybV9j
-aGVjayhzdHJ1Y3QgaW5vZGUgKmlub2RlLCBpbnQgbmVlZCkNCj4gIAlzdHJ1Y3QgY2VwaF9pbm9k
-ZV9pbmZvICpjaSA9IGNlcGhfaW5vZGUoaW5vZGUpOw0KPiAgCXN0cnVjdCBjZXBoX3N0cmluZyAq
-cG9vbF9uczsNCj4gIAlzNjQgcG9vbDsNCj4gLQlpbnQgcmV0LCBmbGFnczsNCj4gKwlpbnQgcmV0
-Ow0KPiArCXVuc2lnbmVkIGxvbmcgZmxhZ3M7DQo+ICANCj4gIAkvKiBPbmx5IG5lZWQgdG8gZG8g
-dGhpcyBmb3IgcmVndWxhciBmaWxlcyAqLw0KPiAgCWlmICghU19JU1JFRyhpbm9kZS0+aV9tb2Rl
-KSkNCj4gQEAgLTI2MDUsMjAgKzI2MDYsMTkgQEAgaW50IGNlcGhfcG9vbF9wZXJtX2NoZWNrKHN0
-cnVjdCBpbm9kZSAqaW5vZGUsIGludCBuZWVkKQ0KPiAgCWlmIChyZXQgPCAwKQ0KPiAgCQlyZXR1
-cm4gcmV0Ow0KPiAgDQo+IC0JZmxhZ3MgPSBDRVBIX0lfUE9PTF9QRVJNOw0KPiAtCWlmIChyZXQg
-JiBQT09MX1JFQUQpDQo+IC0JCWZsYWdzIHw9IENFUEhfSV9QT09MX1JEOw0KPiAtCWlmIChyZXQg
-JiBQT09MX1dSSVRFKQ0KPiAtCQlmbGFncyB8PSBDRVBIX0lfUE9PTF9XUjsNCj4gLQ0KPiAgCXNw
-aW5fbG9jaygmY2ktPmlfY2VwaF9sb2NrKTsNCj4gIAlpZiAocG9vbCA9PSBjaS0+aV9sYXlvdXQu
-cG9vbF9pZCAmJg0KPiAgCSAgICBwb29sX25zID09IHJjdV9kZXJlZmVyZW5jZV9yYXcoY2ktPmlf
-bGF5b3V0LnBvb2xfbnMpKSB7DQo+IC0JCWNpLT5pX2NlcGhfZmxhZ3MgfD0gZmxhZ3M7DQo+IC0g
-ICAgICAgIH0gZWxzZSB7DQo+ICsJCXNldF9iaXQoQ0VQSF9JX1BPT0xfUEVSTV9CSVQsICZjaS0+
-aV9jZXBoX2ZsYWdzKTsNCj4gKwkJaWYgKHJldCAmIFBPT0xfUkVBRCkNCj4gKwkJCXNldF9iaXQo
-Q0VQSF9JX1BPT0xfUkRfQklULCAmY2ktPmlfY2VwaF9mbGFncyk7DQo+ICsJCWlmIChyZXQgJiBQ
-T09MX1dSSVRFKQ0KPiArCQkJc2V0X2JpdChDRVBIX0lfUE9PTF9XUl9CSVQsICZjaS0+aV9jZXBo
-X2ZsYWdzKTsNCj4gKwl9IGVsc2Ugew0KPiAgCQlwb29sID0gY2ktPmlfbGF5b3V0LnBvb2xfaWQ7
-DQo+IC0JCWZsYWdzID0gY2ktPmlfY2VwaF9mbGFnczsNCj4gIAl9DQo+ICsJLyogUmUtcmVhZCBm
-bGFncyB1bmRlciB0aGUgbG9jayBzbyBjaGVjazogc2VlcyB0aGUgdXBkYXRlZCBiaXRzLiAqLw0K
-PiArCWZsYWdzID0gY2ktPmlfY2VwaF9mbGFnczsNCj4gIAlzcGluX3VubG9jaygmY2ktPmlfY2Vw
-aF9sb2NrKTsNCj4gIAlnb3RvIGNoZWNrOw0KPiAgfQ0KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9j
-YXBzLmMgYi9mcy9jZXBoL2NhcHMuYw0KPiBpbmRleCBkNTE0NTRlOTk1YTguLmNiOWU3OGI3MTNk
-OSAxMDA2NDQNCj4gLS0tIGEvZnMvY2VwaC9jYXBzLmMNCj4gKysrIGIvZnMvY2VwaC9jYXBzLmMN
-Cj4gQEAgLTU0OSw3ICs1NDksNyBAQCBzdGF0aWMgdm9pZCBfX2NhcF9kZWxheV9yZXF1ZXVlX2Zy
-b250KHN0cnVjdCBjZXBoX21kc19jbGllbnQgKm1kc2MsDQo+ICANCj4gIAlkb3V0YyhtZHNjLT5m
-c2MtPmNsaWVudCwgIiVwICVsbHguJWxseFxuIiwgaW5vZGUsIGNlcGhfdmlub3AoaW5vZGUpKTsN
-Cj4gIAlzcGluX2xvY2soJm1kc2MtPmNhcF9kZWxheV9sb2NrKTsNCj4gLQljaS0+aV9jZXBoX2Zs
-YWdzIHw9IENFUEhfSV9GTFVTSDsNCj4gKwlzZXRfYml0KENFUEhfSV9GTFVTSF9CSVQsICZjaS0+
-aV9jZXBoX2ZsYWdzKTsNCj4gIAlpZiAoIWxpc3RfZW1wdHkoJmNpLT5pX2NhcF9kZWxheV9saXN0
-KSkNCj4gIAkJbGlzdF9kZWxfaW5pdCgmY2ktPmlfY2FwX2RlbGF5X2xpc3QpOw0KPiAgCWxpc3Rf
-YWRkKCZjaS0+aV9jYXBfZGVsYXlfbGlzdCwgJm1kc2MtPmNhcF9kZWxheV9saXN0KTsNCj4gQEAg
-LTE0MDksNyArMTQwOSw3IEBAIHN0YXRpYyB2b2lkIF9fcHJlcF9jYXAoc3RydWN0IGNhcF9tc2df
-YXJncyAqYXJnLCBzdHJ1Y3QgY2VwaF9jYXAgKmNhcCwNCj4gIAkgICAgICBjZXBoX2NhcF9zdHJp
-bmcocmV2b2tpbmcpKTsNCj4gIAlCVUdfT04oKHJldGFpbiAmIENFUEhfQ0FQX1BJTikgPT0gMCk7
-DQo+ICANCj4gLQljaS0+aV9jZXBoX2ZsYWdzICY9IH5DRVBIX0lfRkxVU0g7DQo+ICsJY2xlYXJf
-Yml0KENFUEhfSV9GTFVTSF9CSVQsICZjaS0+aV9jZXBoX2ZsYWdzKTsNCj4gIA0KPiAgCWNhcC0+
-aXNzdWVkICY9IHJldGFpbjsgIC8qIGRyb3AgYml0cyB3ZSBkb24ndCB3YW50ICovDQo+ICAJLyoN
-Cj4gQEAgLTE2NjYsNyArMTY2Niw3IEBAIHN0YXRpYyB2b2lkIF9fY2VwaF9mbHVzaF9zbmFwcyhz
-dHJ1Y3QgY2VwaF9pbm9kZV9pbmZvICpjaSwNCj4gIAkJbGFzdF90aWQgPSBjYXBzbmFwLT5jYXBf
-Zmx1c2gudGlkOw0KPiAgCX0NCj4gIA0KPiAtCWNpLT5pX2NlcGhfZmxhZ3MgJj0gfkNFUEhfSV9G
-TFVTSF9TTkFQUzsNCj4gKwljbGVhcl9iaXQoQ0VQSF9JX0ZMVVNIX1NOQVBTX0JJVCwgJmNpLT5p
-X2NlcGhfZmxhZ3MpOw0KPiAgDQo+ICAJd2hpbGUgKGZpcnN0X3RpZCA8PSBsYXN0X3RpZCkgew0K
-PiAgCQlzdHJ1Y3QgY2VwaF9jYXAgKmNhcCA9IGNpLT5pX2F1dGhfY2FwOw0KPiBAQCAtMjAyNiw3
-ICsyMDI2LDcgQEAgdm9pZCBjZXBoX2NoZWNrX2NhcHMoc3RydWN0IGNlcGhfaW5vZGVfaW5mbyAq
-Y2ksIGludCBmbGFncykNCj4gIA0KPiAgCXNwaW5fbG9jaygmY2ktPmlfY2VwaF9sb2NrKTsNCj4g
-IAlpZiAoY2ktPmlfY2VwaF9mbGFncyAmIENFUEhfSV9BU1lOQ19DUkVBVEUpIHsNCj4gLQkJY2kt
-PmlfY2VwaF9mbGFncyB8PSBDRVBIX0lfQVNZTkNfQ0hFQ0tfQ0FQUzsNCj4gKwkJc2V0X2JpdChD
-RVBIX0lfQVNZTkNfQ0hFQ0tfQ0FQU19CSVQsICZjaS0+aV9jZXBoX2ZsYWdzKTsNCj4gIA0KPiAg
-CQkvKiBEb24ndCBzZW5kIG1lc3NhZ2VzIHVudGlsIHdlIGdldCBhc3luYyBjcmVhdGUgcmVwbHkg
-Ki8NCj4gIAkJc3Bpbl91bmxvY2soJmNpLT5pX2NlcGhfbG9jayk7DQo+IEBAIC0yNTc3LDcgKzI1
-NzcsNyBAQCBzdGF0aWMgdm9pZCBfX2tpY2tfZmx1c2hpbmdfY2FwcyhzdHJ1Y3QgY2VwaF9tZHNf
-Y2xpZW50ICptZHNjLA0KPiAgCWlmIChjaS0+aV9jZXBoX2ZsYWdzICYgQ0VQSF9JX0FTWU5DX0NS
-RUFURSkNCj4gIAkJcmV0dXJuOw0KPiAgDQo+IC0JY2ktPmlfY2VwaF9mbGFncyAmPSB+Q0VQSF9J
-X0tJQ0tfRkxVU0g7DQo+ICsJY2xlYXJfYml0KENFUEhfSV9LSUNLX0ZMVVNIX0JJVCwgJmNpLT5p
-X2NlcGhfZmxhZ3MpOw0KPiAgDQo+ICAJbGlzdF9mb3JfZWFjaF9lbnRyeV9yZXZlcnNlKGNmLCAm
-Y2ktPmlfY2FwX2ZsdXNoX2xpc3QsIGlfbGlzdCkgew0KPiAgCQlpZiAoY2YtPmlzX2NhcHNuYXAp
-IHsNCj4gQEAgLTI2ODYsNyArMjY4Niw3IEBAIHZvaWQgY2VwaF9lYXJseV9raWNrX2ZsdXNoaW5n
-X2NhcHMoc3RydWN0IGNlcGhfbWRzX2NsaWVudCAqbWRzYywNCj4gIAkJCV9fa2lja19mbHVzaGlu
-Z19jYXBzKG1kc2MsIHNlc3Npb24sIGNpLA0KPiAgCQkJCQkgICAgIG9sZGVzdF9mbHVzaF90aWQp
-Ow0KPiAgCQl9IGVsc2Ugew0KPiAtCQkJY2ktPmlfY2VwaF9mbGFncyB8PSBDRVBIX0lfS0lDS19G
-TFVTSDsNCj4gKwkJCXNldF9iaXQoQ0VQSF9JX0tJQ0tfRkxVU0hfQklULCAmY2ktPmlfY2VwaF9m
-bGFncyk7DQo+ICAJCX0NCj4gIA0KPiAgCQlzcGluX3VubG9jaygmY2ktPmlfY2VwaF9sb2NrKTsN
-Cj4gQEAgLTI4MjksNyArMjgyOSw3IEBAIHN0YXRpYyBpbnQgdHJ5X2dldF9jYXBfcmVmcyhzdHJ1
-Y3QgaW5vZGUgKmlub2RlLCBpbnQgbmVlZCwgaW50IHdhbnQsDQo+ICAJc3Bpbl9sb2NrKCZjaS0+
-aV9jZXBoX2xvY2spOw0KPiAgDQo+ICAJaWYgKChmbGFncyAmIENIRUNLX0ZJTEVMT0NLKSAmJg0K
-PiAtCSAgICAoY2ktPmlfY2VwaF9mbGFncyAmIENFUEhfSV9FUlJPUl9GSUxFTE9DSykpIHsNCj4g
-KwkgICAgdGVzdF9iaXQoQ0VQSF9JX0VSUk9SX0ZJTEVMT0NLX0JJVCwgJmNpLT5pX2NlcGhfZmxh
-Z3MpKSB7DQo+ICAJCWRvdXRjKGNsLCAiJXAgJWxseC4lbGx4IGVycm9yIGZpbGVsb2NrXG4iLCBp
-bm9kZSwNCj4gIAkJICAgICAgY2VwaF92aW5vcChpbm9kZSkpOw0KPiAgCQlyZXQgPSAtRUlPOw0K
-PiBAQCAtMzIwNyw3ICszMjA3LDcgQEAgc3RhdGljIGludCBjZXBoX3RyeV9kcm9wX2NhcF9zbmFw
-KHN0cnVjdCBjZXBoX2lub2RlX2luZm8gKmNpLA0KPiAgCQlCVUdfT04oY2Fwc25hcC0+Y2FwX2Zs
-dXNoLnRpZCA+IDApOw0KPiAgCQljZXBoX3B1dF9zbmFwX2NvbnRleHQoY2Fwc25hcC0+Y29udGV4
-dCk7DQo+ICAJCWlmICghbGlzdF9pc19sYXN0KCZjYXBzbmFwLT5jaV9pdGVtLCAmY2ktPmlfY2Fw
-X3NuYXBzKSkNCj4gLQkJCWNpLT5pX2NlcGhfZmxhZ3MgfD0gQ0VQSF9JX0ZMVVNIX1NOQVBTOw0K
-PiArCQkJc2V0X2JpdChDRVBIX0lfRkxVU0hfU05BUFNfQklULCAmY2ktPmlfY2VwaF9mbGFncyk7
-DQo+ICANCj4gIAkJbGlzdF9kZWwoJmNhcHNuYXAtPmNpX2l0ZW0pOw0KPiAgCQljZXBoX3B1dF9j
-YXBfc25hcChjYXBzbmFwKTsNCj4gQEAgLTMzOTYsNyArMzM5Niw3IEBAIHZvaWQgY2VwaF9wdXRf
-d3JidWZmZXJfY2FwX3JlZnMoc3RydWN0IGNlcGhfaW5vZGVfaW5mbyAqY2ksIGludCBuciwNCj4g
-IAkJCQlpZiAoY2VwaF90cnlfZHJvcF9jYXBfc25hcChjaSwgY2Fwc25hcCkpIHsNCj4gIAkJCQkJ
-cHV0Kys7DQo+ICAJCQkJfSBlbHNlIHsNCj4gLQkJCQkJY2ktPmlfY2VwaF9mbGFncyB8PSBDRVBI
-X0lfRkxVU0hfU05BUFM7DQo+ICsJCQkJCXNldF9iaXQoQ0VQSF9JX0ZMVVNIX1NOQVBTX0JJVCwg
-JmNpLT5pX2NlcGhfZmxhZ3MpOw0KPiAgCQkJCQlmbHVzaF9zbmFwcyA9IHRydWU7DQo+ICAJCQkJ
-fQ0KPiAgCQkJfQ0KPiBAQCAtMzY0OCw3ICszNjQ4LDcgQEAgc3RhdGljIHZvaWQgaGFuZGxlX2Nh
-cF9ncmFudChzdHJ1Y3QgaW5vZGUgKmlub2RlLA0KPiAgDQo+ICAJCWlmIChjaS0+aV9sYXlvdXQu
-cG9vbF9pZCAhPSBvbGRfcG9vbCB8fA0KPiAgCQkgICAgZXh0cmFfaW5mby0+cG9vbF9ucyAhPSBv
-bGRfbnMpDQo+IC0JCQljaS0+aV9jZXBoX2ZsYWdzICY9IH5DRVBIX0lfUE9PTF9QRVJNOw0KPiAr
-CQkJY2xlYXJfYml0KENFUEhfSV9QT09MX1BFUk1fQklULCAmY2ktPmlfY2VwaF9mbGFncyk7DQo+
-ICANCj4gIAkJZXh0cmFfaW5mby0+cG9vbF9ucyA9IG9sZF9uczsNCj4gIA0KPiBAQCAtNDgxNSw3
-ICs0ODE1LDcgQEAgaW50IGNlcGhfZHJvcF9jYXBzX2Zvcl91bmxpbmsoc3RydWN0IGlub2RlICpp
-bm9kZSkNCj4gIAkJCWRvdXRjKG1kc2MtPmZzYy0+Y2xpZW50LCAiJXAgJWxseC4lbGx4XG4iLCBp
-bm9kZSwNCj4gIAkJCSAgICAgIGNlcGhfdmlub3AoaW5vZGUpKTsNCj4gIAkJCXNwaW5fbG9jaygm
-bWRzYy0+Y2FwX2RlbGF5X2xvY2spOw0KPiAtCQkJY2ktPmlfY2VwaF9mbGFncyB8PSBDRVBIX0lf
-RkxVU0g7DQo+ICsJCQlzZXRfYml0KENFUEhfSV9GTFVTSF9CSVQsICZjaS0+aV9jZXBoX2ZsYWdz
-KTsNCj4gIAkJCWlmICghbGlzdF9lbXB0eSgmY2ktPmlfY2FwX2RlbGF5X2xpc3QpKQ0KPiAgCQkJ
-CWxpc3RfZGVsX2luaXQoJmNpLT5pX2NhcF9kZWxheV9saXN0KTsNCj4gIAkJCWxpc3RfYWRkX3Rh
-aWwoJmNpLT5pX2NhcF9kZWxheV9saXN0LA0KPiBAQCAtNTA4MCw3ICs1MDgwLDcgQEAgaW50IGNl
-cGhfcHVyZ2VfaW5vZGVfY2FwKHN0cnVjdCBpbm9kZSAqaW5vZGUsIHN0cnVjdCBjZXBoX2NhcCAq
-Y2FwLCBib29sICppbnZhbGkNCj4gIA0KPiAgCQlpZiAoYXRvbWljX3JlYWQoJmNpLT5pX2ZpbGVs
-b2NrX3JlZikgPiAwKSB7DQo+ICAJCQkvKiBtYWtlIGZ1cnRoZXIgZmlsZSBsb2NrIHN5c2NhbGwg
-cmV0dXJuIC1FSU8gKi8NCj4gLQkJCWNpLT5pX2NlcGhfZmxhZ3MgfD0gQ0VQSF9JX0VSUk9SX0ZJ
-TEVMT0NLOw0KPiArCQkJc2V0X2JpdChDRVBIX0lfRVJST1JfRklMRUxPQ0tfQklULCAmY2ktPmlf
-Y2VwaF9mbGFncyk7DQo+ICAJCQlwcl93YXJuX3JhdGVsaW1pdGVkX2NsaWVudChjbCwNCj4gIAkJ
-CQkiIGRyb3BwaW5nIGZpbGUgbG9ja3MgZm9yICVwICVsbHguJWxseFxuIiwNCj4gIAkJCQlpbm9k
-ZSwgY2VwaF92aW5vcChpbm9kZSkpOw0KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9maWxlLmMgYi9m
-cy9jZXBoL2ZpbGUuYw0KPiBpbmRleCBkNTRkNzE2NjkxNzYuLjdjYTlmNjBmYjBlNSAxMDA2NDQN
-Cj4gLS0tIGEvZnMvY2VwaC9maWxlLmMNCj4gKysrIGIvZnMvY2VwaC9maWxlLmMNCj4gQEAgLTU5
-OCwxMiArNTk4LDEyIEBAIHN0YXRpYyB2b2lkIHdha2VfYXN5bmNfY3JlYXRlX3dhaXRlcnMoc3Ry
-dWN0IGlub2RlICppbm9kZSwNCj4gIA0KPiAgCXNwaW5fbG9jaygmY2ktPmlfY2VwaF9sb2NrKTsN
-Cj4gIAlpZiAoY2ktPmlfY2VwaF9mbGFncyAmIENFUEhfSV9BU1lOQ19DUkVBVEUpIHsNCj4gLQkJ
-Y2xlYXJfYW5kX3dha2VfdXBfYml0KENFUEhfQVNZTkNfQ1JFQVRFX0JJVCwgJmNpLT5pX2NlcGhf
-ZmxhZ3MpOw0KPiArCQkvKiBTZXJpYWxpemVkIGJ5IGlfY2VwaF9sb2NrOyB0aGUgdHdvIG9wcyB0
-b3VjaCBkaWZmZXJlbnQgYml0cy4gKi8NCj4gKwkJY2xlYXJfYW5kX3dha2VfdXBfYml0KENFUEhf
-SV9BU1lOQ19DUkVBVEVfQklULCAmY2ktPmlfY2VwaF9mbGFncyk7DQo+ICANCj4gLQkJaWYgKGNp
-LT5pX2NlcGhfZmxhZ3MgJiBDRVBIX0lfQVNZTkNfQ0hFQ0tfQ0FQUykgew0KPiAtCQkJY2ktPmlf
-Y2VwaF9mbGFncyAmPSB+Q0VQSF9JX0FTWU5DX0NIRUNLX0NBUFM7DQo+ICsJCWlmICh0ZXN0X2Fu
-ZF9jbGVhcl9iaXQoQ0VQSF9JX0FTWU5DX0NIRUNLX0NBUFNfQklULA0KPiArCQkJCSAgICAgICZj
-aS0+aV9jZXBoX2ZsYWdzKSkNCj4gIAkJCWNoZWNrX2NhcCA9IHRydWU7DQo+IC0JCX0NCj4gIAl9
-DQo+ICAJY2VwaF9raWNrX2ZsdXNoaW5nX2lub2RlX2NhcHMoc2Vzc2lvbiwgY2kpOw0KPiAgCXNw
-aW5fdW5sb2NrKCZjaS0+aV9jZXBoX2xvY2spOw0KPiBAQCAtNzY2LDcgKzc2Niw4IEBAIHN0YXRp
-YyBpbnQgY2VwaF9maW5pc2hfYXN5bmNfY3JlYXRlKHN0cnVjdCBpbm9kZSAqZGlyLCBzdHJ1Y3Qg
-aW5vZGUgKmlub2RlLA0KPiAgCQkJICogdGhhdCBwb2ludCBhbmQgZG9uJ3Qgd29ycnkgYWJvdXQg
-c2V0dGluZw0KPiAgCQkJICogQ0VQSF9JX0FTWU5DX0NSRUFURS4NCj4gIAkJCSAqLw0KPiAtCQkJ
-Y2VwaF9pbm9kZShpbm9kZSktPmlfY2VwaF9mbGFncyA9IENFUEhfSV9BU1lOQ19DUkVBVEU7DQo+
-ICsJCQlzZXRfYml0KENFUEhfSV9BU1lOQ19DUkVBVEVfQklULA0KPiArCQkJCSZjZXBoX2lub2Rl
-KGlub2RlKS0+aV9jZXBoX2ZsYWdzKTsNCj4gIAkJCXVubG9ja19uZXdfaW5vZGUoaW5vZGUpOw0K
-PiAgCQl9DQo+ICAJCWlmIChkX2luX2xvb2t1cChkZW50cnkpIHx8IGRfcmVhbGx5X2lzX25lZ2F0
-aXZlKGRlbnRyeSkpIHsNCj4gQEAgLTI0ODIsNyArMjQ4Myw3IEBAIHN0YXRpYyBzc2l6ZV90IGNl
-cGhfd3JpdGVfaXRlcihzdHJ1Y3Qga2lvY2IgKmlvY2IsIHN0cnVjdCBpb3ZfaXRlciAqZnJvbSkN
-Cj4gIA0KPiAgCWlmICgoZ290ICYgKENFUEhfQ0FQX0ZJTEVfQlVGRkVSfENFUEhfQ0FQX0ZJTEVf
-TEFaWUlPKSkgPT0gMCB8fA0KPiAgCSAgICAoaW9jYi0+a2lfZmxhZ3MgJiBJT0NCX0RJUkVDVCkg
-fHwgKGZpLT5mbGFncyAmIENFUEhfRl9TWU5DKSB8fA0KPiAtCSAgICAoY2ktPmlfY2VwaF9mbGFn
-cyAmIENFUEhfSV9FUlJPUl9XUklURSkpIHsNCj4gKwkgICAgdGVzdF9iaXQoQ0VQSF9JX0VSUk9S
-X1dSSVRFX0JJVCwgJmNpLT5pX2NlcGhfZmxhZ3MpKSB7DQo+ICAJCXN0cnVjdCBjZXBoX3NuYXBf
-Y29udGV4dCAqc25hcGM7DQo+ICAJCXN0cnVjdCBpb3ZfaXRlciBkYXRhOw0KPiAgDQo+IGRpZmYg
-LS1naXQgYS9mcy9jZXBoL2lub2RlLmMgYi9mcy9jZXBoL2lub2RlLmMNCj4gaW5kZXggMjJjN2Rh
-MWVhNjFjLi40ODcxZDdhYjI3MzAgMTAwNjQ0DQo+IC0tLSBhL2ZzL2NlcGgvaW5vZGUuYw0KPiAr
-KysgYi9mcy9jZXBoL2lub2RlLmMNCj4gQEAgLTExODAsNyArMTE4MCw3IEBAIGludCBjZXBoX2Zp
-bGxfaW5vZGUoc3RydWN0IGlub2RlICppbm9kZSwgc3RydWN0IHBhZ2UgKmxvY2tlZF9wYWdlLA0K
-PiAgCQlyY3VfYXNzaWduX3BvaW50ZXIoY2ktPmlfbGF5b3V0LnBvb2xfbnMsIHBvb2xfbnMpOw0K
-PiAgDQo+ICAJCWlmIChjaS0+aV9sYXlvdXQucG9vbF9pZCAhPSBvbGRfcG9vbCB8fCBwb29sX25z
-ICE9IG9sZF9ucykNCj4gLQkJCWNpLT5pX2NlcGhfZmxhZ3MgJj0gfkNFUEhfSV9QT09MX1BFUk07
-DQo+ICsJCQljbGVhcl9iaXQoQ0VQSF9JX1BPT0xfUEVSTV9CSVQsICZjaS0+aV9jZXBoX2ZsYWdz
-KTsNCj4gIA0KPiAgCQlwb29sX25zID0gb2xkX25zOw0KPiAgDQo+IEBAIC0zMjQwLDcgKzMyNDAs
-NyBAQCB2b2lkIGNlcGhfaW5vZGVfc2h1dGRvd24oc3RydWN0IGlub2RlICppbm9kZSkNCj4gIAli
-b29sIGludmFsaWRhdGUgPSBmYWxzZTsNCj4gIA0KPiAgCXNwaW5fbG9jaygmY2ktPmlfY2VwaF9s
-b2NrKTsNCj4gLQljaS0+aV9jZXBoX2ZsYWdzIHw9IENFUEhfSV9TSFVURE9XTjsNCj4gKwlzZXRf
-Yml0KENFUEhfSV9TSFVURE9XTl9CSVQsICZjaS0+aV9jZXBoX2ZsYWdzKTsNCj4gIAlwID0gcmJf
-Zmlyc3QoJmNpLT5pX2NhcHMpOw0KPiAgCXdoaWxlIChwKSB7DQo+ICAJCXN0cnVjdCBjZXBoX2Nh
-cCAqY2FwID0gcmJfZW50cnkocCwgc3RydWN0IGNlcGhfY2FwLCBjaV9ub2RlKTsNCj4gZGlmZiAt
-LWdpdCBhL2ZzL2NlcGgvbG9ja3MuYyBiL2ZzL2NlcGgvbG9ja3MuYw0KPiBpbmRleCBkZDc2NGY5
-YzY0YjkuLmM0ZmYyMjY2YmI5NCAxMDA2NDQNCj4gLS0tIGEvZnMvY2VwaC9sb2Nrcy5jDQo+ICsr
-KyBiL2ZzL2NlcGgvbG9ja3MuYw0KPiBAQCAtNTcsOSArNTcsNyBAQCBzdGF0aWMgdm9pZCBjZXBo
-X2ZsX3JlbGVhc2VfbG9jayhzdHJ1Y3QgZmlsZV9sb2NrICpmbCkNCj4gIAljaSA9IGNlcGhfaW5v
-ZGUoaW5vZGUpOw0KPiAgCWlmIChhdG9taWNfZGVjX2FuZF90ZXN0KCZjaS0+aV9maWxlbG9ja19y
-ZWYpKSB7DQo+ICAJCS8qIGNsZWFyIGVycm9yIHdoZW4gYWxsIGxvY2tzIGFyZSByZWxlYXNlZCAq
-Lw0KPiAtCQlzcGluX2xvY2soJmNpLT5pX2NlcGhfbG9jayk7DQo+IC0JCWNpLT5pX2NlcGhfZmxh
-Z3MgJj0gfkNFUEhfSV9FUlJPUl9GSUxFTE9DSzsNCj4gLQkJc3Bpbl91bmxvY2soJmNpLT5pX2Nl
-cGhfbG9jayk7DQo+ICsJCWNsZWFyX2JpdChDRVBIX0lfRVJST1JfRklMRUxPQ0tfQklULCAmY2kt
-PmlfY2VwaF9mbGFncyk7DQo+ICAJfQ0KPiAgCWZsLT5mbF91LmNlcGguaW5vZGUgPSBOVUxMOw0K
-PiAgCWlwdXQoaW5vZGUpOw0KPiBAQCAtMjcxLDE1ICsyNjksMTAgQEAgaW50IGNlcGhfbG9jayhz
-dHJ1Y3QgZmlsZSAqZmlsZSwgaW50IGNtZCwgc3RydWN0IGZpbGVfbG9jayAqZmwpDQo+ICAJZWxz
-ZSBpZiAoSVNfU0VUTEtXKGNtZCkpDQo+ICAJCXdhaXQgPSAxOw0KPiAgDQo+IC0Jc3Bpbl9sb2Nr
-KCZjaS0+aV9jZXBoX2xvY2spOw0KPiAtCWlmIChjaS0+aV9jZXBoX2ZsYWdzICYgQ0VQSF9JX0VS
-Uk9SX0ZJTEVMT0NLKSB7DQo+IC0JCWVyciA9IC1FSU87DQo+IC0JfQ0KPiAtCXNwaW5fdW5sb2Nr
-KCZjaS0+aV9jZXBoX2xvY2spOw0KPiAtCWlmIChlcnIgPCAwKSB7DQo+ICsJaWYgKHRlc3RfYml0
-KENFUEhfSV9FUlJPUl9GSUxFTE9DS19CSVQsICZjaS0+aV9jZXBoX2ZsYWdzKSkgew0KPiAgCQlp
-ZiAob3AgPT0gQ0VQSF9NRFNfT1BfU0VURklMRUxPQ0sgJiYgbG9ja19pc191bmxvY2soZmwpKQ0K
-PiAgCQkJcG9zaXhfbG9ja19maWxlKGZpbGUsIGZsLCBOVUxMKTsNCj4gLQkJcmV0dXJuIGVycjsN
-Cj4gKwkJcmV0dXJuIC1FSU87DQo+ICAJfQ0KPiAgDQo+ICAJaWYgKGxvY2tfaXNfcmVhZChmbCkp
-DQo+IEBAIC0zMzEsMTUgKzMyNCwxMCBAQCBpbnQgY2VwaF9mbG9jayhzdHJ1Y3QgZmlsZSAqZmls
-ZSwgaW50IGNtZCwgc3RydWN0IGZpbGVfbG9jayAqZmwpDQo+ICANCj4gIAlkb3V0YyhjbCwgImZs
-X2ZpbGU6ICVwXG4iLCBmbC0+Yy5mbGNfZmlsZSk7DQo+ICANCj4gLQlzcGluX2xvY2soJmNpLT5p
-X2NlcGhfbG9jayk7DQo+IC0JaWYgKGNpLT5pX2NlcGhfZmxhZ3MgJiBDRVBIX0lfRVJST1JfRklM
-RUxPQ0spIHsNCj4gLQkJZXJyID0gLUVJTzsNCj4gLQl9DQo+IC0Jc3Bpbl91bmxvY2soJmNpLT5p
-X2NlcGhfbG9jayk7DQo+IC0JaWYgKGVyciA8IDApIHsNCj4gKwlpZiAodGVzdF9iaXQoQ0VQSF9J
-X0VSUk9SX0ZJTEVMT0NLX0JJVCwgJmNpLT5pX2NlcGhfZmxhZ3MpKSB7DQo+ICAJCWlmIChsb2Nr
-X2lzX3VubG9jayhmbCkpDQo+ICAJCQlsb2Nrc19sb2NrX2ZpbGVfd2FpdChmaWxlLCBmbCk7DQo+
-IC0JCXJldHVybiBlcnI7DQo+ICsJCXJldHVybiAtRUlPOw0KPiAgCX0NCj4gIA0KPiAgCWlmIChJ
-U19TRVRMS1coY21kKSkNCj4gZGlmZiAtLWdpdCBhL2ZzL2NlcGgvbWRzX2NsaWVudC5jIGIvZnMv
-Y2VwaC9tZHNfY2xpZW50LmMNCj4gaW5kZXggZWQxN2UwMDIzNzA1Li41M2YxMDEyYTllN2QgMTAw
-NjQ0DQo+IC0tLSBhL2ZzL2NlcGgvbWRzX2NsaWVudC5jDQo+ICsrKyBiL2ZzL2NlcGgvbWRzX2Ns
-aWVudC5jDQo+IEBAIC0zNjU3LDcgKzM2NTcsOCBAQCBzdGF0aWMgdm9pZCBfX2RvX3JlcXVlc3Qo
-c3RydWN0IGNlcGhfbWRzX2NsaWVudCAqbWRzYywNCj4gIA0KPiAgCQlzcGluX2xvY2soJmNpLT5p
-X2NlcGhfbG9jayk7DQo+ICAJCWNhcCA9IGNpLT5pX2F1dGhfY2FwOw0KPiAtCQlpZiAoY2ktPmlf
-Y2VwaF9mbGFncyAmIENFUEhfSV9BU1lOQ19DUkVBVEUgJiYgbWRzICE9IGNhcC0+bWRzKSB7DQo+
-ICsJCWlmICh0ZXN0X2JpdChDRVBIX0lfQVNZTkNfQ1JFQVRFX0JJVCwgJmNpLT5pX2NlcGhfZmxh
-Z3MpICYmDQo+ICsJCSAgICBtZHMgIT0gY2FwLT5tZHMpIHsNCj4gIAkJCWRvdXRjKGNsLCAic2Vz
-c2lvbiBjaGFuZ2VkIGZvciBhdXRoIGNhcCAlZCAtPiAlZFxuIiwNCj4gIAkJCSAgICAgIGNhcC0+
-c2Vzc2lvbi0+c19tZHMsIHNlc3Npb24tPnNfbWRzKTsNCj4gIA0KPiBkaWZmIC0tZ2l0IGEvZnMv
-Y2VwaC9tZHNfY2xpZW50LmggYi9mcy9jZXBoL21kc19jbGllbnQuaA0KPiBpbmRleCA0ZTZjODdm
-ODQxNGMuLmQ4NzNlNzg0YjAyNSAxMDA2NDQNCj4gLS0tIGEvZnMvY2VwaC9tZHNfY2xpZW50LmgN
-Cj4gKysrIGIvZnMvY2VwaC9tZHNfY2xpZW50LmgNCj4gQEAgLTY3MCw3ICs2NzAsNyBAQCBzdGF0
-aWMgaW5saW5lIGludCBjZXBoX3dhaXRfb25fYXN5bmNfY3JlYXRlKHN0cnVjdCBpbm9kZSAqaW5v
-ZGUpDQo+ICB7DQo+ICAJc3RydWN0IGNlcGhfaW5vZGVfaW5mbyAqY2kgPSBjZXBoX2lub2RlKGlu
-b2RlKTsNCj4gIA0KPiAtCXJldHVybiB3YWl0X29uX2JpdCgmY2ktPmlfY2VwaF9mbGFncywgQ0VQ
-SF9BU1lOQ19DUkVBVEVfQklULA0KPiArCXJldHVybiB3YWl0X29uX2JpdCgmY2ktPmlfY2VwaF9m
-bGFncywgQ0VQSF9JX0FTWU5DX0NSRUFURV9CSVQsDQo+ICAJCQkgICBUQVNLX0tJTExBQkxFKTsN
-Cj4gIH0NCj4gIA0KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9zbmFwLmMgYi9mcy9jZXBoL3NuYXAu
-Yw0KPiBpbmRleCA1MmI0YzI2ODRmOTIuLjliNzlhNWVhY2E5MyAxMDA2NDQNCj4gLS0tIGEvZnMv
-Y2VwaC9zbmFwLmMNCj4gKysrIGIvZnMvY2VwaC9zbmFwLmMNCj4gQEAgLTcwMCw3ICs3MDAsNyBA
-QCBpbnQgX19jZXBoX2ZpbmlzaF9jYXBfc25hcChzdHJ1Y3QgY2VwaF9pbm9kZV9pbmZvICpjaSwN
-Cj4gIAkJcmV0dXJuIDA7DQo+ICAJfQ0KPiAgDQo+IC0JY2ktPmlfY2VwaF9mbGFncyB8PSBDRVBI
-X0lfRkxVU0hfU05BUFM7DQo+ICsJc2V0X2JpdChDRVBIX0lfRkxVU0hfU05BUFNfQklULCAmY2kt
-PmlfY2VwaF9mbGFncyk7DQo+ICAJZG91dGMoY2wsICIlcCAlbGx4LiVsbHggY2FwX3NuYXAgJXAg
-c25hcGMgJXAgJWxsdSAlcyBzPSVsbHVcbiIsDQo+ICAJICAgICAgaW5vZGUsIGNlcGhfdmlub3Ao
-aW5vZGUpLCBjYXBzbmFwLCBjYXBzbmFwLT5jb250ZXh0LA0KPiAgCSAgICAgIGNhcHNuYXAtPmNv
-bnRleHQtPnNlcSwgY2VwaF9jYXBfc3RyaW5nKGNhcHNuYXAtPmRpcnR5KSwNCj4gZGlmZiAtLWdp
-dCBhL2ZzL2NlcGgvc3VwZXIuaCBiL2ZzL2NlcGgvc3VwZXIuaA0KPiBpbmRleCBhZmM4OWNlOTE4
-MDQuLmNiNDVhNTlkYmIxOSAxMDA2NDQNCj4gLS0tIGEvZnMvY2VwaC9zdXBlci5oDQo+ICsrKyBi
-L2ZzL2NlcGgvc3VwZXIuaA0KPiBAQCAtNjY1LDIzICs2NjUsMzQgQEAgc3RhdGljIGlubGluZSBz
-dHJ1Y3QgaW5vZGUgKmNlcGhfZmluZF9pbm9kZShzdHJ1Y3Qgc3VwZXJfYmxvY2sgKnNiLA0KPiAg
-LyoNCj4gICAqIENlcGggaW5vZGUuDQo+ICAgKi8NCj4gLSNkZWZpbmUgQ0VQSF9JX0RJUl9PUkRF
-UkVECSgxIDw8IDApICAvKiBkZW50cmllcyBpbiBkaXIgYXJlIG9yZGVyZWQgKi8NCj4gLSNkZWZp
-bmUgQ0VQSF9JX0ZMVVNICQkoMSA8PCAyKSAgLyogZG8gbm90IGRlbGF5IGZsdXNoIG9mIGRpcnR5
-IG1ldGFkYXRhICovDQo+IC0jZGVmaW5lIENFUEhfSV9QT09MX1BFUk0JKDEgPDwgMykgIC8qIHBv
-b2wgcmQvd3IgYml0cyBhcmUgdmFsaWQgKi8NCj4gLSNkZWZpbmUgQ0VQSF9JX1BPT0xfUkQJCSgx
-IDw8IDQpICAvKiBjYW4gcmVhZCBmcm9tIHBvb2wgKi8NCj4gLSNkZWZpbmUgQ0VQSF9JX1BPT0xf
-V1IJCSgxIDw8IDUpICAvKiBjYW4gd3JpdGUgdG8gcG9vbCAqLw0KPiAtI2RlZmluZSBDRVBIX0lf
-U0VDX0lOSVRFRAkoMSA8PCA2KSAgLyogc2VjdXJpdHkgaW5pdGlhbGl6ZWQgKi8NCj4gLSNkZWZp
-bmUgQ0VQSF9JX0tJQ0tfRkxVU0gJKDEgPDwgNykgIC8qIGtpY2sgZmx1c2hpbmcgY2FwcyAqLw0K
-PiAtI2RlZmluZSBDRVBIX0lfRkxVU0hfU05BUFMJKDEgPDwgOCkgIC8qIG5lZWQgZmx1c2ggc25h
-cHNzICovDQo+IC0jZGVmaW5lIENFUEhfSV9FUlJPUl9XUklURQkoMSA8PCA5KSAvKiBoYXZlIHNl
-ZW4gd3JpdGUgZXJyb3JzICovDQo+IC0jZGVmaW5lIENFUEhfSV9FUlJPUl9GSUxFTE9DSwkoMSA8
-PCAxMCkgLyogaGF2ZSBzZWVuIGZpbGUgbG9jayBlcnJvcnMgKi8NCj4gLSNkZWZpbmUgQ0VQSF9J
-X09ESVJFQ1RfQklUCSgxMSkgLyogaW5vZGUgaW4gZGlyZWN0IEkvTyBtb2RlICovDQo+IC0jZGVm
-aW5lIENFUEhfSV9PRElSRUNUCQkoMSA8PCBDRVBIX0lfT0RJUkVDVF9CSVQpDQo+IC0jZGVmaW5l
-IENFUEhfQVNZTkNfQ1JFQVRFX0JJVAkoMTIpCSAgLyogYXN5bmMgY3JlYXRlIGluIGZsaWdodCBm
-b3IgdGhpcyAqLw0KPiAtI2RlZmluZSBDRVBIX0lfQVNZTkNfQ1JFQVRFCSgxIDw8IENFUEhfQVNZ
-TkNfQ1JFQVRFX0JJVCkNCj4gLSNkZWZpbmUgQ0VQSF9JX1NIVVRET1dOCQkoMSA8PCAxMykgLyog
-aW5vZGUgaXMgbm8gbG9uZ2VyIHVzYWJsZSAqLw0KPiAtI2RlZmluZSBDRVBIX0lfQVNZTkNfQ0hF
-Q0tfQ0FQUwkoMSA8PCAxNCkgLyogY2hlY2sgY2FwcyBpbW1lZGlhdGVseSBhZnRlciBhc3luYw0K
-PiAtCQkJCQkgICAgIGNyZWF0aW5nIGZpbmlzaGVzICovDQo+ICsjZGVmaW5lIENFUEhfSV9ESVJf
-T1JERVJFRF9CSVQJCSgwKSAgLyogZGVudHJpZXMgaW4gZGlyIGFyZSBvcmRlcmVkICovDQo+ICsJ
-CQkJCSAgICAgLyogYml0IDEgaGlzdG9yaWNhbGx5IHVudXNlZCAqLw0KPiArI2RlZmluZSBDRVBI
-X0lfRkxVU0hfQklUCQkoMikgIC8qIGRvIG5vdCBkZWxheSBmbHVzaCBvZiBkaXJ0eSBtZXRhZGF0
-YSAqLw0KPiArI2RlZmluZSBDRVBIX0lfUE9PTF9QRVJNX0JJVAkJKDMpICAvKiBwb29sIHJkL3dy
-IGJpdHMgYXJlIHZhbGlkICovDQo+ICsjZGVmaW5lIENFUEhfSV9QT09MX1JEX0JJVAkJKDQpICAv
-KiBjYW4gcmVhZCBmcm9tIHBvb2wgKi8NCj4gKyNkZWZpbmUgQ0VQSF9JX1BPT0xfV1JfQklUCQko
-NSkgIC8qIGNhbiB3cml0ZSB0byBwb29sICovDQo+ICsjZGVmaW5lIENFUEhfSV9TRUNfSU5JVEVE
-X0JJVAkJKDYpICAvKiBzZWN1cml0eSBpbml0aWFsaXplZCAqLw0KPiArI2RlZmluZSBDRVBIX0lf
-S0lDS19GTFVTSF9CSVQJCSg3KSAgLyoga2ljayBmbHVzaGluZyBjYXBzICovDQo+ICsjZGVmaW5l
-IENFUEhfSV9GTFVTSF9TTkFQU19CSVQJCSg4KSAgLyogbmVlZCBmbHVzaCBzbmFwcyAqLw0KPiAr
-I2RlZmluZSBDRVBIX0lfRVJST1JfV1JJVEVfQklUCQkoOSkgIC8qIGhhdmUgc2VlbiB3cml0ZSBl
-cnJvcnMgKi8NCj4gKyNkZWZpbmUgQ0VQSF9JX0VSUk9SX0ZJTEVMT0NLX0JJVAkoMTApIC8qIGhh
-dmUgc2VlbiBmaWxlIGxvY2sgZXJyb3JzICovDQo+ICsjZGVmaW5lIENFUEhfSV9PRElSRUNUX0JJ
-VAkJKDExKSAvKiBpbm9kZSBpbiBkaXJlY3QgSS9PIG1vZGUgKi8NCj4gKyNkZWZpbmUgQ0VQSF9J
-X0FTWU5DX0NSRUFURV9CSVQJCSgxMikgLyogYXN5bmMgY3JlYXRlIGluIGZsaWdodCBmb3IgdGhp
-cyAqLw0KPiArI2RlZmluZSBDRVBIX0lfU0hVVERPV05fQklUCQkoMTMpIC8qIGlub2RlIGlzIG5v
-IGxvbmdlciB1c2FibGUgKi8NCj4gKyNkZWZpbmUgQ0VQSF9JX0FTWU5DX0NIRUNLX0NBUFNfQklU
-CSgxNCkgLyogY2hlY2sgY2FwcyBhZnRlciBhc3luYyBjcmVhdGluZyBmaW5pc2hlcyAqLw0KPiAr
-DQo+ICsjZGVmaW5lIENFUEhfSV9ESVJfT1JERVJFRAkJKDEgPDwgQ0VQSF9JX0RJUl9PUkRFUkVE
-X0JJVCkNCj4gKyNkZWZpbmUgQ0VQSF9JX0ZMVVNICQkJKDEgPDwgQ0VQSF9JX0ZMVVNIX0JJVCkN
-Cj4gKyNkZWZpbmUgQ0VQSF9JX1BPT0xfUEVSTQkJKDEgPDwgQ0VQSF9JX1BPT0xfUEVSTV9CSVQp
-DQo+ICsjZGVmaW5lIENFUEhfSV9QT09MX1JECQkJKDEgPDwgQ0VQSF9JX1BPT0xfUkRfQklUKQ0K
-PiArI2RlZmluZSBDRVBIX0lfUE9PTF9XUgkJCSgxIDw8IENFUEhfSV9QT09MX1dSX0JJVCkNCj4g
-KyNkZWZpbmUgQ0VQSF9JX1NFQ19JTklURUQJCSgxIDw8IENFUEhfSV9TRUNfSU5JVEVEX0JJVCkN
-Cj4gKyNkZWZpbmUgQ0VQSF9JX0tJQ0tfRkxVU0gJCSgxIDw8IENFUEhfSV9LSUNLX0ZMVVNIX0JJ
-VCkNCj4gKyNkZWZpbmUgQ0VQSF9JX0ZMVVNIX1NOQVBTCQkoMSA8PCBDRVBIX0lfRkxVU0hfU05B
-UFNfQklUKQ0KPiArI2RlZmluZSBDRVBIX0lfRVJST1JfRklMRUxPQ0sJCSgxIDw8IENFUEhfSV9F
-UlJPUl9GSUxFTE9DS19CSVQpDQo+ICsjZGVmaW5lIENFUEhfSV9PRElSRUNUCQkJKDEgPDwgQ0VQ
-SF9JX09ESVJFQ1RfQklUKQ0KPiArI2RlZmluZSBDRVBIX0lfQVNZTkNfQ1JFQVRFCQkoMSA8PCBD
-RVBIX0lfQVNZTkNfQ1JFQVRFX0JJVCkNCj4gKyNkZWZpbmUgQ0VQSF9JX1NIVVRET1dOCQkJKDEg
-PDwgQ0VQSF9JX1NIVVRET1dOX0JJVCkNCj4gIA0KPiAgLyoNCj4gICAqIE1hc2tzIG9mIGNlcGgg
-aW5vZGUgd29yay4NCj4gQEAgLTY5NCwyNyArNzA1LDE4IEBAIHN0YXRpYyBpbmxpbmUgc3RydWN0
-IGlub2RlICpjZXBoX2ZpbmRfaW5vZGUoc3RydWN0IHN1cGVyX2Jsb2NrICpzYiwNCj4gIA0KPiAg
-LyoNCj4gICAqIFdlIHNldCB0aGUgRVJST1JfV1JJVEUgYml0IHdoZW4gd2Ugc3RhcnQgc2VlaW5n
-IHdyaXRlIGVycm9ycyBvbiBhbiBpbm9kZQ0KPiAtICogYW5kIHRoZW4gY2xlYXIgaXQgd2hlbiB0
-aGV5IHN0YXJ0IHN1Y2NlZWRpbmcuIE5vdGUgdGhhdCB3ZSBkbyBhIGxvY2tsZXNzDQo+IC0gKiBj
-aGVjayBmaXJzdCwgYW5kIG9ubHkgdGFrZSB0aGUgbG9jayBpZiBpdCBsb29rcyBsaWtlIGl0IG5l
-ZWRzIHRvIGJlIGNoYW5nZWQuDQo+IC0gKiBUaGUgd3JpdGUgc3VibWlzc2lvbiBjb2RlIGp1c3Qg
-dGFrZXMgdGhpcyBhcyBhIGhpbnQsIHNvIHdlJ3JlIG5vdCB0b28NCj4gLSAqIHdvcnJpZWQgaWYg
-YSBmZXcgc2xpcCB0aHJvdWdoIGluIGVpdGhlciBkaXJlY3Rpb24uDQo+ICsgKiBhbmQgdGhlbiBj
-bGVhciBpdCB3aGVuIHRoZXkgc3RhcnQgc3VjY2VlZGluZy4gVGhlIHdyaXRlIHN1Ym1pc3Npb24g
-Y29kZQ0KPiArICoganVzdCB0YWtlcyB0aGlzIGFzIGEgaGludCwgc28gd2UncmUgbm90IHRvbyB3
-b3JyaWVkIGlmIGEgZmV3IHNsaXAgdGhyb3VnaA0KPiArICogaW4gZWl0aGVyIGRpcmVjdGlvbi4N
-Cj4gICAqLw0KPiAgc3RhdGljIGlubGluZSB2b2lkIGNlcGhfc2V0X2Vycm9yX3dyaXRlKHN0cnVj
-dCBjZXBoX2lub2RlX2luZm8gKmNpKQ0KPiAgew0KPiAtCWlmICghKFJFQURfT05DRShjaS0+aV9j
-ZXBoX2ZsYWdzKSAmIENFUEhfSV9FUlJPUl9XUklURSkpIHsNCj4gLQkJc3Bpbl9sb2NrKCZjaS0+
-aV9jZXBoX2xvY2spOw0KPiAtCQljaS0+aV9jZXBoX2ZsYWdzIHw9IENFUEhfSV9FUlJPUl9XUklU
-RTsNCj4gLQkJc3Bpbl91bmxvY2soJmNpLT5pX2NlcGhfbG9jayk7DQo+IC0JfQ0KPiArCXNldF9i
-aXQoQ0VQSF9JX0VSUk9SX1dSSVRFX0JJVCwgJmNpLT5pX2NlcGhfZmxhZ3MpOw0KPiAgfQ0KPiAg
-DQo+ICBzdGF0aWMgaW5saW5lIHZvaWQgY2VwaF9jbGVhcl9lcnJvcl93cml0ZShzdHJ1Y3QgY2Vw
-aF9pbm9kZV9pbmZvICpjaSkNCj4gIHsNCj4gLQlpZiAoUkVBRF9PTkNFKGNpLT5pX2NlcGhfZmxh
-Z3MpICYgQ0VQSF9JX0VSUk9SX1dSSVRFKSB7DQo+IC0JCXNwaW5fbG9jaygmY2ktPmlfY2VwaF9s
-b2NrKTsNCj4gLQkJY2ktPmlfY2VwaF9mbGFncyAmPSB+Q0VQSF9JX0VSUk9SX1dSSVRFOw0KPiAt
-CQlzcGluX3VubG9jaygmY2ktPmlfY2VwaF9sb2NrKTsNCj4gLQl9DQo+ICsJY2xlYXJfYml0KENF
-UEhfSV9FUlJPUl9XUklURV9CSVQsICZjaS0+aV9jZXBoX2ZsYWdzKTsNCj4gIH0NCj4gIA0KPiAg
-c3RhdGljIGlubGluZSB2b2lkIF9fY2VwaF9kaXJfc2V0X2NvbXBsZXRlKHN0cnVjdCBjZXBoX2lu
-b2RlX2luZm8gKmNpLA0KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC94YXR0ci5jIGIvZnMvY2VwaC94
-YXR0ci5jDQo+IGluZGV4IGU3NzNiZTA3Zjc2Ny4uODYwZmM4ZTE4NjdkIDEwMDY0NA0KPiAtLS0g
-YS9mcy9jZXBoL3hhdHRyLmMNCj4gKysrIGIvZnMvY2VwaC94YXR0ci5jDQo+IEBAIC0xMDU0LDcg
-KzEwNTQsNyBAQCBzc2l6ZV90IF9fY2VwaF9nZXR4YXR0cihzdHJ1Y3QgaW5vZGUgKmlub2RlLCBj
-b25zdCBjaGFyICpuYW1lLCB2b2lkICp2YWx1ZSwNCj4gIAlpZiAoY3VycmVudC0+am91cm5hbF9p
-bmZvICYmDQo+ICAJICAgICFzdHJuY21wKG5hbWUsIFhBVFRSX1NFQ1VSSVRZX1BSRUZJWCwgWEFU
-VFJfU0VDVVJJVFlfUFJFRklYX0xFTikgJiYNCj4gIAkgICAgc2VjdXJpdHlfaXNtYWNsYWJlbChu
-YW1lICsgWEFUVFJfU0VDVVJJVFlfUFJFRklYX0xFTikpDQo+IC0JCWNpLT5pX2NlcGhfZmxhZ3Mg
-fD0gQ0VQSF9JX1NFQ19JTklURUQ7DQo+ICsJCXNldF9iaXQoQ0VQSF9JX1NFQ19JTklURURfQklU
-LCAmY2ktPmlfY2VwaF9mbGFncyk7DQo+ICBvdXQ6DQo+ICAJc3Bpbl91bmxvY2soJmNpLT5pX2Nl
-cGhfbG9jayk7DQo+ICAJcmV0dXJuIGVycjsNCg0KUmV2aWV3ZWQtYnk6IFZpYWNoZXNsYXYgRHVi
-ZXlrbyA8U2xhdmEuRHViZXlrb0BpYm0uY29tPg0KDQpUaGFua3MsDQpTbGF2YS4NCg==
+On Thu, 2026-05-07 at 12:27 +0000, Alex Markuze wrote:
+> Change send_mds_reconnect() to return an error code so callers can detect
+> and report reconnect failures instead of silently ignoring them. Add earl=
+y
+> bailout checks for sessions that are already closed, rejected, or
+> unregistered, which avoids sending reconnect messages for sessions that
+> can no longer be recovered.
+>=20
+> The early -ESTALE and -ENOENT bailouts use a separate fail_return label
+> that skips the pr_err_client diagnostic, since these codes indicate
+> expected concurrent-teardown races rather than genuine reconnect build
+> failures.
+>=20
+> Move the "reconnect start" log after the early-bailout checks so it
+> only appears for sessions that actually proceed with reconnect.
+>=20
+> Save the prior session state before transitioning to RECONNECTING,
+> and restore it in the failure path.  Without this, a transient
+> build or encoding failure (-ENOMEM, -ENOSPC) strands the session
+> in RECONNECTING indefinitely because check_new_map() only retries
+> sessions in RESTARTING state.
+>=20
+> Rewrite mds_peer_reset() to handle the case where the MDS is past its
+> RECONNECT phase (i.e. active). An active MDS rejects CLIENT_RECONNECT
+> messages because it only accepts them during its own RECONNECT window
+> after restart. Previously, the client would send a doomed reconnect
+> that the MDS would reject or ignore. Now, the client tears the session
+> down locally and lets new requests re-open a fresh session, which is
+> the correct recovery for this scenario. The RECONNECTING state is
+> handled on the same teardown path, since the MDS will reject reconnect
+> attempts from an active client regardless of the session's local state.
+>=20
+> Add explicit cases for CLOSED and REJECTED session states in
+> mds_peer_reset() since these are terminal states where a connection
+> drop is expected behavior.
+>=20
+> The session teardown path in mds_peer_reset() follows the established
+> drop-and-reacquire locking pattern from check_new_map(): take
+> mdsc->mutex for session unregistration, release it, then take s->s_mutex
+> separately for cleanup. This avoids introducing a new simultaneous lock
+> nesting pattern.
+>=20
+> Log reconnect failures from check_new_map() and mds_peer_reset() at
+> pr_warn level rather than pr_err, since return codes like -ESTALE
+> (closed/rejected session) and -ENOENT (unregistered session) are
+> expected during concurrent teardown. Log dropped messages for
+> unregistered sessions via doutc() (dynamic debug) rather than
+> pr_info, as post-reset message arrival is routine and does not
+> warrant unconditional logging.
+>=20
+> Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+> ---
+>  fs/ceph/mds_client.c | 178 +++++++++++++++++++++++++++++++++++++++----
+>  1 file changed, 163 insertions(+), 15 deletions(-)
+>=20
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index d9543399b129..249419c17d3c 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -4470,9 +4470,14 @@ static void handle_session(struct ceph_mds_session=
+ *session,
+>  		break;
+> =20
+>  	case CEPH_SESSION_REJECT:
+> -		WARN_ON(session->s_state !=3D CEPH_MDS_SESSION_OPENING);
+> -		pr_info_client(cl, "mds%d rejected session\n",
+> -			       session->s_mds);
+> +		WARN_ON(session->s_state !=3D CEPH_MDS_SESSION_OPENING &&
+> +			session->s_state !=3D CEPH_MDS_SESSION_RECONNECTING);
+> +		if (session->s_state =3D=3D CEPH_MDS_SESSION_RECONNECTING)
+> +			pr_info_client(cl, "mds%d reconnect rejected\n",
+> +				       session->s_mds);
+> +		else
+> +			pr_info_client(cl, "mds%d rejected session\n",
+> +				       session->s_mds);
+>  		session->s_state =3D CEPH_MDS_SESSION_REJECTED;
+>  		cleanup_session_requests(mdsc, session);
+>  		remove_session_caps(session);
+> @@ -4732,6 +4737,14 @@ static int reconnect_caps_cb(struct inode *inode, =
+int mds, void *arg)
+>  	cap->mseq =3D 0;       /* and migrate_seq */
+>  	cap->cap_gen =3D atomic_read(&cap->session->s_cap_gen);
+> =20
+> +	/*
+> +	 * Note: CEPH_I_ERROR_FILELOCK is not set during reconnect.
+> +	 * Instead, locks are submitted for best-effort MDS reclaim
+> +	 * via the flock_len field below.  If reclaim fails (e.g.,
+> +	 * another client grabbed a conflicting lock), future lock
+> +	 * operations will fail and set the error flag at that point.
+> +	 */
+> +
+>  	/* These are lost when the session goes away */
+>  	if (S_ISDIR(inode->i_mode)) {
+>  		if (cap->issued & CEPH_CAP_DIR_CREATE) {
+> @@ -4946,20 +4959,19 @@ static int encode_snap_realms(struct ceph_mds_cli=
+ent *mdsc,
+>   *
+>   * This is a relatively heavyweight operation, but it's rare.
+>   */
+> -static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+> -			       struct ceph_mds_session *session)
+> +static int send_mds_reconnect(struct ceph_mds_client *mdsc,
+> +			      struct ceph_mds_session *session)
+>  {
+>  	struct ceph_client *cl =3D mdsc->fsc->client;
+>  	struct ceph_msg *reply;
+>  	int mds =3D session->s_mds;
+>  	int err =3D -ENOMEM;
+> +	int old_state;
+>  	struct ceph_reconnect_state recon_state =3D {
+>  		.session =3D session,
+>  	};
+>  	LIST_HEAD(dispose);
+> =20
+> -	pr_info_client(cl, "mds%d reconnect start\n", mds);
+> -
+>  	recon_state.pagelist =3D ceph_pagelist_alloc(GFP_NOFS);
+>  	if (!recon_state.pagelist)
+>  		goto fail_nopagelist;
+> @@ -4968,9 +4980,37 @@ static void send_mds_reconnect(struct ceph_mds_cli=
+ent *mdsc,
+>  	if (!reply)
+>  		goto fail_nomsg;
+> =20
+> +	mutex_lock(&session->s_mutex);
+> +
+> +	/* Serialized by s_mutex against concurrent ceph_get_deleg_ino(). */
+>  	xa_destroy(&session->s_delegated_inos);
+> +	if (session->s_state =3D=3D CEPH_MDS_SESSION_CLOSED ||
+> +	    session->s_state =3D=3D CEPH_MDS_SESSION_REJECTED) {
+> +		pr_info_client(cl, "mds%d skipping reconnect, session %s\n",
+> +			       mds,
+> +			       ceph_session_state_name(session->s_state));
+> +		mutex_unlock(&session->s_mutex);
+> +		ceph_msg_put(reply);
+> +		err =3D -ESTALE;
+> +		goto fail_return;
+> +	}
+> =20
+> -	mutex_lock(&session->s_mutex);
+> +	/* s_mutex -> mdsc->mutex matches cleanup_session_requests() order. */
+> +	mutex_lock(&mdsc->mutex);
+> +	if (mds >=3D mdsc->max_sessions || mdsc->sessions[mds] !=3D session) {
+> +		mutex_unlock(&mdsc->mutex);
+> +		pr_info_client(cl,
+> +			       "mds%d skipping reconnect, session unregistered\n",
+> +			       mds);
+> +		mutex_unlock(&session->s_mutex);
+> +		ceph_msg_put(reply);
+> +		err =3D -ENOENT;
+> +		goto fail_return;
+> +	}
+> +	mutex_unlock(&mdsc->mutex);
+> +
+> +	pr_info_client(cl, "mds%d reconnect start\n", mds);
+> +	old_state =3D session->s_state;
+>  	session->s_state =3D CEPH_MDS_SESSION_RECONNECTING;
+>  	session->s_seq =3D 0;
+> =20
+> @@ -5100,7 +5140,7 @@ static void send_mds_reconnect(struct ceph_mds_clie=
+nt *mdsc,
+> =20
+>  	up_read(&mdsc->snap_rwsem);
+>  	ceph_pagelist_release(recon_state.pagelist);
+> -	return;
+> +	return 0;
+> =20
+>  fail_clear_cap_reconnect:
+>  	spin_lock(&session->s_cap_lock);
+> @@ -5109,13 +5149,29 @@ static void send_mds_reconnect(struct ceph_mds_cl=
+ient *mdsc,
+>  fail:
+>  	ceph_msg_put(reply);
+>  	up_read(&mdsc->snap_rwsem);
+> +	/*
+> +	 * Restore prior session state so map-driven reconnect logic
+> +	 * (check_new_map) can retry.  Without this, a transient build
+> +	 * failure strands the session in RECONNECTING indefinitely.
+> +	 */
+> +	session->s_state =3D old_state;
+>  	mutex_unlock(&session->s_mutex);
+>  fail_nomsg:
+>  	ceph_pagelist_release(recon_state.pagelist);
+>  fail_nopagelist:
+>  	pr_err_client(cl, "error %d preparing reconnect for mds%d\n",
+>  		      err, mds);
+> -	return;
+> +	return err;
+> +
+> +fail_return:
+> +	/*
+> +	 * Early-exit path for expected concurrent-teardown races
+> +	 * (-ESTALE for closed/rejected sessions, -ENOENT for
+> +	 * unregistered sessions).  Skip the pr_err_client diagnostic
+> +	 * since these are not genuine reconnect build failures.
+> +	 */
+> +	ceph_pagelist_release(recon_state.pagelist);
+> +	return err;
+>  }
+> =20
+> =20
+> @@ -5196,9 +5252,15 @@ static void check_new_map(struct ceph_mds_client *=
+mdsc,
+>  		 */
+>  		if (s->s_state =3D=3D CEPH_MDS_SESSION_RESTARTING &&
+>  		    newstate >=3D CEPH_MDS_STATE_RECONNECT) {
+> +			int rc;
+> +
+>  			mutex_unlock(&mdsc->mutex);
+>  			clear_bit(i, targets);
+> -			send_mds_reconnect(mdsc, s);
+> +			rc =3D send_mds_reconnect(mdsc, s);
+> +			if (rc)
+> +				pr_warn_client(cl,
+> +					       "mds%d reconnect failed: %d\n",
+> +					       i, rc);
+>  			mutex_lock(&mdsc->mutex);
+>  		}
+> =20
+> @@ -5262,7 +5324,11 @@ static void check_new_map(struct ceph_mds_client *=
+mdsc,
+>  		}
+>  		doutc(cl, "send reconnect to export target mds.%d\n", i);
+>  		mutex_unlock(&mdsc->mutex);
+> -		send_mds_reconnect(mdsc, s);
+> +		err =3D send_mds_reconnect(mdsc, s);
+> +		if (err)
+> +			pr_warn_client(cl,
+> +				       "mds%d export target reconnect failed: %d\n",
+> +				       i, err);
+>  		ceph_put_mds_session(s);
+>  		mutex_lock(&mdsc->mutex);
+>  	}
+> @@ -6350,12 +6416,92 @@ static void mds_peer_reset(struct ceph_connection=
+ *con)
+>  {
+>  	struct ceph_mds_session *s =3D con->private;
+>  	struct ceph_mds_client *mdsc =3D s->s_mdsc;
+> +	int session_state;
+> =20
+>  	pr_warn_client(mdsc->fsc->client, "mds%d closed our session\n",
+>  		       s->s_mds);
+> -	if (READ_ONCE(mdsc->fsc->mount_state) !=3D CEPH_MOUNT_FENCE_IO &&
+> -	    ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) >=3D CEPH_MDS_STATE_R=
+ECONNECT)
+> -		send_mds_reconnect(mdsc, s);
+> +
+> +	if (READ_ONCE(mdsc->fsc->mount_state) =3D=3D CEPH_MOUNT_FENCE_IO ||
+> +	    ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) < CEPH_MDS_STATE_RECO=
+NNECT)
+> +		return;
+> +
+> +	/*
+> +	 * Only reconnect if MDS is in its RECONNECT phase.  An MDS past
+> +	 * RECONNECT (REJOIN, CLIENTREPLAY, ACTIVE) will reject reconnect
+> +	 * attempts, so those states fall through to session teardown below.
+> +	 */
+> +	if (ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) =3D=3D CEPH_MDS_STATE=
+_RECONNECT) {
+> +		int rc =3D send_mds_reconnect(mdsc, s);
+> +
+> +		if (rc)
+> +			pr_warn_client(mdsc->fsc->client,
+> +				       "mds%d reconnect failed: %d\n",
+> +				       s->s_mds, rc);
+> +		return;
+> +	}
+> +
+> +	/*
+> +	 * MDS is active (past RECONNECT).  It will not accept a
+> +	 * CLIENT_RECONNECT from us, so tear the session down locally
+> +	 * and let new requests re-open a fresh session.
+> +	 *
+> +	 * Snapshot session state with READ_ONCE, then revalidate under
+> +	 * mdsc->mutex before acting.  The subsequent mdsc->mutex
+> +	 * section rechecks s_state to catch concurrent transitions, so
+> +	 * the lockless snapshot here is safe.  s->s_mutex is taken
+> +	 * separately for cleanup after unregistration, which avoids
+> +	 * introducing a new s->s_mutex + mdsc->mutex nesting.
+> +	 */
+> +	session_state =3D READ_ONCE(s->s_state);
+> +
+> +	switch (session_state) {
+> +	case CEPH_MDS_SESSION_RESTARTING:
+> +	case CEPH_MDS_SESSION_RECONNECTING:
+> +	case CEPH_MDS_SESSION_CLOSING:
+> +	case CEPH_MDS_SESSION_OPEN:
+> +	case CEPH_MDS_SESSION_HUNG:
+> +	case CEPH_MDS_SESSION_OPENING:
+> +		mutex_lock(&mdsc->mutex);
+> +		if (s->s_mds >=3D mdsc->max_sessions ||
+> +		    mdsc->sessions[s->s_mds] !=3D s ||
+> +		    s->s_state !=3D session_state) {
+> +			pr_info_client(mdsc->fsc->client,
+> +				       "mds%d state changed to %s during peer reset\n",
+> +				       s->s_mds,
+> +				       ceph_session_state_name(s->s_state));
+> +			mutex_unlock(&mdsc->mutex);
+> +			return;
+> +		}
+> +
+> +		ceph_get_mds_session(s);
+> +		s->s_state =3D CEPH_MDS_SESSION_CLOSED;
+> +		__unregister_session(mdsc, s);
+> +		__wake_requests(mdsc, &s->s_waiting);
+> +		mutex_unlock(&mdsc->mutex);
+> +
+> +		mutex_lock(&s->s_mutex);
+> +		cleanup_session_requests(mdsc, s);
+> +		remove_session_caps(s);
+> +		mutex_unlock(&s->s_mutex);
+> +
+> +		wake_up_all(&mdsc->session_close_wq);
+> +
+> +		mutex_lock(&mdsc->mutex);
+> +		kick_requests(mdsc, s->s_mds);
+> +		mutex_unlock(&mdsc->mutex);
+> +
+> +		ceph_put_mds_session(s);
+> +		break;
+> +	case CEPH_MDS_SESSION_CLOSED:
+> +	case CEPH_MDS_SESSION_REJECTED:
+> +		break;
+> +	default:
+> +		pr_warn_client(mdsc->fsc->client,
+> +			       "mds%d peer reset in unexpected state %s\n",
+> +			       s->s_mds,
+> +			       ceph_session_state_name(session_state));
+> +		break;
+> +	}
+>  }
+> =20
+>  static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *m=
+sg)
+> @@ -6367,6 +6513,8 @@ static void mds_dispatch(struct ceph_connection *co=
+n, struct ceph_msg *msg)
+> =20
+>  	mutex_lock(&mdsc->mutex);
+>  	if (__verify_registered_session(mdsc, s) < 0) {
+> +		doutc(cl, "dropping tid %llu from unregistered session %d\n",
+> +		      le64_to_cpu(msg->hdr.tid), s->s_mds);
+>  		mutex_unlock(&mdsc->mutex);
+>  		goto out;
+>  	}
+
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+
+Thanks,
+Slava.
+
