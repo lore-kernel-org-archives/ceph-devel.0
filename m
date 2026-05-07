@@ -1,91 +1,92 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74F1D3B7744
-	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 12:27:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEFF63ED5AE
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 12:27:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778156880; cv=none; b=EUgeuP6paELS7kPrbuXEbH7buKhrcx4cw9uKYimjbyNaprzrilTANz7eqv4Fp7BLa1FFi7pcSjrIJPOOCjtutQGotk7/kzb4uy+gLsgI1TXhC/cjsqQ2u0wcNm1GGFh+FGcdJ2mf5Ok6A/wxN2XDEW0XFznQ+HT0uYqvxb76Jvo=
+	t=1778156882; cv=none; b=Jr7mpTOMRfofQllY5Lp0gBp8fhDBbOiRw5Zv9cSL4YmfF0hT5wSSyI8neaQymda4F0xjJSv/MHvkp1f9dNYGY/yt9nbiPQEkhIm8xNIdufi/2AM77VKac607RmjRylMNHwFL3M2ZzBweEvoEFELZ/AB2WeOVzvvZenW5RK7ZLb8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778156880; c=relaxed/simple;
-	bh=T3SYwNAcawA/E2EIqbZFX+vNF+vMw0ueYcTwcN8x72o=;
+	s=arc-20240116; t=1778156882; c=relaxed/simple;
+	bh=gL/jSOB0IbbkKEWXnBLxDu/IoPYG7MLarbK3QKLi5pE=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=fi/8+Vbm106ZIGc7RPD6nUUZt9bORhaO2vnASiRpvPBzeNGQ0uDgufrs/vLCHlgQUnhPnJsrODrO26drvS7cNVbd6OjcWhvX8nUPeQIZKrACHnmHnFdYQFd4kr8MZUaFOQqzkw8rxmyXI7Maso/DfkvCveFYPI2XX63rBaugAaQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QVJjGl+0; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=A5eUq+Fq; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=ASdwmv3WK8bKU4DBgtKJ+1E9adzlbFKPV9uhJal518WxS9czqRcG3cGYEp/7d0QGVIA098IbKiJq4cZ3KD9OWrrVJ3Gm/ShbfTbjW4UgwQNu3Wx53cGj+KAtaSu9q2iS4nr8ZT1gxhrGGf0dLo4Jfbq1uS7tmXHZMVc/5gj0rAo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GxtNmxjh; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=b+dRIHjv; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QVJjGl+0";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="A5eUq+Fq"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GxtNmxjh";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="b+dRIHjv"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778156877;
+	s=mimecast20190719; t=1778156879;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=kH1rfK/xXKO/jWZH3nIhV338I1U55E10FikanWCJaSM=;
-	b=QVJjGl+0OhgmJemkI+rrj75MtOYv/UOUFuQZ6AR5WMdWtDrSw+/7q+GWQInPMSSaARv2+z
-	VW2tQIAa/5LTswjZVVW+tGXNcnVO1j/pCDcjDoJwskKFXHbxwz3S4YMmYVmD0drEu/lJoY
-	YJYarrbF5rvjUZumSTSYJw2H5HKlsMo=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=3wPDtDVExZ0W3N9cH87fjGtCkBCDVUlOYUQfuZUKnE4=;
+	b=GxtNmxjhW46h+Bo4II9UJk1C8x9mL+nZ3TbAP6RH52fShSWRD8tQv354oxE2/u3MiVlcaE
+	K+7Ny/0BYB5Oj5STk90VA44yFsA5OezfXUioLB1Yjj7K/nbYgSa+mtyOLtHg6TmD+T4HAu
+	NRZABdV3gzsmQcWtCbJZsfiXPUCpmX4=
+Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
+ [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-445-5Jt-WAJKPECetFlRsHn_vQ-1; Thu, 07 May 2026 08:27:56 -0400
-X-MC-Unique: 5Jt-WAJKPECetFlRsHn_vQ-1
-X-Mimecast-MFC-AGG-ID: 5Jt-WAJKPECetFlRsHn_vQ_1778156875
-Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-b934e96af9dso91025166b.3
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 05:27:56 -0700 (PDT)
+ us-mta-479-eKZxr7QWMuu5PndgEvGEFw-1; Thu, 07 May 2026 08:27:57 -0400
+X-MC-Unique: eKZxr7QWMuu5PndgEvGEFw-1
+X-Mimecast-MFC-AGG-ID: eKZxr7QWMuu5PndgEvGEFw_1778156877
+Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-67c2ce99bc4so898317a12.0
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 05:27:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1778156875; x=1778761675; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1778156876; x=1778761676; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kH1rfK/xXKO/jWZH3nIhV338I1U55E10FikanWCJaSM=;
-        b=A5eUq+Fq1S32GCmgm4N9j9bXoXc5DP04ZTnFU6ubY+X7O3GuP0eSsxq30yrN6JjV8v
-         4GBnANP+8Fkz0Xtg2LbB5NZIvmJlzhSx0Lqo4EuFOjgOz+zSCZUAlCXuPv54QRrCYUwI
-         UzF72YBj5txkYlE2BqybPBDysuFod7Pgxu36zpPkhJUBZcoS0TkIBv5DXS3KKQ9PFPsE
-         2eIzzcJRbkz35gA4r3JVWKoB4raw9p/sxqIBgVyXsyuWJKYNj0zz7IHF0r8xsP7mKCGl
-         63IkIKBbhTk0cbAXnramp5qWrpAcuPfgeEmmU0hgHYToBha1fpbC7G0PNsrvNc96I+Uh
-         T1aQ==
+        bh=3wPDtDVExZ0W3N9cH87fjGtCkBCDVUlOYUQfuZUKnE4=;
+        b=b+dRIHjvscUBwpM9ZZcfoiTA27dJXrO7Hv4+bl5hyKnu/iCFPgnVzpHMJ0JVF37F8n
+         Fo/zj/kQ3wJpVuJ8bw27OIDK7todzLfzPpOM03wZgslNnRFnuJP0RvtNOcA8UHb6kES6
+         PvpyLgH++s/iZx5V0XByPFv0RYCXojJbagnygkUFfZykDLZ+SE9hBKEKx8ruINBm582U
+         8PFauPvky1kchH6w9+S0P+t1DVdmbwe41nQWHBTO1SmoMhuVeS6Tdx5LR7KoqMRgG2/E
+         7+/fuJZkobnI+7+vh8gE4nFjmzAeDc1mVwxyTnVdIZh8Idc16RPeckaJpupYTZgR+VVo
+         9l2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778156875; x=1778761675;
+        d=1e100.net; s=20251104; t=1778156876; x=1778761676;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=kH1rfK/xXKO/jWZH3nIhV338I1U55E10FikanWCJaSM=;
-        b=lv6bi0HJ6YaESLLJ1IsqTN8L3wcACRRojz9ko8oSw7IGgum9xYp8oWLa7RL/dLRbAi
-         BnXrEaHMvI0+2t8fSzZ4QE5Z/GT1fVg1SHEKr2HijkQm/BsFkUTnAT/ijISmPld+ypAX
-         JAxM8JDcS8QJ2WrQykkyQNG7aT7Wdthtk4VeeXLmaa6TMX9OUozF5r3rJe8QPpqSlGv8
-         MABJtTqtiU7YY5d2RRFXpX6rc4sDJ0T27KQ3m3dTH4WJzusav/bmkojR0ApWPN+bEO6q
-         lwXt4qB+uQnVAAfq2Xz3gZlKw0XgYtmk4AGO5R1yoUGi0YKNHD5YFmbGTIkP0ji916Pt
-         lDZA==
-X-Gm-Message-State: AOJu0YythGPk9pKk/NrmRSDgW947FY2wbJRax4rDshd7tLMI8rUDQqTg
-	PWwi8jVsEHG8F12XzZYnmBDb++ijttrpTswjMQdUHdNnS6/mOGfLkiyzKyqpDTjyGe8AVnpV8X8
-	sDTAvjk1ZXNTStj9NQmE9aQ4n2YdJW1XgNgXvnj16tC/MVQT3ONXXhgOvKF7YyZ7gCsGzfEiq1A
-	1bxeyW68Wo2wTrr6eiNfCnKlaiWvveyd+cRefX+TS1peF21s20Xg==
-X-Gm-Gg: AeBDiev0RD6Wa3EraeOOoLD+gBOdvz9He0EGvL8OjQZhFWgQQnLJCgef05rMr5oBaf2
-	PQsA/fOaDOhq5CVy0S3P1tsC3zNN2dzvPL6CieFn0/XkJhp2WVvDuFn6YE13vPlb0b/RdOx4Yf7
-	NKyOy2QaE9nn26pb3Kx/d/L7AS4rfG9o5PqY9ursGJQAVzU051id1IoVrQZDL22TmKbJLR3FDrV
-	6WT+MZOvIb0L8FUvg+vd3Bv1wfW0+zp78WfI/Ih/0QghDfFMThhlCwluv+xPK9I/Vw0UumsVy8m
-	K9CA4XuQ/sB6htGVtIgZamzXz6rEUxrH3tflBTkaeRF/DkySPQORIVhsVY5jC4dByYCubApcsc9
-	GP+0e22HZjc+pPWfY6GgL2V8TNFq7wnYCSKnvtk/Zu4z2VIGc0DJtLrGE9F9nM1Unbw==
-X-Received: by 2002:a17:907:874b:b0:bc3:cb1b:ed6a with SMTP id a640c23a62f3a-bc56c92bec6mr473714166b.15.1778156874643;
+        bh=3wPDtDVExZ0W3N9cH87fjGtCkBCDVUlOYUQfuZUKnE4=;
+        b=Aw14TBYEpelf3kYVflJwBNdLrVOBcN8FjFr+eeR2hcNSbtsRezfAr50HE63mXBYtTZ
+         8z8YJh85/BvjwAfnsJBaFJswl9Ry19j11Lsbidll6xh5Ii+A0TLXAszuWLvRppo3B+Cs
+         qnEQzygbIx0ulSVr1GTs3oSn0aLYmI7qLTcsEvYjqZr97MUvtw/7BhSDsrtcnFJvtNjD
+         Eml2ghF9Xbl2LQL9DHCy9s0mfgVm2qMPY78myn4mb+EzABlHHr4l5hoJDwfKjZJW7Ots
+         0WDuJH5tVyPab4gYQxBwY9bHWOdyTUZOw8PxK8RboTR4yw5AXRzpLEea+4vtLd/FHuvB
+         BI9g==
+X-Gm-Message-State: AOJu0YxsJXqPcqgb0TjMD5YViSzsEcn+dVj4WJiwdL/FUtwTT7DjUMtq
+	sfXukFXnUsITz/tI5Xp8XnW1HCwm3oi1tDaVAHfy2gYPUX27Jut+nZLgk7qmLWcuz3hme0XWsxQ
+	OcFSGcEe0LX2bhK+q1B6Z6SlCVu1Ni5S6t21MUKJKKdgG/mFcdB2oDQX69EmvX95ofhAw3NF/lp
+	boGjRUO+E34hAxprpqDDVoOtfCSiXy16RwDWmAz4vZcTAbhRrBiw==
+X-Gm-Gg: AeBDieseOjN8CyeIyeyYzmTO8ivgfFd+CCMB63wO5jP5FxQMzl6OzR65Jtj85iek7mZ
+	pslJg2kfhocNkYArFaH4uMv1ZA0lK7H0v9883oh3+eEuxiSBRf1SboVGxxECdl/cGUOvYXfCGEH
+	qKE91gQyvAnFojrV2IlBgat0x8QHEF8Bd2XyL6I938dPebHCpVXy5vqX0ZasAVHPFbMqR12/4dp
+	cWqTXmNZ12cCL7RPSQN2e7cEOuazVaUZcL+MB9yleHsBeq+oYkK+c2Zqm4V+JtWNGHfQ/dK4k8e
+	Gy48sWAvw6IC3OuglsRjVf84nVA6MRmujRm/5JRGju9CIokmfxxyeRjB3UpbVJnAuF1TVIx5ldx
+	M03K/tUATgoW343K2vtf6UpoO45N/pLbH5imMZawGsahqXdeU9V996Ep1h9WGrZnUYESSL6t8+W
+	9l
+X-Received: by 2002:a17:907:26c4:b0:baf:19a8:b44b with SMTP id a640c23a62f3a-bc56cd38ef7mr474044166b.25.1778156875761;
+        Thu, 07 May 2026 05:27:55 -0700 (PDT)
+X-Received: by 2002:a17:907:26c4:b0:baf:19a8:b44b with SMTP id a640c23a62f3a-bc56cd38ef7mr474040466b.25.1778156874932;
         Thu, 07 May 2026 05:27:54 -0700 (PDT)
-X-Received: by 2002:a17:907:874b:b0:bc3:cb1b:ed6a with SMTP id a640c23a62f3a-bc56c92bec6mr473708866b.15.1778156873732;
-        Thu, 07 May 2026 05:27:53 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bc81cd34ce8sm76552566b.9.2026.05.07.05.27.53
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bc81cd34ce8sm76552566b.9.2026.05.07.05.27.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 May 2026 05:27:53 -0700 (PDT)
+        Thu, 07 May 2026 05:27:54 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v4 07/11] selftests: ceph: add reset consistency checker
-Date: Thu,  7 May 2026 12:27:33 +0000
-Message-Id: <20260507122737.2804094-8-amarkuze@redhat.com>
+Subject: [PATCH v4 08/11] selftests: ceph: add reset stress test
+Date: Thu,  7 May 2026 12:27:34 +0000
+Message-Id: <20260507122737.2804094-9-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260507122737.2804094-1-amarkuze@redhat.com>
 References: <20260507122737.2804094-1-amarkuze@redhat.com>
@@ -97,323 +98,720 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add a Python post-run validator for the CephFS client reset stress
-test.  The script reads data files written by the stress runner and
-checks that every file was either written completely or is missing,
-with no partial or corrupted content.
+Add a single-client stress test for the CephFS manual session reset
+feature.  The test runs concurrent I/O workers alongside periodic
+reset injection, then validates data integrity via
+validate_consistency.py.
 
-This is a prerequisite for the stress test script which invokes it
-after each run.
+Supports four profiles (baseline, moderate, aggressive, soak) with
+configurable duration, reset interval, and worker counts.
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- .../filesystems/ceph/validate_consistency.py  | 297 ++++++++++++++++++
- 1 file changed, 297 insertions(+)
- create mode 100755 tools/testing/selftests/filesystems/ceph/validate_consistency.py
+ .../filesystems/ceph/reset_stress.sh          | 694 ++++++++++++++++++
+ 1 file changed, 694 insertions(+)
+ create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress.sh
 
-diff --git a/tools/testing/selftests/filesystems/ceph/validate_consistency.py b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
+diff --git a/tools/testing/selftests/filesystems/ceph/reset_stress.sh b/tools/testing/selftests/filesystems/ceph/reset_stress.sh
 new file mode 100755
-index 000000000000..c230a59bdb3a
+index 000000000000..c503c75a5f7a
 --- /dev/null
-+++ b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
-@@ -0,0 +1,297 @@
-+#!/usr/bin/env python3
++++ b/tools/testing/selftests/filesystems/ceph/reset_stress.sh
+@@ -0,0 +1,694 @@
++#!/bin/bash
 +# SPDX-License-Identifier: GPL-2.0
++#
++# CephFS reset stress test:
++# - Runs concurrent I/O and rename workloads
++# - Triggers random client resets through debugfs
++# - Validates consistency and recovery behavior
 +
-+import argparse
-+import bisect
++set -euo pipefail
++
++KSFT_SKIP=4
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++
++# kselftest auto-detect: when invoked with no arguments (e.g. by
++# "make run_tests"), find a CephFS mount automatically or skip.
++if [[ $# -eq 0 ]]; then
++	MOUNT_POINT="$(findmnt -t ceph -n -o TARGET 2>/dev/null | head -1)"
++	if [[ -z "$MOUNT_POINT" ]]; then
++		echo "SKIP: No CephFS mount found and --mount-point not specified"
++		exit "$KSFT_SKIP"
++	fi
++	exec "$0" --mount-point "$MOUNT_POINT"
++fi
++
++PROFILE="moderate"
++DURATION_SEC=""
++COOLDOWN_SEC=20
++FILE_COUNT=64
++IO_WORKERS=""
++RENAME_WORKERS=""
++MOUNT_POINT=""
++OUT_DIR=""
++CLIENT_ID=""
++DEBUGFS_ROOT="/sys/kernel/debug/ceph"
++SLO_SECONDS=30
++EXPECT_RESET=1
++DMESG_CMD=""
++SUDO=""
++
++RESET_MIN_SEC=5
++RESET_MAX_SEC=15
++
++RUN_ID="$(date +%Y%m%d-%H%M%S)"
++WORKLOAD_FLAG=""
++RESET_FLAG=""
++DATA_DIR=""
++
++IO_LOG=""
++RENAME_LOG=""
++RESET_LOG=""
++STATUS_LOG=""
++STATUS_BEFORE=""
++STATUS_FINAL=""
++DMESG_LOG=""
++SUMMARY_LOG=""
++REPORT_JSON=""
++
++RESET_PID=0
++STATUS_PID=0
++declare -a IO_WORKER_PIDS=()
++declare -a RENAME_WORKER_PIDS=()
++
++usage()
++{
++	cat <<EOF
++Usage: $0 --mount-point <cephfs_mount> [options]
++
++Required:
++  --mount-point PATH       CephFS mount point to test under
++
++Options:
++  --profile NAME           baseline|moderate|aggressive|soak (default: moderate)
++  --duration-sec N         Override profile runtime in seconds
++  --cooldown-sec N         Workload drain time after injector stop (default: 20)
++  --file-count N           Number of logical files (default: 64)
++  --io-workers N           Number of concurrent I/O workers (profile default)
++  --rename-workers N       Number of concurrent rename workers (profile default)
++  --out-dir PATH           Artifact directory (default: /tmp/ceph_reset_stress_<ts>)
++  --client-id ID           Ceph debugfs client id; auto-detect if one client exists
++  --debugfs-root PATH      Debugfs Ceph root (default: /sys/kernel/debug/ceph)
++  --slo-seconds N          Max allowed post-reset stall window (default: 30)
++  --no-reset               Disable reset injector (baseline mode helper)
++  --help                   Show this message
++
++Examples:
++  $0 --mount-point /mnt/cephfs --profile moderate
++  $0 --mount-point /mnt/cephfs --profile aggressive --duration-sec 300
++  $0 --mount-point /mnt/cephfs --profile baseline --no-reset
++EOF
++}
++
++now_ms()
++{
++	date +%s%3N
++}
++
++set_profile_defaults()
++{
++	case "$PROFILE" in
++	baseline)
++		RESET_MIN_SEC=0
++		RESET_MAX_SEC=0
++		EXPECT_RESET=0
++		: "${DURATION_SEC:=600}"
++		: "${IO_WORKERS:=1}"
++		: "${RENAME_WORKERS:=1}"
++		;;
++	moderate)
++		RESET_MIN_SEC=5
++		RESET_MAX_SEC=15
++		: "${DURATION_SEC:=900}"
++		: "${IO_WORKERS:=2}"
++		: "${RENAME_WORKERS:=1}"
++		;;
++	aggressive)
++		RESET_MIN_SEC=1
++		RESET_MAX_SEC=5
++		: "${DURATION_SEC:=900}"
++		: "${IO_WORKERS:=4}"
++		: "${RENAME_WORKERS:=2}"
++		;;
++	soak)
++		RESET_MIN_SEC=5
++		RESET_MAX_SEC=15
++		: "${DURATION_SEC:=3600}"
++		: "${IO_WORKERS:=2}"
++		: "${RENAME_WORKERS:=1}"
++		;;
++	*)
++		echo "Unknown profile: $PROFILE" >&2
++		exit 2
++		;;
++	esac
++}
++
++log_summary()
++{
++	local msg="$1"
++	printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$msg" | tee -a "$SUMMARY_LOG"
++}
++
++discover_client_id()
++{
++	local candidates=()
++	local entry
++
++	if [[ -n "$CLIENT_ID" ]]; then
++		if ! $SUDO test -d "$DEBUGFS_ROOT/$CLIENT_ID/reset"; then
++			echo "SKIP: reset debugfs not found for client-id=$CLIENT_ID" >&2
++			exit "$KSFT_SKIP"
++		fi
++		return 0
++	fi
++
++	if ! $SUDO test -d "$DEBUGFS_ROOT"; then
++		echo "SKIP: Debugfs root not found: $DEBUGFS_ROOT" >&2
++		exit "$KSFT_SKIP"
++	fi
++
++	while IFS= read -r entry; do
++		$SUDO test -d "$DEBUGFS_ROOT/$entry/reset" || continue
++		$SUDO test -w "$DEBUGFS_ROOT/$entry/reset/trigger" || continue
++		candidates+=("$entry")
++	done < <($SUDO ls -1 "$DEBUGFS_ROOT" 2>/dev/null || true)
++
++	if [[ ${#candidates[@]} -eq 1 ]]; then
++		CLIENT_ID="${candidates[0]}"
++		return 0
++	fi
++
++	if [[ ${#candidates[@]} -eq 0 ]]; then
++		echo "SKIP: No writable Ceph reset interface found under $DEBUGFS_ROOT" >&2
++		exit "$KSFT_SKIP"
++	fi
++
++	echo "SKIP: Multiple Ceph clients found (${candidates[*]}). Use --client-id." >&2
++	exit "$KSFT_SKIP"
++}
++
++init_dataset()
++{
++	local i
++	mkdir -p "$DATA_DIR/A" "$DATA_DIR/B"
++
++	for ((i = 0; i < FILE_COUNT; i++)); do
++		printf 'seed logical_id=%05d ts_ms=%s\n' "$i" "$(now_ms)" > "$DATA_DIR/A/file_$(printf '%05d' "$i")"
++	done
++}
++
++io_worker()
++{
++	set +e
++	local worker_id="$1"
++	local seq=0
++	local id
++	local relpath
++	local abspath
++	local payload
++	local hash
++	local ts
++
++	while [[ -f "$WORKLOAD_FLAG" ]]; do
++		id="$(printf '%05d' $((RANDOM % FILE_COUNT)))"
++		if [[ -f "$DATA_DIR/A/file_$id" ]]; then
++			relpath="A/file_$id"
++		elif [[ -f "$DATA_DIR/B/file_$id" ]]; then
++			relpath="B/file_$id"
++		else
++			sleep 0.02
++			continue
++		fi
++
++		abspath="$DATA_DIR/$relpath"
++		alt_relpath=""
++		if [[ "$relpath" == A/* ]]; then
++			alt_relpath="B/file_$id"
++		else
++			alt_relpath="A/file_$id"
++		fi
++		alt_abspath="$DATA_DIR/$alt_relpath"
++		payload="worker=${worker_id} io_seq=${seq} id=${id} ts_ms=$(now_ms)"
++		result="$(
++			python3 - "$abspath" "$alt_abspath" "$payload" <<'PY'
 +import hashlib
-+import json
 +import os
-+from pathlib import Path
++import sys
 +
++path = sys.argv[1]
++alt_path = sys.argv[2]
++payload = sys.argv[3]
 +
-+def sha256_file(path: Path) -> str:
++try:
++    fd = os.open(path, os.O_RDWR | os.O_APPEND)
++    actual = path
++except FileNotFoundError:
++    try:
++        fd = os.open(alt_path, os.O_RDWR | os.O_APPEND)
++        actual = alt_path
++    except FileNotFoundError:
++        sys.exit(1)
++
++try:
++    os.write(fd, (payload + "\n").encode())
++    os.fsync(fd)
++    os.lseek(fd, 0, os.SEEK_SET)
 +    digest = hashlib.sha256()
-+    with path.open("rb") as handle:
-+        while True:
-+            chunk = handle.read(1 << 20)
-+            if not chunk:
-+                break
-+            digest.update(chunk)
-+    return digest.hexdigest()
++    while True:
++        chunk = os.read(fd, 1 << 20)
++        if not chunk:
++            break
++        digest.update(chunk)
++    print(actual + " " + digest.hexdigest())
++finally:
++    os.close(fd)
++PY
++		)" || {
++			sleep 0.02
++			continue
++		}
 +
++		actual_abspath="${result%% *}"
++		hash="${result#* }"
++		if [[ "$actual_abspath" == "$alt_abspath" ]]; then
++			relpath="$alt_relpath"
++		fi
 +
-+def parse_io_log(path: Path):
-+    records = []
-+    if not path.exists():
-+        return records
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line_no, line in enumerate(handle, 1):
-+            line = line.strip()
-+            if not line:
-+                continue
-+            parts = line.split(",")
-+            if len(parts) != 5:
-+                raise ValueError(f"io log line {line_no}: expected 5 columns, got {len(parts)}")
-+            ts_ms, seq, logical_id, relpath, digest = parts
-+            records.append(
-+                {
-+                    "ts_ms": int(ts_ms),
-+                    "seq": int(seq),
-+                    "logical_id": int(logical_id),
-+                    "relpath": relpath,
-+                    "digest": digest,
-+                }
-+            )
-+    return records
++		ts="$(now_ms)"
++		printf '%s,%s,%s,%s,%s\n' "$ts" "$seq" "$id" "$relpath" "$hash" >> "$IO_LOG"
++		seq=$((seq + 1))
++		sleep 0.02
++	done
++}
 +
++rename_worker()
++{
++	set +e
++	local worker_id="$1"
++	local seq=0
++	local id
++	local src_rel
++	local dst_rel
++	local rc
++	local ts
 +
-+def parse_rename_log(path: Path):
-+    records = []
-+    if not path.exists():
-+        return records
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line_no, line in enumerate(handle, 1):
-+            line = line.strip()
-+            if not line:
-+                continue
-+            parts = line.split(",")
-+            if len(parts) == 6:
-+                ts_ms, seq, logical_id, src_rel, dst_rel, rc = parts
-+            elif len(parts) == 7:
-+                ts_ms, worker_id, seq, logical_id, src_rel, dst_rel, rc = parts
-+                _ = worker_id  # worker id is informational only
-+            else:
-+                raise ValueError(
-+                    f"rename log line {line_no}: expected 6 or 7 columns, got {len(parts)}"
-+                )
-+            records.append(
-+                {
-+                    "ts_ms": int(ts_ms),
-+                    "seq": int(seq),
-+                    "logical_id": int(logical_id),
-+                    "src_rel": src_rel,
-+                    "dst_rel": dst_rel,
-+                    "rc": int(rc),
-+                }
-+            )
-+    return records
++	while [[ -f "$WORKLOAD_FLAG" ]]; do
++		id="$(printf '%05d' $((RANDOM % FILE_COUNT)))"
 +
++		if [[ -f "$DATA_DIR/A/file_$id" ]]; then
++			src_rel="A/file_$id"
++			dst_rel="B/file_$id"
++		elif [[ -f "$DATA_DIR/B/file_$id" ]]; then
++			src_rel="B/file_$id"
++			dst_rel="A/file_$id"
++		else
++			sleep 0.02
++			continue
++		fi
 +
-+def parse_reset_log(path: Path):
-+    records = []
-+    if not path.exists():
-+        return records
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line_no, line in enumerate(handle, 1):
-+            line = line.strip()
-+            if not line:
-+                continue
-+            parts = line.split(",")
-+            if len(parts) != 4:
-+                raise ValueError(f"reset log line {line_no}: expected 4 columns, got {len(parts)}")
-+            ts_ms, seq, reason, rc = parts
-+            records.append(
-+                {
-+                    "ts_ms": int(ts_ms),
-+                    "seq": int(seq),
-+                    "reason": reason,
-+                    "rc": int(rc),
-+                }
-+            )
-+    return records
++		ts="$(now_ms)"
++		if mv -T "$DATA_DIR/$src_rel" "$DATA_DIR/$dst_rel" 2>/dev/null; then
++			rc=0
++		else
++			rc=$?
++		fi
++		printf '%s,%s,%s,%s,%s,%s,%s\n' "$ts" "$worker_id" "$seq" "$id" "$src_rel" "$dst_rel" "$rc" >> "$RENAME_LOG"
++		seq=$((seq + 1))
++		sleep 0.02
++	done
++}
 +
++random_sleep_seconds()
++{
++	local min_sec="$1"
++	local max_sec="$2"
++	local wait_sec
++	local span
 +
-+def parse_status_file(path: Path):
-+    status = {}
-+    if not path.exists():
-+        return status
-+    with path.open("r", encoding="utf-8") as handle:
-+        for line in handle:
-+            line = line.strip()
-+            if not line or ":" not in line:
-+                continue
-+            key, value = line.split(":", 1)
-+            status[key.strip()] = value.strip()
-+    return status
++	span=$((max_sec - min_sec + 1))
++	wait_sec=$((min_sec + RANDOM % span))
++	sleep "$wait_sec"
++}
 +
++reset_injector()
++{
++	set +e
++	local trigger_path="$1"
++	local seq=0
++	local ts
++	local reason
++	local rc
 +
-+def to_int(value: str, default: int = 0):
-+    try:
-+        return int(value)
-+    except Exception:
-+        return default
++	while [[ -f "$RESET_FLAG" ]]; do
++		random_sleep_seconds "$RESET_MIN_SEC" "$RESET_MAX_SEC"
++		[[ -f "$RESET_FLAG" ]] || break
 +
++		ts="$(now_ms)"
++		reason="stress_${seq}_${ts}"
++		if echo "$reason" | $SUDO tee "$trigger_path" > /dev/null 2>&1; then
++			rc=0
++		else
++			rc=$?
++		fi
++		printf '%s,%s,%s,%s\n' "$ts" "$seq" "$reason" "$rc" >> "$RESET_LOG"
++		seq=$((seq + 1))
++	done
++}
 +
-+def validate_namespace(data_dir: Path, file_count: int, issues):
-+    actual_locations = {}
-+    actual_paths = {}
-+    for logical_id in range(file_count):
-+        name = f"file_{logical_id:05d}"
-+        found = []
-+        for subdir in ("A", "B"):
-+            candidate = data_dir / subdir / name
-+            if candidate.exists():
-+                found.append((subdir, candidate))
-+        if len(found) != 1:
-+            issues.append(
-+                f"namespace invariant failed for logical_id={logical_id:05d}: expected exactly one file in A/B, found {len(found)}"
-+            )
-+            continue
-+        actual_locations[logical_id] = found[0][0]
-+        actual_paths[logical_id] = found[0][1]
-+    return actual_locations, actual_paths
++status_sampler()
++{
++	set +e
++	local status_path="$1"
++	local ts
++	local kv_line
 +
++	while [[ -f "$WORKLOAD_FLAG" || -f "$RESET_FLAG" ]]; do
++		ts="$(now_ms)"
++		if $SUDO test -r "$status_path"; then
++			kv_line="$($SUDO awk -F': ' 'NF>=2 {gsub(/ /, "", $1); gsub(/ /, "", $2); printf "%s=%s;", $1, $2}' "$status_path")"
++			printf '%s,%s\n' "$ts" "$kv_line" >> "$STATUS_LOG"
++		fi
++		sleep 1
++	done
++}
 +
-+def validate_rename_invariant(rename_records, actual_locations, issues):
-+    expected_locations = {}
-+    for rec in rename_records:
-+        if rec["rc"] != 0:
-+            continue
-+        dst = rec["dst_rel"]
-+        if "/" not in dst:
-+            continue
-+        expected_locations[rec["logical_id"]] = dst.split("/", 1)[0]
++stop_pid_with_timeout()
++{
++	local pid="$1"
++	local name="$2"
++	local timeout="$3"
++	local waited=0
 +
-+    for logical_id, expected in expected_locations.items():
-+        actual = actual_locations.get(logical_id)
-+        if actual is None:
-+            continue
-+        if actual != expected:
-+            issues.append(
-+                f"rename invariant failed for logical_id={logical_id:05d}: expected location={expected}, actual={actual}"
-+            )
++	if [[ "$pid" -le 0 ]]; then
++		return 0
++	fi
 +
++	while kill -0 "$pid" 2>/dev/null; do
++		if (( waited >= timeout )); then
++			log_summary "Timeout waiting for $name (pid=$pid), sending SIGTERM/SIGKILL"
++			kill -TERM "$pid" 2>/dev/null || true
++			sleep 1
++			kill -KILL "$pid" 2>/dev/null || true
++			wait "$pid" 2>/dev/null || true
++			return 1
++		fi
++		sleep 1
++		waited=$((waited + 1))
++	done
 +
-+def validate_data_invariant(io_records, actual_paths, issues):
-+    expected_hash = {}
-+    for rec in io_records:
-+        digest = rec["digest"]
-+        if not digest:
-+            continue
-+        expected_hash[rec["logical_id"]] = digest
++	wait "$pid" 2>/dev/null || true
++	return 0
++}
 +
-+    for logical_id, digest in expected_hash.items():
-+        path = actual_paths.get(logical_id)
-+        if path is None:
-+            continue
-+        actual_digest = sha256_file(path)
-+        if digest != actual_digest:
-+            issues.append(
-+                f"data invariant failed for logical_id={logical_id:05d}: expected digest={digest}, actual digest={actual_digest}"
-+            )
++detect_privileges()
++{
++	if [[ -r "$DEBUGFS_ROOT" ]]; then
++		SUDO=""
++	elif sudo -n true 2>/dev/null; then
++		SUDO="sudo"
++	else
++		echo "WARNING: $DEBUGFS_ROOT is not readable and passwordless sudo is not available" >&2
++		echo "WARNING: reset injection, debugfs status checks, and dmesg capture will not work" >&2
++	fi
 +
++	if $SUDO dmesg > /dev/null 2>&1; then
++		DMESG_CMD="$SUDO dmesg"
++	else
++		DMESG_CMD=""
++		echo "WARNING: dmesg is not accessible; kernel errors (hung tasks) will not be detected" >&2
++	fi
++}
 +
-+def validate_reset_and_slo(args, reset_records, io_records, rename_records, status, issues):
-+    if not args.expect_reset:
-+        return
++check_dmesg()
++{
++	local start_epoch="$1"
 +
-+    successful_reset_times = [rec["ts_ms"] for rec in reset_records if rec["rc"] == 0]
-+    if not successful_reset_times:
-+        issues.append("expected reset activity but no successful reset trigger was observed")
++	if [[ -z "$DMESG_CMD" ]]; then
++		return 0
++	fi
 +
-+    phase = status.get("phase")
-+    blocked_requests = to_int(status.get("blocked_requests", "0"), default=-1)
-+    last_errno = to_int(status.get("last_errno", "0"), default=1)
-+    failure_count = to_int(status.get("failure_count", "0"), default=-1)
++	if ! $DMESG_CMD --since "@$start_epoch" > "$DMESG_LOG" 2>/dev/null; then
++		if ! $DMESG_CMD > "$DMESG_LOG" 2>/dev/null; then
++			log_summary "WARNING: dmesg capture failed unexpectedly"
++			return 0
++		fi
++		log_summary "dmesg --since unsupported; captured full dmesg"
++	fi
 +
-+    if phase is None:
-+        issues.append("missing final reset status file or phase field")
-+    elif phase.lower() != "idle":
-+        issues.append(f"recovery invariant failed: phase={phase}, expected idle")
++	if grep -qi "hung task" "$DMESG_LOG" 2>/dev/null; then
++		log_summary "ERROR: kernel log contains 'hung task' during test window"
++		return 1
++	fi
 +
-+    if blocked_requests != 0:
-+        issues.append(f"recovery invariant failed: blocked_requests={blocked_requests}, expected 0")
-+    if last_errno != 0:
-+        issues.append(f"recovery invariant failed: last_errno={last_errno}, expected 0")
-+    if failure_count > 0:
-+        issues.append(
-+            f"recovery invariant failed: failure_count={failure_count}, "
-+            "one or more resets failed during the run"
-+        )
++	return 0
++}
 +
-+    op_times = [rec["ts_ms"] for rec in io_records]
-+    op_times.extend(rec["ts_ms"] for rec in rename_records if rec["rc"] == 0)
-+    op_times.sort()
++cleanup()
++{
++	rm -f "$WORKLOAD_FLAG" "$RESET_FLAG"
++	local pid
++	for pid in "${IO_WORKER_PIDS[@]}" "${RENAME_WORKER_PIDS[@]}" "$RESET_PID" "$STATUS_PID"; do
++		[[ "$pid" -gt 0 ]] 2>/dev/null && kill "$pid" 2>/dev/null || true
++	done
++	wait 2>/dev/null || true
++}
 +
-+    if successful_reset_times and not op_times:
-+        issues.append("recovery SLO failed: no workload completion events were recorded")
-+        return
++parse_args()
++{
++	while [[ $# -gt 0 ]]; do
++		case "$1" in
++		--mount-point)
++			MOUNT_POINT="$2"
++			shift 2
++			;;
++		--profile)
++			PROFILE="$2"
++			shift 2
++			;;
++		--duration-sec)
++			DURATION_SEC="$2"
++			shift 2
++			;;
++		--cooldown-sec)
++			COOLDOWN_SEC="$2"
++			shift 2
++			;;
++		--file-count)
++			FILE_COUNT="$2"
++			shift 2
++			;;
++		--io-workers)
++			IO_WORKERS="$2"
++			shift 2
++			;;
++		--rename-workers)
++			RENAME_WORKERS="$2"
++			shift 2
++			;;
++		--out-dir)
++			OUT_DIR="$2"
++			shift 2
++			;;
++		--client-id)
++			CLIENT_ID="$2"
++			shift 2
++			;;
++		--debugfs-root)
++			DEBUGFS_ROOT="$2"
++			shift 2
++			;;
++		--slo-seconds)
++			SLO_SECONDS="$2"
++			shift 2
++			;;
++		--no-reset)
++			EXPECT_RESET=0
++			shift
++			;;
++		--help|-h)
++			usage
++			exit 0
++			;;
++		*)
++			echo "Unknown option: $1" >&2
++			usage
++			exit 2
++			;;
++		esac
++	done
++}
 +
-+    slo_ms = args.slo_seconds * 1000
-+    for ts in successful_reset_times:
-+        idx = bisect.bisect_left(op_times, ts)
-+        if idx >= len(op_times):
-+            issues.append(f"recovery SLO failed: no operation completion observed after reset at ts_ms={ts}")
-+            continue
-+        delta = op_times[idx] - ts
-+        if delta > slo_ms:
-+            issues.append(
-+                f"recovery SLO failed: first post-reset completion at {delta}ms exceeds threshold {slo_ms}ms (reset ts_ms={ts})"
-+            )
++main()
++{
++	local start_epoch
++	local trigger_path=""
++	local status_path=""
++	local final_rc=0
++	local reset_enabled=0
++	local i
 +
++	parse_args "$@"
 +
-+def main():
-+    parser = argparse.ArgumentParser(description="Validate Ceph reset stress artifacts")
-+    parser.add_argument("--data-dir", required=True)
-+    parser.add_argument("--file-count", required=True, type=int)
-+    parser.add_argument("--io-log", required=True)
-+    parser.add_argument("--rename-log", required=True)
-+    parser.add_argument("--reset-log", required=True)
-+    parser.add_argument("--status-final", required=False, default="")
-+    parser.add_argument("--slo-seconds", required=False, type=int, default=30)
-+    parser.add_argument("--expect-reset", action="store_true")
-+    parser.add_argument("--report-json", required=False, default="")
-+    args = parser.parse_args()
++	if [[ -z "$MOUNT_POINT" ]]; then
++		echo "--mount-point is required" >&2
++		usage
++		exit 2
++	fi
 +
-+    data_dir = Path(args.data_dir)
-+    io_log = Path(args.io_log)
-+    rename_log = Path(args.rename_log)
-+    reset_log = Path(args.reset_log)
-+    status_final = Path(args.status_final) if args.status_final else Path("__missing_status__")
++	if [[ ! -d "$MOUNT_POINT" ]]; then
++		echo "SKIP: Mount point does not exist: $MOUNT_POINT" >&2
++		exit "$KSFT_SKIP"
++	fi
 +
-+    issues = []
++	if ! touch "$MOUNT_POINT/.ceph_reset_test_probe" 2>/dev/null; then
++		echo "SKIP: Mount point is not writable: $MOUNT_POINT" >&2
++		exit "$KSFT_SKIP"
++	fi
++	rm -f "$MOUNT_POINT/.ceph_reset_test_probe"
 +
-+    if not data_dir.exists():
-+        issues.append(f"data directory is missing: {data_dir}")
++	if ! command -v python3 > /dev/null 2>&1; then
++		echo "SKIP: python3 is required but not found in PATH" >&2
++		exit "$KSFT_SKIP"
++	fi
 +
-+    try:
-+        io_records = parse_io_log(io_log)
-+        rename_records = parse_rename_log(rename_log)
-+        reset_records = parse_reset_log(reset_log)
-+    except Exception as exc:
-+        issues.append(f"log parsing failed: {exc}")
-+        io_records = []
-+        rename_records = []
-+        reset_records = []
++	if ! stat -f -c '%T' "$MOUNT_POINT" 2>/dev/null | grep -qi ceph; then
++		echo "WARNING: $MOUNT_POINT does not appear to be a CephFS mount" >&2
++	fi
 +
-+    status = parse_status_file(status_final)
++	detect_privileges
 +
-+    actual_locations, actual_paths = validate_namespace(data_dir, args.file_count, issues)
-+    validate_rename_invariant(rename_records, actual_locations, issues)
-+    validate_data_invariant(io_records, actual_paths, issues)
-+    validate_reset_and_slo(args, reset_records, io_records, rename_records, status, issues)
++	set_profile_defaults
++	if [[ "$EXPECT_RESET" -eq 0 ]]; then
++		PROFILE="baseline"
++		RESET_MIN_SEC=0
++		RESET_MAX_SEC=0
++	fi
 +
-+    report = {
-+        "file_count": args.file_count,
-+        "io_records": len(io_records),
-+        "rename_records": len(rename_records),
-+        "reset_records": len(reset_records),
-+        "expect_reset": args.expect_reset,
-+        "issues": issues,
-+    }
++	if ! [[ "$IO_WORKERS" =~ ^[0-9]+$ && "$RENAME_WORKERS" =~ ^[0-9]+$ ]]; then
++		echo "io-workers and rename-workers must be integers" >&2
++		exit 2
++	fi
 +
-+    if args.report_json:
-+        report_path = Path(args.report_json)
-+        report_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
++	if [[ "$IO_WORKERS" -le 0 || "$RENAME_WORKERS" -le 0 ]]; then
++		echo "io-workers and rename-workers must be > 0" >&2
++		exit 2
++	fi
 +
-+    if issues:
-+        print("FAIL: consistency validation found issues")
-+        for issue in issues:
-+            print(f"  - {issue}")
-+        raise SystemExit(1)
++	if [[ -z "$OUT_DIR" ]]; then
++		OUT_DIR="/tmp/ceph_reset_stress_${RUN_ID}"
++	fi
++	mkdir -p "$OUT_DIR"
 +
-+    print("PASS: consistency validation succeeded")
++	WORKLOAD_FLAG="$OUT_DIR/workload.running"
++	RESET_FLAG="$OUT_DIR/reset.running"
 +
++	DATA_DIR="$MOUNT_POINT/ceph_reset_stress_${RUN_ID}"
++	mkdir -p "$DATA_DIR"
 +
-+if __name__ == "__main__":
-+    main()
++	IO_LOG="$OUT_DIR/io.log"
++	RENAME_LOG="$OUT_DIR/rename.log"
++	RESET_LOG="$OUT_DIR/reset.log"
++	STATUS_LOG="$OUT_DIR/status.log"
++	STATUS_BEFORE="$OUT_DIR/reset_status.before"
++	STATUS_FINAL="$OUT_DIR/reset_status.final"
++	DMESG_LOG="$OUT_DIR/dmesg.log"
++	SUMMARY_LOG="$OUT_DIR/summary.log"
++	REPORT_JSON="$OUT_DIR/validator_report.json"
++
++	: > "$IO_LOG"
++	: > "$RENAME_LOG"
++	: > "$RESET_LOG"
++	: > "$STATUS_LOG"
++	: > "$SUMMARY_LOG"
++
++	start_epoch="$(date +%s)"
++
++	log_summary "Starting Ceph reset stress test"
++	log_summary "Profile=$PROFILE duration=${DURATION_SEC}s cooldown=${COOLDOWN_SEC}s file_count=${FILE_COUNT} io_workers=${IO_WORKERS} rename_workers=${RENAME_WORKERS}"
++	[[ -n "$SUDO" ]] && log_summary "Using sudo for privileged operations"
++	[[ -z "$DMESG_CMD" ]] && log_summary "WARNING: dmesg not available; hung task detection disabled"
++	log_summary "Artifacts=$OUT_DIR"
++	log_summary "Data dir=$DATA_DIR"
++
++	init_dataset
++
++	if [[ "$EXPECT_RESET" -eq 1 ]]; then
++		discover_client_id
++		trigger_path="$DEBUGFS_ROOT/$CLIENT_ID/reset/trigger"
++		status_path="$DEBUGFS_ROOT/$CLIENT_ID/reset/status"
++		if ! $SUDO test -w "$trigger_path"; then
++			echo "SKIP: Reset trigger is not writable: $trigger_path" >&2
++			exit "$KSFT_SKIP"
++		fi
++		if ! $SUDO test -r "$status_path"; then
++			echo "SKIP: Reset status is not readable: $status_path" >&2
++			exit "$KSFT_SKIP"
++		fi
++		$SUDO cat "$status_path" > "$STATUS_BEFORE" || true
++		reset_enabled=1
++		log_summary "Using ceph client id: $CLIENT_ID"
++	fi
++
++	trap cleanup EXIT INT TERM
++
++	touch "$WORKLOAD_FLAG"
++	for ((i = 0; i < IO_WORKERS; i++)); do
++		io_worker "$i" &
++		IO_WORKER_PIDS+=("$!")
++	done
++
++	for ((i = 0; i < RENAME_WORKERS; i++)); do
++		rename_worker "$i" &
++		RENAME_WORKER_PIDS+=("$!")
++	done
++
++	if [[ "$reset_enabled" -eq 1 ]]; then
++		touch "$RESET_FLAG"
++		reset_injector "$trigger_path" &
++		RESET_PID=$!
++
++		status_sampler "$status_path" &
++		STATUS_PID=$!
++	fi
++
++	sleep "$DURATION_SEC"
++
++	if [[ "$reset_enabled" -eq 1 ]]; then
++		rm -f "$RESET_FLAG"
++		stop_pid_with_timeout "$RESET_PID" "reset_injector" 20 || final_rc=1
++		log_summary "Injector stopped; entering cooldown=${COOLDOWN_SEC}s"
++	fi
++
++	sleep "$COOLDOWN_SEC"
++
++	rm -f "$WORKLOAD_FLAG"
++	for i in "${!IO_WORKER_PIDS[@]}"; do
++		stop_pid_with_timeout "${IO_WORKER_PIDS[$i]}" "io_worker[$i]" 20 || final_rc=1
++	done
++	for i in "${!RENAME_WORKER_PIDS[@]}"; do
++		stop_pid_with_timeout "${RENAME_WORKER_PIDS[$i]}" "rename_worker[$i]" 20 || final_rc=1
++	done
++
++	if [[ "$reset_enabled" -eq 1 ]]; then
++		stop_pid_with_timeout "$STATUS_PID" "status_sampler" 10 || final_rc=1
++		$SUDO cat "$status_path" > "$STATUS_FINAL" || true
++	fi
++
++	if ! check_dmesg "$start_epoch"; then
++		final_rc=1
++	fi
++
++	if ! python3 "$SCRIPT_DIR/validate_consistency.py" \
++		--data-dir "$DATA_DIR" \
++		--file-count "$FILE_COUNT" \
++		--io-log "$IO_LOG" \
++		--rename-log "$RENAME_LOG" \
++		--reset-log "$RESET_LOG" \
++		--status-final "$STATUS_FINAL" \
++		--slo-seconds "$SLO_SECONDS" \
++		--report-json "$REPORT_JSON" \
++		$( [[ "$reset_enabled" -eq 1 ]] && echo "--expect-reset" ); then
++		final_rc=1
++	fi
++
++	if [[ "$final_rc" -eq 0 ]]; then
++		log_summary "PASS: stress run completed successfully"
++	else
++		log_summary "FAIL: stress run detected one or more failures"
++	fi
++
++	log_summary "Artifacts available in: $OUT_DIR"
++	exit "$final_rc"
++}
++
++main "$@"
 -- 
 2.34.1
 
