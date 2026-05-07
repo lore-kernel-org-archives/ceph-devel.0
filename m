@@ -1,92 +1,92 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50F8D480DE4
-	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 19:30:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7A8F35CB7F
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 19:31:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778182210; cv=none; b=AW4IiEApU1nUFZlyd92QV5hGY+Q7MiOQ9thgkqOzpGUpZPKEDEwok8253V1xcIt9jXVMftD9LaXnrzctUBbbKA1tKpOVb6ELuWxAMXvQklRIahulrJy+H66xO+b0BKCD83xgfOiXeTLiJTpbZPB/xQGDGZrzq338ClH/3R1Fphc=
+	t=1778182308; cv=none; b=t7knYSG6SgcK07FmvZkc3cjycuh4pGYsjIwiCZAMRc2Qb/7/spZn9G6NYMd/HqvaTrbw4EEfAYZkPARK1X2HVndudfrynOIThHuN41X1GV4ZpxM3Ok4oPV5wpDl3p0+FOaugkKpc6F5a+B1eYMNtoE1P0NGc77UVs59BGXa61jU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778182210; c=relaxed/simple;
-	bh=s7mmcGJn4cxGfZhEmsQHmRuYnLPWzBBMhmOxiL7G1uQ=;
+	s=arc-20240116; t=1778182308; c=relaxed/simple;
+	bh=JgSqdl2D/cq1D+mVAwxG8BFZwIUHyOMouM/lubEGT3c=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=i0PRZwg370UN5TTRlnxOnz79gcPHmWq8SMs557D6mL9KNpKqLfEgjMjv1Z5PdCTPf6xw08pG480Az5KJevHhXB48IhC+q/hg8W2HVLdC81VR9AmkuoY34wJP0/JY6c7fyak3OykcikV7jLDDPQqyaANwqSGgtUZyBq1Ha3TnDi8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NjdZs/vk; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=nE6d4oAD; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:MIME-Version; b=jCeRnljrZ4rTPAtiywZDxqueYZfHa+cYSIT+jvEj3hBudqAnZge96gTlT0zQGtkx09VG17zoavUQ7dKECCIN8+r87+5lt5T/NibyXWf6Fb2Mysvct7M2/34TfslT8ia3dy6+H6gWmXFQbboW5tcpqK4OoLEZbJBIj+BiGPSutA4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eYvhUGHj; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=JTvbBcoM; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NjdZs/vk";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="nE6d4oAD"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eYvhUGHj";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="JTvbBcoM"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778182203;
+	s=mimecast20190719; t=1778182305;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=6/bnJdq7Re8pzWXsv3AFtsBSvp+qvot+lT7d6JLb/D0=;
-	b=NjdZs/vkaTKR/AjDdxwAN0eD548WwNW8DT6qfptCkj97vgBoTtYwQ/oeqPtt7Ik4sHeY3o
-	trFwaHTXlmGh4X6YBkys3peY3l8PZx6ACALVKLmdAkYob9y5HUuMvHiZ30EM7cKVgRXMnT
-	vcI6z+kXLX5elFzOyf1NTZz0iXygZBk=
+	bh=omOviZBPs8i/feB3UPtOLGb6+54cH2ZCUHwxxX1Ffnc=;
+	b=eYvhUGHjW6f+/vwfX1xtLgYc09VlOmmp5Tczn2kbdgPQMXfJoaIv8j9wGVJYC1yVNmHeg1
+	cA2iCXkzOx7IysH//AYxazZP7OTcpwiFv3XZPHpEQ3CXXi7zL1dQO9Mm/lIBr2Jtbg0XsJ
+	SS6MmG5u4x5mNitWVJe3H7MHfME2syY=
 Received: from mail-yw1-f198.google.com (mail-yw1-f198.google.com
  [209.85.128.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-665-LNkCX4khN9y8nFpsYBhdWQ-1; Thu, 07 May 2026 15:30:01 -0400
-X-MC-Unique: LNkCX4khN9y8nFpsYBhdWQ-1
-X-Mimecast-MFC-AGG-ID: LNkCX4khN9y8nFpsYBhdWQ_1778182201
-Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-7bf0b47d2f8so25875827b3.2
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 12:30:01 -0700 (PDT)
+ us-mta-617-PlR14TLhM-uGOQ39-GBLEQ-1; Thu, 07 May 2026 15:31:43 -0400
+X-MC-Unique: PlR14TLhM-uGOQ39-GBLEQ-1
+X-Mimecast-MFC-AGG-ID: PlR14TLhM-uGOQ39-GBLEQ_1778182303
+Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-7bf0b47d2e2so30545007b3.3
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 12:31:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1778182201; x=1778787001; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1778182302; x=1778787102; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=6/bnJdq7Re8pzWXsv3AFtsBSvp+qvot+lT7d6JLb/D0=;
-        b=nE6d4oADH0X7mOoAdx+eCggUsKvZ3qpmt5RSFRwa2x+pQDb4B8eH2dHtzEEsA9tRI9
-         z6Uc04X5ToBfjyfSp8CblF1xsInK3vgJ+jKxhNi4cgJdduTpvJKzdvfjHkQn15shv+M6
-         wTPTSZQEdn+M32ACN+/V/4/2qBXF3ITIr8NYNlCPdjj4MpiersZiB+UPqfAIzFvqST06
-         ZXm9D36oNHa9BRiyZKBqBkPB58BVBeQqUN36OiVJ/Fp/0L5cYgoADRi/56+8CvXwbdrP
-         j8pjlzdOJW0YgbhtcSubwFjSWr2U3fSB/ZNgO/+c1Or3+qp19lLwc8RzI1wBFKpcoWgQ
-         ymIw==
+        bh=omOviZBPs8i/feB3UPtOLGb6+54cH2ZCUHwxxX1Ffnc=;
+        b=JTvbBcoMEz1tE8i2R1USK/RtZiYypjH6RdRQS1j8b0sFXNj5wuBf7RFQ0Fvls5jLj6
+         8QkkUjOPDUuaOAioMVr2Fptt/iaWN8sTBdY9gmzO5ziPJl/7BsZKCE9f6u04roGdiy9R
+         ip25B7O27U1/Sr+TFsf+VAzbK0FN2GPVviqFZlq+YK5Mczu+m+9psVfaupZH6yFRBTKa
+         AZ32k9SvRidTptPMKSvXlnQToZ5a5fjk2+jpFT658JME4kSPTHK7lYnvA3SdFSXfYs+U
+         a6EBcferyRJWpCUFfuCI/uG/qpq+YMsBY59eum4tScaUJzWawamY7eeO2Jddr299LuQS
+         Xi+w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778182201; x=1778787001;
+        d=1e100.net; s=20251104; t=1778182302; x=1778787102;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=6/bnJdq7Re8pzWXsv3AFtsBSvp+qvot+lT7d6JLb/D0=;
-        b=pzMXfkJPB8znOQY+G0T+ciN3mnlOt4UnzT4w5vUs9KvA02vv9Eh8Y7rE+Fg6gMi/qp
-         7XlKk8Nysbf9dYYr4TjeqJUrhzXdm+hxE35ed3s6qGImYsQEOqoElxPyIY1TV0K/qnVy
-         +zPqwthyi5sduUuoj4XjdqhbGXeXxYaxljStXfnFwvWQfGsgeQGy6Sg2DyjsrtEo6/PQ
-         Ht6euS/LfveIMVQj3qAZTjFsqDx+VBzDOmfYU0BHDBjrc4EcK8tuq+6il4SW4hu2+WU7
-         cBRPsccKHtTJWZVnSvNJb2swYQcWBmQcKkjeQZqL5dHUU5cGiZNLQ3SlQo3khCT9zeE9
-         wzqw==
-X-Forwarded-Encrypted: i=1; AFNElJ9x4yLTC/fT5hfHE1q9Lrcfuvy4HqjdygkHEccmy2upHz7nHeTbHeQz1AmcoUSlRW+1WylXqco6WWKr@vger.kernel.org
-X-Gm-Message-State: AOJu0YwI2D0qt+MQrzNKVVKAPCJrHek6QP2iiEqNUi2LzsupJSIxKeia
-	Zk1R8s548zMMbnAfzIXUMMEPWPRnUckcZ9m2UZ/7SCCeGfyf0TkAcvWW77nodX7nwA2OApjb3a9
-	lCwE5tPBTuZNCB8ly3EX0JO5K+iIdeUjVS0L+Jv514MHn7PTJxbp9CPrOWzsKF1c=
-X-Gm-Gg: Acq92OHDNf7IXl0ZAHBrHAzmG6K90r8iMHbq/jmo66X+vVrG6LPHkwuiW86Lld23Kdl
-	oUJFYqddyyISkzPQKDgs6+vOovrHrUlvZWvav/ai5WUiWdr6wJbrgan2cZf92Hj+wMpVbWxJ4ln
-	OuHviXo6cmTZjejk6NVa3e6qParc08KOYnCU0juppNIw6nO1NCm+gBapud6Xaapb90ElT4ppNuY
-	Mzx5OIEJvbFc9dw6Bi8HekVphgS3QlPvEJrkCpN3JA8tJmX96Z/957pi20U0My9wRCK/5dqM1Im
-	2PdvWRaWe+xHWqiBlToYxn6C7BpE2TSfiwT09SWq9B8mfl1ML0P+TToj/P3A8utE6Gp5UJuI53A
-	hMjDDR2x32U10/w6AORDiPgglWXIg6RimzA+MNXYCgCPzSpR+q26b
-X-Received: by 2002:a05:690c:c4d3:b0:79a:7ff5:93ee with SMTP id 00721157ae682-7bdf5e250dbmr104743767b3.22.1778182200521;
-        Thu, 07 May 2026 12:30:00 -0700 (PDT)
-X-Received: by 2002:a05:690c:c4d3:b0:79a:7ff5:93ee with SMTP id 00721157ae682-7bdf5e250dbmr104743347b3.22.1778182199780;
-        Thu, 07 May 2026 12:29:59 -0700 (PDT)
+        bh=omOviZBPs8i/feB3UPtOLGb6+54cH2ZCUHwxxX1Ffnc=;
+        b=rDXcjdR7KxcngV2XhI+ljdvDu95dv+9ueeSDb0CwHiKIQQyiCjohfrde1uD/w7j473
+         WQlkiRDyaCzcZzoWiQLXUA7D9ch3qt4XKBrsHTQE/nYcHcXoNCLS9ZiuBl9Ep1tbHb9q
+         rwq5N2bnOdmxTj4+6Ox9DkhDSJxlKHABn0d3kUjnUnpKlfoeofbsgJY2hCcR7CuIqFzK
+         Ha7mThCl3zzbtEAwj7a1x/Gwgf3fRbN55TRNdq61D5Q3mFoJYCkDJci1MTCZaDj0PwB5
+         GwYjaDTjF5XzNCJiRWZqciuVEirhnDyTJY8o5TLKMU3vSZcEyeW9fZ/Gkr8WVQdU4FXt
+         cHAw==
+X-Forwarded-Encrypted: i=1; AFNElJ9Rk4chMlKfcUo+1HqJQ9LizD3Q27qPbE/r3RG9dYGhE6hvjqnfn6JDMF8JPxfVo6M8nfuKdtqQ5+/O@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw8UcOapoqTvwJ811uidAbMKUJgyYaP8fjBKhwyEseDMKCLHhQQ
+	Z+mPk8fj0spF/KOdGeW70J0aT1G1p1q5xCSwdwpdUbC/xuCShOOhRUEHyxFPge/ztXjdStpoogs
+	anhr5d+8Y/a0kwwbwLMPypuPX/djgj3AwGCbw1DuBf/wbrBE3AYBq605yhzaVB8EZL+GzjXU=
+X-Gm-Gg: Acq92OEv6KJaGPhQ63HJqfE4CquZ/PEdt1s0HNrlDOUaVDu3fAJNtXnW7kS95SWUJiO
+	4tAlfTBtuEe0flB5k/hN4ug+6Gn+gvIc9ozFw9XyXeWXR4rIgegn50RPVKFK2UCyWTUB2nMVr83
+	SrvCmfNillZdA/GXASHqHt6CspbtDKaSbrgYxpC7j7yYIfr/q+YssCiPf3v9xGSdUlJakdSB12f
+	QXsIbfHPSvGarV7qN1GObXxxx0tQbh/tA5/C+KZLOZjZwU9P4QOgpCVowqqLW4FwG2I8rhZdS6C
+	fuE26aOY3sdCf2qoSljYantl1itgYDDRXWrdm5h65jHBgaJZ0MAYgLzL0Exo6uHjtv4SJMVby46
+	hutUluOwhfqEsBFJXrXL3h3LrJdN/y0qZzcaMtg2IRvpgQlZX52KQ
+X-Received: by 2002:a53:ad4b:0:b0:651:c024:5733 with SMTP id 956f58d0204a3-65c79c695e2mr6673161d50.13.1778182302194;
+        Thu, 07 May 2026 12:31:42 -0700 (PDT)
+X-Received: by 2002:a53:ad4b:0:b0:651:c024:5733 with SMTP id 956f58d0204a3-65c79c695e2mr6673084d50.13.1778182300865;
+        Thu, 07 May 2026 12:31:40 -0700 (PDT)
 Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd66861afesm96931587b3.37.2026.05.07.12.29.58
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-65d93341bb8sm102816d50.4.2026.05.07.12.31.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 May 2026 12:29:59 -0700 (PDT)
-Message-ID: <da51a7487cd1a6179d8c4ce2cb5b9caaec18c80d.camel@redhat.com>
-Subject: Re: [EXTERNAL] [PATCH v4 08/11] selftests: ceph: add reset stress
- test
+        Thu, 07 May 2026 12:31:40 -0700 (PDT)
+Message-ID: <90ef613d8829a03647c3cbbae754af6f6a734031.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v4 09/11] selftests: ceph: add reset
+ corner-case tests
 From: Viacheslav Dubeyko <vdubeyko@redhat.com>
 To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
-Date: Thu, 07 May 2026 12:29:58 -0700
-In-Reply-To: <20260507122737.2804094-9-amarkuze@redhat.com>
+Date: Thu, 07 May 2026 12:31:39 -0700
+In-Reply-To: <20260507122737.2804094-10-amarkuze@redhat.com>
 References: <20260507122737.2804094-1-amarkuze@redhat.com>
-	 <20260507122737.2804094-9-amarkuze@redhat.com>
+	 <20260507122737.2804094-10-amarkuze@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.60.0 (3.60.0-1.fc44app2) 
@@ -98,40 +98,45 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Thu, 2026-05-07 at 12:27 +0000, Alex Markuze wrote:
-> Add a single-client stress test for the CephFS manual session reset
-> feature.  The test runs concurrent I/O workers alongside periodic
-> reset injection, then validates data integrity via
-> validate_consistency.py.
+> Add targeted corner-case tests for the CephFS manual session reset
+> feature.  Four sequential tests cover:
 >=20
-> Supports four profiles (baseline, moderate, aggressive, soak) with
-> configurable duration, reset interval, and worker counts.
+>   [1/4] ebusy_rejection       - second reset rejected while first in-flig=
+ht
+>   [2/4] dirty_caps_at_reset   - reset with unflushed dirty caps
+>   [3/4] flock_after_reset     - stale lock EIO + fresh lock after holder =
+exit
+>   [4/4] unmount_during_reset  - umount during active reset (ESHUTDOWN pat=
+h)
+>=20
+> Requires: mounted CephFS, debugfs access (root), flock(1) utility.
 >=20
 > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 > ---
->  .../filesystems/ceph/reset_stress.sh          | 694 ++++++++++++++++++
->  1 file changed, 694 insertions(+)
->  create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress=
-.sh
+>  .../filesystems/ceph/reset_corner_cases.sh    | 646 ++++++++++++++++++
+>  1 file changed, 646 insertions(+)
+>  create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner=
+_cases.sh
 >=20
-> diff --git a/tools/testing/selftests/filesystems/ceph/reset_stress.sh b/t=
-ools/testing/selftests/filesystems/ceph/reset_stress.sh
+> diff --git a/tools/testing/selftests/filesystems/ceph/reset_corner_cases.=
+sh b/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
 > new file mode 100755
-> index 000000000000..c503c75a5f7a
+> index 000000000000..a6dae84a616d
 > --- /dev/null
-> +++ b/tools/testing/selftests/filesystems/ceph/reset_stress.sh
-> @@ -0,0 +1,694 @@
+> +++ b/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
+> @@ -0,0 +1,646 @@
 > +#!/bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +#
-> +# CephFS reset stress test:
-> +# - Runs concurrent I/O and rename workloads
-> +# - Triggers random client resets through debugfs
-> +# - Validates consistency and recovery behavior
+> +# CephFS client reset corner case tests.
+> +# Runs a checklist of targeted tests that exercise specific reset
+> +# code paths not covered by the stress tests.
+> +#
+> +# Requires: mounted CephFS, debugfs access (root), flock(1) utility.
 > +
-> +set -euo pipefail
+> +set -uo pipefail
 > +
 > +KSFT_SKIP=3D4
-> +SCRIPT_DIR=3D"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 > +
 > +# kselftest auto-detect: when invoked with no arguments (e.g. by
 > +# "make run_tests"), find a CephFS mount automatically or skip.
@@ -144,160 +149,117 @@ ools/testing/selftests/filesystems/ceph/reset_stress.sh
 > +	exec "$0" --mount-point "$MOUNT_POINT"
 > +fi
 > +
-> +PROFILE=3D"moderate"
-> +DURATION_SEC=3D""
-> +COOLDOWN_SEC=3D20
-> +FILE_COUNT=3D64
-> +IO_WORKERS=3D""
-> +RENAME_WORKERS=3D""
 > +MOUNT_POINT=3D""
-> +OUT_DIR=3D""
-> +CLIENT_ID=3D""
 > +DEBUGFS_ROOT=3D"/sys/kernel/debug/ceph"
-> +SLO_SECONDS=3D30
-> +EXPECT_RESET=3D1
-> +DMESG_CMD=3D""
-> +SUDO=3D""
+> +DEBUGFS_CLIENT=3D""
+> +TRIGGER_PATH=3D""
+> +STATUS_PATH=3D""
+> +TEMP_MNT=3D""
 > +
-> +RESET_MIN_SEC=3D5
-> +RESET_MAX_SEC=3D15
+> +PASS_COUNT=3D0
+> +FAIL_COUNT=3D0
+> +SKIP_COUNT=3D0
+> +TOTAL=3D4
 > +
-> +RUN_ID=3D"$(date +%Y%m%d-%H%M%S)"
-> +WORKLOAD_FLAG=3D""
-> +RESET_FLAG=3D""
-> +DATA_DIR=3D""
-> +
-> +IO_LOG=3D""
-> +RENAME_LOG=3D""
-> +RESET_LOG=3D""
-> +STATUS_LOG=3D""
-> +STATUS_BEFORE=3D""
-> +STATUS_FINAL=3D""
-> +DMESG_LOG=3D""
-> +SUMMARY_LOG=3D""
-> +REPORT_JSON=3D""
-> +
-> +RESET_PID=3D0
-> +STATUS_PID=3D0
-> +declare -a IO_WORKER_PIDS=3D()
-> +declare -a RENAME_WORKER_PIDS=3D()
-> +
-> +usage()
+> +log()
 > +{
-> +	cat <<EOF
-> +Usage: $0 --mount-point <cephfs_mount> [options]
-> +
-> +Required:
-> +  --mount-point PATH       CephFS mount point to test under
-> +
-> +Options:
-> +  --profile NAME           baseline|moderate|aggressive|soak (default: m=
-oderate)
-> +  --duration-sec N         Override profile runtime in seconds
-> +  --cooldown-sec N         Workload drain time after injector stop (defa=
-ult: 20)
-> +  --file-count N           Number of logical files (default: 64)
-> +  --io-workers N           Number of concurrent I/O workers (profile def=
-ault)
-> +  --rename-workers N       Number of concurrent rename workers (profile =
-default)
-> +  --out-dir PATH           Artifact directory (default: /tmp/ceph_reset_=
-stress_<ts>)
-> +  --client-id ID           Ceph debugfs client id; auto-detect if one cl=
-ient exists
-> +  --debugfs-root PATH      Debugfs Ceph root (default: /sys/kernel/debug=
-/ceph)
-> +  --slo-seconds N          Max allowed post-reset stall window (default:=
- 30)
-> +  --no-reset               Disable reset injector (baseline mode helper)
-> +  --help                   Show this message
-> +
-> +Examples:
-> +  $0 --mount-point /mnt/cephfs --profile moderate
-> +  $0 --mount-point /mnt/cephfs --profile aggressive --duration-sec 300
-> +  $0 --mount-point /mnt/cephfs --profile baseline --no-reset
-> +EOF
+> +	printf '[%s] %s\n' "$(date -u +%H:%M:%S)" "$1"
 > +}
 > +
-> +now_ms()
+> +result()
 > +{
-> +	date +%s%3N
-> +}
+> +	local num=3D"$1"
+> +	local name=3D"$2"
+> +	local status=3D"$3"
+> +	local detail=3D"${4:-}"
 > +
-> +set_profile_defaults()
-> +{
-> +	case "$PROFILE" in
-> +	baseline)
-> +		RESET_MIN_SEC=3D0
-> +		RESET_MAX_SEC=3D0
-> +		EXPECT_RESET=3D0
-> +		: "${DURATION_SEC:=3D600}"
-> +		: "${IO_WORKERS:=3D1}"
-> +		: "${RENAME_WORKERS:=3D1}"
-> +		;;
-> +	moderate)
-> +		RESET_MIN_SEC=3D5
-> +		RESET_MAX_SEC=3D15
-> +		: "${DURATION_SEC:=3D900}"
-> +		: "${IO_WORKERS:=3D2}"
-> +		: "${RENAME_WORKERS:=3D1}"
-> +		;;
-> +	aggressive)
-> +		RESET_MIN_SEC=3D1
-> +		RESET_MAX_SEC=3D5
-> +		: "${DURATION_SEC:=3D900}"
-> +		: "${IO_WORKERS:=3D4}"
-> +		: "${RENAME_WORKERS:=3D2}"
-> +		;;
-> +	soak)
-> +		RESET_MIN_SEC=3D5
-> +		RESET_MAX_SEC=3D15
-> +		: "${DURATION_SEC:=3D3600}"
-> +		: "${IO_WORKERS:=3D2}"
-> +		: "${RENAME_WORKERS:=3D1}"
-> +		;;
-> +	*)
-> +		echo "Unknown profile: $PROFILE" >&2
-> +		exit 2
-> +		;;
+> +	case "$status" in
+> +	PASS) PASS_COUNT=3D$((PASS_COUNT + 1)) ;;
+> +	FAIL) FAIL_COUNT=3D$((FAIL_COUNT + 1)) ;;
+> +	SKIP) SKIP_COUNT=3D$((SKIP_COUNT + 1)) ;;
 > +	esac
+> +
+> +	if [[ -n "$detail" ]]; then
+> +		printf '[%d/%d] %-30s %s  (%s)\n' "$num" "$TOTAL" "$name" "$status" "$=
+detail"
+> +	else
+> +		printf '[%d/%d] %-30s %s\n' "$num" "$TOTAL" "$name" "$status"
+> +	fi
 > +}
 > +
-> +log_summary()
+> +read_status_field()
 > +{
-> +	local msg=3D"$1"
-> +	printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$msg" | tee -a "$S=
-UMMARY_LOG"
+> +	local field=3D"$1"
+> +	awk -F': ' -v key=3D"$field" '$1 =3D=3D key {print $2}' "$STATUS_PATH" =
+2>/dev/null
 > +}
 > +
-> +discover_client_id()
+> +wait_reset_done()
+> +{
+> +	local timeout=3D"${1:-30}"
+> +	local elapsed=3D0
+> +
+> +	while [[ "$(read_status_field "phase")" !=3D "idle" ]]; do
+> +		sleep 1
+> +		elapsed=3D$((elapsed + 1))
+> +		if [[ "$elapsed" -ge "$timeout" ]]; then
+> +			return 1
+> +		fi
+> +	done
+> +	return 0
+> +}
+> +
+> +list_reset_clients()
+> +{
+> +	local entry
+> +
+> +	for entry in "$DEBUGFS_ROOT"/*/; do
+> +		entry=3D"$(basename "$entry")"
+> +		[[ -d "$DEBUGFS_ROOT/$entry/reset" ]] || continue
+> +		[[ -w "$DEBUGFS_ROOT/$entry/reset/trigger" ]] || continue
+> +		printf '%s\n' "$entry"
+> +	done
+> +}
+> +
+> +wait_status_nonidle()
+> +{
+> +	local status_path=3D"$1"
+> +	local timeout=3D"${2:-10}"
+> +	local polls=3D$((timeout * 10))
+> +	local phase
+> +
+> +	while [[ "$polls" -gt 0 ]]; do
+> +		phase=3D"$(awk -F': ' '$1 =3D=3D "phase" {print $2}' "$status_path" 2>=
+/dev/null)"
+> +		if [[ -n "$phase" && "$phase" !=3D "idle" ]]; then
+> +			return 0
+> +		fi
+> +		sleep 0.1
+> +		polls=3D$((polls - 1))
+> +	done
+> +
+> +	return 1
+> +}
+> +
+> +discover_debugfs()
 > +{
 > +	local candidates=3D()
 > +	local entry
 > +
-> +	if [[ -n "$CLIENT_ID" ]]; then
-> +		if ! $SUDO test -d "$DEBUGFS_ROOT/$CLIENT_ID/reset"; then
-> +			echo "SKIP: reset debugfs not found for client-id=3D$CLIENT_ID" >&2
+> +	if [[ -n "$DEBUGFS_CLIENT" ]]; then
+> +		if [[ ! -d "$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset" ]]; then
+> +			echo "SKIP: reset debugfs not found for $DEBUGFS_CLIENT" >&2
 > +			exit "$KSFT_SKIP"
 > +		fi
 > +		return 0
 > +	fi
 > +
-> +	if ! $SUDO test -d "$DEBUGFS_ROOT"; then
-> +		echo "SKIP: Debugfs root not found: $DEBUGFS_ROOT" >&2
-> +		exit "$KSFT_SKIP"
-> +	fi
-> +
-> +	while IFS=3D read -r entry; do
-> +		$SUDO test -d "$DEBUGFS_ROOT/$entry/reset" || continue
-> +		$SUDO test -w "$DEBUGFS_ROOT/$entry/reset/trigger" || continue
+> +	for entry in "$DEBUGFS_ROOT"/*/; do
+> +		entry=3D"$(basename "$entry")"
+> +		[[ -d "$DEBUGFS_ROOT/$entry/reset" ]] || continue
+> +		[[ -w "$DEBUGFS_ROOT/$entry/reset/trigger" ]] || continue
 > +		candidates+=3D("$entry")
-> +	done < <($SUDO ls -1 "$DEBUGFS_ROOT" 2>/dev/null || true)
-> +
-> +	if [[ ${#candidates[@]} -eq 1 ]]; then
-> +		CLIENT_ID=3D"${candidates[0]}"
-> +		return 0
-> +	fi
+> +	done
 > +
 > +	if [[ ${#candidates[@]} -eq 0 ]]; then
 > +		echo "SKIP: No writable Ceph reset interface found under $DEBUGFS_ROOT=
@@ -305,364 +267,505 @@ UMMARY_LOG"
 > +		exit "$KSFT_SKIP"
 > +	fi
 > +
-> +	echo "SKIP: Multiple Ceph clients found (${candidates[*]}). Use --clien=
+> +	if [[ ${#candidates[@]} -gt 1 ]]; then
+> +		echo "SKIP: Multiple Ceph clients found: ${candidates[*]}. Use --clien=
 t-id." >&2
-> +	exit "$KSFT_SKIP"
+> +		exit "$KSFT_SKIP"
+> +	fi
+> +
+> +	DEBUGFS_CLIENT=3D"${candidates[0]}"
 > +}
 > +
-> +init_dataset()
-> +{
-> +	local i
-> +	mkdir -p "$DATA_DIR/A" "$DATA_DIR/B"
+> +# --- Test 1: ebusy_rejection ------------------------------------------=
+------
+> +#
+> +# Trigger a reset while another is guaranteed in-flight.  Creates
+> +# dirty state so the first reset enters DRAINING (which takes
+> +# measurable time), then polls until phase !=3D idle and issues the
+> +# second trigger.  The second trigger must fail (the kernel returns
+> +# -EBUSY), and only one reset must be counted in the accounting.
 > +
-> +	for ((i =3D 0; i < FILE_COUNT; i++)); do
-> +		printf 'seed logical_id=3D%05d ts_ms=3D%s\n' "$i" "$(now_ms)" > "$DATA=
-_DIR/A/file_$(printf '%05d' "$i")"
+> +test_ebusy_rejection()
+> +{
+> +	local num=3D1
+> +	local name=3D"ebusy_rejection"
+> +	local testfile=3D"$MOUNT_POINT/.reset_corner_ebusy_$$"
+> +	local tc_before tc_after sc_before sc_after second_rc phase elapsed
+> +
+> +	tc_before=3D"$(read_status_field "trigger_count")"
+> +	sc_before=3D"$(read_status_field "success_count")"
+> +
+> +	# Create dirty state so the first reset enters DRAINING
+> +	echo "ebusy_dirty_data" > "$testfile"
+> +	sync "$testfile"
+> +
+> +	python3 -c "
+> +import os, sys
+> +fd =3D os.open('$testfile', os.O_WRONLY | os.O_APPEND)
+> +os.write(fd, b'dirty_for_ebusy_test\n')
+> +sys.stdout.write('written')
+> +" 2>/dev/null || {
+> +		result "$num" "$name" FAIL "dirty write failed"
+> +		rm -f "$testfile"
+> +		return
+> +	}
+> +
+> +	# Trigger the first reset -- it will drain dirty state
+> +	echo "ebusy_first" > "$TRIGGER_PATH" 2>/dev/null || {
+> +		result "$num" "$name" FAIL "first trigger failed"
+> +		rm -f "$testfile"
+> +		return
+> +	}
+> +
+> +	# Poll until phase is non-idle (quiescing or draining)
+> +	elapsed=3D0
+> +	while true; do
+> +		phase=3D"$(read_status_field "phase")"
+> +		if [[ "$phase" !=3D "idle" ]]; then
+> +			break
+> +		fi
+> +		sleep 0.1
+> +		elapsed=3D$((elapsed + 1))
+> +		if [[ "$elapsed" -ge 50 ]]; then
+> +			result "$num" "$name" SKIP \
+> +				"first reset completed before overlap could be tested"
+> +			rm -f "$testfile" 2>/dev/null
+> +			return
+> +		fi
 > +	done
+> +
+> +	# Issue the second trigger -- should be rejected with EBUSY
+> +	second_rc=3D0
+> +	echo "ebusy_second" > "$TRIGGER_PATH" 2>/dev/null && second_rc=3D0 || s=
+econd_rc=3D$?
+> +
+> +	if ! wait_reset_done 30; then
+> +		result "$num" "$name" FAIL "first reset never completed"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
+> +
+> +	tc_after=3D"$(read_status_field "trigger_count")"
+> +	sc_after=3D"$(read_status_field "success_count")"
+> +
+> +	if [[ "$((tc_after - tc_before))" -ne 1 ]]; then
+> +		result "$num" "$name" FAIL "trigger_count +$((tc_after - tc_before)), =
+expected +1"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
+> +
+> +	if [[ "$((sc_after - sc_before))" -ne 1 ]]; then
+> +		result "$num" "$name" FAIL "success_count +$((sc_after - sc_before)), =
+expected +1"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
+> +
+> +	if [[ "$second_rc" -eq 0 ]]; then
+> +		result "$num" "$name" FAIL "second trigger did not return error"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
+> +
+> +	rm -f "$testfile" 2>/dev/null
+> +	result "$num" "$name" PASS
 > +}
 > +
-> +io_worker()
+> +# --- Test 2: dirty_caps_at_reset --------------------------------------=
+------
+> +#
+> +# Write to a file without fsync (dirty caps), trigger reset, then
+> +# verify the file is not corrupt.  Manual reset drains dirty caps
+> +# before teardown (best-effort, 5s timeout).  For a non-stuck cap
+> +# the dirty write should be flushed during drain and persist.
+> +# If the drain window is too short, only the synced first line
+> +# persists -- that is acceptable (data loss is documented for
+> +# unflushed writes).
+> +
+> +test_dirty_caps_at_reset()
 > +{
-> +	set +e
-> +	local worker_id=3D"$1"
-> +	local seq=3D0
-> +	local id
-> +	local relpath
-> +	local abspath
-> +	local payload
-> +	local hash
-> +	local ts
+> +	local num=3D2
+> +	local name=3D"dirty_caps_at_reset"
+> +	local testfile=3D"$MOUNT_POINT/.reset_corner_dirty_caps_$$"
+> +	local content_after line_count sc_before sc_after le
 > +
-> +	while [[ -f "$WORKLOAD_FLAG" ]]; do
-> +		id=3D"$(printf '%05d' $((RANDOM % FILE_COUNT)))"
-> +		if [[ -f "$DATA_DIR/A/file_$id" ]]; then
-> +			relpath=3D"A/file_$id"
-> +		elif [[ -f "$DATA_DIR/B/file_$id" ]]; then
-> +			relpath=3D"B/file_$id"
-> +		else
-> +			sleep 0.02
-> +			continue
-> +		fi
+> +	sc_before=3D"$(read_status_field "success_count")"
 > +
-> +		abspath=3D"$DATA_DIR/$relpath"
-> +		alt_relpath=3D""
-> +		if [[ "$relpath" =3D=3D A/* ]]; then
-> +			alt_relpath=3D"B/file_$id"
-> +		else
-> +			alt_relpath=3D"A/file_$id"
-> +		fi
-> +		alt_abspath=3D"$DATA_DIR/$alt_relpath"
-> +		payload=3D"worker=3D${worker_id} io_seq=3D${seq} id=3D${id} ts_ms=3D$(=
-now_ms)"
-> +		result=3D"$(
-> +			python3 - "$abspath" "$alt_abspath" "$payload" <<'PY'
-> +import hashlib
-> +import os
-> +import sys
+> +	echo "line_1_before_dirty_write" > "$testfile"
+> +	sync "$testfile"
 > +
-> +path =3D sys.argv[1]
-> +alt_path =3D sys.argv[2]
-> +payload =3D sys.argv[3]
+> +	python3 -c "
+> +import os, sys
+> +fd =3D os.open('$testfile', os.O_WRONLY | os.O_APPEND)
+> +os.write(fd, b'line_2_dirty_no_fsync\n')
+> +# deliberately no fsync -- leave caps dirty
+> +sys.stdout.write('written')
+> +" 2>/dev/null || {
+> +		result "$num" "$name" FAIL "dirty write failed"
+> +		rm -f "$testfile"
+> +		return
+> +	}
 > +
-> +try:
-> +    fd =3D os.open(path, os.O_RDWR | os.O_APPEND)
-> +    actual =3D path
-> +except FileNotFoundError:
-> +    try:
-> +        fd =3D os.open(alt_path, os.O_RDWR | os.O_APPEND)
-> +        actual =3D alt_path
-> +    except FileNotFoundError:
-> +        sys.exit(1)
+> +	echo "dirty_caps_test" > "$TRIGGER_PATH" 2>/dev/null || {
+> +		result "$num" "$name" FAIL "reset trigger failed"
+> +		rm -f "$testfile"
+> +		return
+> +	}
 > +
-> +try:
-> +    os.write(fd, (payload + "\n").encode())
-> +    os.fsync(fd)
-> +    os.lseek(fd, 0, os.SEEK_SET)
-> +    digest =3D hashlib.sha256()
-> +    while True:
-> +        chunk =3D os.read(fd, 1 << 20)
-> +        if not chunk:
-> +            break
-> +        digest.update(chunk)
-> +    print(actual + " " + digest.hexdigest())
-> +finally:
-> +    os.close(fd)
-> +PY
-> +		)" || {
-> +			sleep 0.02
-> +			continue
-> +		}
+> +	if ! wait_reset_done 30; then
+> +		result "$num" "$name" FAIL "reset did not complete"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
 > +
-> +		actual_abspath=3D"${result%% *}"
-> +		hash=3D"${result#* }"
-> +		if [[ "$actual_abspath" =3D=3D "$alt_abspath" ]]; then
-> +			relpath=3D"$alt_relpath"
-> +		fi
+> +	sc_after=3D"$(read_status_field "success_count")"
+> +	if [[ "$sc_after" -le "$sc_before" ]]; then
+> +		result "$num" "$name" FAIL "success_count did not increment (reset not=
+ exercised)"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
 > +
-> +		ts=3D"$(now_ms)"
-> +		printf '%s,%s,%s,%s,%s\n' "$ts" "$seq" "$id" "$relpath" "$hash" >> "$I=
-O_LOG"
-> +		seq=3D$((seq + 1))
-> +		sleep 0.02
-> +	done
+> +	sync "$testfile" 2>/dev/null || true
+> +	content_after=3D"$(cat "$testfile" 2>/dev/null)" || {
+> +		result "$num" "$name" FAIL "cannot read file after reset"
+> +		rm -f "$testfile"
+> +		return
+> +	}
+> +
+> +	if [[ -z "$content_after" ]]; then
+> +		result "$num" "$name" FAIL "file is empty after reset"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
+> +
+> +	line_count=3D"$(echo "$content_after" | wc -l)"
+> +	if [[ "$line_count" -lt 1 ]]; then
+> +		result "$num" "$name" FAIL "file has $line_count lines, expected >=3D =
+1"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
+> +
+> +	echo "$content_after" | head -1 | grep -q "line_1_before_dirty_write" |=
+| {
+> +		result "$num" "$name" FAIL "first line corrupted"
+> +		rm -f "$testfile"
+> +		return
+> +	}
+> +
+> +	le=3D"$(read_status_field "last_errno")"
+> +	if [[ "$le" !=3D "0" ]]; then
+> +		result "$num" "$name" FAIL "last_errno=3D$le, expected 0"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
+> +
+> +	rm -f "$testfile"
+> +	result "$num" "$name" PASS "file intact ($line_count lines)"
 > +}
 > +
-> +rename_worker()
+> +# --- Test 3: flock_after_reset ----------------------------------------=
+------
+> +#
+> +# Take an exclusive flock, trigger reset, verify stale lock state is
+> +# marked with CEPH_I_ERROR_FILELOCK (same-client flock attempt returns
+> +# EIO).  After the original holder exits (releasing the local lock
+> +# reference and clearing the error flag), a fresh lock can be acquired.
+> +#
+> +# The lock holder uses the fd-based flock form with exec, so killing
+> +# $lock_pid closes the lock fd immediately (no orphaned child with an
+> +# inherited fd copy that would prevent the VFS flock release).
+> +
+> +test_flock_after_reset()
 > +{
-> +	set +e
-> +	local worker_id=3D"$1"
-> +	local seq=3D0
-> +	local id
-> +	local src_rel
-> +	local dst_rel
-> +	local rc
-> +	local ts
+> +	local num=3D3
+> +	local name=3D"flock_after_reset"
+> +	local testfile=3D"$MOUNT_POINT/.reset_corner_flock_$$"
+> +	local lock_pid probe_rc sc_before sc_after
 > +
-> +	while [[ -f "$WORKLOAD_FLAG" ]]; do
-> +		id=3D"$(printf '%05d' $((RANDOM % FILE_COUNT)))"
+> +	sc_before=3D"$(read_status_field "success_count")"
 > +
-> +		if [[ -f "$DATA_DIR/A/file_$id" ]]; then
-> +			src_rel=3D"A/file_$id"
-> +			dst_rel=3D"B/file_$id"
-> +		elif [[ -f "$DATA_DIR/B/file_$id" ]]; then
-> +			src_rel=3D"B/file_$id"
-> +			dst_rel=3D"A/file_$id"
-> +		else
-> +			sleep 0.02
-> +			continue
-> +		fi
+> +	echo "flock_test_content" > "$testfile"
+> +	sync "$testfile"
 > +
-> +		ts=3D"$(now_ms)"
-> +		if mv -T "$DATA_DIR/$src_rel" "$DATA_DIR/$dst_rel" 2>/dev/null; then
-> +			rc=3D0
-> +		else
-> +			rc=3D$?
-> +		fi
-> +		printf '%s,%s,%s,%s,%s,%s,%s\n' "$ts" "$worker_id" "$seq" "$id" "$src_=
-rel" "$dst_rel" "$rc" >> "$RENAME_LOG"
-> +		seq=3D$((seq + 1))
-> +		sleep 0.02
-> +	done
-> +}
+> +	# Hold lock via fd in a subshell; exec ensures killing $lock_pid
+> +	# closes the lock fd directly (no fork/child fd inheritance).
+> +	(
+> +		exec 9<"$testfile"
+> +		flock --exclusive --nonblock 9 || exit 1
+> +		exec sleep 300
+> +	) &
+> +	lock_pid=3D$!
+> +	sleep 0.5
 > +
-> +random_sleep_seconds()
-> +{
-> +	local min_sec=3D"$1"
-> +	local max_sec=3D"$2"
-> +	local wait_sec
-> +	local span
+> +	if ! kill -0 "$lock_pid" 2>/dev/null; then
+> +		result "$num" "$name" FAIL "flock holder died immediately"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
 > +
-> +	span=3D$((max_sec - min_sec + 1))
-> +	wait_sec=3D$((min_sec + RANDOM % span))
-> +	sleep "$wait_sec"
-> +}
+> +	echo "flock_after_reset_test" > "$TRIGGER_PATH" 2>/dev/null || {
+> +		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
+> +		result "$num" "$name" FAIL "reset trigger failed"
+> +		rm -f "$testfile"
+> +		return
+> +	}
 > +
-> +reset_injector()
-> +{
-> +	set +e
-> +	local trigger_path=3D"$1"
-> +	local seq=3D0
-> +	local ts
-> +	local reason
-> +	local rc
+> +	if ! wait_reset_done 30; then
+> +		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
+> +		result "$num" "$name" FAIL "reset did not complete"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
 > +
-> +	while [[ -f "$RESET_FLAG" ]]; do
-> +		random_sleep_seconds "$RESET_MIN_SEC" "$RESET_MAX_SEC"
-> +		[[ -f "$RESET_FLAG" ]] || break
+> +	sc_after=3D"$(read_status_field "success_count")"
+> +	if [[ "$sc_after" -le "$sc_before" ]]; then
+> +		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
+> +		result "$num" "$name" FAIL "success_count did not increment"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
 > +
-> +		ts=3D"$(now_ms)"
-> +		reason=3D"stress_${seq}_${ts}"
-> +		if echo "$reason" | $SUDO tee "$trigger_path" > /dev/null 2>&1; then
-> +			rc=3D0
-> +		else
-> +			rc=3D$?
-> +		fi
-> +		printf '%s,%s,%s,%s\n' "$ts" "$seq" "$reason" "$rc" >> "$RESET_LOG"
-> +		seq=3D$((seq + 1))
-> +	done
-> +}
+> +	# After teardown, CEPH_I_ERROR_FILELOCK is set on the inode.
+> +	# A same-client lock attempt should fail (EIO), NOT succeed.
+> +	probe_rc=3D0
+> +	flock --exclusive --nonblock "$testfile" true 2>/dev/null && probe_rc=
+=3D0 || probe_rc=3D$?
+> +	if [[ "$probe_rc" -eq 0 ]]; then
+> +		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
+> +		result "$num" "$name" FAIL \
+> +			"same-client probe succeeded, expected EIO from stale lock state"
+> +		rm -f "$testfile"
+> +		return
+> +	fi
 > +
-> +status_sampler()
-> +{
-> +	set +e
-> +	local status_path=3D"$1"
-> +	local ts
-> +	local kv_line
+> +	# Kill the holder -- the exec'd sleep IS $lock_pid, so killing it
+> +	# closes fd 9 directly.  VFS flock release fires ceph_fl_release_lock()=
+,
+> +	# which decrements i_filelock_ref to 0 and clears CEPH_I_ERROR_FILELOCK=
+.
+> +	kill "$lock_pid" 2>/dev/null
+> +	wait "$lock_pid" 2>/dev/null
 > +
-> +	while [[ -f "$WORKLOAD_FLAG" || -f "$RESET_FLAG" ]]; do
-> +		ts=3D"$(now_ms)"
-> +		if $SUDO test -r "$status_path"; then
-> +			kv_line=3D"$($SUDO awk -F': ' 'NF>=3D2 {gsub(/ /, "", $1); gsub(/ /, =
-"", $2); printf "%s=3D%s;", $1, $2}' "$status_path")"
-> +			printf '%s,%s\n' "$ts" "$kv_line" >> "$STATUS_LOG"
-> +		fi
+> +	# After the holder exits, a fresh lock should be acquirable.
+> +	# The reset teardown sends SESSION_REQUEST_CLOSE so the MDS
+> +	# releases locks promptly, but retry briefly in case the
+> +	# message races with the connection close.
+> +	local attempt
+> +	probe_rc=3D1
+> +	for attempt in 1 2 3 4 5; do
+> +		probe_rc=3D0
+> +		flock --exclusive --nonblock "$testfile" true 2>/dev/null \
+> +			&& probe_rc=3D0 || probe_rc=3D$?
+> +		[[ "$probe_rc" -eq 0 ]] && break
 > +		sleep 1
 > +	done
-> +}
-> +
-> +stop_pid_with_timeout()
-> +{
-> +	local pid=3D"$1"
-> +	local name=3D"$2"
-> +	local timeout=3D"$3"
-> +	local waited=3D0
-> +
-> +	if [[ "$pid" -le 0 ]]; then
-> +		return 0
+> +	if [[ "$probe_rc" -ne 0 ]]; then
+> +		result "$num" "$name" FAIL \
+> +			"cannot acquire fresh lock after holder exit (rc=3D$probe_rc, ${attem=
+pt} attempts)"
+> +		rm -f "$testfile"
+> +		return
 > +	fi
 > +
-> +	while kill -0 "$pid" 2>/dev/null; do
-> +		if (( waited >=3D timeout )); then
-> +			log_summary "Timeout waiting for $name (pid=3D$pid), sending SIGTERM/=
-SIGKILL"
-> +			kill -TERM "$pid" 2>/dev/null || true
-> +			sleep 1
-> +			kill -KILL "$pid" 2>/dev/null || true
-> +			wait "$pid" 2>/dev/null || true
-> +			return 1
+> +	# Verify file content survived
+> +	grep -q "flock_test_content" "$testfile" 2>/dev/null || {
+> +		result "$num" "$name" FAIL "file content corrupted after reset"
+> +		rm -f "$testfile"
+> +		return
+> +	}
+> +
+> +	rm -f "$testfile"
+> +	result "$num" "$name" PASS "stale lock detected, fresh lock acquired af=
+ter holder exit"
+> +}
+> +
+> +# --- Test 4: unmount_during_reset -------------------------------------=
+------
+> +#
+> +# Mount a fresh CephFS, trigger reset, immediately unmount. The
+> +# ceph_mdsc_destroy() path must wake blocked waiters with -ESHUTDOWN
+> +# and not hang.
+> +
+> +test_unmount_during_reset()
+> +{
+> +	local num=3D4
+> +	local name=3D"unmount_during_reset"
+> +	local temp_mnt=3D"/tmp/ceph_corner_mnt_$$"
+> +	local mount_opts=3D""
+> +	local mount_src=3D""
+> +	local temp_trigger=3D""
+> +	local temp_status=3D""
+> +	local temp_client=3D""
+> +	local temp_file=3D"$temp_mnt/.reset_corner_umount_$$"
+> +	local phase=3D""
+> +	local trigger_ok=3D0
+> +	local attempt
+> +	local -a new_clients=3D()
+> +	declare -A existing_clients=3D()
+> +
+> +	mount_src=3D"$(awk -v mp=3D"$MOUNT_POINT" '$2 =3D=3D mp && $3 =3D=3D "c=
+eph" {print $1; exit}' /proc/mounts 2>/dev/null)"
+> +	mount_opts=3D"$(awk -v mp=3D"$MOUNT_POINT" '$2 =3D=3D mp && $3 =3D=3D "=
+ceph" {print $4; exit}' /proc/mounts 2>/dev/null)"
+> +
+> +	if [[ -z "$mount_src" ]]; then
+> +		result "$num" "$name" SKIP "cannot determine mount source from /proc/m=
+ounts"
+> +		return
+> +	fi
+> +
+> +	while IFS=3D read -r existing; do
+> +		[[ -n "$existing" ]] || continue
+> +		existing_clients["$existing"]=3D1
+> +	done < <(list_reset_clients)
+> +
+> +	mkdir -p "$temp_mnt"
+> +
+> +	if ! mount -t ceph "$mount_src" "$temp_mnt" -o "$mount_opts" 2>/dev/nul=
+l; then
+> +		result "$num" "$name" SKIP "cannot mount additional CephFS instance"
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		return
+> +	fi
+> +
+> +	ls "$temp_mnt" > /dev/null 2>&1
+> +	sync
+> +	sleep 1
+> +
+> +	for attempt in $(seq 1 50); do
+> +		new_clients=3D()
+> +		while IFS=3D read -r entry; do
+> +			[[ -n "$entry" ]] || continue
+> +			if [[ -n "${existing_clients[$entry]+x}" ]]; then
+> +				continue
+> +			fi
+> +			new_clients+=3D("$entry")
+> +		done < <(list_reset_clients)
+> +
+> +		if [[ "${#new_clients[@]}" -eq 1 ]]; then
+> +			temp_client=3D"${new_clients[0]}"
+> +			break
 > +		fi
-> +		sleep 1
-> +		waited=3D$((waited + 1))
-> +	done
 > +
-> +	wait "$pid" 2>/dev/null || true
-> +	return 0
-> +}
-> +
-> +detect_privileges()
-> +{
-> +	if [[ -r "$DEBUGFS_ROOT" ]]; then
-> +		SUDO=3D""
-> +	elif sudo -n true 2>/dev/null; then
-> +		SUDO=3D"sudo"
-> +	else
-> +		echo "WARNING: $DEBUGFS_ROOT is not readable and passwordless sudo is =
-not available" >&2
-> +		echo "WARNING: reset injection, debugfs status checks, and dmesg captu=
-re will not work" >&2
-> +	fi
-> +
-> +	if $SUDO dmesg > /dev/null 2>&1; then
-> +		DMESG_CMD=3D"$SUDO dmesg"
-> +	else
-> +		DMESG_CMD=3D""
-> +		echo "WARNING: dmesg is not accessible; kernel errors (hung tasks) wil=
-l not be detected" >&2
-> +	fi
-> +}
-> +
-> +check_dmesg()
-> +{
-> +	local start_epoch=3D"$1"
-> +
-> +	if [[ -z "$DMESG_CMD" ]]; then
-> +		return 0
-> +	fi
-> +
-> +	if ! $DMESG_CMD --since "@$start_epoch" > "$DMESG_LOG" 2>/dev/null; the=
-n
-> +		if ! $DMESG_CMD > "$DMESG_LOG" 2>/dev/null; then
-> +			log_summary "WARNING: dmesg capture failed unexpectedly"
-> +			return 0
+> +		if [[ "${#new_clients[@]}" -gt 1 ]]; then
+> +			break
 > +		fi
-> +		log_summary "dmesg --since unsupported; captured full dmesg"
+> +
+> +		sleep 0.1
+> +	done
+> +
+> +	if [[ -z "$temp_client" ]]; then
+> +		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		result "$num" "$name" SKIP "cannot identify debugfs client for temp mo=
+unt"
+> +		return
 > +	fi
 > +
-> +	if grep -qi "hung task" "$DMESG_LOG" 2>/dev/null; then
-> +		log_summary "ERROR: kernel log contains 'hung task' during test window=
-"
-> +		return 1
+> +	if [[ "${#new_clients[@]}" -gt 1 ]]; then
+> +		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		result "$num" "$name" SKIP "multiple new debugfs clients appeared"
+> +		return
 > +	fi
 > +
-> +	return 0
+> +	temp_trigger=3D"$DEBUGFS_ROOT/$temp_client/reset/trigger"
+> +	temp_status=3D"$DEBUGFS_ROOT/$temp_client/reset/status"
+> +
+> +	echo "umount_dirty_seed" > "$temp_file" 2>/dev/null || {
+> +		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		result "$num" "$name" FAIL "cannot create dirty state on temp mount"
+> +		return
+> +	}
+> +	sync "$temp_file"
+> +	python3 -c "
+> +import os, sys
+> +fd =3D os.open('$temp_file', os.O_WRONLY | os.O_APPEND)
+> +os.write(fd, b'dirty_for_umount_test\\n')
+> +os.close(fd)
+> +" 2>/dev/null || {
+> +		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		result "$num" "$name" FAIL "cannot dirty temp mount for reset overlap"
+> +		return
+> +	}
+> +
+> +	echo "unmount_test" > "$temp_trigger" 2>/dev/null && trigger_ok=3D1 || =
+trigger_ok=3D0
+> +	if [[ "$trigger_ok" -ne 1 ]]; then
+> +		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		result "$num" "$name" FAIL "cannot trigger reset on temp mount"
+> +		return
+> +	fi
+> +
+> +	if ! wait_status_nonidle "$temp_status" 10; then
+> +		phase=3D"$(awk -F': ' '$1 =3D=3D "phase" {print $2}' "$temp_status" 2>=
+/dev/null)"
+> +		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		result "$num" "$name" FAIL \
+> +			"reset never became active before umount (phase=3D${phase:-unknown})"
+> +		return
+> +	fi
+> +
+> +	local umount_ok=3D0
+> +	timeout 30 umount "$temp_mnt" 2>/dev/null && umount_ok=3D1
+> +
+> +	if [[ "$umount_ok" -ne 1 ]]; then
+> +		umount -l "$temp_mnt" 2>/dev/null || true
+> +		rmdir "$temp_mnt" 2>/dev/null
+> +		result "$num" "$name" FAIL "umount hung for >30s"
+> +		return
+> +	fi
+> +
+> +	rmdir "$temp_mnt" 2>/dev/null
+> +
+> +	ls "$MOUNT_POINT" > /dev/null 2>&1 || {
+> +		result "$num" "$name" FAIL "original mount unhealthy after test"
+> +		return
+> +	}
+> +
+> +	result "$num" "$name" PASS
 > +}
 > +
-> +cleanup()
-> +{
-> +	rm -f "$WORKLOAD_FLAG" "$RESET_FLAG"
-> +	local pid
-> +	for pid in "${IO_WORKER_PIDS[@]}" "${RENAME_WORKER_PIDS[@]}" "$RESET_PI=
-D" "$STATUS_PID"; do
-> +		[[ "$pid" -gt 0 ]] 2>/dev/null && kill "$pid" 2>/dev/null || true
-> +	done
-> +	wait 2>/dev/null || true
-> +}
+> +# --- Main -------------------------------------------------------------=
+-------
 > +
-> +parse_args()
+> +usage()
 > +{
-> +	while [[ $# -gt 0 ]]; do
-> +		case "$1" in
-> +		--mount-point)
-> +			MOUNT_POINT=3D"$2"
-> +			shift 2
-> +			;;
-> +		--profile)
-> +			PROFILE=3D"$2"
-> +			shift 2
-> +			;;
-> +		--duration-sec)
-> +			DURATION_SEC=3D"$2"
-> +			shift 2
-> +			;;
-> +		--cooldown-sec)
-> +			COOLDOWN_SEC=3D"$2"
-> +			shift 2
-> +			;;
-> +		--file-count)
-> +			FILE_COUNT=3D"$2"
-> +			shift 2
-> +			;;
-> +		--io-workers)
-> +			IO_WORKERS=3D"$2"
-> +			shift 2
-> +			;;
-> +		--rename-workers)
-> +			RENAME_WORKERS=3D"$2"
-> +			shift 2
-> +			;;
-> +		--out-dir)
-> +			OUT_DIR=3D"$2"
-> +			shift 2
-> +			;;
-> +		--client-id)
-> +			CLIENT_ID=3D"$2"
-> +			shift 2
-> +			;;
-> +		--debugfs-root)
-> +			DEBUGFS_ROOT=3D"$2"
-> +			shift 2
-> +			;;
-> +		--slo-seconds)
-> +			SLO_SECONDS=3D"$2"
-> +			shift 2
-> +			;;
-> +		--no-reset)
-> +			EXPECT_RESET=3D0
-> +			shift
-> +			;;
-> +		--help|-h)
-> +			usage
-> +			exit 0
-> +			;;
-> +		*)
-> +			echo "Unknown option: $1" >&2
-> +			usage
-> +			exit 2
-> +			;;
-> +		esac
-> +	done
+> +	cat <<EOF
+> +Usage: $0 --mount-point <path> [--client-id <id>] [--debugfs-root <path>=
+]
+> +
+> +Runs targeted corner-case tests for the CephFS client reset feature.
+> +Requires root (debugfs access) and a mounted CephFS filesystem.
+> +
+> +Options:
+> +  --mount-point PATH     CephFS mount point (required)
+> +  --client-id ID         Ceph debugfs client id (auto-detect if one clie=
+nt)
+> +  --debugfs-root PATH    Debugfs ceph root (default: /sys/kernel/debug/c=
+eph)
+> +  --help                 Show this message
+> +EOF
 > +}
 > +
 > +main()
 > +{
-> +	local start_epoch
-> +	local trigger_path=3D""
-> +	local status_path=3D""
-> +	local final_rc=3D0
-> +	local reset_enabled=3D0
-> +	local i
-> +
-> +	parse_args "$@"
+> +	while [[ $# -gt 0 ]]; do
+> +		case "$1" in
+> +		--mount-point)   MOUNT_POINT=3D"$2"; shift 2 ;;
+> +		--client-id)     DEBUGFS_CLIENT=3D"$2"; shift 2 ;;
+> +		--debugfs-root)  DEBUGFS_ROOT=3D"$2"; shift 2 ;;
+> +		--help|-h)       usage; exit 0 ;;
+> +		*)               echo "Unknown option: $1" >&2; usage; exit 2 ;;
+> +		esac
+> +	done
 > +
 > +	if [[ -z "$MOUNT_POINT" ]]; then
 > +		echo "--mount-point is required" >&2
@@ -675,172 +778,28 @@ D" "$STATUS_PID"; do
 > +		exit "$KSFT_SKIP"
 > +	fi
 > +
-> +	if ! touch "$MOUNT_POINT/.ceph_reset_test_probe" 2>/dev/null; then
-> +		echo "SKIP: Mount point is not writable: $MOUNT_POINT" >&2
-> +		exit "$KSFT_SKIP"
+> +	discover_debugfs
+> +	TRIGGER_PATH=3D"$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset/trigger"
+> +	STATUS_PATH=3D"$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset/status"
+> +
+> +	log "CephFS client reset corner case tests"
+> +	log "Mount: $MOUNT_POINT"
+> +	log "Client: $DEBUGFS_CLIENT"
+> +	echo ""
+> +
+> +	test_ebusy_rejection
+> +	test_dirty_caps_at_reset
+> +	test_flock_after_reset
+> +	test_unmount_during_reset
+> +
+> +	echo ""
+> +	echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed, $SKIP_COUNT skip=
+ped (of $TOTAL)"
+> +
+> +	if [[ "$FAIL_COUNT" -gt 0 ]]; then
+> +		exit 1
 > +	fi
-> +	rm -f "$MOUNT_POINT/.ceph_reset_test_probe"
-> +
-> +	if ! command -v python3 > /dev/null 2>&1; then
-> +		echo "SKIP: python3 is required but not found in PATH" >&2
-> +		exit "$KSFT_SKIP"
-> +	fi
-> +
-> +	if ! stat -f -c '%T' "$MOUNT_POINT" 2>/dev/null | grep -qi ceph; then
-> +		echo "WARNING: $MOUNT_POINT does not appear to be a CephFS mount" >&2
-> +	fi
-> +
-> +	detect_privileges
-> +
-> +	set_profile_defaults
-> +	if [[ "$EXPECT_RESET" -eq 0 ]]; then
-> +		PROFILE=3D"baseline"
-> +		RESET_MIN_SEC=3D0
-> +		RESET_MAX_SEC=3D0
-> +	fi
-> +
-> +	if ! [[ "$IO_WORKERS" =3D~ ^[0-9]+$ && "$RENAME_WORKERS" =3D~ ^[0-9]+$ =
-]]; then
-> +		echo "io-workers and rename-workers must be integers" >&2
-> +		exit 2
-> +	fi
-> +
-> +	if [[ "$IO_WORKERS" -le 0 || "$RENAME_WORKERS" -le 0 ]]; then
-> +		echo "io-workers and rename-workers must be > 0" >&2
-> +		exit 2
-> +	fi
-> +
-> +	if [[ -z "$OUT_DIR" ]]; then
-> +		OUT_DIR=3D"/tmp/ceph_reset_stress_${RUN_ID}"
-> +	fi
-> +	mkdir -p "$OUT_DIR"
-> +
-> +	WORKLOAD_FLAG=3D"$OUT_DIR/workload.running"
-> +	RESET_FLAG=3D"$OUT_DIR/reset.running"
-> +
-> +	DATA_DIR=3D"$MOUNT_POINT/ceph_reset_stress_${RUN_ID}"
-> +	mkdir -p "$DATA_DIR"
-> +
-> +	IO_LOG=3D"$OUT_DIR/io.log"
-> +	RENAME_LOG=3D"$OUT_DIR/rename.log"
-> +	RESET_LOG=3D"$OUT_DIR/reset.log"
-> +	STATUS_LOG=3D"$OUT_DIR/status.log"
-> +	STATUS_BEFORE=3D"$OUT_DIR/reset_status.before"
-> +	STATUS_FINAL=3D"$OUT_DIR/reset_status.final"
-> +	DMESG_LOG=3D"$OUT_DIR/dmesg.log"
-> +	SUMMARY_LOG=3D"$OUT_DIR/summary.log"
-> +	REPORT_JSON=3D"$OUT_DIR/validator_report.json"
-> +
-> +	: > "$IO_LOG"
-> +	: > "$RENAME_LOG"
-> +	: > "$RESET_LOG"
-> +	: > "$STATUS_LOG"
-> +	: > "$SUMMARY_LOG"
-> +
-> +	start_epoch=3D"$(date +%s)"
-> +
-> +	log_summary "Starting Ceph reset stress test"
-> +	log_summary "Profile=3D$PROFILE duration=3D${DURATION_SEC}s cooldown=3D=
-${COOLDOWN_SEC}s file_count=3D${FILE_COUNT} io_workers=3D${IO_WORKERS} rena=
-me_workers=3D${RENAME_WORKERS}"
-> +	[[ -n "$SUDO" ]] && log_summary "Using sudo for privileged operations"
-> +	[[ -z "$DMESG_CMD" ]] && log_summary "WARNING: dmesg not available; hun=
-g task detection disabled"
-> +	log_summary "Artifacts=3D$OUT_DIR"
-> +	log_summary "Data dir=3D$DATA_DIR"
-> +
-> +	init_dataset
-> +
-> +	if [[ "$EXPECT_RESET" -eq 1 ]]; then
-> +		discover_client_id
-> +		trigger_path=3D"$DEBUGFS_ROOT/$CLIENT_ID/reset/trigger"
-> +		status_path=3D"$DEBUGFS_ROOT/$CLIENT_ID/reset/status"
-> +		if ! $SUDO test -w "$trigger_path"; then
-> +			echo "SKIP: Reset trigger is not writable: $trigger_path" >&2
-> +			exit "$KSFT_SKIP"
-> +		fi
-> +		if ! $SUDO test -r "$status_path"; then
-> +			echo "SKIP: Reset status is not readable: $status_path" >&2
-> +			exit "$KSFT_SKIP"
-> +		fi
-> +		$SUDO cat "$status_path" > "$STATUS_BEFORE" || true
-> +		reset_enabled=3D1
-> +		log_summary "Using ceph client id: $CLIENT_ID"
-> +	fi
-> +
-> +	trap cleanup EXIT INT TERM
-> +
-> +	touch "$WORKLOAD_FLAG"
-> +	for ((i =3D 0; i < IO_WORKERS; i++)); do
-> +		io_worker "$i" &
-> +		IO_WORKER_PIDS+=3D("$!")
-> +	done
-> +
-> +	for ((i =3D 0; i < RENAME_WORKERS; i++)); do
-> +		rename_worker "$i" &
-> +		RENAME_WORKER_PIDS+=3D("$!")
-> +	done
-> +
-> +	if [[ "$reset_enabled" -eq 1 ]]; then
-> +		touch "$RESET_FLAG"
-> +		reset_injector "$trigger_path" &
-> +		RESET_PID=3D$!
-> +
-> +		status_sampler "$status_path" &
-> +		STATUS_PID=3D$!
-> +	fi
-> +
-> +	sleep "$DURATION_SEC"
-> +
-> +	if [[ "$reset_enabled" -eq 1 ]]; then
-> +		rm -f "$RESET_FLAG"
-> +		stop_pid_with_timeout "$RESET_PID" "reset_injector" 20 || final_rc=3D1
-> +		log_summary "Injector stopped; entering cooldown=3D${COOLDOWN_SEC}s"
-> +	fi
-> +
-> +	sleep "$COOLDOWN_SEC"
-> +
-> +	rm -f "$WORKLOAD_FLAG"
-> +	for i in "${!IO_WORKER_PIDS[@]}"; do
-> +		stop_pid_with_timeout "${IO_WORKER_PIDS[$i]}" "io_worker[$i]" 20 || fi=
-nal_rc=3D1
-> +	done
-> +	for i in "${!RENAME_WORKER_PIDS[@]}"; do
-> +		stop_pid_with_timeout "${RENAME_WORKER_PIDS[$i]}" "rename_worker[$i]" =
-20 || final_rc=3D1
-> +	done
-> +
-> +	if [[ "$reset_enabled" -eq 1 ]]; then
-> +		stop_pid_with_timeout "$STATUS_PID" "status_sampler" 10 || final_rc=3D=
-1
-> +		$SUDO cat "$status_path" > "$STATUS_FINAL" || true
-> +	fi
-> +
-> +	if ! check_dmesg "$start_epoch"; then
-> +		final_rc=3D1
-> +	fi
-> +
-> +	if ! python3 "$SCRIPT_DIR/validate_consistency.py" \
-> +		--data-dir "$DATA_DIR" \
-> +		--file-count "$FILE_COUNT" \
-> +		--io-log "$IO_LOG" \
-> +		--rename-log "$RENAME_LOG" \
-> +		--reset-log "$RESET_LOG" \
-> +		--status-final "$STATUS_FINAL" \
-> +		--slo-seconds "$SLO_SECONDS" \
-> +		--report-json "$REPORT_JSON" \
-> +		$( [[ "$reset_enabled" -eq 1 ]] && echo "--expect-reset" ); then
-> +		final_rc=3D1
-> +	fi
-> +
-> +	if [[ "$final_rc" -eq 0 ]]; then
-> +		log_summary "PASS: stress run completed successfully"
-> +	else
-> +		log_summary "FAIL: stress run detected one or more failures"
-> +	fi
-> +
-> +	log_summary "Artifacts available in: $OUT_DIR"
-> +	exit "$final_rc"
+> +	exit 0
 > +}
 > +
 > +main "$@"
