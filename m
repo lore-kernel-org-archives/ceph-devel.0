@@ -1,91 +1,92 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03AFF3BF68F
-	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 12:28:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F0BE3F074C
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 12:28:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778156884; cv=none; b=ulY8ukHw8FyWIA37jQ2Da+Dhacgs950t9n3+ue8fCzUeEykiX59wtd9s7+2qEiaK/u3dGR2i4BiYKS0J2BDflZZtMQVI/ug0syndqWIUdqIg6Vgf3ndcbuo0PsCN+Iw8ZATRAhysXIQLdC1OzuOyZ/PRo9WNzHOzx7/G9eMrtKE=
+	t=1778156884; cv=none; b=r/Ym8PFwCp7bq8arsxzO2m89XvybhUytUyTnQe3X2npODwqFDWJ+vsjAnlY3KJgTpfYSlPCVGcRVot8+oGE5E4g6UVU/nRs3SP/3iniw3Ulu/KdGm/ra++B3+5nNAFsCVNIDMiiHswZjjtYDXZIOcdyQlDm16SUHcfs3XXm1vlo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1778156884; c=relaxed/simple;
-	bh=r8IRd4p/s1qev9JUdnMphmL7ccbiMxBUwKDhBH1ikl0=;
+	bh=Ds+NWchAxLST5EnvxjghWpSx2cCAXjiNQobyoGIaRDs=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=XycAO5hn328UgrwKxdKCs0jrb3H3Kv/2TWPV7MixVag0QFDPB+FEgL/gFdwXxTMJz9rCH1tgMRXMG6lcHcymVfTCAGWN2Jx3r57tMymX56eBZOeAKUDPmrXUee4Jg2/P9+mRPXVlkbg9EcMzd7isilPd3Ja8N0OgHDSu6TDXBqo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PAwIh7lS; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=mE0IPaka; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=t/X565AMKFLiBwfgCm9If1LMCeRmt+KI6k8S27hWKRnLsS0bWUxpvpHhT3s+GACmf8hgJUTfWX8e+FruOwIo/E9DwdEbDTfMWVILs10vkz4L+wt1pBZXxaljMQLiidryK96sWug6NReTZm5kdXnNFj9pjetztSFUFeKSC2nJPzk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W1LpsHcp; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=rhEluNJj; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PAwIh7lS";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="mE0IPaka"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W1LpsHcp";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="rhEluNJj"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
 	s=mimecast20190719; t=1778156880;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=U5dMqKukHCSzl33nQzKbjII2zLA98OS6tdWQIRQl+ow=;
-	b=PAwIh7lSVWj2GNsToBbtVmWKr6LjA/Ie7vPXe/OCa00zb4fNBxp3dDkcWNScbNHrhJWxYN
-	oe1t6+ZreGZ9hQhj5/dsvloU55WLiaMI4tCAaTXPvvDu9vrSJTTDcwyaQLogF5VIAzMwJ/
-	ywndYmxiWy7rhb7e7GMrYkf9q4unn90=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=ob0h8gSVGLqT/7328u/2PbJUBEL3c1K2zmCjhJRA6LA=;
+	b=W1LpsHcpVqiAfi3uqaJCELFgFtcTp5Gvru3ir5HI69U1uz7yLF3q/XkbfdT0J/vrhMOl/w
+	3hSYKz5ZR/wS9lfF9kQRGgER9gaXusKhXmHyf9Is02wCmTGCFcJoanrFLrGXJwryu3y3/j
+	O68B8w/AXN0X9LvLTB+utnbJTjOKAJw=
+Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
+ [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-564-mgx8dvw4PbCeZAxm41sqiw-1; Thu, 07 May 2026 08:27:55 -0400
-X-MC-Unique: mgx8dvw4PbCeZAxm41sqiw-1
-X-Mimecast-MFC-AGG-ID: mgx8dvw4PbCeZAxm41sqiw_1778156874
-Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-bc5d20e193cso77355266b.1
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 05:27:55 -0700 (PDT)
+ us-mta-425-slEYMKj9PPqGK7EQpzHaAA-1; Thu, 07 May 2026 08:27:59 -0400
+X-MC-Unique: slEYMKj9PPqGK7EQpzHaAA-1
+X-Mimecast-MFC-AGG-ID: slEYMKj9PPqGK7EQpzHaAA_1778156878
+Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-67c1bea170dso590546a12.2
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 05:27:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1778156874; x=1778761674; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1778156877; x=1778761677; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=U5dMqKukHCSzl33nQzKbjII2zLA98OS6tdWQIRQl+ow=;
-        b=mE0IPakay2xvw+qrfsKftyR/27asPnOjVk+AAAd4S2vtTEwgqjdc6BotJvUqiO9/jM
-         yPfyoVwO9gt0x/Bea2cdV6gtMCH1THOhkTbi+l4MpUWYSfO18na0jCxjiP7AUGvEU/uH
-         PmqislzHOg2U2NcSbjNiPY+RYyggY8KukSlaKAQ98s4r3K7KlJlk+lwgEFLm4etU+hKz
-         0dxI+ykHRPVji40dRJx3lyW9exQpjw35/xxC5tBVu/tZXpU+KiJ98quGXpm2QPgiyHEQ
-         pTN1M4lRVKbGikcvakPyeptCy5AL3iAW8CqMk9VQ1Km6RiGwHotUV63Yn5LJ+xo86DSv
-         XADg==
+        bh=ob0h8gSVGLqT/7328u/2PbJUBEL3c1K2zmCjhJRA6LA=;
+        b=rhEluNJjpSsi3MFJnGOyKGZB/ch1fGk4+nGA8nvVlR9tHRWBZUMDlDB9p6RQMhRnD0
+         luVsDxqTTeJEc85c9lASOMriVYgpzikhIzk5QrvUpCj2VaY5INUH40W5U4D0PfXLX300
+         umM9b6gh10G8u0PYjLATbj7JgRLRcc5Gf5v4siCyA/9BLzro5TN1uiBr36+7RRf5/B7P
+         ksiLflHLZETKjoEbv9KOzP81P1z/ErMAQ1s7BztGETbL/TEkz2pxqalp/i91rwKEJ8OK
+         fNOFQU2D3TXFAWt6ZXqlZeX5/beQ7HaA4Y/3t8b5blDaGDarDfEpzC0CXV48WmVNEb0+
+         kQng==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778156874; x=1778761674;
+        d=1e100.net; s=20251104; t=1778156877; x=1778761677;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=U5dMqKukHCSzl33nQzKbjII2zLA98OS6tdWQIRQl+ow=;
-        b=osbfhcy139rlvHVulzqk2w8rcuVglJK+vAvCXiHwbhaOE0Qszk8w0ydjLHT4bchlYq
-         qNGmRJVnq96y0b+SCZ36clTD2y3cudKWNDJiPxvjGir+iql/XjD+06nhmyrQ18zXrIZb
-         VK4AH8/e4/+Z8aCD5vMM9f0hEe2kuBelD+Kcsu85OVmYgDxW+z2WkJzEafgS5m0jrkOC
-         6/ISjsEwTzQYHatUKcMl51NHTFJdZMHRO/nvgAyeu7+4bjedrQ7rk6l+QudRBglxq1Mz
-         Gem7nBNny8TP8nioZdV46b353Q7u2pIQ/5yns44gkkDLb+94JZ9Brv17x2MpTWoMBaGx
-         vzFQ==
-X-Gm-Message-State: AOJu0Yw+KpJveWUj30GNu1d29LTt/FOu1Pjp827+sBrNh2DxBODCVNFw
-	euK0GDo+czjhTSZ8E9nbQyNquoTuazBETZPhWT3HymagL0UnZSOjxXHVJQP2Ei3ry97/mlinBMT
-	lyqrddpYdHH+ICKIMRrJfLABEKNoKDrL1vnL6BV0cCse48AoaXIAOS0aJVAR920CXVqMlMCuq8/
-	n43jv5/4AB/38Lnwu4Im0NRPRX1q9ELe7im4Z9bQjS/Qb5soYiQQ==
-X-Gm-Gg: AeBDieuTdnoXnA6sSQmJkEPKM3dnmw+wJSnnXnF2pLnM2lfA5BaX/wnuW+p8OA91FZJ
-	hJ7YZEUo/hR5h6Ysomo1IZQIbfIs1tUixmUzP4uaQ8jaOUxSkQAoVKg4Stfe4AKd+DPHYkxldbn
-	u4KnP6iT/SoeYCn5cJjn9lr4QcokGJ7EAuKXohmMgIwzJjTgplWbZAgfVlWsegMDAuoYM4/QvO3
-	msku3hVYWHYqJpAoQmQmxrJlCxN1Ti3lm3KqI1evEt1AxmZ+yUdr2XNXMnHkB+13zNAJhshFXSD
-	F3KxGYCUdE1Yd5IEI4svuOKhOi7NS+V5ESe2ZvbyYFCNYjLLEACdaJuhxBHAZTRIaT+OETA9WCN
-	K7YfgmClK5EgKhbxzXUztdN1S6eT/EHaVU7VwB/sLR/ojfgCXSHx3KDqKQw7LwEvPqg==
-X-Received: by 2002:a17:907:a02:b0:b98:8494:3174 with SMTP id a640c23a62f3a-bc85cdae255mr134899966b.24.1778156873023;
-        Thu, 07 May 2026 05:27:53 -0700 (PDT)
-X-Received: by 2002:a17:907:a02:b0:b98:8494:3174 with SMTP id a640c23a62f3a-bc85cdae255mr134895966b.24.1778156872088;
-        Thu, 07 May 2026 05:27:52 -0700 (PDT)
+        bh=ob0h8gSVGLqT/7328u/2PbJUBEL3c1K2zmCjhJRA6LA=;
+        b=DMxU97F3X6+AF/6QCDOey1lT0v+P7sj50+vmGI0ActG0a2F8kk7UTrIrRGHHmAgwbj
+         sQiQqIRC3/ykLDqfNYA+WiwQ2ZZ1GQOvKxtKo8MtQ35cna5sCc71v+dPPYd/yyCSLg8T
+         Lnq+5NvBjp/MLd4MNmsuqa45P/SutBq73s+O8J6R+zhkUqhdaUg0CmLVisROXrB9OFuN
+         /RlbHQTmwDY+090vgnUW2wa7DcTW4OuPqDDTAysXG/DiXExDjjJ/Ee4VEv21geBsssYD
+         2oOEznlM8vCpn3yCqGxBYXufJ0rtaOH4TTKHEsCCu3DHcYlXmqzEl9J/pXqBYiT91AZQ
+         Gwng==
+X-Gm-Message-State: AOJu0YxHMKEOtNxEJGHJeC1U+NzA61D6XobrsxLxVrztJeWIHI2TSTvv
+	D3xTm1YTk5MFiZYWzqCT+baUn9aFxYiBvK/PdTkzgRpgz6l9ktUW+UGuQIjt71ViZrFdQfsxx3k
+	47SuZu27KTxxUvfOTRBjA6nPbyxBXVQP9e5BXtxV+kd85oOhtucMZeqnyk8USyloY+p2uCnsqlA
+	Xnxe+4AsVE9JNQ8URTY9QL320A331RCXazcfFMGYHWgcwZs1WJJw==
+X-Gm-Gg: AeBDietl2j9UmSUwdOmAkAp3V0dpOPeZkt6UX+f5/ZSLElcLyVa9o9nECd9tq7xRLFR
+	IXMXZy+/4+L3MEoCDpkZX+KfzICn+vBI2NrIhbj8X3svotQLhF5uRKZ5QS6UhZBRFV/4q2iwtul
+	Fam3fxqz3IbMm1NNWA+jrFkyzMsAZ/R3QQHfSbFpegubRk5XMTILhC5/skVxSMArnOJYion5fB6
+	jwZJExAs2v4WN6WkNZwNdTXMtEWmQyz1z389aJcYnmSLA4rcdGA0Ur1QJECKimEomZgdHkDiERf
+	tZ8p4Deom2+aO7hBYvMbBO1cIIqxgCdI1BF6Ah4le5bsvqSvns4+EfyWPF3W7tnWbzvOpJgukk9
+	OVQXgb71foqyQJpnSW/shIj2xPXV4bjuJ2Unn0XFNt9qxzfdJad7lHdDSmW9sAYRa5AsNIVxiuD
+	+l
+X-Received: by 2002:a17:907:e143:b0:bc6:41f0:9b2f with SMTP id a640c23a62f3a-bc641f09bf6mr218282666b.15.1778156876927;
+        Thu, 07 May 2026 05:27:56 -0700 (PDT)
+X-Received: by 2002:a17:907:e143:b0:bc6:41f0:9b2f with SMTP id a640c23a62f3a-bc641f09bf6mr218279366b.15.1778156875946;
+        Thu, 07 May 2026 05:27:55 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bc81cd34ce8sm76552566b.9.2026.05.07.05.27.51
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bc81cd34ce8sm76552566b.9.2026.05.07.05.27.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 May 2026 05:27:51 -0700 (PDT)
+        Thu, 07 May 2026 05:27:55 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v4 05/11] ceph: add client reset state machine and session teardown
-Date: Thu,  7 May 2026 12:27:31 +0000
-Message-Id: <20260507122737.2804094-6-amarkuze@redhat.com>
+Subject: [PATCH v4 09/11] selftests: ceph: add reset corner-case tests
+Date: Thu,  7 May 2026 12:27:35 +0000
+Message-Id: <20260507122737.2804094-10-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260507122737.2804094-1-amarkuze@redhat.com>
 References: <20260507122737.2804094-1-amarkuze@redhat.com>
@@ -97,741 +98,674 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add the client-side reset state machine, request gating, and manual
-session teardown implementation.
+Add targeted corner-case tests for the CephFS manual session reset
+feature.  Four sequential tests cover:
 
-Manual reset is an operator-triggered escape hatch for client/MDS
-stalemates in which caps, locks, or unsafe metadata state stop making
-forward progress.  The reset blocks new metadata work, attempts a
-bounded best-effort drain of dirty client state while sessions are
-still alive, and finally asks the MDS to close sessions before tearing
-local session state down directly.
+  [1/4] ebusy_rejection       - second reset rejected while first in-flight
+  [2/4] dirty_caps_at_reset   - reset with unflushed dirty caps
+  [3/4] flock_after_reset     - stale lock EIO + fresh lock after holder exit
+  [4/4] unmount_during_reset  - umount during active reset (ESHUTDOWN path)
 
-The reset state machine tracks four phases: IDLE -> QUIESCING ->
-DRAINING -> TEARDOWN -> IDLE.  QUIESCING is set synchronously by
-schedule_reset() before the workqueue item is dispatched, so that new
-metadata requests and file-lock acquisitions are gated immediately --
-even before the work function begins running.  All non-IDLE phases
-block callers on blocked_wq, preventing races with session teardown.
-
-The drain phase flushes mdlog state, dirty caps, and pending cap
-releases for a bounded interval.  State that still cannot make progress
-within that interval is discarded during teardown, which is the point
-of the reset: break the stalemate and allow fresh sessions to rebuild
-clean state.
-
-The session teardown follows the established check_new_map()
-forced-close pattern: unregister sessions under mdsc->mutex, then clean
-up caps and requests under s->s_mutex.  Reconnect is not attempted
-because the MDS only accepts reconnects during its own RECONNECT phase
-after restart, not from an active client.
-
-Blocked callers are released when reset completes and observe the final
-result via -EAGAIN (reset failed) or 0 (success).  Internal work-function
-errors such as -ENOMEM are not propagated to unrelated callers like
-open() or flock(); the detailed error remains in debugfs and
-tracepoints.
-
-The work function checks st->shutdown before each phase transition
-(DRAINING, TEARDOWN) so that a concurrent ceph_mdsc_destroy() is not
-overwritten.  If destroy already took ownership, the work function
-releases session references and returns without touching the state.
-
-The timeout calculation for blocked-request waiters uses max_t() to
-prevent jiffies underflow when the deadline has already passed.
-
-The close-grace sleep before teardown is a best-effort nudge to let
-queued REQUEST_CLOSE messages egress; it is not a correctness
-requirement since the MDS still has session_autoclose as a fallback.
-
-The destroy path marks reset as failed and wakes blocked waiters before
-cancel_work_sync() so unmount does not stall.
+Requires: mounted CephFS, debugfs access (root), flock(1) utility.
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- fs/ceph/locks.c      |  16 ++
- fs/ceph/mds_client.c | 508 +++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/mds_client.h |  46 ++++
- 3 files changed, 570 insertions(+)
+ .../filesystems/ceph/reset_corner_cases.sh    | 646 ++++++++++++++++++
+ 1 file changed, 646 insertions(+)
+ create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
 
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index c4ff2266bb94..677221bd64e0 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -249,6 +249,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- {
- 	struct inode *inode = file_inode(file);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
-+	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	int err = 0;
- 	u16 op = CEPH_MDS_OP_SETFILELOCK;
-@@ -275,6 +276,13 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- 		return -EIO;
- 	}
- 
-+	/* Wait for reset to complete before acquiring new locks */
-+	if (op == CEPH_MDS_OP_SETFILELOCK && !lock_is_unlock(fl)) {
-+		err = ceph_mdsc_wait_for_reset(mdsc);
-+		if (err)
-+			return err;
-+	}
+diff --git a/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh b/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
+new file mode 100755
+index 000000000000..a6dae84a616d
+--- /dev/null
++++ b/tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
+@@ -0,0 +1,646 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++#
++# CephFS client reset corner case tests.
++# Runs a checklist of targeted tests that exercise specific reset
++# code paths not covered by the stress tests.
++#
++# Requires: mounted CephFS, debugfs access (root), flock(1) utility.
 +
- 	if (lock_is_read(fl))
- 		lock_cmd = CEPH_LOCK_SHARED;
- 	else if (lock_is_write(fl))
-@@ -311,6 +319,7 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
- {
- 	struct inode *inode = file_inode(file);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
-+	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	int err = 0;
- 	u8 wait = 0;
-@@ -330,6 +339,13 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
- 		return -EIO;
- 	}
- 
-+	/* Wait for reset to complete before acquiring new locks */
-+	if (!lock_is_unlock(fl)) {
-+		err = ceph_mdsc_wait_for_reset(mdsc);
-+		if (err)
-+			return err;
-+	}
++set -uo pipefail
 +
- 	if (IS_SETLKW(cmd))
- 		wait = 1;
- 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 6ab5031e697a..ce773b1095da 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -6,6 +6,7 @@
- #include <linux/slab.h>
- #include <linux/gfp.h>
- #include <linux/sched.h>
-+#include <linux/delay.h>
- #include <linux/debugfs.h>
- #include <linux/seq_file.h>
- #include <linux/ratelimit.h>
-@@ -65,6 +66,7 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
- 			    struct list_head *head);
- static void ceph_cap_release_work(struct work_struct *work);
- static void ceph_cap_reclaim_work(struct work_struct *work);
-+static void ceph_mdsc_reset_workfn(struct work_struct *work);
- 
- static const struct ceph_connection_operations mds_con_ops;
- 
-@@ -3844,6 +3846,22 @@ int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc, struct inode *dir,
- 	struct ceph_client *cl = mdsc->fsc->client;
- 	int err = 0;
- 
-+	/*
-+	 * If a reset is in progress, wait for it to complete.
-+	 *
-+	 * This is best-effort: a request can pass this check just
-+	 * before the phase leaves IDLE and proceed concurrently with
-+	 * reset.  That is acceptable because (a) such requests will
-+	 * either complete normally or fail and be retried by the
-+	 * caller, and (b) adding lock serialization here would
-+	 * penalize every request for a rare manual operation.
-+	 */
-+	err = ceph_mdsc_wait_for_reset(mdsc);
-+	if (err) {
-+		doutc(cl, "wait_for_reset failed: %d\n", err);
-+		return err;
-+	}
++KSFT_SKIP=4
 +
- 	/* take CAP_PIN refs for r_inode, r_parent, r_old_dentry */
- 	if (req->r_inode)
- 		ceph_get_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
-@@ -5266,6 +5284,474 @@ static int send_mds_reconnect(struct ceph_mds_client *mdsc,
- 	return err;
- }
- 
-+const char *ceph_reset_phase_name(enum ceph_client_reset_phase phase)
++# kselftest auto-detect: when invoked with no arguments (e.g. by
++# "make run_tests"), find a CephFS mount automatically or skip.
++if [[ $# -eq 0 ]]; then
++	MOUNT_POINT="$(findmnt -t ceph -n -o TARGET 2>/dev/null | head -1)"
++	if [[ -z "$MOUNT_POINT" ]]; then
++		echo "SKIP: No CephFS mount found and --mount-point not specified"
++		exit "$KSFT_SKIP"
++	fi
++	exec "$0" --mount-point "$MOUNT_POINT"
++fi
++
++MOUNT_POINT=""
++DEBUGFS_ROOT="/sys/kernel/debug/ceph"
++DEBUGFS_CLIENT=""
++TRIGGER_PATH=""
++STATUS_PATH=""
++TEMP_MNT=""
++
++PASS_COUNT=0
++FAIL_COUNT=0
++SKIP_COUNT=0
++TOTAL=4
++
++log()
 +{
-+	switch (phase) {
-+	case CEPH_CLIENT_RESET_IDLE:	  return "idle";
-+	case CEPH_CLIENT_RESET_QUIESCING: return "quiescing";
-+	case CEPH_CLIENT_RESET_DRAINING:  return "draining";
-+	case CEPH_CLIENT_RESET_TEARDOWN:  return "teardown";
-+	default:			  return "unknown";
-+	}
++	printf '[%s] %s\n' "$(date -u +%H:%M:%S)" "$1"
 +}
 +
-+/**
-+ * ceph_mdsc_wait_for_reset - wait for an active reset to complete
-+ * @mdsc: MDS client
-+ *
-+ * Returns 0 if reset completed successfully or no reset was active.
-+ * Returns -EAGAIN if reset completed with an error, signalling the
-+ * caller to retry.  The internal error (e.g. -ENOMEM) is not propagated
-+ * because callers like open() or flock() have no way to act on
-+ * work-function internals.  The detailed error is available via debugfs
-+ * reset/status and tracepoints.
-+ * Returns -ETIMEDOUT if we timed out waiting.
-+ * Returns -ERESTARTSYS if interrupted by signal.
-+ */
-+int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc)
++result()
 +{
-+	struct ceph_client_reset_state *st = &mdsc->reset_state;
-+	struct ceph_client *cl = mdsc->fsc->client;
-+	unsigned long deadline = jiffies + CEPH_CLIENT_RESET_WAIT_TIMEOUT_SEC * HZ;
-+	int blocked_count;
-+	long remaining;
-+	long wait_ret;
-+	int ret;
++	local num="$1"
++	local name="$2"
++	local status="$3"
++	local detail="${4:-}"
 +
-+	if (ceph_reset_is_idle(st))
-+		return 0;
++	case "$status" in
++	PASS) PASS_COUNT=$((PASS_COUNT + 1)) ;;
++	FAIL) FAIL_COUNT=$((FAIL_COUNT + 1)) ;;
++	SKIP) SKIP_COUNT=$((SKIP_COUNT + 1)) ;;
++	esac
 +
-+	blocked_count = atomic_inc_return(&st->blocked_requests);
-+	doutc(cl, "request blocked during reset, %d total blocked\n",
-+	      blocked_count);
-+
-+retry:
-+	remaining = max_t(long, deadline - jiffies, 1);
-+	wait_ret = wait_event_interruptible_timeout(st->blocked_wq,
-+						    ceph_reset_is_idle(st),
-+						    remaining);
-+
-+	if (wait_ret == 0) {
-+		atomic_dec(&st->blocked_requests);
-+		pr_warn_client(cl, "timed out waiting for reset to complete\n");
-+		return -ETIMEDOUT;
-+	}
-+	if (wait_ret < 0) {
-+		atomic_dec(&st->blocked_requests);
-+		return (int)wait_ret;  /* -ERESTARTSYS */
-+	}
-+
-+	/*
-+	 * Verify phase is still IDLE under the lock.  If another reset
-+	 * was scheduled between the wake-up and this check, loop back
-+	 * and wait for it to finish rather than returning a stale result.
-+	 */
-+	spin_lock(&st->lock);
-+	if (st->phase != CEPH_CLIENT_RESET_IDLE) {
-+		spin_unlock(&st->lock);
-+		if (time_before(jiffies, deadline))
-+			goto retry;
-+		atomic_dec(&st->blocked_requests);
-+		return -ETIMEDOUT;
-+	}
-+	ret = st->last_errno;
-+	spin_unlock(&st->lock);
-+
-+	atomic_dec(&st->blocked_requests);
-+	return ret ? -EAGAIN : 0;
-+}
-+
-+static void ceph_mdsc_reset_complete(struct ceph_mds_client *mdsc, int ret)
-+{
-+	struct ceph_client_reset_state *st = &mdsc->reset_state;
-+
-+	spin_lock(&st->lock);
-+	/*
-+	 * If destroy already marked us as shut down, it owns the
-+	 * final bookkeeping and waiter wakeup.  Just bail so we
-+	 * don't overwrite its state.
-+	 */
-+	if (st->shutdown) {
-+		spin_unlock(&st->lock);
-+		return;
-+	}
-+	st->last_finish = jiffies;
-+	st->last_errno = ret;
-+	st->phase = CEPH_CLIENT_RESET_IDLE;
-+	if (ret)
-+		st->failure_count++;
++	if [[ -n "$detail" ]]; then
++		printf '[%d/%d] %-30s %s  (%s)\n' "$num" "$TOTAL" "$name" "$status" "$detail"
 +	else
-+		st->success_count++;
-+	spin_unlock(&st->lock);
-+
-+	/* Wake up all requests that were blocked waiting for reset */
-+	wake_up_all(&st->blocked_wq);
-+
++		printf '[%d/%d] %-30s %s\n' "$num" "$TOTAL" "$name" "$status"
++	fi
 +}
 +
-+static void ceph_mdsc_reset_workfn(struct work_struct *work)
++read_status_field()
 +{
-+	struct ceph_mds_client *mdsc =
-+		container_of(work, struct ceph_mds_client, reset_work);
-+	struct ceph_client_reset_state *st = &mdsc->reset_state;
-+	struct ceph_client *cl = mdsc->fsc->client;
-+	struct ceph_mds_session **sessions = NULL;
-+	char reason[CEPH_CLIENT_RESET_REASON_LEN];
-+	unsigned long drain_deadline;
-+	int max_sessions, i, n = 0, torn_down = 0;
-+	int ret = 0;
-+
-+	spin_lock(&st->lock);
-+	strscpy(reason, st->last_reason, sizeof(reason));
-+	spin_unlock(&st->lock);
-+
-+	mutex_lock(&mdsc->mutex);
-+	max_sessions = mdsc->max_sessions;
-+	if (max_sessions <= 0) {
-+		mutex_unlock(&mdsc->mutex);
-+		goto out_complete;
-+	}
-+
-+	sessions = kcalloc(max_sessions, sizeof(*sessions), GFP_KERNEL);
-+	if (!sessions) {
-+		mutex_unlock(&mdsc->mutex);
-+		ret = -ENOMEM;
-+		pr_err_client(cl,
-+			      "manual session reset failed to allocate session array\n");
-+		ceph_mdsc_reset_complete(mdsc, ret);
-+		return;
-+	}
-+
-+	for (i = 0; i < max_sessions; i++) {
-+		struct ceph_mds_session *session = mdsc->sessions[i];
-+
-+		if (!session)
-+			continue;
-+
-+		/*
-+		 * Read session state without s_mutex to avoid nesting
-+		 * mdsc->mutex -> s_mutex, which would invert the
-+		 * s_mutex -> mdsc->mutex order used by
-+		 * cleanup_session_requests().  s_state is an int
-+		 * so loads are atomic; the teardown loop below
-+		 * handles races with concurrent state transitions.
-+		 */
-+		switch (READ_ONCE(session->s_state)) {
-+		case CEPH_MDS_SESSION_OPEN:
-+		case CEPH_MDS_SESSION_HUNG:
-+		case CEPH_MDS_SESSION_OPENING:
-+		case CEPH_MDS_SESSION_RESTARTING:
-+		case CEPH_MDS_SESSION_RECONNECTING:
-+		case CEPH_MDS_SESSION_CLOSING:
-+			sessions[n++] = ceph_get_mds_session(session);
-+			break;
-+		default:
-+			pr_info_client(cl,
-+				       "mds%d in state %s, skipping reset\n",
-+				       session->s_mds,
-+				       ceph_session_state_name(session->s_state));
-+			break;
-+		}
-+	}
-+	mutex_unlock(&mdsc->mutex);
-+
-+	pr_info_client(cl,
-+		       "manual session reset executing (sessions=%d, reason=\"%s\")\n",
-+		       n, reason);
-+
-+	if (n == 0) {
-+		kfree(sessions);
-+		goto out_complete;
-+	}
-+
-+	spin_lock(&st->lock);
-+	if (st->shutdown) {
-+		spin_unlock(&st->lock);
-+		goto out_sessions;
-+	}
-+	st->phase = CEPH_CLIENT_RESET_DRAINING;
-+	spin_unlock(&st->lock);
-+
-+	/*
-+	 * Best-effort drain: flush dirty state while sessions are still
-+	 * alive.  New requests are blocked while phase != IDLE.
-+	 * The sessions are functional, so non-stuck state drains normally.
-+	 * Stuck state (the cause of the stalemate the operator is trying
-+	 * to break) will not drain -- that is expected, and we proceed to
-+	 * forced teardown after the timeout.
-+	 *
-+	 * Four things are drained:
-+	 *  1. MDS journal -- send_flush_mdlog asks each MDS to journal
-+	 *     pending unsafe operations (creates, renames, setattrs).
-+	 *  2. Unsafe requests -- bounded wait for each unsafe write
-+	 *     request to reach safe status via r_safe_completion.
-+	 *  3. Dirty caps -- ceph_flush_dirty_caps triggers cap flush on
-+	 *     all sessions.  Non-stuck caps flush in milliseconds.
-+	 *  4. Cap releases -- push pending cap release messages.
-+	 *
-+	 * The unsafe-request wait and cap-flush wait below provide
-+	 * the bounded drain window during which all categories can
-+	 * make progress.
-+	 */
-+	for (i = 0; i < n; i++)
-+		send_flush_mdlog(sessions[i]);
-+
-+	/*
-+	 * Both drain legs (unsafe requests and cap flushes) share a
-+	 * single deadline so the total drain time is bounded at
-+	 * CEPH_CLIENT_RESET_DRAIN_SEC.
-+	 */
-+	drain_deadline = jiffies + CEPH_CLIENT_RESET_DRAIN_SEC * HZ;
-+
-+	/*
-+	 * Wait for unsafe write requests (creates, renames, setattrs)
-+	 * to reach safe status.  Uses the same pattern as
-+	 * flush_mdlog_and_wait_mdsc_unsafe_requests() but bounded by
-+	 * the shared drain deadline.  Requests that do not complete within
-+	 * the window are force-dropped during teardown.
-+	 */
-+	{
-+		struct ceph_mds_request *req;
-+		struct rb_node *rn;
-+		u64 last_tid;
-+
-+		mutex_lock(&mdsc->mutex);
-+		last_tid = mdsc->last_tid;
-+		mutex_unlock(&mdsc->mutex);
-+
-+		mutex_lock(&mdsc->mutex);
-+		rn = rb_first(&mdsc->request_tree);
-+		while (rn) {
-+			req = rb_entry(rn, struct ceph_mds_request, r_node);
-+			if (req->r_tid > last_tid)
-+				break;
-+			if (req->r_op == CEPH_MDS_OP_SETFILELOCK ||
-+			    !(req->r_op & CEPH_MDS_OP_WRITE)) {
-+				rn = rb_next(rn);
-+				continue;
-+			}
-+			ceph_mdsc_get_request(req);
-+			mutex_unlock(&mdsc->mutex);
-+
-+			wait_for_completion_timeout(&req->r_safe_completion,
-+				max_t(long, drain_deadline - jiffies, 1));
-+
-+			mutex_lock(&mdsc->mutex);
-+			ceph_mdsc_put_request(req);
-+			if (time_after(jiffies, drain_deadline))
-+				break;
-+			rn = rb_first(&mdsc->request_tree);
-+		}
-+		mutex_unlock(&mdsc->mutex);
-+
-+		if (time_after_eq(jiffies, drain_deadline))
-+			WRITE_ONCE(st->drain_timed_out, true);
-+	}
-+
-+	ceph_flush_dirty_caps(mdsc);
-+	ceph_flush_cap_releases(mdsc);
-+
-+	spin_lock(&mdsc->cap_dirty_lock);
-+	if (!list_empty(&mdsc->cap_flush_list)) {
-+		struct ceph_cap_flush *cf =
-+			list_last_entry(&mdsc->cap_flush_list,
-+					struct ceph_cap_flush, g_list);
-+		u64 want_flush = mdsc->last_cap_flush_tid;
-+		long drain_ret;
-+
-+		/*
-+		 * Setting wake on the last entry is sufficient: flush
-+		 * entries complete in order, so when this entry finishes
-+		 * all earlier ones are already done.
-+		 */
-+		cf->wake = true;
-+		spin_unlock(&mdsc->cap_dirty_lock);
-+		pr_info_client(cl,
-+			       "draining (want_flush=%llu, %d sessions)\n",
-+			       want_flush, n);
-+		drain_ret = wait_event_timeout(mdsc->cap_flushing_wq,
-+					       check_caps_flush(mdsc,
-+								want_flush),
-+					       max_t(long,
-+						     drain_deadline - jiffies,
-+						     1));
-+		if (drain_ret == 0) {
-+			pr_info_client(cl,
-+				       "drain timed out, proceeding with forced teardown\n");
-+			WRITE_ONCE(st->drain_timed_out, true);
-+		} else {
-+			pr_info_client(cl, "drain completed successfully\n");
-+		}
-+	} else {
-+		spin_unlock(&mdsc->cap_dirty_lock);
-+	}
-+
-+	spin_lock(&st->lock);
-+	if (st->shutdown) {
-+		spin_unlock(&st->lock);
-+		goto out_sessions;
-+	}
-+	st->phase = CEPH_CLIENT_RESET_TEARDOWN;
-+	spin_unlock(&st->lock);
-+
-+	/*
-+	 * Ask each MDS to close the session before we tear it down
-+	 * locally.  Without this the MDS sees only a connection drop and
-+	 * waits for the client to reconnect (up to session_autoclose
-+	 * seconds) before evicting the session and releasing locks.
-+	 *
-+	 * Reuse the normal close machinery so the session state/sequence
-+	 * snapshot is serialized under s_mutex and a racing s_seq bump
-+	 * retransmits REQUEST_CLOSE while the session remains CLOSING.
-+	 * We send all close requests first, then yield briefly to let the
-+	 * network stack transmit them before __unregister_session()
-+	 * closes the connections.
-+	 */
-+	for (i = 0; i < n; i++) {
-+		int err;
-+
-+		mutex_lock(&sessions[i]->s_mutex);
-+		err = __close_session(mdsc, sessions[i]);
-+		mutex_unlock(&sessions[i]->s_mutex);
-+		if (err < 0)
-+			pr_warn_client(cl,
-+				       "mds%d failed to queue close request before reset: %d\n",
-+				       sessions[i]->s_mds, err);
-+	}
-+	/*
-+	 * Best-effort grace period: yield briefly so the network stack
-+	 * can transmit the queued REQUEST_CLOSE messages before we tear
-+	 * down connections.  Not a correctness requirement -- the MDS
-+	 * will still evict via session_autoclose if it never receives
-+	 * the close request.
-+	 *
-+	 * Event-based waiting is not viable here: there is no completion
-+	 * event for "message left the NIC," and waiting for the MDS
-+	 * SESSION_CLOSE response would re-create the stalemate that the
-+	 * reset is meant to break.
-+	 */
-+	if (n > 0)
-+		msleep(CEPH_CLIENT_RESET_CLOSE_GRACE_MS);
-+
-+	/*
-+	 * Tear down each session: close the connection, remove all
-+	 * caps, clean up requests, then kick pending requests so they
-+	 * re-open a fresh session on the next attempt.
-+	 *
-+	 * This is modeled on the check_new_map() forced-close path
-+	 * for stopped MDS ranks - a proven pattern for hard session
-+	 * teardown.  We do NOT attempt send_mds_reconnect() because
-+	 * the MDS only accepts reconnects during its own RECONNECT
-+	 * phase (after MDS restart), not from an active client.
-+	 *
-+	 * Any state that did not drain (caps that didn't flush, unsafe
-+	 * requests that the MDS didn't journal) is force-dropped here.
-+	 * This is intentional: that state is stuck and is the reason
-+	 * the operator triggered the reset.
-+	 */
-+	for (i = 0; i < n; i++) {
-+		int mds = sessions[i]->s_mds;
-+
-+		pr_info_client(cl, "mds%d resetting session\n", mds);
-+
-+		mutex_lock(&mdsc->mutex);
-+		if (mds >= mdsc->max_sessions ||
-+		    mdsc->sessions[mds] != sessions[i]) {
-+			pr_info_client(cl,
-+				       "mds%d session already torn down, skipping\n",
-+				       mds);
-+			mutex_unlock(&mdsc->mutex);
-+			ceph_put_mds_session(sessions[i]);
-+			sessions[i] = NULL;
-+			continue;
-+		}
-+		sessions[i]->s_state = CEPH_MDS_SESSION_CLOSED;
-+		__unregister_session(mdsc, sessions[i]);
-+		__wake_requests(mdsc, &sessions[i]->s_waiting);
-+		mutex_unlock(&mdsc->mutex);
-+
-+		mutex_lock(&sessions[i]->s_mutex);
-+		cleanup_session_requests(mdsc, sessions[i]);
-+		remove_session_caps(sessions[i]);
-+		mutex_unlock(&sessions[i]->s_mutex);
-+
-+		wake_up_all(&mdsc->session_close_wq);
-+
-+		ceph_put_mds_session(sessions[i]);
-+
-+		mutex_lock(&mdsc->mutex);
-+		kick_requests(mdsc, mds);
-+		mutex_unlock(&mdsc->mutex);
-+
-+		torn_down++;
-+		pr_info_client(cl, "mds%d session reset complete\n", mds);
-+	}
-+
-+	kfree(sessions);
-+
-+	spin_lock(&st->lock);
-+	st->sessions_reset = torn_down;
-+	spin_unlock(&st->lock);
-+
-+out_complete:
-+	ceph_mdsc_reset_complete(mdsc, ret);
-+	return;
-+
-+out_sessions:
-+	/* shutdown == true: ceph_mdsc_destroy() owns the final transition. */
-+	for (i = 0; i < n; i++)
-+		ceph_put_mds_session(sessions[i]);
-+	kfree(sessions);
++	local field="$1"
++	awk -F': ' -v key="$field" '$1 == key {print $2}' "$STATUS_PATH" 2>/dev/null
 +}
 +
-+int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
-+			     const char *reason)
++wait_reset_done()
 +{
-+	struct ceph_client_reset_state *st = &mdsc->reset_state;
-+	struct ceph_fs_client *fsc = mdsc->fsc;
-+	const char *msg = (reason && reason[0]) ? reason : "manual";
-+	int mount_state;
++	local timeout="${1:-30}"
++	local elapsed=0
 +
-+	mount_state = READ_ONCE(fsc->mount_state);
-+	if (mount_state != CEPH_MOUNT_MOUNTED) {
-+		pr_warn_client(fsc->client,
-+			       "reset rejected: mount_state=%d (not mounted)\n",
-+			       mount_state);
-+		return -EINVAL;
-+	}
-+
-+	spin_lock(&st->lock);
-+	if (st->phase != CEPH_CLIENT_RESET_IDLE) {
-+		spin_unlock(&st->lock);
-+		return -EBUSY;
-+	}
-+
-+	st->phase = CEPH_CLIENT_RESET_QUIESCING;
-+	st->last_start = jiffies;
-+	st->last_errno = 0;
-+	st->drain_timed_out = false;
-+	st->sessions_reset = 0;
-+	st->trigger_count++;
-+	strscpy(st->last_reason, msg, sizeof(st->last_reason));
-+	spin_unlock(&st->lock);
-+
-+	if (WARN_ON_ONCE(!queue_work(system_unbound_wq, &mdsc->reset_work))) {
-+		spin_lock(&st->lock);
-+		st->phase = CEPH_CLIENT_RESET_IDLE;
-+		st->last_errno = -EALREADY;
-+		st->last_finish = jiffies;
-+		st->failure_count++;
-+		spin_unlock(&st->lock);
-+		wake_up_all(&st->blocked_wq);
-+		return -EALREADY;
-+	}
-+
-+	pr_info_client(mdsc->fsc->client,
-+		       "manual session reset scheduled (reason=\"%s\")\n",
-+		       msg);
-+	return 0;
++	while [[ "$(read_status_field "phase")" != "idle" ]]; do
++		sleep 1
++		elapsed=$((elapsed + 1))
++		if [[ "$elapsed" -ge "$timeout" ]]; then
++			return 1
++		fi
++	done
++	return 0
 +}
 +
- 
- /*
-  * compare old and new mdsmaps, kicking requests
-@@ -5811,6 +6297,11 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 	INIT_LIST_HEAD(&mdsc->dentry_leases);
- 	INIT_LIST_HEAD(&mdsc->dentry_dir_leases);
- 
-+	spin_lock_init(&mdsc->reset_state.lock);
-+	init_waitqueue_head(&mdsc->reset_state.blocked_wq);
-+	atomic_set(&mdsc->reset_state.blocked_requests, 0);
-+	INIT_WORK(&mdsc->reset_work, ceph_mdsc_reset_workfn);
-+
- 	ceph_caps_init(mdsc);
- 	ceph_adjust_caps_max_min(mdsc, fsc->mount_options);
- 
-@@ -6336,6 +6827,23 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
- 	/* flush out any connection work with references to us */
- 	ceph_msgr_flush();
- 
-+	/*
-+	 * Mark reset as failed and wake any blocked waiters before
-+	 * cancelling, so unmount doesn't stall on blocked_wq timeout
-+	 * if cancel_work_sync() prevents the work from running.
-+	 */
-+	spin_lock(&mdsc->reset_state.lock);
-+	mdsc->reset_state.shutdown = true;
-+	if (mdsc->reset_state.phase != CEPH_CLIENT_RESET_IDLE) {
-+		mdsc->reset_state.phase = CEPH_CLIENT_RESET_IDLE;
-+		mdsc->reset_state.last_errno = -ESHUTDOWN;
-+		mdsc->reset_state.last_finish = jiffies;
-+		mdsc->reset_state.failure_count++;
-+	}
-+	spin_unlock(&mdsc->reset_state.lock);
-+	wake_up_all(&mdsc->reset_state.blocked_wq);
-+
-+	cancel_work_sync(&mdsc->reset_work);
- 	ceph_mdsc_stop(mdsc);
- 
- 	ceph_metric_destroy(&mdsc->metric);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 8208fdf02efe..b1a0621cd37e 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -80,7 +80,47 @@ struct ceph_cap;
- #define CEPH_CAP_FLUSH_WAIT_TIMEOUT_SEC 60
- #define CEPH_CAP_FLUSH_MAX_DUMP_ENTRIES 5
- #define CEPH_CAP_FLUSH_MAX_DUMP_ITERS 5
-+#define CEPH_CLIENT_RESET_REASON_LEN	64
-+#define CEPH_CLIENT_RESET_DRAIN_SEC	30
-+#define CEPH_CLIENT_RESET_CLOSE_GRACE_MS 100
-+#define CEPH_CLIENT_RESET_WAIT_TIMEOUT_SEC 120
- 
-+enum ceph_client_reset_phase {
-+	CEPH_CLIENT_RESET_IDLE = 0,
-+	/*
-+	 * QUIESCING is set synchronously by schedule_reset() before the
-+	 * workqueue item is dispatched.  It gates new requests (any
-+	 * phase != IDLE blocks callers) during the window between
-+	 * scheduling and the work function's transition to DRAINING.
-+	 */
-+	CEPH_CLIENT_RESET_QUIESCING,
-+	CEPH_CLIENT_RESET_DRAINING,
-+	CEPH_CLIENT_RESET_TEARDOWN,
-+};
-+
-+struct ceph_client_reset_state {
-+	spinlock_t lock;		/* protects all fields below */
-+	u64 trigger_count;		/* number of resets triggered */
-+	u64 success_count;		/* number of successful resets */
-+	u64 failure_count;		/* number of failed resets */
-+	unsigned long last_start;	/* jiffies when last reset started */
-+	unsigned long last_finish;	/* jiffies when last reset finished */
-+	int last_errno;			/* result of most recent reset */
-+	enum ceph_client_reset_phase phase; /* current reset phase */
-+	bool drain_timed_out;		/* drain exceeded timeout */
-+	bool shutdown;			/* destroy in progress */
-+	int sessions_reset;		/* sessions torn down in last reset */
-+	char last_reason[CEPH_CLIENT_RESET_REASON_LEN]; /* operator-supplied reason */
-+
-+	/* Request blocking during reset */
-+	wait_queue_head_t blocked_wq;	/* waitqueue for blocked callers */
-+	atomic_t blocked_requests;	/* count of blocked callers */
-+};
-+
-+static inline bool ceph_reset_is_idle(struct ceph_client_reset_state *st)
++list_reset_clients()
 +{
-+	return READ_ONCE(st->phase) == CEPH_CLIENT_RESET_IDLE;
++	local entry
++
++	for entry in "$DEBUGFS_ROOT"/*/; do
++		entry="$(basename "$entry")"
++		[[ -d "$DEBUGFS_ROOT/$entry/reset" ]] || continue
++		[[ -w "$DEBUGFS_ROOT/$entry/reset/trigger" ]] || continue
++		printf '%s\n' "$entry"
++	done
 +}
- struct ceph_mds_cap_match {
- 	s64 uid;  /* default to MDS_AUTH_UID_ANY */
- 	u32 num_gids;
-@@ -543,6 +583,8 @@ struct ceph_mds_client {
- 	struct list_head  dentry_dir_leases; /* lru list */
- 
- 	struct ceph_client_metric metric;
-+	struct work_struct	reset_work;
-+	struct ceph_client_reset_state reset_state;
- 	struct ceph_subvolume_metrics_tracker subvol_metrics;
- 
- 	/* Subvolume metrics send tracking */
-@@ -574,10 +616,14 @@ extern struct ceph_mds_session *
- __ceph_lookup_mds_session(struct ceph_mds_client *, int mds);
- 
- extern const char *ceph_session_state_name(int s);
-+extern const char *ceph_reset_phase_name(enum ceph_client_reset_phase phase);
- 
- extern struct ceph_mds_session *
- ceph_get_mds_session(struct ceph_mds_session *s);
- extern void ceph_put_mds_session(struct ceph_mds_session *s);
-+int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
-+			     const char *reason);
-+int ceph_mdsc_wait_for_reset(struct ceph_mds_client *mdsc);
- 
- extern int ceph_mdsc_init(struct ceph_fs_client *fsc);
- extern void ceph_mdsc_close_sessions(struct ceph_mds_client *mdsc);
++
++wait_status_nonidle()
++{
++	local status_path="$1"
++	local timeout="${2:-10}"
++	local polls=$((timeout * 10))
++	local phase
++
++	while [[ "$polls" -gt 0 ]]; do
++		phase="$(awk -F': ' '$1 == "phase" {print $2}' "$status_path" 2>/dev/null)"
++		if [[ -n "$phase" && "$phase" != "idle" ]]; then
++			return 0
++		fi
++		sleep 0.1
++		polls=$((polls - 1))
++	done
++
++	return 1
++}
++
++discover_debugfs()
++{
++	local candidates=()
++	local entry
++
++	if [[ -n "$DEBUGFS_CLIENT" ]]; then
++		if [[ ! -d "$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset" ]]; then
++			echo "SKIP: reset debugfs not found for $DEBUGFS_CLIENT" >&2
++			exit "$KSFT_SKIP"
++		fi
++		return 0
++	fi
++
++	for entry in "$DEBUGFS_ROOT"/*/; do
++		entry="$(basename "$entry")"
++		[[ -d "$DEBUGFS_ROOT/$entry/reset" ]] || continue
++		[[ -w "$DEBUGFS_ROOT/$entry/reset/trigger" ]] || continue
++		candidates+=("$entry")
++	done
++
++	if [[ ${#candidates[@]} -eq 0 ]]; then
++		echo "SKIP: No writable Ceph reset interface found under $DEBUGFS_ROOT" >&2
++		exit "$KSFT_SKIP"
++	fi
++
++	if [[ ${#candidates[@]} -gt 1 ]]; then
++		echo "SKIP: Multiple Ceph clients found: ${candidates[*]}. Use --client-id." >&2
++		exit "$KSFT_SKIP"
++	fi
++
++	DEBUGFS_CLIENT="${candidates[0]}"
++}
++
++# --- Test 1: ebusy_rejection ------------------------------------------------
++#
++# Trigger a reset while another is guaranteed in-flight.  Creates
++# dirty state so the first reset enters DRAINING (which takes
++# measurable time), then polls until phase != idle and issues the
++# second trigger.  The second trigger must fail (the kernel returns
++# -EBUSY), and only one reset must be counted in the accounting.
++
++test_ebusy_rejection()
++{
++	local num=1
++	local name="ebusy_rejection"
++	local testfile="$MOUNT_POINT/.reset_corner_ebusy_$$"
++	local tc_before tc_after sc_before sc_after second_rc phase elapsed
++
++	tc_before="$(read_status_field "trigger_count")"
++	sc_before="$(read_status_field "success_count")"
++
++	# Create dirty state so the first reset enters DRAINING
++	echo "ebusy_dirty_data" > "$testfile"
++	sync "$testfile"
++
++	python3 -c "
++import os, sys
++fd = os.open('$testfile', os.O_WRONLY | os.O_APPEND)
++os.write(fd, b'dirty_for_ebusy_test\n')
++sys.stdout.write('written')
++" 2>/dev/null || {
++		result "$num" "$name" FAIL "dirty write failed"
++		rm -f "$testfile"
++		return
++	}
++
++	# Trigger the first reset -- it will drain dirty state
++	echo "ebusy_first" > "$TRIGGER_PATH" 2>/dev/null || {
++		result "$num" "$name" FAIL "first trigger failed"
++		rm -f "$testfile"
++		return
++	}
++
++	# Poll until phase is non-idle (quiescing or draining)
++	elapsed=0
++	while true; do
++		phase="$(read_status_field "phase")"
++		if [[ "$phase" != "idle" ]]; then
++			break
++		fi
++		sleep 0.1
++		elapsed=$((elapsed + 1))
++		if [[ "$elapsed" -ge 50 ]]; then
++			result "$num" "$name" SKIP \
++				"first reset completed before overlap could be tested"
++			rm -f "$testfile" 2>/dev/null
++			return
++		fi
++	done
++
++	# Issue the second trigger -- should be rejected with EBUSY
++	second_rc=0
++	echo "ebusy_second" > "$TRIGGER_PATH" 2>/dev/null && second_rc=0 || second_rc=$?
++
++	if ! wait_reset_done 30; then
++		result "$num" "$name" FAIL "first reset never completed"
++		rm -f "$testfile"
++		return
++	fi
++
++	tc_after="$(read_status_field "trigger_count")"
++	sc_after="$(read_status_field "success_count")"
++
++	if [[ "$((tc_after - tc_before))" -ne 1 ]]; then
++		result "$num" "$name" FAIL "trigger_count +$((tc_after - tc_before)), expected +1"
++		rm -f "$testfile"
++		return
++	fi
++
++	if [[ "$((sc_after - sc_before))" -ne 1 ]]; then
++		result "$num" "$name" FAIL "success_count +$((sc_after - sc_before)), expected +1"
++		rm -f "$testfile"
++		return
++	fi
++
++	if [[ "$second_rc" -eq 0 ]]; then
++		result "$num" "$name" FAIL "second trigger did not return error"
++		rm -f "$testfile"
++		return
++	fi
++
++	rm -f "$testfile" 2>/dev/null
++	result "$num" "$name" PASS
++}
++
++# --- Test 2: dirty_caps_at_reset --------------------------------------------
++#
++# Write to a file without fsync (dirty caps), trigger reset, then
++# verify the file is not corrupt.  Manual reset drains dirty caps
++# before teardown (best-effort, 5s timeout).  For a non-stuck cap
++# the dirty write should be flushed during drain and persist.
++# If the drain window is too short, only the synced first line
++# persists -- that is acceptable (data loss is documented for
++# unflushed writes).
++
++test_dirty_caps_at_reset()
++{
++	local num=2
++	local name="dirty_caps_at_reset"
++	local testfile="$MOUNT_POINT/.reset_corner_dirty_caps_$$"
++	local content_after line_count sc_before sc_after le
++
++	sc_before="$(read_status_field "success_count")"
++
++	echo "line_1_before_dirty_write" > "$testfile"
++	sync "$testfile"
++
++	python3 -c "
++import os, sys
++fd = os.open('$testfile', os.O_WRONLY | os.O_APPEND)
++os.write(fd, b'line_2_dirty_no_fsync\n')
++# deliberately no fsync -- leave caps dirty
++sys.stdout.write('written')
++" 2>/dev/null || {
++		result "$num" "$name" FAIL "dirty write failed"
++		rm -f "$testfile"
++		return
++	}
++
++	echo "dirty_caps_test" > "$TRIGGER_PATH" 2>/dev/null || {
++		result "$num" "$name" FAIL "reset trigger failed"
++		rm -f "$testfile"
++		return
++	}
++
++	if ! wait_reset_done 30; then
++		result "$num" "$name" FAIL "reset did not complete"
++		rm -f "$testfile"
++		return
++	fi
++
++	sc_after="$(read_status_field "success_count")"
++	if [[ "$sc_after" -le "$sc_before" ]]; then
++		result "$num" "$name" FAIL "success_count did not increment (reset not exercised)"
++		rm -f "$testfile"
++		return
++	fi
++
++	sync "$testfile" 2>/dev/null || true
++	content_after="$(cat "$testfile" 2>/dev/null)" || {
++		result "$num" "$name" FAIL "cannot read file after reset"
++		rm -f "$testfile"
++		return
++	}
++
++	if [[ -z "$content_after" ]]; then
++		result "$num" "$name" FAIL "file is empty after reset"
++		rm -f "$testfile"
++		return
++	fi
++
++	line_count="$(echo "$content_after" | wc -l)"
++	if [[ "$line_count" -lt 1 ]]; then
++		result "$num" "$name" FAIL "file has $line_count lines, expected >= 1"
++		rm -f "$testfile"
++		return
++	fi
++
++	echo "$content_after" | head -1 | grep -q "line_1_before_dirty_write" || {
++		result "$num" "$name" FAIL "first line corrupted"
++		rm -f "$testfile"
++		return
++	}
++
++	le="$(read_status_field "last_errno")"
++	if [[ "$le" != "0" ]]; then
++		result "$num" "$name" FAIL "last_errno=$le, expected 0"
++		rm -f "$testfile"
++		return
++	fi
++
++	rm -f "$testfile"
++	result "$num" "$name" PASS "file intact ($line_count lines)"
++}
++
++# --- Test 3: flock_after_reset ----------------------------------------------
++#
++# Take an exclusive flock, trigger reset, verify stale lock state is
++# marked with CEPH_I_ERROR_FILELOCK (same-client flock attempt returns
++# EIO).  After the original holder exits (releasing the local lock
++# reference and clearing the error flag), a fresh lock can be acquired.
++#
++# The lock holder uses the fd-based flock form with exec, so killing
++# $lock_pid closes the lock fd immediately (no orphaned child with an
++# inherited fd copy that would prevent the VFS flock release).
++
++test_flock_after_reset()
++{
++	local num=3
++	local name="flock_after_reset"
++	local testfile="$MOUNT_POINT/.reset_corner_flock_$$"
++	local lock_pid probe_rc sc_before sc_after
++
++	sc_before="$(read_status_field "success_count")"
++
++	echo "flock_test_content" > "$testfile"
++	sync "$testfile"
++
++	# Hold lock via fd in a subshell; exec ensures killing $lock_pid
++	# closes the lock fd directly (no fork/child fd inheritance).
++	(
++		exec 9<"$testfile"
++		flock --exclusive --nonblock 9 || exit 1
++		exec sleep 300
++	) &
++	lock_pid=$!
++	sleep 0.5
++
++	if ! kill -0 "$lock_pid" 2>/dev/null; then
++		result "$num" "$name" FAIL "flock holder died immediately"
++		rm -f "$testfile"
++		return
++	fi
++
++	echo "flock_after_reset_test" > "$TRIGGER_PATH" 2>/dev/null || {
++		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
++		result "$num" "$name" FAIL "reset trigger failed"
++		rm -f "$testfile"
++		return
++	}
++
++	if ! wait_reset_done 30; then
++		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
++		result "$num" "$name" FAIL "reset did not complete"
++		rm -f "$testfile"
++		return
++	fi
++
++	sc_after="$(read_status_field "success_count")"
++	if [[ "$sc_after" -le "$sc_before" ]]; then
++		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
++		result "$num" "$name" FAIL "success_count did not increment"
++		rm -f "$testfile"
++		return
++	fi
++
++	# After teardown, CEPH_I_ERROR_FILELOCK is set on the inode.
++	# A same-client lock attempt should fail (EIO), NOT succeed.
++	probe_rc=0
++	flock --exclusive --nonblock "$testfile" true 2>/dev/null && probe_rc=0 || probe_rc=$?
++	if [[ "$probe_rc" -eq 0 ]]; then
++		kill "$lock_pid" 2>/dev/null; wait "$lock_pid" 2>/dev/null
++		result "$num" "$name" FAIL \
++			"same-client probe succeeded, expected EIO from stale lock state"
++		rm -f "$testfile"
++		return
++	fi
++
++	# Kill the holder -- the exec'd sleep IS $lock_pid, so killing it
++	# closes fd 9 directly.  VFS flock release fires ceph_fl_release_lock(),
++	# which decrements i_filelock_ref to 0 and clears CEPH_I_ERROR_FILELOCK.
++	kill "$lock_pid" 2>/dev/null
++	wait "$lock_pid" 2>/dev/null
++
++	# After the holder exits, a fresh lock should be acquirable.
++	# The reset teardown sends SESSION_REQUEST_CLOSE so the MDS
++	# releases locks promptly, but retry briefly in case the
++	# message races with the connection close.
++	local attempt
++	probe_rc=1
++	for attempt in 1 2 3 4 5; do
++		probe_rc=0
++		flock --exclusive --nonblock "$testfile" true 2>/dev/null \
++			&& probe_rc=0 || probe_rc=$?
++		[[ "$probe_rc" -eq 0 ]] && break
++		sleep 1
++	done
++	if [[ "$probe_rc" -ne 0 ]]; then
++		result "$num" "$name" FAIL \
++			"cannot acquire fresh lock after holder exit (rc=$probe_rc, ${attempt} attempts)"
++		rm -f "$testfile"
++		return
++	fi
++
++	# Verify file content survived
++	grep -q "flock_test_content" "$testfile" 2>/dev/null || {
++		result "$num" "$name" FAIL "file content corrupted after reset"
++		rm -f "$testfile"
++		return
++	}
++
++	rm -f "$testfile"
++	result "$num" "$name" PASS "stale lock detected, fresh lock acquired after holder exit"
++}
++
++# --- Test 4: unmount_during_reset -------------------------------------------
++#
++# Mount a fresh CephFS, trigger reset, immediately unmount. The
++# ceph_mdsc_destroy() path must wake blocked waiters with -ESHUTDOWN
++# and not hang.
++
++test_unmount_during_reset()
++{
++	local num=4
++	local name="unmount_during_reset"
++	local temp_mnt="/tmp/ceph_corner_mnt_$$"
++	local mount_opts=""
++	local mount_src=""
++	local temp_trigger=""
++	local temp_status=""
++	local temp_client=""
++	local temp_file="$temp_mnt/.reset_corner_umount_$$"
++	local phase=""
++	local trigger_ok=0
++	local attempt
++	local -a new_clients=()
++	declare -A existing_clients=()
++
++	mount_src="$(awk -v mp="$MOUNT_POINT" '$2 == mp && $3 == "ceph" {print $1; exit}' /proc/mounts 2>/dev/null)"
++	mount_opts="$(awk -v mp="$MOUNT_POINT" '$2 == mp && $3 == "ceph" {print $4; exit}' /proc/mounts 2>/dev/null)"
++
++	if [[ -z "$mount_src" ]]; then
++		result "$num" "$name" SKIP "cannot determine mount source from /proc/mounts"
++		return
++	fi
++
++	while IFS= read -r existing; do
++		[[ -n "$existing" ]] || continue
++		existing_clients["$existing"]=1
++	done < <(list_reset_clients)
++
++	mkdir -p "$temp_mnt"
++
++	if ! mount -t ceph "$mount_src" "$temp_mnt" -o "$mount_opts" 2>/dev/null; then
++		result "$num" "$name" SKIP "cannot mount additional CephFS instance"
++		rmdir "$temp_mnt" 2>/dev/null
++		return
++	fi
++
++	ls "$temp_mnt" > /dev/null 2>&1
++	sync
++	sleep 1
++
++	for attempt in $(seq 1 50); do
++		new_clients=()
++		while IFS= read -r entry; do
++			[[ -n "$entry" ]] || continue
++			if [[ -n "${existing_clients[$entry]+x}" ]]; then
++				continue
++			fi
++			new_clients+=("$entry")
++		done < <(list_reset_clients)
++
++		if [[ "${#new_clients[@]}" -eq 1 ]]; then
++			temp_client="${new_clients[0]}"
++			break
++		fi
++
++		if [[ "${#new_clients[@]}" -gt 1 ]]; then
++			break
++		fi
++
++		sleep 0.1
++	done
++
++	if [[ -z "$temp_client" ]]; then
++		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
++		rmdir "$temp_mnt" 2>/dev/null
++		result "$num" "$name" SKIP "cannot identify debugfs client for temp mount"
++		return
++	fi
++
++	if [[ "${#new_clients[@]}" -gt 1 ]]; then
++		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
++		rmdir "$temp_mnt" 2>/dev/null
++		result "$num" "$name" SKIP "multiple new debugfs clients appeared"
++		return
++	fi
++
++	temp_trigger="$DEBUGFS_ROOT/$temp_client/reset/trigger"
++	temp_status="$DEBUGFS_ROOT/$temp_client/reset/status"
++
++	echo "umount_dirty_seed" > "$temp_file" 2>/dev/null || {
++		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
++		rmdir "$temp_mnt" 2>/dev/null
++		result "$num" "$name" FAIL "cannot create dirty state on temp mount"
++		return
++	}
++	sync "$temp_file"
++	python3 -c "
++import os, sys
++fd = os.open('$temp_file', os.O_WRONLY | os.O_APPEND)
++os.write(fd, b'dirty_for_umount_test\\n')
++os.close(fd)
++" 2>/dev/null || {
++		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
++		rmdir "$temp_mnt" 2>/dev/null
++		result "$num" "$name" FAIL "cannot dirty temp mount for reset overlap"
++		return
++	}
++
++	echo "unmount_test" > "$temp_trigger" 2>/dev/null && trigger_ok=1 || trigger_ok=0
++	if [[ "$trigger_ok" -ne 1 ]]; then
++		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
++		rmdir "$temp_mnt" 2>/dev/null
++		result "$num" "$name" FAIL "cannot trigger reset on temp mount"
++		return
++	fi
++
++	if ! wait_status_nonidle "$temp_status" 10; then
++		phase="$(awk -F': ' '$1 == "phase" {print $2}' "$temp_status" 2>/dev/null)"
++		umount "$temp_mnt" 2>/dev/null || umount -l "$temp_mnt" 2>/dev/null
++		rmdir "$temp_mnt" 2>/dev/null
++		result "$num" "$name" FAIL \
++			"reset never became active before umount (phase=${phase:-unknown})"
++		return
++	fi
++
++	local umount_ok=0
++	timeout 30 umount "$temp_mnt" 2>/dev/null && umount_ok=1
++
++	if [[ "$umount_ok" -ne 1 ]]; then
++		umount -l "$temp_mnt" 2>/dev/null || true
++		rmdir "$temp_mnt" 2>/dev/null
++		result "$num" "$name" FAIL "umount hung for >30s"
++		return
++	fi
++
++	rmdir "$temp_mnt" 2>/dev/null
++
++	ls "$MOUNT_POINT" > /dev/null 2>&1 || {
++		result "$num" "$name" FAIL "original mount unhealthy after test"
++		return
++	}
++
++	result "$num" "$name" PASS
++}
++
++# --- Main --------------------------------------------------------------------
++
++usage()
++{
++	cat <<EOF
++Usage: $0 --mount-point <path> [--client-id <id>] [--debugfs-root <path>]
++
++Runs targeted corner-case tests for the CephFS client reset feature.
++Requires root (debugfs access) and a mounted CephFS filesystem.
++
++Options:
++  --mount-point PATH     CephFS mount point (required)
++  --client-id ID         Ceph debugfs client id (auto-detect if one client)
++  --debugfs-root PATH    Debugfs ceph root (default: /sys/kernel/debug/ceph)
++  --help                 Show this message
++EOF
++}
++
++main()
++{
++	while [[ $# -gt 0 ]]; do
++		case "$1" in
++		--mount-point)   MOUNT_POINT="$2"; shift 2 ;;
++		--client-id)     DEBUGFS_CLIENT="$2"; shift 2 ;;
++		--debugfs-root)  DEBUGFS_ROOT="$2"; shift 2 ;;
++		--help|-h)       usage; exit 0 ;;
++		*)               echo "Unknown option: $1" >&2; usage; exit 2 ;;
++		esac
++	done
++
++	if [[ -z "$MOUNT_POINT" ]]; then
++		echo "--mount-point is required" >&2
++		usage
++		exit 2
++	fi
++
++	if [[ ! -d "$MOUNT_POINT" ]]; then
++		echo "SKIP: Mount point does not exist: $MOUNT_POINT" >&2
++		exit "$KSFT_SKIP"
++	fi
++
++	discover_debugfs
++	TRIGGER_PATH="$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset/trigger"
++	STATUS_PATH="$DEBUGFS_ROOT/$DEBUGFS_CLIENT/reset/status"
++
++	log "CephFS client reset corner case tests"
++	log "Mount: $MOUNT_POINT"
++	log "Client: $DEBUGFS_CLIENT"
++	echo ""
++
++	test_ebusy_rejection
++	test_dirty_caps_at_reset
++	test_flock_after_reset
++	test_unmount_during_reset
++
++	echo ""
++	echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed, $SKIP_COUNT skipped (of $TOTAL)"
++
++	if [[ "$FAIL_COUNT" -gt 0 ]]; then
++		exit 1
++	fi
++	exit 0
++}
++
++main "$@"
 -- 
 2.34.1
 
