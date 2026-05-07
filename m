@@ -1,89 +1,94 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 470512DB788
-	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 12:27:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE0B13BE16E
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 12:27:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778156870; cv=none; b=uAS1+KcXxXy311mwVuNWyFRwAI8pFdBDMlGQwV0xDv2+4UiwXJC/zds9hFOx3ok9/RT6tv7yiewxvp5zI/qLTVqt9nGuF706EVX+UgOH85R7RTGKLj9eHhQQtPzT6kIlxg/gsO9SupSawn0MnmTsHWASCk8fPE8q+t3NY6tQHjc=
+	t=1778156872; cv=none; b=LSTOWLvCCLq10zzrhphQY2bP/EegHDcN7bW7UAfMRo+THyhXJZlHNaEIsgbRI5TZbdurjNX+9t6YWQCuom9nEUWRTYR1wezL1xc7BuZ1IIMc0AjmwTuJPR9TVdWLIWzVVy18N8cKJRV+bsuumvTc/IZzKBgH8qxP8mzYXoO5anA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778156870; c=relaxed/simple;
-	bh=n9xUSq+CgF/HoTkhcg1ovXhodC9Lf7dcnp/oGwsRsWY=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=SDmmEIhklkdqN04Tu9ki5pL3DHD3PpWUpqZxuznk07WTl+exZHUu8PUeaeRrQiy1c+F+J1COxVKICObo3mF+hpWFLW8OhASKcGGmYXw6jxDJEjMt3TLLQV8bpDJb2maBAHnViED4c83EStk4NFAx41izqS0SPEZchMwGSEmPJj8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KULykeDP; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Z7m3pBdT; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1778156872; c=relaxed/simple;
+	bh=BkwvWfSeKDQBzYewgCSDOX7+DXJwYrncWZ0nVxvGRoc=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=Gkz/lR3I95n6ZMJH5I/K41fIgyprnPjg1r3cjLP9G7AJNN+nu+A8FdF9SFQ2IIU1kNom6LatItonO94Wj09bUm1hOdV697wllWFdpd2dFXXlYePvYPd+8ccbpR5E0gHq+McPrpotn+JpwnRizvCxkDHagc89H7DCjjx5pkq8fh4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CDI3WzVo; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=NgDHkcSx; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KULykeDP";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Z7m3pBdT"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CDI3WzVo";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="NgDHkcSx"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778156866;
+	s=mimecast20190719; t=1778156869;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=sH6HxK5bHOwiUyRvbU/AAVnaaifL50arexDXP1yWMkY=;
-	b=KULykeDPwBZCSFoJux6fbHEZtXJeuv+g8rsXolBoGph6M/tF6A/FTKVA/hmNEsimM2+Gby
-	nblSvgl96YCmfzq8jNQwGH933LyYagBnS9F2OX130axdaXIJz5Y4oL/WttavjnXRE6LsH+
-	ACM4fRt+6lMRDy1z731QYYeAB/TrUcY=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=mzE1ZZ9iLT8Ua7YvTuaaF3p2dABvmzNW3xB0CEXdZLE=;
+	b=CDI3WzVoHAxKkpTFD+NboIGseuXKwiHzZZr0kOFjzh2hqiRxGqyKikIU+SQdbWFeS1LeXD
+	jFQ/wtFrtYAveCWtj+cr+Jry7o6VkcIsYDm29uAAWY5z5pEiZn3H3rSmPkF3WAwG59Pnb5
+	ThNGHgGt2GyDrSNXHiBn8r5qZFOLy/k=
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
+ [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-128-NdVh3WfoP7qgZ_cG6QD_rg-1; Thu, 07 May 2026 08:27:44 -0400
-X-MC-Unique: NdVh3WfoP7qgZ_cG6QD_rg-1
-X-Mimecast-MFC-AGG-ID: NdVh3WfoP7qgZ_cG6QD_rg_1778156863
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-ba70cda6755so70003066b.1
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 05:27:44 -0700 (PDT)
+ us-mta-104-1QOwlzHoODKM368Yy2GuQA-1; Thu, 07 May 2026 08:27:47 -0400
+X-MC-Unique: 1QOwlzHoODKM368Yy2GuQA-1
+X-Mimecast-MFC-AGG-ID: 1QOwlzHoODKM368Yy2GuQA_1778156866
+Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-b934e96af9dso91010966b.3
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 05:27:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1778156863; x=1778761663; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=sH6HxK5bHOwiUyRvbU/AAVnaaifL50arexDXP1yWMkY=;
-        b=Z7m3pBdT2KS5hsWcAqFEPdGUyr70MNhKL7lCwF/QmD/P5lthyIGSoUodq6MsQBK/8e
-         6GFmKuJrBQGXNRFFLMEmkuglY1Pk1ZgKqPiCjL6L8HRCa1nlQb4oH61koQo6gwNUP18a
-         Xv6ggkpu+JWcROIYNAMTAFovBWjKNVVwuDK+BxK61C3V1kt8djMltEhnovHtl3IDI5YI
-         T9JiQ8a48/YvP9IJhqEpKNd6SgNxX9QMwtsXU3wqASdmygYKXeJfxkFdFu3tl/9pGgBs
-         dU1S2JZFPKtfUt2yiRiuI4rGs6XBENRkILbcWg8FRcxxMHZod2j/bbwe7jFbItAUjRit
-         zmIQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778156863; x=1778761663;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=redhat.com; s=google; t=1778156866; x=1778761666; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=sH6HxK5bHOwiUyRvbU/AAVnaaifL50arexDXP1yWMkY=;
-        b=TY4V+ayrNZKJZDSeAiiD3piZvRIlsgPJ6zcEa3sHLdUgPSqNCUcjuVwU+q0tZGjZz7
-         XRJVu+y9xg6YaDbVw5Ktu4SnDFM7c9CrDgJK+gQnPXu+n1nC3005aZvtHWQxUCjieSce
-         qhj0ZoFcyhes1MpoEW94D3cd5cjEne3CNZNAkilhH994cRNuKzZUZmkelWbfHO+LoKWN
-         8H8/uNmujkmwPDQkbU1sXo66EYz2n0NFQZ053zpqcM/YpR0wlp4vyc4IxTZkeAdjyguf
-         6EGeNWLcIhDfC1RaZF1XafaIIK1YqZT1/6N6HwS4EFyTsnQFajXOOr5nuhmp9f+i5gtj
-         liYw==
-X-Gm-Message-State: AOJu0YxhNPA2evTVM/R3A1klr1vjhLL+Fa+s8+JIKzQOApS4ASIbG3Bw
-	cvK0KoU4Nztn7t3UKc5vOYWw04b84Z8iQi2VgXkaXsm2J+bD4Q8jCw5ejZFo0cnnH76uqUIQ22Z
-	TriSAzM0R1KZpTEwij8b7h2BWOkn0qZY+YhuanF6JO1Ok/JhBfLiROe53YNZ03d/az+BhvsWA7+
-	L9h1BuRtHy7a3ROXGV5EtUionflgTuM+wlmoXpSxKhNvSmo8Y=
-X-Gm-Gg: AeBDiet+7jNqT2A0xSHNlmnJlRsX/N5wyJU6agLHSyMm7xGHbYpFSD9gAsJjEuVGNQ9
-	cO3bpI2jS342T3/om4rGATfoT3ycKJtAnUy0TNnx+J/9XeFPbWhv63CTAVxKmxi/Oj4KuTJgOMl
-	w3FuY3vgN6mHZIxyBFrNHDI+2Tp0awpgQLPzGJrZSAE3GwRLeb1kYIPOZzRMD+R3BpXW1pc4LT6
-	AuRqoklObAk4UHQ5vsWIsAJUPdl+r49OUtJqL5f2wVui+y00xEJXYX9z6fRpEfi7sWzDUZKEXm1
-	CfDA7hSIu2z/g8YqhPKmIgT1Gdun5NncXNOidbN8X8Y9rl2Rd0ehVn89TSe8+s1UOMZAtWUNSnx
-	LVtL7Yhv5O2CmbncaZuieQqWn9IaVpdgWhA8EemisKhaB88XV4qqjKVCyvX61R269jw==
-X-Received: by 2002:a17:907:c91f:b0:bc5:fdd8:4ba8 with SMTP id a640c23a62f3a-bc5fdd85a33mr286176266b.35.1778156862705;
-        Thu, 07 May 2026 05:27:42 -0700 (PDT)
-X-Received: by 2002:a17:907:c91f:b0:bc5:fdd8:4ba8 with SMTP id a640c23a62f3a-bc5fdd85a33mr286173666b.35.1778156861925;
-        Thu, 07 May 2026 05:27:41 -0700 (PDT)
+        bh=mzE1ZZ9iLT8Ua7YvTuaaF3p2dABvmzNW3xB0CEXdZLE=;
+        b=NgDHkcSxUCnOBOLkfYLXfQit1A/eb0L2fXMEn5K2g30hcUSmURyzuK+HduAlS0/qQh
+         xyfzb6zsCB7j05+poxVAOLir3XNFFDX+5/SKZf7ZTeRj3bYtw9ZLG4NOI8plOaFjoDW/
+         G7WBEQrrhLk8WUNh/5h9SK3sA1GGS5Gp9yO9tHckjESZ2KqXp9FOUTT008G0fsnRng1E
+         ZR14LvvABPqaFHGdqiMO3+uchoh7WWYl4Hkwrk5B8P+sVZKVAM3iFY7UlATZNF1HRWsP
+         C7G8zOZcLl4wLSmK+kuBHLfG/oDMmQRmpoW+PFTejHq0S7LjGB3BAInoJAd47wqmykPN
+         z3sQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778156866; x=1778761666;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=mzE1ZZ9iLT8Ua7YvTuaaF3p2dABvmzNW3xB0CEXdZLE=;
+        b=QYOQlHPEtN5myQC/D5lpt6xIQs+bLzvrzP6IbMEFOqIn6UeAM5Pf5gMK7tKW+MtcbH
+         0vg1WJte56W2Ik7TCn2uyVREm24aASZNeq14VZERrxzsbFQnz19b+ij8yPvwXf5hyUP7
+         TM//qG3cH0BeMOhJxT+lWMLlxKS5Ao+vGojqvm6MWud9ZGSvFks6cKwISFa2vLbCzGj9
+         VswRzajOvFWM3XEantjpUB4j66HEeJwQedqiBMzMlpjfq176aqV2FZDHd75D7aFtzCux
+         QLddir7UxzIjM1FO3t3x8QJI380u7DwmKNIj0BYdzZiIGSG3Z0fGltgCItBveA+OYE0z
+         1DRA==
+X-Gm-Message-State: AOJu0Yx1em35jSer+o4NPL3xCyO3Ka5stNmGXKCiwrEcWivIgg5yk75r
+	/5A0iMVpdHSJ1LbJ17KjA+zqJQ4scTgc5xBDe4Q48jjiJtQxpFKOhMIp134l+JrECdlp2CrJz5D
+	vDUrYIdPLzuPOeP0jwB9ic7uN1DXTsNTjKxlDVrkOhS4UeqQeb4q4J8aVdVhqlR/6qa72hA2lPY
+	LLjMHNI4LdrNDxJMw/4CjrpoNrOK4kXfDOc6gBl7IqeFpYYBsWew==
+X-Gm-Gg: AeBDietcx86Ad2X4I3qyhlqdC//aXwKwqKPFZUyZHD4lX3e0ij7+NefrMU85vGevpfa
+	5M8kX34VIZMqG47KRK+nv/UTM8sxKTVsqEyu/1B+F8wVPes57bZ//K66HWjcpLMRkiZQTXpwH0d
+	vrBtk5rqAiAcgYioIbAQggnr6CHtOYYD8nUPkcJ75sSVrqD+Hg1wkrOURrxO+ilDAklptccPzCi
+	3SL44fA7qJkp8CwNMNEKCLHzn4w8oUm71N+zO71oef88vueR5SxMGYmZd7+wUuSZ5EC6TT0g0OR
+	XtfGVOubUxoukcigx4BTu2b1ZXwg3Pv+v3gVDVONLpCYJEgFaZUxwrAqEkl5oasCdCizxHKcRqR
+	LZvLyyop0trsODHYleEiEAhyGjxy7CcWDUdcXAyYmGuKB5CPRKZhPHx1xH/wTcmwX7w==
+X-Received: by 2002:a17:907:3f24:b0:bc6:2bd3:8176 with SMTP id a640c23a62f3a-bc62bd388e2mr341828566b.35.1778156865760;
+        Thu, 07 May 2026 05:27:45 -0700 (PDT)
+X-Received: by 2002:a17:907:3f24:b0:bc6:2bd3:8176 with SMTP id a640c23a62f3a-bc62bd388e2mr341823066b.35.1778156864692;
+        Thu, 07 May 2026 05:27:44 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bc81cd34ce8sm76552566b.9.2026.05.07.05.27.41
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bc81cd34ce8sm76552566b.9.2026.05.07.05.27.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 May 2026 05:27:41 -0700 (PDT)
+        Thu, 07 May 2026 05:27:44 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org,
 	idryomov@gmail.com,
 	vdubeyko@redhat.com,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v4 00/11] ceph: manual client session reset
-Date: Thu,  7 May 2026 12:27:26 +0000
-Message-Id: <20260507122737.2804094-1-amarkuze@redhat.com>
+Subject: [PATCH v4 01/11] ceph: convert inode flags to named bit positions and atomic bitops
+Date: Thu,  7 May 2026 12:27:27 +0000
+Message-Id: <20260507122737.2804094-2-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260507122737.2804094-1-amarkuze@redhat.com>
+References: <20260507122737.2804094-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -92,202 +97,461 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This series adds operator-initiated manual client session reset for
-CephFS, providing a controlled escape hatch for client/MDS stalemates
-in which caps, locks, or unsafe metadata state stop making forward
-progress.
+Define named bit-position constants for all CEPH_I_* inode flags and
+derive the bitmask values from them.  This gives every flag a named
+_BIT constant usable with the test_bit/set_bit/clear_bit family.
+The intentionally unused bit position 1 is documented inline.
 
-Motivation
+Convert all flag modifications to use atomic bitops (set_bit,
+clear_bit, test_and_clear_bit).  The previous code mixed lockless
+atomic ops on some flags (ERROR_WRITE, ODIRECT) with non-atomic
+read-modify-write (|= / &= ~) on other flags sharing the same
+unsigned long.  A concurrent non-atomic RMW can clobber an
+adjacent lockless atomic update -- for example, a lockless
+clear_bit(ERROR_WRITE) could be silently resurrected by a
+concurrent ci->i_ceph_flags |= CEPH_I_FLUSH under the spinlock.
+Using atomic bitops for all modifications eliminates this class
+of race entirely.
 
-When a CephFS client enters a stalemate with the MDS -- stuck cap
-flushes, hung file locks, or unsafe requests that cannot be journaled --
-the only current recovery options are client eviction from the MDS side
-or a full client node restart.  Both are disruptive and can cascade to
-other workloads on the same node.
+Flags whose only users are now the _BIT form (ERROR_WRITE,
+ASYNC_CHECK_CAPS) have their old mask defines removed to document
+that callers must use the _BIT constant with the set_bit/test_bit
+family.  ERROR_FILELOCK and SHUTDOWN retain their mask defines
+because they are still used via bitmask tests in lockless readers
+(ceph_inode_is_shutdown, reconnect_caps_cb).
 
-Manual reset gives the operator a targeted tool: block new metadata
-work, attempt a bounded best-effort drain of dirty client state while
-sessions are still alive, then tear sessions down and let new requests
-re-open fresh sessions.  State that cannot drain (the stuck state
-causing the stalemate) is force-dropped -- that is the point of the
-reset.
+The direct assignment in ceph_finish_async_create() is converted
+from i_ceph_flags = CEPH_I_ASYNC_CREATE to set_bit().  This
+inode is I_NEW at this point -- still invisible to other threads
+and guaranteed to have zero flags from alloc_inode -- so either
+form is safe, but set_bit() keeps the conversion uniform.
 
-Design
+Co-developed-by: Viacheslav Dubeyko <vdubeyko@redhat.com>
+Signed-off-by: Viacheslav Dubeyko <vdubeyko@redhat.com>
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+ fs/ceph/addr.c       | 20 +++++++-------
+ fs/ceph/caps.c       | 24 ++++++++---------
+ fs/ceph/file.c       | 13 ++++-----
+ fs/ceph/inode.c      |  4 +--
+ fs/ceph/locks.c      | 22 ++++-----------
+ fs/ceph/mds_client.c |  3 ++-
+ fs/ceph/mds_client.h |  2 +-
+ fs/ceph/snap.c       |  2 +-
+ fs/ceph/super.h      | 64 +++++++++++++++++++++++---------------------
+ fs/ceph/xattr.c      |  2 +-
+ 10 files changed, 74 insertions(+), 82 deletions(-)
 
-The reset is triggered via debugfs:
-
-    echo "reason" > /sys/kernel/debug/ceph/<client>/reset/trigger
-    cat /sys/kernel/debug/ceph/<client>/reset/status
-
-The state machine tracks four phases:
-
-    IDLE -> QUIESCING -> DRAINING -> TEARDOWN -> IDLE
-
-QUIESCING is set synchronously by schedule_reset() before the workqueue
-item is dispatched.  This provides immediate request gating from the
-caller's context -- new metadata requests and file-lock acquisitions
-block the moment the operator triggers the reset, with no race window
-between scheduling and the work function starting.  All non-IDLE phases
-block callers on blocked_wq; the hot path adds only a single READ_ONCE
-per request.
-
-The drain phase uses a single shared deadline (bounded at 30 seconds)
-across all drain legs.  It first waits for unsafe write requests
-(creates, renames, setattrs) to reach safe status, then flushes dirty
-caps and pushes pending cap releases, using whatever time remains
-within the shared deadline.  Non-stuck state drains in milliseconds;
-stuck state times out and is force-dropped during teardown.  The
-drain_timed_out flag is monotonic: once set by any drain leg, it stays
-true for the lifetime of the reset.
-
-The session teardown follows the established check_new_map()
-forced-close pattern: unregister sessions under mdsc->mutex, then
-clean up caps and requests under s->s_mutex.  Reconnect is not
-attempted because the MDS only accepts CLIENT_RECONNECT during its
-own RECONNECT phase after restart, not from an active client.  A
-SESSION_REQUEST_CLOSE is sent to each MDS before local teardown so
-the MDS can release server-side state promptly rather than waiting
-for session_autoclose timeout.
-
-Blocked callers are released when reset completes and observe the
-final result via -EAGAIN (reset failed, retry later) or 0 (success).
-Internal work-function errors such as -ENOMEM are not propagated to
-unrelated callers like open() or flock(); the detailed error remains
-in debugfs and tracepoints.
-
-The work function checks st->shutdown before each phase transition
-(DRAINING, TEARDOWN) so that a concurrent ceph_mdsc_destroy() is not
-overwritten.  If destroy already took ownership, the work function
-releases session references and returns without touching the state.
-
-The destroy path marks reset as failed and wakes blocked waiters
-before cancel_work_sync() so unmount does not stall.
-
-Patch breakdown
-
-Prep / cleanup:
-
- 1. Convert all CEPH_I_* inode flags to named bit-position constants
-    and switch all flag modifications to atomic bitops (set_bit,
-    clear_bit, test_and_clear_bit).  The previous code mixed lockless
-    atomics with non-atomic read-modify-write on the same unsigned
-    long, which is a correctness hazard.  Flag reads under i_ceph_lock
-    that only test lock-serialised flags retain bitmask tests.
-
- 2. Fix a __force endian cast in reconnect_caps_cb() to use the
-    proper cpu_to_le32() macro and the new test_bit() accessor.
-
-Hardening / diagnostics:
-
- 3. Harden send_mds_reconnect() with error return, early bailout for
-    closed/rejected/unregistered sessions, state restoration on
-    transient failure.  Rewrite mds_peer_reset() to handle active-MDS
-    (past RECONNECT phase) by tearing the session down locally.
-
- 4. Convert wait_caps_flush() to a diagnostic timeout loop that
-    periodically dumps pending flush state, improving observability
-    for reset-drain stalls and existing sync/writeback hangs.
-
-Core feature:
-
- 5. Add the reset state machine, request gating, session teardown
-    work function, scheduling, and destroy-path coordination.
-
- 6. Add the debugfs trigger/status interface and four tracepoints
-    (schedule, complete, blocked, unblocked).
-
-Testing:
-
- 7-11. kselftest-integrated shell tests split into five patches:
-    data integrity checker (7), stress test with concurrent I/O and
-    random-interval reset injection (8), targeted corner cases --
-    overlapping resets, dirty data across reset, stale locks, unmount
-    during reset (9), five-stage validation wrapper with per-stage
-    timeouts (10), and kselftest Makefile/MAINTAINERS wiring (11).
-    All 5 validation stages pass on a real CephFS cluster.
-
-Changes since v3
-
- - Rebased onto testing (7.1-rc1 + ceph fixes).
- - Dropped v3 patch 7 ("add trace points to the MDS client") --
-   already upstream as d927a595ab2f.
- - Patch 1: fixed flags type from int to unsigned long in
-   ceph_pool_perm_check() (Slava).  Added commit message paragraph
-   documenting the set_bit() conversion in ceph_finish_async_create().
- - Patch 3: moved xa_destroy() under s_mutex with comment explaining
-   serialization against ceph_get_deleg_ino() (Slava).  Added lock
-   ordering comment at mdsc->mutex acquisition.  Added comment
-   explaining why mds_peer_reset() narrows the RECONNECT state check
-   from >= to ==.
- - Patch 4: split CEPH_CAP_FLUSH_MAX_DUMP_COUNT into separate
-   CEPH_CAP_FLUSH_MAX_DUMP_ENTRIES (array bound) and
-   CEPH_CAP_FLUSH_MAX_DUMP_ITERS (iteration limit) (Slava).  Moved
-   all flush timeout defines to mds_client.h alongside reset defines
-   (Slava).  Split comment block into per-field struct documentation
-   and separate function safety comment for dump_cap_flushes() (Slava).
-   Fixed for-loop variable declaration to match fs/ceph/ convention.
-   Fixed commit message to reference the correct macro names and to
-   stay within 72-column body width.
- - Patch 5: added bounded wait for unsafe write requests during the
-   drain phase, using a shared deadline across all drain legs so the
-   total drain time stays within CEPH_CLIENT_RESET_DRAIN_SEC.  Made
-   drain_timed_out monotonic (once set, stays true for the reset).
-   Replaced spin_lock/spin_unlock around drain_timed_out writes with
-   WRITE_ONCE() (Slava).  Added ceph_reset_is_idle() inline helper
-   (Slava).  Added per-field comments to struct ceph_client_reset_state
-   (Slava).  Changed -EIO return to -EAGAIN for reset-failure
-   signalling to callers (Slava).  Increased CEPH_CLIENT_RESET_DRAIN_SEC
-   from 5s to 30s (Slava).  Added sessions[i] = NULL after
-   ceph_put_mds_session() in teardown skip path (Slava).  Added comment
-   at out_sessions label explaining destroy ownership.  Expanded
-   msleep() comment explaining why event-based waiting is not viable.
- - Patch 6: tracepoint placement fixed to fire before -EAGAIN return.
- - Patch 11: added MAINTAINERS F: entry for the test directory and
-   the filesystems/ceph line in the top-level selftests Makefile.
-
-Alex Markuze (11):
-  ceph: convert inode flags to named bit positions and atomic bitops
-  ceph: use proper endian conversion for flock_len in reconnect
-  ceph: harden send_mds_reconnect and handle active-MDS peer reset
-  ceph: add diagnostic timeout loop to wait_caps_flush()
-  ceph: add client reset state machine and session teardown
-  ceph: add manual reset debugfs control and tracepoints
-  selftests: ceph: add reset consistency checker
-  selftests: ceph: add reset stress test
-  selftests: ceph: add reset corner-case tests
-  selftests: ceph: add validation harness
-  selftests: ceph: wire up Ceph reset kselftests and documentation
-
- MAINTAINERS                                   |   1 +
- fs/ceph/addr.c                                |  20 +-
- fs/ceph/caps.c                                |  34 +-
- fs/ceph/debugfs.c                             | 103 +++
- fs/ceph/file.c                                |  13 +-
- fs/ceph/inode.c                               |   5 +-
- fs/ceph/locks.c                               |  38 +-
- fs/ceph/mds_client.c                          | 800 +++++++++++++++++-
- fs/ceph/mds_client.h                          |  52 +-
- fs/ceph/snap.c                                |   2 +-
- fs/ceph/super.h                               |  70 +-
- fs/ceph/xattr.c                               |   2 +-
- include/trace/events/ceph.h                   |  67 ++
- tools/testing/selftests/Makefile              |   1 +
- .../selftests/filesystems/ceph/Makefile       |   7 +
- .../testing/selftests/filesystems/ceph/README |  84 ++
- .../filesystems/ceph/reset_corner_cases.sh    | 646 ++++++++++++++
- .../filesystems/ceph/reset_stress.sh          | 694 +++++++++++++++
- .../filesystems/ceph/run_validation.sh        | 350 ++++++++
- .../selftests/filesystems/ceph/settings       |   1 +
- .../filesystems/ceph/validate_consistency.py  | 297 +++++++
- 21 files changed, 3185 insertions(+), 102 deletions(-)
- create mode 100644 tools/testing/selftests/filesystems/ceph/Makefile
- create mode 100644 tools/testing/selftests/filesystems/ceph/README
- create mode 100755 tools/testing/selftests/filesystems/ceph/reset_corner_cases.sh
- create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress.sh
- create mode 100755 tools/testing/selftests/filesystems/ceph/run_validation.sh
- create mode 100644 tools/testing/selftests/filesystems/ceph/settings
- create mode 100755 tools/testing/selftests/filesystems/ceph/validate_consistency.py
-
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 94ffa127b1d3..1859a0c92d66 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -2563,7 +2563,8 @@ int ceph_pool_perm_check(struct inode *inode, int need)
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_string *pool_ns;
+ 	s64 pool;
+-	int ret, flags;
++	int ret;
++	unsigned long flags;
+ 
+ 	/* Only need to do this for regular files */
+ 	if (!S_ISREG(inode->i_mode))
+@@ -2605,20 +2606,19 @@ int ceph_pool_perm_check(struct inode *inode, int need)
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	flags = CEPH_I_POOL_PERM;
+-	if (ret & POOL_READ)
+-		flags |= CEPH_I_POOL_RD;
+-	if (ret & POOL_WRITE)
+-		flags |= CEPH_I_POOL_WR;
+-
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (pool == ci->i_layout.pool_id &&
+ 	    pool_ns == rcu_dereference_raw(ci->i_layout.pool_ns)) {
+-		ci->i_ceph_flags |= flags;
+-        } else {
++		set_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
++		if (ret & POOL_READ)
++			set_bit(CEPH_I_POOL_RD_BIT, &ci->i_ceph_flags);
++		if (ret & POOL_WRITE)
++			set_bit(CEPH_I_POOL_WR_BIT, &ci->i_ceph_flags);
++	} else {
+ 		pool = ci->i_layout.pool_id;
+-		flags = ci->i_ceph_flags;
+ 	}
++	/* Re-read flags under the lock so check: sees the updated bits. */
++	flags = ci->i_ceph_flags;
+ 	spin_unlock(&ci->i_ceph_lock);
+ 	goto check;
+ }
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index d51454e995a8..cb9e78b713d9 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -549,7 +549,7 @@ static void __cap_delay_requeue_front(struct ceph_mds_client *mdsc,
+ 
+ 	doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 	spin_lock(&mdsc->cap_delay_lock);
+-	ci->i_ceph_flags |= CEPH_I_FLUSH;
++	set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
+ 	if (!list_empty(&ci->i_cap_delay_list))
+ 		list_del_init(&ci->i_cap_delay_list);
+ 	list_add(&ci->i_cap_delay_list, &mdsc->cap_delay_list);
+@@ -1409,7 +1409,7 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
+ 	      ceph_cap_string(revoking));
+ 	BUG_ON((retain & CEPH_CAP_PIN) == 0);
+ 
+-	ci->i_ceph_flags &= ~CEPH_I_FLUSH;
++	clear_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
+ 
+ 	cap->issued &= retain;  /* drop bits we don't want */
+ 	/*
+@@ -1666,7 +1666,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
+ 		last_tid = capsnap->cap_flush.tid;
+ 	}
+ 
+-	ci->i_ceph_flags &= ~CEPH_I_FLUSH_SNAPS;
++	clear_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
+ 
+ 	while (first_tid <= last_tid) {
+ 		struct ceph_cap *cap = ci->i_auth_cap;
+@@ -2026,7 +2026,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
+-		ci->i_ceph_flags |= CEPH_I_ASYNC_CHECK_CAPS;
++		set_bit(CEPH_I_ASYNC_CHECK_CAPS_BIT, &ci->i_ceph_flags);
+ 
+ 		/* Don't send messages until we get async create reply */
+ 		spin_unlock(&ci->i_ceph_lock);
+@@ -2577,7 +2577,7 @@ static void __kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE)
+ 		return;
+ 
+-	ci->i_ceph_flags &= ~CEPH_I_KICK_FLUSH;
++	clear_bit(CEPH_I_KICK_FLUSH_BIT, &ci->i_ceph_flags);
+ 
+ 	list_for_each_entry_reverse(cf, &ci->i_cap_flush_list, i_list) {
+ 		if (cf->is_capsnap) {
+@@ -2686,7 +2686,7 @@ void ceph_early_kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 			__kick_flushing_caps(mdsc, session, ci,
+ 					     oldest_flush_tid);
+ 		} else {
+-			ci->i_ceph_flags |= CEPH_I_KICK_FLUSH;
++			set_bit(CEPH_I_KICK_FLUSH_BIT, &ci->i_ceph_flags);
+ 		}
+ 
+ 		spin_unlock(&ci->i_ceph_lock);
+@@ -2829,7 +2829,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 	spin_lock(&ci->i_ceph_lock);
+ 
+ 	if ((flags & CHECK_FILELOCK) &&
+-	    (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK)) {
++	    test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
+ 		doutc(cl, "%p %llx.%llx error filelock\n", inode,
+ 		      ceph_vinop(inode));
+ 		ret = -EIO;
+@@ -3207,7 +3207,7 @@ static int ceph_try_drop_cap_snap(struct ceph_inode_info *ci,
+ 		BUG_ON(capsnap->cap_flush.tid > 0);
+ 		ceph_put_snap_context(capsnap->context);
+ 		if (!list_is_last(&capsnap->ci_item, &ci->i_cap_snaps))
+-			ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
++			set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
+ 
+ 		list_del(&capsnap->ci_item);
+ 		ceph_put_cap_snap(capsnap);
+@@ -3396,7 +3396,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+ 				if (ceph_try_drop_cap_snap(ci, capsnap)) {
+ 					put++;
+ 				} else {
+-					ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
++					set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
+ 					flush_snaps = true;
+ 				}
+ 			}
+@@ -3648,7 +3648,7 @@ static void handle_cap_grant(struct inode *inode,
+ 
+ 		if (ci->i_layout.pool_id != old_pool ||
+ 		    extra_info->pool_ns != old_ns)
+-			ci->i_ceph_flags &= ~CEPH_I_POOL_PERM;
++			clear_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
+ 
+ 		extra_info->pool_ns = old_ns;
+ 
+@@ -4815,7 +4815,7 @@ int ceph_drop_caps_for_unlink(struct inode *inode)
+ 			doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode,
+ 			      ceph_vinop(inode));
+ 			spin_lock(&mdsc->cap_delay_lock);
+-			ci->i_ceph_flags |= CEPH_I_FLUSH;
++			set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
+ 			if (!list_empty(&ci->i_cap_delay_list))
+ 				list_del_init(&ci->i_cap_delay_list);
+ 			list_add_tail(&ci->i_cap_delay_list,
+@@ -5080,7 +5080,7 @@ int ceph_purge_inode_cap(struct inode *inode, struct ceph_cap *cap, bool *invali
+ 
+ 		if (atomic_read(&ci->i_filelock_ref) > 0) {
+ 			/* make further file lock syscall return -EIO */
+-			ci->i_ceph_flags |= CEPH_I_ERROR_FILELOCK;
++			set_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
+ 			pr_warn_ratelimited_client(cl,
+ 				" dropping file locks for %p %llx.%llx\n",
+ 				inode, ceph_vinop(inode));
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index d54d71669176..7ca9f60fb0e5 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -598,12 +598,12 @@ static void wake_async_create_waiters(struct inode *inode,
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
+-		clear_and_wake_up_bit(CEPH_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
++		/* Serialized by i_ceph_lock; the two ops touch different bits. */
++		clear_and_wake_up_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
+ 
+-		if (ci->i_ceph_flags & CEPH_I_ASYNC_CHECK_CAPS) {
+-			ci->i_ceph_flags &= ~CEPH_I_ASYNC_CHECK_CAPS;
++		if (test_and_clear_bit(CEPH_I_ASYNC_CHECK_CAPS_BIT,
++				      &ci->i_ceph_flags))
+ 			check_cap = true;
+-		}
+ 	}
+ 	ceph_kick_flushing_inode_caps(session, ci);
+ 	spin_unlock(&ci->i_ceph_lock);
+@@ -766,7 +766,8 @@ static int ceph_finish_async_create(struct inode *dir, struct inode *inode,
+ 			 * that point and don't worry about setting
+ 			 * CEPH_I_ASYNC_CREATE.
+ 			 */
+-			ceph_inode(inode)->i_ceph_flags = CEPH_I_ASYNC_CREATE;
++			set_bit(CEPH_I_ASYNC_CREATE_BIT,
++				&ceph_inode(inode)->i_ceph_flags);
+ 			unlock_new_inode(inode);
+ 		}
+ 		if (d_in_lookup(dentry) || d_really_is_negative(dentry)) {
+@@ -2482,7 +2483,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 
+ 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+ 	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
+-	    (ci->i_ceph_flags & CEPH_I_ERROR_WRITE)) {
++	    test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
+ 		struct ceph_snap_context *snapc;
+ 		struct iov_iter data;
+ 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 22c7da1ea61c..4871d7ab2730 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1180,7 +1180,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+ 		rcu_assign_pointer(ci->i_layout.pool_ns, pool_ns);
+ 
+ 		if (ci->i_layout.pool_id != old_pool || pool_ns != old_ns)
+-			ci->i_ceph_flags &= ~CEPH_I_POOL_PERM;
++			clear_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
+ 
+ 		pool_ns = old_ns;
+ 
+@@ -3240,7 +3240,7 @@ void ceph_inode_shutdown(struct inode *inode)
+ 	bool invalidate = false;
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+-	ci->i_ceph_flags |= CEPH_I_SHUTDOWN;
++	set_bit(CEPH_I_SHUTDOWN_BIT, &ci->i_ceph_flags);
+ 	p = rb_first(&ci->i_caps);
+ 	while (p) {
+ 		struct ceph_cap *cap = rb_entry(p, struct ceph_cap, ci_node);
+diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+index dd764f9c64b9..c4ff2266bb94 100644
+--- a/fs/ceph/locks.c
++++ b/fs/ceph/locks.c
+@@ -57,9 +57,7 @@ static void ceph_fl_release_lock(struct file_lock *fl)
+ 	ci = ceph_inode(inode);
+ 	if (atomic_dec_and_test(&ci->i_filelock_ref)) {
+ 		/* clear error when all locks are released */
+-		spin_lock(&ci->i_ceph_lock);
+-		ci->i_ceph_flags &= ~CEPH_I_ERROR_FILELOCK;
+-		spin_unlock(&ci->i_ceph_lock);
++		clear_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
+ 	}
+ 	fl->fl_u.ceph.inode = NULL;
+ 	iput(inode);
+@@ -271,15 +269,10 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
+ 	else if (IS_SETLKW(cmd))
+ 		wait = 1;
+ 
+-	spin_lock(&ci->i_ceph_lock);
+-	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
+-		err = -EIO;
+-	}
+-	spin_unlock(&ci->i_ceph_lock);
+-	if (err < 0) {
++	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
+ 		if (op == CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(fl))
+ 			posix_lock_file(file, fl, NULL);
+-		return err;
++		return -EIO;
+ 	}
+ 
+ 	if (lock_is_read(fl))
+@@ -331,15 +324,10 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
+ 
+ 	doutc(cl, "fl_file: %p\n", fl->c.flc_file);
+ 
+-	spin_lock(&ci->i_ceph_lock);
+-	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
+-		err = -EIO;
+-	}
+-	spin_unlock(&ci->i_ceph_lock);
+-	if (err < 0) {
++	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
+ 		if (lock_is_unlock(fl))
+ 			locks_lock_file_wait(file, fl);
+-		return err;
++		return -EIO;
+ 	}
+ 
+ 	if (IS_SETLKW(cmd))
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index ed17e0023705..53f1012a9e7d 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -3657,7 +3657,8 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 
+ 		spin_lock(&ci->i_ceph_lock);
+ 		cap = ci->i_auth_cap;
+-		if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE && mds != cap->mds) {
++		if (test_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags) &&
++		    mds != cap->mds) {
+ 			doutc(cl, "session changed for auth cap %d -> %d\n",
+ 			      cap->session->s_mds, session->s_mds);
+ 
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 4e6c87f8414c..d873e784b025 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -670,7 +670,7 @@ static inline int ceph_wait_on_async_create(struct inode *inode)
+ {
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 
+-	return wait_on_bit(&ci->i_ceph_flags, CEPH_ASYNC_CREATE_BIT,
++	return wait_on_bit(&ci->i_ceph_flags, CEPH_I_ASYNC_CREATE_BIT,
+ 			   TASK_KILLABLE);
+ }
+ 
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 52b4c2684f92..9b79a5eaca93 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -700,7 +700,7 @@ int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
+ 		return 0;
+ 	}
+ 
+-	ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
++	set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
+ 	doutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s s=%llu\n",
+ 	      inode, ceph_vinop(inode), capsnap, capsnap->context,
+ 	      capsnap->context->seq, ceph_cap_string(capsnap->dirty),
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index afc89ce91804..cb45a59dbb19 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -665,23 +665,34 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
+ /*
+  * Ceph inode.
+  */
+-#define CEPH_I_DIR_ORDERED	(1 << 0)  /* dentries in dir are ordered */
+-#define CEPH_I_FLUSH		(1 << 2)  /* do not delay flush of dirty metadata */
+-#define CEPH_I_POOL_PERM	(1 << 3)  /* pool rd/wr bits are valid */
+-#define CEPH_I_POOL_RD		(1 << 4)  /* can read from pool */
+-#define CEPH_I_POOL_WR		(1 << 5)  /* can write to pool */
+-#define CEPH_I_SEC_INITED	(1 << 6)  /* security initialized */
+-#define CEPH_I_KICK_FLUSH	(1 << 7)  /* kick flushing caps */
+-#define CEPH_I_FLUSH_SNAPS	(1 << 8)  /* need flush snapss */
+-#define CEPH_I_ERROR_WRITE	(1 << 9) /* have seen write errors */
+-#define CEPH_I_ERROR_FILELOCK	(1 << 10) /* have seen file lock errors */
+-#define CEPH_I_ODIRECT_BIT	(11) /* inode in direct I/O mode */
+-#define CEPH_I_ODIRECT		(1 << CEPH_I_ODIRECT_BIT)
+-#define CEPH_ASYNC_CREATE_BIT	(12)	  /* async create in flight for this */
+-#define CEPH_I_ASYNC_CREATE	(1 << CEPH_ASYNC_CREATE_BIT)
+-#define CEPH_I_SHUTDOWN		(1 << 13) /* inode is no longer usable */
+-#define CEPH_I_ASYNC_CHECK_CAPS	(1 << 14) /* check caps immediately after async
+-					     creating finishes */
++#define CEPH_I_DIR_ORDERED_BIT		(0)  /* dentries in dir are ordered */
++					     /* bit 1 historically unused */
++#define CEPH_I_FLUSH_BIT		(2)  /* do not delay flush of dirty metadata */
++#define CEPH_I_POOL_PERM_BIT		(3)  /* pool rd/wr bits are valid */
++#define CEPH_I_POOL_RD_BIT		(4)  /* can read from pool */
++#define CEPH_I_POOL_WR_BIT		(5)  /* can write to pool */
++#define CEPH_I_SEC_INITED_BIT		(6)  /* security initialized */
++#define CEPH_I_KICK_FLUSH_BIT		(7)  /* kick flushing caps */
++#define CEPH_I_FLUSH_SNAPS_BIT		(8)  /* need flush snaps */
++#define CEPH_I_ERROR_WRITE_BIT		(9)  /* have seen write errors */
++#define CEPH_I_ERROR_FILELOCK_BIT	(10) /* have seen file lock errors */
++#define CEPH_I_ODIRECT_BIT		(11) /* inode in direct I/O mode */
++#define CEPH_I_ASYNC_CREATE_BIT		(12) /* async create in flight for this */
++#define CEPH_I_SHUTDOWN_BIT		(13) /* inode is no longer usable */
++#define CEPH_I_ASYNC_CHECK_CAPS_BIT	(14) /* check caps after async creating finishes */
++
++#define CEPH_I_DIR_ORDERED		(1 << CEPH_I_DIR_ORDERED_BIT)
++#define CEPH_I_FLUSH			(1 << CEPH_I_FLUSH_BIT)
++#define CEPH_I_POOL_PERM		(1 << CEPH_I_POOL_PERM_BIT)
++#define CEPH_I_POOL_RD			(1 << CEPH_I_POOL_RD_BIT)
++#define CEPH_I_POOL_WR			(1 << CEPH_I_POOL_WR_BIT)
++#define CEPH_I_SEC_INITED		(1 << CEPH_I_SEC_INITED_BIT)
++#define CEPH_I_KICK_FLUSH		(1 << CEPH_I_KICK_FLUSH_BIT)
++#define CEPH_I_FLUSH_SNAPS		(1 << CEPH_I_FLUSH_SNAPS_BIT)
++#define CEPH_I_ERROR_FILELOCK		(1 << CEPH_I_ERROR_FILELOCK_BIT)
++#define CEPH_I_ODIRECT			(1 << CEPH_I_ODIRECT_BIT)
++#define CEPH_I_ASYNC_CREATE		(1 << CEPH_I_ASYNC_CREATE_BIT)
++#define CEPH_I_SHUTDOWN			(1 << CEPH_I_SHUTDOWN_BIT)
+ 
+ /*
+  * Masks of ceph inode work.
+@@ -694,27 +705,18 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
+ 
+ /*
+  * We set the ERROR_WRITE bit when we start seeing write errors on an inode
+- * and then clear it when they start succeeding. Note that we do a lockless
+- * check first, and only take the lock if it looks like it needs to be changed.
+- * The write submission code just takes this as a hint, so we're not too
+- * worried if a few slip through in either direction.
++ * and then clear it when they start succeeding. The write submission code
++ * just takes this as a hint, so we're not too worried if a few slip through
++ * in either direction.
+  */
+ static inline void ceph_set_error_write(struct ceph_inode_info *ci)
+ {
+-	if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
+-		spin_lock(&ci->i_ceph_lock);
+-		ci->i_ceph_flags |= CEPH_I_ERROR_WRITE;
+-		spin_unlock(&ci->i_ceph_lock);
+-	}
++	set_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
+ }
+ 
+ static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
+ {
+-	if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
+-		spin_lock(&ci->i_ceph_lock);
+-		ci->i_ceph_flags &= ~CEPH_I_ERROR_WRITE;
+-		spin_unlock(&ci->i_ceph_lock);
+-	}
++	clear_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
+ }
+ 
+ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index e773be07f767..860fc8e1867d 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -1054,7 +1054,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
+ 	if (current->journal_info &&
+ 	    !strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) &&
+ 	    security_ismaclabel(name + XATTR_SECURITY_PREFIX_LEN))
+-		ci->i_ceph_flags |= CEPH_I_SEC_INITED;
++		set_bit(CEPH_I_SEC_INITED_BIT, &ci->i_ceph_flags);
+ out:
+ 	spin_unlock(&ci->i_ceph_lock);
+ 	return err;
 -- 
 2.34.1
 
