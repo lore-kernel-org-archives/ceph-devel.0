@@ -1,92 +1,92 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D67083E92AC
-	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 19:24:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50F8D480DE4
+	for <ceph-devel@vger.kernel.org>; Thu,  7 May 2026 19:30:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778181877; cv=none; b=ZzNB5bAHTbluIv8ib4wxSO0WVMCZYZaI62EFY2BDyKX/YWFZzZlwru3D23JMsRBlYdBwoeIdYFMZXV5in2gZlSZl9y+bgo9Jg05YVoXmBXrpk3oaVkRtGbqiWYLwSavzizReuXP03CL8po9fxzVaJzcFzUsxtziu/1gN+Gk504w=
+	t=1778182210; cv=none; b=AW4IiEApU1nUFZlyd92QV5hGY+Q7MiOQ9thgkqOzpGUpZPKEDEwok8253V1xcIt9jXVMftD9LaXnrzctUBbbKA1tKpOVb6ELuWxAMXvQklRIahulrJy+H66xO+b0BKCD83xgfOiXeTLiJTpbZPB/xQGDGZrzq338ClH/3R1Fphc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778181877; c=relaxed/simple;
-	bh=Ldcy+NfeCKQL4gdHy6jOYRlm7dqkx4JsUXfsmQ7fkyE=;
+	s=arc-20240116; t=1778182210; c=relaxed/simple;
+	bh=s7mmcGJn4cxGfZhEmsQHmRuYnLPWzBBMhmOxiL7G1uQ=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=m+J3Z+eplrI2z2216MFPeVVVqzIpxJ28R3XLUklw3bjyrecujdrsfNTi0FcVVyNUKImWzfHeLj5i27CD8ViLkbxhwR/g/KdvLakpi9oZ1kF/v4liL3WWfSDFqY1WLglY/FMqTBZzFEvvvdv3jjhedssYbUZs+EOOLRP4Wf7DjtQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CAolMxtH; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=GwjP0Xlq; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:MIME-Version; b=i0PRZwg370UN5TTRlnxOnz79gcPHmWq8SMs557D6mL9KNpKqLfEgjMjv1Z5PdCTPf6xw08pG480Az5KJevHhXB48IhC+q/hg8W2HVLdC81VR9AmkuoY34wJP0/JY6c7fyak3OykcikV7jLDDPQqyaANwqSGgtUZyBq1Ha3TnDi8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NjdZs/vk; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=nE6d4oAD; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CAolMxtH";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="GwjP0Xlq"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NjdZs/vk";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="nE6d4oAD"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778181874;
+	s=mimecast20190719; t=1778182203;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=eJas2sGqLwB+vZWX5Y6mMjONuOkT/m3kcsxZweoSdiM=;
-	b=CAolMxtHN47Sg+kbhLQw2qp98+bCqHmyFza2pjdQCFhqQQPSynnTMwmW435QEAnQMOUSxw
-	ZvK2lrlxUMLDAULFWLt0JOHs1rzGytt4TaFONs1dzqbxUFJZTJ1OuFHAx8RG/rkDBkoTdf
-	TsGxvT1kSApvKXJZIxFyybO3oKlVFng=
-Received: from mail-yx1-f70.google.com (mail-yx1-f70.google.com
- [74.125.224.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=6/bnJdq7Re8pzWXsv3AFtsBSvp+qvot+lT7d6JLb/D0=;
+	b=NjdZs/vkaTKR/AjDdxwAN0eD548WwNW8DT6qfptCkj97vgBoTtYwQ/oeqPtt7Ik4sHeY3o
+	trFwaHTXlmGh4X6YBkys3peY3l8PZx6ACALVKLmdAkYob9y5HUuMvHiZ30EM7cKVgRXMnT
+	vcI6z+kXLX5elFzOyf1NTZz0iXygZBk=
+Received: from mail-yw1-f198.google.com (mail-yw1-f198.google.com
+ [209.85.128.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-402-UnPZ28CfPBCcZhznLE_X2A-1; Thu, 07 May 2026 15:24:33 -0400
-X-MC-Unique: UnPZ28CfPBCcZhznLE_X2A-1
-X-Mimecast-MFC-AGG-ID: UnPZ28CfPBCcZhznLE_X2A_1778181873
-Received: by mail-yx1-f70.google.com with SMTP id 956f58d0204a3-65c223da702so2647139d50.1
-        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 12:24:33 -0700 (PDT)
+ us-mta-665-LNkCX4khN9y8nFpsYBhdWQ-1; Thu, 07 May 2026 15:30:01 -0400
+X-MC-Unique: LNkCX4khN9y8nFpsYBhdWQ-1
+X-Mimecast-MFC-AGG-ID: LNkCX4khN9y8nFpsYBhdWQ_1778182201
+Received: by mail-yw1-f198.google.com with SMTP id 00721157ae682-7bf0b47d2f8so25875827b3.2
+        for <ceph-devel@vger.kernel.org>; Thu, 07 May 2026 12:30:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1778181873; x=1778786673; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1778182201; x=1778787001; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=eJas2sGqLwB+vZWX5Y6mMjONuOkT/m3kcsxZweoSdiM=;
-        b=GwjP0XlqJh6XXpLvqEBjvQ+LIomHQZFIQvFWw1x6ojH0CRmSA27Rp5KekHwwb6HSBM
-         WchnH/0ICUu8kRP8XfGXFwj8uvIrLDjw7lqSkj2OaIQabvFwU5CwIsTfRBeZqL4fTHMA
-         lwxmnz9LSh7Gknj1ONYKrvY1e1HE3ogexjovw42GbnfrRAlb5oTfv7P0dH0T0MQNw5/f
-         LnhqE9fcc06z4bBUnzqUtBK4L6MTJGrYRjaGoUq9Qu5KTQ+BIWkKlc8wnFLI0Yp7/9zP
-         ZZaVQfOMuSy+N8AHsMWoXwCpR6uCw3LgADjkQG2D3CFVXfpRom/CTwxneBwBNX/BcR+L
-         FuCA==
+        bh=6/bnJdq7Re8pzWXsv3AFtsBSvp+qvot+lT7d6JLb/D0=;
+        b=nE6d4oADH0X7mOoAdx+eCggUsKvZ3qpmt5RSFRwa2x+pQDb4B8eH2dHtzEEsA9tRI9
+         z6Uc04X5ToBfjyfSp8CblF1xsInK3vgJ+jKxhNi4cgJdduTpvJKzdvfjHkQn15shv+M6
+         wTPTSZQEdn+M32ACN+/V/4/2qBXF3ITIr8NYNlCPdjj4MpiersZiB+UPqfAIzFvqST06
+         ZXm9D36oNHa9BRiyZKBqBkPB58BVBeQqUN36OiVJ/Fp/0L5cYgoADRi/56+8CvXwbdrP
+         j8pjlzdOJW0YgbhtcSubwFjSWr2U3fSB/ZNgO/+c1Or3+qp19lLwc8RzI1wBFKpcoWgQ
+         ymIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778181873; x=1778786673;
+        d=1e100.net; s=20251104; t=1778182201; x=1778787001;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=eJas2sGqLwB+vZWX5Y6mMjONuOkT/m3kcsxZweoSdiM=;
-        b=s3U4KPRmH8Lc+YMu13apK9ws8QGaemyG5Zt1G1cJLWT9EqqVgsegqCapKQeAbAMP+Y
-         krhWfCg6kr/u9GlVgWW5EEt36VqqtjN12dneh5uzst7RVbW6kZVIrEeMqGBuuvv1N4hN
-         1veqpY0g4kP03WbKjEDsh2K4crsFyileY7L0BQd1UwwO4gnZvd1K9ujygFIMZ20ibl5i
-         /gNII3dyilktU5PT04o3VWjJdClNmPlUwjCpMMuOgPsKzvgrRAX3GtFe7mBkpFY6ThIz
-         qvBVFa7EwPf0EcyWe6tNDA6bCTuMZ73s+Nxj3XxhZtJk3cwKwd7t7UlqQ6/4ASYNrjjX
-         RA/Q==
-X-Forwarded-Encrypted: i=1; AFNElJ/Hm0ET4asUiuKWoBO0MZf3LrZDH/ZtCiIab35BWftFdNBoTziugWnpUzdL5XUDdg0G0eTE2c+ExN7U@vger.kernel.org
-X-Gm-Message-State: AOJu0YwLRmUpOnK19sh6XlyzABTtq1ap6AxU8hfHm0EJnMj/aCXR/1h/
-	j7vKDsjNiMSDzo0hXubLcIkqoh81Dhn8WycU3/X4UGQAUHUHZGanUTNgP9PtztkJUFyYHCNlpzV
-	9dw+I7TOLftFF7to/o+DKaFY21xCXHa51HaPw5zGj3VV6KBm0fE36XR3zN/A/CgA=
-X-Gm-Gg: Acq92OFlkLemD0Cfv/WidMUju8/2cFO3lbeZn/B5S1sx61u7tk8iSSqUX8WufJNGSmt
-	64aGf0X348uHCH/2ytM8hM87yQxDpuhQDLLk3Dz5ZDv6n7DSksrW2Eqs4Z5zRPJUVR70ZgmUns8
-	6/xowAobdCz2aSv6+UgS6a9VHLQRAM60MXjs2NHIy7wdwJGAUAhWM+l8Etf30EfTvAFCe1OF7OV
-	Qwk66KMTrmWt3TXovW6ACxTjxVwIY+HwLLLOGElruPzUP4op63vxEZYvgSUPbYolziQDTqypLoo
-	bs7jSROeABXttlWU68Bt2ES7AXWYRPouiLpxjQTAVM+XccptIWtwSzx9u6ClvWuuEgaEVl/Uu6G
-	tN22UFtF/qBMb3/jabh8L2Ncr0VAOUujvcLoSw4sP3gQTU6kjqtqK
-X-Received: by 2002:a05:690e:480a:b0:650:3952:3d2a with SMTP id 956f58d0204a3-65c79877bf0mr7764023d50.8.1778181872765;
-        Thu, 07 May 2026 12:24:32 -0700 (PDT)
-X-Received: by 2002:a05:690e:480a:b0:650:3952:3d2a with SMTP id 956f58d0204a3-65c79877bf0mr7763998d50.8.1778181872192;
-        Thu, 07 May 2026 12:24:32 -0700 (PDT)
+        bh=6/bnJdq7Re8pzWXsv3AFtsBSvp+qvot+lT7d6JLb/D0=;
+        b=pzMXfkJPB8znOQY+G0T+ciN3mnlOt4UnzT4w5vUs9KvA02vv9Eh8Y7rE+Fg6gMi/qp
+         7XlKk8Nysbf9dYYr4TjeqJUrhzXdm+hxE35ed3s6qGImYsQEOqoElxPyIY1TV0K/qnVy
+         +zPqwthyi5sduUuoj4XjdqhbGXeXxYaxljStXfnFwvWQfGsgeQGy6Sg2DyjsrtEo6/PQ
+         Ht6euS/LfveIMVQj3qAZTjFsqDx+VBzDOmfYU0BHDBjrc4EcK8tuq+6il4SW4hu2+WU7
+         cBRPsccKHtTJWZVnSvNJb2swYQcWBmQcKkjeQZqL5dHUU5cGiZNLQ3SlQo3khCT9zeE9
+         wzqw==
+X-Forwarded-Encrypted: i=1; AFNElJ9x4yLTC/fT5hfHE1q9Lrcfuvy4HqjdygkHEccmy2upHz7nHeTbHeQz1AmcoUSlRW+1WylXqco6WWKr@vger.kernel.org
+X-Gm-Message-State: AOJu0YwI2D0qt+MQrzNKVVKAPCJrHek6QP2iiEqNUi2LzsupJSIxKeia
+	Zk1R8s548zMMbnAfzIXUMMEPWPRnUckcZ9m2UZ/7SCCeGfyf0TkAcvWW77nodX7nwA2OApjb3a9
+	lCwE5tPBTuZNCB8ly3EX0JO5K+iIdeUjVS0L+Jv514MHn7PTJxbp9CPrOWzsKF1c=
+X-Gm-Gg: Acq92OHDNf7IXl0ZAHBrHAzmG6K90r8iMHbq/jmo66X+vVrG6LPHkwuiW86Lld23Kdl
+	oUJFYqddyyISkzPQKDgs6+vOovrHrUlvZWvav/ai5WUiWdr6wJbrgan2cZf92Hj+wMpVbWxJ4ln
+	OuHviXo6cmTZjejk6NVa3e6qParc08KOYnCU0juppNIw6nO1NCm+gBapud6Xaapb90ElT4ppNuY
+	Mzx5OIEJvbFc9dw6Bi8HekVphgS3QlPvEJrkCpN3JA8tJmX96Z/957pi20U0My9wRCK/5dqM1Im
+	2PdvWRaWe+xHWqiBlToYxn6C7BpE2TSfiwT09SWq9B8mfl1ML0P+TToj/P3A8utE6Gp5UJuI53A
+	hMjDDR2x32U10/w6AORDiPgglWXIg6RimzA+MNXYCgCPzSpR+q26b
+X-Received: by 2002:a05:690c:c4d3:b0:79a:7ff5:93ee with SMTP id 00721157ae682-7bdf5e250dbmr104743767b3.22.1778182200521;
+        Thu, 07 May 2026 12:30:00 -0700 (PDT)
+X-Received: by 2002:a05:690c:c4d3:b0:79a:7ff5:93ee with SMTP id 00721157ae682-7bdf5e250dbmr104743347b3.22.1778182199780;
+        Thu, 07 May 2026 12:29:59 -0700 (PDT)
 Received: from li-4c4c4544-0032-4210-804c-c3c04f423534.ibm.com ([2600:1700:6476:1430::29])
-        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-65d935f47eesm78722d50.18.2026.05.07.12.24.31
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7bd66861afesm96931587b3.37.2026.05.07.12.29.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 May 2026 12:24:31 -0700 (PDT)
-Message-ID: <c7ec42b9399464cfc0c4f7707df810e07e4a2630.camel@redhat.com>
-Subject: Re: [EXTERNAL] [PATCH v4 07/11] selftests: ceph: add reset
- consistency checker
+        Thu, 07 May 2026 12:29:59 -0700 (PDT)
+Message-ID: <da51a7487cd1a6179d8c4ce2cb5b9caaec18c80d.camel@redhat.com>
+Subject: Re: [EXTERNAL] [PATCH v4 08/11] selftests: ceph: add reset stress
+ test
 From: Viacheslav Dubeyko <vdubeyko@redhat.com>
 To: Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, idryomov@gmail.com
-Date: Thu, 07 May 2026 12:24:30 -0700
-In-Reply-To: <20260507122737.2804094-8-amarkuze@redhat.com>
+Date: Thu, 07 May 2026 12:29:58 -0700
+In-Reply-To: <20260507122737.2804094-9-amarkuze@redhat.com>
 References: <20260507122737.2804094-1-amarkuze@redhat.com>
-	 <20260507122737.2804094-8-amarkuze@redhat.com>
+	 <20260507122737.2804094-9-amarkuze@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.60.0 (3.60.0-1.fc44app2) 
@@ -98,352 +98,752 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Thu, 2026-05-07 at 12:27 +0000, Alex Markuze wrote:
-> Add a Python post-run validator for the CephFS client reset stress
-> test.  The script reads data files written by the stress runner and
-> checks that every file was either written completely or is missing,
-> with no partial or corrupted content.
+> Add a single-client stress test for the CephFS manual session reset
+> feature.  The test runs concurrent I/O workers alongside periodic
+> reset injection, then validates data integrity via
+> validate_consistency.py.
 >=20
-> This is a prerequisite for the stress test script which invokes it
-> after each run.
+> Supports four profiles (baseline, moderate, aggressive, soak) with
+> configurable duration, reset interval, and worker counts.
 >=20
 > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 > ---
->  .../filesystems/ceph/validate_consistency.py  | 297 ++++++++++++++++++
->  1 file changed, 297 insertions(+)
->  create mode 100755 tools/testing/selftests/filesystems/ceph/validate_con=
-sistency.py
+>  .../filesystems/ceph/reset_stress.sh          | 694 ++++++++++++++++++
+>  1 file changed, 694 insertions(+)
+>  create mode 100755 tools/testing/selftests/filesystems/ceph/reset_stress=
+.sh
 >=20
-> diff --git a/tools/testing/selftests/filesystems/ceph/validate_consistenc=
-y.py b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
+> diff --git a/tools/testing/selftests/filesystems/ceph/reset_stress.sh b/t=
+ools/testing/selftests/filesystems/ceph/reset_stress.sh
 > new file mode 100755
-> index 000000000000..c230a59bdb3a
+> index 000000000000..c503c75a5f7a
 > --- /dev/null
-> +++ b/tools/testing/selftests/filesystems/ceph/validate_consistency.py
-> @@ -0,0 +1,297 @@
-> +#!/usr/bin/env python3
+> +++ b/tools/testing/selftests/filesystems/ceph/reset_stress.sh
+> @@ -0,0 +1,694 @@
+> +#!/bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# CephFS reset stress test:
+> +# - Runs concurrent I/O and rename workloads
+> +# - Triggers random client resets through debugfs
+> +# - Validates consistency and recovery behavior
 > +
-> +import argparse
-> +import bisect
+> +set -euo pipefail
+> +
+> +KSFT_SKIP=3D4
+> +SCRIPT_DIR=3D"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+> +
+> +# kselftest auto-detect: when invoked with no arguments (e.g. by
+> +# "make run_tests"), find a CephFS mount automatically or skip.
+> +if [[ $# -eq 0 ]]; then
+> +	MOUNT_POINT=3D"$(findmnt -t ceph -n -o TARGET 2>/dev/null | head -1)"
+> +	if [[ -z "$MOUNT_POINT" ]]; then
+> +		echo "SKIP: No CephFS mount found and --mount-point not specified"
+> +		exit "$KSFT_SKIP"
+> +	fi
+> +	exec "$0" --mount-point "$MOUNT_POINT"
+> +fi
+> +
+> +PROFILE=3D"moderate"
+> +DURATION_SEC=3D""
+> +COOLDOWN_SEC=3D20
+> +FILE_COUNT=3D64
+> +IO_WORKERS=3D""
+> +RENAME_WORKERS=3D""
+> +MOUNT_POINT=3D""
+> +OUT_DIR=3D""
+> +CLIENT_ID=3D""
+> +DEBUGFS_ROOT=3D"/sys/kernel/debug/ceph"
+> +SLO_SECONDS=3D30
+> +EXPECT_RESET=3D1
+> +DMESG_CMD=3D""
+> +SUDO=3D""
+> +
+> +RESET_MIN_SEC=3D5
+> +RESET_MAX_SEC=3D15
+> +
+> +RUN_ID=3D"$(date +%Y%m%d-%H%M%S)"
+> +WORKLOAD_FLAG=3D""
+> +RESET_FLAG=3D""
+> +DATA_DIR=3D""
+> +
+> +IO_LOG=3D""
+> +RENAME_LOG=3D""
+> +RESET_LOG=3D""
+> +STATUS_LOG=3D""
+> +STATUS_BEFORE=3D""
+> +STATUS_FINAL=3D""
+> +DMESG_LOG=3D""
+> +SUMMARY_LOG=3D""
+> +REPORT_JSON=3D""
+> +
+> +RESET_PID=3D0
+> +STATUS_PID=3D0
+> +declare -a IO_WORKER_PIDS=3D()
+> +declare -a RENAME_WORKER_PIDS=3D()
+> +
+> +usage()
+> +{
+> +	cat <<EOF
+> +Usage: $0 --mount-point <cephfs_mount> [options]
+> +
+> +Required:
+> +  --mount-point PATH       CephFS mount point to test under
+> +
+> +Options:
+> +  --profile NAME           baseline|moderate|aggressive|soak (default: m=
+oderate)
+> +  --duration-sec N         Override profile runtime in seconds
+> +  --cooldown-sec N         Workload drain time after injector stop (defa=
+ult: 20)
+> +  --file-count N           Number of logical files (default: 64)
+> +  --io-workers N           Number of concurrent I/O workers (profile def=
+ault)
+> +  --rename-workers N       Number of concurrent rename workers (profile =
+default)
+> +  --out-dir PATH           Artifact directory (default: /tmp/ceph_reset_=
+stress_<ts>)
+> +  --client-id ID           Ceph debugfs client id; auto-detect if one cl=
+ient exists
+> +  --debugfs-root PATH      Debugfs Ceph root (default: /sys/kernel/debug=
+/ceph)
+> +  --slo-seconds N          Max allowed post-reset stall window (default:=
+ 30)
+> +  --no-reset               Disable reset injector (baseline mode helper)
+> +  --help                   Show this message
+> +
+> +Examples:
+> +  $0 --mount-point /mnt/cephfs --profile moderate
+> +  $0 --mount-point /mnt/cephfs --profile aggressive --duration-sec 300
+> +  $0 --mount-point /mnt/cephfs --profile baseline --no-reset
+> +EOF
+> +}
+> +
+> +now_ms()
+> +{
+> +	date +%s%3N
+> +}
+> +
+> +set_profile_defaults()
+> +{
+> +	case "$PROFILE" in
+> +	baseline)
+> +		RESET_MIN_SEC=3D0
+> +		RESET_MAX_SEC=3D0
+> +		EXPECT_RESET=3D0
+> +		: "${DURATION_SEC:=3D600}"
+> +		: "${IO_WORKERS:=3D1}"
+> +		: "${RENAME_WORKERS:=3D1}"
+> +		;;
+> +	moderate)
+> +		RESET_MIN_SEC=3D5
+> +		RESET_MAX_SEC=3D15
+> +		: "${DURATION_SEC:=3D900}"
+> +		: "${IO_WORKERS:=3D2}"
+> +		: "${RENAME_WORKERS:=3D1}"
+> +		;;
+> +	aggressive)
+> +		RESET_MIN_SEC=3D1
+> +		RESET_MAX_SEC=3D5
+> +		: "${DURATION_SEC:=3D900}"
+> +		: "${IO_WORKERS:=3D4}"
+> +		: "${RENAME_WORKERS:=3D2}"
+> +		;;
+> +	soak)
+> +		RESET_MIN_SEC=3D5
+> +		RESET_MAX_SEC=3D15
+> +		: "${DURATION_SEC:=3D3600}"
+> +		: "${IO_WORKERS:=3D2}"
+> +		: "${RENAME_WORKERS:=3D1}"
+> +		;;
+> +	*)
+> +		echo "Unknown profile: $PROFILE" >&2
+> +		exit 2
+> +		;;
+> +	esac
+> +}
+> +
+> +log_summary()
+> +{
+> +	local msg=3D"$1"
+> +	printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$msg" | tee -a "$S=
+UMMARY_LOG"
+> +}
+> +
+> +discover_client_id()
+> +{
+> +	local candidates=3D()
+> +	local entry
+> +
+> +	if [[ -n "$CLIENT_ID" ]]; then
+> +		if ! $SUDO test -d "$DEBUGFS_ROOT/$CLIENT_ID/reset"; then
+> +			echo "SKIP: reset debugfs not found for client-id=3D$CLIENT_ID" >&2
+> +			exit "$KSFT_SKIP"
+> +		fi
+> +		return 0
+> +	fi
+> +
+> +	if ! $SUDO test -d "$DEBUGFS_ROOT"; then
+> +		echo "SKIP: Debugfs root not found: $DEBUGFS_ROOT" >&2
+> +		exit "$KSFT_SKIP"
+> +	fi
+> +
+> +	while IFS=3D read -r entry; do
+> +		$SUDO test -d "$DEBUGFS_ROOT/$entry/reset" || continue
+> +		$SUDO test -w "$DEBUGFS_ROOT/$entry/reset/trigger" || continue
+> +		candidates+=3D("$entry")
+> +	done < <($SUDO ls -1 "$DEBUGFS_ROOT" 2>/dev/null || true)
+> +
+> +	if [[ ${#candidates[@]} -eq 1 ]]; then
+> +		CLIENT_ID=3D"${candidates[0]}"
+> +		return 0
+> +	fi
+> +
+> +	if [[ ${#candidates[@]} -eq 0 ]]; then
+> +		echo "SKIP: No writable Ceph reset interface found under $DEBUGFS_ROOT=
+" >&2
+> +		exit "$KSFT_SKIP"
+> +	fi
+> +
+> +	echo "SKIP: Multiple Ceph clients found (${candidates[*]}). Use --clien=
+t-id." >&2
+> +	exit "$KSFT_SKIP"
+> +}
+> +
+> +init_dataset()
+> +{
+> +	local i
+> +	mkdir -p "$DATA_DIR/A" "$DATA_DIR/B"
+> +
+> +	for ((i =3D 0; i < FILE_COUNT; i++)); do
+> +		printf 'seed logical_id=3D%05d ts_ms=3D%s\n' "$i" "$(now_ms)" > "$DATA=
+_DIR/A/file_$(printf '%05d' "$i")"
+> +	done
+> +}
+> +
+> +io_worker()
+> +{
+> +	set +e
+> +	local worker_id=3D"$1"
+> +	local seq=3D0
+> +	local id
+> +	local relpath
+> +	local abspath
+> +	local payload
+> +	local hash
+> +	local ts
+> +
+> +	while [[ -f "$WORKLOAD_FLAG" ]]; do
+> +		id=3D"$(printf '%05d' $((RANDOM % FILE_COUNT)))"
+> +		if [[ -f "$DATA_DIR/A/file_$id" ]]; then
+> +			relpath=3D"A/file_$id"
+> +		elif [[ -f "$DATA_DIR/B/file_$id" ]]; then
+> +			relpath=3D"B/file_$id"
+> +		else
+> +			sleep 0.02
+> +			continue
+> +		fi
+> +
+> +		abspath=3D"$DATA_DIR/$relpath"
+> +		alt_relpath=3D""
+> +		if [[ "$relpath" =3D=3D A/* ]]; then
+> +			alt_relpath=3D"B/file_$id"
+> +		else
+> +			alt_relpath=3D"A/file_$id"
+> +		fi
+> +		alt_abspath=3D"$DATA_DIR/$alt_relpath"
+> +		payload=3D"worker=3D${worker_id} io_seq=3D${seq} id=3D${id} ts_ms=3D$(=
+now_ms)"
+> +		result=3D"$(
+> +			python3 - "$abspath" "$alt_abspath" "$payload" <<'PY'
 > +import hashlib
-> +import json
 > +import os
-> +from pathlib import Path
+> +import sys
 > +
+> +path =3D sys.argv[1]
+> +alt_path =3D sys.argv[2]
+> +payload =3D sys.argv[3]
 > +
-> +def sha256_file(path: Path) -> str:
+> +try:
+> +    fd =3D os.open(path, os.O_RDWR | os.O_APPEND)
+> +    actual =3D path
+> +except FileNotFoundError:
+> +    try:
+> +        fd =3D os.open(alt_path, os.O_RDWR | os.O_APPEND)
+> +        actual =3D alt_path
+> +    except FileNotFoundError:
+> +        sys.exit(1)
+> +
+> +try:
+> +    os.write(fd, (payload + "\n").encode())
+> +    os.fsync(fd)
+> +    os.lseek(fd, 0, os.SEEK_SET)
 > +    digest =3D hashlib.sha256()
-> +    with path.open("rb") as handle:
-> +        while True:
-> +            chunk =3D handle.read(1 << 20)
-> +            if not chunk:
-> +                break
-> +            digest.update(chunk)
-> +    return digest.hexdigest()
+> +    while True:
+> +        chunk =3D os.read(fd, 1 << 20)
+> +        if not chunk:
+> +            break
+> +        digest.update(chunk)
+> +    print(actual + " " + digest.hexdigest())
+> +finally:
+> +    os.close(fd)
+> +PY
+> +		)" || {
+> +			sleep 0.02
+> +			continue
+> +		}
 > +
+> +		actual_abspath=3D"${result%% *}"
+> +		hash=3D"${result#* }"
+> +		if [[ "$actual_abspath" =3D=3D "$alt_abspath" ]]; then
+> +			relpath=3D"$alt_relpath"
+> +		fi
 > +
-> +def parse_io_log(path: Path):
-> +    records =3D []
-> +    if not path.exists():
-> +        return records
-> +    with path.open("r", encoding=3D"utf-8") as handle:
-> +        for line_no, line in enumerate(handle, 1):
-> +            line =3D line.strip()
-> +            if not line:
-> +                continue
-> +            parts =3D line.split(",")
-> +            if len(parts) !=3D 5:
-> +                raise ValueError(f"io log line {line_no}: expected 5 col=
-umns, got {len(parts)}")
-> +            ts_ms, seq, logical_id, relpath, digest =3D parts
-> +            records.append(
-> +                {
-> +                    "ts_ms": int(ts_ms),
-> +                    "seq": int(seq),
-> +                    "logical_id": int(logical_id),
-> +                    "relpath": relpath,
-> +                    "digest": digest,
-> +                }
-> +            )
-> +    return records
+> +		ts=3D"$(now_ms)"
+> +		printf '%s,%s,%s,%s,%s\n' "$ts" "$seq" "$id" "$relpath" "$hash" >> "$I=
+O_LOG"
+> +		seq=3D$((seq + 1))
+> +		sleep 0.02
+> +	done
+> +}
 > +
+> +rename_worker()
+> +{
+> +	set +e
+> +	local worker_id=3D"$1"
+> +	local seq=3D0
+> +	local id
+> +	local src_rel
+> +	local dst_rel
+> +	local rc
+> +	local ts
 > +
-> +def parse_rename_log(path: Path):
-> +    records =3D []
-> +    if not path.exists():
-> +        return records
-> +    with path.open("r", encoding=3D"utf-8") as handle:
-> +        for line_no, line in enumerate(handle, 1):
-> +            line =3D line.strip()
-> +            if not line:
-> +                continue
-> +            parts =3D line.split(",")
-> +            if len(parts) =3D=3D 6:
-> +                ts_ms, seq, logical_id, src_rel, dst_rel, rc =3D parts
-> +            elif len(parts) =3D=3D 7:
-> +                ts_ms, worker_id, seq, logical_id, src_rel, dst_rel, rc =
-=3D parts
-> +                _ =3D worker_id  # worker id is informational only
-> +            else:
-> +                raise ValueError(
-> +                    f"rename log line {line_no}: expected 6 or 7 columns=
-, got {len(parts)}"
-> +                )
-> +            records.append(
-> +                {
-> +                    "ts_ms": int(ts_ms),
-> +                    "seq": int(seq),
-> +                    "logical_id": int(logical_id),
-> +                    "src_rel": src_rel,
-> +                    "dst_rel": dst_rel,
-> +                    "rc": int(rc),
-> +                }
-> +            )
-> +    return records
+> +	while [[ -f "$WORKLOAD_FLAG" ]]; do
+> +		id=3D"$(printf '%05d' $((RANDOM % FILE_COUNT)))"
 > +
+> +		if [[ -f "$DATA_DIR/A/file_$id" ]]; then
+> +			src_rel=3D"A/file_$id"
+> +			dst_rel=3D"B/file_$id"
+> +		elif [[ -f "$DATA_DIR/B/file_$id" ]]; then
+> +			src_rel=3D"B/file_$id"
+> +			dst_rel=3D"A/file_$id"
+> +		else
+> +			sleep 0.02
+> +			continue
+> +		fi
 > +
-> +def parse_reset_log(path: Path):
-> +    records =3D []
-> +    if not path.exists():
-> +        return records
-> +    with path.open("r", encoding=3D"utf-8") as handle:
-> +        for line_no, line in enumerate(handle, 1):
-> +            line =3D line.strip()
-> +            if not line:
-> +                continue
-> +            parts =3D line.split(",")
-> +            if len(parts) !=3D 4:
-> +                raise ValueError(f"reset log line {line_no}: expected 4 =
-columns, got {len(parts)}")
-> +            ts_ms, seq, reason, rc =3D parts
-> +            records.append(
-> +                {
-> +                    "ts_ms": int(ts_ms),
-> +                    "seq": int(seq),
-> +                    "reason": reason,
-> +                    "rc": int(rc),
-> +                }
-> +            )
-> +    return records
+> +		ts=3D"$(now_ms)"
+> +		if mv -T "$DATA_DIR/$src_rel" "$DATA_DIR/$dst_rel" 2>/dev/null; then
+> +			rc=3D0
+> +		else
+> +			rc=3D$?
+> +		fi
+> +		printf '%s,%s,%s,%s,%s,%s,%s\n' "$ts" "$worker_id" "$seq" "$id" "$src_=
+rel" "$dst_rel" "$rc" >> "$RENAME_LOG"
+> +		seq=3D$((seq + 1))
+> +		sleep 0.02
+> +	done
+> +}
 > +
+> +random_sleep_seconds()
+> +{
+> +	local min_sec=3D"$1"
+> +	local max_sec=3D"$2"
+> +	local wait_sec
+> +	local span
 > +
-> +def parse_status_file(path: Path):
-> +    status =3D {}
-> +    if not path.exists():
-> +        return status
-> +    with path.open("r", encoding=3D"utf-8") as handle:
-> +        for line in handle:
-> +            line =3D line.strip()
-> +            if not line or ":" not in line:
-> +                continue
-> +            key, value =3D line.split(":", 1)
-> +            status[key.strip()] =3D value.strip()
-> +    return status
+> +	span=3D$((max_sec - min_sec + 1))
+> +	wait_sec=3D$((min_sec + RANDOM % span))
+> +	sleep "$wait_sec"
+> +}
 > +
+> +reset_injector()
+> +{
+> +	set +e
+> +	local trigger_path=3D"$1"
+> +	local seq=3D0
+> +	local ts
+> +	local reason
+> +	local rc
 > +
-> +def to_int(value: str, default: int =3D 0):
-> +    try:
-> +        return int(value)
-> +    except Exception:
-> +        return default
+> +	while [[ -f "$RESET_FLAG" ]]; do
+> +		random_sleep_seconds "$RESET_MIN_SEC" "$RESET_MAX_SEC"
+> +		[[ -f "$RESET_FLAG" ]] || break
 > +
+> +		ts=3D"$(now_ms)"
+> +		reason=3D"stress_${seq}_${ts}"
+> +		if echo "$reason" | $SUDO tee "$trigger_path" > /dev/null 2>&1; then
+> +			rc=3D0
+> +		else
+> +			rc=3D$?
+> +		fi
+> +		printf '%s,%s,%s,%s\n' "$ts" "$seq" "$reason" "$rc" >> "$RESET_LOG"
+> +		seq=3D$((seq + 1))
+> +	done
+> +}
 > +
-> +def validate_namespace(data_dir: Path, file_count: int, issues):
-> +    actual_locations =3D {}
-> +    actual_paths =3D {}
-> +    for logical_id in range(file_count):
-> +        name =3D f"file_{logical_id:05d}"
-> +        found =3D []
-> +        for subdir in ("A", "B"):
-> +            candidate =3D data_dir / subdir / name
-> +            if candidate.exists():
-> +                found.append((subdir, candidate))
-> +        if len(found) !=3D 1:
-> +            issues.append(
-> +                f"namespace invariant failed for logical_id=3D{logical_i=
-d:05d}: expected exactly one file in A/B, found {len(found)}"
-> +            )
-> +            continue
-> +        actual_locations[logical_id] =3D found[0][0]
-> +        actual_paths[logical_id] =3D found[0][1]
-> +    return actual_locations, actual_paths
+> +status_sampler()
+> +{
+> +	set +e
+> +	local status_path=3D"$1"
+> +	local ts
+> +	local kv_line
 > +
+> +	while [[ -f "$WORKLOAD_FLAG" || -f "$RESET_FLAG" ]]; do
+> +		ts=3D"$(now_ms)"
+> +		if $SUDO test -r "$status_path"; then
+> +			kv_line=3D"$($SUDO awk -F': ' 'NF>=3D2 {gsub(/ /, "", $1); gsub(/ /, =
+"", $2); printf "%s=3D%s;", $1, $2}' "$status_path")"
+> +			printf '%s,%s\n' "$ts" "$kv_line" >> "$STATUS_LOG"
+> +		fi
+> +		sleep 1
+> +	done
+> +}
 > +
-> +def validate_rename_invariant(rename_records, actual_locations, issues):
-> +    expected_locations =3D {}
-> +    for rec in rename_records:
-> +        if rec["rc"] !=3D 0:
-> +            continue
-> +        dst =3D rec["dst_rel"]
-> +        if "/" not in dst:
-> +            continue
-> +        expected_locations[rec["logical_id"]] =3D dst.split("/", 1)[0]
+> +stop_pid_with_timeout()
+> +{
+> +	local pid=3D"$1"
+> +	local name=3D"$2"
+> +	local timeout=3D"$3"
+> +	local waited=3D0
 > +
-> +    for logical_id, expected in expected_locations.items():
-> +        actual =3D actual_locations.get(logical_id)
-> +        if actual is None:
-> +            continue
-> +        if actual !=3D expected:
-> +            issues.append(
-> +                f"rename invariant failed for logical_id=3D{logical_id:0=
-5d}: expected location=3D{expected}, actual=3D{actual}"
-> +            )
+> +	if [[ "$pid" -le 0 ]]; then
+> +		return 0
+> +	fi
 > +
+> +	while kill -0 "$pid" 2>/dev/null; do
+> +		if (( waited >=3D timeout )); then
+> +			log_summary "Timeout waiting for $name (pid=3D$pid), sending SIGTERM/=
+SIGKILL"
+> +			kill -TERM "$pid" 2>/dev/null || true
+> +			sleep 1
+> +			kill -KILL "$pid" 2>/dev/null || true
+> +			wait "$pid" 2>/dev/null || true
+> +			return 1
+> +		fi
+> +		sleep 1
+> +		waited=3D$((waited + 1))
+> +	done
 > +
-> +def validate_data_invariant(io_records, actual_paths, issues):
-> +    expected_hash =3D {}
-> +    for rec in io_records:
-> +        digest =3D rec["digest"]
-> +        if not digest:
-> +            continue
-> +        expected_hash[rec["logical_id"]] =3D digest
+> +	wait "$pid" 2>/dev/null || true
+> +	return 0
+> +}
 > +
-> +    for logical_id, digest in expected_hash.items():
-> +        path =3D actual_paths.get(logical_id)
-> +        if path is None:
-> +            continue
-> +        actual_digest =3D sha256_file(path)
-> +        if digest !=3D actual_digest:
-> +            issues.append(
-> +                f"data invariant failed for logical_id=3D{logical_id:05d=
-}: expected digest=3D{digest}, actual digest=3D{actual_digest}"
-> +            )
+> +detect_privileges()
+> +{
+> +	if [[ -r "$DEBUGFS_ROOT" ]]; then
+> +		SUDO=3D""
+> +	elif sudo -n true 2>/dev/null; then
+> +		SUDO=3D"sudo"
+> +	else
+> +		echo "WARNING: $DEBUGFS_ROOT is not readable and passwordless sudo is =
+not available" >&2
+> +		echo "WARNING: reset injection, debugfs status checks, and dmesg captu=
+re will not work" >&2
+> +	fi
 > +
+> +	if $SUDO dmesg > /dev/null 2>&1; then
+> +		DMESG_CMD=3D"$SUDO dmesg"
+> +	else
+> +		DMESG_CMD=3D""
+> +		echo "WARNING: dmesg is not accessible; kernel errors (hung tasks) wil=
+l not be detected" >&2
+> +	fi
+> +}
 > +
-> +def validate_reset_and_slo(args, reset_records, io_records, rename_recor=
-ds, status, issues):
-> +    if not args.expect_reset:
-> +        return
+> +check_dmesg()
+> +{
+> +	local start_epoch=3D"$1"
 > +
-> +    successful_reset_times =3D [rec["ts_ms"] for rec in reset_records if=
- rec["rc"] =3D=3D 0]
-> +    if not successful_reset_times:
-> +        issues.append("expected reset activity but no successful reset t=
-rigger was observed")
+> +	if [[ -z "$DMESG_CMD" ]]; then
+> +		return 0
+> +	fi
 > +
-> +    phase =3D status.get("phase")
-> +    blocked_requests =3D to_int(status.get("blocked_requests", "0"), def=
-ault=3D-1)
-> +    last_errno =3D to_int(status.get("last_errno", "0"), default=3D1)
-> +    failure_count =3D to_int(status.get("failure_count", "0"), default=
-=3D-1)
+> +	if ! $DMESG_CMD --since "@$start_epoch" > "$DMESG_LOG" 2>/dev/null; the=
+n
+> +		if ! $DMESG_CMD > "$DMESG_LOG" 2>/dev/null; then
+> +			log_summary "WARNING: dmesg capture failed unexpectedly"
+> +			return 0
+> +		fi
+> +		log_summary "dmesg --since unsupported; captured full dmesg"
+> +	fi
 > +
-> +    if phase is None:
-> +        issues.append("missing final reset status file or phase field")
-> +    elif phase.lower() !=3D "idle":
-> +        issues.append(f"recovery invariant failed: phase=3D{phase}, expe=
-cted idle")
+> +	if grep -qi "hung task" "$DMESG_LOG" 2>/dev/null; then
+> +		log_summary "ERROR: kernel log contains 'hung task' during test window=
+"
+> +		return 1
+> +	fi
 > +
-> +    if blocked_requests !=3D 0:
-> +        issues.append(f"recovery invariant failed: blocked_requests=3D{b=
-locked_requests}, expected 0")
-> +    if last_errno !=3D 0:
-> +        issues.append(f"recovery invariant failed: last_errno=3D{last_er=
-rno}, expected 0")
-> +    if failure_count > 0:
-> +        issues.append(
-> +            f"recovery invariant failed: failure_count=3D{failure_count}=
-, "
-> +            "one or more resets failed during the run"
-> +        )
+> +	return 0
+> +}
 > +
-> +    op_times =3D [rec["ts_ms"] for rec in io_records]
-> +    op_times.extend(rec["ts_ms"] for rec in rename_records if rec["rc"] =
-=3D=3D 0)
-> +    op_times.sort()
+> +cleanup()
+> +{
+> +	rm -f "$WORKLOAD_FLAG" "$RESET_FLAG"
+> +	local pid
+> +	for pid in "${IO_WORKER_PIDS[@]}" "${RENAME_WORKER_PIDS[@]}" "$RESET_PI=
+D" "$STATUS_PID"; do
+> +		[[ "$pid" -gt 0 ]] 2>/dev/null && kill "$pid" 2>/dev/null || true
+> +	done
+> +	wait 2>/dev/null || true
+> +}
 > +
-> +    if successful_reset_times and not op_times:
-> +        issues.append("recovery SLO failed: no workload completion event=
-s were recorded")
-> +        return
+> +parse_args()
+> +{
+> +	while [[ $# -gt 0 ]]; do
+> +		case "$1" in
+> +		--mount-point)
+> +			MOUNT_POINT=3D"$2"
+> +			shift 2
+> +			;;
+> +		--profile)
+> +			PROFILE=3D"$2"
+> +			shift 2
+> +			;;
+> +		--duration-sec)
+> +			DURATION_SEC=3D"$2"
+> +			shift 2
+> +			;;
+> +		--cooldown-sec)
+> +			COOLDOWN_SEC=3D"$2"
+> +			shift 2
+> +			;;
+> +		--file-count)
+> +			FILE_COUNT=3D"$2"
+> +			shift 2
+> +			;;
+> +		--io-workers)
+> +			IO_WORKERS=3D"$2"
+> +			shift 2
+> +			;;
+> +		--rename-workers)
+> +			RENAME_WORKERS=3D"$2"
+> +			shift 2
+> +			;;
+> +		--out-dir)
+> +			OUT_DIR=3D"$2"
+> +			shift 2
+> +			;;
+> +		--client-id)
+> +			CLIENT_ID=3D"$2"
+> +			shift 2
+> +			;;
+> +		--debugfs-root)
+> +			DEBUGFS_ROOT=3D"$2"
+> +			shift 2
+> +			;;
+> +		--slo-seconds)
+> +			SLO_SECONDS=3D"$2"
+> +			shift 2
+> +			;;
+> +		--no-reset)
+> +			EXPECT_RESET=3D0
+> +			shift
+> +			;;
+> +		--help|-h)
+> +			usage
+> +			exit 0
+> +			;;
+> +		*)
+> +			echo "Unknown option: $1" >&2
+> +			usage
+> +			exit 2
+> +			;;
+> +		esac
+> +	done
+> +}
 > +
-> +    slo_ms =3D args.slo_seconds * 1000
-> +    for ts in successful_reset_times:
-> +        idx =3D bisect.bisect_left(op_times, ts)
-> +        if idx >=3D len(op_times):
-> +            issues.append(f"recovery SLO failed: no operation completion=
- observed after reset at ts_ms=3D{ts}")
-> +            continue
-> +        delta =3D op_times[idx] - ts
-> +        if delta > slo_ms:
-> +            issues.append(
-> +                f"recovery SLO failed: first post-reset completion at {d=
-elta}ms exceeds threshold {slo_ms}ms (reset ts_ms=3D{ts})"
-> +            )
+> +main()
+> +{
+> +	local start_epoch
+> +	local trigger_path=3D""
+> +	local status_path=3D""
+> +	local final_rc=3D0
+> +	local reset_enabled=3D0
+> +	local i
 > +
+> +	parse_args "$@"
 > +
-> +def main():
-> +    parser =3D argparse.ArgumentParser(description=3D"Validate Ceph rese=
-t stress artifacts")
-> +    parser.add_argument("--data-dir", required=3DTrue)
-> +    parser.add_argument("--file-count", required=3DTrue, type=3Dint)
-> +    parser.add_argument("--io-log", required=3DTrue)
-> +    parser.add_argument("--rename-log", required=3DTrue)
-> +    parser.add_argument("--reset-log", required=3DTrue)
-> +    parser.add_argument("--status-final", required=3DFalse, default=3D""=
-)
-> +    parser.add_argument("--slo-seconds", required=3DFalse, type=3Dint, d=
-efault=3D30)
-> +    parser.add_argument("--expect-reset", action=3D"store_true")
-> +    parser.add_argument("--report-json", required=3DFalse, default=3D"")
-> +    args =3D parser.parse_args()
+> +	if [[ -z "$MOUNT_POINT" ]]; then
+> +		echo "--mount-point is required" >&2
+> +		usage
+> +		exit 2
+> +	fi
 > +
-> +    data_dir =3D Path(args.data_dir)
-> +    io_log =3D Path(args.io_log)
-> +    rename_log =3D Path(args.rename_log)
-> +    reset_log =3D Path(args.reset_log)
-> +    status_final =3D Path(args.status_final) if args.status_final else P=
-ath("__missing_status__")
+> +	if [[ ! -d "$MOUNT_POINT" ]]; then
+> +		echo "SKIP: Mount point does not exist: $MOUNT_POINT" >&2
+> +		exit "$KSFT_SKIP"
+> +	fi
 > +
-> +    issues =3D []
+> +	if ! touch "$MOUNT_POINT/.ceph_reset_test_probe" 2>/dev/null; then
+> +		echo "SKIP: Mount point is not writable: $MOUNT_POINT" >&2
+> +		exit "$KSFT_SKIP"
+> +	fi
+> +	rm -f "$MOUNT_POINT/.ceph_reset_test_probe"
 > +
-> +    if not data_dir.exists():
-> +        issues.append(f"data directory is missing: {data_dir}")
+> +	if ! command -v python3 > /dev/null 2>&1; then
+> +		echo "SKIP: python3 is required but not found in PATH" >&2
+> +		exit "$KSFT_SKIP"
+> +	fi
 > +
-> +    try:
-> +        io_records =3D parse_io_log(io_log)
-> +        rename_records =3D parse_rename_log(rename_log)
-> +        reset_records =3D parse_reset_log(reset_log)
-> +    except Exception as exc:
-> +        issues.append(f"log parsing failed: {exc}")
-> +        io_records =3D []
-> +        rename_records =3D []
-> +        reset_records =3D []
+> +	if ! stat -f -c '%T' "$MOUNT_POINT" 2>/dev/null | grep -qi ceph; then
+> +		echo "WARNING: $MOUNT_POINT does not appear to be a CephFS mount" >&2
+> +	fi
 > +
-> +    status =3D parse_status_file(status_final)
+> +	detect_privileges
 > +
-> +    actual_locations, actual_paths =3D validate_namespace(data_dir, args=
-.file_count, issues)
-> +    validate_rename_invariant(rename_records, actual_locations, issues)
-> +    validate_data_invariant(io_records, actual_paths, issues)
-> +    validate_reset_and_slo(args, reset_records, io_records, rename_recor=
-ds, status, issues)
+> +	set_profile_defaults
+> +	if [[ "$EXPECT_RESET" -eq 0 ]]; then
+> +		PROFILE=3D"baseline"
+> +		RESET_MIN_SEC=3D0
+> +		RESET_MAX_SEC=3D0
+> +	fi
 > +
-> +    report =3D {
-> +        "file_count": args.file_count,
-> +        "io_records": len(io_records),
-> +        "rename_records": len(rename_records),
-> +        "reset_records": len(reset_records),
-> +        "expect_reset": args.expect_reset,
-> +        "issues": issues,
-> +    }
+> +	if ! [[ "$IO_WORKERS" =3D~ ^[0-9]+$ && "$RENAME_WORKERS" =3D~ ^[0-9]+$ =
+]]; then
+> +		echo "io-workers and rename-workers must be integers" >&2
+> +		exit 2
+> +	fi
 > +
-> +    if args.report_json:
-> +        report_path =3D Path(args.report_json)
-> +        report_path.write_text(json.dumps(report, indent=3D2, sort_keys=
-=3DTrue), encoding=3D"utf-8")
+> +	if [[ "$IO_WORKERS" -le 0 || "$RENAME_WORKERS" -le 0 ]]; then
+> +		echo "io-workers and rename-workers must be > 0" >&2
+> +		exit 2
+> +	fi
 > +
-> +    if issues:
-> +        print("FAIL: consistency validation found issues")
-> +        for issue in issues:
-> +            print(f"  - {issue}")
-> +        raise SystemExit(1)
+> +	if [[ -z "$OUT_DIR" ]]; then
+> +		OUT_DIR=3D"/tmp/ceph_reset_stress_${RUN_ID}"
+> +	fi
+> +	mkdir -p "$OUT_DIR"
 > +
-> +    print("PASS: consistency validation succeeded")
+> +	WORKLOAD_FLAG=3D"$OUT_DIR/workload.running"
+> +	RESET_FLAG=3D"$OUT_DIR/reset.running"
 > +
+> +	DATA_DIR=3D"$MOUNT_POINT/ceph_reset_stress_${RUN_ID}"
+> +	mkdir -p "$DATA_DIR"
 > +
-> +if __name__ =3D=3D "__main__":
-> +    main()
+> +	IO_LOG=3D"$OUT_DIR/io.log"
+> +	RENAME_LOG=3D"$OUT_DIR/rename.log"
+> +	RESET_LOG=3D"$OUT_DIR/reset.log"
+> +	STATUS_LOG=3D"$OUT_DIR/status.log"
+> +	STATUS_BEFORE=3D"$OUT_DIR/reset_status.before"
+> +	STATUS_FINAL=3D"$OUT_DIR/reset_status.final"
+> +	DMESG_LOG=3D"$OUT_DIR/dmesg.log"
+> +	SUMMARY_LOG=3D"$OUT_DIR/summary.log"
+> +	REPORT_JSON=3D"$OUT_DIR/validator_report.json"
+> +
+> +	: > "$IO_LOG"
+> +	: > "$RENAME_LOG"
+> +	: > "$RESET_LOG"
+> +	: > "$STATUS_LOG"
+> +	: > "$SUMMARY_LOG"
+> +
+> +	start_epoch=3D"$(date +%s)"
+> +
+> +	log_summary "Starting Ceph reset stress test"
+> +	log_summary "Profile=3D$PROFILE duration=3D${DURATION_SEC}s cooldown=3D=
+${COOLDOWN_SEC}s file_count=3D${FILE_COUNT} io_workers=3D${IO_WORKERS} rena=
+me_workers=3D${RENAME_WORKERS}"
+> +	[[ -n "$SUDO" ]] && log_summary "Using sudo for privileged operations"
+> +	[[ -z "$DMESG_CMD" ]] && log_summary "WARNING: dmesg not available; hun=
+g task detection disabled"
+> +	log_summary "Artifacts=3D$OUT_DIR"
+> +	log_summary "Data dir=3D$DATA_DIR"
+> +
+> +	init_dataset
+> +
+> +	if [[ "$EXPECT_RESET" -eq 1 ]]; then
+> +		discover_client_id
+> +		trigger_path=3D"$DEBUGFS_ROOT/$CLIENT_ID/reset/trigger"
+> +		status_path=3D"$DEBUGFS_ROOT/$CLIENT_ID/reset/status"
+> +		if ! $SUDO test -w "$trigger_path"; then
+> +			echo "SKIP: Reset trigger is not writable: $trigger_path" >&2
+> +			exit "$KSFT_SKIP"
+> +		fi
+> +		if ! $SUDO test -r "$status_path"; then
+> +			echo "SKIP: Reset status is not readable: $status_path" >&2
+> +			exit "$KSFT_SKIP"
+> +		fi
+> +		$SUDO cat "$status_path" > "$STATUS_BEFORE" || true
+> +		reset_enabled=3D1
+> +		log_summary "Using ceph client id: $CLIENT_ID"
+> +	fi
+> +
+> +	trap cleanup EXIT INT TERM
+> +
+> +	touch "$WORKLOAD_FLAG"
+> +	for ((i =3D 0; i < IO_WORKERS; i++)); do
+> +		io_worker "$i" &
+> +		IO_WORKER_PIDS+=3D("$!")
+> +	done
+> +
+> +	for ((i =3D 0; i < RENAME_WORKERS; i++)); do
+> +		rename_worker "$i" &
+> +		RENAME_WORKER_PIDS+=3D("$!")
+> +	done
+> +
+> +	if [[ "$reset_enabled" -eq 1 ]]; then
+> +		touch "$RESET_FLAG"
+> +		reset_injector "$trigger_path" &
+> +		RESET_PID=3D$!
+> +
+> +		status_sampler "$status_path" &
+> +		STATUS_PID=3D$!
+> +	fi
+> +
+> +	sleep "$DURATION_SEC"
+> +
+> +	if [[ "$reset_enabled" -eq 1 ]]; then
+> +		rm -f "$RESET_FLAG"
+> +		stop_pid_with_timeout "$RESET_PID" "reset_injector" 20 || final_rc=3D1
+> +		log_summary "Injector stopped; entering cooldown=3D${COOLDOWN_SEC}s"
+> +	fi
+> +
+> +	sleep "$COOLDOWN_SEC"
+> +
+> +	rm -f "$WORKLOAD_FLAG"
+> +	for i in "${!IO_WORKER_PIDS[@]}"; do
+> +		stop_pid_with_timeout "${IO_WORKER_PIDS[$i]}" "io_worker[$i]" 20 || fi=
+nal_rc=3D1
+> +	done
+> +	for i in "${!RENAME_WORKER_PIDS[@]}"; do
+> +		stop_pid_with_timeout "${RENAME_WORKER_PIDS[$i]}" "rename_worker[$i]" =
+20 || final_rc=3D1
+> +	done
+> +
+> +	if [[ "$reset_enabled" -eq 1 ]]; then
+> +		stop_pid_with_timeout "$STATUS_PID" "status_sampler" 10 || final_rc=3D=
+1
+> +		$SUDO cat "$status_path" > "$STATUS_FINAL" || true
+> +	fi
+> +
+> +	if ! check_dmesg "$start_epoch"; then
+> +		final_rc=3D1
+> +	fi
+> +
+> +	if ! python3 "$SCRIPT_DIR/validate_consistency.py" \
+> +		--data-dir "$DATA_DIR" \
+> +		--file-count "$FILE_COUNT" \
+> +		--io-log "$IO_LOG" \
+> +		--rename-log "$RENAME_LOG" \
+> +		--reset-log "$RESET_LOG" \
+> +		--status-final "$STATUS_FINAL" \
+> +		--slo-seconds "$SLO_SECONDS" \
+> +		--report-json "$REPORT_JSON" \
+> +		$( [[ "$reset_enabled" -eq 1 ]] && echo "--expect-reset" ); then
+> +		final_rc=3D1
+> +	fi
+> +
+> +	if [[ "$final_rc" -eq 0 ]]; then
+> +		log_summary "PASS: stress run completed successfully"
+> +	else
+> +		log_summary "FAIL: stress run detected one or more failures"
+> +	fi
+> +
+> +	log_summary "Artifacts available in: $OUT_DIR"
+> +	exit "$final_rc"
+> +}
+> +
+> +main "$@"
 
 Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
