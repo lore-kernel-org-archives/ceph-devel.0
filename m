@@ -1,137 +1,138 @@
-Received: from mail-ua1-f45.google.com (mail-ua1-f45.google.com [209.85.222.45])
+Received: from mail-vs1-f48.google.com (mail-vs1-f48.google.com [209.85.217.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE38E450906
-	for <ceph-devel@vger.kernel.org>; Mon, 11 May 2026 19:26:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5C0843D4FA
+	for <ceph-devel@vger.kernel.org>; Mon, 11 May 2026 19:38:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.217.48
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778527571; cv=pass; b=en4Gt4Qv8ZPqC+One+KBSF0uc02zxidsdcnSgArheRKb+Iq8CdTLVtIccBQJaoxVqeQTOtbO9q4OqiYqE/3VnIQi3yloy/s246MXs1QyB0PGaGBQZXwNqTHInn1CapBU7KZ4K9ftsZRyZi21hpbmWYYUkpaaUKt8oR7B5mmiq6k=
+	t=1778528283; cv=pass; b=nnF/jhFGaE+yrc1kmTVFaGQQ/unLnIq9KdlyLWPcE7+9O3Oxqx2wJ7XN2/4PbY0oj8l5KEmh0BPLGPgBLtJUVPIXPbHoVVHl/9sInYU4WYTjfPW/wYmHxgXwPAvoETslIUBeu2VRjmbPogEeu2weVg2AVVfDiXpIazp4j17qygc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778527571; c=relaxed/simple;
-	bh=A+yl1Ss0Jy2o7/qGj7Q654nsMY98rYI7uc59+35hLlA=;
+	s=arc-20240116; t=1778528283; c=relaxed/simple;
+	bh=Kf8ASw7c6TSjvkbupbDPMcm2+Q5ekYTObzCiqDCd/ng=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=KRIXOf1LtWDD0Cy0OjE9C1pmsUHj26sFCYWKJavMLVyC0vSQgvalLws/IvkDejmZfqgRtQ63PHGEJD8PffEm7EXZIbijuWgvhF9VovqfhklnKNOlCStoQVbNJ9B270wuNU94Jz834gAJXCzBO6T+E9euQE6ulkbhKP/WvYTNYqI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DtA6yOW0; arc=pass smtp.client-ip=209.85.222.45
+	 To:Cc:Content-Type; b=TyHZdk2feHJWCJiCdbdjqqj99bnU9a6UQMSH1hod8e/cTdgECkE1r+CfaE0yybIUrpiIUExS82bZT7dwDjjBjpZB63cdjSBfF4uMPLJ1OIfb3cwVq/38v4rBpNBTpn2NrIZxV+lBbX5TVOWSTyrp5W5vRGpcte6eMcQq9EDdoFw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=rlGd0SNt; arc=pass smtp.client-ip=209.85.217.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DtA6yOW0"
-Received: by mail-ua1-f45.google.com with SMTP id a1e0cc1a2514c-95695190911so1149143241.2
-        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2026 12:26:05 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1778527565; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rlGd0SNt"
+Received: by mail-vs1-f48.google.com with SMTP id ada2fe7eead31-632e479586aso1244509137.2
+        for <ceph-devel@vger.kernel.org>; Mon, 11 May 2026 12:38:01 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778528281; cv=none;
         d=google.com; s=arc-20240605;
-        b=c5ldchRwg5qM1ZhKtL/lvgoHVDHf9+2J4KmHThPIxziGBk3VPcEekU98uJSmGzwqjD
-         dk8itO0Gt2/3a/kwDTqpGHPP8zeCEQdBQS0t8mAnsDnUhbWXpIM06j2pEQhqd/bys9zM
-         TeVw9EnJ5y2V6cDVVSE4N7s+YnBgSTVQLgogQNgEwD7sHhsw0/5vt1oiCu3oCFcIhxBB
-         xA/7MJOOq14c5T5yet49kJM3326oo7HbptFsjTcIN1R+IXF44xvzsg5lDFjk27AzGkKz
-         cOLXUkFsKFsb7kFW12s/yCynAY7GdIqc5SexFdRIwsLqxSfIULMsL3YSmetWZhmXwKaJ
-         RKZQ==
+        b=dRt9xDfovGI/PNbe26RAPgXvVCZejAdJl+U1DeixX9WpVWD1M9h/itFXY3Z5c7107J
+         0ZSJw9cfZqLdPq0Ovi05LMN/pFxS5Tlf7iMwKEJ8QI7IEfl+uvoxbqha5rCPixUUntxf
+         XmRJL9gtNeDIEDUvAEfC6FEFtMEN00HB5AQbZVsg6xnZVY9QQ5QsbdD9sLr+WGsYwVC+
+         kOc6JUIqt6vwMT/zyBSxopCTN+kj/16QIaHexQGDLCUmVsdMlnMucxFHlSm0fHyE1N5Q
+         x2CCu2/ppow4mgnGA7QJD5adXLkqx34Wqs70DBaiqviYNR+VSZet2B3Vd+/LT/3krIQR
+         z04g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=+Y9DN9ou3xhN5TkTjq8zUSjodrymSeogwQFXoWPv7e4=;
-        fh=wCGcmkyqUABwuDHx2ewfVrP0zHyOImC/mTuSC5pz/Rs=;
-        b=Fxe62YAB2ht8Y5mOOZixJoMXYYZL9fqUhVgs9JjdT+4fTjLSVUucOOl+9NsqxDop95
-         TUDWI6jsn+kJVDDH7XWIbYdg27AVzK4ZYQaQz09cOktixDPif80WCILcim1ly8KwJgQJ
-         +aLrxQRdVsLu+mmAtQmUN7NlTjcR5Pwn5xVfkoSVa5bvj9jiemPZXbY8iyS82NoBthCF
-         siuv4N1E8ONX+YRXL5aZ4FH5AcNYdNPV4nFO+TqZtUO9UxsTyoTxT2whIRKrLz5nIfJp
-         Mm5iIeGKJBmsfCrqctDGzRi+x1bCt0mmzKHDjl+EqgpyF7WLbvf0hPk4IsQg0yCTsGj5
-         hLgA==;
+        bh=K7grrXc6EkBlTMWDA+FMiibEnmYiFgT7YFiIxmGlKu8=;
+        fh=NtyYXZX+HOSJGO73qTCjf1ir11meRH4PNh2iMycVshk=;
+        b=bI4ihnSVsTH9A+yjuh41gFWNQHdz13346dXoaXmo6EuFhMplOPcFlDs7OS+jiOpOwq
+         t4r6tHObXDJmUm06CDSrO7kuiZ3fe8fi12UskBpHXCIi6p37ERQ4hO0RLpd2Hb4gKlqy
+         IWut1/omAntCHOmevRw2GSjcmNQWtRYFAKaNfT3Q9PnhHprKkhPPnrp24Hi1PB9RJLQG
+         Cwp0+zDij5RturoHMHtiUMmeBScrmgeVwg6leR084mBBHEHDV1KwGGmy1O5zyVyqbPUe
+         uE/kmQi9p81Ss7adwAUN/tPSClKjapHIfm96CMnDC8Ot2pU3XhJRwqicz44TJdiKKK0w
+         GWeg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778527565; x=1779132365; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1778528281; x=1779133081; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=+Y9DN9ou3xhN5TkTjq8zUSjodrymSeogwQFXoWPv7e4=;
-        b=DtA6yOW0VabQ+lww+HDs4j2xv91N0Na+b7agTMRR982FPV6M4t+XLLZ5rRDGKgB1q/
-         WXXu4iUihuUJn3RZQ6TL4/ulP4x1jnjLOucmE6+/cGSYy6EHGRs+P2OB8GqUSr1s73sP
-         V+DRZk/dTSISJS0uz/Qq47dy9vm1r5eQyjkWKUjWt9P8wurUEn8KWioTlTmekOcfxO2z
-         PtBGy/iJFVtcgXc1yJxUUO2HgKgPvOt9tHxe3wW6KMZvaKx1IM8Pv1Kzo81EHG0CIbmm
-         kzR/GGYXz2d8m8kZAcEXRUhhentJV2Gv1H7wcKU4755GMQzMgvj08OltadSFzAoZxzFm
-         2Wqw==
+        bh=K7grrXc6EkBlTMWDA+FMiibEnmYiFgT7YFiIxmGlKu8=;
+        b=rlGd0SNtAnWrXoD5Yx0qEoD8ljN/m5XqzPO73I9Q6EbV6/u/0XXFuSMkb3VaeNMFFP
+         yqbqeSC6WLEscOhCxEdGp+zVy2vS0xYBFP3W1gPggH1kCIv2LLjuu7Lf7ZT7gR50arKm
+         K5+Qow54EB9uy0SGnFypFbQUun8GAhhWAnkAmTgFzcf9M4Bp12diekRDfMoTHTo2ZP+b
+         1BcekZ/jDO4L7VCIUWTs4BmzBz0JIs6RTFqj7ktUyUgm5ZbtnGdknemnjZvBl6ZBHdAQ
+         prSvvCW2lFxDW4IFxfv1qPgWRDelARL5jG/qLYI+7bblm3XzkofajhfibSRqj+PYyh1l
+         llng==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778527565; x=1779132365;
+        d=1e100.net; s=20251104; t=1778528281; x=1779133081;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=+Y9DN9ou3xhN5TkTjq8zUSjodrymSeogwQFXoWPv7e4=;
-        b=LlFxspk+rRsMrENum4HZhyrbDsAz5aYU2bLI5Bwac5wxG8gi7hQ6/8PNgKUpiodjsc
-         tWi6mKQ26OX9GY0hVGa35aAZkR2vPGsk3Z9nOZ2Yga32TGNtNn/1xOvjZiedIjq4KocJ
-         2NutDBdz3dz+EB9rjU2ik+Jwbs3Aye9KwL6HzyWVe9MZ0v94rdt6G+uxOZiAt2OOOqzc
-         EHsA7U4kg26C5WqxlVXd+frEM7zrQF7RexuxlYP2JlQ5/LgCRA6TVkE4Nrtf4Ir3ElFT
-         pmtIRhIF9bd5DLiBC1ZfmoZCAUg3sAFGvvS1jx1IUd/KPm2oB2UUSMJ7Om2bVrWpGkxN
-         Lgpw==
-X-Forwarded-Encrypted: i=1; AFNElJ/Oycwd34/oWOnn2niX2SolzXD8C9zkS/hJDRmrzAJ40/+D21ElaZpYZacJgrZWEe+sBUgmL+1/ETDK@vger.kernel.org
-X-Gm-Message-State: AOJu0Yze/nOJ2ljopBbJ/rhH6liWwsGU0UCOy9np7lVx/o2fUwWnHsYa
-	tlHiAgoI9tH877PhaFXL2UzEf+Rz4uA6kMyaqAQVVEHGvl0q4+O7QHSAiMGcJA5IXT3q/qcC6B/
-	5wAeN7vCdwK+M7gAo9NpaPv6Zyl3Rs30=
-X-Gm-Gg: Acq92OGcZUNG9uDpRWDLKqFis9kSEzDKgkrMkp4ipITAuXFoBZT/Zbd+l4GLiBmmenQ
-	7e+5WDM2Ra46gQOwIdhkhMubgwdhCm76vSnRRAuJt9LM+rsATRQnCpWmrSxuLjRCwbX+mvvfIEv
-	VA19XE2B0sJD1c+xBBbBi9q8hdn7CxnviQOlAZGHMNt+/3zJw0nb8GzExeTkfhIeQLd5X/FXt1R
-	ue/0UmMW2KMVKo/1Jtsx8bejb1F2BuWy/LnYREfanuWHfAzSVZTJRyWdapUKPlFHnaWJxVoeakb
-	85fNb4c=
-X-Received: by 2002:a05:6102:f0d:b0:631:3226:dd8f with SMTP id
- ada2fe7eead31-631dbd7042dmr3919522137.18.1778527564723; Mon, 11 May 2026
- 12:26:04 -0700 (PDT)
+        bh=K7grrXc6EkBlTMWDA+FMiibEnmYiFgT7YFiIxmGlKu8=;
+        b=ednIyx7qQcrfUgZReHT1o9IOxUsn6ZCT35It9pz3kCVvpveRQ5KR8DqZZWmEx15YEg
+         iT//ma3vwnoM/H4nr18ZJuaFOAftKfVk8Oky0tDgKMSd2+Fzaq4qPd6VT0npfOvg2hTM
+         brastLCr4jSh1svMNErCmqC07Jp28ROyVk4Fl/Zq18JnHQn7CcoLm6bpCC/nPdkQdzyG
+         e6sfGKV4WuoFRCPLcuuE3TQiTHyWnhJKSf2LNFR3Vu4bDjk6reUuYE39camLJ6+ZLaiA
+         1JxGvBC1vcY+gG/PTUtWAyCTNGHd0O4la+xaxLITMKrJTzBowKSVKF6PAnpzUO5Yb4Li
+         uU/g==
+X-Forwarded-Encrypted: i=1; AFNElJ9cPFY155MALcgVVDdgpTPg8UzJWtfbxQfWEDezcmw5zmf5FC31vbrBsjG/zyKSDHTsI78zDlwYRwjD@vger.kernel.org
+X-Gm-Message-State: AOJu0YwHoxYUC9TMgtdJQpzlYDFUDN4Li+GUnAHKgwUcv/A4k8PSH8sa
+	BCEtrCt+Od9mMs+Qx+NSn+dwWiemqpkn3GMJZFVjQompLXDAOZeUU09WcNgEQq030mKlJWYC9Z3
+	DDQ5Oll+mugWeUrAkHEWpb9F31wzMoFlA5f7O
+X-Gm-Gg: Acq92OEXdXvLHkrNpovdxwjyYJOhdq37SnErnIUjAOqzdg8EdJNkEoF6RxOApoNT5sA
+	JxAlzy5PHyHIDfiiZrsZFww7h3MHsBz7PlPIjNMpAFw7BoaijS1pa5lrkHgpOWtZ2e/0qarLrL5
+	0iNv52ugEps5ahVafK+4krsu1Oh0lGnpVoovolXWcDSbo90vW+Km94qD+vXYFw84ClFvoJL2XIv
+	UHrCSasgGEx8gNy5OVMtbIrfADEu0gJ+rOhXbWQ8MkDcBICVJJf2IiAPlznxV4lTqH5H6u5KZXG
+	02fEzIQ=
+X-Received: by 2002:a05:6102:4a8d:b0:607:95f4:53b5 with SMTP id
+ ada2fe7eead31-631d91da8a1mr5396046137.4.1778528280720; Mon, 11 May 2026
+ 12:38:00 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260505090812.500588-1-raphael.zimmer@tu-ilmenau.de>
-In-Reply-To: <20260505090812.500588-1-raphael.zimmer@tu-ilmenau.de>
+References: <20260511144024.1267287-1-raphael.zimmer@tu-ilmenau.de>
+In-Reply-To: <20260511144024.1267287-1-raphael.zimmer@tu-ilmenau.de>
 From: Ilya Dryomov <idryomov@gmail.com>
-Date: Mon, 11 May 2026 21:25:52 +0200
-X-Gm-Features: AVHnY4IEGHX4aiwpcK3TDs0NrJ3JDVDfr_TzqZiH8_RGkaGgTZpy2ShH4vyGNvY
-Message-ID: <CAOi1vP_EnMNXS3+JLzoy2h_48jA-dKgvnfp52G4_d58eE3buyw@mail.gmail.com>
-Subject: Re: [PATCH] libceph: Fix potential out-of-bounds access in osdmap_decode()
+Date: Mon, 11 May 2026 21:37:48 +0200
+X-Gm-Features: AVHnY4LQLAu9w4NUg4aVeJp1uUypwxYm5MX-a1WIOhM528qt-uIGzRV_K2ShQFw
+Message-ID: <CAOi1vP_ms5n2jcyqx7DwaDi3KMZnm=E_bJOuX8Rzu5pQfqzwtw@mail.gmail.com>
+Subject: Re: [PATCH] libceph: Use non-asserting rbtree insertion function in decode_choose_args()
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 Cc: Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, May 5, 2026 at 11:08=E2=80=AFAM Raphael Zimmer
+On Mon, May 11, 2026 at 4:41=E2=80=AFPM Raphael Zimmer
 <raphael.zimmer@tu-ilmenau.de> wrote:
 >
-> When decoding osd_state and osd_weight from an incoming osdmap in
-> osdmap_decode(), both are decoded for each osd, i.e., map->max_osd
-> times. The ceph_decode_need() check only accounts for
-> sizeof(*map->osd_weight) once. This can potentially result in an
-> out-of-bounds memory access if the incoming message is corrupted such
-> that the max_osd value exceeds the actual content of the osdmap message.
+> A message of type CEPH_MSG_OSD_MAP contains an OSD map that itself
+> contains a CRUSH map. The received CRUSH map may optionally contain
+> choose_args that get decoded in decode_choose_args(). In this function,
+> num_choose_arg_maps is read from the message, and a corresponding number
+> of crush_choose_arg_maps gets decoded afterwards. Each
+> crush_choose_arg_map has a choose_args_index, which serves as the key
+> when inserting it into the choose_args rbtree of the decoded crush_map.
+> If a (potentially corrupted) message contains two crush_choose_arg_maps
+> with the same index, the assertion in insert_choose_arg_map() triggers a
+> kernel BUG when trying to insert the second crush_choose_arg_map.
 >
-> This patch fixes the issue by changing the corresponding part in the
-> ceph_decode_need() check to account for
-> map->max_osd*sizeof(*map->osd_weight).
+> This patch fixes the issue by switching to the non-asserting rbtree
+> insertion function and rejecting the message as invalid if the insertion
+> fails.
 >
 > Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 > ---
->  net/ceph/osdmap.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  net/ceph/osdmap.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
 > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 669348d883f0..2095e73ccf6c 100644
+> index 2095e73ccf6c..d160c7663aca 100644
 > --- a/net/ceph/osdmap.c
 > +++ b/net/ceph/osdmap.c
-> @@ -1705,7 +1705,7 @@ static int osdmap_decode(void **p, void *end, bool =
-msgr2,
->         ceph_decode_need(p, end, 3*sizeof(u32) +
->                          map->max_osd*(struct_v >=3D 5 ? sizeof(u32) :
->                                                        sizeof(u8)) +
-> -                                      sizeof(*map->osd_weight), e_inval)=
-;
-> +                        map->max_osd*sizeof(*map->osd_weight), e_inval);
->         if (ceph_decode_32(p) !=3D map->max_osd)
->                 goto e_inval;
+> @@ -392,7 +392,8 @@ static int decode_choose_args(void **p, void *end, st=
+ruct crush_map *c)
+>                                 goto e_inval;
+>                 }
 >
-> --
-> 2.47.3
->
+> -               insert_choose_arg_map(&c->choose_args, arg_map);
+> +               if (!__insert_choose_arg_map(&c->choose_args, arg_map))
+> +                       goto e_inval;
 
-Applied.
+Hi Raphael,
+
+Really minor, but I think it would be nicer to reject with EEXIST for
+consistency with __decode_pools() or decode_crush_names().
 
 Thanks,
 
