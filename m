@@ -1,47 +1,47 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D2DF439DBC7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D453C4C9579
 	for <ceph-devel@vger.kernel.org>; Tue, 12 May 2026 12:35:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778589316; cv=none; b=UhW4HwgCqWhONotMEj/3oGKSYN63dWY7co8lHIEY/fTlZNI/zdzZfK5mYn3U4IWZRQnZKqlf6stXo6pAJ0DpQf70h2btI8VwIQuweXQX1/RS4HH+SVZxeOr4UzScXgG2ZfPD5WK7DywhD5qgykrS017d/MjXQJSKbXgsAttygcQ=
+	t=1778589316; cv=none; b=qN3n7lAqsq8t9MlhZbzx7euByiS+O/3caO+K0XSgVWpZ1V5zEUSz3D47cGwkI8+MP9WBY+3Dt1hMEEL7ErkRuARmgxb3Se61omWHJBd1Y0kWC3hCUjIfBNb+0/chzlxefw+skQtLUF8yGsN336+xtLxceBEAWb/5J0F8eNKmGHg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1778589316; c=relaxed/simple;
-	bh=3YvfC4SFqq5CAax8989wspHy9qRmH43JzGvB3HLN65o=;
+	bh=853CF/ipdIOZWSBvml99qDygptnRkJVXQwOPCjZS9T4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=V1mKGUTA4A8KPj6QIIQc87rnyYhNS4yjATsxP5KEcdUkiKEH8R+vqF6+zg4UuMNH5aEDOXV0Krkl6jF+S+07sKde7T7oS3R3xpHB6N5sxMlgBKYWXLNewG/sXbgtJmQ3lMOchCIbhPVh4g2pBBle1s2axiGNVDwDyvApd8O5ir8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iwVLt6YJ; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=Q3EmBCnt59jpa3FiUZwzDuHo1caEf1RNiXHDCw5O1osQm78Wfl/4ihaJxC/PKJp7kGCYPdrmAmaIfd8e4J6h92XYwT0fV0bl3EtTFoN/AHvDu2Wqem2mXeOLpUIpR8YwbqHUqbWQPywDeA8EXEXNow1e2b4M4RWlCEvbknMJOHI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eWT5KTGj; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iwVLt6YJ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eWT5KTGj"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778589302;
+	s=mimecast20190719; t=1778589300;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=XqTDgxS92higoqL65+640Zno11P+YXpAqTm+1gBq9A0=;
-	b=iwVLt6YJd68kMY9CE2AUFFV75Sj/ZbwIxelXHUUX6LQMl2vW66/LU5Jp/SR5B40EFlfY5Z
-	YfT0tlCOpqKrTmHKGhRatd+zb7DmRLuWka349x/KBKe2hkscDaYha31bovmKwHIYswthKS
-	1TVySy6+6qYPh5m+7at/r9aw5QH+UKo=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+	bh=Gap7WXFqPLGHG+h8WlKiOQ50JtpUJcaaxJqkfmLdmEA=;
+	b=eWT5KTGj6wsUaa49C1ikdsS9zPglijL3KvznTWqXSPrEluDj/9albBQLBxuJVreRuTLuuz
+	uwmOAzRvJwQVyegQUUp0uabS6TdVl/t8JjLHWIziiq6zIM7V7NutgAwJcCdU9Z7338tWE4
+	k/Ns1ID4KPTLY/rnDSDbXDtIMnWPCvs=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-198-r0kVuVHoNG68j78FkHt2fg-1; Tue,
- 12 May 2026 08:35:01 -0400
-X-MC-Unique: r0kVuVHoNG68j78FkHt2fg-1
-X-Mimecast-MFC-AGG-ID: r0kVuVHoNG68j78FkHt2fg_1778589299
-Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-164-v1BCWvwDO-aUdYWifMv6FQ-1; Tue,
+ 12 May 2026 08:34:56 -0400
+X-MC-Unique: v1BCWvwDO-aUdYWifMv6FQ-1
+X-Mimecast-MFC-AGG-ID: v1BCWvwDO-aUdYWifMv6FQ_1778589295
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 85F6B195607B;
-	Tue, 12 May 2026 12:34:59 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 1F46119560B1;
+	Tue, 12 May 2026 12:34:55 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.48.83])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id CF68419560A2;
-	Tue, 12 May 2026 12:34:56 +0000 (UTC)
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id BE0AE180034E;
+	Tue, 12 May 2026 12:34:51 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -51,10 +51,12 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-cifs@vger.kernel.org,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v6 10/24] netfs: Fix overrun check in netfs_extract_user_iter()
-Date: Tue, 12 May 2026 13:33:47 +0100
-Message-ID: <20260512123404.719402-11-dhowells@redhat.com>
+	linux-kernel@vger.kernel.org,
+	Xiaoli Feng <xifeng@redhat.com>,
+	stable@vger.kernel.org
+Subject: [PATCH v6 09/24] netfs: fix error handling in netfs_extract_user_iter()
+Date: Tue, 12 May 2026 13:33:46 +0100
+Message-ID: <20260512123404.719402-10-dhowells@redhat.com>
 In-Reply-To: <20260512123404.719402-1-dhowells@redhat.com>
 References: <20260512123404.719402-1-dhowells@redhat.com>
 Precedence: bulk
@@ -64,71 +66,65 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
-Fix netfs_extract_user_iter() so that if iov_iter_extract_pages() overfills
-pages[], then those pages don't get included in the iterator constructed at
-the end of the function.  If there was an overfill, memory corruption has
-already happened.
+From: Paulo Alcantara <pc@manguebit.org>
+
+In netfs_extract_user_iter(), if iov_iter_extract_pages() failed to
+extract user pages, bail out on -ENOMEM, otherwise return the error
+code only if @npages == 0, allowing short DIO reads and writes to be
+issued.
+
+This fixes mmapstress02 from LTP tests against CIFS.
 
 Fixes: 85dd2c8ff368 ("netfs: Add a function to extract a UBUF or IOVEC into a BVEC iterator")
-Closes: https://sashiko.dev/#/patchset/20260427154639.180684-1-dhowells%40redhat.com
+Reported-by: Xiaoli Feng <xifeng@redhat.com>
+Signed-off-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Paulo Alcantara <pc@manguebit.org>
-cc: netfs@lists.linux.dev
-cc: linux-fsdevel@vger.kernel.org
+Cc: netfs@lists.linux.dev
+Cc: stable@vger.kernel.org
+Cc: linux-cifs@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org
 ---
- fs/netfs/iterator.c | 26 +++++++++++++++++---------
- 1 file changed, 17 insertions(+), 9 deletions(-)
+ fs/netfs/iterator.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/fs/netfs/iterator.c b/fs/netfs/iterator.c
-index 429e4396e1b0..b375567e0520 100644
+index 6903028b7162..429e4396e1b0 100644
 --- a/fs/netfs/iterator.c
 +++ b/fs/netfs/iterator.c
-@@ -72,21 +72,24 @@ ssize_t netfs_extract_user_iter(struct iov_iter *orig, size_t orig_len,
+@@ -22,7 +22,7 @@
+  *
+  * Extract the page fragments from the given amount of the source iterator and
+  * build up a second iterator that refers to all of those bits.  This allows
+- * the original iterator to disposed of.
++ * the original iterator to be disposed of.
+  *
+  * @extraction_flags can have ITER_ALLOW_P2PDMA set to request peer-to-peer DMA be
+  * allowed on the pages extracted.
+@@ -67,8 +67,8 @@ ssize_t netfs_extract_user_iter(struct iov_iter *orig, size_t orig_len,
+ 		ret = iov_iter_extract_pages(orig, &pages, count,
+ 					     max_pages - npages, extraction_flags,
+ 					     &offset);
+-		if (ret < 0) {
+-			pr_err("Couldn't get user pages (rc=%zd)\n", ret);
++		if (unlikely(ret <= 0)) {
++			ret = ret ?: -EIO;
  			break;
  		}
  
--		if (ret > count) {
--			pr_err("get_pages rc=%zd more than %zu\n", ret, count);
-+		if (WARN(ret > count,
-+			 "%s: extract_pages overrun %zd > %zu bytes\n",
-+			 __func__, ret, count)) {
-+			ret = -EIO;
- 			break;
- 		}
- 
--		count -= ret;
--		ret += offset;
--		cur_npages = DIV_ROUND_UP(ret, PAGE_SIZE);
--
--		if (npages + cur_npages > max_pages) {
--			pr_err("Out of bvec array capacity (%u vs %u)\n",
--			       npages + cur_npages, max_pages);
-+		cur_npages = DIV_ROUND_UP(offset + ret, PAGE_SIZE);
-+		if (WARN(cur_npages > max_pages - npages,
-+			 "%s: extract_pages overrun %u > %u pages\n",
-+			 __func__, npages + cur_npages, max_pages)) {
-+			ret = -EIO;
- 			break;
- 		}
- 
-+		count -= ret;
-+		ret += offset;
-+
- 		for (i = 0; i < cur_npages; i++) {
- 			len = ret > PAGE_SIZE ? PAGE_SIZE : ret;
- 			bvec_set_page(bv + npages + i, *pages++, len - offset, offset);
-@@ -97,6 +100,11 @@ ssize_t netfs_extract_user_iter(struct iov_iter *orig, size_t orig_len,
+@@ -97,6 +97,13 @@ ssize_t netfs_extract_user_iter(struct iov_iter *orig, size_t orig_len,
  		npages += cur_npages;
  	}
  
-+	/* Note: Don't try to clean up after EIO.  Either we got no pages, so
-+	 * nothing to clean up, or we got a buffer overrun, memory corruption
-+	 * and can't trust the stuff in the buffer (a WARN was emitted).
-+	 */
++	if (ret < 0 && (ret == -ENOMEM || npages == 0)) {
++		for (i = 0; i < npages; i++)
++			unpin_user_page(bv[i].bv_page);
++		kvfree(bv);
++		return ret;
++	}
 +
- 	if (ret < 0 && (ret == -ENOMEM || npages == 0)) {
- 		for (i = 0; i < npages; i++)
- 			unpin_user_page(bv[i].bv_page);
+ 	iov_iter_bvec(new, orig->data_source, bv, npages, orig_len - count);
+ 	return npages;
+ }
 
