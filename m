@@ -1,76 +1,74 @@
-Received: from mail-yx1-f47.google.com (mail-yx1-f47.google.com [74.125.224.47])
+Received: from mail-yx1-f43.google.com (mail-yx1-f43.google.com [74.125.224.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6F6738D687
-	for <ceph-devel@vger.kernel.org>; Wed, 13 May 2026 16:40:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E9E64C77D9
+	for <ceph-devel@vger.kernel.org>; Wed, 13 May 2026 16:40:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778690420; cv=none; b=Iny5CYJOToxvCesknlmzR71wBBgMSp/gXRIQTR4i3ykY6cP6p94hbKWDxCfRVI7LFw/YEnNEuEX162FrsoWIkkbJDyJzt9DDgA7LAbHMz+FNvHN9C5XU+i/moqynE9mYJL9GRUPXdiHqcNPNTym03YafN4LEfQFs6HBnDOFsDt4=
+	t=1778690456; cv=none; b=JVAJppvvGTpSK/GUuiwMGl2HuOJuLdSlLTgWH4akjuakSNOsiBvunj+wsmxLy+s0CmJ77LxBD04ar0Fhx3G6ihT3zowJSOVJ1VpZYc/+beiMTbaWxeDZOsKO2MruMOR9LxM67zoT4SJpHy4f8/Yv/9ndgzV4FY6i2i6nX4TawKw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778690420; c=relaxed/simple;
-	bh=H9yTeOTXGM0jMDI0rQK+xMdSOwwOoKn5jIxtu2BRMs8=;
+	s=arc-20240116; t=1778690456; c=relaxed/simple;
+	bh=cn2w2/ThmERdLnAwpsFfljyXVHmWkPp04bP3ZlX8dt8=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=tTGtuz7mOtNHN4b92pGuNa7kztMqa6WHetc3oMJ4LsZGemQDrrEQ3RekJI1X3yE7RpRsrFkQunenE5qveT4sqyuxljKemd7NPL2/L9jXBQMq+xk6ry9CC1H3Pp07BHi1zCZCa7jHP4E4xsHI/pxrvPhtf5INHbUMAc+rD+IB1Mw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=k6oHRUFf; arc=none smtp.client-ip=74.125.224.47
+	 Content-Type:MIME-Version; b=bYwrJVaZmN74xmzOyaCFpHVeas3brhJZChzQ1whlNhsn6u3GG/n6tVZYX/Kn0GlWK3Dy/7X1JeqU5A0JyRV3tSl+C+5cyMm8uA57qIQd5Z0ZYhfNaX8iET1OgZT2oGmXQkGiqE2xXRRqhkd5zdfB4xHdR3pd1xQdZWWn49DXNvI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=0wLT8xmB; arc=none smtp.client-ip=74.125.224.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="k6oHRUFf"
-Received: by mail-yx1-f47.google.com with SMTP id 956f58d0204a3-65c52bb5dd7so7083403d50.2
-        for <ceph-devel@vger.kernel.org>; Wed, 13 May 2026 09:40:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="0wLT8xmB"
+Received: by mail-yx1-f43.google.com with SMTP id 956f58d0204a3-65c21049dafso6650390d50.2
+        for <ceph-devel@vger.kernel.org>; Wed, 13 May 2026 09:40:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1778690418; x=1779295218; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1778690452; x=1779295252; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=lslwSwUB8ihFK26su81DjZjl8eRHYRjgvwVFE2LcKS8=;
-        b=k6oHRUFfOIIICKX6OnRdj2bsUmXzH0fBExTJNRSrPk6E6lPUehlY2aHnyG7ESKdO+D
-         jXwqDKvKb2HL7fXmnQWUwcMJYm53eL/G1PRLUSm8ZrmrzTRmph37kpNaS0i1pb4KmIZs
-         Ig9VH0GpRnD8zgeMTe9GeMXEsyJ50fFfBJyF1TwTIdbcaewtdKl/F3kPuLJyBzgHcDLB
-         pSKJHnOwYVv6ROpIlRsSM8tL9Qh1BPsrKdxm/AZxlcxjo/iPbbMclxxbBZkAkaqlS7Ap
-         pzK+M9ConSDUMwMYHabgVhGQoJb02vCOnt4B/fXJPq8cbb/FTSwCbwwMdp+JmDtt0Wg4
-         STOQ==
+        bh=TMlnUQ5E7rjsRRONKThFQebpJF9AGTukipGJxxo/QeQ=;
+        b=0wLT8xmB9wom/XukuKqUmIeLwIiztpYp1k5FfoJb454sTRHaIVCllChNhVINCZUlC4
+         bJCkXoJnk7bkMP6vJ+92Fx3YwV70xIkPcf994B6+ebmMv4+i2Vq7r5qmKJUVmcO+eI26
+         airl4juQRqnxbnSwLRWKZpP0HE+41ovT7e3s4xXc05TzSd6Eq/BaiML6VXR378j1+vrW
+         ytndgReMt+sHjnU/TvUpY7RBma1sWUBV/ugEeiPQXLz9YeAtCVLF5KkIOFXMshuqZChy
+         cSZ0i3HBY97XMt2wZMACohWlFMPmhnxLrJYLSWwImg4VvfrhSNusigcs8uiicbe3V013
+         BD3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778690418; x=1779295218;
+        d=1e100.net; s=20251104; t=1778690452; x=1779295252;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=lslwSwUB8ihFK26su81DjZjl8eRHYRjgvwVFE2LcKS8=;
-        b=FyCobW/r9vVNSxk0GLi2ALuWSDmBphXorbmQN/jRA4kQM396VzvEENzeh3PdTAGddW
-         UBcUq5eIplOQqHxlz1rh9ulBBjawshaZ8dZneNvRyT2GSvkl/SLOlA95TDFKlyviEOLo
-         0dUBibNIvzi/K+tavM6Eei0AyicFpGc8ofCSEqJM9+xiWfYgeF/ri9+GIg6GkKnQ3p4u
-         RcL7VAf27F9RgS5Ug3emVjb/P3f5VjlzyXljTX1HxhYjmGdo7Eh9cqrxuddX9TiI+exy
-         yqSAmrxaZ8Me/JNKvUsHYgVBwlM+D9T3nr81ncH+rKDIq+sLRASIP1uIBNbDotTayvHm
-         ke1A==
-X-Forwarded-Encrypted: i=1; AFNElJ/kTfTimyySaJku8fVgIzJg788j2KQIlK6SCrEVLpNVqRBpf+6aYQ9QOH8Mfkj7qcE7kBL2/bP7HgPS@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywz74A95non3sDAUK+A+1sju3Zuz/D4fCXyx+2eJMQceO3fJAEu
-	nyoaIKNsHgcaUC+QTI1g52+8w7+I4v4iK/bnaKHi4fzRHB2caMnKCMEPcUynYJh7PRXpSCOM7Bz
-	bMgV1gpc=
-X-Gm-Gg: Acq92OG+ZxC4wI9+TLxDb9PFImZS8HmERXu2V2VSeLSmyb4kg4V6DzmVDTEy03Rj0gO
-	ZU4VBYP6FG4kGriC9nlPRQhc7Ca+l+4rqGUSF3DqEpLW7HJHcI3MrQnYNgzZLqxYx5JrYn8ODz4
-	kqUgTTKpPHTBLqsmj/o17wUUE6o9RsGyQVq5qOUzOwRQOQxVLfqUrgW1JBiMVcnaA6P0R08a4OG
-	IMyCxpRyGe/ZhIles9BDaqcnPZilQWxjjhKwSMkYWg/2y5g8j6TZMUkOLUGgfbJSDpvDp+XtzPY
-	NtzO3g6GEUlfANPNjVnvMSBj0+sKoCbqDsg8/egpU7STfRrVeEZRs66yAhohK+uvXyML0+Ek07A
-	LPMoHUDNd8eSt5TOtfvlC5NUZ43yqSg9joP755vYCq6DhKMfLJgoqjRJcDdHwm9ZyMPC0zZCcaG
-	IiGXs+Voxpd4SZOjaJrOSI49+v7hJacAmyr55uEmMnjvtdnhLJttb9UOJNWqa/wXi+fHNmAeSmM
-	CKWnI/J4915jkN0AJQs3lccAn3vyDmg6YkI6qo6xKZRAuPRZWkUEVfftYh7
-X-Received: by 2002:a05:690e:4004:b0:651:daf6:3d85 with SMTP id 956f58d0204a3-65df62e45fbmr4181229d50.30.1778690417703;
-        Wed, 13 May 2026 09:40:17 -0700 (PDT)
+        bh=TMlnUQ5E7rjsRRONKThFQebpJF9AGTukipGJxxo/QeQ=;
+        b=VIV0XCYJGPdnRBtxLN+vZq8EOA+Q2oq7AGhTuJcLRxryw1HRjN0Q/KW0lGK7ogMttH
+         5Rto3zP3H/PbzPIsdiMZT02xE+MAoKmew/OGKMHTKkkz3cNvjoAvzBpxlQj3U2frYoqP
+         pImhxxH/sGKhixpmU65nbgwTnSqq4ytHNcAvv9QvszxXRy5Ven5y3oVczXQ+81TFTGtC
+         n/vx1IoTFcluEf/rlchaelkQqedM6bqLcAh5m418gkCuaB0MHEuhYg6LYXN2XdOms3Xr
+         1saJJQohI+EBx/I0y85MSk8RfZRZbF3EB4Ftv/tup/ER2NUArWq8Hy0coV8dPSiXz8SC
+         I9Ag==
+X-Forwarded-Encrypted: i=1; AFNElJ9ssxwIceOjV7T/ZzdAvyHkW7k1YIVGt6HfzR6+eqsUtwNoSMLtKA/ZuLey44OOY1oEA8hcbNbtq9Qn@vger.kernel.org
+X-Gm-Message-State: AOJu0YxlPfdn3UqtgQEB90Z5H99IiiHnXTeT7UTkovrYv23F1wBZVqfP
+	ar8esKikobyGJHNpKSShYNUaf8pkoh+0qLtMXoGtwCwzhfOvjlF162gFdSO18jDWyNY=
+X-Gm-Gg: Acq92OEeq/hWFvG5r6mpDabtzvulx7FYywT+BoxqlbuC8wvyoculV8/pPAglbt0xbVQ
+	RPbjJ58i2ObwWtITST/RuvPWD0+jh7N8b6Y62NJgvOuIc/XqfF9vUfHXLDyo64fZQeUdu68Fle6
+	M+PPBxGT+jJ6fjg5f8iwUEKbEy9xwNuSZYB9wQy436B5DFsD8tDgICv1/SxFdcutiguoHZ4/PCb
+	iJ+Nf+/iO2Mp5wjWJClo9+KUdyTOp5cBDWVbeOJWh0uYe0lA6CSrfC/hWlT864kTHyl0qJhmOlN
+	y7w6p6qcVEQzWzLUqpvFJsU+y4FJ99Gcl0tJ4SAAPX4tORP1M/onC+hSEBGhjuspt/9ObRflTl7
+	gtEmrj8UTvYQUWlY9EzuvyQ7X1WETIdPRvHe9Hs2xseUE2BVY1YFh83MU2dg8HVajMjJoNQmlwu
+	jGslqGcNBFHW899gS2oN32s9j/IfHX3WlRWEzpwy6c6L6A34AcWd4dRadpT3ata9HQ7BPhpd6FD
+	AYweaJptN5+6Bye+VCvvfU0muLIG5/yecvfxMyC8kj+SdPmF75FikD+hgAL
+X-Received: by 2002:a05:690e:150d:b0:650:5316:175b with SMTP id 956f58d0204a3-65df638321bmr3458829d50.52.1778690451692;
+        Wed, 13 May 2026 09:40:51 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:9ff5:f08a:b03d:3394? ([2600:1700:6476:1430:9ff5:f08a:b03d:3394])
-        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-65de4126710sm2976121d50.12.2026.05.13.09.40.16
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-65d96c5719dsm9066436d50.21.2026.05.13.09.40.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 May 2026 09:40:17 -0700 (PDT)
-Message-ID: <a9e24eba42be211967a5342550561250c5894dea.camel@dubeyko.com>
-Subject: Re: [PATCH] libceph: Fix multiplication overflow in
- __decode_pg_upmap_items()
+        Wed, 13 May 2026 09:40:51 -0700 (PDT)
+Message-ID: <7f1c956b984f9524977bf6269c2c82947f72fb4d.camel@dubeyko.com>
+Subject: Re: [bug report] libceph: Multiplication overflow that leads to
+ out-of-bounds writes in __decode_pg_upmap_items()
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: security@kernel.org, ceph-devel@vger.kernel.org
-Date: Wed, 13 May 2026 09:40:15 -0700
-In-Reply-To: <20260513081425.1477060-1-raphael.zimmer@tu-ilmenau.de>
+Cc: "security@kernel.org" <security@kernel.org>, ceph-devel@vger.kernel.org
+Date: Wed, 13 May 2026 09:40:49 -0700
+In-Reply-To: <8edcef9c-0b7c-46dc-8094-dc55b62567d3@tu-ilmenau.de>
 References: <8edcef9c-0b7c-46dc-8094-dc55b62567d3@tu-ilmenau.de>
-	 <20260513081425.1477060-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,45 +125,64 @@ MIME-Version: 1.0
 
 cc: ceph-devel@vger.kernel.org
 
-On Wed, 2026-05-13 at 10:14 +0200, Raphael Zimmer wrote:
+On Wed, 2026-05-13 at 10:13 +0200, Raphael Zimmer wrote:
+> Hi,
+> I encountered a bug in the libceph module, specifically in the
+> function
+> __decode_pg_upmap_items() in net/ceph/osdmap.c. It can be triggered
+> by a
+> message of type CEPH_MSG_OSD_MAP arriving on an open connection to a
+> Ceph monitor or OSD.
+>=20
 > A message of type CEPH_MSG_OSD_MAP holds an OSD map, which typically
-> contains a pg_upmap part at its end. When decoding this part in
-> __decode_pg_upmap_items(), a len value is decoded from the message to
-> determine the number of items and the size of the allocation needed
-> for
-> them. If the len value is greater than or equal to 2^31, an overflow
-> occurs in the multiplication that is performed to determine the
-> needed
-> size of the incoming buffer to decode, as well as for the length of
-> the
-> allocation for the ceph_pg_mapping struct. Subsequently, this results
-> in
-> out-of-bounds writes (and reads) when decoding the incoming message
-> fields into the ceph_pg_mapping struct.
+> contains a pg_upmap part at its end. When decoding this part,
+> __decode_pg_upmap_items() is called. In this function, a len value is
+> decoded from the message. It is used to determine the number of items
+> and the size of the allocation needed for them. If the len value is
+> greater than or equal to 2^31, an overflow occurs in the
+> multiplication
+> that is performed to determine the needed size of the incoming buffer
+> to
+> decode, as well as for the length of the allocation for the
+> ceph_pg_mapping struct. The performed multiplication is "2 * len *
+> sizeof(u32)" where len is of type u32. Subsequently, the len
+> parameter
+> is used as the upper bound of a loop that decodes the incoming
+> message
+> fields into the ceph_pg_mapping struct. This results in out-of-bounds
+> memory accesses in case of a previous overflow. The len field can be
+> set
+> arbitrarily by a (maliciously acting) Ceph monitor or OSD and allows
+> writing data received over the network beyond the end of the
+> allocated
+> buffer. Furthermore, I observed that it can ultimately result in a
+> kernel panic because of general protection faults when attempting to
+> access the memory.
 >=20
-> This patch fixes the issue by adding a UL suffix to the literal in
-> the
-> multiplication to perform it as an unsigned long multiplication.
+> The issues can be reproduced on the recent stable release 7.0.6 when
+> injecting a specifically crafted message into an open Ceph
+> connection.
+> However, 32-bit systems are probably not affected, as the previous
+> check
+> for:
+> if ((size_t)len > (SIZE_MAX - sizeof(*pg)) / (2 * sizeof(u32)))
+> 		return ERR_PTR(-EINVAL);
+> would not allow a value this large for len on these systems.
 >=20
-> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-> ---
-> =C2=A0net/ceph/osdmap.c | 4 ++--
-> =C2=A01 file changed, 2 insertions(+), 2 deletions(-)
+> The bug can be fixed by explicitly performing the multiplication in
+> 64
+> bit on 64-bit systems by switching to "2UL * len * sizeof(u32)" or
+> changing the evaluation order of the multiplication. This would
+> suffice
+> as the mentioned check catches such values already beforehand on 32-
+> bit
+> systems, so that an additional check is not necessary. However, I
+> would
+> also be open to adding an additional check instead if it seems more
+> appropriate.
 >=20
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 8b5b0587a0cf..42b7b5300901 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -1620,8 +1620,8 @@ static struct ceph_pg_mapping
-> *__decode_pg_upmap_items(void **p, void *end,
-> =C2=A0	if ((size_t)len > (SIZE_MAX - sizeof(*pg)) / (2 *
-> sizeof(u32)))
-> =C2=A0		return ERR_PTR(-EINVAL);
-> =C2=A0
-> -	ceph_decode_need(p, end, 2 * len * sizeof(u32), e_inval);
-> -	pg =3D alloc_pg_mapping(2 * len * sizeof(u32));
-> +	ceph_decode_need(p, end, 2UL * len * sizeof(u32), e_inval);
-> +	pg =3D alloc_pg_mapping(2UL * len * sizeof(u32));
-> =C2=A0	if (!pg)
-> =C2=A0		return ERR_PTR(-ENOMEM);
-> =C2=A0
+> I will send the proposed fix in reply to this email.
+>=20
+>=20
+> Best regards,
+> Raphael
