@@ -1,74 +1,75 @@
-Received: from mail-yx1-f42.google.com (mail-yx1-f42.google.com [74.125.224.42])
+Received: from mail-yx1-f45.google.com (mail-yx1-f45.google.com [74.125.224.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EE5B4C6EF9
-	for <ceph-devel@vger.kernel.org>; Fri, 15 May 2026 16:49:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96B3040B6D8
+	for <ceph-devel@vger.kernel.org>; Fri, 15 May 2026 16:49:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778863745; cv=none; b=T+U7CWvG7vIC7T+pRg9ZXEGIAX4M94X3wgl7qftOyQLZnZ4Y08pg/nUUTbBsrikMxrIKHHp6xEHnSrE62ZgbK+qc4+0o2pTjX/0/BG1DFCDp5yWr9qMiWMWRYxRVN7JeprTSaxu85NUI3IRLGIkJUrKPRjTo3wVgRB5henceaxo=
+	t=1778863790; cv=none; b=kJd8+0t5Aasnd1YwBp46SPEvYP7O0swOeY64jQxtf65Tp9mA6FCyu+GKyhCynK0KSAe9pfgqjTegjnA2oGUJZmvROczyEg0TzTOeck7wWKPzN1IW5ZICok10j+f0RCNLLKK5Y+0R8GdPzsmDE1pb83HPxez6vjT/DdHS8sEczxs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778863745; c=relaxed/simple;
-	bh=zV0tRYhjEYEs+ktSl+Z7jsXNU9jQo+1GWeZ84IBSnrk=;
+	s=arc-20240116; t=1778863790; c=relaxed/simple;
+	bh=7+Rt2qzAcD4IjdxEToLm+AnkPrCGVlDqr/Ek41GToTo=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=O3i8eX2mMMm6ktnszDyMqbjeTY0CE7g0Rg7YFWjGBZ0UO6dPKBuXGpanXDyMd+wexYFosKUIVBYq8drxWcMq5MAQ95Oli30GvlzyDxEriEddUy4wBA4H7Y1M1Q9pl1F3lkxgtGdPV360p644kz+THJnqHNYfn7whOGJsQUkOlNg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=OJdwRHry; arc=none smtp.client-ip=74.125.224.42
+	 Content-Type:MIME-Version; b=NKqVkoYXidkda7ONV7ww1c7EPU5he+s4vPTyk2Pj7PvauLfdTG0IFR9i65ViMxZ2WXN6I3XtTTj5mcutrunPGz+yFoG4Te4b+sPivd3+xp2H22P41cp6mbsMKG3w+X9NljgCJZz6qjurQPTlWZUkLY7736vcTBjtCDBmQpPzgGQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=SBgHvqld; arc=none smtp.client-ip=74.125.224.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="OJdwRHry"
-Received: by mail-yx1-f42.google.com with SMTP id 956f58d0204a3-654672a6d68so95205d50.0
-        for <ceph-devel@vger.kernel.org>; Fri, 15 May 2026 09:49:03 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="SBgHvqld"
+Received: by mail-yx1-f45.google.com with SMTP id 956f58d0204a3-65dead17c24so38155d50.2
+        for <ceph-devel@vger.kernel.org>; Fri, 15 May 2026 09:49:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1778863742; x=1779468542; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1778863788; x=1779468588; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=hSgFZ9L/M/K3Vw9fQOZwgrv3KdwrF2juopKREfk3PrE=;
-        b=OJdwRHry+qQN9I4k3Ghg99SWmJih2ez33uYXAoPy4t3ruKY0raMn13HnhvXkjhtnDM
-         BvlSDe5Kuk6XPLYKSEOa1rO8XSwnhBfCaaLS/r/w09E8WdgJ+7g4gLpwwau6PMPQXJ1p
-         jRMOZH2TLD0ICsRy3dFv9HR0/yaWY2we0eksvo3dkaxTkmHJbIsay4jlf/lQCx97+X1C
-         ZwTaUSaoQJy3IQT6zb5SXPK2+6JS0mXC1CpG9neghnk6Ay+yVJIb+p/lo1eoOEZpX1zB
-         9OKLpnguz8AKT4CP9i7S/OostaSEsEEBeGyTa3lYekvoA92yhWalamElpS9CocPeM00w
-         oWUQ==
+        bh=btKpAOh+PKREiy8pssiYryJxMIh/DLaGTqNCwb2cU/U=;
+        b=SBgHvqldQQAu7Rasw7dL+jGxmeCiULiBY9dxPnQXyqQACHixFiwod6MIlXZkyZCIhf
+         aHJ1jSzVf6sSGukIlxo2XdBi3R8cFCfFRdsfrAlkPHwSP815wCNajuE1pFKpMSDDwJMK
+         FOOYvWBcruxyFj8F5H2VNqYVrK+j3ewjKijzrYe75MKDUzJ8777DG4vDXu8ciB94P2Qw
+         5hzgG62X5euRUhTwH0/i/Uy3OynZcky+RNXiSVongp9bvbo7Oz46LZggmjGVi9WYwXOx
+         hQBhp4ESxXIVcomu4riMUHn2nUS17X9+CHexvTipMNfUpFYsFCHncg3zbWCS8hYKh1WO
+         lpVg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778863742; x=1779468542;
+        d=1e100.net; s=20251104; t=1778863788; x=1779468588;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=hSgFZ9L/M/K3Vw9fQOZwgrv3KdwrF2juopKREfk3PrE=;
-        b=OtZf07popTJBuRsStqFhZ3Qig4hsmwc4nCsLcC5Aorum97shslou3R7RdqrGPhVcgq
-         EjIDktLGv9qgc9k5udYbDJjaNI12g8RnySG0+bf7aL6HA2HTtgI7WjJVsbHE0TUVAXZY
-         rnv6ih6GVohT30DgqCLIfracWT6NOp2/wEzwX9uEwB4yIt/qyKuPZ54+CFJgyoGF6piK
-         uVIKV67NdNGY+4sa/cY7yG/BnpKGEwHRnzDGZr0W05i8gI+4eqAnQEfU9xXeCUmG3R8P
-         Q2dlozX+yxAZf1A/OrZiX9dGiBOxPdu9mQbQ8UIYZ7WpH9VbpgdaT0hHnfs4Ddl1Lg++
-         xxOw==
-X-Forwarded-Encrypted: i=1; AFNElJ/T6skMIWtNaUVkKwPYf5xKCu1WAVJ3XRjEE+d6kCcGcrtOfq/Tsg6HL7J+IxkZugZPVG6KIXoSNs9s@vger.kernel.org
-X-Gm-Message-State: AOJu0YxDcAqq5CLwmsqoewudeFhV0fBsIvg6yjgqkA89wnTS6vZ3ozw9
-	Wl29EoOkdKlBzUTPLzX77cFJGF0xpFrbnufTpscKf/Ix8z2U0JTVDq9+zWCNMJm07J0=
-X-Gm-Gg: Acq92OEz7XTge1KFvfYwJ5l21U06XrreKGE9hehqR/7sf/cwjAHDiF5iCMEt1+wNRYM
-	IrfJCMJ3tlJOyzWvHQCkCXnf95mzWpAD9SFEUCLJwAw89oKlMCsKbvkW+Q7BbXb2HDYwRWuWpZH
-	uop7jSCpiRzMDsBJsliIw+/eSbiU58oVeL3i0fwLFtgYPsi5so+7gVEaQ9gTQlHPsnfjBLCb02+
-	LhoYhHJ2K9IoJwnHgnahiB+XKAbqf9uhCF5fQ9axYSMd37WawUt9HiC6Zf2rN9UcHVrBCKjpcWh
-	D5ml+gK0OYJYiQfoNfIqTcpXiSCVtgDkZuSHICedJ5RiyYUkP+AFvNZjq/8S7DmiYSf30XbFhvg
-	k9LdhM1ACsVLIzfE6YgRGOCKJ7TnLLqs+F3bwzeFV6tO51SOki7Pu/GeAI4u1vGPoX0Cxt0l2wT
-	5cCE9rwofeRCU5a9I7JfHfMzxU3vJGKR23GXI2m2z8XY+UPEA3uJD8xcUMUsejREMi6YVitFGmp
-	3gpp5T3KjNF/RYU77yadug/6ZGnKSmCmmJVK785E8qcKv9nVedpEjPTc8w0GboAUWYN
-X-Received: by 2002:a05:690c:6b01:b0:7bd:7d69:7658 with SMTP id 00721157ae682-7c95c4ed051mr52959477b3.47.1778863742331;
-        Fri, 15 May 2026 09:49:02 -0700 (PDT)
+        bh=btKpAOh+PKREiy8pssiYryJxMIh/DLaGTqNCwb2cU/U=;
+        b=G9Rfyu0fX06/QqWIf0DluesU7heRWa8zrKsBSuAqHzuMaBHawWNxspFD33gYg1xfXs
+         ziGnf8cGh/Ag4R1BIO+NX/kaLYcbbNb4XKU3umqpFb5CElQIlw/rmBF2VcXImGN8r2p8
+         vpeptB8PQi25b+XChi3zkk0fK1S5rSKTssJYl4YKI+nF7qArE6AZgGXYc1x+rHoTe//6
+         O1IJZ+LZ1ZfItcwdvYjIhbQtTxZQwi/s22ijoNSF6eaABDigD+3imZ6bJbNp22niiuTy
+         qiq/dWK5nxwaFOb2BMpmykGxKDgkUQ0JZjJU5f0PJCgtYRBUhlRhWqjMPrefbRXbFRjI
+         ZvSQ==
+X-Forwarded-Encrypted: i=1; AFNElJ+DLDngfRh2XC8qvI/ey/f+JVclAe4LWj0nflOU6vh3XPQPL1yFcc0DiVL5T/l5SCd2dVQsXzKIHdSs@vger.kernel.org
+X-Gm-Message-State: AOJu0YxMNsV9O0YoVPaLDVQuWt5649SaxCDJizgvTjt5ZpNWdFNtVpHW
+	szApJtmxNfTq6oJWpwVdn609CyJgxLlHRrj7BxJ4JK4WQcvW4EJP0hqAmrd1lJTRLsI=
+X-Gm-Gg: Acq92OH0dmzh+8kAjYmqlEDW0pIM1EaTYM1L9dYSuuZgSub+1647SRsnCUDSiS91ECM
+	IPkdj/Hg6AMzDrTLB9qpHLuEUqRBdxcxkxBazDVWJFc+/Q+3V0iZzectdZwHbv2rg7jdZ/9RUIW
+	5bVr/jas7vzk5F7xhjmWJplBYKIC7dY2Xg+Zp7y8j3GeMNFXeKwmNzRXSit4Fiq9DYTcBbBUDj0
+	iVE8dCyL/1ic6xmNBJ6WO5l7FEttjc3N/EvGNPp0YRbzbO8vhyoBxHT7MoPP9C2MpHc8gWmsehk
+	COkmlM7ceiG8IgsLoysau+cDQGovQ/1GB7x6jNXjQcinAsB7xWc9/fcuz1wGhBgVfvQjg9BDV1T
+	Mxexb0ZHr4yQtgL1phzGAzjhSgn06chTZQ+74sD3xa+TLhzNUtiUnVx0lVJBkp4Q3VNEL6crUtX
+	Gf8jFwr6X0HwhpWq1ETNaKicWc6YGpAHGhqPZBVXTn/W5P+6crGWv4DVjFUXy0pyjlMK4mCMteM
+	KcyMbwEix3gR8w6nEkzV8zvMaIfNgK89drjl8OQOCWhgL5mPSz7ez9YMw==
+X-Received: by 2002:a05:690c:c4e3:b0:79e:9cc1:edf7 with SMTP id 00721157ae682-7c95ae490a8mr51259507b3.13.1778863788375;
+        Fri, 15 May 2026 09:49:48 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:7ec4:8c87:a1b:125e? ([2600:1700:6476:1430:7ec4:8c87:a1b:125e])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7c7f55bca95sm31402817b3.39.2026.05.15.09.49.01
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7c7f55b85edsm32209507b3.35.2026.05.15.09.49.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 09:49:01 -0700 (PDT)
-Message-ID: <472fa2f69fca6eed081417517f0ba2c5d00602c8.camel@dubeyko.com>
-Subject: Re: [bug report] libceph: out-of-bounds writes with oversized
+        Fri, 15 May 2026 09:49:47 -0700 (PDT)
+Message-ID: <f919b66a7cc03dfd22231b87353ebeaf864e3d0a.camel@dubeyko.com>
+Subject: Re: [PATCH] libceph: Fix out-of-bounds writes with oversized
  monitor reply messages
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: "security@kernel.org" <security@kernel.org>, ceph-devel@vger.kernel.org
-Date: Fri, 15 May 2026 09:49:00 -0700
-In-Reply-To: <3f154565-9f37-40aa-b34a-be6f5c2b4463@tu-ilmenau.de>
+Cc: security@kernel.org, ceph-devel@vger.kernel.org
+Date: Fri, 15 May 2026 09:49:46 -0700
+In-Reply-To: <20260515133129.1595265-1-raphael.zimmer@tu-ilmenau.de>
 References: <3f154565-9f37-40aa-b34a-be6f5c2b4463@tu-ilmenau.de>
+	 <20260515133129.1595265-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -125,62 +126,66 @@ MIME-Version: 1.0
 
 cc: ceph-devel@vger.kernel.org
 
-On Fri, 2026-05-15 at 15:29 +0200, Raphael Zimmer wrote:
-> Hi,
+On Fri, 2026-05-15 at 15:31 +0200, Raphael Zimmer wrote:
+> When processing an incoming reply message of type
+> CEPH_MSG_STATFS_REPLY,
+> CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on the
+> monitor connection, an already allocated reply message for the given
+> transaction ID is used (if existing). Such a message has a
+> preallocated
+> front segment with a fixed length of 64, 512, or 32 bytes, depending
+> on
+> the message type it was allocated for. The actual length to receive
+> into
+> this buffer is read from the message. If this value exceeds the
+> allocation size, data received from the network is written beyond the
+> end of the allocated buffer.
 >=20
-> I encountered a bug in the libceph module. The bug manifests as a
-> write
-> buffer overflow when receiving the front segment of a message on a
-> connection to a Ceph monitor. It can be triggered by a (corrupted)
-> reply
-> message of type CEPH_MSG_STATFS_REPLY, CEPH_MSG_MON_COMMAND_ACK, or
-> CEPH_MSG_MON_GET_VERSION_REPLY.
+> This patch fixes the issue by adding a check that compares the needed
+> front segment length to the previously allocated length when
+> retrieving
+> the message buffer. If the needed length exceeds the allocation, a
+> new
+> message buffer with the needed size is allocated to replace the
+> previous
+> one.
 >=20
-> The problem is as follows:
-> When processing an incoming message on the monitor connection,
-> ceph_con_in_msg_alloc() (net/ceph/messenger_v2.c) allocates a message
-> by
-> calling con->ops->alloc_msg(con, hdr, skip), which translates to a
-> call
-> of mon_alloc_msg() (net/ceph/mon_client.c). For messages of the
-> aforementioned types, get_generic_reply() is called, and an already
-> allocated reply message for the given transaction ID is returned (if
-> existing). These messages have a preallocated front segment with a
-> fixed
-> length of 64, 512, or 32 bytes, depending on the message type it was
-> allocated for. The actual length to receive into this buffer is read
-> from the message. If this value exceeds the allocation size, data
-> received from the network is written beyond the end of the allocated
-> buffer. The maximum accepted value for front_len is 16MB, which
-> defines
-> an upper bound for the amount of data that can be written beyond the
-> end
-> of the buffer. This behavior can be triggered by a maliciously acting
-> monitor, or, with a connection in ms_mode crc, also by modifying a
-> message in transit. However, it requires having sent a message of
-> type
-> CEPH_MSG_STATFS, CEPH_MSG_MON_SUBSCRIBE, or CEPH_MSG_MON_GET_VERSION
-> to
-> a Ceph monitor previously.
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+> =C2=A0net/ceph/mon_client.c | 11 +++++++++++
+> =C2=A01 file changed, 11 insertions(+)
 >=20
-> The bug can be fixed by adding a check for
-> 	front_len > req->reply->front_alloc_len
-> to get_generic_reply(). If front_len exceeds the preallocated length,
-> the message could either be skipped, or a new reply message can be
-> allocated, similar to how it is done on OSD connections in
-> get_reply()
-> (net/ceph/osd_client.c) or for messages of type
-> CEPH_MSG_MON_SUBSCRIBE_ACK and CEPH_MSG_AUTH_REPLY in
-> mon_alloc_msg().
->=20
-> I will send a suggested patch with the second option in reply to this
-> email. There is currently another patch, handling oversized mon and
-> MDS
-> data segments, that adds another similar check to get_generic_reply()
-> that is not yet on the current master branch of the ceph-client git
-> repository. Therefore, I based the patch on the testing branch where
-> this is already applied.
->=20
->=20
-> Best regards,
-> Raphael
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index 66c0d6d6b33d..b84dd2bfe77b 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -712,6 +712,8 @@ static struct ceph_msg *get_generic_reply(struct
+> ceph_connection *con,
+> =C2=A0	struct ceph_mon_client *monc =3D con->private;
+> =C2=A0	struct ceph_mon_generic_request *req;
+> =C2=A0	u64 tid =3D le64_to_cpu(hdr->tid);
+> +	int type =3D le16_to_cpu(hdr->type);
+> +	int front_len =3D le32_to_cpu(hdr->front_len);
+> =C2=A0	u32 data_len =3D le32_to_cpu(hdr->data_len);
+> =C2=A0	struct ceph_msg *m;
+> =C2=A0
+> @@ -721,6 +723,15 @@ static struct ceph_msg *get_generic_reply(struct
+> ceph_connection *con,
+> =C2=A0		dout("get_generic_reply %lld dne\n", tid);
+> =C2=A0		*skip =3D 1;
+> =C2=A0		m =3D NULL;
+> +	} else if (front_len > req->reply->front_alloc_len) {
+> +		pr_warn_ratelimited("get_generic_reply %llu front %d
+> > prealloc %d\n",
+> +				=C2=A0=C2=A0=C2=A0 tid, front_len,
+> +				=C2=A0=C2=A0=C2=A0 req->reply->front_alloc_len);
+> +		m =3D ceph_msg_new(type, front_len, GFP_NOFS, false);
+> +		if (m) {
+> +			ceph_msg_put(req->reply);
+> +			req->reply =3D m;
+> +		}
+> =C2=A0	} else if (data_len > req->reply->data_length) {
+> =C2=A0		pr_warn_ratelimited("mon generic reply tid %llu data
+> %u > preallocated %zu, skipping\n",
+> =C2=A0				=C2=A0=C2=A0=C2=A0 tid, data_len, req->reply-
+> >data_length);
