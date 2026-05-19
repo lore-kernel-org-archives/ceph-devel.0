@@ -1,45 +1,45 @@
 Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60E9032B128
-	for <ceph-devel@vger.kernel.org>; Tue, 19 May 2026 11:01:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA3564A33E7
+	for <ceph-devel@vger.kernel.org>; Tue, 19 May 2026 11:14:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779188501; cv=none; b=rXLcbcWDKq3a8532iwn1IrbfrXK3k8i0BJNHogYSCkbmVD3Cmax7riEebhkik9zNys5Ei/OKzGhluReuzHUTKC5pLiTmU30aGCTIkpRmNYhLoSDYm9tCgB+jCWe3V9fjAsT/T0hhWgKpOSrvzCrKu7eiBA7EDereU815SdS4Mjw=
+	t=1779189252; cv=none; b=qYcEDSDpoJBIdN41QgaBEsfHTNdrzIq7D8ynXSpUp3kUeTGCvjFHUtHPLGYmCXaR6iW7Zxj0KHFOF1HNc+yb6Smvo/OWwb9qHx+kYwe8QxPBw2pV7vwN3e7Xrs5M+S/x9PMRPFgKbEYCVxp9pSw8/hnl5mjxWUUGpbSOAcgHLWw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779188501; c=relaxed/simple;
-	bh=gKdcEzkMvSptC/4TGWbsZZjSsqr6KWphxjn9pD3+qlM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Vwdxap/j/H3lDt+AYSyjavZvYG7Ay23anoiiZiFiEhiGPG5kcdZzYtKud2bAOZxuGblCqt1e8hd8bc0G0Heb2rheRnFUnGwMDwQ9APirVy/RpIYJ/qmpBcJI6IxaZIAKBd/nXrebQXsplY2StYSPjUUCNS4rrYLqZj6KtRxfQX0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=GgUsfSFZ; arc=none smtp.client-ip=141.24.179.34
+	s=arc-20240116; t=1779189252; c=relaxed/simple;
+	bh=JicSbTs+p80/EH4LmtE355Kd4+kpzImbjTEQjFWBH/8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=IElSTqzelKMIYC6c9OLGkj+0DHjsd8fNj0mPWFb/OzR3/qAWEq7azt4MlblQlmDzXk1AbTsrUsjsk/0SL+zwRIfuVhucGhhUbHIdZHM0SAffbxoG4EpMoU9fIcSJKPVbmLq7PSv+46e4RnV2t6ZfxZ26HBCbw9vpIw/xJNilZKw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=GBSSEykn; arc=none smtp.client-ip=141.24.179.34
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="GgUsfSFZ"
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="GBSSEykn"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1779188497; h=from : to
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1779189249; h=from : to
  : cc : subject : date : message-id : mime-version :
  content-transfer-encoding : from;
- bh=gKdcEzkMvSptC/4TGWbsZZjSsqr6KWphxjn9pD3+qlM=;
- b=GgUsfSFZoOu1e/bKewIBRTvI6WpZhCkIYnYG3Os60ZSuKMplAcJPfFX5Z0PEEH+l3C3Mv
- zaDYIja9A1V58Bdz4giTTBn4YxIGRjBucmg/n7+GvX8etRgBsbinVPL1+XHj8tSaS+/ZdIK
- vw3aAVk1xXJfs1WHuiB3+YmstadzNk3dNJfpJ0qG24aIQpItm+mB+zhOszlpHmvEZMAwQtw
- n3yI8Oz88iwqcjoHjDH7HAAWuG0+qpSB1Xl5H2pVPvk2KqEU0cvAxWIMinMPGaK+YivIo6g
- hgULpYpNbvHBD5IuEwZysJz/OuV3xf+MZrQTaUvgg3WEbgMoeJ4fmDzITq/w==
+ bh=JicSbTs+p80/EH4LmtE355Kd4+kpzImbjTEQjFWBH/8=;
+ b=GBSSEyknaaAa+ykZUSbeJC33MGbdd48dAmwdViPNUtmTRiXeNLYaIRSqVuXskjOkGAL6J
+ 3DdgIT+G+y0dBYV+3QH1D9+oBlHQhfznPDhI2MMN3s+izBZbvC8u1Aj3V57rje84kNSij55
+ yg1lsxxEZl6PtGAO/Kv7NNNdEqxcFHLlC1WFWt5PTRbtyOKl7yoRMWVUXFBBcGVinFbhRr2
+ Z2Tarv0f4/RfKaXW6GUFXEyTW+roqcXciOe80g/qiz+92WaKVj+/5/lDQaAeqC5Pys9UuQY
+ cLYVaf2n46dm5zEL//CkqTA4vLZ2ewksgdfACN9dX68KdmyDIdpVhOq2DR8Q==
 Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 9D9C65FD5B;
-	Tue, 19 May 2026 13:01:37 +0200 (CEST)
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 3477F5FB5B;
+	Tue, 19 May 2026 13:14:09 +0200 (CEST)
 Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 849CC5FA3E;
-	Tue, 19 May 2026 13:01:37 +0200 (CEST)
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 1B7F85FA3E;
+	Tue, 19 May 2026 13:14:09 +0200 (CEST)
 From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 To: Ilya Dryomov <idryomov@gmail.com>,
 	Alex Markuze <amarkuze@redhat.com>,
 	Viacheslav Dubeyko <slava@dubeyko.com>
 Cc: ceph-devel@vger.kernel.org,
 	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Subject: [PATCH v3] libceph: Fix multiplication overflow in __decode_pg_upmap_items()
-Date: Tue, 19 May 2026 13:01:30 +0200
-Message-ID: <20260519110130.2189287-1-raphael.zimmer@tu-ilmenau.de>
+Subject: [PATCH v2] libceph: Fix out-of-bounds writes with oversized monitor reply messages
+Date: Tue, 19 May 2026 13:14:07 +0200
+Message-ID: <20260519111407.2191040-1-raphael.zimmer@tu-ilmenau.de>
 X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -49,52 +49,58 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-A message of type CEPH_MSG_OSD_MAP holds an OSD map, which typically
-contains a pg_upmap part at its end. When decoding this part in
-__decode_pg_upmap_items(), a len value is decoded from the message to
-determine the number of items and the size of the allocation needed for
-them. If the len value is greater than or equal to 2^31, an overflow
-occurs in the multiplication that is performed to determine the needed
-size of the incoming buffer to decode, as well as for the length of the
-allocation for the ceph_pg_mapping struct. Subsequently, this results in
-out-of-bounds writes (and reads) when decoding the incoming message
-fields into the ceph_pg_mapping struct.
+When processing an incoming reply message of type CEPH_MSG_STATFS_REPLY,
+CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on the
+monitor connection, an already allocated reply message for the given
+transaction ID is used (if existing). Such a message has a preallocated
+front segment with a fixed length of 64, 512, or 32 bytes, depending on
+the message type it was allocated for. The actual length to receive into
+this buffer is read from the message. If this value exceeds the
+allocation size, data received from the network is written beyond the
+end of the allocated buffer.
 
-This patch fixes the issue by splitting the computation into multiple
-parts and storing the results in local variables of type size_t. This
-prevents the overflow by performing the multiplication in the
-appropriate data type and ensures that the result is calculated only
-once.
+This patch fixes the issue by adding a check that compares the needed
+front segment length to the previously allocated length when retrieving
+the message buffer. If the needed length exceeds the allocation, a new
+message buffer with the needed size is allocated to replace the previous
+one.
 
 Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 ---
- net/ceph/osdmap.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+ net/ceph/mon_client.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 8b5b0587a0cf..076763420b1d 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -1615,13 +1615,16 @@ static struct ceph_pg_mapping *__decode_pg_upmap_items(void **p, void *end,
- {
- 	struct ceph_pg_mapping *pg;
- 	u32 len, i;
-+	const size_t item_size = 2 * sizeof(u32);
-+	size_t payload_len;
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 66c0d6d6b33d..267dfadfbf8e 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -712,6 +712,8 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
+ 	struct ceph_mon_client *monc = con->private;
+ 	struct ceph_mon_generic_request *req;
+ 	u64 tid = le64_to_cpu(hdr->tid);
++	int type = le16_to_cpu(hdr->type);
++	int front_len = le32_to_cpu(hdr->front_len);
+ 	u32 data_len = le32_to_cpu(hdr->data_len);
+ 	struct ceph_msg *m;
  
- 	ceph_decode_32_safe(p, end, len, e_inval);
--	if ((size_t)len > (SIZE_MAX - sizeof(*pg)) / (2 * sizeof(u32)))
-+	if ((size_t)len > (SIZE_MAX - sizeof(*pg)) / item_size)
- 		return ERR_PTR(-EINVAL);
- 
--	ceph_decode_need(p, end, 2 * len * sizeof(u32), e_inval);
--	pg = alloc_pg_mapping(2 * len * sizeof(u32));
-+	payload_len = len * item_size;
-+	ceph_decode_need(p, end, payload_len, e_inval);
-+	pg = alloc_pg_mapping(payload_len);
- 	if (!pg)
- 		return ERR_PTR(-ENOMEM);
- 
+@@ -721,6 +723,17 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
+ 		dout("get_generic_reply %lld dne\n", tid);
+ 		*skip = 1;
+ 		m = NULL;
++	} else if (front_len > req->reply->front_alloc_len) {
++		pr_warn_ratelimited("get_generic_reply %llu front %d > prealloc %d\n",
++				    tid, front_len,
++				    req->reply->front_alloc_len);
++		*skip = 0;
++		m = ceph_msg_new(type, front_len, GFP_NOFS, false);
++		if (m) {
++			ceph_msg_put(req->reply);
++			req->reply = m;
++			m = ceph_msg_get(req->reply);
++		}
+ 	} else if (data_len > req->reply->data_length) {
+ 		pr_warn_ratelimited("mon generic reply tid %llu data %u > preallocated %zu, skipping\n",
+ 				    tid, data_len, req->reply->data_length);
 -- 
 2.47.3
 
