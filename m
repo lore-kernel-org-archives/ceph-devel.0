@@ -1,201 +1,174 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4CA73A3E79;
-	Wed, 20 May 2026 18:49:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.156.1
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779302980; cv=fail; b=AoiZxKfyfbndSIG/0zt4nXOAdhbuDAmR+ful36dOKGPCnPw+SWh53fsTdvtFHhEk8kt5bsQaFLct2jaHfLL0c9su/6MBKuSW+wQb80vWwad6PWacGlo/ImWxA9SuGhukuSXXxMelaaHlOKoKlM01UKVvThoeTLRoCSUgd1lCy5w=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779302980; c=relaxed/simple;
-	bh=B4MzrfUCDV5qa3PSXZ3UoKOmUUq3DIWNPYQeNuQDUeU=;
-	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=sSwGKOT/S0Te+Py7A4FPiovUPk38uUo1ULTE0Y/MNbTbPlNw4FgAZZea9n+JJOnnqppfPd29s0Ag+2R/Gr3FWia7zz2L7Lolk5hE1LeK+x+ZLAJIUb2iVfIvn5ASqHz9rhSXCJMy5mi2azJK1IP24jK8P3zXr8Ha+uCCKM3ugbM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=kOFsEGjB; arc=fail smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8BC937C930
+	for <ceph-devel@vger.kernel.org>; Wed, 20 May 2026 21:47:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779313640; cv=none; b=WbT29c3kfR+zQn+G3xbDQd/5iWwnA0IRSiTh3PdaQ3wq9IxDDQOkzK2aF2GPgRv+kTGivJ32eo7noTpfLssWUPdCPFzzs0qj3OZJVGJaiPBf/nBZzvajq+D8vVNiuyyrE8/1BMpwYXSmTNVRxFyWgtUnEXysmlv+cRz39+V4Pr4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779313640; c=relaxed/simple;
+	bh=NKs8ioIT4GNOLloiVcuQ7wCdXkO1syOO3P0T4A9XlZw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=S6Oo5rJjSZucl77Iyyjh4UW2HRGEZNoR3GTwU0qezNo5Fw0iuP8+gbKPdSFl5am8GYALDKKovFtNK2+p7gGg91+Kk5wXTORh9/a4ZwsA/uj2Y6Uz4YmU4PK/NdRc7N7/lkRqlIYu44+dLKqkx0z7OU3W+x8mGTATxhXaKcdDqAA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=AN6lMSIJ; arc=none smtp.client-ip=209.85.128.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="kOFsEGjB"
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64KF6Swg3505643;
-	Wed, 20 May 2026 18:49:23 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=B4MzrfUCDV5qa3PSXZ3UoKOmUUq3DIWNPYQeNuQDUeU=; b=kOFsEGjB
-	pnwH/fQuRa3vcWscvC5YySlMqLwsjWgT6Szb6mVWwNZHklLLKZkbpGyl92gbNaR0
-	NbPSqr89TZtbuxhyqrBKMR+NmXLCY5rLyz/p+Nhiwod2k4l5eUSadRYR0JagtukM
-	eCu1bzQEZiDa7iPioAb30GNgKLWZJlJjHt6ncPb9QlA7S2v5uX1BHW8YFlvXxK+Y
-	V7qkTjdfU0QpiGxHUQYvYwTc8msc2kB5Viqq0WuMQOj20Nyw5sduTsC5aw8qU8FS
-	R2tAjy5o87r2YPgmYGwX31AJlwfMmzP2CN4YK5Tieom0Wwjuh40+N9wRo7wPVnNQ
-	v6ibAPwSfoycmA==
-Received: from sn4pr0501cu005.outbound.protection.outlook.com (mail-southcentralusazon11011053.outbound.protection.outlook.com [40.93.194.53])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4e6h8mufe9-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Wed, 20 May 2026 18:49:22 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=nIXfSU6PIxXGqDnBdc1QtMDQ1ErP6fjYS/8MOITyRhxx+g6qQ457HzAlJ0PxQrY7gWB2K+64LsIyDUKacqtBwJlYdRzMp1zbJwbz1ETpStks1WjsM3V1XOqnI9DwNvQyd7RwulwH94PoqoORxyXU6xmtnmAL8FqNV+ciOVDljjt7RHfA9r+hU2/644pEpag6mpJySYV+Q1bfv1B5LtXdMHLqbJOM5yKv4wdrmFpyu7D9kpkarekozQLJHiXjZww+5aumLJxt6omFHBcSUGDQUx27yKJUzbD1gX9ep+msMUvNRTzFMKu5ocQWa3D+F4o7HFYLsNMZ5UCeufzhBcjRag==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=B4MzrfUCDV5qa3PSXZ3UoKOmUUq3DIWNPYQeNuQDUeU=;
- b=L3bhe8KujQ2jJSa3Rj9ocf0zGnCK4HEWQaszSkCG9baheIpd7FZWwJK1P+NM3WBYC0xWyhjJ5sZxUj55vyRftB+2m2oheoPDBE41gEdhD/NM9jcGJJEVoEKVicH3aS1Avd1aT2jr+c3go+MMz22UR9emIrVrndnFETKTb1euC+ONpQ9+F3oHfKt45SjyHOmwlzSF/RQm5dScKWAZ1bmj5qYf8VHvhvZYpKSZB1kUnP4D4HnumFt9MF4Fl02DP/R4aJm4NMpOeIzfVVjWI+KlZmsF2aJzT9JFx53rrqnzq7sG3rPXP3QYHnEcnCp3M1D+eT6RtTPA/hgmOkw/YrTQWg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by LV8PR15MB6666.namprd15.prod.outlook.com (2603:10b6:408:25e::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.48.14; Wed, 20 May
- 2026 18:49:18 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.21.0048.013; Wed, 20 May 2026
- 18:49:18 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: "jack@suse.cz" <jack@suse.cz>, "brauner@kernel.org" <brauner@kernel.org>,
-        "neil@brown.name" <neil@brown.name>,
-        "slava@dubeyko.com" <slava@dubeyko.com>,
-        Alex Markuze <amarkuze@redhat.com>,
-        "zenghongling@kylinos.cn"
-	<zenghongling@kylinos.cn>,
-        "idryomov@gmail.com" <idryomov@gmail.com>,
-        "jlayton@kernel.org" <jlayton@kernel.org>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "zhongling0719@126.com" <zhongling0719@126.com>
-Thread-Topic: [EXTERNAL] [PATCH] ceph: Fix ERR_PTR(0) in ceph_mkdir()
-Thread-Index: AQHc6D+H7PHgwc4bNkqqy/cTjJGwv7YXQjoA
-Date: Wed, 20 May 2026 18:49:18 +0000
-Message-ID: <d2cd070ded01305414815248032bbfc331c392ee.camel@ibm.com>
-References: <20260520095428.69422-1-zenghongling@kylinos.cn>
-In-Reply-To: <20260520095428.69422-1-zenghongling@kylinos.cn>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|LV8PR15MB6666:EE_
-x-ms-office365-filtering-correlation-id: e4e6280d-1604-4d0c-fb6c-08deb6a07fb1
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|376014|1800799024|7416014|10070799003|22082099003|56012099003|18002099003|11063799006|38070700021;
-x-microsoft-antispam-message-info:
- qf0S/4quMYqYyffxIfgUqJqdQh3ab1IBRb1MaOQnhj+lLgUSPkTmA69t3dVW5d087Pk7mfFqWq9ZYwv0kb3ZYdQrpoQnlJuMNU60zbVuy4bowRiap4wuNSxiswRpblM42mxdDEQAYOvvff4HrubZHgCqnkrgIgnRrPcn0KQbbT5DOO6AEv/N0RXq5ekclu37oDHw0hDqtR5Bf2JbhBwLCueS0wgvgmxYzMqReGw1HGmsU/EnEh0D9oP+4rmNYBWae+5P/TAQa9KOK964EelbFmkIFvx0k7a1qmkAAHa7QLI146/te8DKQBROmlvDoHYrVSnfqYhPSXTTSX/H6hHNbIaVr3gUekOEBJGMyTSYKzbsV6XCfMW5W80C3rd47AyYfJ6850k6FDkIQhSz8gYac6vNQJEA+y9Yp190/cfBwDsRX3o8ybAI8JEewHeXOMYcbWqW2s0X4rkghriRMnATrIJLGNy9JNho0DtnL0YwypIZznFfiiB3JmHQI8V2MXHIx14YdXRzE9iV+L9pJp7gLMxRr/hwA3wWBqj58imwLFC/jDd7wG+HvsJkhj77sDBkWJpnpqQylaleX9PFcpXvzcqI5mSsTBW0VX4uepVs6EK7Rnpa+4vwE74SYJpWKn6rLBO8DsJzINR2LaZd2+n0mmUNt/2mzICnmm4ghjdYVnSQKEZtF/eqcGEolbY/Q1YXyZZBaWx8UGJP61qZphUpt2SFbJpajv0Di6i4+B6ygRQkkhoVixXlDmgF1k5Ftglx
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(7416014)(10070799003)(22082099003)(56012099003)(18002099003)(11063799006)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?TndEUTR6ZUdSMUV5SVZSQTRPK1NNZUtSc2JWcEptRkpkTGdZOWpHTU05YTMy?=
- =?utf-8?B?bGJibU5ZUHFGZTlSd3BZdnZ2cFFxVDBxZUhORSt5ZkxidXNjdWlEbmhOMHVD?=
- =?utf-8?B?dlBPcTJpWWtkVDM5ZHhzYjNMSzdERVdnVVhwSHQ0Um43aWxKZU9Jckg5RGpI?=
- =?utf-8?B?QXRuZlg5SWRZYVpMN0dpekFWdCtBYlI5RWhhSFRoc3M2N240UTVHbHZndEZ6?=
- =?utf-8?B?ZDlta0lXdTBoNXltd0pZM2V5aVg4UUYvVFRLN25OV3RXS3JXd3ppVkNQTllO?=
- =?utf-8?B?RS9pdUhyRkN1cHdqMHdrbGN3dUZ6bFpvbjR0eGRaWXVQSXZwVnpRY1p6UFh5?=
- =?utf-8?B?UGFqTWhQT1hIekxhVTFtUUlTY2dJRCs0dldnOHNQYjRQUCt0c0ZXSExTREtX?=
- =?utf-8?B?emFFa2lqaWdqNFJWZXBDYXBDNFFyNTdQS1RsZzloeWllOElkdk42cGZRejRJ?=
- =?utf-8?B?QzVFeHRjbTN2VENhbTdrT1RpNVBERXcvTXlRMjZTSTFaVjJkaTIvYXBJNU95?=
- =?utf-8?B?c2UvZXNjM2ZSb1pGalc3REhFVzZNekxwbkJIZjU5ZTZTVEdsbThIVW4rR1l5?=
- =?utf-8?B?aUw0QXA3WlovUGwwR2VSV2JBY0lvOWNnQ0ZMNlJxRVJGZXJnUGt3T0RkS3Za?=
- =?utf-8?B?TjVoUWtLOGRDV3pGbloxcjJhclB3SE9yRTVYR0tQdGNXa2tuSlFtVVlVR3VV?=
- =?utf-8?B?R1M4MWpoRDczU0JoVWVYcUJJQ1hWL21Gd2Mxd3NES1YyVzRZV004Y0FPTTBz?=
- =?utf-8?B?NlVhcm5NTldIdkQ5Vjk5NElHVys2WWs0OXlQbzFkTGwzS3loZlJKMWVkTS93?=
- =?utf-8?B?NHlRc2xyQUJOV0RRM0RYY0JtSVZwRFJENlVnOFBQUFdyeXNaNG1vTGtFNUFR?=
- =?utf-8?B?QUREMjY1V21Rb3RhZWFQQUREd3lwUE52SGFUcERjNDdqUUZxT2d3b2hnanA3?=
- =?utf-8?B?NWJOVllJWHI3VXp4eHZrYzlMWWcraWpsWTIyVEtWaC8rUjk0dXgrZjlTbExv?=
- =?utf-8?B?TDhzMG1iNzR0aE01Vm1HUzhLa3RoZy9oNzRSVTc3TjNJalhlczBvcmJraGhN?=
- =?utf-8?B?UzhGMkxLRm9ZaTRiTGdqVkhyVStHTTRpVnc3emd6ekg0a0lpQlExSmxka2JP?=
- =?utf-8?B?alZ2b0RxczFhVi9FcXo1MVZMY1hOZXJvMHJqVHBiOTkrUWlnYTV2bDdlUmpV?=
- =?utf-8?B?ZEtBdlcvNUxTTHlGcnhmVStuWW5UZkt0VlZEdjY2V0NpUlhiRk42WmVEaWha?=
- =?utf-8?B?NVRSY2w4YVFnRkZwc2tXY2Y1T1FOemtIOHJ3K0QwaS9DbHg0VWszbktxekxK?=
- =?utf-8?B?aURXNEdEbnpmb1hUTllad0U4bmdFSUVram9xdFA0aUhiSTFWVmdsZEY3cC8v?=
- =?utf-8?B?eVM3VTJuQUFodlhPdVRXYTRqY2F3NnZmM3l4RnJRME5qR0J3a3RIVzJUdWhL?=
- =?utf-8?B?Skh2Ymo3QUdTdldpeEN3WkZ2VHYrSjl0cGpMUTRxMEtkTkxmQnFBMUZCQi9K?=
- =?utf-8?B?V0hGVXlNOUN0S0N6UDVWa1NvWHF2Wi9nZFNFQVpjRFhzT3drZTM4d3UxN2cw?=
- =?utf-8?B?b1NBelM4bWZON09tNkFYcFZKeUpQbG1HWTZiTWVFN2lqSDlwZkdpTkkwVTRE?=
- =?utf-8?B?MHpscTlyY21haGE0SC9HNHZjSFd5cml3OEFmK2VkaGNFRmIwZUdKS0Y4V2xI?=
- =?utf-8?B?WVhpVnJvemZ0dTRsM0gvVjg4R1FPU1d1ZjZjTEFNcDRTbGg1cE1SNXJJbUZP?=
- =?utf-8?B?NUlYcUd0MWZsdUVKY3lQdVcwejVZZithS2R3RUU0WkJuNXJJcjdtMXQrMXdw?=
- =?utf-8?B?MVJCVGZSSXM2TWY2Q0VNeUpFN1ZuMkZZZjZvL2VrV1pzZ0c1bHlSdmhFWTYv?=
- =?utf-8?B?d05Zekc0cDhoaFVseE1yc0xZbTVYTFFIS0VKMm1PZ3FoS1ZsMkZsa3lUcVJC?=
- =?utf-8?B?THJmZjBnZzVlbHllSnBRUUFZZFgvV0kyc05HeEg4eHI2d3Avc2hER1E1UXI2?=
- =?utf-8?B?RDlHeHAxRHpWNUJHc2pwdEZIVlZ6blFDcExKNzN2dDU1WlVBcm5pbS9hKzhx?=
- =?utf-8?B?R3Zibml6VStyTG1OREQ1VW52MGhSQTg4L09JbGk3Y1U3QXVsWjdjMDZwVjdQ?=
- =?utf-8?B?LzNXTkxPM3JLODNjckpoMFRVTVFnZklOcUNkcHorbzRMWlZzdXhBVFlBUmtj?=
- =?utf-8?B?WmFFaUxwcWo0bDlBRHV4bXdYY3dKcXdVbVZXd29iMjdHaWdQc29XQkI2UVhS?=
- =?utf-8?B?Sk04VkgyaStxZDQ0amlrVFY0UGxyRWE2NkxnVjlncnNNSEVBTDIyclVQN2p6?=
- =?utf-8?B?ais4YUxMUDlOakFSajZrbTZGanNWL2tXUllzTklUc1NYR1VRemI2cW1pdmYy?=
- =?utf-8?Q?cDmQdPETNbSY+4we39tpJ5+CsXU7QzbZ/QvjQ?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <48EDC079F43A5E4B915001CC20E5DB64@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="AN6lMSIJ"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-7b37d84a6b3so48665347b3.2
+        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2026 14:47:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1779313638; x=1779918438; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=cEeOx8/xhFZsrcl/1GIXqMSpQIHlDxoBYeOisqb3d54=;
+        b=AN6lMSIJwjz+++UUonmin8KFg1BSpSfcQbSJAWeZA8dLXn7aob4uR4H1RroHxGH/Vv
+         cxXMT/2CEhjK4D2tR2E6gUDZ4wTAeBefOmaQfL75vjC3XicymjfEO5lL8JVW5Q+A6nUW
+         ozRZSSCVf20weBd2bYIPEBNplHU/GC/QPGeKktb3GMsZRSwdHfgMEf1tbMnwcn7319Sm
+         DyYGEYQ/bvsCTDcC6bsv0vzWhBt0TkduHNVMlNlzdDMJA+emn4c3PwgpMncAGFYl12Co
+         A6VhYHIrR8gJDT3BR38npNCKA2dfhuOtjC10ZK61eam96aX97BmohWj/PEs9iERaNueR
+         g9NA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779313638; x=1779918438;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cEeOx8/xhFZsrcl/1GIXqMSpQIHlDxoBYeOisqb3d54=;
+        b=m6yV1E8eebBCO2XNXGkbCgxHYG0LmnkFrRFqM9I1R65/G/yELexCDN+u+AZzi5PHzd
+         xn5tmghd9osUv5Mcd1kJqpFk+CJhdM+xsCLmUnF13WqRxIOAwAhe+vzT4JUpWRaqfZSE
+         I30kr/4zWtM6RyteltHG5ADX2G6XZLucJFh8wzJN3Vzwv2XjqdjLQTb7P3nrPbuqbdQ2
+         xyN2w0zgOR/9S898vhvuSdFZvJzvxrGobh6A+3he90a6ww2A389Gtw5olloP41kPZlUe
+         Y2LR4x4UOp//lr7bUasgYAmcESYEawooGW33gCKgvcCa9sQH29scS+pp+K27P6yLHdsc
+         e1pg==
+X-Gm-Message-State: AOJu0YyjMBRxplPSdTqw1wW+ZAaSazJNql/NgKVSKzyfHC8Ygym7Iryf
+	lmj1USwlKt8Po9LYQ3nh2gM0mpSgQA1g9hiPB9NxHTH146Gpexqr4k/3gIcco9GMreqhgKQV5R9
+	MlOWWcXA=
+X-Gm-Gg: Acq92OHpZTpvuyY0awlDmrqXSQVbQm/6Zr1oj5ZD5rJn8YknuFW7Hv/iStvJ4G+sxzk
+	i49LFBklh5QIKy8buTY90yQiMyersWlYeK+ISsb7ax2eWYOZ8HHMyQRHnDw26ehjZuh5jscew9h
+	3iFsCKL+ZNDfIcMv+1ptp3llhEZJmqNMPiYYlJGlQ0jdUH0mrLENNzcLEoEAL3SvpnElzEUXWXt
+	38R0ULCPMcLdsP/Izr06WXPdrwWs4arxln5dw5PGl3DhHkDLq+XuQe0k6tiM0gY9albMtctV8ww
+	qTSIMaarDwwy4aXz99CkQ49iqkv0rt8qEubgG+PO/3GhTQMqz6qxmIbPoWeZtSD0xrlhbujLv36
+	+O7K2DlYGFv+ZiSHltqwt4zLKuRs9A2WobFYZDWRIMKZ8kq4ez68dOLlcxICCf/LETRMXBP1eNP
+	F2Kgyeb5SWvH2R5dai4WMkTGK8RQL+vWf1UDzU0faC5svT+ypDSgHLYYR5uR2JOlhoKhViJYYpA
+	XMO66FaYIVe9r/e1tGFA1BrcLnd
+X-Received: by 2002:a05:690c:9c0f:b0:7d0:261a:69e with SMTP id 00721157ae682-7d20cc3df59mr2857607b3.27.1779313637655;
+        Wed, 20 May 2026 14:47:17 -0700 (PDT)
+Received: from system76-pc.attlocal.net ([2600:1700:6476:1430:8978:d38:491:e9c6])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7cc996b7d54sm58080137b3.12.2026.05.20.14.47.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 May 2026 14:47:17 -0700 (PDT)
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	linux-fsdevel@vger.kernel.org,
+	pdonnell@redhat.com,
+	amarkuze@redhat.com,
+	Slava.Dubeyko@ibm.com,
+	slava@dubeyko.com,
+	sagemct@ibm.com
+Subject: [PATCH] ceph: fix denial of service issue in ceph_update_snap_trace()
+Date: Wed, 20 May 2026 14:47:01 -0700
+Message-ID: <20260520214700.1265095-2-slava@dubeyko.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	DEBmV1Jdp9NGAgvaLIRFNi0TVXfbH4RpU+JjJ3biL4AAfsDRJeHoky1efqywNutHa7XAjGjrUBWdNSn4D7EWodUTErl0FIjAl+hh1fzRAjQg1l+HsH3Q5sJkd0MGslk9zxcChr+QdMcfd5OrHxh+ToafJSeq0Nf839WjA2dz+EipugndV4lSK2vKD5ut0l1s5LeRMyAh4EAkOEJN2Hb3QeUMTpMdxN3BW4bDuQOdUqIbBCzIIkiZ5vxrCs/OY29jnJKLPLnTVw627cUYZA+gb3s2uEYP3pSYS6tALUtBSe6RujRO6vkWAdw4uC00/E9dvoVfxNlamKGHqedgsT0GeA==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e4e6280d-1604-4d0c-fb6c-08deb6a07fb1
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 May 2026 18:49:18.6566
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: m/3mPPPNvgtNE//cOCU0jQIqiviw0NVy6yxGc6DJ7NKRv2rQsorxI1m2oho7XgbXhA2ukzdbPPFbFqO9IfqiYw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV8PR15MB6666
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-GUID: LsQqFG_IbrxxtHXxEfXtj1l90hw9r6-S
-X-Authority-Analysis: v=2.4 cv=GYMnWwXL c=1 sm=1 tr=0 ts=6a0e0232 cx=c_pps
- a=SqiBG769zjf53VTvhFyIdA==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=NGcC8JguVDcA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=uAbxVGIbfxUO_5tXvNgY:22 a=IwYZnHCrTWuxvp6nU2IA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-ORIG-GUID: 5QC0N8NPKonK12fYyr4ZYxxjZjhoj49j
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTIwMDE4MiBTYWx0ZWRfX/ZdcPi1ULDK+
- 7slAYyMpuL2fyxJsYCJhcBCP1GcwNGFOgmyhLtSOzbTGpC2NfG+Ut7Y04emqWAR6ixzJS2PWciz
- An+msZu3VZXfNpGH8MUJ2De0ool+vnIcAPPH38TRe6NgTM2yUoynhb+ZpM6b1ZlPlVQAgkVl+r0
- X5raSk//Oowz7PtlX4gDneWCc8RmYzH/0vvQyNEPeD11tEmKqPq4YXReVYsaES/P2dKHtX3KzQm
- ua6O+ExBvEEZzFhY9SvIk2aFJhiT6JIzNkUbWRVAYBxdZcMn4Ijs2xaXMypZK6grOpoV1RDY4RT
- vDwrrs2o+1gHeXDfWD2HruD0ypbA8gsU3ZDfIf9BcVQGtMvHcnnmiNFse/bAfgkkjKK/CPjTiEQ
- NtWuWYtl4uzK5wXESM1zqqCKNosvUF+zvxI+ZAarDdJOV5h+mJ045Rl31eXLyf6RzI85XLQxSyF
- jzg/6IXulRlCOeidGaw==
-Subject: Re:  [PATCH] ceph: Fix ERR_PTR(0) in ceph_mkdir()
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-20_03,2026-05-18_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 malwarescore=0 lowpriorityscore=0 priorityscore=1501 bulkscore=0
- adultscore=0 suspectscore=0 spamscore=0 clxscore=1011 impostorscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2605130000 definitions=main-2605200182
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-T24gV2VkLCAyMDI2LTA1LTIwIGF0IDE3OjU0ICswODAwLCBIb25nbGluZyBaZW5nIHdyb3RlOg0K
-PiBXaGVuIG1rZGlyIHN1Y2NlZWRzLCBjZXBoX21rZGlyKCkgc2V0cyByZXQgdG8gRVJSX1BUUigw
-KSB3aGljaCBpcw0KPiBpbmNvcnJlY3QuIEl0IHNob3VsZCByZXR1cm4gTlVMTCBpbnN0ZWFkIGZv
-ciBzdWNjZXNzLg0KPiANCj4gRml4ZXM6IDg4ZDViYWY2OTA4MiAoIkNoYW5nZSBpbm9kZV9vcGVy
-YXRpb25zLm1rZGlyIHRvIHJldHVybiBzdHJ1Y3QgZGVudHJ5ICoiKQ0KPiBTaWduZWQtb2ZmLWJ5
-OiBIb25nbGluZyBaZW5nIDx6ZW5naG9uZ2xpbmdAa3lsaW5vcy5jbj4NCj4gLS0tDQo+ICBmcy9j
-ZXBoL2Rpci5jIHwgMiArLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRl
-bGV0aW9uKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9kaXIuYyBiL2ZzL2NlcGgvZGly
-LmMNCj4gaW5kZXggYmFjOWNmYjZiOTgyLi5hYjdmN2I3MDE2YzYgMTAwNjQ0DQo+IC0tLSBhL2Zz
-L2NlcGgvZGlyLmMNCj4gKysrIGIvZnMvY2VwaC9kaXIuYw0KPiBAQCAtMTE2Nyw3ICsxMTY3LDcg
-QEAgc3RhdGljIHN0cnVjdCBkZW50cnkgKmNlcGhfbWtkaXIoc3RydWN0IG1udF9pZG1hcCAqaWRt
-YXAsIHN0cnVjdCBpbm9kZSAqZGlyLA0KPiAgCSAgICAhcmVxLT5yX3JlcGx5X2luZm8uaGVhZC0+
-aXNfdGFyZ2V0ICYmDQo+ICAJICAgICFyZXEtPnJfcmVwbHlfaW5mby5oZWFkLT5pc19kZW50cnkp
-DQo+ICAJCWVyciA9IGNlcGhfaGFuZGxlX25vdHJhY2VfY3JlYXRlKGRpciwgZGVudHJ5KTsNCj4g
-LQlyZXQgPSBFUlJfUFRSKGVycik7DQo+ICsJcmV0ID0gZXJyID8gRVJSX1BUUihlcnIpIDogTlVM
-TDsNCj4gIG91dF9yZXE6DQo+ICAJaWYgKCFJU19FUlIocmV0KSAmJiByZXEtPnJfZGVudHJ5ICE9
-IGRlbnRyeSkNCj4gIAkJLyogU29tZSBvdGhlciBkZW50cnkgd2FzIHNwbGljZWQgaW4gKi8NCg0K
-SSB0aGluayB0aGF0IHRoaXMgbW9kaWZpY2F0aW9uIGRvZXNuJ3QgbWFrZSBzZW5zZS4gVGhlIEVS
-Ul9QVFIoMCkgcmV0dXJucyBOVUxMLA0KYXMgZmFyIGFzIEkgY2FuIHVuZGVyc3RhbmQuDQoNCiAg
-c3RhdGljIGlubGluZSB2b2lkICogX19tdXN0X2NoZWNrIEVSUl9QVFIobG9uZyBlcnJvcikNCiAg
-ew0KICAgICAgcmV0dXJuICh2b2lkICopIGVycm9yOw0KICB9DQoNCkVSUl9QVFIoMCkgZXZhbHVh
-dGVzIHRvICh2b2lkICopMCwgd2hpY2ggaXMgZXhhY3RseSBOVUxMLg0KDQpUaGFua3MsDQpTbGF2
-YS4NCg==
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+
+A WARN_ON() fires inside ceph_update_snap_trace() when the client
+receives a malformed snap trace from the MDS. The kernel additionally
+logs:
+
+ceph_update_snap_trace do remount to continue after corrupted snaptrace is fixed
+
+indicating the client cannot recover the snap state and forces
+the operator to remount the filesystem. Triggered with the call chain
+reaching the warn from ceph_con_process_message() -> mds_dispatch()
+-> ceph_update_snap_trace(). Impact: denial of service of the affected
+mount until remount; the client refuses further snap-related operations
+after the warn, so any open file in a snap-realm becomes unusable.
+
+[  230.026879] WARNING: fs/ceph/snap.c:926 at ceph_update_snap_trace+0x308/0x3300, CPU#1: kworker/1:1/58
+[  230.028125] Modules linked in:
+[  230.028427] CPU: 1 UID: 0 PID: 58 Comm: kworker/1:1 Not tainted 6.19.0-g44331bd6a610-dirty #9 PREEMPT(lazy)
+[  230.029089] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.14.0-0-g155821a1990b-prebuilt.qemu.org 04/01/2014
+[  230.029815] Workqueue: ceph-msgr ceph_con_workfn
+[  230.030177] RIP: 0010:ceph_update_snap_trace+0x31c/0x3300
+[  230.030550] Code: fa 48 c1 ea 03 80 3c 02 00 0f 85 23 26 00 00 48 8d 3d 28 d2 3a 05 48 8b 73 28 49 89 e9 4d 89 e8 4c 89 f1 48 c7 c2 40 40 8e 9e <67> 48 0f b9 3a e8 3a 7c db fe 48 b8 00 00 00 00 00 fc ff df 4d 8d
+[  230.031708] RSP: 0018:ffffc900003f7728 EFLAGS: 00010246
+[  230.032084] RAX: dffffc0000000000 RBX: ffff88812282d000 RCX: ffffffff9e8e3b40
+[  230.032533] RDX: ffffffff9e8e4040 RSI: 0000000000016f97 RDI: ffffffffa087e7d0
+[  230.033008] RBP: ffffffff9e8e3c00 R08: ffffffff9e8e3b40 R09: ffffffff9e8e3c00
+[  230.033460] R10: 00000000fffffffb R11: ffff888102928040 R12: ffff88811031a3e0
+[  230.033937] R13: ffffffff9e8e3b40 R14: ffffffff9e8e3b40 R15: 1ffff9200007eefd
+[  230.034401] FS:  0000000000000000(0000) GS:ffff888254a05000(0000) knlGS:0000000000000000
+[  230.034941] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  230.035315] CR2: 00007f7efa7be740 CR3: 000000012435c000 CR4: 0000000000750ef0
+[  230.035803] PKRU: 55555554
+[  230.036001] Call Trace:
+[  230.036175]  <TASK>
+[  230.036342]  ? mds_dispatch+0x1ceb/0x6f60
+[  230.036645]  ? __pfx___might_resched+0x10/0x10
+[  230.037010]  ? iget5_locked+0x44/0xb0
+[  230.037316]  ? __pfx_ceph_update_snap_trace+0x10/0x10
+[  230.037670]  ? __pfx_down_write+0x10/0x10
+[  230.038005]  mds_dispatch+0x1dd1/0x6f60
+[  230.038306]  ? ceph_con_process_message+0x1ab/0x270
+[  230.039024]  ? lock_release+0xc7/0x270
+[  230.039321]  ? __pfx_mds_dispatch+0x10/0x10
+[  230.039622]  ? __local_bh_enable_ip+0xa1/0x110
+[  230.039992]  ceph_con_process_message+0x1f4/0x270
+--
+[  321.986495] libceph: failed to decode MOSDOpReply for tid 9: -22
+[  330.121991] ------------[ cut here ]------------
+
+The error path in ceph_update_snap_trace() is reached whenever snap trace
+decoding fails. The two entry points are:
+(1) bad — a ceph_decode_need() macro fails when the encoded snap trace does not
+contain enough bytes for the declared number of snaps or prior-parent snaps.
+(2) fail — reached directly from -ENOMEM returns (ceph_create_snap_realm(),
+dup_array(), adjust_snap_realm_parent()).
+
+This patch fixes the issue by changing WARN(1, ...) on
+pr_warn_ratelimited().
+
+Fixes: 38d46409c463 ("ceph: print cluster fsid and client global_id in all debug logs")
+Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+cc: Alex Markuze <amarkuze@redhat.com>
+cc: Ilya Dryomov <idryomov@gmail.com>
+cc: Patrick Donnelly <pdonnell@redhat.com>
+cc: Ceph Development <ceph-devel@vger.kernel.org>
+---
+ fs/ceph/snap.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 52b4c2684f92..599eee32c8f5 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -923,11 +923,11 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 		pr_err_client(cl, "failed to blocklist %s: %d\n",
+ 			      ceph_pr_addr(&client->msgr.inst.addr), ret);
+ 
+-	WARN(1, "[client.%lld] %s %s%sdo remount to continue%s",
+-	     client->monc.auth->global_id, __func__,
+-	     ret ? "" : ceph_pr_addr(&client->msgr.inst.addr),
+-	     ret ? "" : " was blocklisted, ",
+-	     err == -EIO ? " after corrupted snaptrace is fixed" : "");
++	pr_warn_ratelimited("[client.%lld] %s %s%sdo remount to continue%s",
++			    client->monc.auth->global_id, __func__,
++			    ret ? "" : ceph_pr_addr(&client->msgr.inst.addr),
++			    ret ? "" : " was blocklisted, ",
++			    err == -EIO ? " after corrupted snaptrace is fixed" : "");
+ 
+ 	return err;
+ }
+-- 
+2.54.0
+
