@@ -1,166 +1,89 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21D2F2C21DD
-	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 01:07:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.173
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779325658; cv=pass; b=Y+g7jsdI8KTnaPuNCoqaWfPeMNAmRdXjkn5GNnu+g2FvtdoU35bVk891cg6dtimds/C7AmO2Dpx4Q/ZEALtDC5KQkgFOpE44KLBFL5S0napEr89RxsuMAqtUKmCrcgoAgggNRgedCgBfIYe9IMcHHRfsGVGp7+39glXwqCohpn4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779325658; c=relaxed/simple;
-	bh=6o6OhfFgqhvs6+Xg2vngq/GiNQmqcRy4IaSDQZXFPoU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=eH1zow//HNZ0/wOSG2gzgzz8gO2kJtmEGcw1TASpLg9ViPg73ZA2BCXKZ2n3+5azaNwdQvv64P1s2FLNnVJzOqDodJHyJ+6PYQcqd7CsMThVq4jG5lGhTpL7BF/PIUCjlxaM+uchk9/Q1iypHVXFd0nMBGLFnGWG42hAKMc7tqw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=avOEfJQk; arc=pass smtp.client-ip=209.85.128.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 877053859FA;
+	Thu, 21 May 2026 10:54:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779360849; cv=none; b=AiwPHxNfR/8E5vElKjlBZ+GtAytjkb01jMwdufSnxogVZBeepLEtATAMLG/jfuCVp7aPVUjZQikAk/t6jgrFqz4c85kMnJ37P7yPwbPqmT4L+2Uc8uT8cVMfX0cviwFkvmrlAAlw4qnwWvH5/r7g3jM3Ql4EZ8UOUKVgk9Tl1Rk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779360849; c=relaxed/simple;
+	bh=tMnuYwHgo7w7gPx8laBi+vh4biK3BacbRE3N0c3HULA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=axyV6XOy9rnkopkiUzgQlJzH80gVIDis2YjiL0TxlZ1Qp4eHJW1LIkHtHJryI8ClKe3bnE3Cz3unmbpFCQHkLT/Pdga2LsI2dusfEBreHSGtAr5Ei3dDbuFilLNoud3ks+MyKqltDJJcq+n141622JrR513e4K86hYo44V33nfk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=A8rOS1cG; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="avOEfJQk"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-7b41fdf9de2so39600557b3.0
-        for <ceph-devel@vger.kernel.org>; Wed, 20 May 2026 18:07:35 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1779325655; cv=none;
-        d=google.com; s=arc-20240605;
-        b=Xs8AxTTzeMdOyU8biZ6zmrKuUXCKGWhVSXGtSDi1sw2YTX0shT7CWs8uwFxEr7PnCt
-         ZwbDnTHOeF1JueIPgAszSCTHUZE805wkYdM9Od+Ma4zYhWiqCzgWhEyI/gZHK9IkoVyl
-         R0fllECiQUh3EZ0dwtu9iP/Xwueip+n+DCr9fi3uW0Cx4sYAjaYTayWui1XCRKPWIBqG
-         9mCFlh6GJc2FuSkA1lpDjh93nMr5TG8tnGqAwenX98zj0WquqNWqPr/1xshhHko7IKDs
-         glkwnWNeGsPB4tmJvAc4T5t9SBRrmLZJlLUP5jsYhAOVLI/HUhW8pn4ZWvc7qP7fDrwS
-         A0DQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=/c0mGkmQo08jz/C9LTSuPhAbp4719+rYek+3orkehRo=;
-        fh=pn4J0ZSLUIPZ54URCXxo37R4SvqncX5ffsda4z5lA/w=;
-        b=AjCXA7AQNp7F72hfNSHGvNUl4zDYGzvno5bE6MyMLE9KqA2ne78+6KdMrEBe8xQfUo
-         WU4Y6IaxIjtgtRZvY4IuLz98sldSG2kMYOMnImtbBj+0icCcAEMUeAgC5vivunt4Zypz
-         9qM0xNdgu7czU4aTRNU4NnJ3KfFxpV4Ev+E62Y6J1RSspqtK8cToFnrW8YPajCpMFTRz
-         FXyhbKDvNvVtEDt10w4d8g2QncrB8/CA6oltK/BPUax6Z9S02Y1LmAmUsN990vU4jLjM
-         L9s5MQuZwOuQv9HrOdW/hcPtjm9iN85KLdx1EWcDKsn7Y4DupM8XOK64kSn0gg7N/SM5
-         Wosw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779325655; x=1779930455; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/c0mGkmQo08jz/C9LTSuPhAbp4719+rYek+3orkehRo=;
-        b=avOEfJQk9XPK2nssdDJ5nZCRUosqu0jqYFCpAwPRnWl0C12aO1jsWg708ei2jymQB/
-         +pKxukhxaH+rBE5ZT8hiVaah38/9ReQPspWVqX1BgUoJOsQbpehJOQbQRFOM3BqwLpgw
-         sbYtFGcsVg7tXjTSwukM4dIYa6c2QJnGx8wezwh+LLrnlGZgY2IhdyMKIkmbztm6J6bh
-         i2nXsAIbVOSsFrqvPAf4cc4uCmsCeM8FWFO9sKdam9G3pRFOy94brZx6DL9nt/M/0Wcs
-         Oio1Ln7nnYK4RRT6rUv4yk2kNBO/hsi40w33xg2PCtwd0N5Mn9WANJBGe1HtFpAla8Eg
-         NtUQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779325655; x=1779930455;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=/c0mGkmQo08jz/C9LTSuPhAbp4719+rYek+3orkehRo=;
-        b=kB5v9VDMC1AdD9J4mywHFN/jNq8MkpPkDq7m/nAg7ltPW4tOQBmYXlx/YoODWfpSox
-         bm/8giPBwV1SCi8U0WJjwUBVoUq7W7Ju9wxEEqAJID7SgojRBi9tLTDN3s5+AV9GqKSo
-         CCGViGBGQjAcgShGdIeb20h/bfSGnfGahBAMxjwe1uO2NK14bSnsl61dVAE3xuQYXHOo
-         ITalU/MulWXd+KjJ3ebJYBhRVE6hgbCjvLn3bGQ/GO3dGn/if7rhSoj8dFuz0SSvK1Cp
-         DsHDD0GxaVRt85o/dL1bxjnzjYoitS4R86zDt7YEWyxS5upVkhQWL8IOZq6TAR9FuM33
-         DwFg==
-X-Forwarded-Encrypted: i=1; AFNElJ8Gdf4bjZe4N8DiUJxQyTeMUcX5Cls9hIvqBUB1H9gmzxeze8LeB3KTcUYS2dKEMiM9LLBpkxVReBC7@vger.kernel.org
-X-Gm-Message-State: AOJu0YzmmKbAYt0QoG4DT/Jpm4n0RFBxes6YBRdTWvGEynv5mO543zYh
-	OGFnmNtiPYYbSBq4Dg92nhqZJJqE0H6txGqHvTKcxUcZoSfXZvzZdu+DGUPyJpQTB2hia1gg5lb
-	8OT285T5UIWn8H9tamSL2K2uTwW2jZ1c=
-X-Gm-Gg: Acq92OEj8BUPxi272Rd+PDxJk56A0xOoKzRT8f2ztiuMmSRL27+3i6p60CY1fbk+R9X
-	PtuMY6bYn98n05IOiVocBAiD0mxeWV9nE6bMK6XxOdVDAZHCdrggO/vHWypH75EESr5NwWptQAb
-	k5bD5QXf6vXO4qfa8GmOk2Xm5l92n1WMvtGWQI/sGgDgIaZblqNyEhbY/QgIrh0FD3hU27oKPD1
-	p5ft4GUvi97o5j6J4njBXzSdGuVhG60AlBoXpEhOOoqKbWuwEwcUQXaIyuD1WOwlw1VR/0lY15h
-	jJKvKeUh0+cqyiBDhC/LD5jABWJ8VPMjNC7k6i87j6Td7E5/zMPRiJK38g==
-X-Received: by 2002:a05:690c:23c3:b0:7b7:1753:1bd5 with SMTP id
- 00721157ae682-7d20a2bd737mr9515747b3.7.1779325655215; Wed, 20 May 2026
- 18:07:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="A8rOS1cG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 284D11F000E9;
+	Thu, 21 May 2026 10:53:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1779360848;
+	bh=hReAb/JnSiPheNetMpN9KuPDi9ArATr3SUITGa4P4hY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=A8rOS1cGqyEFWheeZg7Gevs8sfK5NeBIFPOWaiaMtEpuax0stwjgnfBRYXfe42fw+
+	 PkNdqWpTczhnsT+5zzafbfYYvZnE4lsb8LCl3MbH4SiEBUzeWbsTW/TwyEUH0EIWI7
+	 rXjTEEae4IQY/alXlNlwPRciBuM89DudZ/0g8hE6byUVFb4DnQ8vNmVB3OHZAvQaOL
+	 XbhBeyiBJWf6wy9ijtvnhwfR525PNDcFDIE5KN6Tbtkp0Pynq0S6/Wx6IaNQC4z55O
+	 nUvMijOU4uSW0CyHmDv2UcBnjr0lOBq1iiL/FkAZ6Ns5OmsYyneoVPjm5n+3fraI/R
+	 kde4w0nv6lkqw==
+Date: Thu, 21 May 2026 12:53:56 +0200
+From: Christian Brauner <brauner@kernel.org>
+To: linux-fsdevel@vger.kernel.org, 
+	Dorjoy Chowdhury <dorjoychy111@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-api@vger.kernel.org, 
+	ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, linux-nfs@vger.kernel.org, 
+	linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, linux-kselftest@vger.kernel.org, 
+	viro@zeniv.linux.org.uk, jack@suse.cz, jlayton@kernel.org, chuck.lever@oracle.com, 
+	alex.aring@gmail.com, arnd@arndb.de, adilger@dilger.ca, mjguzik@gmail.com, 
+	smfrench@gmail.com, richard.henderson@linaro.org, mattst88@gmail.com, 
+	linmag7@gmail.com, tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com, 
+	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, idryomov@gmail.com, 
+	amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, trondmy@kernel.org, 
+	anna@kernel.org, sfrench@samba.org, pc@manguebit.org, ronniesahlberg@gmail.com, 
+	sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com, shuah@kernel.org, 
+	miklos@szeredi.hu, hansg@kernel.org
+Subject: Re: [PATCH v6 0/4] OPENAT2_REGULAR flag support for openat2
+Message-ID: <20260521-grube-leitfaden-0e5420c9bedc@brauner>
+References: <20260328172314.45807-1-dorjoychy111@gmail.com>
+ <20260416-abgraben-seeweg-a44ce660957f@brauner>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260519113017.1851462-1-michael.bommarito@gmail.com> <6176a49943969a3948b21bfa98c98aa69c0b6c16.camel@ibm.com>
-In-Reply-To: <6176a49943969a3948b21bfa98c98aa69c0b6c16.camel@ibm.com>
-From: Michael Bommarito <michael.bommarito@gmail.com>
-Date: Wed, 20 May 2026 21:07:24 -0400
-X-Gm-Features: AVHnY4JjLe5tM-z0l0ct9MDwLv5s0xybADAO1684DUHRrmgfjftmm_3pCPqfb04
-Message-ID: <CAJJ9bXzUcYt5hT8ejxbFW0QwwHdQS=N_RmG8ZnU07=E2_L_P1g@mail.gmail.com>
-Subject: Re: [PATCH] ceph: bound num_split_inos and num_split_realms in ceph_handle_snap()
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	"slava@dubeyko.com" <slava@dubeyko.com>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 
-	"stable@vger.kernel.org" <stable@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260416-abgraben-seeweg-a44ce660957f@brauner>
 
-On Tue, May 19, 2026 at 3:47=E2=80=AFPM Viacheslav Dubeyko
-<Slava.Dubeyko@ibm.com> wrote:
-> I am not completely sure that it's good to mention it. Do we have final p=
-olicy
-> accepted?
+On Thu, Apr 16, 2026 at 03:07:12PM +0200, Christian Brauner wrote:
+> On Sat, 28 Mar 2026 23:22:21 +0600, Dorjoy Chowdhury wrote:
+> > I came upon this "Ability to only open regular files" uapi feature suggestion
+> > from https://uapi-group.org/kernel-features/#ability-to-only-open-regular-files
+> > and thought it would be something I could do as a first patch and get to
+> > know the kernel code a bit better.
+> > 
+> > The following filesystems have been tested by building and booting the kernel
+> > x86 bzImage in a Fedora 43 VM in QEMU. I have tested with OPENAT2_REGULAR that
+> > regular files can be successfully opened and non-regular files (directory, fifo etc)
+> > return -EFTYPE.
+> > - btrfs
+> > - NFS (loopback)
+> > - SMB (loopback)
+> > 
+> > [...]
+> 
+> - I've added an explanation why OPENAT2_REGULAR is only needed for some
+>   ->atomic_open() implementers but not others. What I don't like is that
+>   we need all that custom handling in there but it's managable.
+> 
+> - I dropped the topmost style conversions. They really don't belong
+>   there and if we switch to something better we should use (1 << <nr>).
+> 
+> - I split the EFTYPE errno introduction into a separate patch.
 
-Yup, it's now required to disclose:
-https://docs.kernel.org/process/coding-assistants.html
-
-> We introduced the self-tests recently. And you are welcomed to add KUnit =
-based
-> unit-tests.
-
-My bad.  I can add one with a patch set in v2.
-
-> I don't where patch uses i variable. What is the point of this change?
-> ...
-> I am not sure that we really need Claude AI generated comment here. Maybe=
-, some
-> short comment is written by human being makes sense. But, currently, I pr=
-efer
-> completely remove this comment.
-
-Sure, agree.
-
-> > +     split_inos_bytes   =3D array_size(num_split_inos,   sizeof(u64));
->
-> What is the point of this alignment? Claude AI like this? Please, double =
-check
-> the generated code and follow to Linux kernel style. Have you run the
-> checkpatch.pl script for the patch?
->
-
-That's all my whitespace, not Claude :)
-
-And checkpatch.pl does ret 0 with no warnings/errors.  But you're
-right that it's not house style, I'll fix it.
-
->
-> Could it be possible that split_inos_bytes or split_realms_bytes are less=
-er than
-> SIZE_MAX but we still could have overflow?
->
-> > +         check_add_overflow(split_inos_bytes, split_realms_bytes,
-> > +                            &split_bytes) ||
->
-> All this check looks like a good candidate for static inline function.
->
-> > +         (size_t)(e - p) < split_bytes)
->
-> The whole check looks complicated and confusing. It's really easy to miss
-> something in the logic. I believe that this code requires some refactorin=
-g. I am
-> not very like the pattern of calculating the split_bytes in the previous
-> condition check.
->
-> What about this?
->
->   split_bytes =3D size_add(split_inos_bytes, split_realms_bytes);
->   if (split_bytes =3D=3D SIZE_MAX || (size_t)(e - p) < split_bytes)
->       goto bad;
-
-Yours does looks more intuitive.  I'll refactor those and inline the
-check in v2 tomorrow morning.
-
-Thanks,
-Mike
+So I've massaged this series a bit in that I moved OPENAT2_REGULAR into
+the upper 64-bit and internally use a __O_REGULAR bit. After having
+thought about it makes a lot more sense to move the openat2() only
+features into the upper 32-bit for the uapi space. I also ported the
+selftests to the TEST* framework to fit with Aleksa's recent rework.
