@@ -1,179 +1,155 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+Received: from mail-vs1-f48.google.com (mail-vs1-f48.google.com [209.85.217.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 352ED2D3A75
-	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 14:10:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779372635; cv=none; b=Xi5oYgNSW68T7VGf7f1sNSwXDLK2kIfAR2Mpzh7vsTvbK40q67FuKgXJEQGYNyArh/wYyV35PLWeufCybBntsLnAHpxiL0P9VuLlMM6DqJUuynKWW62ujIYezOM2PBmOdskqqMyCcKUBEDWFrLLObO6AghYnR7aVcBvHi08rMXE=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779372635; c=relaxed/simple;
-	bh=6RlyQ3PoQLb/mFu/rZlnILn3W+UF3uXxp2l5YOXKYho=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Y7fsC4bGfL9q/Ge0qtW7mAcqrzkDr+cKj57m+62sjcgVGnc95k2CH3muefaihHmiasx4UDpy2Qt7yfWbTS2ycen0j65DZWjAHVgCzu/S0HXNIDIXPE2FVo9eQDYlfwLGBPV48wIsUB/50DxlMQAC3TDwKf/5B11WtZyNKkDrW1Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=enhV25uK; arc=none smtp.client-ip=209.85.214.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F689348860
+	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 15:49:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.217.48
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779378578; cv=pass; b=jee+ctGF9Gqy/USB6gQmiATC+04yQ6EV/mi4M7m2mHq7P2BGobFLoVn8WqkEbFiyn+awTaQ4QLbBgOoRMTUFiFk6MeH4miFPN3R8iqren9Z/+bgJ95JDk3Ea4pcgTfySwU6eLCGsIcrVAVm6tw1KBDxhtjRWVXe3EcxClLNwcNY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779378578; c=relaxed/simple;
+	bh=oTJGeDYTACLQP4b7lcnYS7MF/F8SkeHi472hQfd2CPw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=gnoed14J5rO2QVUiQu2qylOOQv+fUAo63srtZYhmNFy0rBhCeFYd60eMd3OfWrngvV44bCub6YHyaewELgi/WZ+WLvsuWGjyljDIHTFqXttVRPAAn7Ug/DjMPAhK/ipPAy4GkU7LwwrOVF3ycgid2jRO2C1wkDEs3ULosAPeBl4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lL1NHx9I; arc=pass smtp.client-ip=209.85.217.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="enhV25uK"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2be3781e543so5292175ad.0
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 07:10:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lL1NHx9I"
+Received: by mail-vs1-f48.google.com with SMTP id ada2fe7eead31-63169437ac7so4775127137.1
+        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 08:49:36 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1779378575; cv=none;
+        d=google.com; s=arc-20240605;
+        b=L4AJnlI1TclgeMfhRh1HW5Xe9BkSL+fUL2niczMHsJbkG8qEkSBzLYNGBSGCItKiA3
+         +7a4a16sGLT20DUQlfasEafLhC0VJJNkR20s09u1k4SXqhCp58h9zxTJNEgsjqJFjF8q
+         dQd8lKUuzFBSqGbkd0lC5JKZBTeMW6lIVfhouGKArGJ9/TkEpmStP+eomwKbshas1x1i
+         4oviBSArbYvAN3GqtI8R4YhEekEi1HwIhji9ciSK9Ubq9CJx+AYJAQj8aF4Pb+R6sL0O
+         rQC9uPFg1KSphF+dWPq7MzUYoKzHa0vi8sVXtLFQwK+NC21++6GcMrmQ7U0AiVcMXnZI
+         JZ0w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=BTiKHHtH6isAoh5+/ntoHPqjIgkFbjjbM7Qgllx7bcY=;
+        fh=U9am7XnOoKODC57vh8GQmxDyhhpsAe27fgDrZYtLi3I=;
+        b=Czr0K1RXgZgbazvrBDnnP9pPjYrSsu/KHqCAH+Xyajdl+zY2jwFwTZJOtebcsUbw/8
+         yMjdPO5QsNWrkYwZIegHXBC6UDom41Ie2e5ojRVQGEB1JVUJzLKRtBV0BOuZ3QaTuX+e
+         +EoWsHBJwsHfpmiuiAvyBDwZmNDrKGIFiL0NHaWcOChxs5XOusudbutG2oUwX5a6muGy
+         /6C/FNI14eqfsA+ZmqMmux4mzL90uK0sd0Q2bvMAWTZnatYS7Yf4min3vPKf3zb1oR9t
+         CNrTYY0fwY5HXrXCHPWHC4aNP/q3t602EwfOQBWZK/hnZ0yjHk2g56tHuttrigRl9r7U
+         owGw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779372633; x=1779977433; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=7TEFoD15Gehd8ToTlGMdZgCg4EXx05S17FiyO5aZVIY=;
-        b=enhV25uKKdbr0QBlFohTu3F8bcvYgTjpOstHctvfhwMi39VrNeKJRD6ji1ngsySRQ2
-         c+Gt7euizKvOWTtGcmk2MGCRyWC8AugcB+m5IviWT2tgQv2vez2qpPuEcAxukzVs6mXM
-         kO7bk03ntynEzGFR7yqiZRYsuN+NJAGygMCerlZofWxXzQ6RtB2xZr6XZxBezTUCulSB
-         vMskNRt1OfIqXRkhtzFj1SVF4VmO93PBfYYNu1P5zDHuuhoDeAhAN25MRVHENo9VwVvf
-         6MBF7vbXFrSPJJAnCg+lYI4Kyxp22ZNd9MCYPdCFsbxjHA2YYkqdTIwiFsTYxM5GPCoy
-         4psQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779372633; x=1779977433;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1779378575; x=1779983375; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=7TEFoD15Gehd8ToTlGMdZgCg4EXx05S17FiyO5aZVIY=;
-        b=m0ekDdA4oEXc2Aun6JGkHtsEHG+ULpQIKPZ1KQ6vrCM0+lPLRx7CQP3AmM7Xi7lO81
-         Gc94q68CjjLuzbeknB0CRk2rz5KprjaZHm64DeBi9T4z4jCadEkuzykVW7gfjGZjIHdp
-         z33snzn7yE2uq1A02XS6Deth5AQAx3uusx0BE27oM+xUKnGcRwATSgZAsTFVTvOnYWDW
-         SJN8YcpUpTNt5jRfE0P8tOau+dfhwUT9G1g9aQdED0G1zH05JSWx1AQUB+tNkzz75CrA
-         w+pLdXouz1MngxNk61vlYd211qRgf8+vDML3BWp4tUGslB3dMmA8F0qxmxpfXmZ4EBTt
-         a3Sw==
-X-Forwarded-Encrypted: i=1; AFNElJ/nUubl0wsx0VHqyppTSBJR3vkMm2ijj5wMpN2ndT3rNmKDOy/kkVDBTmDB00hL3mxvVnA+sMvo4xgo@vger.kernel.org
-X-Gm-Message-State: AOJu0YzSMq8SBS48aNPBG64Gc8CIUKuDL9GDeAScGvmH/q3DlFOFWd3P
-	8tZnGVK4//hN/kIQWcvm7sj56BrUP18+7qRQEwWsQxI95AOsLUm/sNEz
-X-Gm-Gg: Acq92OH1ffofccaed9GamP0A2klpzxpFQZuuGNX71XmLLuy4phKqwLQ7mI7dC1OvmSX
-	l1w6lS8Tmc2Y32pVL/DMzH68FxcU6YrTVNiIBi2RXygc3SLZ7cAnOQ+hxOsqY2DXDqoFn7ES0Sh
-	oySqEZCBHh6rG5ZjronTlSURyVdU4724h6xgZDK2tBFuao7ymMtxFzSwSJtJpgyiSWQJJyYEkax
-	QmKlMiAgGhws+vYRdGH5vyD3sqCzcnwNP1snmvYdmTFTL183Qd4pmjiC38ID4IkpWXJjA57xlNC
-	m6Sg0f9LEXO8N0wG8l/5WSE84DoNvC9OJX/YMSs+6jcd6E7H2dl8Y+tJnZBLxVF+XOmp1URh9Fl
-	Dc02ie8Cm7mX0btPMxjGKWRk+5oHHNialyok9qAZMK6Ch3kngAAn6uMT7Aa+keb8PQGKhQF+8Ck
-	85HmniVuiigyDpj9Wv
-X-Received: by 2002:a17:902:d488:b0:2b0:ac1e:972e with SMTP id d9443c01a7336-2bea33712c9mr15265625ad.8.1779372633369;
-        Thu, 21 May 2026 07:10:33 -0700 (PDT)
-Received: from kali ([2402:e280:3d7c:a2:536a:b505:93f5:9d5d])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2bea9902e0dsm12345245ad.61.2026.05.21.07.10.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 May 2026 07:10:32 -0700 (PDT)
-From: Pavitra Jha <jhapavitra98@gmail.com>
-To: idryomov@gmail.com
-Cc: amarkuze@redhat.com,
-	slava@dubeyko.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Pavitra Jha <jhapavitra98@gmail.com>,
-	stable@vger.kernel.org
-Subject: [PATCH] ceph: fix OOB read and unbounded alloc in decode_watchers()
-Date: Thu, 21 May 2026 10:08:06 -0400
-Message-ID: <20260521140807.204657-1-jhapavitra98@gmail.com>
-X-Mailer: git-send-email 2.53.0
+        bh=BTiKHHtH6isAoh5+/ntoHPqjIgkFbjjbM7Qgllx7bcY=;
+        b=lL1NHx9IIKtcx4n399OipzLHTG7xOmxIhzXqniZ5H/PlWZnBHPquJmbnT+WXpW8VGl
+         gD5K7nwalvqc4Jt0om+M7KYYupeksRrANY4jRunce7CrRXOXxqnPI7tkmKyFagBaXwF0
+         8hbAFX6ZrBAhSIQxY+fV56hM0QhsKH/3w0jYikbW8LAIDNiMade6YzJVU1Efx90sVY3x
+         4RhbDvS072Slf7nSGxLx08t5GZTGyaCT39m+CpTwAhqunSH3Y9mmA6I+HSghd2xMwMha
+         PQ0O8KzBHHVN1VIStAFdCi0DV3GfXQMWyTqCZkVW0qbXHgDdJtycc4DpHzSHcGvAFvB1
+         f1xg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779378575; x=1779983375;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=BTiKHHtH6isAoh5+/ntoHPqjIgkFbjjbM7Qgllx7bcY=;
+        b=NSnHz4xIZrTkFJBK6HwVvHjDUuhFeLjn/dKB/sCNWfqa+/IkhkFkjxkibopwPmdOAQ
+         S/sHGXAaB1BRCNyv+hjJHFKQsgGPa0HwNVfCFm60uQzQ0KWGoYu0ACGHvBXo2PJ2g7ow
+         47vb0PumLllNttcJr5xzxdtlNZs5NO677Dm09BwKKRtK8HxWlve+N+JVv+pOv6E7O4FS
+         f/nQxdiWBm2RHMO/RWXoxQfLVMxdmyfU6xpwGquNdk+khylZRXK7n5pT1lw/7SaWzlOl
+         SbF7rqTyUHTde44OiAEtGSyhq+tM6nhgTdATd2r2Wt7KbmrNBB8G+yKw7FsKcfzoCC1O
+         l2Jw==
+X-Forwarded-Encrypted: i=1; AFNElJ+Uzl1hHwzBy06r5jdMg4udEmLzL7B6nwSBB62xAEa+bAz6mLk9e77rm9yxBCeeJxAU6L95LODZkq2/@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzrw6NqUtlEe7YwVBOVniVygxEvrQTQ/f6VTi2x1l5G+Fg+H30M
+	ZiMIbUIia4/Aut45+UAejwkorGb+exMgScdCN6VhgiaHASCb1Em6fuw45yMEyHNXyH/Vbj5Tsvd
+	2zdJotlvB5hrUTHYBqQ9weJbjvArXpGiosQ==
+X-Gm-Gg: Acq92OFq5Sv/ted1nwruNXNmtMmcBHyZ+/yAYQsixt5btoA5b2R0mOHUibVqGko/xvn
+	wFGWrbDQFVKz8A5nsKFDBVmbZPX6oc3RELsC7ga8zVTBlJf/MQw2PkxoWeEp3VsqGJdbLKt7oqh
+	FQFjydYJ6VT823zrZzsuE4qwSyHHsdbJdtxs9XPoGjbfYGxByCkEoFeYEh8r/h45hZCs1ETwgdj
+	4C3nL4Ihc4pwJP99lyyUTfoXPc2q0rhBIKr/6EoxByVRELoESFKqH8lnhGvprtfbxnMNfwTJ9Ai
+	cwR1GV+NQNhEHsKGz/m65JDBxH16JrWHrr+RCSit+ra2vST0qMgitFU=
+X-Received: by 2002:a05:6102:1591:b0:650:a9f6:4d29 with SMTP id
+ ada2fe7eead31-67390b66b29mr2592164137.13.1779378575543; Thu, 21 May 2026
+ 08:49:35 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260328172314.45807-1-dorjoychy111@gmail.com>
+ <20260416-abgraben-seeweg-a44ce660957f@brauner> <20260521-grube-leitfaden-0e5420c9bedc@brauner>
+In-Reply-To: <20260521-grube-leitfaden-0e5420c9bedc@brauner>
+From: Dorjoy Chowdhury <dorjoychy111@gmail.com>
+Date: Thu, 21 May 2026 21:49:23 +0600
+X-Gm-Features: AVHnY4JMLUcx8yOSfS2Q9vtP8tvb48vFjP_vPMN644Wd5G5CD5CLlCbq3u4DVJI
+Message-ID: <CAFfO_h4Em26Hfbv-DWF+9dNS8TBuGpfWjWFBUhLr7jYCKzj3_Q@mail.gmail.com>
+Subject: Re: [PATCH v6 0/4] OPENAT2_REGULAR flag support for openat2
+To: Christian Brauner <brauner@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-api@vger.kernel.org, ceph-devel@vger.kernel.org, gfs2@lists.linux.dev, 
+	linux-nfs@vger.kernel.org, linux-cifs@vger.kernel.org, v9fs@lists.linux.dev, 
+	linux-kselftest@vger.kernel.org, viro@zeniv.linux.org.uk, jack@suse.cz, 
+	jlayton@kernel.org, chuck.lever@oracle.com, alex.aring@gmail.com, 
+	arnd@arndb.de, adilger@dilger.ca, mjguzik@gmail.com, smfrench@gmail.com, 
+	richard.henderson@linaro.org, mattst88@gmail.com, linmag7@gmail.com, 
+	tsbogend@alpha.franken.de, James.Bottomley@hansenpartnership.com, 
+	deller@gmx.de, davem@davemloft.net, andreas@gaisler.com, idryomov@gmail.com, 
+	amarkuze@redhat.com, slava@dubeyko.com, agruenba@redhat.com, 
+	trondmy@kernel.org, anna@kernel.org, sfrench@samba.org, pc@manguebit.org, 
+	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, 
+	bharathsm@microsoft.com, shuah@kernel.org, miklos@szeredi.hu, 
+	hansg@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-ceph_start_decoding() validates that struct_len bytes remain in the
-buffer after the encoding header, but accepts struct_len=0 as valid:
-ceph_decode_need(p, end, 0, bad) always passes. When a malicious or
-compromised OSD sends an obj_list_watch_response_t reply with
-struct_len=0, ceph_start_decoding() returns success with p == end,
-leaving zero bytes guaranteed for subsequent reads.
+On Thu, May 21, 2026 at 4:54=E2=80=AFPM Christian Brauner <brauner@kernel.o=
+rg> wrote:
+>
+> On Thu, Apr 16, 2026 at 03:07:12PM +0200, Christian Brauner wrote:
+> > On Sat, 28 Mar 2026 23:22:21 +0600, Dorjoy Chowdhury wrote:
+> > > I came upon this "Ability to only open regular files" uapi feature su=
+ggestion
+> > > from https://uapi-group.org/kernel-features/#ability-to-only-open-reg=
+ular-files
+> > > and thought it would be something I could do as a first patch and get=
+ to
+> > > know the kernel code a bit better.
+> > >
+> > > The following filesystems have been tested by building and booting th=
+e kernel
+> > > x86 bzImage in a Fedora 43 VM in QEMU. I have tested with OPENAT2_REG=
+ULAR that
+> > > regular files can be successfully opened and non-regular files (direc=
+tory, fifo etc)
+> > > return -EFTYPE.
+> > > - btrfs
+> > > - NFS (loopback)
+> > > - SMB (loopback)
+> > >
+> > > [...]
+> >
+> > - I've added an explanation why OPENAT2_REGULAR is only needed for some
+> >   ->atomic_open() implementers but not others. What I don't like is tha=
+t
+> >   we need all that custom handling in there but it's managable.
+> >
+> > - I dropped the topmost style conversions. They really don't belong
+> >   there and if we switch to something better we should use (1 << <nr>).
+> >
+> > - I split the EFTYPE errno introduction into a separate patch.
+>
+> So I've massaged this series a bit in that I moved OPENAT2_REGULAR into
+> the upper 64-bit and internally use a __O_REGULAR bit. After having
+> thought about it makes a lot more sense to move the openat2() only
+> features into the upper 32-bit for the uapi space. I also ported the
+> selftests to the TEST* framework to fit with Aleksa's recent rework.
 
-The immediately following ceph_decode_32(p) in decode_watchers() has
-no preceding bounds check. With p == end this is a 4-byte read past
-the validated buffer boundary. The garbage value is then passed
-directly to kzalloc_objs() with no upper bound, allowing an OSD to
-drive an allocation of up to ~4 GiB worth of struct ceph_watch_item
-objects under GFP_NOIO pressure, or -- if adjacent slab bytes happen
-to contain a small value -- a legitimately-sized allocation followed
-by decode_watcher() writing attacker-controlled data into it.
+Thanks for fixing up!
 
-The sibling function decode_watcher() already uses the safe variants
-(ceph_decode_copy_safe, ceph_decode_64_safe, ceph_decode_skip_32)
-after its own ceph_start_decoding() call. decode_watchers() is the
-only site that uses the bare variant, confirming an oversight.
-
-Fix by replacing ceph_decode_32(p) with ceph_decode_32_safe(p, end,
-*num_watchers, e_inval), consistent with the established pattern.
-
-KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
-
-  [   72.047085] ceph_oob_poc: buf=ffff8880085936c8 end=ffff8880085936ce
-  [   72.048685] ceph_oob_poc: ceph_start_decoding OK: struct_v=1
-  struct_len=0 p==end: 1
-  [   72.049477] ceph_oob_poc: triggering OOB read past slab boundary...
-  [   72.050699] ==================================================
-  [   72.051427] BUG: KASAN: slab-out-of-bounds in
-  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
-  [   72.051427] Read of size 4 at addr ffff8880085936ce by task insmod/61
-  [   72.051427] CPU: 0 UID: 0 PID: 61 Comm: insmod Tainted: G O
-  [   72.051427]  7.0.0-rc7-g9c2abf69da83-dirty #14 PREEMPT(lazy)
-  [   72.051427] Call Trace:
-  [   72.051427]  dump_stack_lvl+0x4d/0x70
-  [   72.051427]  print_report+0x170/0x4f3
-  [   72.051427]  kasan_report+0xda/0x110
-  [   72.051427]  kasan_check_range+0x125/0x200
-  [   72.051427]  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
-  [   72.051427]  do_one_initcall+0x9a/0x310
-  [   72.051427]  do_init_module+0x186/0x410
-  [   72.051427]  load_module+0x2ba7/0x2e50
-  [   72.051427]  init_module_from_file+0x15c/0x180
-  [   72.051427]  idempotent_init_module+0x19f/0x430
-  [   72.051427]  __x64_sys_finit_module+0x78/0xc0
-  [   72.051427]  do_syscall_64+0xe2/0x570
-  [   72.051427]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
-  [   72.051427] The buggy address belongs to the object at ffff8880085936c8
-  [   72.051427]  which belongs to the cache kmalloc-8 of size 8
-  [   72.051427] The buggy address is located 0 bytes to the right of
-  [   72.051427]  allocated 6-byte region [ffff8880085936c8, ffff8880085936ce)
-  [   72.051427] Memory state around the buggy address:
-  [   72.051427] >ffff888008593680: fc fc fc fc fc fc fc fc fc 06 fc fc fc fc fc fc
-  [   72.051427]                                               ^
-  [   72.051427] ==================================================
-  [   72.129720] ceph_oob_poc: num_watchers=3435973836 (OOB garbage)
-
-  0xCCCCCCCC (3435973836) is KASAN redzone poison, confirming the read
-  landed in the slab redzone immediately past the 6-byte allocation.
-
-Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
-deployment (e.g. cloud) can trigger this against any kernel client
-that calls CEPH_OSD_OP_LIST_WATCHERS, without any further privileges
-beyond OSD session establishment.
-
-Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
-Cc: stable@vger.kernel.org
-Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
----
- net/ceph/osd_client.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 2ff00070c..0148e4c40 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -5030,7 +5030,7 @@ static int decode_watchers(void **p, void *end,
- 	if (ret)
- 		return ret;
- 
--	*num_watchers = ceph_decode_32(p);
-+	ceph_decode_32_safe(p, end, *num_watchers, e_inval);
- 	*watchers = kzalloc_objs(**watchers, *num_watchers, GFP_NOIO);
- 	if (!*watchers)
- 		return -ENOMEM;
-@@ -5044,6 +5044,9 @@ static int decode_watchers(void **p, void *end,
- 	}
- 
- 	return 0;
-+
-+e_inval:
-+	return -EINVAL;
- }
- 
- /*
--- 
-2.53.0
-
+Regards,
+Dorjoy
