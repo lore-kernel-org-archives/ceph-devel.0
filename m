@@ -1,98 +1,63 @@
-Received: from mail-pg1-f174.google.com (mail-pg1-f174.google.com [209.85.215.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F21E51EB9F2
-	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 17:02:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C218C327BFB;
+	Thu, 21 May 2026 21:53:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779382970; cv=none; b=iSGVgy01ZWbCkfa2iyiXC0qKkdyz1o6+Tt/xyEJHxpr8Q1EQ6hi7rLwRmlTb8tf7ETyHLpysvOP8rho72p5DRSsVfjoSacdcUpWkLrx4wIab0g8kOGdAcvU9r73ko8UIlFNZZHb4qAuLa2n3T955MmvUkl1GjivZAtkT6asFenI=
+	t=1779400398; cv=none; b=E5Ge4GJfjm2sNry1vPtZ532vThEo66yZX4E2ae6nbBwR9Ae7l+MLqhOSyhKf2MZv43o9znJTdn1lNY4aBfK2mtvsP/QosPui68BEgmDuOSNdcbquMiD87NUa99FvR6bC//m/mxW2dee/jn5Z0XjC4eMOP4lM7DX7UhXymceal6Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779382970; c=relaxed/simple;
-	bh=o2rwJH3rg4n0IyTgb3wBFbXuLrWfUcMx3QDfps5r9Vs=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kn4BUyDURPiKvu7zMbZrF0tKmiU+b9lKVTVLUGeDZWfiPtW/U/rr0x2D9bZ0VRDVmEdEi+eTUUoq0TZHJivibVje2/xziSOdiDFoZyEq7yv0ZzaX0VdSnWLMIC/8V3xjtgI3RZEyYQPEae0JT2e1kmBv3FdrF0ltemw8J9RU9Qs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VNGUcOo5; arc=none smtp.client-ip=209.85.215.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1779400398; c=relaxed/simple;
+	bh=MgLY+jKOg5qjwC4VIbBDyHg8FaWqLlwij5xjBBmnswU=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=ROf3beNMAMhlT/vcJvQ4bvuAh0JWdRmGP49EBaxdDtEFdre267JgMJ0cbFpE7M4Q3WLvLhghrxe7al3n+KljvgXuVZM7nTrsG/TXJtkDq5gea8I9O+wH8iAUxpCbA4ymhzNZjH7PR3L/LaxtEFagusf9RdyAD/0TDCfooCKq+rk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QeFaQvvi; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VNGUcOo5"
-Received: by mail-pg1-f174.google.com with SMTP id 41be03b00d2f7-c801b30188dso3015610a12.3
-        for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 10:02:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779382968; x=1779987768; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=+D7s1JXk1C2HHkvryXwPr7t7F+VrBvyKHcCcWWt8whs=;
-        b=VNGUcOo5pPBm10H/lCoQAzWNpQ75jlbKyR1EVVBFZ7VN2cvQF2M7nIbUiyS9c2gaA2
-         dPOTWKsr0vbFPQGedriIQVmeMd08OGdoEdZYmNv0YiEWvauznjvmSFiW34DNx1WvHszq
-         k+d8Y8jHiVHkg9gLOpctllaI7pB7wAk8/p2sNzggsmQ50k+tDR5lAXEqxnZEHMVbkAeZ
-         Yv+jUpiF3/ThzB7Uc+/Ly/YqHaOP/8dv8s+ZUVuCVS/T1nukLEf1saEW3KF6vwSQF+Ht
-         YP60UUo0dAkXbyx4q4FKlk2N8NYdXsx/viLDeUdWDKzEoxV67xDCaD4JyLBfHWmthevL
-         PPIQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779382968; x=1779987768;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+D7s1JXk1C2HHkvryXwPr7t7F+VrBvyKHcCcWWt8whs=;
-        b=XYnvF50MMOvhng0oWFVSozkYSAvjqM5B+Qtl0KSDTWp6rXG7AQ/+v7jh+Ik83ztESw
-         bwUcNKARj3llgXiSwRziBmmr/7U0eVx9LQSJwGhdu8Q2tH3yzzVZRDI6Aib82DNScEju
-         NfuAqgt3o6oEaIQx3k8r7gsLXeuPJRkRTwiH/RPTx9D55WSGRtN49Upv/WmSdht2ticA
-         sTjB0NbjQXXJAjgDe5fakTePVPGskVDomFu/Y/7tV/hFGpaUePGchVbe3KI2FT3gybtH
-         u4FcBRISwfR9cmIAru4h68g8j40g6DQiHVtrWzwY55hVCl5+/ffMOp70w6+sEYU2U+XU
-         8zYQ==
-X-Gm-Message-State: AOJu0Yz6fs45rRKBrv3a4NtAzfMTIkKTGWMcBprDW/5sxczQYea1wxmf
-	tznn2H7bBUnjAmriiC97Qlg58dDxGFWziA/Z3WWASAy1OaghgjY0NK6O
-X-Gm-Gg: Acq92OEUemF92HvqoK2u0HuCCW2hKLPThRGCF4ObHNSFD7mqtWkxAuEdWLNSoDtwbRc
-	zEscuhpXknQzvrGHRXieBSaJBHPcVz+jpYqgcMWixrX342mqOfCGPjhLw6hiuHaBJKyFJdSdEND
-	FYimnllMZKJkOjolP9E3jHPGPHdhkM8u3jFiKdKjMNlRO+ORmBnViBX/CLr2tOsdaPMmfeUFjg2
-	Fi0VaoH50DNu/8zIrq8CvGwCCN24gNpKzqbqWHuh6LOa8gjwFX4yv9uSi3qgDYFXGNC/40sH7Rk
-	qx7o/c5CdCyF6cFVcR/ae5hZL+lbkJb4AVkPtSPO9hV8AMjPQ7namoLK+M43fl361/H/TAkbBkZ
-	PoehwrAHoFdaeTzmMhxMXTJOnz+zmmwhq9gGLDKZzay0F28EVrrWeLnvq8Wk0YxrrEQm1H5zgt7
-	0a6LJuf6yn7FLjsPc9+wKUv8CJDkz6igIzv6WrgGD0KGTsgh+V
-X-Received: by 2002:a05:6a20:a122:b0:3a2:d976:2210 with SMTP id adf61e73a8af0-3b308540f7cmr4393640637.8.1779382968042;
-        Thu, 21 May 2026 10:02:48 -0700 (PDT)
-Received: from zambezi (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8cc781fc883sm10968446d6.46.2026.05.21.10.02.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 May 2026 10:02:44 -0700 (PDT)
-From: Ilya Dryomov <idryomov@gmail.com>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [GIT PULL] Ceph fix for 7.1-rc5
-Date: Thu, 21 May 2026 19:02:34 +0200
-Message-ID: <20260521170235.1584548-1-idryomov@gmail.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QeFaQvvi"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A98851F000E9;
+	Thu, 21 May 2026 21:53:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1779400397;
+	bh=SVcyUnes7FkFA4lgAefftt9GAV8kE/hdicd7LuxtwZI=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc;
+	b=QeFaQvviufcyiDupE8aRO5UGsodrw/zz9EJ/bZSXMVZflwgmWlFDXpus0PnYjLzBY
+	 9HOwpo7NAhPg38kp4/76s6JCLqOTQQFRPg+nUouPpoBb+U4NwcOSieMRCwWRwdZ+Vm
+	 5tTfwpJwgXZQJi/fptZYwxffdMkSEEa0q1TZ0qMqqdqTN3tDvTgBhHYDlYSOaDKWFP
+	 tzo4h9ZMbOm3l3Fi/zpBugHNK22EMiDsOeaKAayJ0bHspDpR0hfz44neNX6oNUKrzQ
+	 qAkGyJIzMh8Sd7lGuRjFsdz405q0vSeh0SntUkmZFH8dnGpJaNd7MSJ270j7/TIvGF
+	 YzvsmvQBihN8A==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 939A53930E3C;
+	Thu, 21 May 2026 21:53:28 +0000 (UTC)
+Subject: Re: [GIT PULL] Ceph fix for 7.1-rc5
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20260521170235.1584548-1-idryomov@gmail.com>
+References: <20260521170235.1584548-1-idryomov@gmail.com>
+X-PR-Tracked-List-Id: <ceph-devel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20260521170235.1584548-1-idryomov@gmail.com>
+X-PR-Tracked-Remote: https://github.com/ceph/ceph-client.git tags/ceph-for-7.1-rc5
+X-PR-Tracked-Commit-Id: 9fc75b71fdd38465c76c6f6a884cdd4ae3c72d90
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 6d3b2673e1fd553395933b6f2bc88c9e9d2a2bc5
+Message-Id: <177940040708.527128.1508668579847865931.pr-tracker-bot@kernel.org>
+Date: Thu, 21 May 2026 21:53:27 +0000
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-Hi Linus,
+The pull request you sent on Thu, 21 May 2026 19:02:34 +0200:
 
-The following changes since commit 5200f5f493f79f14bbdc349e402a40dfb32f23c8:
+> https://github.com/ceph/ceph-client.git tags/ceph-for-7.1-rc5
 
-  Linux 7.1-rc4 (2026-05-17 13:59:58 -0700)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/6d3b2673e1fd553395933b6f2bc88c9e9d2a2bc5
 
-are available in the Git repository at:
+Thank you!
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-7.1-rc5
-
-for you to fetch changes up to 9fc75b71fdd38465c76c6f6a884cdd4ae3c72d90:
-
-  rbd: eliminate a race in lock_dwork draining on unmap (2026-05-20 22:09:08 +0200)
-
-----------------------------------------------------------------
-A fix for an "rbd unmap" race condition which popped up on a production
-setup where many RBD devices are frequently mapped and unmapped, marked
-for stable.
-
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      rbd: eliminate a race in lock_dwork draining on unmap
-
- drivers/block/rbd.c | 20 ++++++++------------
- 1 file changed, 8 insertions(+), 12 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
