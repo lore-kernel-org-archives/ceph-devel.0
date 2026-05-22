@@ -1,222 +1,193 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f175.google.com (mail-pg1-f175.google.com [209.85.215.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BAE372621
-	for <ceph-devel@vger.kernel.org>; Thu, 21 May 2026 21:59:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779400749; cv=fail; b=BJ3Bfjct2Xj+8byNpbX31J/2i2KPwBRHNHBtXxDPvRGzT2qR3Vpwr63IFjhNd8PhwGNSD1+n5WAgqsctNxiVHi9qW3Z6WQnaG96/Bu6vAAREu4QksDGLoR/s5D0e7Ur3AuSsUOwOpzUkYNUE8trBs0YNxBUDlB23cgclbKDWaEU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779400749; c=relaxed/simple;
-	bh=kEgYZCPZk75TY7zDNB3ackNw/llqf2887ZtmBH/ibBY=;
-	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=SMC9xWqY5rcrkZ3eEn/HYDRprXl/7yW1o8AZ78Y/HOEQzgi01tGUkt8F74Qj+SPQo0JPn4PV/MhAbza2c7vyNXw0jM7CkVVa1mei+b4yq/NCfYXnpHUQUAze1NEoL11lN1tkw7RNIlke11xuXHCii7QOO6Ov13QjneeluNsr4Rg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=DkNj/2/g; arc=fail smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D5243CB8FB
+	for <ceph-devel@vger.kernel.org>; Fri, 22 May 2026 10:20:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.175
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779445250; cv=none; b=X6Jr2FXt6N66C2BWGfvYBuI025IT4gbQhjpqn56bdDgdPqMsVx7M3VldcLlhFAOlFIfPM7XY5HmXUMonWMJ7Bmm68dHT+uzaDOuPYYNq05NxSkk+mgfAvp6CInhuclE++XkcG+Dr7WDOXfZZIzMsGSnnN4LCv5AG8SPgo1znkLE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779445250; c=relaxed/simple;
+	bh=CqqfADRIYdy2j/+p5yLnh5aLdmAPFqsu0MNRmXCNItE=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=XvN3MUEenrkFVUoDJL3P6HkfyN+3ZYbXP0EUK6VSbNf2O2tusVIv5HUmrYncd1dcnHgHgSsMatxkJ/CCoI37hq8ZudftrpiJ6jvxB7fE+jAUcms8eKGv3rckyMr58Jr+OsAgdlLYoTI+EOpi16sabQEzRbDVNtG31zKN/1Jkw58=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=AKn6JC0r; arc=none smtp.client-ip=209.85.215.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="DkNj/2/g"
-Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64LL7H682090331;
-	Thu, 21 May 2026 21:58:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=kEgYZCPZk75TY7zDNB3ackNw/llqf2887ZtmBH/ibBY=; b=DkNj/2/g
-	wID0WHZxHBPeDw4gfF8mqOGDuReOd+4XQmAOCTJOshFdVVrqr0NU0oGzEEZbkrIL
-	Kj5Krq9rCxW7SWHfbG4KIG+r2XjbPJduYQGfk3d9JBf32AUG4GXjnn1xs/j/vRcr
-	vI35shjuLikpKNZa6cNlEWFzCJtYWNNdnIFIchQ2UlOyrlZPbfUrG1ASQnU2qy6F
-	wRDcOlqtt403WuF+s10Xe+9LOev8MIh8qjMp7qViUowa7I6CKsWORQ61qxL5LI7l
-	3dz0aBa3eh6EDnbq61cHgHNN033MeZmcoMvEffz8CjJWQXz4OkEHaztcnf5jluZg
-	LvTFsyw9jSG5pg==
-Received: from cy3pr05cu001.outbound.protection.outlook.com (mail-westcentralusazon11013037.outbound.protection.outlook.com [40.93.201.37])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4e6h88qvy3-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Thu, 21 May 2026 21:58:54 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=kCMiKdalKC8A3ZjrbrQLuLnpQtVQy4DP/O1gdj0ji5wD3jMP0G0pFof5kc78jUQiMnDmyZk6CbdViDiTtGWr3o5MIGb2uE2JQwVb1SQMZdhFI4A+gPhNVgvj/gXYSvVPpMK1FN+Nc+MY/SuVL7GYjHEkYVtcapCVOD74mLNauIge51MXeipRaYCIu9e9LRXw1ItEf0SNxdLi2CFxDCL/z4rFrgHJTMg1lANaY17sfkDvEZjse/vrfbMRwyFeWtJE5whmrb44oA7TPoG+b7QYodKYfyMj9ARkXGZwf/HLKNbp3nIx+IRGSFs43nNsbgPdDwOOBehfVrivZ8VltRcvfw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=kEgYZCPZk75TY7zDNB3ackNw/llqf2887ZtmBH/ibBY=;
- b=L3eEEhRRGR6YxHoxmaTt8sGlORA14h25NAw8YyhonUxjlyU94klzmxmPq4Xbt8qA9dGIcpOg5ocTSLP6JOyCnmzTtwd1+t3GBhkZlo0rsO7HY2ZDb49Pcq8E6QiK4gn6Ed6Vm5EPxiQ9IdWXsk9haW/ZYEZNjySpj/sWJZw35nAbgbFQQc2iu9c26dlLrFbX03qXb6TMqjJHn9n5jzU9Z3mUbLX33PPcHIrdICUGNn+Bik0i+Uj/Q/5Cwd/ABWJER6ILx61wxnw5owT1K5/K23Dj8Brr2xgpYbRCeX9yVa+mQ1l/VwjAMGcj4w+4xpHQQx1L/xPfukvKDKXyr7ZZDg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by DM3PPF7C333E81B.namprd15.prod.outlook.com (2603:10b6:f:fc00::425) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.48.17; Thu, 21 May
- 2026 21:58:52 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.21.0048.016; Thu, 21 May 2026
- 21:58:52 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: "raphael.zimmer@tu-ilmenau.de" <raphael.zimmer@tu-ilmenau.de>,
-        "idryomov@gmail.com" <idryomov@gmail.com>,
-        Alex Markuze
-	<amarkuze@redhat.com>,
-        "slava@dubeyko.com" <slava@dubeyko.com>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Thread-Topic: [EXTERNAL] [PATCH v3] libceph: Fix out-of-bounds writes with
- oversized monitor reply messages
-Thread-Index: AQHc6R7F1kAECPZhBkmST29fDvhSy7YZB8aA
-Date: Thu, 21 May 2026 21:58:52 +0000
-Message-ID: <41e9c36c9a05c8239177cee688cfddcebfd6455f.camel@ibm.com>
-References: <20260521121424.2869056-1-raphael.zimmer@tu-ilmenau.de>
-In-Reply-To: <20260521121424.2869056-1-raphael.zimmer@tu-ilmenau.de>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|DM3PPF7C333E81B:EE_
-x-ms-office365-filtering-correlation-id: d77c6e3c-9886-41dc-346c-08deb7842593
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|10070799003|376014|366016|38070700021|18002099003|22082099003|56012099003|11063799006;
-x-microsoft-antispam-message-info:
- dd4Ebk7n9d7Xjnddlpdu7oWI7J7ExOFUoWnXCLddd/KkmCe3jIbquAaxcQMRLDVuI3hnXx3FfwlQ1USQHwDPaiNC3NsLnY68LvJXCsrWE/3O/xMQ7qMq0y9BUGvsYYTU18pQdeR0/ZmGOtWEy9PzQ40ZBTUy83wrkQpNncC/PXGdmAS2aFJnd8HdgZM5HiP+tdHP9QY3UbvjIb+qfAV/O4ClMY/7LN2n0CiLaAg1A341gc0hFKZRAcC45w4chew75KaZVJKMjYe7r/Vk1P17SCn4FBrOYRH0SUlX72EaEeOXxnc9En9aZ5uNK5Jk49jOEYm+9yY46j8MBZFnErnVgcV9M8wpnvc7qzRGSCSDQ4Lurd5cBEGVxmj7PBZqp5fwKQ8YiFPjZLTk+m+PeCt4fpRVCNHHE6QYdO654Op2sX2jOC8fTommxjMXQ5cLZOxTNOQ4E/eS1nluGHIz2VKSBvV3KHUqnIdLoIfysNowNzmjK/VWIo085QmRJ83m/E3TCGIFBXp2ul8xZ4kAZjui6dA2aes8I81J9hU/nh4SAbfgEynFiXcikDYUVCPfQO9di+ZD4y+u7BgXFKZEXxCaPnDY8coYu3gx3PAanIEu6kBqlIs+3Py9Pkpv7QzHC+eCWYD/Xip/mHOD5IMeAQkHkjaWe5KbM8GEwqqo71RAx5oSZ6ZngJaIGxIGTCKdUi1kd/+KbOCrwCJ9PCID+J/j9MmoRyK/bZwkE9HIix5+g0/eCZ0RaU3qoZCreCYzqp0f
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(10070799003)(376014)(366016)(38070700021)(18002099003)(22082099003)(56012099003)(11063799006);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?ZmN0WjQ0b0VqU0Q5OUFvdldZQm14YmM0VnU5Ty85OHJMdlI5QjlTbDgrTEJI?=
- =?utf-8?B?ejE4K3d5R012YXRoblFqeVRPMXlxYWpVc0laaGhuM3ovM2ZyeDFHbEJaMDZF?=
- =?utf-8?B?SWFxTE5QR09GQjZRM1Y3bTN4YlY5RXlFZHN0V09wenN2T0tvZExDclgxT2pT?=
- =?utf-8?B?RUhzWWlEUDJhMUhqUnV6NitnNE5wcGl0NVQvWDl0dGFrRktlcjlxQnNvRTJJ?=
- =?utf-8?B?SElEd1ZCTzVzZEhiV3FNTDJHRk5wcnhzWmY2NEZtQy9lZnhmOW5kYUhsOTR1?=
- =?utf-8?B?K0lDZlJQSzdiVThqS3FLRXRPZGEyYnp4UjZRU0syanZHOTlSRktoVG9qRDd5?=
- =?utf-8?B?YmRMOTVhUlBYQ0tSd3N5SzMzRWFGUVVFOFVzcVkyS2VpU2pPUHkwZ1FCMU9M?=
- =?utf-8?B?L0JQVlZ6MGhEMHJzM0NXc1R5ZkZYem9uUlQ4eUNtRjlTN1ZHSitCSVBZRjJQ?=
- =?utf-8?B?QU5seEpqWTExa2l0RHVzNnB6T0ZON2NncWtEWG5CUUFkOU5YUjNSZ3N6RWRU?=
- =?utf-8?B?Z0dTcGhQZ1JabFNqd0kwRkc0OFRQYkc5Z0RmVE1xMFhXVnRZTk1Fb0lpbnNU?=
- =?utf-8?B?aEhFK1Y4N0hjNFF0ZnphRDV1bHNVMUFUeTRZN3dvMjZzMVVnbkhDZkZma3dS?=
- =?utf-8?B?UXRNdzNDdmw5bC9Eb1ZSem0wdlR3TC9VUFp1Y2JsbzYybXlEMzBnWUlWaHhI?=
- =?utf-8?B?OHRCUmdEVDlWM1E0ekZSdHViSjdaWWM4ZCt3QXBXcGVocHFrUGl2eVVHdWps?=
- =?utf-8?B?YVkvTmlUa29EN3pDQXBtRFNyZUIrcUljRklIRC9uVExoc004T3FaeWduM09B?=
- =?utf-8?B?UGdaK3JVVmxtNVNIdi9VaHQyaFZCd0dtc1FMbis4V3lMaDJrbGtJWSsyNFJD?=
- =?utf-8?B?V3RkWFV1QzZvSlR0dHI5TC9PcFcyRWFHNk00NXA5OUcrdG0yOGZMSXlEUDB2?=
- =?utf-8?B?R1A3aTVTZHV3UmR0TXcrVlpEeGdjb1VEa09icnZCS0dSU2lNMk5pdTRUNkNU?=
- =?utf-8?B?b2JnMVQwL3hESFFFRXlxbjhaaERLMkdYY0FVa09wb0FWQ3F0SnhMRUJUUEZr?=
- =?utf-8?B?WDlSYW5zWHlMVDAvVmZYS2NpTzhaWmh0SHkzQ3cxZHd5a0I5aVl0Tlh3QUc5?=
- =?utf-8?B?R2xJc0VXK0FRcjFNdVJtajB6MjdDRm5lSlZTd3h3OWVsbnJrUVN1SWFsNGtt?=
- =?utf-8?B?ZFJ4TE5Nb0RBTk9KeE12ckMwUUdqWTA1eE1DTUxnU3QxUUdSbFJPdVp5UVlW?=
- =?utf-8?B?RzZRN3JSYjlqeDZRa2VnRDhmdUtiRmNJbVlCSzlWTVNiZWNUOE9Sak9rN2dG?=
- =?utf-8?B?RVowNTJQNjk5Zm5SUWpZbStMNHRmUGQxS2V2R0JjTG5HcXBld214bEY1cEVF?=
- =?utf-8?B?RjFKQlpzbzlPeWt1V0JqOTRZbzljRmVkS29HZUs0SzU1eWd3UFY1Y2VQV1Bh?=
- =?utf-8?B?SWNxRWpTcHdaSys5SDdMM1IxNDlhbzFISDVOcy9TWFVROXJrM2thVlpCS252?=
- =?utf-8?B?VFlFbFZJQjQ4WjVBenIzR3ZZZEgrZlYwdndQSkEzUTJWOEFOY013ZzV4TkJB?=
- =?utf-8?B?OWpkZGVIdUU4Wmt0OWFhdEo3OUhyY3Y0YU5CTjB0YWJYTXNOU1dDUXBGWWJK?=
- =?utf-8?B?V3Q0TWFXYTBYbVIxRmtNWkw4ZFhXUm9lOUR6dGw3Njc0NVJyUDJKTnk2eURV?=
- =?utf-8?B?a1hLbnpxUlM3Nzh5MUFTVWhWNWlhcGdkWG9QRzBnamNJVFFjb1VGTURqNlhv?=
- =?utf-8?B?SElRQ2U2N0o5U2dLekhwckcvVlB1Q0pRdVl1UE5EQXczY2R3ZlA0Q1lnLzFC?=
- =?utf-8?B?cDdUTlc4S3ZGcERGK2JGK21tRHJDRzRmeU44Q3JJc0IxbHVZUFQrcWZUQkgy?=
- =?utf-8?B?RzljR3FsZWE3MlJyaW5OdkhGdjJZckl3UjMxKy8yTE1hOGVzYXlwazFDZXlB?=
- =?utf-8?B?WUpidFBmODRDNkloNFFUSXV0MVlBeVQwQXZCMjFJamRoQ1NtbTEyUVhOWk9r?=
- =?utf-8?B?TjFEVEFjTy9DZmxrRW9DUTZzbWlYdGJpTE5KYWZBMlBxeC9va0drUDduRFdp?=
- =?utf-8?B?VjZtVFNiRmUxb202MTNpenErTmVnY3RCaStpcDhEaExmT1hCSFpCNDl5WVg3?=
- =?utf-8?B?VWhDVHl2ZU95akRDNUFUQkU3UU4zMkdIeXI5K3dBMEdwMkU5ZXhWMWtOOTNs?=
- =?utf-8?B?cWV1NXYzbmtDcXZ4dGo0NHZZTzNBcFBta1N0ak5Ib0p5d0tkb1VneDk1bmp4?=
- =?utf-8?B?bldiM3FhNjRUNEs1L2h5ZG5SbjBVdkF1VXpZZnp4a3lsbnFndytRTGZVTzlo?=
- =?utf-8?B?MkR6SHNleXFUVkl6eXZNYzZrYkVXQUljTDF1UUtGaUswcTZ5NHZTQ1pZZFRp?=
- =?utf-8?Q?GMlpepWoaBerkkro2EkPUKz1iw2Qk/DXVWAie?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <4C0CFCDB083C9B4FA7E97CB0796928A7@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AKn6JC0r"
+Received: by mail-pg1-f175.google.com with SMTP id 41be03b00d2f7-c7979304c0cso620941a12.0
+        for <ceph-devel@vger.kernel.org>; Fri, 22 May 2026 03:20:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1779445248; x=1780050048; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wGF3BRrejRrTaJFBtcO7t80MSvJtsYjl3QazzV4jG8M=;
+        b=AKn6JC0rJME5dKelu613J4AmnNJeh8RFoPZjk5s7fpJzGNmpFd6rz3zNLP78ewEfPD
+         R0BRTADB8h6LZ6Dju/Sdv2jTfZV7Ho9K45+F7/4dcpU/d89v8H3Y/SM6X+fEZV0L+K97
+         M4MhlJQrAULo5U0R6CtZpp9wIMgeaVupMdqeASZHa4Ih+jGKGd8mZci4paQ2LGjlSw/M
+         0N3JxX5nxXMrVTAoZs18ZdDX4+NsYum+0XQrn8OgxYR5bgtP6kd9C91qN7dyibnxcM8Z
+         j5zRAEMZvAO3XQZhgilu3kP24vZmQ8cdZynkR5ZEWpzsHAYhFS794v4dw65YbKudCurX
+         Xp0g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779445248; x=1780050048;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=wGF3BRrejRrTaJFBtcO7t80MSvJtsYjl3QazzV4jG8M=;
+        b=bRGlK5im1YgNADz6jT83pHavK3cD7yRx99a/wk7gym+YYtiQ0N7XzbBOu1iqEBLBoJ
+         wa31bOKFil8vWGIx4vQtbk9F/sI2DptOCzkyWBpGK9XyYvD7BsD2owTwjSfENCEhNZ5p
+         TR3/b9CMZGzMv7NGfX2yBEIucegT+rtw23mWNNu/NJeSnQMFF7R0G3z5xSq1yFYOvL37
+         iSn7FojZLvG7UXnADZuqG74aTv7eNud7xX/jToWCE2igZKEHzBC4FhzdZo+3HBgbE5Cd
+         r0PGwH6NwF49Ag0hjUz8J5mmX5HCBLJ9aOkCKQvNsy8StIVTo/fkiGMGdOs1eiUjB0LR
+         eGPw==
+X-Forwarded-Encrypted: i=1; AFNElJ9hlxlvZj1/ISoJ/dXDFVygInOOcL/F5QjNACNuTH0W6GpuEfJU/xb67E8uIEgMmJV2/Szu48DykQ+4@vger.kernel.org
+X-Gm-Message-State: AOJu0YztKL1phtAVYrQxoHLVQjRzCCNqw8hmKhcscB3NUQPHFMtJjTyU
+	AM82HpaZnaWHvCRAW0N9CbMY8F0YVX4qvC2DIbnG0a5fG7JNYSkeM+fU
+X-Gm-Gg: Acq92OFh2XwHqferX/ZNuFw2hNZHmSFkL0lQx/WBWr66c0zV+C7TzAdgYaNNloXTkZ9
+	lu7OnKQSas/nbN4q0jV+M0+le+/i7Ra4YELORbBccKcG9s837g+j4bIZKb1uodp/N7832NjgLw+
+	Xu549iKYzCBnRWtCKKk5VZ9FgPCixsdLs3ifCo5eDEFOzGaR7zdZ1chPVFoRYk1PXclLqOcvH0T
+	v2oxHAjA+PEtDb4zYHy2TBndiFqFQ89xFZAFFLrAG8WuA2z45bCyRJcHsEYfKjNyV2Vte+3GAmK
+	Mewrb9U3gMA8P7rShHA0H/xwoSrH0Jqz01HHEKxv4VTTpLJc+WhB/v2lIBxkPEa89IsMYGjBiXf
+	R279FUZ/1cEsHwKII4GSj9oP6z19ba4SN3tGdojAzdXofy/wpJdyzpkcydTq9IwLr/Jb/iMXW6z
+	eYuV3FCtQ/6guJABNAlQ==
+X-Received: by 2002:a05:6a20:5481:b0:3a0:b812:3a84 with SMTP id adf61e73a8af0-3b328ce6862mr1642445637.1.1779445247567;
+        Fri, 22 May 2026 03:20:47 -0700 (PDT)
+Received: from kali ([2402:e280:3d7c:a2:536a:b505:93f5:9d5d])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-84164ea09a9sm1881827b3a.31.2026.05.22.03.20.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 22 May 2026 03:20:46 -0700 (PDT)
+From: Pavitra Jha <jhapavitra98@gmail.com>
+To: idryomov@gmail.com
+Cc: amarkuze@redhat.com,
+	slava@dubeyko.com,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org,
+	Pavitra Jha <jhapavitra98@gmail.com>
+Subject: [PATCH v2] ceph: fix OOB read in decode_watchers() via missing bounds check
+Date: Fri, 22 May 2026 06:19:32 -0400
+Message-ID: <20260522101932.304458-1-jhapavitra98@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260521140807.204657-1-jhapavitra98@gmail.com>
+References: <20260521140807.204657-1-jhapavitra98@gmail.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	UaSGF0o4k+omG0p/Uz8zUkp/7IDBV1uuyznHUAvhVcFjMi7gISiE040ueoO1dYFzG5FxcZwh1GqTgA26nDj+3VhTULqbEMkBT1bjlMqlfT+Wjyj9cMnBdu0uYAQOmdrf6iE/Ij/my+2jxOQVIcRpcoGcdSw6mX4ORpd5gnR8aUkJjkFjQqMR18KyvATwEEobElDwyL9ulkdCIvr9MsuULDAClF6KefVznbq7JQJonI0pLmHoLxiEly7YOnWopsTbN2Uo9GjEcAcUAHe4x5Bb6UJcLe6iN+jOB9DxOYACGGtAg4l9DzKRf0hVMtwAP0oOGhaNqnVS+ly3ikAgNDBOeA==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: d77c6e3c-9886-41dc-346c-08deb7842593
-X-MS-Exchange-CrossTenant-originalarrivaltime: 21 May 2026 21:58:52.6507
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: kYCl+EeSLGT7gVJxuE9YIzNdO2kdnQ7sij+S+e9C4Q2zFHYXBJEQQ9D3jZ+R94/KHQ0lWp3YisIyq8cOyVyvBQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM3PPF7C333E81B
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-ORIG-GUID: ld6XxZ8tCXPoKGusFOZ3HbOIMVfieAsL
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTIxMDIxOCBTYWx0ZWRfX671jArTLTlCe
- 1moqmHqqETqrq/tayH4sJMcUy3tpBe4P6E83shNxbyuqAQ2c+VLB38/v0myucP+nApVgXfDquzN
- yOJIv6wkpHnjaTmSEzGQ96+tDFybTk+bROAFkuQnmooYsds2f4l3awfsjVdbfL0jUjsFYiZE0et
- kmj3VKXVDcRxzETXRN3D4/ZMT1cgB53E1Mpr1bxQieya+dWpD/Z5IMf/PsYxSD5X/DnsQ/gLoGq
- VKTt6575RarLzD+yzYrzvr+Y7iSP5Ib0rx2S29XFU07XfbDFau1e0wYHr3AwR+b7+jcDyoeWhVC
- nv9wKIMK/wnjXJM9vLXio93RLKHC2AhNCfGjBqAz/BkWUSULEG+zv4+kaNvWRSO3pzRoz0bwSSm
- mMFX7TjK56QlAyEwlyLZ8XLlHAFu/VhLWNRx4yejMXO1NeTP0xfs22DLPagWHhYAHrbEBueFj6C
- n6Ll5PUeg1FdHDNT7fQ==
-X-Proofpoint-GUID: uZhdShgYL5HtyQZKhBXbuN-8GknIWxdH
-X-Authority-Analysis: v=2.4 cv=apyCzyZV c=1 sm=1 tr=0 ts=6a0f801f cx=c_pps
- a=a2CzU9h33xTdk3q/+L33yA==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=NGcC8JguVDcA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=V8glGbnc2Ofi9Qvn3v5h:22 a=VnNF1IyMAAAA:8 a=KhCgcTnWa4wjtVPZodkA:9
- a=QEXdDO2ut3YA:10
-Subject: Re:  [PATCH v3] libceph: Fix out-of-bounds writes with oversized
- monitor reply messages
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-21_04,2026-05-18_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 lowpriorityscore=0 priorityscore=1501 impostorscore=0
- bulkscore=0 suspectscore=0 adultscore=0 spamscore=0 phishscore=0
- clxscore=1015 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2605130000
- definitions=main-2605210218
+Content-Transfer-Encoding: 8bit
 
-T24gVGh1LCAyMDI2LTA1LTIxIGF0IDE0OjE0ICswMjAwLCBSYXBoYWVsIFppbW1lciB3cm90ZToN
-Cj4gV2hlbiBwcm9jZXNzaW5nIGFuIGluY29taW5nIHJlcGx5IG1lc3NhZ2Ugb2YgdHlwZSBDRVBI
-X01TR19TVEFURlNfUkVQTFksDQo+IENFUEhfTVNHX01PTl9DT01NQU5EX0FDSywgb3IgQ0VQSF9N
-U0dfTU9OX0dFVF9WRVJTSU9OX1JFUExZIG9uIHRoZQ0KPiBtb25pdG9yIGNvbm5lY3Rpb24sIGFu
-IGFscmVhZHkgYWxsb2NhdGVkIHJlcGx5IG1lc3NhZ2UgZm9yIHRoZSBnaXZlbg0KPiB0cmFuc2Fj
-dGlvbiBJRCBpcyB1c2VkIChpZiBleGlzdGluZykuIFN1Y2ggYSBtZXNzYWdlIGhhcyBhIHByZWFs
-bG9jYXRlZA0KPiBmcm9udCBzZWdtZW50IHdpdGggYSBmaXhlZCBsZW5ndGggb2YgNjQsIDUxMiwg
-b3IgMzIgYnl0ZXMsIGRlcGVuZGluZyBvbg0KPiB0aGUgbWVzc2FnZSB0eXBlIGl0IHdhcyBhbGxv
-Y2F0ZWQgZm9yLiBUaGUgYWN0dWFsIGxlbmd0aCB0byByZWNlaXZlIGludG8NCj4gdGhpcyBidWZm
-ZXIgaXMgcmVhZCBmcm9tIHRoZSBtZXNzYWdlLiBJZiB0aGlzIHZhbHVlIGV4Y2VlZHMgdGhlDQo+
-IGFsbG9jYXRpb24gc2l6ZSwgZGF0YSByZWNlaXZlZCBmcm9tIHRoZSBuZXR3b3JrIGlzIHdyaXR0
-ZW4gYmV5b25kIHRoZQ0KPiBlbmQgb2YgdGhlIGFsbG9jYXRlZCBidWZmZXIuDQo+IA0KPiBUaGlz
-IHBhdGNoIGZpeGVzIHRoZSBpc3N1ZSBieSBhZGRpbmcgYSBjaGVjayB0aGF0IGNvbXBhcmVzIHRo
-ZSBuZWVkZWQNCj4gZnJvbnQgc2VnbWVudCBsZW5ndGggdG8gdGhlIHByZXZpb3VzbHkgYWxsb2Nh
-dGVkIGxlbmd0aCB3aGVuIHJldHJpZXZpbmcNCj4gdGhlIG1lc3NhZ2UgYnVmZmVyLiBJZiB0aGUg
-bmVlZGVkIGxlbmd0aCBleGNlZWRzIHRoZSBhbGxvY2F0aW9uLCBhIG5ldw0KPiBtZXNzYWdlIGJ1
-ZmZlciB3aXRoIHRoZSBuZWVkZWQgc2l6ZSBpcyBhbGxvY2F0ZWQgdG8gcmVwbGFjZSB0aGUgcHJl
-dmlvdXMNCj4gb25lLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogUmFwaGFlbCBaaW1tZXIgPHJhcGhh
-ZWwuemltbWVyQHR1LWlsbWVuYXUuZGU+DQo+IC0tLQ0KPiAgbmV0L2NlcGgvbW9uX2NsaWVudC5j
-IHwgMTMgKysrKysrKysrKysrKw0KPiAgMSBmaWxlIGNoYW5nZWQsIDEzIGluc2VydGlvbnMoKykN
-Cj4gDQo+IGRpZmYgLS1naXQgYS9uZXQvY2VwaC9tb25fY2xpZW50LmMgYi9uZXQvY2VwaC9tb25f
-Y2xpZW50LmMNCj4gaW5kZXggNjZjMGQ2ZDZiMzNkLi44NTJlZDBjYWU2NjAgMTAwNjQ0DQo+IC0t
-LSBhL25ldC9jZXBoL21vbl9jbGllbnQuYw0KPiArKysgYi9uZXQvY2VwaC9tb25fY2xpZW50LmMN
-Cj4gQEAgLTcxMiw2ICs3MTIsOCBAQCBzdGF0aWMgc3RydWN0IGNlcGhfbXNnICpnZXRfZ2VuZXJp
-Y19yZXBseShzdHJ1Y3QgY2VwaF9jb25uZWN0aW9uICpjb24sDQo+ICAJc3RydWN0IGNlcGhfbW9u
-X2NsaWVudCAqbW9uYyA9IGNvbi0+cHJpdmF0ZTsNCj4gIAlzdHJ1Y3QgY2VwaF9tb25fZ2VuZXJp
-Y19yZXF1ZXN0ICpyZXE7DQo+ICAJdTY0IHRpZCA9IGxlNjRfdG9fY3B1KGhkci0+dGlkKTsNCj4g
-KwlpbnQgdHlwZSA9IGxlMTZfdG9fY3B1KGhkci0+dHlwZSk7DQo+ICsJaW50IGZyb250X2xlbiA9
-IGxlMzJfdG9fY3B1KGhkci0+ZnJvbnRfbGVuKTsNCj4gIAl1MzIgZGF0YV9sZW4gPSBsZTMyX3Rv
-X2NwdShoZHItPmRhdGFfbGVuKTsNCj4gIAlzdHJ1Y3QgY2VwaF9tc2cgKm07DQo+ICANCj4gQEAg
-LTcyMSw2ICs3MjMsMTcgQEAgc3RhdGljIHN0cnVjdCBjZXBoX21zZyAqZ2V0X2dlbmVyaWNfcmVw
-bHkoc3RydWN0IGNlcGhfY29ubmVjdGlvbiAqY29uLA0KPiAgCQlkb3V0KCJnZXRfZ2VuZXJpY19y
-ZXBseSAlbGxkIGRuZVxuIiwgdGlkKTsNCj4gIAkJKnNraXAgPSAxOw0KPiAgCQltID0gTlVMTDsN
-Cj4gKwl9IGVsc2UgaWYgKGZyb250X2xlbiA+IHJlcS0+cmVwbHktPmZyb250X2FsbG9jX2xlbikg
-ew0KPiArCQlwcl93YXJuX3JhdGVsaW1pdGVkKCJ0aWQgJWxsdSBmcm9udCAlZCA+IHByZWFsbG9j
-ICVkXG4iLA0KPiArCQkJCSAgICB0aWQsIGZyb250X2xlbiwNCj4gKwkJCQkgICAgcmVxLT5yZXBs
-eS0+ZnJvbnRfYWxsb2NfbGVuKTsNCj4gKwkJKnNraXAgPSAwOw0KPiArCQltID0gY2VwaF9tc2df
-bmV3KHR5cGUsIGZyb250X2xlbiwgR0ZQX05PRlMsIGZhbHNlKTsNCj4gKwkJaWYgKG0pIHsNCj4g
-KwkJCWNlcGhfbXNnX3B1dChyZXEtPnJlcGx5KTsNCj4gKwkJCXJlcS0+cmVwbHkgPSBtOw0KPiAr
-CQkJbSA9IGNlcGhfbXNnX2dldChyZXEtPnJlcGx5KTsNCj4gKwkJfQ0KPiAgCX0gZWxzZSBpZiAo
-ZGF0YV9sZW4gPiByZXEtPnJlcGx5LT5kYXRhX2xlbmd0aCkgew0KPiAgCQlwcl93YXJuX3JhdGVs
-aW1pdGVkKCJtb24gZ2VuZXJpYyByZXBseSB0aWQgJWxsdSBkYXRhICV1ID4gcHJlYWxsb2NhdGVk
-ICV6dSwgc2tpcHBpbmdcbiIsDQo+ICAJCQkJICAgIHRpZCwgZGF0YV9sZW4sIHJlcS0+cmVwbHkt
-PmRhdGFfbGVuZ3RoKTsNCg0KTG9va3MgZ29vZC4NCg0KUmV2aWV3ZWQtYnk6IFZpYWNoZXNsYXYg
-RHViZXlrbyA8U2xhdmEuRHViZXlrb0BpYm0uY29tPg0KDQpUaGFua3MsDQpTbGF2YS4NCg==
+ceph_start_decoding() validates that struct_len bytes remain in the
+buffer after the encoding header, but accepts struct_len=0 as valid:
+ceph_decode_need(p, end, 0, bad) always passes. When a malicious or
+compromised OSD sends an obj_list_watch_response_t reply with
+struct_len=0, ceph_start_decoding() returns success with p == end,
+leaving zero bytes guaranteed for subsequent reads.
+
+The immediately following ceph_decode_32(p) in decode_watchers() has
+no preceding bounds check. With p == end this is a 4-byte read past
+the validated buffer boundary. The garbage value is then passed
+directly to kzalloc_objs() as the watcher count.
+
+The sibling function decode_watcher() already uses the safe variants
+(ceph_decode_copy_safe, ceph_decode_64_safe, ceph_decode_skip_32)
+after its own ceph_start_decoding() call. decode_watchers() is the
+only site that uses the bare variant, confirming an oversight.
+
+Fix by replacing ceph_decode_32(p) with ceph_decode_32_safe(p, end,
+*num_watchers, e_inval), consistent with the established pattern.
+
+KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
+
+  [   72.047085] ceph_oob_poc: buf=ffff8880085936c8 end=ffff8880085936ce
+  [   72.048685] ceph_oob_poc: ceph_start_decoding OK: struct_v=1
+  struct_len=0 p==end: 1
+  [   72.049477] ceph_oob_poc: triggering OOB read past slab boundary...
+  [   72.050699] ==================================================
+  [   72.051427] BUG: KASAN: slab-out-of-bounds in
+  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
+  [   72.051427] Read of size 4 at addr ffff8880085936ce by task insmod/61
+  [   72.051427] CPU: 0 UID: 0 PID: 61 Comm: insmod Tainted: G O
+  [   72.051427]  7.0.0-rc7-g9c2abf69da83-dirty #14 PREEMPT(lazy)
+  [   72.051427] Call Trace:
+  [   72.051427]  dump_stack_lvl+0x4d/0x70
+  [   72.051427]  print_report+0x170/0x4f3
+  [   72.051427]  kasan_report+0xda/0x110
+  [   72.051427]  kasan_check_range+0x125/0x200
+  [   72.051427]  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
+  [   72.051427]  do_one_initcall+0x9a/0x310
+  [   72.051427]  do_init_module+0x186/0x410
+  [   72.051427]  load_module+0x2ba7/0x2e50
+  [   72.051427]  init_module_from_file+0x15c/0x180
+  [   72.051427]  idempotent_init_module+0x19f/0x430
+  [   72.051427]  __x64_sys_finit_module+0x78/0xc0
+  [   72.051427]  do_syscall_64+0xe2/0x570
+  [   72.051427]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
+  [   72.051427] The buggy address belongs to the object at ffff8880085936c8
+  [   72.051427]  which belongs to the cache kmalloc-8 of size 8
+  [   72.051427] The buggy address is located 0 bytes to the right of
+  [   72.051427]  allocated 6-byte region [ffff8880085936c8, ffff8880085936ce)
+  [   72.051427] Memory state around the buggy address:
+  [   72.051427] >ffff888008593680: fc fc fc fc fc fc fc fc fc 06 fc fc fc fc fc fc
+  [   72.051427]                                               ^
+  [   72.051427] ==================================================
+  [   72.129720] ceph_oob_poc: num_watchers=3435973836 (OOB garbage)
+
+  0xCCCCCCCC (3435973836) is KASAN redzone poison, confirming the read
+  landed in the slab redzone immediately past the 6-byte allocation.
+
+Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
+deployment (e.g. cloud) can trigger this against any kernel client
+that calls CEPH_OSD_OP_LIST_WATCHERS, without any further privileges
+beyond OSD session establishment.
+
+Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
+Cc: stable@vger.kernel.org
+Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
+---
+v2: Correct commit message. v1 overstated the impact:
+
+  - "unbounded alloc": retracted. kzalloc_objs() uses size_mul()
+    internally which returns SIZE_MAX on overflow, causing kmalloc
+    to return NULL. The large garbage value from the OOB read will
+    simply fail allocation with -ENOMEM.
+
+  - "decode_watcher() writing attacker-controlled data into it":
+    retracted. ceph_start_decoding() calls ceph_decode_need() for
+    its 6-byte header, which catches p==end and returns -ERANGE
+    before any copy occurs. Verified with a follow-up KASAN harness.
+
+  The fix itself is unchanged.
+---
+ net/ceph/osd_client.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 2ff00070c..0148e4c40 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -5030,7 +5030,7 @@ static int decode_watchers(void **p, void *end,
+ 	if (ret)
+ 		return ret;
+ 
+-	*num_watchers = ceph_decode_32(p);
++	ceph_decode_32_safe(p, end, *num_watchers, e_inval);
+ 	*watchers = kzalloc_objs(**watchers, *num_watchers, GFP_NOIO);
+ 	if (!*watchers)
+ 		return -ENOMEM;
+@@ -5044,6 +5044,9 @@ static int decode_watchers(void **p, void *end,
+ 	}
+ 
+ 	return 0;
++
++e_inval:
++	return -EINVAL;
+ }
+ 
+ /*
+-- 
+2.53.0
+
