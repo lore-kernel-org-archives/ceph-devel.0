@@ -1,77 +1,46 @@
-Received: from mail-pg1-f175.google.com (mail-pg1-f175.google.com [209.85.215.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D5243CB8FB
-	for <ceph-devel@vger.kernel.org>; Fri, 22 May 2026 10:20:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6B3733A70A
+	for <ceph-devel@vger.kernel.org>; Fri, 22 May 2026 15:45:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779445250; cv=none; b=X6Jr2FXt6N66C2BWGfvYBuI025IT4gbQhjpqn56bdDgdPqMsVx7M3VldcLlhFAOlFIfPM7XY5HmXUMonWMJ7Bmm68dHT+uzaDOuPYYNq05NxSkk+mgfAvp6CInhuclE++XkcG+Dr7WDOXfZZIzMsGSnnN4LCv5AG8SPgo1znkLE=
+	t=1779464734; cv=none; b=BNvT0C8RDL+rO6MgdLCo8HIr20xb0jm5nwX2ptnlmGO8RCzW8K2GmDtrcFuRPaBIHllR7LVndmMjLwhuWY5++r2XMzAso3q+LaEZdJ/JDWVuQe62wNQ+UEzzEkZuSg9XNE+6nIuH1Rur3lvUHTSyjn7Ic+mQx31UmPBWMAX0TCc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779445250; c=relaxed/simple;
-	bh=CqqfADRIYdy2j/+p5yLnh5aLdmAPFqsu0MNRmXCNItE=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=XvN3MUEenrkFVUoDJL3P6HkfyN+3ZYbXP0EUK6VSbNf2O2tusVIv5HUmrYncd1dcnHgHgSsMatxkJ/CCoI37hq8ZudftrpiJ6jvxB7fE+jAUcms8eKGv3rckyMr58Jr+OsAgdlLYoTI+EOpi16sabQEzRbDVNtG31zKN/1Jkw58=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=AKn6JC0r; arc=none smtp.client-ip=209.85.215.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1779464734; c=relaxed/simple;
+	bh=TcKlIOu984ZlttycTX9M0kCWDtOg8YYjbqj9X1TY5+k=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=i0gLYc33Qi5MmE/Al0+NhfE9NGBWVT71v1zhscqe34Km5HPgosiYWQxf/HQ94eBRkBF9xteiyGM6NHD0PIB8IagdmCuJ+T6v8AkJ0y8gm0hn1zIT8KNfjzQkmD1TpDNM4RRQLnClupucXEQzRuQncjFfY49pUgUd34U3qbq2LWE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=XulOSbIL; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AKn6JC0r"
-Received: by mail-pg1-f175.google.com with SMTP id 41be03b00d2f7-c7979304c0cso620941a12.0
-        for <ceph-devel@vger.kernel.org>; Fri, 22 May 2026 03:20:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779445248; x=1780050048; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=wGF3BRrejRrTaJFBtcO7t80MSvJtsYjl3QazzV4jG8M=;
-        b=AKn6JC0rJME5dKelu613J4AmnNJeh8RFoPZjk5s7fpJzGNmpFd6rz3zNLP78ewEfPD
-         R0BRTADB8h6LZ6Dju/Sdv2jTfZV7Ho9K45+F7/4dcpU/d89v8H3Y/SM6X+fEZV0L+K97
-         M4MhlJQrAULo5U0R6CtZpp9wIMgeaVupMdqeASZHa4Ih+jGKGd8mZci4paQ2LGjlSw/M
-         0N3JxX5nxXMrVTAoZs18ZdDX4+NsYum+0XQrn8OgxYR5bgtP6kd9C91qN7dyibnxcM8Z
-         j5zRAEMZvAO3XQZhgilu3kP24vZmQ8cdZynkR5ZEWpzsHAYhFS794v4dw65YbKudCurX
-         Xp0g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779445248; x=1780050048;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=wGF3BRrejRrTaJFBtcO7t80MSvJtsYjl3QazzV4jG8M=;
-        b=bRGlK5im1YgNADz6jT83pHavK3cD7yRx99a/wk7gym+YYtiQ0N7XzbBOu1iqEBLBoJ
-         wa31bOKFil8vWGIx4vQtbk9F/sI2DptOCzkyWBpGK9XyYvD7BsD2owTwjSfENCEhNZ5p
-         TR3/b9CMZGzMv7NGfX2yBEIucegT+rtw23mWNNu/NJeSnQMFF7R0G3z5xSq1yFYOvL37
-         iSn7FojZLvG7UXnADZuqG74aTv7eNud7xX/jToWCE2igZKEHzBC4FhzdZo+3HBgbE5Cd
-         r0PGwH6NwF49Ag0hjUz8J5mmX5HCBLJ9aOkCKQvNsy8StIVTo/fkiGMGdOs1eiUjB0LR
-         eGPw==
-X-Forwarded-Encrypted: i=1; AFNElJ9hlxlvZj1/ISoJ/dXDFVygInOOcL/F5QjNACNuTH0W6GpuEfJU/xb67E8uIEgMmJV2/Szu48DykQ+4@vger.kernel.org
-X-Gm-Message-State: AOJu0YztKL1phtAVYrQxoHLVQjRzCCNqw8hmKhcscB3NUQPHFMtJjTyU
-	AM82HpaZnaWHvCRAW0N9CbMY8F0YVX4qvC2DIbnG0a5fG7JNYSkeM+fU
-X-Gm-Gg: Acq92OFh2XwHqferX/ZNuFw2hNZHmSFkL0lQx/WBWr66c0zV+C7TzAdgYaNNloXTkZ9
-	lu7OnKQSas/nbN4q0jV+M0+le+/i7Ra4YELORbBccKcG9s837g+j4bIZKb1uodp/N7832NjgLw+
-	Xu549iKYzCBnRWtCKKk5VZ9FgPCixsdLs3ifCo5eDEFOzGaR7zdZ1chPVFoRYk1PXclLqOcvH0T
-	v2oxHAjA+PEtDb4zYHy2TBndiFqFQ89xFZAFFLrAG8WuA2z45bCyRJcHsEYfKjNyV2Vte+3GAmK
-	Mewrb9U3gMA8P7rShHA0H/xwoSrH0Jqz01HHEKxv4VTTpLJc+WhB/v2lIBxkPEa89IsMYGjBiXf
-	R279FUZ/1cEsHwKII4GSj9oP6z19ba4SN3tGdojAzdXofy/wpJdyzpkcydTq9IwLr/Jb/iMXW6z
-	eYuV3FCtQ/6guJABNAlQ==
-X-Received: by 2002:a05:6a20:5481:b0:3a0:b812:3a84 with SMTP id adf61e73a8af0-3b328ce6862mr1642445637.1.1779445247567;
-        Fri, 22 May 2026 03:20:47 -0700 (PDT)
-Received: from kali ([2402:e280:3d7c:a2:536a:b505:93f5:9d5d])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-84164ea09a9sm1881827b3a.31.2026.05.22.03.20.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 May 2026 03:20:46 -0700 (PDT)
-From: Pavitra Jha <jhapavitra98@gmail.com>
-To: idryomov@gmail.com
-Cc: amarkuze@redhat.com,
-	slava@dubeyko.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org,
-	Pavitra Jha <jhapavitra98@gmail.com>
-Subject: [PATCH v2] ceph: fix OOB read in decode_watchers() via missing bounds check
-Date: Fri, 22 May 2026 06:19:32 -0400
-Message-ID: <20260522101932.304458-1-jhapavitra98@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260521140807.204657-1-jhapavitra98@gmail.com>
-References: <20260521140807.204657-1-jhapavitra98@gmail.com>
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="XulOSbIL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1779464719; h=from : to
+ : cc : subject : date : message-id : mime-version :
+ content-transfer-encoding : from;
+ bh=TcKlIOu984ZlttycTX9M0kCWDtOg8YYjbqj9X1TY5+k=;
+ b=XulOSbILu9jdAOx0g8yuK+QnjWJ6cjcFgVyT/gWnMw8UQ3qOdVhidPDkTvM6jnkB9UI2T
+ /XL6yfQiQqw11WAskC+q8izEA5w5RSCAhDwccTG+3msqYgX2ZLYZA3pynAn/O7CCuNq1E5f
+ NFVsJ61tPo4MqEr9HmaVXniBI4oMM+3d5vSzegVDCoscH44GdnGVgsULG4Tc92ZtRD33h/v
+ tQRfM63aBi9ObknD80eVUYRPfZ8jR/Fi+ruNgM+hmopCJ9PgVkX8AfukRS9Dui1GPsz1Lf7
+ +YGBaqQNHN9ocnfgV2qpC+hWu23OEW2xJyS2Nh5XIJ4HJxrYWMGnw4dQdWUA==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 5EFBC5FF33;
+	Fri, 22 May 2026 17:45:19 +0200 (CEST)
+Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 34AD95FB24;
+	Fri, 22 May 2026 17:45:18 +0200 (CEST)
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org,
+	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Subject: [PATCH] libceph: Reject monmaps advertising zero monitors
+Date: Fri, 22 May 2026 17:44:20 +0200
+Message-ID: <20260522154420.3324836-1-raphael.zimmer@tu-ilmenau.de>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -80,114 +49,40 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-ceph_start_decoding() validates that struct_len bytes remain in the
-buffer after the encoding header, but accepts struct_len=0 as valid:
-ceph_decode_need(p, end, 0, bad) always passes. When a malicious or
-compromised OSD sends an obj_list_watch_response_t reply with
-struct_len=0, ceph_start_decoding() returns success with p == end,
-leaving zero bytes guaranteed for subsequent reads.
+A message of type CEPH_MSG_MON_MAP contains a monmap that is sent from a
+monitor to the client. This monmap contains information about the
+existing monitors in the cluster. Currently, a monmap indicating that
+there are zero monitors in the cluster is treated as valid. However, it
+is impossible to have zero monitors in the cluster and still receive a
+valid monmap from a monitor. Therefore, such a monmap must be corrupted
+and should be treated as invalid. Furthermore, a monmap with a monitor
+count of zero can subsequently crash the client when attempting to open
+a session with a monitor in __open_session(). This happens because the
+"BUG_ON(monc->monmap->num_mon < 1)" assertion in pick_new_mon() is
+triggered.
 
-The immediately following ceph_decode_32(p) in decode_watchers() has
-no preceding bounds check. With p == end this is a 4-byte read past
-the validated buffer boundary. The garbage value is then passed
-directly to kzalloc_objs() as the watcher count.
+This patch extends a check in ceph_monmap_decode() to also reject
+arriving mon_maps with num_mon == 0 rather than only with
+num_mon > CEPH_MAX_MON.
 
-The sibling function decode_watcher() already uses the safe variants
-(ceph_decode_copy_safe, ceph_decode_64_safe, ceph_decode_skip_32)
-after its own ceph_start_decoding() call. decode_watchers() is the
-only site that uses the bare variant, confirming an oversight.
-
-Fix by replacing ceph_decode_32(p) with ceph_decode_32_safe(p, end,
-*num_watchers, e_inval), consistent with the established pattern.
-
-KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
-
-  [   72.047085] ceph_oob_poc: buf=ffff8880085936c8 end=ffff8880085936ce
-  [   72.048685] ceph_oob_poc: ceph_start_decoding OK: struct_v=1
-  struct_len=0 p==end: 1
-  [   72.049477] ceph_oob_poc: triggering OOB read past slab boundary...
-  [   72.050699] ==================================================
-  [   72.051427] BUG: KASAN: slab-out-of-bounds in
-  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
-  [   72.051427] Read of size 4 at addr ffff8880085936ce by task insmod/61
-  [   72.051427] CPU: 0 UID: 0 PID: 61 Comm: insmod Tainted: G O
-  [   72.051427]  7.0.0-rc7-g9c2abf69da83-dirty #14 PREEMPT(lazy)
-  [   72.051427] Call Trace:
-  [   72.051427]  dump_stack_lvl+0x4d/0x70
-  [   72.051427]  print_report+0x170/0x4f3
-  [   72.051427]  kasan_report+0xda/0x110
-  [   72.051427]  kasan_check_range+0x125/0x200
-  [   72.051427]  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
-  [   72.051427]  do_one_initcall+0x9a/0x310
-  [   72.051427]  do_init_module+0x186/0x410
-  [   72.051427]  load_module+0x2ba7/0x2e50
-  [   72.051427]  init_module_from_file+0x15c/0x180
-  [   72.051427]  idempotent_init_module+0x19f/0x430
-  [   72.051427]  __x64_sys_finit_module+0x78/0xc0
-  [   72.051427]  do_syscall_64+0xe2/0x570
-  [   72.051427]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
-  [   72.051427] The buggy address belongs to the object at ffff8880085936c8
-  [   72.051427]  which belongs to the cache kmalloc-8 of size 8
-  [   72.051427] The buggy address is located 0 bytes to the right of
-  [   72.051427]  allocated 6-byte region [ffff8880085936c8, ffff8880085936ce)
-  [   72.051427] Memory state around the buggy address:
-  [   72.051427] >ffff888008593680: fc fc fc fc fc fc fc fc fc 06 fc fc fc fc fc fc
-  [   72.051427]                                               ^
-  [   72.051427] ==================================================
-  [   72.129720] ceph_oob_poc: num_watchers=3435973836 (OOB garbage)
-
-  0xCCCCCCCC (3435973836) is KASAN redzone poison, confirming the read
-  landed in the slab redzone immediately past the 6-byte allocation.
-
-Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
-deployment (e.g. cloud) can trigger this against any kernel client
-that calls CEPH_OSD_OP_LIST_WATCHERS, without any further privileges
-beyond OSD session establishment.
-
-Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
-Cc: stable@vger.kernel.org
-Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
+Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 ---
-v2: Correct commit message. v1 overstated the impact:
+ net/ceph/mon_client.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-  - "unbounded alloc": retracted. kzalloc_objs() uses size_mul()
-    internally which returns SIZE_MAX on overflow, causing kmalloc
-    to return NULL. The large garbage value from the OOB read will
-    simply fail allocation with -ENOMEM.
-
-  - "decode_watcher() writing attacker-controlled data into it":
-    retracted. ceph_start_decoding() calls ceph_decode_need() for
-    its 6-byte header, which catches p==end and returns -ERANGE
-    before any copy occurs. Verified with a follow-up KASAN harness.
-
-  The fix itself is unchanged.
----
- net/ceph/osd_client.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 2ff00070c..0148e4c40 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -5030,7 +5030,7 @@ static int decode_watchers(void **p, void *end,
- 	if (ret)
- 		return ret;
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index d2cdc8ee3155..6c5f83379055 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -114,7 +114,7 @@ static struct ceph_monmap *ceph_monmap_decode(void **p, void *end, bool msgr2)
  
--	*num_watchers = ceph_decode_32(p);
-+	ceph_decode_32_safe(p, end, *num_watchers, e_inval);
- 	*watchers = kzalloc_objs(**watchers, *num_watchers, GFP_NOIO);
- 	if (!*watchers)
- 		return -ENOMEM;
-@@ -5044,6 +5044,9 @@ static int decode_watchers(void **p, void *end,
- 	}
+ 	dout("%s fsid %pU epoch %u num_mon %u\n", __func__, &fsid, epoch,
+ 	     num_mon);
+-	if (num_mon > CEPH_MAX_MON)
++	if (num_mon > CEPH_MAX_MON || num_mon == 0)
+ 		goto e_inval;
  
- 	return 0;
-+
-+e_inval:
-+	return -EINVAL;
- }
- 
- /*
+ 	monmap = kmalloc_flex(*monmap, mon_inst, num_mon, GFP_NOIO);
 -- 
-2.53.0
+2.47.3
 
