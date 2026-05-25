@@ -1,204 +1,119 @@
-Received: from mail-pf1-f180.google.com (mail-pf1-f180.google.com [209.85.210.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C046237DEB8
-	for <ceph-devel@vger.kernel.org>; Sat, 23 May 2026 08:59:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3325ADDA9;
+	Mon, 25 May 2026 06:13:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779526786; cv=none; b=dVlZwCMPuyeGNJ2BvmoeuaP2vGrd7TnhukpctkpU6grtLCz3YlSNyT/v10Wsq0iobAEV8BpZZLNbFGcNBto1JsNeIvOiqRTZOxjgNxTQXlCA+v9gWiIQYDXyk400mJ85Wza2zqEKfXY7s47tbKZaLvAK1X6Qqcew6FXp4DHji04=
+	t=1779689603; cv=none; b=PWKcT2/U5R7B74SXluvjO0ipblnh3+W8dACtlHI7pC/uIU94tor9MgAit51FY6wW+5SE5mYg5XVOy1Rlz2owa7tLyKqEFfZFs92kHQw4sjZLiG69zDklbho8FbwohmMZQkobuFXYqsq1MWWLe/pWV1XeVKQ3gU0yg7q3H+71t5Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779526786; c=relaxed/simple;
-	bh=JVNLwiPtXCyMV1uRjjpMghimPebbtQ44GeZ/L5I6yMI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=QFpHDeZkh48dAS6bt7PL2+2Qx3SgBQ+OEQ06c9aHMqB3OO6VOiUYqjkcjltCsEbdjn2kuLfAlzBFjuFz9CSRQFTZXXd6iKaChVPpCmAMP4S+Gx8hmlQhzslSE5nsTzjLYWVDsoXj/iK8x0zzBJXNMGxcmUATOT9q18lqNblmP+8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=H/PWrlph; arc=none smtp.client-ip=209.85.210.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1779689603; c=relaxed/simple;
+	bh=eeD04UdoyibCLUbSESv4nDuwLvjdA69yocynqRXPeSQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=is2PNyz4XmIVLBUpW43iGhnDlWk9ygsFCI6C+ucV9nptBXkmcydX5jA7tPt65Zt9X+IqGHiqX8ieqgoyWd/4mjkyPRGwPAcklvi0PLBY3TCAVKgkNItHTfnihdPqUicNC8OdmnRh5fydxFetpR4lFC7GVsfDZxNv3l0ZKvuHPTA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=ch8C4AQu; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="H/PWrlph"
-Received: by mail-pf1-f180.google.com with SMTP id d2e1a72fcca58-83dc08db8e0so458530b3a.3
-        for <ceph-devel@vger.kernel.org>; Sat, 23 May 2026 01:59:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779526784; x=1780131584; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=cvyRGKblMsa85uNp1iOm2E+XE8wdYLKtD/IRDH9iso4=;
-        b=H/PWrlph2jVfux0bnLqrNUuOu/Oa6PZpjwffR3wsXrYoIZTqVM2enQ9aijwC3v98mg
-         pnXJFEHhshwJAY+riflVAW8Tqtx9eTYfA/2h6PXaAsqRD6/B7YfRaqO0Bl8yCf7/iNmQ
-         ith0w4BCSdjaVDlLQy4c9HrKz8UejVJSdO6+q4SfU1J7NP4Go35bMeSgrlMidI8vLbvz
-         g5NIwzDmk74j7u/zpa4uPRZ4jHIpbEI34zhsXR8i6weTQ01OqO+EQFsAbyJlJT6U6bm/
-         qXX69IWRNVPNSe4vrYwCNWaSMajcgDGXS5ZlrLLajpG0aZHJ7+BA2seoCAYvZSGPzm4M
-         ol/Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779526784; x=1780131584;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cvyRGKblMsa85uNp1iOm2E+XE8wdYLKtD/IRDH9iso4=;
-        b=ExAIg9js+tiJp3MIHU7sMmnpP20YBMcU+mO8xwx6N1CtNSl5mJvjv+0ofIeigSWwaf
-         4uUoaWiPco9Gehgro12xsNzL9D5ifu9sQtbHgu9zbkOjosdynmCsAexBNUf5B5k3w1ME
-         z3v9GyGUzyZ5+M+/W4Hp4VIjdNZkkMP7F+1khx0zheRVv0RL7r5B9qpgTEZhet+xKVFy
-         NU6gdrkFFAjB8kmFxfmF9gOy8Q8em84nt4BY+kniyYP8VcHlSxbvPDSNMk5w4w+EnaBm
-         ZgglQ9TEZ4Fdd3VN4QeWiB9v6mifQfRwnGqBiwnrGY5WG4wq3FnRYut+V7RX+ICF9aJ2
-         kkNQ==
-X-Forwarded-Encrypted: i=1; AFNElJ/bndj7o+IJi4QpnSIV8jEk5eaeNtWwjW7HAGVRCPbNSRBNc2aJU3xzPOpDG/XA81Ko3tLFJfOn5QIf@vger.kernel.org
-X-Gm-Message-State: AOJu0YwzgqM2/+hZY1yCZj6cHQo6ouhf8IpghZ07mrg3DcRCrtfDUU44
-	Yqp9m3XBgTjhYeE15399+Dvacz14QqOdbAMQ6g/T2qj/T5g8S5H50IEO
-X-Gm-Gg: Acq92OGk6zhJkVRdC2wZDCUKc9D4p2DfXIJPxej37V0ZdTlb1XpDX6a2acUCl4ckurG
-	CqQVFLrJh6O0hDR/3Wl2iU997q3GzWHEQQiLes3z8JC6fTmz6ECnyKa1AS+nW072dHtPPiBQwQX
-	dP1B5CiZHfxbufC3yWRfnQo1KYA5mAhvTYRTCJHPXouYH0Zb90g3GwtwN7kLQ4tNrdFfuhfKGMk
-	xXzanU3nRzB9fFu5eFq5QA/wMhala777T6ULWVHArVA7PO9rbVJAAb/JjKosetDlGk95lPmmKg2
-	DQKTUi/Hw/zdPFFjWvkAtYroGWcXKjdof1NmDRTtk7Ar36l+qZXsUr9CYCjC/3RkwiwikviPCdU
-	/R5GuELpt7f5zyTxmdE4V38zx1Co6NuaBsKJNBf/Mfp2WtLqVGYZyzairV5gSnopmbaf9AHr+t0
-	STehUTIXuailwQwFeThA/+Tq9rJ+A=
-X-Received: by 2002:a05:6a21:4c11:b0:3b3:cff:cb54 with SMTP id adf61e73a8af0-3b328cde60emr3597088637.2.1779526783906;
-        Sat, 23 May 2026 01:59:43 -0700 (PDT)
-Received: from kali ([2402:e280:3d7c:a2:536a:b505:93f5:9d5d])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-84164b0427bsm4696739b3a.22.2026.05.23.01.59.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 23 May 2026 01:59:43 -0700 (PDT)
-From: Pavitra Jha <jhapavitra98@gmail.com>
-To: idryomov@gmail.com
-Cc: amarkuze@redhat.com,
-	slava@dubeyko.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org,
-	Pavitra Jha <jhapavitra98@gmail.com>
-Subject: [PATCH] ceph: fix multiple unsafe decodes in decode_locker()
-Date: Sat, 23 May 2026 04:59:02 -0400
-Message-ID: <20260523085902.502821-1-jhapavitra98@gmail.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="ch8C4AQu"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=k3SPzxVyWdadKptBoGs22ABp+4fSutAbLhXgTnFnk+c=; b=ch8C4AQus3YZ806Wh67oNprJWu
+	4YgLFI2/PnBCMuybdDy7PbfGtTtnOYTERUedeW5E5Ru5s2A42Wbka5YWGITgpXyoniyxVkeoX4jLc
+	IUiRdYgZdzB/Am4gsRBuGO/BRVBQ7wRZfgKXj1zZbTQQSFMZAafdMq1Nx00l5Uir2sYkM1+syo7Sb
+	tR2MZOHYxgUNgn6enT0n7mgnTQttQ6CNWFQCnUaBYMiOmFQAvhU06ASH+830Qwzg/OZoJ2MMde8pk
+	5myaDznWnGdkaDDiOgZB+6sZOcmbLJfO3PHqjAYQdxaW+wE6I2paALx9V82PLnhPBfyxJiW3AXzQ8
+	ADrqVaWg==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wROYn-0000000GOIp-2PQ1;
+	Mon, 25 May 2026 06:13:09 +0000
+Date: Sun, 24 May 2026 23:13:09 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: David Howells <dhowells@redhat.com>
+Cc: Christian Brauner <christian@brauner.io>,
+	Matthew Wilcox <willy@infradead.org>,
+	Christoph Hellwig <hch@infradead.org>,
+	Paulo Alcantara <pc@manguebit.org>, Jens Axboe <axboe@kernel.dk>,
+	Leon Romanovsky <leon@kernel.org>, Steve French <sfrench@samba.org>,
+	ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	Trond Myklebust <trondmy@kernel.org>, netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev, linux-erofs@lists.ozlabs.org,
+	linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-block@vger.kernel.org
+Subject: Re: [PATCH v2 05/21] Add a function to kmap one page of a multipage
+ bio_vec
+Message-ID: <ahPodavlA-gt44FO@infradead.org>
+References: <20260518222959.488126-1-dhowells@redhat.com>
+ <20260518222959.488126-6-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260518222959.488126-6-dhowells@redhat.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-decode_locker() in cls_lock_client.c contains three unsafe decode
-operations that allow a malicious or compromised OSD to trigger
-slab-out-of-bounds reads:
+On Mon, May 18, 2026 at 11:29:37PM +0100, David Howells wrote:
+> Add a function to kmap one page of a multipage bio_vec by offset (which is
+> added to the offset in the bio_vec internally).  The caller is responsible
+> for calculating how much of the page is then available.
+> 
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> Acked-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
+> cc: Matthew Wilcox <willy@infradead.org>
+> cc: Christoph Hellwig <hch@infradead.org>
+> cc: Jens Axboe <axboe@kernel.dk>
+> cc: linux-block@vger.kernel.org
+> cc: netfs@lists.linux.dev
+> cc: linux-fsdevel@vger.kernel.org
+> ---
+>  include/linux/bvec.h | 17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
+> 
+> diff --git a/include/linux/bvec.h b/include/linux/bvec.h
+> index d36dd476feda..9df4a56fef61 100644
+> --- a/include/linux/bvec.h
+> +++ b/include/linux/bvec.h
+> @@ -299,4 +299,21 @@ static inline phys_addr_t bvec_phys(const struct bio_vec *bvec)
+>  	return page_to_phys(bvec->bv_page) + bvec->bv_offset;
+>  }
+>  
+> +/**
+> + * kmap_local_bvec - Map part of a bvec into the kernel virtual address space
+> + * @bvec: bvec to map
+> + * @offset: Offset into bvec
+> + *
+> + * Map the page containing the byte at @offset into the kernel virtual address
+> + * space.  The caller is responsible for making sure this doesn't overrun.
+> + *
+> + * Call kunmap_local on the returned address to unmap.
+> + */
+> +static inline void *kmap_local_bvec(struct bio_vec *bvec, size_t offset)
 
-1. ceph_decode_copy() at the locker_id_t name field has no preceding
-   bounds check. With p == end after ceph_start_decoding() accepts
-   struct_len=0, this reads sizeof(ceph_entity_name) = 9 bytes past
-   the validated buffer boundary.
+The name is rather confusing for something that does not map the entire
+bvec, and is an anagram of the existing bvec_kmap_local.  So please
+rename it to bvec_kmap_partial or something.
 
-2. *p += sizeof(struct ceph_timespec) after the locker_info_t header
-   is an unchecked pointer advance. A malicious OSD can position p
-   past end, causing all subsequent _safe checks to pass against a
-   bogus boundary.
+> +{
+> +	offset += bvec->bv_offset;
+> +
+> +	return kmap_local_page(bvec->bv_page + offset / PAGE_SIZE) + offset % PAGE_SIZE;
 
-3. len = ceph_decode_32(p) has no preceding bounds check, and the
-   immediately following *p += len is uncapped. A malicious OSD can
-   send len=0xffffffff, advancing p gigabytes past end and escaping
-   the decode window entirely.
+Overly long line.  Also this can use shits and byte masking to be a tad
+more efficient and matching the rest of the bvec code.
 
-Fix all three by replacing bare operations with their safe variants:
-  ceph_decode_copy   -> ceph_decode_copy_safe
-  *p += sizeof(...)  -> ceph_decode_skip_n
-  ceph_decode_32(p)  -> ceph_decode_32_safe
-  *p += len          -> ceph_decode_skip_n
-
-A new bad: label is added to return -EINVAL on any bounds violation.
-
-KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
-
-  [   26.183969] ceph_oob4_poc: buf=ffff888009e31000 end=ffff888009e31fa0
-  [   26.186087] ceph_oob4_poc: struct_v=1 struct_len=0 p==end: 1
-  [   26.186738] ceph_oob4_poc: triggering bare ceph_decode_32 past slab boundary...
-  [   26.187679] ==================================================================
-  [   26.188236] BUG: KASAN: slab-out-of-bounds in ceph_oob4_init+0x22b/0xff0 [ceph_oob4_poc]
-  [   26.188236] Read of size 4 at addr ffff888009e31fa0 by task insmod/59
-  [   26.188236] CPU: 0 UID: 0 PID: 59 Comm: insmod Tainted: G           O        7.0.0-rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
-  [   26.188236] Tainted: [O]=OOT_MODULE
-  [   26.188236] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-debian-1.17.0-1 04/01/2014
-  [   26.188236] Call Trace:
-  [   26.188236]  <TASK>
-  [   26.188236]  dump_stack_lvl+0x4d/0x70
-  [   26.188236]  print_report+0x170/0x4f3
-  [   26.188236]  ? __pfx__raw_spin_lock_irqsave+0x10/0x10
-  [   26.188236]  kasan_report+0xda/0x110
-  [   26.188236]  ? ceph_oob4_init+0x22b/0xff0 [ceph_oob4_poc]
-  [   26.188236]  ? ceph_oob4_init+0x22b/0xff0 [ceph_oob4_poc]
-  [   26.188236]  ? __pfx_ceph_oob4_init+0x10/0x10 [ceph_oob4_poc]
-  [   26.188236]  ceph_oob4_init+0x22b/0xff0 [ceph_oob4_poc]
-  [   26.188236]  do_one_initcall+0x9a/0x3a0
-  [   26.188236]  ? __pfx_do_one_initcall+0x10/0x10
-  [   26.188236]  do_init_module+0x27c/0x790
-  [   26.188236]  load_module+0x4a9a/0x6350
-  [   26.188236]  init_module_from_file+0x15c/0x180
-  [   26.188236]  idempotent_init_module+0x21f/0x750
-  [   26.188236]  __x64_sys_finit_module+0xba/0x120
-  [   26.188236]  do_syscall_64+0xe2/0x570
-  [   26.188236]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
-  [   26.188236]  </TASK>
-  [   26.188236] The buggy address belongs to the object at ffff888009e31000
-  [   26.188236]  which belongs to the cache kmalloc-4k of size 4096
-  [   26.188236] The buggy address is located 0 bytes to the right of
-  [   26.188236]  allocated 4000-byte region [ffff888009e31000, ffff888009e31fa0)
-  [   26.188236] Memory state around the buggy address:
-  [   26.188236]  ffff888009e31f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  [   26.188236] >ffff888009e31f80: 00 00 00 00 fc fc fc fc fc fc fc fc fc fc fc fc
-  [   26.188236]                                ^
-  [   26.188236]  ffff888009e32000: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
-  [   26.188236] ==================================================================
-  [   26.255513] ceph_oob4_poc: len=0xcccccccc (OOB garbage from KASAN redzone)
-
-  0xCCCCCCCC is KASAN redzone poison, confirming the read landed in
-  the slab redzone immediately past the 4000-byte allocation.
-
-Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
-deployment can trigger this against any kernel client that issues the
-lock.get_info class method (e.g. during RBD exclusive lock acquisition)
-without any further privileges beyond OSD session establishment.
-
-Fixes: d4ed4a530562 ("libceph: support for lock.lock_info")
-Cc: stable@vger.kernel.org
-Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
----
- net/ceph/cls_lock_client.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
-
-diff --git a/net/ceph/cls_lock_client.c b/net/ceph/cls_lock_client.c
-index 78276273c..00f0309a6 100644
---- a/net/ceph/cls_lock_client.c
-+++ b/net/ceph/cls_lock_client.c
-@@ -259,7 +259,7 @@ static int decode_locker(void **p, void *end, struct ceph_locker *locker)
- 	if (ret)
- 		return ret;
- 
--	ceph_decode_copy(p, &locker->id.name, sizeof(locker->id.name));
-+	ceph_decode_copy_safe(p, end, &locker->id.name, sizeof(locker->id.name), bad);
- 	s = ceph_extract_encoded_string(p, end, NULL, GFP_NOIO);
- 	if (IS_ERR(s))
- 		return PTR_ERR(s);
-@@ -270,19 +270,21 @@ static int decode_locker(void **p, void *end, struct ceph_locker *locker)
- 	if (ret)
- 		return ret;
- 
--	*p += sizeof(struct ceph_timespec); /* skip expiration */
-+	ceph_decode_skip_n(p, end, sizeof(struct ceph_timespec), bad); /* skip expiration */
- 
- 	ret = ceph_decode_entity_addr(p, end, &locker->info.addr);
- 	if (ret)
- 		return ret;
- 
--	len = ceph_decode_32(p);
--	*p += len; /* skip description */
-+	ceph_decode_32_safe(p, end, len, bad);
-+	ceph_decode_skip_n(p, end, len, bad); /* skip description */
- 
- 	dout("%s %s%llu cookie %s addr %s\n", __func__,
- 	     ENTITY_NAME(locker->id.name), locker->id.cookie,
- 	     ceph_pr_addr(&locker->info.addr));
- 	return 0;
-+bad:
-+	return -EINVAL;
- }
- 
- static int decode_lockers(void **p, void *end, u8 *type, char **tag,
--- 
-2.53.0
+Users of this would be interesting and why you're not simply using a
+bvec_iter at page granularity, which is what other block kmap code
+does.
 
