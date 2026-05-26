@@ -1,228 +1,218 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ot1-f46.google.com (mail-ot1-f46.google.com [209.85.210.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 429283C13FE;
-	Tue, 26 May 2026 20:57:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779829058; cv=fail; b=RYInIRyXTTsHXJlqR7mOLxGjimCvbRq06mR2zdQG4lOiGuNYWtngSSn1ooi6dN7YqpkoPno47V9cIAepCAcA5i/d1QYs/M5WsSG1HxV2ylPksMr5WFfYDl+f8nNRYmaQUca3WyS6qQ8dGt4w1GSqnyGIc3Y2977Xd08uZ2rYX+w=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779829058; c=relaxed/simple;
-	bh=ztadpTqDNW4MgEyA8t4o6CKI3PrP6RfQJ2JKXFadRF8=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=BYc2CPunjPVdVY++/95Zc2yAGBRNEGwpUYt+oKN6/3Zi2i9+3vIbbT30UzPu+L+f6FAaFbVmxLVeErfTDjbLlgh3iyF+PsVDvZyCtV5UDb0jKrqTth1SAXqrXijNzpmbjSu9JxNQ8FTq9FTr+yyPrbmiBjEi7afIdZOK1RE/kw8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=k5wV0vrJ; arc=fail smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F9EE3C98B7
+	for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 22:38:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.46
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779835132; cv=none; b=bbyPz0iLoNcVu0T3RbvZYWVrO1Ei76BRgno+jeNRimNBMW2Nd89a3/kbI1XeupoNMXBN4yVIVrpSqt7TyFTkjj/Z+LZClQX/8pNh3CGxQTcRpOT5X359afT2XRsrqKKJpgUgdD4/tXrqP7/BxGPoB95kdAgNiGE4HGEj0sMbhH4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779835132; c=relaxed/simple;
+	bh=PEOnU1euQksNTBNEpTVO434Z1jfRAyw8+p3ekYQ4Oqg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=GKfe1Ha75BiAWurYnAoNjuly10msXSUDDjZyBafmUvB682I2A1HbEjOH3PTLssCrGIU0fWR9oUmlQV4CXEJHPAwP00O45b5y4YNocLVKeFrPBx+wEfvAT4wxF7UvuZD8LodbvQuPcsqWThlwBcpjBdxipIKYMMsKiWgFGjzJmxE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=PWmWm9wE; arc=none smtp.client-ip=209.85.210.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="k5wV0vrJ"
-Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64QAF5Tx2120926;
-	Tue, 26 May 2026 20:57:26 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=ztadpTqDNW4MgEyA8t4o6CKI3PrP6RfQJ2JKXFadRF8=; b=k5wV0vrJ
-	/ZWzpO/FdqGbcavCaelcIS8/DnuSmkMqybFwtWddS4sb+stl/aQvCNwjojTy6yJD
-	oYBHw4kSjIb8ZrSCuuwysmLpNO/Tnx4wWO3LNvjpopLC0kSlRh9dUtzUuFIB3wde
-	1ttldjbNGndbgexxLvgxGU7YtTqwgHGmLfBq463I3xp4xsku0ZZT9F/VZBBR8rRE
-	HzfhZJ8l1ICKrxXWzq0dr92pzvOFxU4HCaA7EdrgewNrzish8LhNCh5t0hDActV3
-	3s7Wh0rMVgFb47Xpq+r7ACMTiQ5UAD9BCgnViBE6iyrucUPnapbGyru9plxu3GjA
-	29QyK0s/q0hIUg==
-Received: from cy3pr05cu001.outbound.protection.outlook.com (mail-westcentralusazon11013029.outbound.protection.outlook.com [40.93.201.29])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4eb4pdd77g-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Tue, 26 May 2026 20:57:25 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=ObCzasGqcye9SgVBS7oOqH7osG1qkBzu6Jx6XidQd29qeSETLahzbd4SRPrVySz6WwjkeB2zMePLPZP4QkWh4X/8/AGh75i64jnS4m5FwOfjYE5Pb+1G0IFepsFMmZCHW79LINAD8Z1Z52xghWBi8OyJfgfZPk6uhKCfmDx1L6aqAxD+OJcvkP7nMoYL3R3g/UzUG8uJLt7EEiWKf6zL/OGpcYw1YO2WPn5YZqL+edAqsPBnDvb68lc0uMhP3ROT/18Ju+FNa1zipNIvkxOQvakUp7wGJB1dctAnWPrvljJWT+fFIZY61rryc3QnkLMwTB/Y3TgC0ODlwQpNQtilOw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ztadpTqDNW4MgEyA8t4o6CKI3PrP6RfQJ2JKXFadRF8=;
- b=o77qClMQPrfAQYdkQX3KLkMIdyMWG2Btsc3yPfvY+ALTPEjkZQH+XjbhLMddBgNGr143Zr0ycsdGUVdnO/6B6Zd5kCNKDsz0hX73Rtm1dAbf+yMMxBXQHvVjzU6R7WdbRz7TyZCDo2jVP+tXveZvuL5I+0Wyx8W7NANqMEfhkrx8T56KAB61PUC6AU+vKnFXt2WQ5zXufspidisEjvWpGKX3/AWeGgfGOrMElv0V9cPv+L2QesFwCCeawwMzoD5LQjEn1cGzRJX1bZSNdZEr2M3So8I5Y8RLFJgF33Gf+RUNAHYRFANn38MtLOHTuCAdQSaVQtSiuklIaeoJHar/ng==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by DM4PR15MB5520.namprd15.prod.outlook.com (2603:10b6:8:110::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.71.11; Tue, 26 May
- 2026 20:57:22 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.21.0071.011; Tue, 26 May 2026
- 20:57:22 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: "david.laight.linux@gmail.com" <david.laight.linux@gmail.com>
-CC: "jack@suse.cz" <jack@suse.cz>, "brauner@kernel.org" <brauner@kernel.org>,
-        "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-        "slava@dubeyko.com" <slava@dubeyko.com>,
-        "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>,
-        Alex Markuze <amarkuze@redhat.com>,
-        "neil@brown.name" <neil@brown.name>,
-        "jlayton@kernel.org"
-	<jlayton@kernel.org>,
-        "idryomov@gmail.com" <idryomov@gmail.com>,
-        "zenghongling@kylinos.cn" <zenghongling@kylinos.cn>,
-        "zhongling0719@126.com"
-	<zhongling0719@126.com>
-Subject: Re:  [PATCH] ceph: Fix ERR_PTR(0) in ceph_mkdir()
-Thread-Topic: [PATCH] ceph: Fix ERR_PTR(0) in ceph_mkdir()
-Thread-Index: AQHc7VI/kCqKsCSOwUq7h2dX4XX+0w==
-Date: Tue, 26 May 2026 20:57:22 +0000
-Message-ID: <4d3e957637bb27c6959c08fae2dce1690a6f1306.camel@ibm.com>
-References: <20260520095428.69422-1-zenghongling@kylinos.cn>
-			<d2cd070ded01305414815248032bbfc331c392ee.camel@ibm.com>
-		 <20260520234153.7a89f0b1@pumpkin>
-	 <5feb37e5f77d29d9a41f20df8ab1162fab7730a9.camel@ibm.com>
-In-Reply-To: <5feb37e5f77d29d9a41f20df8ab1162fab7730a9.camel@ibm.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|DM4PR15MB5520:EE_
-x-ms-office365-filtering-correlation-id: 99fb61f0-adbd-41ed-7385-08debb69623f
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|10070799003|376014|7416014|366016|38070700021|4143699003|11063799006|56012099006|22082099003|18002099003;
-x-microsoft-antispam-message-info:
- Xq0bGskBtzjKna5SD7WXlxyuGJFArF9Q0Gx7QOvT5HsDsTQsEKdrrvsU413LHyDmRxwCT508YuB7mUcMZ7+gRUgOCwEUTUegNuWi1FkN4Q9fX76GQIwFlMGhHles6vQ0K36We9yftwUJqV/rAf0m0Xl95hBgG5gjTaptafbWK8eZVg6+nmY9rYXKeNlNidfFfL+nML8MBJeP+W7gQNceiHVHjaqHt93O6hsWue6qgVYdHVjV7ouWUpI68J8yHFTj3o1t0Ypo5rzqXU0JXnWtsOULZ45bOApg8pDkHcsEsxDhoJwFLjYyDylcCFVlnDVfMhCTqF6TBTSKzzl0Xg2AU7EQj2eoEDZUMPv1koRB6fbmHTDEkdkpZOMZVCwsSRyRJBQF12QX3U43NWjb5rCIG1JYYJY8SRrUNiU5YKBLv1adveG7XsSgAfse9sBoIsdTKjtqoCVgzAkhBUUYjEe/XeCwrDr6Au6JH8GtGoq6aMXrwpyjCS1/fnR/BHJU1Vfc+1Z9UIOlziN+Lnn650qNxDty3tisMxsVoeFyEtE1UoRE7rA5klNiOF4KoBAs6wfn7n7QNtnrBWYiFPa+dNxMwdoj1+WClOU+Jktrekqu3DahuKoYnpEDNZPHXzL+M7L9dQETOrXAeZFawvL1oPoIn624SyIGT6tQfjmFMvyvWwN2IWOkOYxWWh8zCp4bG1zyIzJNmIvWNR0u0ZHg+YgX4LpkTUA6HpLA51xoc0IaaN/f9CoBt1qVaFYonnIerppb
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(10070799003)(376014)(7416014)(366016)(38070700021)(4143699003)(11063799006)(56012099006)(22082099003)(18002099003);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?NkMxZUFqZzYzZVhnL25jaFplamZ3MENkS3JJbTN1UFJtVEtjM0lVSVBEdWJS?=
- =?utf-8?B?ZVlibzhML3JFSjJHNlJiTUZDNFU2am9uUi9LQUpHMDBOZmF1cDNFS1IzVTJt?=
- =?utf-8?B?VHpnb2RxZXB1RzNSQTRTVUZyd25VbzFQQjVUYXBaWVA4TlNHaG1QeWRhakJu?=
- =?utf-8?B?T2dTT3RWaXF6WjlTK0pUT2JEVFIzS01YR21HWnJSUHlrdnljb3pXTE1zTUVk?=
- =?utf-8?B?TjBkRmovaXF5clZwLzFJb0YwdStyblNlS053YjlMeVJsano1MTh1WjBESXJr?=
- =?utf-8?B?cUIxbmdqWVpmVkxMM3lSYlJnUDZHTThZREdxamdTSTV4U2RONE8zL2piOW1W?=
- =?utf-8?B?eFByU1ZpM3VnOTh4ZlhpNmJ5alJEUFdnclF0NVFEMlNJNG52U3M2cjZyK01E?=
- =?utf-8?B?SXVLUlJTUS9tSTRlZjhUSzJlVy92UG5SMVFOczFzc25jQnMyVUY3VDJRWjNG?=
- =?utf-8?B?WHJmeU9RYkNZRFRwVmEzeGllMlpWNzEwcGFtbzdkekpFTTZBbVNkZ3FWcUk3?=
- =?utf-8?B?Zms0c2pnUjA2alNrVVFFaG5SeHJQRXJxTE1xSHo1WVJKektzUnRQWU12R0hw?=
- =?utf-8?B?TzdIeFFqSzRJNnFTZ003bUNRYitPd2pyT1U0OHR6N0xKU3JJeWsxUCs5eWJs?=
- =?utf-8?B?Z2xQbXdRK3RnMXJqMDdERXBReklNSVF0YjFZL3ZKcTBlU25DaXFWSGk3NjZ1?=
- =?utf-8?B?T2hGN1Fya3FBcEJpaWFYbUE0Nk5idzIyY08yUzcxU3FjeHU1ZWV6Q29tVlBK?=
- =?utf-8?B?bXBpVHJwelczNlN0ZFU5Qkh1VHVOLy9iQVdWT3VYenBtQlhhSXpncEo3Ym1J?=
- =?utf-8?B?eDcrVENTL1VHN0J4OXA1K1JONkJLbzVlQTV2M3JQV21aRmRhNTN4TmdpYTQy?=
- =?utf-8?B?R1Y3UjYza1pRZmM3UFhNQWtZZno1UUpGRmVxWTllWmg2cXMvNlVIVmpVSHQz?=
- =?utf-8?B?YjQ5cFN0Um90MHMzbk5YcnJhVDRJbEVDK3Y2YzQyWmpGV1hndjlCckNpTyt1?=
- =?utf-8?B?VnJadGFNVEtyRnE2T2w0d3JsWTlZQUdwUnJXY0Z1QmZqcUZYc2QybUpQeGcx?=
- =?utf-8?B?WGZQR3lOQzg2RE9SYXlqMEEyaTFDV2NVNC9GMGlkYnB5M1FrbFZna3VMTm9l?=
- =?utf-8?B?OUQwa3RrMmtWZFE1T21uZXc2Z24zc0d6TGVwQzlNcE9sc3JvQ1JvK1kydHFq?=
- =?utf-8?B?K2hkZTF4aER6MW9nM0NkMXNVbkJZNXZYMi8xZ2tvMGJjekk1d3lwNCs1VGU2?=
- =?utf-8?B?UGR4OUFoWUFOcjRDMFZxelhOcFpNYmkwWm44VjVxT2hNekV6SnpQM2NkK2R2?=
- =?utf-8?B?VnRGSWozRHlqWXROa3I1amVCZEZBTWk4UDNLeG1haE1WRHczVzBtR3h2N3ho?=
- =?utf-8?B?NnZOMDJPc1U1UVlGMG9TZ1R5UlgzelBKVTBWTjFlcVRzSXVDWGlaNXpSNFBH?=
- =?utf-8?B?TllzcVFCUWNqbnlVU2tVNGphVVB4RkV1Y3NsVENjbnlKS1EwSFM1Qnp2MU04?=
- =?utf-8?B?bzJUSktrVTYxVnRXaTMwMUlKOTJuQUUzWGNMajlOZk1EQktieWY2cWdFV3JL?=
- =?utf-8?B?eWlKaHpPaTVwOWVEUHRnZktXMmdsMXFuc2xsV3VicXMzWEo1N24rd2lUOXAy?=
- =?utf-8?B?dUxFMXdOTkI5VHBPK0d0aXF3ajAxSTA2WmlJelRPK2pNYm9QaTVnbEc5WWN1?=
- =?utf-8?B?ZUlCSGJmMXovZTM1dE9RQmMvREJkQ1o4MkJkRXBkOWJLeFVBSHB0TFMzMWFF?=
- =?utf-8?B?Z3MyWWlpVjRhcFNVTG5MSlpXdzUzQlBPNXRZNG5QNVF3OGEvSytCVUVXSTRV?=
- =?utf-8?B?UnVFLzY4WlR1dm5UaGt0cVIrRzlNd2ZKT0NRWnFBUGhXTUxXa3UyRW1Jd2xm?=
- =?utf-8?B?MnhJcGNzQVVlQTk5b2Rqek5zSzhaeEZyK0oxQk85bHpyTGxyV0RsS1pTbnNM?=
- =?utf-8?B?Q0RqaEtUTWpia1k0SlhEMTBtc3JGYlo5SWZ4d00xamZteFdYdVZLY2RYSFkr?=
- =?utf-8?B?UE92Z1NhVTJQVjVZMDArbzRIY21YOG00MStKaDI5WWtVWlF0a2VTNk5rbnQ1?=
- =?utf-8?B?QVFvb0t1M0FQakd6UkkvTWozMUlrVldpV3czOCtHeGRFaExxRVY0b3c0SWhW?=
- =?utf-8?B?bkd0Q3ZPZmNWYzkxbjNPVFFIaS9sVXR3Znl2c0FERjJHbVg5NzU3Q3pLeW1i?=
- =?utf-8?B?c3FpU3UxNjB6cFJ2aXczeHM1NDl0cWROQ25Kdi9jVzZjRENlbVFFVGN0YW1Q?=
- =?utf-8?B?SjVLOVBndFJMT2ZjUC9hcS9kbEd0RWwyR1k5YjlUNUFQTDdCbER6NlV0TC9i?=
- =?utf-8?B?WEY1NUFkemsyL0VFc3g1cm1HSExKd1llYXRhWGxHYzZXQWJjNWwwQzZjVVI5?=
- =?utf-8?Q?yuh2thXeISO2ZDpL6BQbgXOuUePSSizaOBZ9J?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <FEC209475CB42F43A455C7402AA99604@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="PWmWm9wE"
+Received: by mail-ot1-f46.google.com with SMTP id 46e09a7af769-7dcdaf06498so7233173a34.2
+        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 15:38:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1779835128; x=1780439928; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=NAedWjqG73p0z+Bcksz0PqqemyZWbohHadUN5qn1TcQ=;
+        b=PWmWm9wEoVFsdRQPQCkctiZEsCgafhee+yu4qVk0vCj8tw0aps0E8AWmTKytSV2fOC
+         W3nvQjPm2ZynWyL2LPPoqk3faf3rzsNi41m7EgpUxPkFQAPr2PCbNgdNE4IAzxsS6DjH
+         US6A2lq2zF35p1SvlbbMsKV1SOKt2wiLuHAXOiLGmIDvdsrZam5R7BylE19lcI+5LFeI
+         4/ZL/7CwGeth3BLto8SHnoHfKfT0EBXIinPrKmcEF1VuV9bCUJ0xHQRgWxIgt6vKMx7C
+         0sqtcR21kgO1C6Qxk9qNZ3Sn39pmh7otZ5P/3+qFdc+8yUkVeRx6dBr3L27JgZQ/GRdF
+         GjBQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779835128; x=1780439928;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=NAedWjqG73p0z+Bcksz0PqqemyZWbohHadUN5qn1TcQ=;
+        b=tCiL1HcLlFTlofoIo6AX0m2UOH/xzzuQQWSAvmotdPsVfgR3A+ApNf6qz4vwADDCxS
+         ymii9NQly5IrDV0f8gKG5BYGYAmaEqovo3st9i8gAdL1Q+pPo7w+68y9YvoCKXrPmN9h
+         zCXB0iLRyMZyeQQ6815pLjzJpZkAd9vqNr1VszKbpYG3GkXDloRsHOT7tNdiGxcUaHLM
+         rfWP/G+SP4yJs1KO36HCrNgPGECm9Y+FHXjiA5X3cEkv9rU4tiVwEdxW9Xv5MIFTXUlv
+         0kYb0jxldFzU4ZFMLdlJuWd+/QSImgVAOa0SndHjvZx828/s/gA3JfPireqOXvMYDOjj
+         kBZQ==
+X-Gm-Message-State: AOJu0YxFHGPv+kMUBxozCiJyd2iB3n83sx1tLLTV+ZNHlhOS0PrSLttD
+	8NCFLtnOgvSrsA+4wjGJojapKy49d5vvBo9Q+NeAHoAoqHPIWTBcGVSYJZcCLQIoLRJWZzIiT9a
+	2bJ4g6Zo=
+X-Gm-Gg: Acq92OEcvMfqr+734b5q8nLGnDA29Qy2SaLzXTMxZFL/trMQNVnyGas4OEKrvRg+Pi5
+	75Ge1XagRw5mSOilQ2htEyQIHLUba49QGcFJf0Okl8PWuCkrAk/djPLz0BZOxF47jBFYidL0Icd
+	cDMag2rzptx8+unV4Zn+2KmE05HCxR41WavossXgdxFF2gVNeP8/KFVpGd/QRCTkGz5gBeiNh/2
+	Cl3Vt/aN/RJsqblRSEih0CxNk4wk5w7PCsFEEd1fQXijLM4iFlZX3tqCD0EojB6gu5rT0/B7ck4
+	ckW+VxpBEyzfOAKtSzT9RsVieOYWW2biJ7k/ka+YwllvHPqY8bH1palTZsEN3TdtFSgA8sG+lY6
+	IHYlWUyJFlFd5+ULcl5bwAo2uUEBCKLk2CokJd3MpLlYjl+kOJLqQFJA6EZ9Bd6IPhobxlQEvRV
+	oJEj+/p9gCQlO7MMFE5XR3KmaBGh+UWaQlAffZW/aQ78ccj/Eg1ZDW4+9iT8ZbubPhbRIlC74Re
+	Ct7n4FnYhMssWeHboArG8qvQym4Nfw=
+X-Received: by 2002:a05:6830:6482:b0:7dc:d587:af3 with SMTP id 46e09a7af769-7e5ff08ccf4mr12142890a34.23.1779835127937;
+        Tue, 26 May 2026 15:38:47 -0700 (PDT)
+Received: from system76-pc.attlocal.net ([2600:1700:6476:1430:c597:e624:3ba8:752c])
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7e6065e5ed1sm11150345a34.14.2026.05.26.15.38.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 May 2026 15:38:47 -0700 (PDT)
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	linux-fsdevel@vger.kernel.org,
+	pdonnell@redhat.com,
+	amarkuze@redhat.com,
+	Slava.Dubeyko@ibm.com,
+	slava@dubeyko.com,
+	sagemct@ibm.com
+Subject: [PATCH] libceph: rework behavior for not recognized tag codes
+Date: Tue, 26 May 2026 15:38:30 -0700
+Message-ID: <20260526223829.1385751-2-slava@dubeyko.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	GXInHrjzBkQo+WQuhKDG4pyPaV+P9E00xTbBuMqtQl7MYTM6wX81LKdrW6n6N4hzy+GQ+6oSAqwRDBCr9cHed+aX7gOpAZFwc+riyOUlm9OnlDy/Wxn8cPQDkEc0c6qbJDv77mNQ349+dpuII3e5Z3sh3cug3cqL3y/dTNbk8i1Dibl3OggAe63GA3Ht7YJbT6/5fVQ/ehKovMm2f24qjy5Ai6rdRgxvqLbWWyt2i/k+QJYQd33rukW0dNz0OGGIlLnt2LoW163r1RshjxDCPZNrdeGVWJz40JhGiIkJBWaOsLbAd1+aext1xeK3+40MLyG+sLFG9GyxXJQNpeMn+g==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 99fb61f0-adbd-41ed-7385-08debb69623f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 26 May 2026 20:57:22.7100
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: hCBKNIekuQI5Im39lHCbuxyXepaKAPhbF4er1ueOF+eDyIJywbBjIPpldROayjDsi9KXYIZP/UEGLKabk+vuBw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR15MB5520
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Authority-Analysis: v=2.4 cv=OdqoyBTY c=1 sm=1 tr=0 ts=6a160936 cx=c_pps
- a=jY48VJWlCesAGUsWasdw0A==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=NGcC8JguVDcA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=RzCfie-kr_QcCd8fBx8p:22 a=VnNF1IyMAAAA:8 a=v58Y35vW0u9X7un8fhUA:9
- a=QEXdDO2ut3YA:10
-X-Proofpoint-GUID: 74vxiSP8SD6ilTPkoj9U8GuzKuWXecks
-X-Proofpoint-ORIG-GUID: B-jPSfdhIYbkh4kqbx8vxuO2RJr6KiPE
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTI2MDE4MiBTYWx0ZWRfXw102WXApvocj
- Akmlbv+BBPO3nbn7hKCIkwVO9kkiEFQMa42LH49Ok7KiGZavVdVPTyEJraiaeD87iT4ZpCMQP7J
- 514TgC4knMF2FqOdTedfzpYWBpAi3WRd0TzHltM9dzBUcj3RQgsS7Qfn83ZX7OmfjdePqZPWl5A
- 9Ag94OTOSx0wLAV//uoT14nEN7wgZskFqzYX/1Lg13WsNIutz6sDpu6VyavJfGjFgJVj3ZnP0cC
- s+2oQKusbMBCwNnw9Ge9UtfgeZcB7IaC+L7P7xsamYh2dxeL65qclodaO5aA47LmdEKc972LxB7
- XmqumLJs7DTklx0GvKwfUj6eAGSNmKrNssJ/UZr13kKGlR69w7lb21hXLEuY+kljCfl5RjTKQeR
- nkT64OMRdKNLLFeQtg3hSQnr/jpajnZZb0iknjn8xg8LQmljbr6I4epDTadYximXZ/yexv8tDnJ
- MquRLkFJa+j8EU9s7zA==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-05-26_04,2026-05-26_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 impostorscore=0 clxscore=1015 malwarescore=0
- lowpriorityscore=0 bulkscore=0 suspectscore=0 adultscore=0 spamscore=0
- phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2605130000
- definitions=main-2605260182
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-T24gV2VkLCAyMDI2LTA1LTIwIGF0IDIyOjQ1ICswMDAwLCBWaWFjaGVzbGF2IER1YmV5a28gd3Jv
-dGU6DQo+IE9uIFdlZCwgMjAyNi0wNS0yMCBhdCAyMzo0MSArMDEwMCwgRGF2aWQgTGFpZ2h0IHdy
-b3RlOg0KPiA+IE9uIFdlZCwgMjAgTWF5IDIwMjYgMTg6NDk6MTggKzAwMDANCj4gPiBWaWFjaGVz
-bGF2IER1YmV5a28gPFNsYXZhLkR1YmV5a29AaWJtLmNvbT4gd3JvdGU6DQo+ID4gDQo+ID4gPiBP
-biBXZWQsIDIwMjYtMDUtMjAgYXQgMTc6NTQgKzA4MDAsIEhvbmdsaW5nIFplbmcgd3JvdGU6DQo+
-ID4gPiA+IFdoZW4gbWtkaXIgc3VjY2VlZHMsIGNlcGhfbWtkaXIoKSBzZXRzIHJldCB0byBFUlJf
-UFRSKDApIHdoaWNoIGlzDQo+ID4gPiA+IGluY29ycmVjdC4gSXQgc2hvdWxkIHJldHVybiBOVUxM
-IGluc3RlYWQgZm9yIHN1Y2Nlc3MuDQo+ID4gPiA+IA0KPiA+ID4gPiBGaXhlczogODhkNWJhZjY5
-MDgyICgiQ2hhbmdlIGlub2RlX29wZXJhdGlvbnMubWtkaXIgdG8gcmV0dXJuIHN0cnVjdCBkZW50
-cnkgKiIpDQo+ID4gPiA+IFNpZ25lZC1vZmYtYnk6IEhvbmdsaW5nIFplbmcgPHplbmdob25nbGlu
-Z0BreWxpbm9zLmNuPg0KPiA+ID4gPiAtLS0NCj4gPiA+ID4gIGZzL2NlcGgvZGlyLmMgfCAyICst
-DQo+ID4gPiA+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkN
-Cj4gPiA+ID4gDQo+ID4gPiA+IGRpZmYgLS1naXQgYS9mcy9jZXBoL2Rpci5jIGIvZnMvY2VwaC9k
-aXIuYw0KPiA+ID4gPiBpbmRleCBiYWM5Y2ZiNmI5ODIuLmFiN2Y3YjcwMTZjNiAxMDA2NDQNCj4g
-PiA+ID4gLS0tIGEvZnMvY2VwaC9kaXIuYw0KPiA+ID4gPiArKysgYi9mcy9jZXBoL2Rpci5jDQo+
-ID4gPiA+IEBAIC0xMTY3LDcgKzExNjcsNyBAQCBzdGF0aWMgc3RydWN0IGRlbnRyeSAqY2VwaF9t
-a2RpcihzdHJ1Y3QgbW50X2lkbWFwICppZG1hcCwgc3RydWN0IGlub2RlICpkaXIsDQo+ID4gPiA+
-ICAJICAgICFyZXEtPnJfcmVwbHlfaW5mby5oZWFkLT5pc190YXJnZXQgJiYNCj4gPiA+ID4gIAkg
-ICAgIXJlcS0+cl9yZXBseV9pbmZvLmhlYWQtPmlzX2RlbnRyeSkNCj4gPiA+ID4gIAkJZXJyID0g
-Y2VwaF9oYW5kbGVfbm90cmFjZV9jcmVhdGUoZGlyLCBkZW50cnkpOw0KPiA+ID4gPiAtCXJldCA9
-IEVSUl9QVFIoZXJyKTsNCj4gPiA+ID4gKwlyZXQgPSBlcnIgPyBFUlJfUFRSKGVycikgOiBOVUxM
-Ow0KPiA+ID4gPiAgb3V0X3JlcToNCj4gPiA+ID4gIAlpZiAoIUlTX0VSUihyZXQpICYmIHJlcS0+
-cl9kZW50cnkgIT0gZGVudHJ5KQ0KPiA+ID4gPiAgCQkvKiBTb21lIG90aGVyIGRlbnRyeSB3YXMg
-c3BsaWNlZCBpbiAqLyAgDQo+ID4gPiANCj4gPiA+IEkgdGhpbmsgdGhhdCB0aGlzIG1vZGlmaWNh
-dGlvbiBkb2Vzbid0IG1ha2Ugc2Vuc2UuIFRoZSBFUlJfUFRSKDApIHJldHVybnMgTlVMTCwNCj4g
-PiA+IGFzIGZhciBhcyBJIGNhbiB1bmRlcnN0YW5kLg0KPiA+ID4gDQo+ID4gPiAgIHN0YXRpYyBp
-bmxpbmUgdm9pZCAqIF9fbXVzdF9jaGVjayBFUlJfUFRSKGxvbmcgZXJyb3IpDQo+ID4gPiAgIHsN
-Cj4gPiA+ICAgICAgIHJldHVybiAodm9pZCAqKSBlcnJvcjsNCj4gPiA+ICAgfQ0KPiA+ID4gDQo+
-ID4gPiBFUlJfUFRSKDApIGV2YWx1YXRlcyB0byAodm9pZCAqKTAsIHdoaWNoIGlzIGV4YWN0bHkg
-TlVMTC4NCj4gPiANCj4gPiBJbiBwcmFjdGlzZSB5ZXMsIHRlY2huaWNhbGx5IG5vLg0KPiA+IE5V
-TEwgaXMgYW4gJ2ludGVnZXIgY29uc3RhbnQgZXhwcmVzc2lvbiB3aXRoIHZhbHVlIDAnIGNhc3Qg
-dG8gJ3ZvaWQgKicuDQo+ID4gRVJSX1BUUigwKSB3aWxsIGJlIHRoZSAnYWxsIHplcm8nIGJpdCBw
-YXR0ZXJuLCBOVUxMIGlzIGFuIGltcGxlbWVudGF0aW9uDQo+ID4gZGVmaW5lZCBiaXQgcGF0dGVy
-bi4NCj4gPiBTbyAnKHZvaWQgKikoMSAtIDEpJyBpcyBOVUxMIGJ1dCAnKHZvaWQgKikoeCA9IDAp
-JyBpc24ndC4NCj4gPiANCj4gPiBCdXQgSSB0aGluayBzcGFyc2UoKSBpcyB0cnlpbmcgdG8gc3Rv
-cCB5b3UgY29udmVydGluZyBhIE5VTEwNCj4gPiBwb2ludGVyIGludG8gJ3N1Y2Nlc3MnIHdoZW4g
-ZmFpbHVyZSB0byAnYWxsb2NhdGUvZmluZCcgc29tZXRoaW5nDQo+ID4gd291bGQgbm9ybWFsbHkg
-YmUgYW4gZXJyb3IuDQo+ID4gDQo+ID4gDQo+IA0KPiBTbywgZG8geW91IHRoaW5rIHRoYXQgdGhp
-cyBwYXRjaCBtYWtlcyBzZW5zZT8gSSBjb3VsZCBiZSB3cm9uZyB3aXRoIG15DQo+IGNvbmNsdXNp
-b24uIDopDQo+IA0KPiANCg0KSSB0aGluayB3ZSBjYW4gYWNjZXB0IHRoZSBwYXRjaC4NCg0KUmV2
-aWV3ZWQtYnk6IFZpYWNoZXNsYXYgRHViZXlrbyA8U2xhdmEuRHViZXlrb0BpYm0uY29tPg0KDQpU
-aGFua3MsDQpTbGF2YS4NCg==
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+
+[  196.609307] WARNING: net/ceph/messenger_v1.c:901 at ceph_con_v1_try_read+0x4e0f/0x6020, CPU#6: kworker/6:0/49
+[  196.612062] Modules linked in:
+[  196.613111] CPU: 6 UID: 0 PID: 49 Comm: kworker/6:0 Not tainted 6.19.0-g990dca9c3b7a-dirty #47 PREEMPT(lazy)
+[  196.615707] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+[  196.618102] Workqueue: ceph-msgr ceph_con_workfn
+[  196.619417] RIP: 0010:ceph_con_v1_try_read+0x4e0f/0x6020
+[  196.620919] Code: 85 a9 fc 90 0f 0b e8 c0 85 a9 fc 90 0f 0b 90 e9 c4 e0 ff ff e8 b2 85 a9 fc 90 0f 0b e8 aa 85 a9 fc 90 0f 0b e8 a2 85 a9 fc 90 <0f> 0b 90 e9 2b e2 ff ff e8 94 85 a9 fc 90 0f 0b 48 8b 3c 24 e8 68
+[  196.625686] RSP: 0018:ff11000100e4fa30 EFLAGS: 00010293
+[  196.627142] RAX: 0000000000000000 RBX: 000000000000001d RCX: ffffffff9eb8ba8e
+[  196.629041] RDX: ff11000100e04480 RSI: 000000000000001d RDI: 0000000000000004
+[  196.630938] RBP: 0000000075184a6c R08: 0000000000000001 R09: 0000000000000001
+[  196.632874] R10: 0000000075184a6c R11: ff11000100e04480 R12: 000000000000000d
+[  196.634763] R13: ff1100012698a533 R14: ff1100012698a0b8 R15: 0000000000000000
+[  196.636667] FS:  0000000000000000(0000) GS:ff1100040bc00000(0000) knlGS:0000000000000000
+[  196.638807] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  196.640390] CR2: 00007f3f19a5f3b0 CR3: 00000003408a8006 CR4: 0000000000771ef0
+[  196.642293] PKRU: 55555554
+[  196.643105] Call Trace:
+[  196.643782]  <TASK>
+[  196.644481]  ? register_lock_class+0x41/0x760
+[  196.645739]  ? srso_alias_return_thunk+0x5/0xfbef5
+[  196.647303]  ? srso_alias_return_thunk+0x5/0xfbef5
+[  196.648896]  ? __pfx___mutex_lock+0x10/0x10
+[  196.649986]  ? __lock_acquire+0x466/0x2260
+[  196.650770]  ? __pfx_ceph_con_v1_try_read+0x10/0x10
+[  196.651784]  ceph_con_workfn+0xa26/0x1340
+[  196.652617]  process_one_work+0x8fc/0x1990
+[  196.653496]  ? __pfx_process_one_work+0x10/0x10
+[  196.654430]  ? srso_alias_return_thunk+0x5/0xfbef5
+[  196.655393]  ? lock_is_held_type+0x8f/0x100
+[  196.656260]  ? srso_alias_return_thunk+0x5/0xfbef5
+[  196.657229]  worker_thread+0x6d3/0xf20
+[  196.658062]  ? __pfx_worker_thread+0x10/0x10
+[  196.658904]  kthread+0x37d/0x490
+[  196.659590]  ? lockdep_hardirqs_on_prepare+0xea/0x1a0
+[  196.660573]  ? __pfx_kthread+0x10/0x10
+[  196.661370]  ret_from_fork+0x67b/0xad0
+[  196.662167]  ? __pfx_ret_from_fork+0x10/0x10
+[  196.663059]  ? srso_alias_return_thunk+0x5/0xfbef5
+[  196.664008]  ? __switch_to+0x7a0/0x10c0
+[  196.664751]  ? __pfx_kthread+0x10/0x10
+[  196.665547]  ret_from_fork_asm+0x1a/0x30
+[  196.666389]  </TASK>
+[  196.666822] irq event stamp: 9881
+[  196.667490] hardirqs last  enabled at (9891): [<ffffffff9b40a7db>] __up_console_sem+0x7b/0x90
+[  196.669088] hardirqs last disabled at (9900): [<ffffffff9b40a7c0>] __up_console_sem+0x60/0x90
+[  196.670667] softirqs last  enabled at (9664): [<ffffffff9b267a34>] __irq_exit_rcu+0xc4/0x100
+[  196.672258] softirqs last disabled at (9641): [<ffffffff9b267a34>] __irq_exit_rcu+0xc4/0x100
+[  196.673711] ---[ end trace 0000000000000000 ]---
+[  197.154025] libceph: mon0 (1)10.0.0.2:6789 socket closed (con state OPEN)
+[  197.155329] libceph: mon0 (1)10.0.0.2:6789 session lost, hunting for new mon
+[  197.158745] libceph: mon0 (1)10.0.0.2:6789 socket closed (con state V1_BANNER)
+
+First issue:
+
+After the client and server complete the v1 handshake and the server's reply
+tag is CEPH_MSGR_TAG_READY or CEPH_MSGR_TAG_SEQ, the client increments its
+own connect_seq and then checks that the server echoed back the same value.
+The con->v1.in_reply.connect_seq comes directly from the network —
+the server's connect reply message. A MITM who corrupts even one byte of
+that field produces a mismatch.
+
+Using WARN_ON() on a value that comes from the wire means an attacker controls
+whether the kernel warning fires, giving them the ability to permanently taint
+the kernel (TAINT_WARN). WARN_ON() does not affect control flow — after the
+warning, the code continues and opens the connection as if everything were fine,
+with an inconsistent connect_seq.
+
+The second issue:
+
+The bad_tag is reached when the first byte of a new msgr-v1 frame is not one of
+the four recognised tag values (CEPH_MSGR_TAG_MSG, ACK, KEEPALIVE2_ACK, CLOSE).
+Any single-byte value 0–255 except those four reaches bad_tag. An attacker who
+can flood system log with error messages.
+
+This patch compares con->v1.connect_seq and con->v1.in_reply.connect_seq.
+If they are not the same, then pr_err_ratelimited() will be called
+instead of WARN_ON(). The second fix exchanges pr_err() on
+pr_err_ratelimited() for the case of bad tag in ceph_con_v1_try_read().
+
+Fixes: a56dd9bf4722 ("libceph: move msgr1 protocol specific fields to its own struct")
+Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+cc: Alex Markuze <amarkuze@redhat.com>
+cc: Ilya Dryomov <idryomov@gmail.com>
+cc: Patrick Donnelly <pdonnell@redhat.com>
+cc: Ceph Development <ceph-devel@vger.kernel.org>
+---
+ net/ceph/messenger_v1.c | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/net/ceph/messenger_v1.c b/net/ceph/messenger_v1.c
+index c9e002d96319..5b2b68220e88 100644
+--- a/net/ceph/messenger_v1.c
++++ b/net/ceph/messenger_v1.c
+@@ -742,6 +742,7 @@ static int process_connect(struct ceph_connection *con)
+ 	u64 sup_feat = from_msgr(con->msgr)->supported_features;
+ 	u64 req_feat = from_msgr(con->msgr)->required_features;
+ 	u64 server_feat = le64_to_cpu(con->v1.in_reply.features);
++	u32 connect_seq;
+ 	int ret;
+ 
+ 	dout("process_connect on %p tag %d\n", con, con->v1.in_tag);
+@@ -894,12 +895,15 @@ static int process_connect(struct ceph_connection *con)
+ 			le32_to_cpu(con->v1.in_reply.global_seq);
+ 		con->v1.connect_seq++;
+ 		con->peer_features = server_feat;
++		connect_seq = le32_to_cpu(con->v1.in_reply.connect_seq);
+ 		dout("process_connect got READY gseq %d cseq %d (%d)\n",
+-		     con->v1.peer_global_seq,
+-		     le32_to_cpu(con->v1.in_reply.connect_seq),
+-		     con->v1.connect_seq);
+-		WARN_ON(con->v1.connect_seq !=
+-			le32_to_cpu(con->v1.in_reply.connect_seq));
++		     con->v1.peer_global_seq, connect_seq, con->v1.connect_seq);
++		if (con->v1.connect_seq != connect_seq) {
++			pr_err_ratelimited("connect_seq mismatch: my %u peer %u\n",
++					   con->v1.connect_seq, connect_seq);
++			con->error_msg = "protocol error, connect_seq mismatch";
++			return -1;
++		}
+ 
+ 		if (con->v1.in_reply.flags & CEPH_MSG_CONNECT_LOSSY)
+ 			ceph_con_flag_set(con, CEPH_CON_F_LOSSYTX);
+@@ -1456,7 +1460,7 @@ int ceph_con_v1_try_read(struct ceph_connection *con)
+ 	return ret;
+ 
+ bad_tag:
+-	pr_err("try_read bad tag %d\n", con->v1.in_tag);
++	pr_err_ratelimited("try_read bad tag %d\n", con->v1.in_tag);
+ 	con->error_msg = "protocol error, garbage tag";
+ 	ret = -1;
+ 	goto out;
+-- 
+2.54.0
+
