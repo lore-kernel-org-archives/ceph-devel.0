@@ -1,74 +1,75 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 517152848A1
-	for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 16:32:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6694D3B38AB
+	for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 16:33:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779813180; cv=none; b=hvIXy2ZKH/SSNqEwVQkS0V3f3N+x+nqzN9K4FfhShD9dzjm9s8wdYoHW8fGQr24K2pkLbH6tRs6wuapLWc78e8vhS/4O9O42nQVVSO7slTJ1ahl0Q4CZGl+r0l5oaWSa4j74LZ68R+Vz+g/iQ/RwA1Qy3KgBR50XlGLR82m+PnI=
+	t=1779813205; cv=none; b=lbW8WA8ihaSG2vzlPVOZRiUNMw9b1vb0Y/XTRwlIFKCQjDSIBQHCg81SAyeYbsljvR0WyBBqGlY2zV+Y2q3fMzR3TrmLdXrQtQIx6++nANeSCboI9SrKoQoQYzwFqWFBTlh/4BGqdsjU8u+xSUCzeB6bsGGCqaqvmYN0iqoZJbc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779813180; c=relaxed/simple;
-	bh=poZsfj/UwUb2WLbLR3S2QQZCQt9woHNmN3GQx9bCnD0=;
+	s=arc-20240116; t=1779813205; c=relaxed/simple;
+	bh=NQOe+UjWdGnVmxzEkYjltdvt9gXONMQhZwwsb4lN7B4=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=bo/6/WW28QRgjuMMaXpMNtuVZ/a8TGc16aDu93SCd7XyLbph/8Cx1/Savdyq8WiAw7CJIfQKzFA4ZVFsUixxZQEks5o3B/a0IMBZyb/bxlpAgGW+u5NZ34BHIYAj0nUpZBPhbEoHj/Bm5b0pSP6S9ILmsK7/qcb74twYr+a26uM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=YsidaHuE; arc=none smtp.client-ip=209.85.128.172
+	 Content-Type:MIME-Version; b=EuiDzJwbL3jdzSBy29q4NA7O8w0s/IHaB69+Vv6AMK9INpqiRdCjmnjG8amkrYvJsTLP5fiAshvr6lpvbg7rHOviC20LGie7P+Yt5X/vYSNxQI6f6jaKVtSDTC1kN0BCNL2R8brNMUo7a6AlqE1Cb48mGE07heaiQhl5F705DYU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=m45F4RQM; arc=none smtp.client-ip=209.85.128.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="YsidaHuE"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-7c5d8f45465so104955457b3.1
-        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 09:32:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="m45F4RQM"
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-7bdf83185bbso105904887b3.2
+        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 09:33:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1779813178; x=1780417978; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1779813203; x=1780418003; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=Vz833UBNpvGkocryyLDxNEOOUpVoX0GySBSEyjg3XUA=;
-        b=YsidaHuETWna0Y+7mlC/K7aqe4Xv1tlv2szpcK1iKKpSkXDfoOudteq8V6kH+pwHmr
-         rqjR17UCu5vR5C1mnTUFZn2S/VqFZCjSFoLW0YgeAtIiw7slVVG66QJAT0Rh72iuqXjm
-         STNGKVPj0uwUBJKpfC0DsZHLeRfzf9B5QfpKLLdCiaqVizLWoAl/nXPkR3ar56+eoO/J
-         UVhs7XUE9rZJJpgkMgQWNlYCRsB+/kFZ1e9XPrmaPIIcc8Pjx9tkAk/Gnwi02dsN/m3F
-         endxjZUvt19B982sSKRAjDiTm86V3aHlBDRlLr5HR2OFBysO/TpkPEIyll5Ok/y+XqYG
-         c6zA==
+        bh=P6VodZMHHDEo/2rU5Zr5IuL2TP0ijXOb7QcnvRQEv4o=;
+        b=m45F4RQMKjOb6gVCHJrpQgeonJ0NuBcAQ7rhVL8nPw7Y3iWp48DHC5k967FwOurgGp
+         L6bx8mYYvFmwKRNPI6bjwYc00Hzwlxo+dgcw2UvnH3hRolb21aUapaLXldUCHqu4LQcW
+         FyXirU5xQXyhOj42ZeWraL57CNwS5Krft24BQW6fwxxoy0NbHEKna0fOhIEy0sKTa0TN
+         nAHVkhWHOe3eWlvAEJr1Z+xuzvvawDieK0EJZ9Kx6VsQm/x1OZabGRampu/rJgeZ80S6
+         72bbW+sMlI03THc7vssEhdJL3pPBlX01K5DU0xvJ2SL9GYtCx8CCS2UX/Ee8dfVc9QCe
+         /YDg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779813178; x=1780417978;
+        d=1e100.net; s=20251104; t=1779813203; x=1780418003;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Vz833UBNpvGkocryyLDxNEOOUpVoX0GySBSEyjg3XUA=;
-        b=OOOy+cayuaHcvJxvLb3ly+x3plqlxlRSCqZq4fOS9nwTnQgvsD6fNr30Dd9F7MiB2q
-         +V5A4JTsVgfbN+tHBDFF7R0bhVDonIrhM9Ga4pI0AYVn++Q4QdRj81gRA5ZyUAqWapq5
-         t99kblU+KKgZuVRMQuyQh1orHDOq/mj3APxQ96JbnKT0KFTAFH/2FZas1jRXLANZ4+g5
-         fDBEIrhWmxZkyZZVV5qjt90KTN+T6IZJs7HWDxyRfCyIYLoxQqgHc8q6NRdW1dSU4JY0
-         WtP8tEc0udfPZ60h46zgMMDntEXok7oRrb4a3VMDXksWrpS+XXbFyhLhx22gxz0TUqrc
-         q5UA==
-X-Forwarded-Encrypted: i=1; AFNElJ91dFdeeJLBgedqKLrWG7Y83xo6QS1pecQRNOij9AVVDjY8Hld1YtprWTOYdFXxDkigPjIA0HthbSgr@vger.kernel.org
-X-Gm-Message-State: AOJu0YygGvDIF+Y5ebQg2bKnbDowQc7SRSxx3UzJ3GYznO7aFHSqOpg7
-	hHwzmyf83MSmAF/iW9PYkZ1SwkknMDIUkJNpzWrbQ3OJfL5RRw938pb5VV9IgCd6umc=
-X-Gm-Gg: Acq92OHhnUSdKkT69CGa+7DHJR+lqhJRzI94pLWuvQsyDd7nI9RPqmFQRmT5V6F3NZO
-	Hqi0mNh8LkfKYpV7p+e40ouQDIfFZ5OBvD4TBLnQNzgbW5Bg+DCxl5bsFteKdYPnMU7c6cKXgzN
-	66YLaujV72X1mvDOXNh1/1p8/4Tis8Uj7Um4vXRLjYSn/4YL5riWzXG1eXxciWryQOgLdTgeiOP
-	TZN7/Zp2ca4boiQkF2iMh+nm7jbTbLlIvmYAjU6C56906aknjU36JQmhxNpi8YAuFIs0jlAqSSj
-	CuhEqsACqrYY+PuIvdGSJtij9fbkpETI/Ioc5oBgKDyQsYZfFVcJBl2c7LH5GWZe/oF5lkwJejK
-	7i8RoJCcPTGJ9hBVV3tNWZyivWHCFMSia/48FNsvVmR2R3YdkEFvybHG7qLO4G/i3zYHEQNSczb
-	93V/6h7wKRjfy7k1P9SxbHIcI8J0WQnBR5Ni6FeURKMyENzZ0oWacXfEr107oy1zCkZW+25My0E
-	38Vc8Y9W9RiY2gE2La/wBtyFqPSaWm/ihu55evB0vGYpIxFdFmankTMJIDhf22oEihFhH4=
-X-Received: by 2002:a05:690c:4a13:b0:7b1:fa45:72e3 with SMTP id 00721157ae682-7d3337e7e1fmr223095557b3.4.1779813178270;
-        Tue, 26 May 2026 09:32:58 -0700 (PDT)
+        bh=P6VodZMHHDEo/2rU5Zr5IuL2TP0ijXOb7QcnvRQEv4o=;
+        b=cugYK414K0RRuRo+1cqvKS5P5+vYlo0w8h4MIoQ+XYadds6NavUGOwzc6vVg0wi4i6
+         Rt66uBZv8hSqwfL2OMDJ1bvf388D7mpWpI5ZIVAEdR0dFCOWxaV5qTiq1KlBREKvjjF3
+         +En72x+JH4ZOyLKroe6mShsFXB93Ord7Tu5NrhKCAAYvf1h8C+4jeoI9qdEl8V5DIpTV
+         jnGnZ1Bnouf17oXiR3P1HVwXpXMvHPwQ1z97kOdwdCBH1R382Wphijj0jXTx+ST04HEE
+         wksQIbZxnjulzzK8ou2PlCMvcPMv9SHtUb9yrPINbTDnnM0HPs0rvgdDPrzxM6cUxGGW
+         XTug==
+X-Forwarded-Encrypted: i=1; AFNElJ+zjQbxwb6zqs0DHNzv13epVHjnfp9pWse/Kf2chkhoRMhnuoQFInmtNjSBViFXozXTn9MFevG5Mnpl@vger.kernel.org
+X-Gm-Message-State: AOJu0YzEU3j/14bWkGfS2jVQqFLcdMz57QqTN8Fx05D5kZQUsUVR6NaG
+	+a9XoasKbxbUacmhFV0/pqjET4yaknqaMYmblHEbwX4c/n61xIcOGit9AtgdA0QE9J4=
+X-Gm-Gg: Acq92OEbAy1RsswAmaAC5Xpcfx4IElVEWXNFzXPTo8ie4qOR3nZNF/6hRMMNHSLeGqH
+	sEICX8YZCom1Pn8gvBttuEAZm28esgru7dOpfePFbUvw0Y7HoV98+uDsJLneMXbW+Fg6tesJXqD
+	DEa+jmDhq7o/LH4e0B3zL8Z1JsaB/yvZiSvgLD1HOa6tq7SqD2nv5G8LYdQv0QQVixQ9qW6PBHJ
+	aMzo+qfCagZFgwqGOS9WiCUSuCmG0OZ8YjF5HcRw1oiCoduf0hfj3PqveI+gLHzp3c6cDEFW3FV
+	rNbZCzXS2X9ow2gADNEBGIcZpCjU9hYQzWvNQIxrDMgjjYOfmV/BF9QWIviFePZmKIfRPU4mvG6
+	z8ctPqDAg+tA+HQnY8sek1L6PveUX4OXH0qmm+4x5I0ijuONh/mH19imrY4WMtkEQhR86aoclnj
+	h9qP1bCJy1jr/1x/qrBlBSsXwKPFA1oJP3XrbwLMUsi/y5Kpk2WAYm8uDT0E+Jvhi8nXWDWju7q
+	3Tj35RENxJrKFLRmppX9M3qAvTUy5AjDuxWVCqbZL3/0h90m7QttGsceU9mTP+KBkR17mI=
+X-Received: by 2002:a05:690c:3686:b0:7c8:615c:7b55 with SMTP id 00721157ae682-7d33a158d60mr209140077b3.23.1779813203354;
+        Tue, 26 May 2026 09:33:23 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:569d:a84b:2a39:6537? ([2600:1700:6476:1430:569d:a84b:2a39:6537])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7d38c33c8c5sm62721467b3.38.2026.05.26.09.32.57
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7d38c8396basm63604767b3.44.2026.05.26.09.33.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 May 2026 09:32:57 -0700 (PDT)
-Message-ID: <9468ab69783d8063a48196cb26526e3cfe9990a2.camel@dubeyko.com>
-Subject: Re: [bug report] libceph: out-of-bounds accesses in
+        Tue, 26 May 2026 09:33:22 -0700 (PDT)
+Message-ID: <47b69468215fd0748aa4ce95034b0a19ee8ccc15.camel@dubeyko.com>
+Subject: Re: [PATCH] libceph: Fix multiplication overflow in
  decode_new_up_state_weight()
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: "security@kernel.org" <security@kernel.org>, ceph-devel@vger.kernel.org
-Date: Tue, 26 May 2026 09:32:56 -0700
-In-Reply-To: <8ece78d3-8a7f-4d7c-9619-ccc41f1bdd11@tu-ilmenau.de>
+Cc: security@kernel.org, ceph-devel@vger.kernel.org
+Date: Tue, 26 May 2026 09:33:21 -0700
+In-Reply-To: <20260526154443.3467352-1-raphael.zimmer@tu-ilmenau.de>
 References: <8ece78d3-8a7f-4d7c-9619-ccc41f1bdd11@tu-ilmenau.de>
+	 <20260526154443.3467352-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -125,84 +126,54 @@ MIME-Version: 1.0
 
 CC: ceph-devel@vger.kernel.org
 
-On Tue, 2026-05-26 at 17:43 +0200, Raphael Zimmer wrote:
-> Hi,
->=20
-> I encountered two bugs in the libceph module. Both occur in the
-> function
-> decode_new_up_state_weight() in net/ceph/osdmap.c and may result in
-> accessing out-of-bounds memory. They can be triggered by a corrupted
-> message of type CEPH_MSG_OSD_MAP received over a connection to a Ceph
-> monitor or OSD.
->=20
-> When the received message of type CEPH_MSG_OSD_MAP contains an
-> incremental osdmap, decode_new_up_state_weight() is called as part of
-> its decoding.
->=20
-> The first problem is a potential multiplication overflow when
-> calculating the needed decoding length based on a value read from the
-> incoming message.
-> The function decodes new_weight, new_state, and new_up_client, but in
-> a
-> different order than they appear in the message. Therefore, the
-> lengths
-> of new_up_client and new_state are calculated first, and they are
-> skipped to decode them later. When calculating the length of the
-> new_state part, the following logic is used:
-> 	ceph_decode_32_safe(p, end, len, e_inval);
-> 	len *=3D sizeof(u32) + (struct_v >=3D 5 ? sizeof(u32) :
-> sizeof(u8));
-> 	ceph_decode_need(p, end, len, e_inval);
-> If a large len value is decoded from the incoming message, an
-> overflow
-> occurs in the multiplication. This may result in having enough room
+On Tue, 2026-05-26 at 17:44 +0200, Raphael Zimmer wrote:
+> If a message of type CEPH_MSG_OSD_MAP contains a (maliciously)
+> corrupted
+> osdmap, out-of-bounds memory accesses may occur in
+> decode_new_up_state_weight(). This happens because the bounds check
 > for
-> the calculated length and skipping this value.
-> When decoding new_state later, len is read again from the message
-> buffer
-> and used as iteration count for the subsequent decoding loop. In this
-> case, no overflowing multiplication is performed, and the decoding
-> exceeds the previously skipped part of the message buffer and very
-> likely also the end of the total buffer, resulting in out-of-bounds
-> reads.
+> the new_state part is based on calculating its length depending on a
+> len
+> value read from the incoming message. This calculation may overflow
+> leading to an incorrect bounds check. Subsequently, out-of-bounds
+> reads
+> may occur when decoding this part.
 >=20
-> The second problem concerns possible negative values decoded from the
-> osd fields, present in each of the three aforementioned parts.
-> The values are decoded from a 32-bit message field and stored in a
-> variable of type s32. Subsequently, a check using if (osd >=3D
-> map->max_osd) is performed to not allow values that exceed the number
-> of
-> OSDs. This only catches values that are too large. A negative value
-> will
-> pass this check and lead to indexing into an array with a negative
-> value. This can happen at multiple positions in the code and lead to
-> out-of-bounds reads and writes. For example, a maliciously crafted
-> message containing osd fields with values interpreted as negative
-> numbers in the new_weight part allows writing arbitrarily chosen 32-
-> bit
-> values to arbitrarily chosen (32-bit-aligned) relative indices
-> located
-> prior to the memory buffer allocated for map->osd_weight.
+> This patch adds a check that catches large values for len that would
+> result in a multiplication overflow to treat such osdmaps/messages as
+> invalid.
 >=20
-> The first issue can be fixed by adding a check that catches large
-> values
-> for len that would result in a multiplication overflow, and treat
-> such
-> osdmaps/messages as invalid.
-> The second problem can be prevented by changing the data type of the
-> osd
-> variables to u32. This would prevent values read from these message
-> fields from being interpreted as negative numbers. This choice of
-> data
-> type also matches the type of map->max_osd with which the comparison
-> to
-> filter out high values is performed.
+> Fixes: 930c53286977 ("libceph: apply new_state before new_up_client
+> on incrementals")
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+> =C2=A0net/ceph/osdmap.c | 5 ++++-
+> =C2=A01 file changed, 4 insertions(+), 1 deletion(-)
 >=20
-> I will send a suggested patch that addresses each of the issues in
-> reply
-> to this email. However, if it would be preferred to have both fixes
-> combined in a single patch, I can do this as well.
->=20
->=20
-> Best regards,
-> Raphael
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 076763420b1d..4638df7ad231 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -1846,6 +1846,7 @@ static int decode_new_up_state_weight(void **p,
+> void *end, u8 struct_v,
+> =C2=A0	void *new_state;
+> =C2=A0	void *new_weight_end;
+> =C2=A0	u32 len;
+> +	const u32 new_state_len =3D sizeof(u32) + (struct_v >=3D 5 ?
+> sizeof(u32) : sizeof(u8));
+> =C2=A0	int ret;
+> =C2=A0	int i;
+> =C2=A0
+> @@ -1865,7 +1866,9 @@ static int decode_new_up_state_weight(void **p,
+> void *end, u8 struct_v,
+> =C2=A0
+> =C2=A0	new_state =3D *p;
+> =C2=A0	ceph_decode_32_safe(p, end, len, e_inval);
+> -	len *=3D sizeof(u32) + (struct_v >=3D 5 ? sizeof(u32) :
+> sizeof(u8));
+> +	if (len > U32_MAX / new_state_len)
+> +		goto e_inval;
+> +	len *=3D new_state_len;
+> =C2=A0	ceph_decode_need(p, end, len, e_inval);
+> =C2=A0	*p +=3D len;
+> =C2=A0
