@@ -1,75 +1,75 @@
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6694D3B38AB
-	for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 16:33:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D6A53AEF50
+	for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 16:33:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779813205; cv=none; b=lbW8WA8ihaSG2vzlPVOZRiUNMw9b1vb0Y/XTRwlIFKCQjDSIBQHCg81SAyeYbsljvR0WyBBqGlY2zV+Y2q3fMzR3TrmLdXrQtQIx6++nANeSCboI9SrKoQoQYzwFqWFBTlh/4BGqdsjU8u+xSUCzeB6bsGGCqaqvmYN0iqoZJbc=
+	t=1779813226; cv=none; b=lKBQKgqWF0dLoBuUQlVllrP7lK4Soi6Uu0hHA4iCEwN95MC0hQfcNSmSQSau44cl2xzTlQYyUwS4pTsszL4n2h2d6lMxqYDbGm5jVz4Y1kKCq8OZwu4x3J88/8HCyxPsDI9W1oBTeziKnB9wQlr4JA0vjo6tQvTTNoK9iXn4OJU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779813205; c=relaxed/simple;
-	bh=NQOe+UjWdGnVmxzEkYjltdvt9gXONMQhZwwsb4lN7B4=;
+	s=arc-20240116; t=1779813226; c=relaxed/simple;
+	bh=RBf7gEGkQ8IVe0/2TfFpMkSN+PGlwMrYNfOXmVMqfi4=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=EuiDzJwbL3jdzSBy29q4NA7O8w0s/IHaB69+Vv6AMK9INpqiRdCjmnjG8amkrYvJsTLP5fiAshvr6lpvbg7rHOviC20LGie7P+Yt5X/vYSNxQI6f6jaKVtSDTC1kN0BCNL2R8brNMUo7a6AlqE1Cb48mGE07heaiQhl5F705DYU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=m45F4RQM; arc=none smtp.client-ip=209.85.128.179
+	 Content-Type:MIME-Version; b=rb49iVVzpVJEGmpF7me3l1+sZ5sOeqP2w1CfH3V4tqcWl/G+rMQFqSSp9HkpiZa3l5r1bXDWoF3kmBu3XUwb6lNFDG6BBJnPwm4oSYyBrySb+LsHiJPyGeHvlhxvlM0EYtpMQ31LWTj774DhnpA8QtuWT6glf3l160Wc1wehtEE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=0j//doZf; arc=none smtp.client-ip=209.85.128.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="m45F4RQM"
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-7bdf83185bbso105904887b3.2
-        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 09:33:24 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="0j//doZf"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-7bde9d73678so110387817b3.0
+        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 09:33:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1779813203; x=1780418003; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1779813222; x=1780418022; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=P6VodZMHHDEo/2rU5Zr5IuL2TP0ijXOb7QcnvRQEv4o=;
-        b=m45F4RQMKjOb6gVCHJrpQgeonJ0NuBcAQ7rhVL8nPw7Y3iWp48DHC5k967FwOurgGp
-         L6bx8mYYvFmwKRNPI6bjwYc00Hzwlxo+dgcw2UvnH3hRolb21aUapaLXldUCHqu4LQcW
-         FyXirU5xQXyhOj42ZeWraL57CNwS5Krft24BQW6fwxxoy0NbHEKna0fOhIEy0sKTa0TN
-         nAHVkhWHOe3eWlvAEJr1Z+xuzvvawDieK0EJZ9Kx6VsQm/x1OZabGRampu/rJgeZ80S6
-         72bbW+sMlI03THc7vssEhdJL3pPBlX01K5DU0xvJ2SL9GYtCx8CCS2UX/Ee8dfVc9QCe
-         /YDg==
+        bh=2D/WCc7wIW1+upgEMQvlsg5VTwxMfKIs5SXS6cc8+e0=;
+        b=0j//doZfMAWZJ/fR/4PdwSU0FKQhNX+iQ7uRrrKsFWPvYi7IaKv39/vHlG3GFbI+hC
+         K5Kmr1XP2/NnfzZ5VvkfahiVSi39t0UxT1iMQ4PgFKt3JIrIWiRjQLH6NKSagPEu1KPq
+         NsOeBtM6E1m+m3S3ONp4kmwoIljusCDUEGd+S6DyU4/b19rKAw516zFGpH35obiE10OJ
+         K56BaF+gdDN73IEv+fboGVTyRQ3jVV4u0w1lcEc1F8ed4908pjoqa1E2wuyDlej2xqd1
+         5w8Y+2Oy4OjfAqemBoWG5584qwO6Rc3dil2JuUeb7YjxAQshxroGmWc8W4QXQmU1MzJJ
+         QX0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779813203; x=1780418003;
+        d=1e100.net; s=20251104; t=1779813222; x=1780418022;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=P6VodZMHHDEo/2rU5Zr5IuL2TP0ijXOb7QcnvRQEv4o=;
-        b=cugYK414K0RRuRo+1cqvKS5P5+vYlo0w8h4MIoQ+XYadds6NavUGOwzc6vVg0wi4i6
-         Rt66uBZv8hSqwfL2OMDJ1bvf388D7mpWpI5ZIVAEdR0dFCOWxaV5qTiq1KlBREKvjjF3
-         +En72x+JH4ZOyLKroe6mShsFXB93Ord7Tu5NrhKCAAYvf1h8C+4jeoI9qdEl8V5DIpTV
-         jnGnZ1Bnouf17oXiR3P1HVwXpXMvHPwQ1z97kOdwdCBH1R382Wphijj0jXTx+ST04HEE
-         wksQIbZxnjulzzK8ou2PlCMvcPMv9SHtUb9yrPINbTDnnM0HPs0rvgdDPrzxM6cUxGGW
-         XTug==
-X-Forwarded-Encrypted: i=1; AFNElJ+zjQbxwb6zqs0DHNzv13epVHjnfp9pWse/Kf2chkhoRMhnuoQFInmtNjSBViFXozXTn9MFevG5Mnpl@vger.kernel.org
-X-Gm-Message-State: AOJu0YzEU3j/14bWkGfS2jVQqFLcdMz57QqTN8Fx05D5kZQUsUVR6NaG
-	+a9XoasKbxbUacmhFV0/pqjET4yaknqaMYmblHEbwX4c/n61xIcOGit9AtgdA0QE9J4=
-X-Gm-Gg: Acq92OEbAy1RsswAmaAC5Xpcfx4IElVEWXNFzXPTo8ie4qOR3nZNF/6hRMMNHSLeGqH
-	sEICX8YZCom1Pn8gvBttuEAZm28esgru7dOpfePFbUvw0Y7HoV98+uDsJLneMXbW+Fg6tesJXqD
-	DEa+jmDhq7o/LH4e0B3zL8Z1JsaB/yvZiSvgLD1HOa6tq7SqD2nv5G8LYdQv0QQVixQ9qW6PBHJ
-	aMzo+qfCagZFgwqGOS9WiCUSuCmG0OZ8YjF5HcRw1oiCoduf0hfj3PqveI+gLHzp3c6cDEFW3FV
-	rNbZCzXS2X9ow2gADNEBGIcZpCjU9hYQzWvNQIxrDMgjjYOfmV/BF9QWIviFePZmKIfRPU4mvG6
-	z8ctPqDAg+tA+HQnY8sek1L6PveUX4OXH0qmm+4x5I0ijuONh/mH19imrY4WMtkEQhR86aoclnj
-	h9qP1bCJy1jr/1x/qrBlBSsXwKPFA1oJP3XrbwLMUsi/y5Kpk2WAYm8uDT0E+Jvhi8nXWDWju7q
-	3Tj35RENxJrKFLRmppX9M3qAvTUy5AjDuxWVCqbZL3/0h90m7QttGsceU9mTP+KBkR17mI=
-X-Received: by 2002:a05:690c:3686:b0:7c8:615c:7b55 with SMTP id 00721157ae682-7d33a158d60mr209140077b3.23.1779813203354;
-        Tue, 26 May 2026 09:33:23 -0700 (PDT)
+        bh=2D/WCc7wIW1+upgEMQvlsg5VTwxMfKIs5SXS6cc8+e0=;
+        b=iv9snbw5GhzFjh9Klac57d1bJEne4ejMvogpibP/EfPowkfEvHpojS4Ikyh5bQiUn+
+         CcMCpZsDZBsMoT1AaoIKfCcXa6OAVL5PKWffMTDr977EX58J1LsMQrg9JiFUecVtIGvW
+         nNLUWhZwXZrS6w9nVV+4jg5KYFtRBzihpiNnsWlRTEvVrkRevD9za73tPh7FClmik03m
+         n9TM67tJ3D5lTFccyI2N7sySsG1ztr7jA637O6vltbRJ+dmqPzL9mYjgfIvlyRUf8URX
+         /HvrOgaQXn1w5B5b9Q1p36MgTV3OhDi43uq+cpI0w3bglqqr7LjJzGuUu0C/moQ+KZt8
+         ZdlQ==
+X-Forwarded-Encrypted: i=1; AFNElJ/5a+OCk2p7Td5CxhijMxat9PZ5HheWVlVHSPaW5mtu1bPLJTfwMgScFvxEfHvhqUen/40agSUapT3M@vger.kernel.org
+X-Gm-Message-State: AOJu0YwXC4RD6MnWgh56+Ib3eiakaqLPyveoexikC/B5Pvzzf/tIp128
+	BE4ayJZiNh475LIidrKFaKcRiJDnR/hpR0YMN9zpYl7N6QQr3H+QNFndS/INEopMt8A=
+X-Gm-Gg: Acq92OEiitNmUx/qoFfI1Mou1KK7NE0ThtStrHgEoGcpv6rNAGSf+9pByCE53IFRSBG
+	04UfhCccBczVxSrYCDzHvxFVx+lMwrJ16wIGNlMDD9Boz6fuOgGs798LCq4QGfUoxuMWb1Poc87
+	I4NHS+CBAqgH0iLqf+1xCmqlRwMqmT0f7Q8lYnz6Bvj1RLGZ5QMB+kPaQw1OL42Dd7RLH9kQg6z
+	gPZbGNtcnps4C2+V+Y77Jd+nvqjsSmW9fm5tfeCDBedP4NMGKrlajz547Fp2oK8FALkYcvkRbTG
+	0ky/IORMiLt2EMgy9lJLeuhscyXNdDNQ9eAE+K7BZB5RiYdHRp95Y9vHR8v/FTqtQ0Pq7DcAzzv
+	R+FkVC3kQ4JWCpDhduX1Q4RuYQB0nqzQ5HJT/XXQuRH2m5dpAlvn7wAP0MRrI7May8eTfAc/kOR
+	wz7cpogSUH3NPvdKP2JT8jmisN5boMDXURE99BXJR2Jrj3CStHbTCIg16aLQtkmsJiWmqsdSagD
+	fUrE6cyplDTwfTwE8iuhI9HAiOruVccMv5SW7cLl38hWYEgoj6psJYkfzZx
+X-Received: by 2002:a05:690c:82:b0:7bd:9a25:f39f with SMTP id 00721157ae682-7d20b27c60cmr184227867b3.4.1779813222326;
+        Tue, 26 May 2026 09:33:42 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:569d:a84b:2a39:6537? ([2600:1700:6476:1430:569d:a84b:2a39:6537])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7d38c8396basm63604767b3.44.2026.05.26.09.33.22
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7d38be313c9sm63634007b3.30.2026.05.26.09.33.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 May 2026 09:33:22 -0700 (PDT)
-Message-ID: <47b69468215fd0748aa4ce95034b0a19ee8ccc15.camel@dubeyko.com>
-Subject: Re: [PATCH] libceph: Fix multiplication overflow in
+        Tue, 26 May 2026 09:33:41 -0700 (PDT)
+Message-ID: <a1588473555d3b8887ad755fa7c3ddaeac508675.camel@dubeyko.com>
+Subject: Re: [PATCH] libceph: Use u32 for decoding osd indices in
  decode_new_up_state_weight()
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
 Cc: security@kernel.org, ceph-devel@vger.kernel.org
-Date: Tue, 26 May 2026 09:33:21 -0700
-In-Reply-To: <20260526154443.3467352-1-raphael.zimmer@tu-ilmenau.de>
+Date: Tue, 26 May 2026 09:33:40 -0700
+In-Reply-To: <20260526154533.3467475-1-raphael.zimmer@tu-ilmenau.de>
 References: <8ece78d3-8a7f-4d7c-9619-ccc41f1bdd11@tu-ilmenau.de>
-	 <20260526154443.3467352-1-raphael.zimmer@tu-ilmenau.de>
+	 <20260526154533.3467475-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -126,54 +126,123 @@ MIME-Version: 1.0
 
 CC: ceph-devel@vger.kernel.org
 
-On Tue, 2026-05-26 at 17:44 +0200, Raphael Zimmer wrote:
+On Tue, 2026-05-26 at 17:45 +0200, Raphael Zimmer wrote:
 > If a message of type CEPH_MSG_OSD_MAP contains a (maliciously)
 > corrupted
 > osdmap, out-of-bounds memory accesses may occur in
-> decode_new_up_state_weight(). This happens because the bounds check
-> for
-> the new_state part is based on calculating its length depending on a
-> len
-> value read from the incoming message. This calculation may overflow
-> leading to an incorrect bounds check. Subsequently, out-of-bounds
-> reads
-> may occur when decoding this part.
+> decode_new_up_state_weight(). In this function, osd indices are
+> decoded
+> at multiple places from the incoming message into a variable of type
+> s32. The subsequent check only catches values exceeding the number of
+> OSDs. Negative values will pass this check and result in array
+> accesses
+> with negative indices.
 >=20
-> This patch adds a check that catches large values for len that would
-> result in a multiplication overflow to treat such osdmaps/messages as
-> invalid.
+> This patch changes the type of all three occurrences of an osd
+> variable
+> from s32 to u32 to prevent interpreting these as negative indices.
+> Furthermore, the type of the osd parameter of set_primary_affinity()
+> is
+> changed from int to u32, because this function gets called from
+> decode_new_up_state_weight() with the decoded osd index. This was the
+> only occurrence where it was called with a signed integer value.
+> Since
+> all calls of this function are now performed with a value of type u32
+> for the osd parameter, the parameter should also have this type.
 >=20
 > Fixes: 930c53286977 ("libceph: apply new_state before new_up_client
 > on incrementals")
 > Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 > ---
-> =C2=A0net/ceph/osdmap.c | 5 ++++-
-> =C2=A01 file changed, 4 insertions(+), 1 deletion(-)
+> =C2=A0net/ceph/osdmap.c | 18 +++++++++---------
+> =C2=A01 file changed, 9 insertions(+), 9 deletions(-)
 >=20
 > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 076763420b1d..4638df7ad231 100644
+> index 4638df7ad231..6c572c32a22f 100644
 > --- a/net/ceph/osdmap.c
 > +++ b/net/ceph/osdmap.c
-> @@ -1846,6 +1846,7 @@ static int decode_new_up_state_weight(void **p,
-> void *end, u8 struct_v,
-> =C2=A0	void *new_state;
-> =C2=A0	void *new_weight_end;
-> =C2=A0	u32 len;
-> +	const u32 new_state_len =3D sizeof(u32) + (struct_v >=3D 5 ?
-> sizeof(u32) : sizeof(u8));
-> =C2=A0	int ret;
-> =C2=A0	int i;
+> @@ -1508,7 +1508,7 @@ u32 ceph_get_primary_affinity(struct
+> ceph_osdmap *map, int osd)
+> =C2=A0	return map->osd_primary_affinity[osd];
+> =C2=A0}
 > =C2=A0
-> @@ -1865,7 +1866,9 @@ static int decode_new_up_state_weight(void **p,
+> -static int set_primary_affinity(struct ceph_osdmap *map, int osd,
+> u32 aff)
+> +static int set_primary_affinity(struct ceph_osdmap *map, u32 osd,
+> u32 aff)
+> =C2=A0{
+> =C2=A0	if (!map->osd_primary_affinity) {
+> =C2=A0		int i;
+> @@ -1875,7 +1875,7 @@ static int decode_new_up_state_weight(void **p,
 > void *end, u8 struct_v,
-> =C2=A0
-> =C2=A0	new_state =3D *p;
+> =C2=A0	/* new_weight */
 > =C2=A0	ceph_decode_32_safe(p, end, len, e_inval);
-> -	len *=3D sizeof(u32) + (struct_v >=3D 5 ? sizeof(u32) :
-> sizeof(u8));
-> +	if (len > U32_MAX / new_state_len)
-> +		goto e_inval;
-> +	len *=3D new_state_len;
-> =C2=A0	ceph_decode_need(p, end, len, e_inval);
-> =C2=A0	*p +=3D len;
+> =C2=A0	while (len--) {
+> -		s32 osd;
+> +		u32 osd;
+> =C2=A0		u32 w;
 > =C2=A0
+> =C2=A0		ceph_decode_need(p, end, 2*sizeof(u32), e_inval);
+> @@ -1884,7 +1884,7 @@ static int decode_new_up_state_weight(void **p,
+> void *end, u8 struct_v,
+> =C2=A0		if (osd >=3D map->max_osd)
+> =C2=A0			goto e_inval;
+> =C2=A0
+> -		osdmap_info(map, "osd%d weight 0x%x %s\n", osd, w,
+> +		osdmap_info(map, "osd%u weight 0x%x %s\n", osd, w,
+> =C2=A0			=C2=A0=C2=A0=C2=A0 w =3D=3D CEPH_OSD_IN ? "(in)" :
+> =C2=A0			=C2=A0=C2=A0=C2=A0 (w =3D=3D CEPH_OSD_OUT ? "(out)" : ""));
+> =C2=A0		map->osd_weight[osd] =3D w;
+> @@ -1905,7 +1905,7 @@ static int decode_new_up_state_weight(void **p,
+> void *end, u8 struct_v,
+> =C2=A0	*p =3D new_state;
+> =C2=A0	len =3D ceph_decode_32(p);
+> =C2=A0	while (len--) {
+> -		s32 osd;
+> +		u32 osd;
+> =C2=A0		u32 xorstate;
+> =C2=A0
+> =C2=A0		osd =3D ceph_decode_32(p);
+> @@ -1920,10 +1920,10 @@ static int decode_new_up_state_weight(void
+> **p, void *end, u8 struct_v,
+> =C2=A0			xorstate =3D CEPH_OSD_UP;
+> =C2=A0		if ((map->osd_state[osd] & CEPH_OSD_UP) &&
+> =C2=A0		=C2=A0=C2=A0=C2=A0 (xorstate & CEPH_OSD_UP))
+> -			osdmap_info(map, "osd%d down\n", osd);
+> +			osdmap_info(map, "osd%u down\n", osd);
+> =C2=A0		if ((map->osd_state[osd] & CEPH_OSD_EXISTS) &&
+> =C2=A0		=C2=A0=C2=A0=C2=A0 (xorstate & CEPH_OSD_EXISTS)) {
+> -			osdmap_info(map, "osd%d does not exist\n",
+> osd);
+> +			osdmap_info(map, "osd%u does not exist\n",
+> osd);
+> =C2=A0			ret =3D set_primary_affinity(map, osd,
+> =C2=A0						=C2=A0=C2=A0
+> CEPH_OSD_DEFAULT_PRIMARY_AFFINITY);
+> =C2=A0			if (ret)
+> @@ -1939,7 +1939,7 @@ static int decode_new_up_state_weight(void **p,
+> void *end, u8 struct_v,
+> =C2=A0	*p =3D new_up_client;
+> =C2=A0	len =3D ceph_decode_32(p);
+> =C2=A0	while (len--) {
+> -		s32 osd;
+> +		u32 osd;
+> =C2=A0		struct ceph_entity_addr addr;
+> =C2=A0
+> =C2=A0		osd =3D ceph_decode_32(p);
+> @@ -1953,9 +1953,9 @@ static int decode_new_up_state_weight(void **p,
+> void *end, u8 struct_v,
+> =C2=A0		if (ret)
+> =C2=A0			return ret;
+> =C2=A0
+> -		dout("%s osd%d addr %s\n", __func__, osd,
+> ceph_pr_addr(&addr));
+> +		dout("%s osd%u addr %s\n", __func__, osd,
+> ceph_pr_addr(&addr));
+> =C2=A0
+> -		osdmap_info(map, "osd%d up\n", osd);
+> +		osdmap_info(map, "osd%u up\n", osd);
+> =C2=A0		map->osd_state[osd] |=3D CEPH_OSD_EXISTS |
+> CEPH_OSD_UP;
+> =C2=A0		map->osd_addr[osd] =3D addr;
+> =C2=A0	}
