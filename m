@@ -1,233 +1,152 @@
-Received: from mail-oo1-f48.google.com (mail-oo1-f48.google.com [209.85.161.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CA12375F81
-	for <ceph-devel@vger.kernel.org>; Wed, 27 May 2026 02:59:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 942A63B777C
+	for <ceph-devel@vger.kernel.org>; Wed, 27 May 2026 08:59:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779850764; cv=none; b=AcfiTz2W3wDhlRfw32JmD3roCfnvkljtuAfMrpSxQFBnsONxDJhy89jx2PUz/clD7YQYWJ9Uqi9WQPTMezP1uRvDE3VNmwoDvOiLn42HtkmxS0EdjSdNJ2PzxxVvENXWsqSwAH2vHeSg1/C6bRyvkDbR/NQzbblMTJeAjtzENqs=
+	t=1779872357; cv=none; b=YJWcVNUSuS3QoRSf4X/xhpN6IZ5f2RyfXPwJIdhohxJAD6jfBpVqTr6MR1zpOFUGuQYXGdP54GQV4zcY8rFfivJve/aQrpMZ2a34SUu6Ig9Gv9wOKOVyXQbTTyZ/yUPu4wQ6ME2Mr7VEUaacf3AquYp+o0tDrHXizWBUSqGJGp4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779850764; c=relaxed/simple;
-	bh=kjicujkA5E7r76arGyOQ0yL2KoWTZqaFbfby1uBLO1Y=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=oRMJgbVeKYt+2qdikZBnKKBedtdFiSxJEB90VgsPmWg2tdCRJs7KVVRTdLCvx7xtOAm9i1CUS1AnZ+VaVGDuXz+unuExLlpwv4QNIgOrfW0EbFHrkjBrBOCPrCyb6M8QnoySNFvQHK+yuO4KvJDie+gKJrlWguJTIFGLuJ6HfEs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=UysuvIhR; arc=none smtp.client-ip=209.85.161.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1779872357; c=relaxed/simple;
+	bh=wt20C9F7iEE4Swxy+x6nXe05s8kFho3jePBzbFxhjdI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=OOdjv90e2lC+8yPCd0LQK7248rxGUxpFSHn2LtEOJ5yAliWN5VtcSXnbl6C8eJQd+Gk4V+Q6a3179PW60YauHPvJvToLJ/R5DQafanqiQp/hiH20jTrC4bxq64YyhjocqSr/jIQeHLPICGknNmsuJ5TVIpmxtVM0uXfebTiPtgE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=xtB6taZk; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UysuvIhR"
-Received: by mail-oo1-f48.google.com with SMTP id 006d021491bc7-69d79fc48d2so3654643eaf.1
-        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 19:59:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779850762; x=1780455562; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Zegv+ZZxpEC4mW2h/ysZZnf1Sps69/IlZUIElRjQ8+k=;
-        b=UysuvIhRG5IcrkrkpEDoV7+WWk473J0TvePpbTuLr4pyCyi3y+WiFjewZzZyIaC7E2
-         eTpnoPuO2p644Z4CtwWcpeZWfXP63vY3rCyz+sK8DUYhBgK9yCFT394aTpsDDivGCWyi
-         94AIkY7STXGsywlqEia4Gp3RSsj4iJmeXGffnHQqFJh8Upz6r2eEFDAVJNjc9LeLFmA8
-         4UWvlBoJbNTQLwNymFdBcEN6aykfLIwxaWDtU1PoI1E7Eo3qCDpTOI+IazY7gPfYLwL8
-         1D4PuDk6vRN3jVED6WEYpSIXspyNOl4z5zjyOzHiMfwsXAO9IOJ9ypNosxMzFOk3AqsI
-         kpcQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779850762; x=1780455562;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=Zegv+ZZxpEC4mW2h/ysZZnf1Sps69/IlZUIElRjQ8+k=;
-        b=KeuSRIYGxrufTc9npU3PCkigQPbEWhr1QU/MgrCxUvQ2/dKrrfZnVweTL+pe/SvJ9e
-         ZXwv06S1RGVZIpsKBIvxYLlHI9YoOWy++kfFuIbeRN15xckwWVHGd5R/7QkxMLJ31nQS
-         nRy+DAgIZNOzjrFN0oVNh/SpJhJ4/yxxG3cTAgpNuoBjSD50XXzVK5JLmR9+wnXqmVfX
-         HkFb15mB8gkkKpJqngfRJ49oTmgpia4QZenESXqH0mAGczfsAwpgFjvo0gXuqDPQhFtD
-         pMPODju48b2nKmHsgq49gtFLNaOjU6hf05UJzQZwqI8WP9iihMQfcVFrjXfmwIIKS/4H
-         Zzqw==
-X-Forwarded-Encrypted: i=1; AFNElJ/v6Ad8iQdM2JftApxv+Cae75wTdXQb8Y7mIatHVodsBpmkz/He5XWpu6/hyzRB1xWebjrxWBjVFM/J@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx97upkzAJryHscVD/OpDaa8vnfDKXOPqOrxTpuFJnmLDTIjAA0
-	WLj4oVePFGk2jq0U6PlV8UWIoGSN2uKA97D56UT0vnRKPWkmDD4iTg3b
-X-Gm-Gg: Acq92OGCRrMudo1qIjGDS0Fzdr8Lf6rk06+I3V+1tFt9lNhLvO3L808wvdiM1fJgo9S
-	m94OvmzKNDmuT3fDdEuLE/lMkJVSMoEhg3C/jvw3zJpUhoWVOXbXH9nOMPpw7pc5D7+XuZ9Azzn
-	LOuadK8CIqWVQVbIu5dEESHoTjdUuXEeGpnI9qj/qzyvKzWdj4Iw6qXI8Nx89J8bnGOBzOfWWdN
-	//kkHquOhDtXqbaQq/X39LXTPRlj1CEaeD/wPz68jCx+aTmcQDUpwRr1PJfENQyvjeJQWNGbzVq
-	NWws13ERRJaH7mMOQgFOKseJyrrSDjG8+ivTxoxFJltfRCViSP7HyJvpEs7tDa1NZcQwCH8z4Ls
-	zok3RFJK0vhiYqP0W/tisYcdN+QXVLXvCTFZA2j6L1TzSRMn+sehB4Vs2aAuPwRV682WWqwdciQ
-	ZiynyFkINAPsB87Zkf0V0VngslzSVHho0yTFDiCQvMFGePmEE8G/jHGQl384U=
-X-Received: by 2002:a05:6820:1748:b0:696:17a6:c06f with SMTP id 006d021491bc7-69d7ead4fa3mr11345857eaf.12.1779850762129;
-        Tue, 26 May 2026 19:59:22 -0700 (PDT)
-Received: from localhost (static-23-234-115-121.cust.tzulo.com. [23.234.115.121])
-        by smtp.gmail.com with UTF8SMTPSA id 586e51a60fabf-43b63976d57sm15305313fac.9.2026.05.26.19.59.20
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 26 May 2026 19:59:21 -0700 (PDT)
-From: Sam Edwards <cfsworks@gmail.com>
-X-Google-Original-From: Sam Edwards <CFSworks@gmail.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: Jeff Layton <jlayton@kernel.org>,
-	Xiubo Li <xiubli@redhat.com>,
-	Milind Changire <mchangir@redhat.com>,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Sam Edwards <CFSworks@gmail.com>,
-	stable@vger.kernel.org
-Subject: [PATCH 2/2] ceph: properly decrypt filenames in vmalloc() buffers
-Date: Tue, 26 May 2026 19:58:28 -0700
-Message-ID: <20260527025828.5966-3-CFSworks@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260527025828.5966-1-CFSworks@gmail.com>
-References: <20260527025828.5966-1-CFSworks@gmail.com>
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="xtB6taZk"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1779872347; h=message-id
+ : date : mime-version : subject : to : cc : references : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=wt20C9F7iEE4Swxy+x6nXe05s8kFho3jePBzbFxhjdI=;
+ b=xtB6taZk+ZBFUUX+R5KsY0fG9AUYs/f7eni0sEmKsJbsSr+Tl7z+sfkpINvIJcQUI+oCV
+ Z/IbgbmieshcuLN7pHPOPB/cx2sdb93nDKp/YIvSJhiCkAWOOUBqKWMTBLBOAO4VqImu/6v
+ UYiH3yuT1M8AARO1Z/MkDHB9WYTOrGG6ELT1SXtdhUpLHCc36pHVlQuTbe77HJdQFcifuP1
+ yTTxf/YnZQUGxvCk4c3Vw6s6DBTbqDD9gWHq/mK1jxWhI3w/nLcW3Jvxvv47ZEpzEFh1o2B
+ ry/1GHwyU7zlQwj6xr1H58dfESxV5y47dM0OAB4ufon3XW/kkH2XmufLomIw==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 14AF65FC52;
+	Wed, 27 May 2026 10:59:06 +0200 (CEST)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 9779A5FC99;
+	Wed, 27 May 2026 10:59:06 +0200 (CEST)
+Message-ID: <d2c60213-a6c1-4caf-980a-575b1c43fcb9@tu-ilmenau.de>
+Date: Wed, 27 May 2026 10:59:06 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] libceph: Reject monmaps advertising zero monitors
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+ "idryomov@gmail.com" <idryomov@gmail.com>, Alex Markuze
+ <amarkuze@redhat.com>, "slava@dubeyko.com" <slava@dubeyko.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+References: <20260522154420.3324836-1-raphael.zimmer@tu-ilmenau.de>
+ <502b1825d71f4ec870b64ec8257946a916bb0fee.camel@ibm.com>
+Content-Language: en-US
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
+ 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
+In-Reply-To: <502b1825d71f4ec870b64ec8257946a916bb0fee.camel@ibm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-The fscrypt subsystem uses the scatterlist crypto API, inheriting its
-requirement that any buffers are in the linear mapping region. However,
-the messenger client uses kvmalloc() to create buffers for messages,
-which will occasionally place those buffers in the vmalloc() region when
-physical memory fragmentation doesn't permit a large enough kmalloc().
-The various callers of ceph_fname_to_usr() directly pass (slices of) raw
-messages from the MDS without considering that the messages may be in
-vmalloc() buffers, resulting in oopses especially on non-x86 platforms
-(see 'Closes:' for more details and a reproducer).
+On 26.05.26 8:30 PM, Viacheslav Dubeyko wrote:
+> On Fri, 2026-05-22 at 17:44 +0200, Raphael Zimmer wrote:
+>> A message of type CEPH_MSG_MON_MAP contains a monmap that is sent from a
+>> monitor to the client. This monmap contains information about the
+>> existing monitors in the cluster. Currently, a monmap indicating that
+>> there are zero monitors in the cluster is treated as valid. However, it
+>> is impossible to have zero monitors in the cluster and still receive a
+>> valid monmap from a monitor. Therefore, such a monmap must be corrupted
+>> and should be treated as invalid. Furthermore, a monmap with a monitor
+>> count of zero can subsequently crash the client when attempting to open
+>> a session with a monitor in __open_session(). This happens because the
+>> "BUG_ON(monc->monmap->num_mon < 1)" assertion in pick_new_mon() is
+>> triggered.
+>>
+>> This patch extends a check in ceph_monmap_decode() to also reject
+>> arriving mon_maps with num_mon == 0 rather than only with
+>> num_mon > CEPH_MAX_MON.
+>>
+>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+>> ---
+>>  net/ceph/mon_client.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>> index d2cdc8ee3155..6c5f83379055 100644
+>> --- a/net/ceph/mon_client.c
+>> +++ b/net/ceph/mon_client.c
+>> @@ -114,7 +114,7 @@ static struct ceph_monmap *ceph_monmap_decode(void **p, void *end, bool msgr2)
+>>  
+>>  	dout("%s fsid %pU epoch %u num_mon %u\n", __func__, &fsid, epoch,
+>>  	     num_mon);
+>> -	if (num_mon > CEPH_MAX_MON)
+>> +	if (num_mon > CEPH_MAX_MON || num_mon == 0)
+> 
+> The patch makes sense. But, I think we need to reverse the order:
+> 
+> if (num_mon == 0 || num_mon > CEPH_MAX_MON)
+> 
+> It will look like more reasonable, from my point of view. What do you think?
+> 
 
-Make ceph_fname_to_usr() explicitly tolerant of vmalloc()-allocated
-fname->ctext, fname->name, and/or oname->name buffers, using `tname`
-(which, when non-null, must be a linear address; when null, is briefly
-allocated as necessary) as a bounce buffer to avoid passing any
-inappropriate addresses to fscrypt_fname_disk_to_usr().
+I think it may look somewhat cleaner this way. Since there isn't really
+any functional difference, I can reverse the order as suggested.
 
-Additionally change parse_reply_info_readdir() -- the only function to
-supply its own `tname` -- to follow the new "tname must never come from
-vmalloc()" rule by passing NULL when the message is not in the linear
-region. Though this causes a per-dentry kmalloc()+kfree(), this overhead
-exists only when processing the minority of messages that spill into
-vmalloc(). My (crude) testing puts this at only about 1 in 8,000 readdir
-messages. Still, if the overhead proves unreasonable in the future, it
-is easy enough to mitigate: a future change could allocate a bounce
-buffer in parse_reply_info_readdir() and use that as `tname` instead.
+> As far as I can see, usually, Ceph cluster has odd number of monitors (3, 5,
+> etc) and not only one. I am thinking should we share some message in system log
+> if it is not so? What do you think?
+> 
 
-Fixes: 457117f077c67 ("ceph: add helpers for converting names for userland presentation")
-Closes: https://lore.kernel.org/ceph-devel/CAH5Ym4ga7miUQE0K-cJA93Ya7w62P69MAN27R5cBiYnudoOHdA@mail.gmail.com/T/
-Cc: stable@vger.kernel.org # v6.6+
-Signed-off-by: Sam Edwards <CFSworks@gmail.com>
----
- fs/ceph/crypto.c     | 37 +++++++++++++++++++++++++++++--------
- fs/ceph/mds_client.c |  8 ++++++--
- 2 files changed, 35 insertions(+), 10 deletions(-)
+I'm not sure about this. What would be the reason for it? If there is
+only one or an even number of monitors in the cluster, that's something
+that should be seen from the cluster and managed there if necessary. So
+we are talking about a corrupted monmap as considered in this patch.
+Claiming there are zero monitors has an actual impact, as it may crash
+the client. A non-zero value is valid and can be handled. If a monitor
+lies and announces a different number of monitors than are actually
+present, this can have some consequences. A log message could be helpful
+in detecting it. But a monitor can also announce a wrong number that is
+still odd. And if there is actually an even number of monitors, we
+create additional useless log output.
+Which log level did you have in mind?
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index 7515cb251226..61d6830d16bc 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -298,6 +298,10 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
-  * Otherwise, base64 decode the string, and then ask fscrypt to format it
-  * for userland presentation.
-  *
-+ * Though the fscrypt/crypto subsystems broadly expect all buffers to be in the
-+ * linear-mapped region, this function slightly relaxes those requirements:
-+ * fname->ctext, fname->name, and oname->name may be vmalloc(), but not tname.
-+ *
-  * Returns 0 on success or negative error code on error.
-  */
- int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
-@@ -305,11 +309,15 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- {
- 	struct inode *dir = fname->dir;
- 	struct fscrypt_str _tname = FSTR_INIT(NULL, 0);
-+	struct fscrypt_str _oname;
- 	struct fscrypt_str iname;
- 	char *name = fname->name;
- 	int name_len = fname->name_len;
- 	int ret;
- 
-+	if (WARN_ON_ONCE(tname && is_vmalloc_addr(tname)))
-+		return -EIO;
-+
- 	/* Sanity check that the resulting name will fit in the buffer */
- 	if (fname->name_len > NAME_MAX || fname->ctext_len > NAME_MAX)
- 		return -EIO;
-@@ -350,16 +358,18 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- 		goto out_inode;
- 	}
- 
-+	if (!tname && (fname->ctext_len == 0 ||
-+		       unlikely(is_vmalloc_addr(fname->ctext)) ||
-+		       unlikely(is_vmalloc_addr(oname->name)))) {
-+		ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
-+		if (ret)
-+			goto out_inode;
-+		tname = _tname.name;
-+	}
-+
- 	if (fname->ctext_len == 0) {
- 		int declen;
- 
--		if (!tname) {
--			ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
--			if (ret)
--				goto out_inode;
--			tname = _tname.name;
--		}
--
- 		declen = base64_decode(name, name_len, tname, false,
- 				       BASE64_IMAP);
- 		if (declen <= 0) {
-@@ -368,12 +378,21 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- 		}
- 		iname.name = tname;
- 		iname.len = declen;
-+	} else if (unlikely(is_vmalloc_addr(fname->ctext))) {
-+		memcpy(tname, fname->ctext, fname->ctext_len);
-+
-+		iname.name = tname;
-+		iname.len = fname->ctext_len;
- 	} else {
- 		iname.name = fname->ctext;
- 		iname.len = fname->ctext_len;
- 	}
- 
--	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, oname);
-+	_oname.name = unlikely(is_vmalloc_addr(oname->name)) ?
-+		tname : oname->name;
-+	_oname.len = oname->len;
-+	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, &_oname);
-+	oname->len = _oname.len;
- 	if (!ret && (dir != fname->dir)) {
- 		char tmp_buf[BASE64_CHARS(NAME_MAX)];
- 
-@@ -381,6 +400,8 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- 				    oname->len, oname->name, dir->i_ino);
- 		memcpy(oname->name, tmp_buf, name_len);
- 		oname->len = name_len;
-+	} else if (!ret && unlikely(is_vmalloc_addr(oname->name))) {
-+		memcpy(oname->name, _oname.name, _oname.len);
- 	}
- 
- out:
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index aa6730b48e97..8fcf185e3a82 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -538,9 +538,13 @@ static int parse_reply_info_readdir(void **p, void *end,
- 			 * to do the base64_decode in-place. It's
- 			 * safe because the decoded string should
- 			 * always be shorter, which is 3/4 of origin
--			 * string.
-+			 * string. If this message was allocated with
-+			 * vmalloc() (happens, but rarely), leave it
-+			 * NULL and let ceph_fname_to_usr() allocate
-+			 * suitable temporary working space instead.
- 			 */
--			tname = _name;
-+			if (likely(!is_vmalloc_addr(_name)))
-+				tname = _name;
- 
- 			/*
- 			 * Set oname to _name too, and this will be
--- 
-2.53.0
-
+Best regards,
+Raphael
