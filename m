@@ -1,218 +1,117 @@
-Received: from mail-ot1-f46.google.com (mail-ot1-f46.google.com [209.85.210.46])
+Received: from mail-oa1-f45.google.com (mail-oa1-f45.google.com [209.85.160.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F9EE3C98B7
-	for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 22:38:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9DD6280A56
+	for <ceph-devel@vger.kernel.org>; Wed, 27 May 2026 02:59:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779835132; cv=none; b=bbyPz0iLoNcVu0T3RbvZYWVrO1Ei76BRgno+jeNRimNBMW2Nd89a3/kbI1XeupoNMXBN4yVIVrpSqt7TyFTkjj/Z+LZClQX/8pNh3CGxQTcRpOT5X359afT2XRsrqKKJpgUgdD4/tXrqP7/BxGPoB95kdAgNiGE4HGEj0sMbhH4=
+	t=1779850761; cv=none; b=dLGEYEAmK4n55EdNyrO5aqh/zg4KrjlFa3h2haXkxT6DEBl2/FwewN6ZefGzF9p30XoJxf1gA6SKezXlnE6rhCwGH+VHTMxhFcpCcO5WPIxP9GQ2ek41VZvUzZrF2PnGGxepwO7D0bkJNvc1V/bmJqwHrKFr0gy2dyq8Crcv3Zk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779835132; c=relaxed/simple;
-	bh=PEOnU1euQksNTBNEpTVO434Z1jfRAyw8+p3ekYQ4Oqg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=GKfe1Ha75BiAWurYnAoNjuly10msXSUDDjZyBafmUvB682I2A1HbEjOH3PTLssCrGIU0fWR9oUmlQV4CXEJHPAwP00O45b5y4YNocLVKeFrPBx+wEfvAT4wxF7UvuZD8LodbvQuPcsqWThlwBcpjBdxipIKYMMsKiWgFGjzJmxE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=PWmWm9wE; arc=none smtp.client-ip=209.85.210.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
+	s=arc-20240116; t=1779850761; c=relaxed/simple;
+	bh=YK969zcmEITdi2ESwgUBknPGuyQjoRuk0+gFO2c30mc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=A5nfeX/m84ja/Q5U4H0130OgI5VVDMy0a5XE/b46NM9HspaRyVpuPWbv2qBxiZN9ReNjTVq9zpkhj+9JXs7hYAtPjGggwwKe+/hI7r6Yf62p5e8CcgOgE69Dw+Pc6RwxzatpvlEzQFMrNSDgG5A4NQC+RwRQJgp1hW3AYcSOwxg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Y5H1cIlF; arc=none smtp.client-ip=209.85.160.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="PWmWm9wE"
-Received: by mail-ot1-f46.google.com with SMTP id 46e09a7af769-7dcdaf06498so7233173a34.2
-        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 15:38:48 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Y5H1cIlF"
+Received: by mail-oa1-f45.google.com with SMTP id 586e51a60fabf-43a833aeda0so7852886fac.2
+        for <ceph-devel@vger.kernel.org>; Tue, 26 May 2026 19:59:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1779835128; x=1780439928; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1779850758; x=1780455558; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=NAedWjqG73p0z+Bcksz0PqqemyZWbohHadUN5qn1TcQ=;
-        b=PWmWm9wEoVFsdRQPQCkctiZEsCgafhee+yu4qVk0vCj8tw0aps0E8AWmTKytSV2fOC
-         W3nvQjPm2ZynWyL2LPPoqk3faf3rzsNi41m7EgpUxPkFQAPr2PCbNgdNE4IAzxsS6DjH
-         US6A2lq2zF35p1SvlbbMsKV1SOKt2wiLuHAXOiLGmIDvdsrZam5R7BylE19lcI+5LFeI
-         4/ZL/7CwGeth3BLto8SHnoHfKfT0EBXIinPrKmcEF1VuV9bCUJ0xHQRgWxIgt6vKMx7C
-         0sqtcR21kgO1C6Qxk9qNZ3Sn39pmh7otZ5P/3+qFdc+8yUkVeRx6dBr3L27JgZQ/GRdF
-         GjBQ==
+        bh=mj9MCtIAD7d1JSfCaa/HTdSWgA5gV5kV6QttYxTWGWY=;
+        b=Y5H1cIlFiUI0fzaw6Kp/bQxzyQYicoM4xjPucITU5kqTsUZY4Kbu6e9gQgPBnbzjc6
+         OsXe+cc4KSF4R6ZWX2x8fHNpQofNWKM4hAXBYa7mKDcbPvG8dHe2TYdQJvrZJPwMXSAW
+         NjzUt/gc9FtBmN9/GBJjH5dY8aEXKMIGpDuFG7hqBT+4nrun4JFMwC8D0/lX7YpnX15F
+         5XT/5leXE2bhlRgfpRLoL8/lCWlboe1Y0vx00D2yjJcD6Edz8JiG/Z3PAJlfEjcN6Vmq
+         JXPq1zPnezZoYSKFjkSBP+hofDKNeynISnZiqN6bEt3VxhlXW/rb0Bg6GeLSx5FnUOEP
+         YZGg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779835128; x=1780439928;
+        d=1e100.net; s=20251104; t=1779850758; x=1780455558;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=NAedWjqG73p0z+Bcksz0PqqemyZWbohHadUN5qn1TcQ=;
-        b=tCiL1HcLlFTlofoIo6AX0m2UOH/xzzuQQWSAvmotdPsVfgR3A+ApNf6qz4vwADDCxS
-         ymii9NQly5IrDV0f8gKG5BYGYAmaEqovo3st9i8gAdL1Q+pPo7w+68y9YvoCKXrPmN9h
-         zCXB0iLRyMZyeQQ6815pLjzJpZkAd9vqNr1VszKbpYG3GkXDloRsHOT7tNdiGxcUaHLM
-         rfWP/G+SP4yJs1KO36HCrNgPGECm9Y+FHXjiA5X3cEkv9rU4tiVwEdxW9Xv5MIFTXUlv
-         0kYb0jxldFzU4ZFMLdlJuWd+/QSImgVAOa0SndHjvZx828/s/gA3JfPireqOXvMYDOjj
-         kBZQ==
-X-Gm-Message-State: AOJu0YxFHGPv+kMUBxozCiJyd2iB3n83sx1tLLTV+ZNHlhOS0PrSLttD
-	8NCFLtnOgvSrsA+4wjGJojapKy49d5vvBo9Q+NeAHoAoqHPIWTBcGVSYJZcCLQIoLRJWZzIiT9a
-	2bJ4g6Zo=
-X-Gm-Gg: Acq92OEcvMfqr+734b5q8nLGnDA29Qy2SaLzXTMxZFL/trMQNVnyGas4OEKrvRg+Pi5
-	75Ge1XagRw5mSOilQ2htEyQIHLUba49QGcFJf0Okl8PWuCkrAk/djPLz0BZOxF47jBFYidL0Icd
-	cDMag2rzptx8+unV4Zn+2KmE05HCxR41WavossXgdxFF2gVNeP8/KFVpGd/QRCTkGz5gBeiNh/2
-	Cl3Vt/aN/RJsqblRSEih0CxNk4wk5w7PCsFEEd1fQXijLM4iFlZX3tqCD0EojB6gu5rT0/B7ck4
-	ckW+VxpBEyzfOAKtSzT9RsVieOYWW2biJ7k/ka+YwllvHPqY8bH1palTZsEN3TdtFSgA8sG+lY6
-	IHYlWUyJFlFd5+ULcl5bwAo2uUEBCKLk2CokJd3MpLlYjl+kOJLqQFJA6EZ9Bd6IPhobxlQEvRV
-	oJEj+/p9gCQlO7MMFE5XR3KmaBGh+UWaQlAffZW/aQ78ccj/Eg1ZDW4+9iT8ZbubPhbRIlC74Re
-	Ct7n4FnYhMssWeHboArG8qvQym4Nfw=
-X-Received: by 2002:a05:6830:6482:b0:7dc:d587:af3 with SMTP id 46e09a7af769-7e5ff08ccf4mr12142890a34.23.1779835127937;
-        Tue, 26 May 2026 15:38:47 -0700 (PDT)
-Received: from system76-pc.attlocal.net ([2600:1700:6476:1430:c597:e624:3ba8:752c])
-        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7e6065e5ed1sm11150345a34.14.2026.05.26.15.38.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 May 2026 15:38:47 -0700 (PDT)
-From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
-	linux-fsdevel@vger.kernel.org,
-	pdonnell@redhat.com,
-	amarkuze@redhat.com,
-	Slava.Dubeyko@ibm.com,
-	slava@dubeyko.com,
-	sagemct@ibm.com
-Subject: [PATCH] libceph: rework behavior for not recognized tag codes
-Date: Tue, 26 May 2026 15:38:30 -0700
-Message-ID: <20260526223829.1385751-2-slava@dubeyko.com>
-X-Mailer: git-send-email 2.43.0
+        bh=mj9MCtIAD7d1JSfCaa/HTdSWgA5gV5kV6QttYxTWGWY=;
+        b=kDgQd75e1M97POWuP2IAUn7+rkOWWYQDJZt8H3mr25B2B21xo8Xnmk3g6Xepblf5u2
+         tH+BnhG1T1xenJGx2sEfnKzWcZnOuKHSvxNrRd2ghQCZB3Jniane0D/kSZtBipBKLARL
+         yp1+HVJLG63LSFOmTCE8+Gdan/vrPXoYAhk9qgQgspN1Y2DaN16kMX6k9f77OpvkxVvn
+         pVbjYlwO87FVPmryiYAG62ckSjJkFCRegTMvU+8k5uqSovIp1NuGAZsqaEIuUJqMwayA
+         Kndyizz3RLtkK9ovGWzs780egPP9YktsPrGVXCUfmff1KRfme7+KhIwe3EuhKIAtbzSL
+         q+lg==
+X-Forwarded-Encrypted: i=1; AFNElJ/zJ7p5QTWo0uLlAlOn4EdBTGfpY5qxgZSUgIg20u5ArKpTVyMk3/kVaHoKjad+JPEBEPou8TBj9D45@vger.kernel.org
+X-Gm-Message-State: AOJu0YwwpW8qjpYz/LEAu526RP3RC/b7H4DaPLcabconmpi89JXUMGvx
+	qn0VFZcEiibS03Bc5ZGbBuhtVv4YdIcpg1FTBlvLsQGNNQ9bSetOYrHg
+X-Gm-Gg: Acq92OEkd8BGGpnwGAJWNNEi2hIr4oLM6mJcU/jNX2Arxlp5WEBQrcxre0lFb/8XTC1
+	wWxX7d9BFg1WnuNqnxQ9/L4TPEyMzC1GlSypODqRz5zAuMwiuKoQVsf4DcOTem9qeIfR1HTu16v
+	vYlwaZ1FrmPOEtqehzaUZW0rBQAck5YW9K9mzwKipehalufu+ArS14pZrJdcaBvUHS98Hw1YHqZ
+	l6M7eJCYeRDdWGAWsyeJHKP+n9Dl06fBFMNueF3eLBAljei4Rm+GTHhSOSigBD79xU76JAHCssj
+	ipBhNGMe34hA1GcT8LCU6rj5vkXC6wcOT0nw0xalp02Wp+nrqO0z8/U+i2959y8Vn8JtCaQ+oSx
+	S9cLxIWHBFKbp3B7dossucKwvbYZyowwe5U9QttMkI17ubBny0FekA8N713L6IqGS0SL+xUZiDW
+	uLkN977IAPLDb/JTcYmLUC3WOfgAu7i3cU8dz/pDEhXJazV0FP/HoiLkGNGyFgG+Bf77sOrA==
+X-Received: by 2002:a05:6808:1644:b0:484:e5e2:6b8c with SMTP id 5614622812f47-4854a243fd2mr12915019b6e.23.1779850757874;
+        Tue, 26 May 2026 19:59:17 -0700 (PDT)
+Received: from localhost (static-23-234-115-121.cust.tzulo.com. [23.234.115.121])
+        by smtp.gmail.com with UTF8SMTPSA id 5614622812f47-48570e55783sm5659554b6e.2.2026.05.26.19.59.15
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 26 May 2026 19:59:17 -0700 (PDT)
+From: Sam Edwards <cfsworks@gmail.com>
+X-Google-Original-From: Sam Edwards <CFSworks@gmail.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: Jeff Layton <jlayton@kernel.org>,
+	Xiubo Li <xiubli@redhat.com>,
+	Milind Changire <mchangir@redhat.com>,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Sam Edwards <CFSworks@gmail.com>
+Subject: [PATCH 0/2] Bounce buffer for mds client decryption when vmalloc()
+Date: Tue, 26 May 2026 19:58:26 -0700
+Message-ID: <20260527025828.5966-1-CFSworks@gmail.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Hi Ceph maintainers,
 
-[  196.609307] WARNING: net/ceph/messenger_v1.c:901 at ceph_con_v1_try_read+0x4e0f/0x6020, CPU#6: kworker/6:0/49
-[  196.612062] Modules linked in:
-[  196.613111] CPU: 6 UID: 0 PID: 49 Comm: kworker/6:0 Not tainted 6.19.0-g990dca9c3b7a-dirty #47 PREEMPT(lazy)
-[  196.615707] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
-[  196.618102] Workqueue: ceph-msgr ceph_con_workfn
-[  196.619417] RIP: 0010:ceph_con_v1_try_read+0x4e0f/0x6020
-[  196.620919] Code: 85 a9 fc 90 0f 0b e8 c0 85 a9 fc 90 0f 0b 90 e9 c4 e0 ff ff e8 b2 85 a9 fc 90 0f 0b e8 aa 85 a9 fc 90 0f 0b e8 a2 85 a9 fc 90 <0f> 0b 90 e9 2b e2 ff ff e8 94 85 a9 fc 90 0f 0b 48 8b 3c 24 e8 68
-[  196.625686] RSP: 0018:ff11000100e4fa30 EFLAGS: 00010293
-[  196.627142] RAX: 0000000000000000 RBX: 000000000000001d RCX: ffffffff9eb8ba8e
-[  196.629041] RDX: ff11000100e04480 RSI: 000000000000001d RDI: 0000000000000004
-[  196.630938] RBP: 0000000075184a6c R08: 0000000000000001 R09: 0000000000000001
-[  196.632874] R10: 0000000075184a6c R11: ff11000100e04480 R12: 000000000000000d
-[  196.634763] R13: ff1100012698a533 R14: ff1100012698a0b8 R15: 0000000000000000
-[  196.636667] FS:  0000000000000000(0000) GS:ff1100040bc00000(0000) knlGS:0000000000000000
-[  196.638807] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[  196.640390] CR2: 00007f3f19a5f3b0 CR3: 00000003408a8006 CR4: 0000000000771ef0
-[  196.642293] PKRU: 55555554
-[  196.643105] Call Trace:
-[  196.643782]  <TASK>
-[  196.644481]  ? register_lock_class+0x41/0x760
-[  196.645739]  ? srso_alias_return_thunk+0x5/0xfbef5
-[  196.647303]  ? srso_alias_return_thunk+0x5/0xfbef5
-[  196.648896]  ? __pfx___mutex_lock+0x10/0x10
-[  196.649986]  ? __lock_acquire+0x466/0x2260
-[  196.650770]  ? __pfx_ceph_con_v1_try_read+0x10/0x10
-[  196.651784]  ceph_con_workfn+0xa26/0x1340
-[  196.652617]  process_one_work+0x8fc/0x1990
-[  196.653496]  ? __pfx_process_one_work+0x10/0x10
-[  196.654430]  ? srso_alias_return_thunk+0x5/0xfbef5
-[  196.655393]  ? lock_is_held_type+0x8f/0x100
-[  196.656260]  ? srso_alias_return_thunk+0x5/0xfbef5
-[  196.657229]  worker_thread+0x6d3/0xf20
-[  196.658062]  ? __pfx_worker_thread+0x10/0x10
-[  196.658904]  kthread+0x37d/0x490
-[  196.659590]  ? lockdep_hardirqs_on_prepare+0xea/0x1a0
-[  196.660573]  ? __pfx_kthread+0x10/0x10
-[  196.661370]  ret_from_fork+0x67b/0xad0
-[  196.662167]  ? __pfx_ret_from_fork+0x10/0x10
-[  196.663059]  ? srso_alias_return_thunk+0x5/0xfbef5
-[  196.664008]  ? __switch_to+0x7a0/0x10c0
-[  196.664751]  ? __pfx_kthread+0x10/0x10
-[  196.665547]  ret_from_fork_asm+0x1a/0x30
-[  196.666389]  </TASK>
-[  196.666822] irq event stamp: 9881
-[  196.667490] hardirqs last  enabled at (9891): [<ffffffff9b40a7db>] __up_console_sem+0x7b/0x90
-[  196.669088] hardirqs last disabled at (9900): [<ffffffff9b40a7c0>] __up_console_sem+0x60/0x90
-[  196.670667] softirqs last  enabled at (9664): [<ffffffff9b267a34>] __irq_exit_rcu+0xc4/0x100
-[  196.672258] softirqs last disabled at (9641): [<ffffffff9b267a34>] __irq_exit_rcu+0xc4/0x100
-[  196.673711] ---[ end trace 0000000000000000 ]---
-[  197.154025] libceph: mon0 (1)10.0.0.2:6789 socket closed (con state OPEN)
-[  197.155329] libceph: mon0 (1)10.0.0.2:6789 session lost, hunting for new mon
-[  197.158745] libceph: mon0 (1)10.0.0.2:6789 socket closed (con state V1_BANNER)
+This is my proposed patchset after my previous RFC [1]. Apologies for the long
+delay, life gets busy (and my Linux hacking time was eaten by trying to stay
+patched in the face of the recent flood of LPE vulns), so it took me longer
+than usual to get patches written, tested, and cleaned up. Glad to be back! :)
 
-First issue:
+Since Alex pointed out last time that parse_reply_info_trace() has the same
+latent bug, and Slava disliked the already-high complexity of
+parse_reply_info_readdir(), I opted to resolve the issue in ceph_fname_to_usr()
+instead. The purpose of patch #2 is to make ceph_fname_to_usr() explicitly
+responsible for handling vmalloc()-backed filename buffers (for base64,
+ciphertext, and plaintext), using the `tname` parameter as a bounce buffer
+where appropriate (and preserving the allocate-when-needed behavior).
 
-After the client and server complete the v1 handshake and the server's reply
-tag is CEPH_MSGR_TAG_READY or CEPH_MSGR_TAG_SEQ, the client increments its
-own connect_seq and then checks that the server echoed back the same value.
-The con->v1.in_reply.connect_seq comes directly from the network —
-the server's connect reply message. A MITM who corrupts even one byte of
-that field produces a mismatch.
+Patch #1 simplifies `struct fscrypt_str *tname` to `unsigned char *tname`, both
+in recognition of `tname->len` being unused/unnecessary, and to eliminate the
+`tname == NULL` / `tname->name == NULL` confusion.
 
-Using WARN_ON() on a value that comes from the wire means an attacker controls
-whether the kernel warning fires, giving them the ability to permanently taint
-the kernel (TAINT_WARN). WARN_ON() does not affect control flow — after the
-warning, the code continues and opens the connection as if everything were fine,
-with an inconsistent connect_seq.
+Cheers,
+Sam
 
-The second issue:
+[1] https://lore.kernel.org/ceph-devel/CAH5Ym4ga7miUQE0K-cJA93Ya7w62P69MAN27R5cBiYnudoOHdA@mail.gmail.com/T/
 
-The bad_tag is reached when the first byte of a new msgr-v1 frame is not one of
-the four recognised tag values (CEPH_MSGR_TAG_MSG, ACK, KEEPALIVE2_ACK, CLOSE).
-Any single-byte value 0–255 except those four reaches bad_tag. An attacker who
-can flood system log with error messages.
+Sam Edwards (2):
+  ceph: pass fscrypt `tname` buffers directly
+  ceph: properly decrypt filenames in vmalloc() buffers
 
-This patch compares con->v1.connect_seq and con->v1.in_reply.connect_seq.
-If they are not the same, then pr_err_ratelimited() will be called
-instead of WARN_ON(). The second fix exchanges pr_err() on
-pr_err_ratelimited() for the case of bad tag in ceph_con_v1_try_read().
+ fs/ceph/crypto.c     | 45 ++++++++++++++++++++++++++++++++------------
+ fs/ceph/crypto.h     |  4 ++--
+ fs/ceph/mds_client.c | 12 ++++++++----
+ 3 files changed, 43 insertions(+), 18 deletions(-)
 
-Fixes: a56dd9bf4722 ("libceph: move msgr1 protocol specific fields to its own struct")
-Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-cc: Alex Markuze <amarkuze@redhat.com>
-cc: Ilya Dryomov <idryomov@gmail.com>
-cc: Patrick Donnelly <pdonnell@redhat.com>
-cc: Ceph Development <ceph-devel@vger.kernel.org>
----
- net/ceph/messenger_v1.c | 16 ++++++++++------
- 1 file changed, 10 insertions(+), 6 deletions(-)
-
-diff --git a/net/ceph/messenger_v1.c b/net/ceph/messenger_v1.c
-index c9e002d96319..5b2b68220e88 100644
---- a/net/ceph/messenger_v1.c
-+++ b/net/ceph/messenger_v1.c
-@@ -742,6 +742,7 @@ static int process_connect(struct ceph_connection *con)
- 	u64 sup_feat = from_msgr(con->msgr)->supported_features;
- 	u64 req_feat = from_msgr(con->msgr)->required_features;
- 	u64 server_feat = le64_to_cpu(con->v1.in_reply.features);
-+	u32 connect_seq;
- 	int ret;
- 
- 	dout("process_connect on %p tag %d\n", con, con->v1.in_tag);
-@@ -894,12 +895,15 @@ static int process_connect(struct ceph_connection *con)
- 			le32_to_cpu(con->v1.in_reply.global_seq);
- 		con->v1.connect_seq++;
- 		con->peer_features = server_feat;
-+		connect_seq = le32_to_cpu(con->v1.in_reply.connect_seq);
- 		dout("process_connect got READY gseq %d cseq %d (%d)\n",
--		     con->v1.peer_global_seq,
--		     le32_to_cpu(con->v1.in_reply.connect_seq),
--		     con->v1.connect_seq);
--		WARN_ON(con->v1.connect_seq !=
--			le32_to_cpu(con->v1.in_reply.connect_seq));
-+		     con->v1.peer_global_seq, connect_seq, con->v1.connect_seq);
-+		if (con->v1.connect_seq != connect_seq) {
-+			pr_err_ratelimited("connect_seq mismatch: my %u peer %u\n",
-+					   con->v1.connect_seq, connect_seq);
-+			con->error_msg = "protocol error, connect_seq mismatch";
-+			return -1;
-+		}
- 
- 		if (con->v1.in_reply.flags & CEPH_MSG_CONNECT_LOSSY)
- 			ceph_con_flag_set(con, CEPH_CON_F_LOSSYTX);
-@@ -1456,7 +1460,7 @@ int ceph_con_v1_try_read(struct ceph_connection *con)
- 	return ret;
- 
- bad_tag:
--	pr_err("try_read bad tag %d\n", con->v1.in_tag);
-+	pr_err_ratelimited("try_read bad tag %d\n", con->v1.in_tag);
- 	con->error_msg = "protocol error, garbage tag";
- 	ret = -1;
- 	goto out;
 -- 
-2.54.0
+2.53.0
 
