@@ -1,217 +1,224 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0CBA2FFFA4;
-	Thu, 28 May 2026 18:45:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779993917; cv=fail; b=RGwd0SEAKw0U/PtCmc1yDfNJM7j4FanIZQoh6I3n6SEClAIn7WK2eUl9fQav44Y0JauFwWI+3P4I1zTOYKsiVNOfM77Oy9/RD2ZxmW+dOt9A7cBLFNw6zQnOvSyqNL8hW7offr10/iYQquguQXHRvQaO8YBrm+8BjCeJb4jD5cs=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779993917; c=relaxed/simple;
-	bh=ew3LO9RIIUFPfz5KTYRx3iqtPXSRrW2eFkUmUlm/mCw=;
-	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
-	 MIME-Version:Subject; b=l7vvdx+EfLUIty4HHw6gs/KepmVmpycKgI4LJY0hXAa3qDFRrjCzN22cjNjwgNXzRic0v8lmIKXhEQJdEdgcEWXcleWJbthDdD7GaoIfHYNaNg+eZQykXUDwUxpJyyX8CBvG5YncIf7SfoSQOsFnHRdSLSmgkN/D7fxRShR5zNY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=s/mDZ7yq; arc=fail smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29B77335566;
+	Thu, 28 May 2026 20:04:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779998672; cv=none; b=fKh5Je8Fu+GJECWji7H57Zvra1EJ+6bI1lBAo5ckQKQmLT67OzAUHUN3GRVt8UCMxGVDm5+wbShboC69EFhBXRxUnFsfDkUEQpZ+Y9QE3NWOja6pDzA+kjocdwaz9BgTQk+XE+GT4kSFknL2MZ4UyIdY/5Au0053/weCFb6PygE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779998672; c=relaxed/simple;
+	bh=gFddTSvRaUGStOTlSlmJ+nW70bl91iYobgt0G1acJFY=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=aMBl00CiRgqlUubfXt2+VWa42jdU5SCMx980K2ZUtSaMMNJ1vjJTfZQk1rC0zkKf5wIcoWahumXzPyo53J6SJb8Z6jxPu6OEf1eJkfblw7lKrQldAf6RiqnJMWgIiL6QV3/WeoGzCHmL8XdIXuYoiHgi+wFuJvYJUH4WvHMOWgw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=tqsFHVVq; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="s/mDZ7yq"
-Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64SBxakM035143;
-	Thu, 28 May 2026 18:44:17 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-id:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	pp1; bh=ew3LO9RIIUFPfz5KTYRx3iqtPXSRrW2eFkUmUlm/mCw=; b=s/mDZ7yq
-	yslFY2ZkMcptPwj4ZgmmqxmcoMp2QJ3V41pH8nAZFjFlr6oj4Kah7agxBgN8xskL
-	/R2j5jgHtqNPWRaFlTQm78E+56HXSuZzcrq9pF62APbQ/LWBGQxPD9iO+krbKrsG
-	yqgh1Mw+6NF3qZAQAHQpaxh3BB8y+Y0VTAIAbHm4QAUy+cZfZl2Ihm/6TLEMvt+p
-	0AYE6DskvzAP0oAQgM967GJ7d9iAqqcsosyuUFpGfDyqC1mPCWft6yWSK9Or+dlS
-	MbXJrasgHNCiVYo/zaswBWE89ccBkx2Vp6969RX/amFIhKvWEbwgOqZ2p8zvBtf4
-	HFc24CLYc+ky6g==
-Received: from dm1pr04cu001.outbound.protection.outlook.com (mail-centralusazon11010008.outbound.protection.outlook.com [52.101.61.8])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4ee88bce8a-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Thu, 28 May 2026 18:44:16 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=MwcTdaMmmX9s6uP1X0RQZ14Can6wx3578P2gh10lYgj3rTZrP14iTO3yPXcJp8h9gY00VjlD5HRxZ6zQaHLg1QzgeDq3b2ze4I1AnBfNxnXJVT7/TZIJhBGCGzjq47sWj1UI1atf2uMMAy0Mkm033WhfVywGOFyh5Jnj7qaykwb1naFTQiLMvup6DF5gdkuWRT/lbUWwPDbR+69T+KzMz408h6CBtkudyDBiTzwLlSa7Cd5PQ74xH1oBtDZN9/ZaFzA4wg7QILdKe0/sIU1xK9RI4E2fbVhk2wv6dTpwMD6yYUN7zqTwafX5PLAJI06+BzyPUEfEKXcshUVV8N8nmA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ew3LO9RIIUFPfz5KTYRx3iqtPXSRrW2eFkUmUlm/mCw=;
- b=GPswNJFXfUPEPwkAtZhn4ixbbXVDN/1BMj1qfhazvqsuMkjtqNFG55zCM3Lxj2Og2EX3h355LwE3TKQRujLFbR7RDL5smrxhSJK0EpwOIK2xkB9ZNsKLmdp7Iy5kzJxA1QojS61rFrP3H6xDjL/DpE3uaQEcvzoNSbrDlOKqC81NoolKnGZoZeds+piKFstMQsMU5W2xlkMyDwe5oYH47byTBCl9VQDP9uQKxCxGZlGM+iL7HD0EshGZ692FzT12KwjK2mUTXbP7sItRapqvcpaZIb6Eh0SmCe4g6idGbzPGMMbi9/RdCzVOibW9UMNeHJnZrnLkF6FXS1Nr5cLz6Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
- header.d=ibm.com; arc=none
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
- by BLAPR15MB3955.namprd15.prod.outlook.com (2603:10b6:208:274::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9891.15; Thu, 28 May
- 2026 18:44:14 +0000
-Received: from SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
- ([fe80::920c:d2ba:5432:b539%7]) with mapi id 15.21.0071.011; Thu, 28 May 2026
- 18:44:14 +0000
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-To: "vulab@iscas.ac.cn" <vulab@iscas.ac.cn>,
-        "idryomov@gmail.com"
-	<idryomov@gmail.com>,
-        "slava@dubeyko.com" <slava@dubeyko.com>,
-        Alex Markuze
-	<amarkuze@redhat.com>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Thread-Topic: [EXTERNAL] [PATCH] ceph: fix writeback_count leak in
- write_folio_nounlock()
-Thread-Index: AQHc7lXXxD65xi37AEugEYGcXXwjBbYjx0mA
-Date: Thu, 28 May 2026 18:44:14 +0000
-Message-ID: <549d1a995cdba258425126d2826dcd2601e9463f.camel@ibm.com>
-References: <20260528035458.1146314-1-vulab@iscas.ac.cn>
-In-Reply-To: <20260528035458.1146314-1-vulab@iscas.ac.cn>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|BLAPR15MB3955:EE_
-x-ms-office365-filtering-correlation-id: 173fc64f-1fef-412f-3bcb-08debce91d98
-x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|376014|1800799024|10070799003|38070700021|56012099006|22082099003|18002099003|11063799006;
-x-microsoft-antispam-message-info:
- MJ7D59lRkRe9r9lyKJ+bLEEJPZUYsMcsiDGGIqFCXLG5ytjtGuMrtei6/B2DzizTh0DCI+Ov370CHyqUBtskxkd5FqF0GfCyW+eifvoLriG+irGvQPw+fs+TZPS90e+GaSupfjwS4+fikwkCljNdKcXnKfmYDV6BxgB51INu24NtbyCTFj5KlG+CkiMwiv+h1pO1A8GEWiTa2ymvnhYAAfhRVXK+n7Zp3LFZ2bvU17LTwNni2rmtgImnkh57qREpZ2aTv5ldnYxacbgFy87K3FS0c7IkMlfZCvrdb9mYO36km2t4SjwoUXWcoPhniP9vDWiezRiu2iZigDes2agjILMPvfOXXp6Dp+YgOVB1K+2bM9KoKw+6TZRg2p0q7T+6IYhmcTnhROwY7IrgjF+Gx/xhyEPzyRdU8vqIolLuC6GQOddGkysW8VQF+qOmGsaol87z7Pe8+IqUE97i9Bn2HdG6Tg5ZwDgQxTyINUgIT11IABduNAseWBGjjs+cyyi5qb6mu1Q37PSpMlV1FIOSGTFrXkYhKnA6thx91slFQjkRV+EUhrhZHzQrOm0UBxEGXb9lxJHaOpIa1TrDDbB+KJFit9VC+Cn8DzdYynj0pnvxM7I21KB1vk5FG8I9U34ns4B8RJHbk6ZSv2vcoUIs1VQS4s9tQXCCHES8/zggO+3+EV9v0r7Y4L46mVXNb3F23f2njvGPWPiI3y3d5owWTYZ5JjvhPEX4HqOo6Cdk7R2rywN+pM2+WvCs/PHkFxg9
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(10070799003)(38070700021)(56012099006)(22082099003)(18002099003)(11063799006);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?UUFpY3dCc3RabHIzM2hjYytwZlFDamFlTnFqbXhtOXlOaHExRnBzSFE1RDBq?=
- =?utf-8?B?dWIzTEgrSnlqbDNiQzA3MFBaNUs0QWh4a1JQWERxUXFEYzhkdzV5ZWZSNlAr?=
- =?utf-8?B?aVhNams2QjFYSkhkTkNqS2ZLZldCdVhabUM3TlNJWXhJYVJIV25Qd3Awbzdw?=
- =?utf-8?B?dkZNQ2luQzBCZENBT0JwRVR4YktCZWsyZUgvcEE4VS9EUVR3bWVPcVRzTktq?=
- =?utf-8?B?dGVIRGVtTWUxTUxCTnd0M3dQRlUwOVNCbGlWUGNnbFVoTndyb2lTQWtKQ2hR?=
- =?utf-8?B?NTlmWTdPaDFNLzd4M0FxQW0rdDNRK2E5T3QvTm96TFhDZmhROVpua3ZTUDdF?=
- =?utf-8?B?UjRVU2dsYUExdldPUUsvT1dpeTNWTXpjUkdHMWhWOEFvemZyZ2pxaVJ2YXBV?=
- =?utf-8?B?czBBMm0xOVBMSEw0ZnhXQkNMUHpRQ0pXRnp1Y2xORjB1VXBLV3F3N2N1ck9w?=
- =?utf-8?B?N29ldFpkMUtpWW4wMCsxSWs2cmNZSFRIN3FZNVFkL3pDMS8xc3NmSE55anpw?=
- =?utf-8?B?c29ySERBVW5SSlZzRGl1d2RVaVQ2bTFUZmxjdHhXTnVqWUhQOHFENXY5NitF?=
- =?utf-8?B?UnV4UU1jZjNVMEpaMkw4bHZTTUVKc0Q3MUMrOEFrTXFqa0NvVkUvRXl5Qm80?=
- =?utf-8?B?SnU1enV5Z0szeFBwQ0tGb3ZleU1VNm91dzBRM0lOQ1JrWmRaT1hxUm5PSlJu?=
- =?utf-8?B?Q25Va1FGVlpDc0hsNDltWHhNVjUwcVRJTGNJTXdZZlFQMmRzVjRqQzJiR3BI?=
- =?utf-8?B?NDM1SHNCZ0pFaE1kc1JpOW1kaVBvbUt4bHdOTkZFUjNhY0ZMbnlQTWZ0NXZY?=
- =?utf-8?B?dEh4RG1sNW1QaVdYWlZUdWJTWUlveTZqOUEveVpxL0RDZHpOUjcrZjlMSFZn?=
- =?utf-8?B?eFJCWUtOaWFkaS9YZnA0a0hkM0VxQ0VzRzYyeTRoVlNwczhRWFVCc3FIZ2xZ?=
- =?utf-8?B?anJuUlZ0MVd6OWF4dk12ZnlkWW9Vb1RpdTBnelluSFpaYUhBLzd4UFlnc2Qv?=
- =?utf-8?B?Rmt4MWtCWGJ1MldtN1VDLyt2Q1M5LzVwSWVqZGpQV3dISyswZG1hMWZWdkV2?=
- =?utf-8?B?cnpFRk5OMEdpSC9JZmVZOHh5dXlsZ0RrY1RLWlYreFZ6cmFmRE5BcFBGOUps?=
- =?utf-8?B?Z2JRU2FkM2FjTHNmVnJxQXlEV1BaY2FUSDUxRmRvMmZhSnFzSkhrc3U5bC9k?=
- =?utf-8?B?d2Z4eG1jejJia1kyMGsrRkN5bE5vaTRJM29LWnpLTVorVXBQQ1BVcVI4T0Rr?=
- =?utf-8?B?bmpXZHBEamxmb1RKRkF5S3dFR2VMWWRLREhTUlFMOXRkWmVnWjdISVJ5ZGFy?=
- =?utf-8?B?V3lNeThFSjRMbWNIZVZuaEN2UVVnOS9KS2FQeFBCTzBXZnp2Sm1tbUErK2VN?=
- =?utf-8?B?SDV4V2wyZm0zNFo0YmZ5dC9oQ3c4VEVQMzJtdk8vOWdFMFZJWTFJaWh3czNQ?=
- =?utf-8?B?L2VmNGRwSkJiZE5PT2hMOUpKeDhLcnc3S0g1WXByZEJpeGRDcm9DRURNRGEy?=
- =?utf-8?B?WXVCOE8xRkVYdTIrY3J5R0lXQnlHS0hWdjlicUhkMlhvVzhHL2dwUEtUb3RV?=
- =?utf-8?B?dlp4N3ZZK25ZSW1SVXN0TmdTam9FbFZlbEtDMFJsd2w5VWhKM29LQVArMTBr?=
- =?utf-8?B?MzdJWWR2NDFaQklCem9ya0o3YjdabFdFb2NoMmdGZlBSMUVVTlRmM3NBUklz?=
- =?utf-8?B?VG5HWW1IVDlMbGFRSzdhMlNWSG9ycEJkb21PQStHWjduTUx2eXhWanRPb2Fj?=
- =?utf-8?B?Nk5MdU92QnhHbDRXOEVkb3NiaUc5SnRZM2sxeDEwRHNuT2FlSzhub2lqajlK?=
- =?utf-8?B?cjB1YjlSZFdzeDhRdVo5dGZxOFVsV3NDUmxSbjNNelhFYXdFamxhR0lWQVQ5?=
- =?utf-8?B?Y01UZUZYSmZEbkEreko2UnJtSDR0L014ZVJuV2ZraC9RYnJSeEJyTlptU2N6?=
- =?utf-8?B?cGgyaEcvd1RTV3Y2b2duTEdWRVo5SlpIdTd2aE5XY0xSZnUxQlFWUm5DOTJT?=
- =?utf-8?B?eUxuU1BqOUlUTll3ZSt1YjhEdlp1MFR0NStrelFHUXYyREpDZUJzbVV1VUFl?=
- =?utf-8?B?OStCRmZ4OEZINkMzS3NSQ1BuRVZVTExwMHByeEhuRVMvQWU0cHk2Wmd4QlBj?=
- =?utf-8?B?ci9XRHYyendLV3BQN3IwaUFqTmg0dEJXaUdiaWZGR25TamtCZGZ6U2dSV1lN?=
- =?utf-8?B?TlJUZk5hRGtXbmpHOEtyYnM1MlNrd3Z4SWcvVFRZSFpSTHU4QWVBdkgrc3Ax?=
- =?utf-8?B?NW1MejYrd3QyOWYwUkcwSytoeGNlNExxQms2R1ZRemVHQXU1WlBsMUFFdXgx?=
- =?utf-8?B?VGlUbEFEUy9GUnZ1SENKaDdHQXRFdUtpRkpVcFZmeER1SWVlOGlHMEV0ZmFV?=
- =?utf-8?Q?awappEiRMkhjGQxDzeHjEkODeO4iGJ2irxKAW?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <229701B437635A488F145DF5635F5977@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="tqsFHVVq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D3BD1F000E9;
+	Thu, 28 May 2026 20:04:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linuxfoundation.org;
+	s=korg; t=1779998671;
+	bh=Rif6r0+T54GQJxKH5xaPrMAA16L9Ba4scEuJpizsBXY=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=tqsFHVVqJFXpudaRO4Ubh1ZdmCQOs378okIlCd+oA6XOTGkOvYfgiCN/LKx05tFID
+	 o7ru8ZzRiBjt2Wq2/2ChvygkDh709twjvpEkxmfgs0vmFbx6lpgRASVyxCGpw+9fWh
+	 h34nfoZX8HAN1FENQPJhKBYewT1taEcciG+K/jzo=
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: stable@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	patches@lists.linux.dev,
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+	David Howells <dhowells@redhat.com>,
+	"Paulo Alcantara (Red Hat)" <pc@manguebit.org>,
+	netfs@lists.linux.dev,
+	linux-fsdevel@vger.kernel.org,
+	Ceph Development <ceph-devel@vger.kernel.org>,
+	Christian Brauner <brauner@kernel.org>,
+	Sasha Levin <sashal@kernel.org>
+Subject: [PATCH 7.0 256/461] netfs: fix VM_BUG_ON_FOLIO() issue in netfs_write_begin() call
+Date: Thu, 28 May 2026 21:46:25 +0200
+Message-ID: <20260528194654.565537981@linuxfoundation.org>
+X-Mailer: git-send-email 2.54.0
+In-Reply-To: <20260528194646.819809818@linuxfoundation.org>
+References: <20260528194646.819809818@linuxfoundation.org>
+User-Agent: quilt/0.69
+X-stable: review
+X-Patchwork-Hint: ignore
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	subGjFcyfpTITAUOcyL7+Cho9k6YFNxljQjDmI566sIEL0BHaiExjoC/0kBFsDJFf0DOpl0/nR1Pz0nVslREtHyNhi7FW80EsIzDS43jsrV+bCR8yAbUmJ8CbMgvXHTDSmmm+PpPB6T+iDp6Vv51X1s8jupjfjL7wipo24JGPD6dLWQKt7KFEUBp7pLfkxF6sF1VfIgE3UKp0/IdfgrxjX+PmBwrA0aDv3xEsypY/NHXb2t5Ey7FlXq8q16qYCht521eT2smsc9/uAplJUv8ZKFVWMS4RoJBVrqsIIWsxEywZy/NKgDX3MQWphSb1KJQgsS0ph6ktHO0PKz+AiST+A==
-X-OriginatorOrg: ibm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 173fc64f-1fef-412f-3bcb-08debce91d98
-X-MS-Exchange-CrossTenant-originalarrivaltime: 28 May 2026 18:44:14.3081
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: fWYl3KI+ymdHxNljz1jpTSVLXntfYT3zzLp/fgFBhY9BVwX/Cw/Tw+H5G5xtKBPnhwA7LisRQ43qEr7F0qMcaQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BLAPR15MB3955
-X-Proofpoint-Reinject: loops=2 maxloops=12
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTI4MDE4OCBTYWx0ZWRfX22KVj8iZ0Cza
- B5xwVb6r1ojAMmXgLr3zu2vTPMYmWPKHG5618F4Oxk0cm2ny2VXCBoxGLdkKglcHeLjEN7886iR
- nQ3yUHKVqBcjDJ4BlXU1ysdE1x7uoeAGP9HfGbxQiUovUi0MdZkyboMUH/Q9+agir5xaLv43Eug
- 6kXl4mSeH1IKTrs9XpvJ4JzFy3C454s+pJDPNUtI+HorHJvmgHIzGZ+5Yw8onCuvYQVFz9RKzUb
- aBrkWvwaewfkN/qxmR/Ifk8OFmOArvR2TXo3tyTjdh9vqrfA3PpcO4x5S5Sgk+Wdo1kQMg1kSVa
- cWExCJR2+Ldsg/vmB02gpUdHiEDgu2xi8A9vFuw0UMz57+mGoG01FNrdx/BNjCIlOScGeLQFfGj
- EobYGv+MWqXJmJyqJm3zLn2a6jRxMtc8NGkJ9XkuyPiN/a+bzkSBZ9aa3SjF3J5YIq+eZOUyBxJ
- I3pTqB8Im2OcG6Cg5RQ==
-X-Proofpoint-ORIG-GUID: sRH6Syca0CoYFGnCf-WuRFTPTNWpqA5S
-X-Authority-Analysis: v=2.4 cv=IJEyzAvG c=1 sm=1 tr=0 ts=6a188d01 cx=c_pps
- a=E1AkXC+xFF28g4y6WI75Xg==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=NGcC8JguVDcA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=V8glGbnc2Ofi9Qvn3v5h:22 a=8v9YfVCGButt467MqUwA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-GUID: BetybAXhf3c4ICgZvEu_pp70wVrB-Kqz
-Subject: Re:  [PATCH] ceph: fix writeback_count leak in write_folio_nounlock()
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-05-28_04,2026-05-28_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 phishscore=0 clxscore=1011 spamscore=0 bulkscore=0
- adultscore=0 priorityscore=1501 malwarescore=0 lowpriorityscore=0
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2605210000
- definitions=main-2605280188
+Content-Transfer-Encoding: 8bit
 
-T24gVGh1LCAyMDI2LTA1LTI4IGF0IDAzOjU0ICswMDAwLCBXZW50YW8gTGlhbmcgd3JvdGU6DQo+
-IHdyaXRlX2ZvbGlvX25vdW5sb2NrKCkgaW5jcmVtZW50cyBmc2MtPndyaXRlYmFja19jb3VudCB0
-byB0cmFjaw0KPiBpbi1mbGlnaHQgd3JpdGViYWNrIG9wZXJhdGlvbnMuIE9uIHNldmVyYWwgZXJy
-b3IgcGF0aHMgd2hlcmUgdGhlDQo+IGZ1bmN0aW9uIHJldHVybnMgZWFybHkgKGZvbGlvIGxvb2t1
-cCBmYWlsdXJlLCBzbmFwc2hvdCBjb250ZXh0DQo+IGFsbG9jYXRpb24gZmFpbHVyZSwgYW5kIHdy
-aXRlcGFnZXMgc3VibWlzc2lvbiBmYWlsdXJlKSwgdGhlIGZ1bmN0aW9uDQo+IHJldHVybnMgd2l0
-aG91dCBjYWxsaW5nIGF0b21pY19sb25nX2RlYygpIHRvIGRlY3JlbWVudCB0aGUgY291bnRlci4N
-Cj4gDQo+IEVhY2ggbGVha2VkIGluY3JlbWVudCBrZWVwcyB0aGUgY291bnRlciBhYm92ZSB6ZXJv
-LCB3aGljaCBjYW4gcHJldmVudA0KPiB0aGUgZmlsZXN5c3RlbSBmcm9tIGNsZWFubHkgdW5tb3Vu
-dGluZyBvciBzdXNwZW5kaW5nIHdyaXRlcy4NCj4gDQo+IEFkZCBhdG9taWNfbG9uZ19kZWMoKSBj
-YWxscyBvbiBhbGwgZXJyb3IgcGF0aHMgdGhhdCBjdXJyZW50bHkgcmV0dXJuDQo+IHdpdGhvdXQg
-ZGVjcmVtZW50aW5nIHRoZSBjb3VudGVyLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogV2VudGFvIExp
-YW5nIDx2dWxhYkBpc2Nhcy5hYy5jbj4NCj4gLS0tDQo+ICBmcy9jZXBoL2FkZHIuYyB8IDMgKysr
-DQo+ICAxIGZpbGUgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspDQo+IA0KPiBkaWZmIC0tZ2l0IGEv
-ZnMvY2VwaC9hZGRyLmMgYi9mcy9jZXBoL2FkZHIuYw0KPiBpbmRleCAwYTg2ZjY3MmNjMDkuLmE2
-MDYzNzg2NDljMyAxMDA2NDQNCj4gLS0tIGEvZnMvY2VwaC9hZGRyLmMNCj4gKysrIGIvZnMvY2Vw
-aC9hZGRyLmMNCj4gQEAgLTc5MCw2ICs3OTAsNyBAQCBzdGF0aWMgaW50IHdyaXRlX2ZvbGlvX25v
-dW5sb2NrKHN0cnVjdCBmb2xpbyAqZm9saW8sDQo+ICAJCQkJICAgIGNlcGhfd2JjLnRydW5jYXRl
-X3NpemUsIHRydWUpOw0KPiAgCWlmIChJU19FUlIocmVxKSkgew0KPiAgCQlmb2xpb19yZWRpcnR5
-X2Zvcl93cml0ZXBhZ2Uod2JjLCBmb2xpbyk7DQo+ICsJCWF0b21pY19sb25nX2RlYygmZnNjLT53
-cml0ZWJhY2tfY291bnQpOw0KDQpHb29kIGNhdGNoLiBCdXQgSSBiZWxpZXZlIHRoYXQgd2UgbmVl
-ZCB0byB1c2UgdGhpcyBwYXR0ZXJuIGluIGFsbCB0aHJlZSBjYXNlczoNCg0KICBpZiAoYXRvbWlj
-X2xvbmdfZGVjX3JldHVybigmZnNjLT53cml0ZWJhY2tfY291bnQpIDwNCiAgICAgIENPTkdFU1RJ
-T05fT0ZGX1RIUkVTSChmc2MtPm1vdW50X29wdGlvbnMtPmNvbmdlc3Rpb25fa2IpKQ0KICAgICAg
-ZnNjLT53cml0ZV9jb25nZXN0ZWQgPSBmYWxzZTsNCg0KPiAgCQlyZXR1cm4gUFRSX0VSUihyZXEp
-Ow0KPiAgCX0NCj4gIA0KPiBAQCAtODA5LDYgKzgxMCw3IEBAIHN0YXRpYyBpbnQgd3JpdGVfZm9s
-aW9fbm91bmxvY2soc3RydWN0IGZvbGlvICpmb2xpbywNCj4gIAkJCWZvbGlvX3JlZGlydHlfZm9y
-X3dyaXRlcGFnZSh3YmMsIGZvbGlvKTsNCj4gIAkJCWZvbGlvX2VuZF93cml0ZWJhY2soZm9saW8p
-Ow0KPiAgCQkJY2VwaF9vc2RjX3B1dF9yZXF1ZXN0KHJlcSk7DQo+ICsJCQlhdG9taWNfbG9uZ19k
-ZWMoJmZzYy0+d3JpdGViYWNrX2NvdW50KTsNCg0KRGl0dG8uDQoNCj4gIAkJCXJldHVybiBQVFJf
-RVJSKGJvdW5jZV9wYWdlKTsNCj4gIAkJfQ0KPiAgCX0NCj4gQEAgLTg0Nyw2ICs4NDksNyBAQCBz
-dGF0aWMgaW50IHdyaXRlX2ZvbGlvX25vdW5sb2NrKHN0cnVjdCBmb2xpbyAqZm9saW8sDQo+ICAJ
-CQkgICAgICBjZXBoX3Zpbm9wKGlub2RlKSwgZm9saW8pOw0KPiAgCQkJZm9saW9fcmVkaXJ0eV9m
-b3Jfd3JpdGVwYWdlKHdiYywgZm9saW8pOw0KPiAgCQkJZm9saW9fZW5kX3dyaXRlYmFjayhmb2xp
-byk7DQo+ICsJCQlhdG9taWNfbG9uZ19kZWNfcmV0dXJuKCZmc2MtPndyaXRlYmFja19jb3VudCk7
-DQoNCkRpdHRvLiBFc3BlY2lhbGx5LCBpdCBpcyBub3QgY2xlYXIgd2h5IGF0b21pY19sb25nX2Rl
-Y19yZXR1cm4oKSB3YXMgdXNlZCBpbnN0ZWFkDQpvZiBhdG9taWNfbG9uZ19kZWMoKSBpZiB3ZSBk
-b24ndCBmb2xsb3cgdGhlIGFib3ZlLW1lbnRpb25lZCBwYXR0ZXJuLg0KDQpUaGFua3MsDQpTbGF2
-YS4NCg0KPiAgCQkJcmV0dXJuIGVycjsNCj4gIAkJfQ0KPiAgCQlpZiAoZXJyID09IC1FQkxPQ0tM
-SVNURUQpDQo=
+7.0-stable review patch.  If anyone has any objections, please let me know.
+
+------------------
+
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+
+[ Upstream commit dc7832d05deb4d632e8035e3299e31a3528fa0d0 ]
+
+The multiple runs of generic/013 test-case is capable
+to reproduce a kernel BUG at mm/filemap.c:1504 with
+probability of 30%.
+
+while true; do
+  sudo ./check generic/013
+done
+
+[ 9849.452376] page: refcount:3 mapcount:0 mapping:00000000e58ff252 index:0x10781 pfn:0x1c322
+[ 9849.452412] memcg:ffff8881a1915800
+[ 9849.452417] aops:ceph_aops ino:1000058db9e dentry name(?):"f9XXXXXX"
+[ 9849.452432] flags: 0x17ffffc0000000(node=0|zone=2|lastcpupid=0x1fffff)
+[ 9849.452441] raw: 0017ffffc0000000 0000000000000000 dead000000000122 ffff88816110d248
+[ 9849.452445] raw: 0000000000010781 0000000000000000 00000003ffffffff ffff8881a1915800
+[ 9849.452447] page dumped because: VM_BUG_ON_FOLIO(!folio_test_locked(folio))
+[ 9849.452474] ------------[ cut here ]------------
+[ 9849.452476] kernel BUG at mm/filemap.c:1504!
+[ 9849.478635] Oops: invalid opcode: 0000 [#1] SMP KASAN NOPTI
+[ 9849.481772] CPU: 2 UID: 0 PID: 84223 Comm: fsstress Not tainted 7.0.0-rc1+ #18 PREEMPT(full)
+[ 9849.482881] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-9.fc43 06/1
+0/2025
+[ 9849.484539] RIP: 0010:folio_unlock+0x85/0xa0
+[ 9849.485076] Code: 89 df 31 f6 e8 1c f3 ff ff 48 8b 5d f8 c9 31 c0 31 d2 31 f6 31 ff c3 cc
+cc cc cc 48 c7 c6 80 6c d9 a7 48 89 df e8 4b b3 10 00 <0f> 0b 48 89 df e8 21 e6 2c 00 eb 9d 0f 1f 40 00 66 66 2e 0f 1f 84
+[ 9849.493818] RSP: 0018:ffff8881bb8076b0 EFLAGS: 00010246
+[ 9849.495740] RAX: 0000000000000000 RBX: ffffea00070c8980 RCX: 0000000000000000
+[ 9849.498678] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
+[ 9849.500559] RBP: ffff8881bb8076b8 R08: 0000000000000000 R09: 0000000000000000
+[ 9849.501097] R10: 0000000000000000 R11: 0000000000000000 R12: 0000000010782000
+[ 9849.502108] R13: ffff8881935de738 R14: ffff88816110d010 R15: 0000000000001000
+[ 9849.502516] FS:  00007e36cbe94740(0000) GS:ffff88824a899000(0000) knlGS:0000000000000000
+[ 9849.502996] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[ 9849.503810] CR2: 000000c0002b0000 CR3: 000000011bbf6004 CR4: 0000000000772ef0
+[ 9849.504459] PKRU: 55555554
+[ 9849.504626] Call Trace:
+[ 9849.505242]  <TASK>
+[ 9849.505379]  netfs_write_begin+0x7c8/0x10a0
+[ 9849.505877]  ? __kasan_check_read+0x11/0x20
+[ 9849.506384]  ? __pfx_netfs_write_begin+0x10/0x10
+[ 9849.507178]  ceph_write_begin+0x8c/0x1c0
+[ 9849.507934]  generic_perform_write+0x391/0x8f0
+[ 9849.508503]  ? __pfx_generic_perform_write+0x10/0x10
+[ 9849.509062]  ? file_update_time_flags+0x19a/0x4b0
+[ 9849.509581]  ? ceph_get_caps+0x63/0xf0
+[ 9849.510259]  ? ceph_get_caps+0x63/0xf0
+[ 9849.510530]  ceph_write_iter+0xe79/0x1ae0
+[ 9849.511282]  ? __pfx_ceph_write_iter+0x10/0x10
+[ 9849.511839]  ? lock_acquire+0x1ad/0x310
+[ 9849.512334]  ? ksys_write+0xf9/0x230
+[ 9849.512582]  ? lock_is_held_type+0xaa/0x140
+[ 9849.513128]  vfs_write+0x512/0x1110
+[ 9849.513634]  ? __fget_files+0x33/0x350
+[ 9849.513893]  ? __pfx_vfs_write+0x10/0x10
+[ 9849.514143]  ? mutex_lock_nested+0x1b/0x30
+[ 9849.514394]  ksys_write+0xf9/0x230
+[ 9849.514621]  ? __pfx_ksys_write+0x10/0x10
+[ 9849.514887]  ? do_syscall_64+0x25e/0x1520
+[ 9849.515122]  ? __kasan_check_read+0x11/0x20
+[ 9849.515366]  ? trace_hardirqs_on_prepare+0x178/0x1c0
+[ 9849.515655]  __x64_sys_write+0x72/0xd0
+[ 9849.515885]  ? trace_hardirqs_on+0x24/0x1c0
+[ 9849.516130]  x64_sys_call+0x22f/0x2390
+[ 9849.516341]  do_syscall_64+0x12b/0x1520
+[ 9849.516545]  ? do_syscall_64+0x27c/0x1520
+[ 9849.516783]  ? do_syscall_64+0x27c/0x1520
+[ 9849.517003]  ? lock_release+0x318/0x480
+[ 9849.517220]  ? __x64_sys_io_getevents+0x143/0x2d0
+[ 9849.517479]  ? percpu_ref_put_many.constprop.0+0x8f/0x210
+[ 9849.517779]  ? entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[ 9849.518073]  ? do_syscall_64+0x25e/0x1520
+[ 9849.518291]  ? __kasan_check_read+0x11/0x20
+[ 9849.518519]  ? trace_hardirqs_on_prepare+0x178/0x1c0
+[ 9849.518799]  ? do_syscall_64+0x27c/0x1520
+[ 9849.519024]  ? local_clock_noinstr+0xf/0x120
+[ 9849.519262]  ? entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[ 9849.519544]  ? do_syscall_64+0x25e/0x1520
+[ 9849.519781]  ? __kasan_check_read+0x11/0x20
+[ 9849.520008]  ? trace_hardirqs_on_prepare+0x178/0x1c0
+[ 9849.520273]  ? do_syscall_64+0x27c/0x1520
+[ 9849.520491]  ? trace_hardirqs_on_prepare+0x178/0x1c0
+[ 9849.520767]  ? irqentry_exit+0x10c/0x6c0
+[ 9849.520984]  ? trace_hardirqs_off+0x86/0x1b0
+[ 9849.521224]  ? exc_page_fault+0xab/0x130
+[ 9849.521472]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[ 9849.521766] RIP: 0033:0x7e36cbd14907
+[ 9849.521989] Code: 10 00 f7 d8 64 89 02 48 c7 c0 ff ff ff ff eb b7 0f 1f 00 f3 0f 1e fa 64 8b 04 25 18 00 00 00 85 c0 75 10 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 51 c3 48 83 ec 28 48 89 54 24 18 48 89 74 24
+[ 9849.523057] RSP: 002b:00007ffff2d2a968 EFLAGS: 00000246 ORIG_RAX: 0000000000000001
+[ 9849.523484] RAX: ffffffffffffffda RBX: 000000000000e549 RCX: 00007e36cbd14907
+[ 9849.523885] RDX: 000000000000e549 RSI: 00005bd797ec6370 RDI: 0000000000000004
+[ 9849.524277] RBP: 0000000000000004 R08: 0000000000000047 R09: 00005bd797ec6370
+[ 9849.524652] R10: 0000000000000078 R11: 0000000000000246 R12: 0000000000000049
+[ 9849.525062] R13: 0000000010781a37 R14: 00005bd797ec6370 R15: 0000000000000000
+[ 9849.525447]  </TASK>
+[ 9849.525574] Modules linked in: intel_rapl_msr intel_rapl_common intel_uncore_frequency_common intel_pmc_core pmt_telemetry pmt_discovery pmt_class intel_pmc_ssram_telemetry intel_vsec kvm_intel joydev kvm irqbypass ghash_clmulni_intel aesni_intel input_leds rapl mac_hid psmouse vga16fb serio_raw vgastate floppy i2c_piix4 bochs qemu_fw_cfg i2c_smbus pata_acpi sch_fq_codel rbd msr parport_pc ppdev lp parport efi_pstore
+[ 9849.529150] ---[ end trace 0000000000000000 ]---
+[ 9849.529502] RIP: 0010:folio_unlock+0x85/0xa0
+[ 9849.530813] Code: 89 df 31 f6 e8 1c f3 ff ff 48 8b 5d f8 c9 31 c0 31 d2 31 f6 31 ff c3 cc cc cc cc 48 c7 c6 80 6c d9 a7 48 89 df e8 4b b3 10 00 <0f> 0b 48 89 df e8 21 e6 2c 00 eb 9d 0f 1f 40 00 66 66 2e 0f 1f 84
+[ 9849.534986] RSP: 0018:ffff8881bb8076b0 EFLAGS: 00010246
+[ 9849.536198] RAX: 0000000000000000 RBX: ffffea00070c8980 RCX: 0000000000000000
+[ 9849.537718] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
+[ 9849.539321] RBP: ffff8881bb8076b8 R08: 0000000000000000 R09: 0000000000000000
+[ 9849.540862] R10: 0000000000000000 R11: 0000000000000000 R12: 0000000010782000
+[ 9849.542438] R13: ffff8881935de738 R14: ffff88816110d010 R15: 0000000000001000
+[ 9849.543996] FS:  00007e36cbe94740(0000) GS:ffff88824b899000(0000) knlGS:0000000000000000
+[ 9849.545854] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[ 9849.547092] CR2: 00007e36cb3ff000 CR3: 000000011bbf6006 CR4: 0000000000772ef0
+[ 9849.548679] PKRU: 55555554
+
+The race sequence:
+1. Read completes -> netfs_read_collection() runs
+2. netfs_wake_rreq_flag(rreq, NETFS_RREQ_IN_PROGRESS, ...)
+3. netfs_wait_for_read() returns -EFAULT to netfs_write_begin()
+4. The netfs_unlock_abandoned_read_pages() unlocks the folio
+5. netfs_write_begin() calls folio_unlock(folio) -> VM_BUG_ON_FOLIO()
+
+The key reason of the issue that netfs_unlock_abandoned_read_pages()
+doesn't check the flag NETFS_RREQ_NO_UNLOCK_FOLIO and executes
+folio_unlock() unconditionally. This patch implements in
+netfs_unlock_abandoned_read_pages() logic similar to
+netfs_unlock_read_folio().
+
+Fixes: ee4cdf7ba857 ("netfs: Speed up buffered reading")
+Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Signed-off-by: David Howells <dhowells@redhat.com>
+Link: https://patch.msgid.link/20260512123404.719402-8-dhowells@redhat.com
+Reviewed-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
+cc: netfs@lists.linux.dev
+cc: linux-fsdevel@vger.kernel.org
+cc: Ceph Development <ceph-devel@vger.kernel.org>
+Signed-off-by: Christian Brauner <brauner@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ fs/netfs/read_retry.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/fs/netfs/read_retry.c b/fs/netfs/read_retry.c
+index 5ec548b996d65..e10eb5a073326 100644
+--- a/fs/netfs/read_retry.c
++++ b/fs/netfs/read_retry.c
+@@ -292,8 +292,15 @@ void netfs_unlock_abandoned_read_pages(struct netfs_io_request *rreq)
+ 			struct folio *folio = folioq_folio(p, slot);
+ 
+ 			if (folio && !folioq_is_marked2(p, slot)) {
+-				trace_netfs_folio(folio, netfs_folio_trace_abandon);
+-				folio_unlock(folio);
++				if (folio->index == rreq->no_unlock_folio &&
++				    test_bit(NETFS_RREQ_NO_UNLOCK_FOLIO,
++					     &rreq->flags)) {
++					_debug("no unlock");
++				} else {
++					trace_netfs_folio(folio,
++						netfs_folio_trace_abandon);
++					folio_unlock(folio);
++				}
+ 			}
+ 		}
+ 	}
+-- 
+2.53.0
+
+
+
