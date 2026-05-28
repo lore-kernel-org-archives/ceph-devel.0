@@ -1,49 +1,78 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f45.google.com (mail-pj1-f45.google.com [209.85.216.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29B77335566;
-	Thu, 28 May 2026 20:04:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C02063016E0
+	for <ceph-devel@vger.kernel.org>; Thu, 28 May 2026 20:22:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779998672; cv=none; b=fKh5Je8Fu+GJECWji7H57Zvra1EJ+6bI1lBAo5ckQKQmLT67OzAUHUN3GRVt8UCMxGVDm5+wbShboC69EFhBXRxUnFsfDkUEQpZ+Y9QE3NWOja6pDzA+kjocdwaz9BgTQk+XE+GT4kSFknL2MZ4UyIdY/5Au0053/weCFb6PygE=
+	t=1779999730; cv=none; b=uEXx2WiOF/nr13HKClcBtgY7cmghZkR5rXxQeghIJ81u/oUhHQx4NOJyH7II5rdbK+yasMKMgXvJsK5Sl1zo0uLN3134Ko8MVjIgw9ZFz6ZdFo+Ixr+diYXQcko4AsXJYhD7z+LRMn0BV+AXDWQAVbqIvasop8KoOzcZzgOcYq0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779998672; c=relaxed/simple;
-	bh=gFddTSvRaUGStOTlSlmJ+nW70bl91iYobgt0G1acJFY=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=aMBl00CiRgqlUubfXt2+VWa42jdU5SCMx980K2ZUtSaMMNJ1vjJTfZQk1rC0zkKf5wIcoWahumXzPyo53J6SJb8Z6jxPu6OEf1eJkfblw7lKrQldAf6RiqnJMWgIiL6QV3/WeoGzCHmL8XdIXuYoiHgi+wFuJvYJUH4WvHMOWgw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=tqsFHVVq; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779999730; c=relaxed/simple;
+	bh=8r3Njt8panVzaDyqKXn/pvgpQoA+kH4AbvtZB3YhhYU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=SQqZEPuGodHeq8POdsCAq+eEFqk+YCwHFnl35gGJ5VN4gRho7ONqmuU4yh/1xY2T1iLWki/GUMTuIUty9QC2wlfKaijsRcJPs2tOEU30oMO1aL4XRnpSFj0GM9mFhhLr6b9IABjHafXWTAXQhCC11ei9KcEId+Q2zdFEoilWYfM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=haWb59rv; arc=none smtp.client-ip=209.85.216.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="tqsFHVVq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D3BD1F000E9;
-	Thu, 28 May 2026 20:04:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linuxfoundation.org;
-	s=korg; t=1779998671;
-	bh=Rif6r0+T54GQJxKH5xaPrMAA16L9Ba4scEuJpizsBXY=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=tqsFHVVqJFXpudaRO4Ubh1ZdmCQOs378okIlCd+oA6XOTGkOvYfgiCN/LKx05tFID
-	 o7ru8ZzRiBjt2Wq2/2ChvygkDh709twjvpEkxmfgs0vmFbx6lpgRASVyxCGpw+9fWh
-	 h34nfoZX8HAN1FENQPJhKBYewT1taEcciG+K/jzo=
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: stable@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	patches@lists.linux.dev,
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	David Howells <dhowells@redhat.com>,
-	"Paulo Alcantara (Red Hat)" <pc@manguebit.org>,
-	netfs@lists.linux.dev,
-	linux-fsdevel@vger.kernel.org,
-	Ceph Development <ceph-devel@vger.kernel.org>,
-	Christian Brauner <brauner@kernel.org>,
-	Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 7.0 256/461] netfs: fix VM_BUG_ON_FOLIO() issue in netfs_write_begin() call
-Date: Thu, 28 May 2026 21:46:25 +0200
-Message-ID: <20260528194654.565537981@linuxfoundation.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="haWb59rv"
+Received: by mail-pj1-f45.google.com with SMTP id 98e67ed59e1d1-36bba9a1089so67175a91.3
+        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2026 13:22:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1779999729; x=1780604529; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=BvVT0II3dEilSbYrBZE5Ytb4041NB7ZsFn14SAB4u14=;
+        b=haWb59rvJjBrnh/KE1CyLwsmwK7M4ximKxm1/arnsKrv709NK+S8XTL0r9sPVIR2bK
+         yUGa0ngl5dy4TUeNIWL+PF5vugF+NYq12ehSZoOdS/VWMgutbyylUzvh5DNnbu+GCRwH
+         sRLGdgpNodocXvDF/QJLhulhA0c+G+rx1/L26xTdJV74W2j3fOF1vhkDWo/39uUjNqhn
+         QczCmBxty9LJ1Bm8XE0n2y/ANxcl/AgoSWj8jY7uefdTIAsudkvLNm8pDUY95Vwti5Yk
+         i1ZMbm8VJFopXstkl5XGnJVZ5c3yycJpr/ddYj49lzXIMIx1xA3jTWxxawi9C69CwuLL
+         J5+Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779999729; x=1780604529;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BvVT0II3dEilSbYrBZE5Ytb4041NB7ZsFn14SAB4u14=;
+        b=VoAXNnHxJTc7ympLy5g0u2OmUOmLBrgmhc3eVwKws2hz50KfFav9E+TIE6sS450+ZF
+         NG4tB7Dh3hD42MzDqHB30UxzNzq6jmOwkmMbbXqNSqUvZlmdxCDQsEfHgXnIvu9yPRWK
+         kbcKxD4CxDLFyTO/30a9c4MALZTjUFk9t4cacT+FZVPusb23/hoTVXq5H6jWykyNP0GY
+         u7YH2lXbbqKminlgtcUAUoxeFiKFv9LHIrfbdV8t5NNrhEGeceJodK+BGpNZuYqZ8+0A
+         a9Q4nTlzjtAse57sFZ0DVpggcqhcEberdUQdJUf5+3y5M9EcwHCUPY+ZCUwpz5sKHuRd
+         TRsg==
+X-Forwarded-Encrypted: i=1; AFNElJ8KUYZO/XuuxpwNAj2AY+SPk27swftVgTNQiGaFmfoxQqxeQrL8NsvSm6gxOqVXRMdCGWyOAVomlHcu@vger.kernel.org
+X-Gm-Message-State: AOJu0YwmHAr9NM9CnTgEoh9fIu3Rx65L+LDc7UfxgLPsoC/rq7qgnRFM
+	NB9GsKv6nvUVMS7G89k7UMRv7hBkJaloH1r3YhaOSfOUzBHqfibi/ojekvtp+2NJ
+X-Gm-Gg: Acq92OE/qlRp84fDZlVZhF6xEMFnj/janIifmi7I+Sn7aX84XOvtGMmxsZGGRxfl94u
+	HH8TgN7tYLOTCho7Awe1r1sv/Z02Cp5byR0fCur3DJxjAvTSN7aH97SaKbegLEiSBDQdiz65H9Q
+	FoVO9gJcEhIlTu+SeovBSpE4mzujSv7VAVp4+MclLbpQqcnAiydpZ1GutQw4yKA0QNXNoauLMlU
+	8biwmIOTOfOK1dlBfBzs5dbxeCGHYqlzv6x3rXAvy4atxO0/ZwTGkWxfWz9RyGGu7rLnYYvqScO
+	6NSNq8AHrGMOUzBLfkABZzOa+uhmprqCm5nkxwDE0f6bwdUx/CvcfyHhA42Bcm6RWe/miBmRrz+
+	oTeuTawk1nMkuhW2DLgFT8hqMWKpuS9uvKtN+XIeVgYQaBWglCZqCL1qq19HCCWHTaV+bNngfVP
+	GfQKx3s6dA5KFaUIOTuLCn1AcO43PwuG0w15TLse0j5IZtYCzPBtIQ/RPXsVKmglxH9JZN3MG5V
+	lppMN/FUdRaI/mFtZEkljzZoEYErU6pHTnT/P7SaAsYfA==
+X-Received: by 2002:a17:90a:dfcf:b0:35d:a3b4:2f0d with SMTP id 98e67ed59e1d1-36bbcc146f3mr122373a91.6.1779999729076;
+        Thu, 28 May 2026 13:22:09 -0700 (PDT)
+Received: from ryzen ([2601:644:8000:5b5d:7285:c2ff:fe45:8a32])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-36b908da770sm2334406a91.2.2026.05.28.13.22.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 May 2026 13:22:08 -0700 (PDT)
+From: Rosen Penev <rosenp@gmail.com>
+To: linux-block@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>,
+	Dongsheng Yang <dongsheng.yang@linux.dev>,
+	Jens Axboe <axboe@kernel.dk>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+	Bill Wendling <morbo@google.com>,
+	Justin Stitt <justinstitt@google.com>,
+	ceph-devel@vger.kernel.org (open list:RADOS BLOCK DEVICE (RBD)),
+	linux-kernel@vger.kernel.org (open list),
+	llvm@lists.linux.dev (open list:CLANG/LLVM BUILD SUPPORT:Keyword:\b(?i:clang|llvm)\b)
+Subject: [PATCH] rbd: cast snap_count to size_t to avoid tautological comparison warning
+Date: Thu, 28 May 2026 13:21:51 -0700
+Message-ID: <20260528202151.136274-1-rosenp@gmail.com>
 X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260528194646.819809818@linuxfoundation.org>
-References: <20260528194646.819809818@linuxfoundation.org>
-User-Agent: quilt/0.69
-X-stable: review
-X-Patchwork-Hint: ignore
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -52,173 +81,30 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-7.0-stable review patch.  If anyone has any objections, please let me know.
+snap_count is u32 but the comparison is against a SIZE_MAX-derived value
+(~2^61 on 64-bit), which clang flags as always false with
+-Wtautological-constant-out-of-range-compare. Cast to size_t so the
+comparison is done in the correct width.
 
-------------------
-
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-
-[ Upstream commit dc7832d05deb4d632e8035e3299e31a3528fa0d0 ]
-
-The multiple runs of generic/013 test-case is capable
-to reproduce a kernel BUG at mm/filemap.c:1504 with
-probability of 30%.
-
-while true; do
-  sudo ./check generic/013
-done
-
-[ 9849.452376] page: refcount:3 mapcount:0 mapping:00000000e58ff252 index:0x10781 pfn:0x1c322
-[ 9849.452412] memcg:ffff8881a1915800
-[ 9849.452417] aops:ceph_aops ino:1000058db9e dentry name(?):"f9XXXXXX"
-[ 9849.452432] flags: 0x17ffffc0000000(node=0|zone=2|lastcpupid=0x1fffff)
-[ 9849.452441] raw: 0017ffffc0000000 0000000000000000 dead000000000122 ffff88816110d248
-[ 9849.452445] raw: 0000000000010781 0000000000000000 00000003ffffffff ffff8881a1915800
-[ 9849.452447] page dumped because: VM_BUG_ON_FOLIO(!folio_test_locked(folio))
-[ 9849.452474] ------------[ cut here ]------------
-[ 9849.452476] kernel BUG at mm/filemap.c:1504!
-[ 9849.478635] Oops: invalid opcode: 0000 [#1] SMP KASAN NOPTI
-[ 9849.481772] CPU: 2 UID: 0 PID: 84223 Comm: fsstress Not tainted 7.0.0-rc1+ #18 PREEMPT(full)
-[ 9849.482881] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-9.fc43 06/1
-0/2025
-[ 9849.484539] RIP: 0010:folio_unlock+0x85/0xa0
-[ 9849.485076] Code: 89 df 31 f6 e8 1c f3 ff ff 48 8b 5d f8 c9 31 c0 31 d2 31 f6 31 ff c3 cc
-cc cc cc 48 c7 c6 80 6c d9 a7 48 89 df e8 4b b3 10 00 <0f> 0b 48 89 df e8 21 e6 2c 00 eb 9d 0f 1f 40 00 66 66 2e 0f 1f 84
-[ 9849.493818] RSP: 0018:ffff8881bb8076b0 EFLAGS: 00010246
-[ 9849.495740] RAX: 0000000000000000 RBX: ffffea00070c8980 RCX: 0000000000000000
-[ 9849.498678] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
-[ 9849.500559] RBP: ffff8881bb8076b8 R08: 0000000000000000 R09: 0000000000000000
-[ 9849.501097] R10: 0000000000000000 R11: 0000000000000000 R12: 0000000010782000
-[ 9849.502108] R13: ffff8881935de738 R14: ffff88816110d010 R15: 0000000000001000
-[ 9849.502516] FS:  00007e36cbe94740(0000) GS:ffff88824a899000(0000) knlGS:0000000000000000
-[ 9849.502996] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[ 9849.503810] CR2: 000000c0002b0000 CR3: 000000011bbf6004 CR4: 0000000000772ef0
-[ 9849.504459] PKRU: 55555554
-[ 9849.504626] Call Trace:
-[ 9849.505242]  <TASK>
-[ 9849.505379]  netfs_write_begin+0x7c8/0x10a0
-[ 9849.505877]  ? __kasan_check_read+0x11/0x20
-[ 9849.506384]  ? __pfx_netfs_write_begin+0x10/0x10
-[ 9849.507178]  ceph_write_begin+0x8c/0x1c0
-[ 9849.507934]  generic_perform_write+0x391/0x8f0
-[ 9849.508503]  ? __pfx_generic_perform_write+0x10/0x10
-[ 9849.509062]  ? file_update_time_flags+0x19a/0x4b0
-[ 9849.509581]  ? ceph_get_caps+0x63/0xf0
-[ 9849.510259]  ? ceph_get_caps+0x63/0xf0
-[ 9849.510530]  ceph_write_iter+0xe79/0x1ae0
-[ 9849.511282]  ? __pfx_ceph_write_iter+0x10/0x10
-[ 9849.511839]  ? lock_acquire+0x1ad/0x310
-[ 9849.512334]  ? ksys_write+0xf9/0x230
-[ 9849.512582]  ? lock_is_held_type+0xaa/0x140
-[ 9849.513128]  vfs_write+0x512/0x1110
-[ 9849.513634]  ? __fget_files+0x33/0x350
-[ 9849.513893]  ? __pfx_vfs_write+0x10/0x10
-[ 9849.514143]  ? mutex_lock_nested+0x1b/0x30
-[ 9849.514394]  ksys_write+0xf9/0x230
-[ 9849.514621]  ? __pfx_ksys_write+0x10/0x10
-[ 9849.514887]  ? do_syscall_64+0x25e/0x1520
-[ 9849.515122]  ? __kasan_check_read+0x11/0x20
-[ 9849.515366]  ? trace_hardirqs_on_prepare+0x178/0x1c0
-[ 9849.515655]  __x64_sys_write+0x72/0xd0
-[ 9849.515885]  ? trace_hardirqs_on+0x24/0x1c0
-[ 9849.516130]  x64_sys_call+0x22f/0x2390
-[ 9849.516341]  do_syscall_64+0x12b/0x1520
-[ 9849.516545]  ? do_syscall_64+0x27c/0x1520
-[ 9849.516783]  ? do_syscall_64+0x27c/0x1520
-[ 9849.517003]  ? lock_release+0x318/0x480
-[ 9849.517220]  ? __x64_sys_io_getevents+0x143/0x2d0
-[ 9849.517479]  ? percpu_ref_put_many.constprop.0+0x8f/0x210
-[ 9849.517779]  ? entry_SYSCALL_64_after_hwframe+0x76/0x7e
-[ 9849.518073]  ? do_syscall_64+0x25e/0x1520
-[ 9849.518291]  ? __kasan_check_read+0x11/0x20
-[ 9849.518519]  ? trace_hardirqs_on_prepare+0x178/0x1c0
-[ 9849.518799]  ? do_syscall_64+0x27c/0x1520
-[ 9849.519024]  ? local_clock_noinstr+0xf/0x120
-[ 9849.519262]  ? entry_SYSCALL_64_after_hwframe+0x76/0x7e
-[ 9849.519544]  ? do_syscall_64+0x25e/0x1520
-[ 9849.519781]  ? __kasan_check_read+0x11/0x20
-[ 9849.520008]  ? trace_hardirqs_on_prepare+0x178/0x1c0
-[ 9849.520273]  ? do_syscall_64+0x27c/0x1520
-[ 9849.520491]  ? trace_hardirqs_on_prepare+0x178/0x1c0
-[ 9849.520767]  ? irqentry_exit+0x10c/0x6c0
-[ 9849.520984]  ? trace_hardirqs_off+0x86/0x1b0
-[ 9849.521224]  ? exc_page_fault+0xab/0x130
-[ 9849.521472]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
-[ 9849.521766] RIP: 0033:0x7e36cbd14907
-[ 9849.521989] Code: 10 00 f7 d8 64 89 02 48 c7 c0 ff ff ff ff eb b7 0f 1f 00 f3 0f 1e fa 64 8b 04 25 18 00 00 00 85 c0 75 10 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 51 c3 48 83 ec 28 48 89 54 24 18 48 89 74 24
-[ 9849.523057] RSP: 002b:00007ffff2d2a968 EFLAGS: 00000246 ORIG_RAX: 0000000000000001
-[ 9849.523484] RAX: ffffffffffffffda RBX: 000000000000e549 RCX: 00007e36cbd14907
-[ 9849.523885] RDX: 000000000000e549 RSI: 00005bd797ec6370 RDI: 0000000000000004
-[ 9849.524277] RBP: 0000000000000004 R08: 0000000000000047 R09: 00005bd797ec6370
-[ 9849.524652] R10: 0000000000000078 R11: 0000000000000246 R12: 0000000000000049
-[ 9849.525062] R13: 0000000010781a37 R14: 00005bd797ec6370 R15: 0000000000000000
-[ 9849.525447]  </TASK>
-[ 9849.525574] Modules linked in: intel_rapl_msr intel_rapl_common intel_uncore_frequency_common intel_pmc_core pmt_telemetry pmt_discovery pmt_class intel_pmc_ssram_telemetry intel_vsec kvm_intel joydev kvm irqbypass ghash_clmulni_intel aesni_intel input_leds rapl mac_hid psmouse vga16fb serio_raw vgastate floppy i2c_piix4 bochs qemu_fw_cfg i2c_smbus pata_acpi sch_fq_codel rbd msr parport_pc ppdev lp parport efi_pstore
-[ 9849.529150] ---[ end trace 0000000000000000 ]---
-[ 9849.529502] RIP: 0010:folio_unlock+0x85/0xa0
-[ 9849.530813] Code: 89 df 31 f6 e8 1c f3 ff ff 48 8b 5d f8 c9 31 c0 31 d2 31 f6 31 ff c3 cc cc cc cc 48 c7 c6 80 6c d9 a7 48 89 df e8 4b b3 10 00 <0f> 0b 48 89 df e8 21 e6 2c 00 eb 9d 0f 1f 40 00 66 66 2e 0f 1f 84
-[ 9849.534986] RSP: 0018:ffff8881bb8076b0 EFLAGS: 00010246
-[ 9849.536198] RAX: 0000000000000000 RBX: ffffea00070c8980 RCX: 0000000000000000
-[ 9849.537718] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
-[ 9849.539321] RBP: ffff8881bb8076b8 R08: 0000000000000000 R09: 0000000000000000
-[ 9849.540862] R10: 0000000000000000 R11: 0000000000000000 R12: 0000000010782000
-[ 9849.542438] R13: ffff8881935de738 R14: ffff88816110d010 R15: 0000000000001000
-[ 9849.543996] FS:  00007e36cbe94740(0000) GS:ffff88824b899000(0000) knlGS:0000000000000000
-[ 9849.545854] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[ 9849.547092] CR2: 00007e36cb3ff000 CR3: 000000011bbf6006 CR4: 0000000000772ef0
-[ 9849.548679] PKRU: 55555554
-
-The race sequence:
-1. Read completes -> netfs_read_collection() runs
-2. netfs_wake_rreq_flag(rreq, NETFS_RREQ_IN_PROGRESS, ...)
-3. netfs_wait_for_read() returns -EFAULT to netfs_write_begin()
-4. The netfs_unlock_abandoned_read_pages() unlocks the folio
-5. netfs_write_begin() calls folio_unlock(folio) -> VM_BUG_ON_FOLIO()
-
-The key reason of the issue that netfs_unlock_abandoned_read_pages()
-doesn't check the flag NETFS_RREQ_NO_UNLOCK_FOLIO and executes
-folio_unlock() unconditionally. This patch implements in
-netfs_unlock_abandoned_read_pages() logic similar to
-netfs_unlock_read_folio().
-
-Fixes: ee4cdf7ba857 ("netfs: Speed up buffered reading")
-Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Signed-off-by: David Howells <dhowells@redhat.com>
-Link: https://patch.msgid.link/20260512123404.719402-8-dhowells@redhat.com
-Reviewed-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
-cc: netfs@lists.linux.dev
-cc: linux-fsdevel@vger.kernel.org
-cc: Ceph Development <ceph-devel@vger.kernel.org>
-Signed-off-by: Christian Brauner <brauner@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Assisted-by: Opencode:Big-pickle
+Signed-off-by: Rosen Penev <rosenp@gmail.com>
 ---
- fs/netfs/read_retry.c | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+ drivers/block/rbd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/netfs/read_retry.c b/fs/netfs/read_retry.c
-index 5ec548b996d65..e10eb5a073326 100644
---- a/fs/netfs/read_retry.c
-+++ b/fs/netfs/read_retry.c
-@@ -292,8 +292,15 @@ void netfs_unlock_abandoned_read_pages(struct netfs_io_request *rreq)
- 			struct folio *folio = folioq_folio(p, slot);
- 
- 			if (folio && !folioq_is_marked2(p, slot)) {
--				trace_netfs_folio(folio, netfs_folio_trace_abandon);
--				folio_unlock(folio);
-+				if (folio->index == rreq->no_unlock_folio &&
-+				    test_bit(NETFS_RREQ_NO_UNLOCK_FOLIO,
-+					     &rreq->flags)) {
-+					_debug("no unlock");
-+				} else {
-+					trace_netfs_folio(folio,
-+						netfs_folio_trace_abandon);
-+					folio_unlock(folio);
-+				}
- 			}
- 		}
- 	}
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 94709466ad19..b4ba51db9a28 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -6079,7 +6079,7 @@ static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev,
+ 	 * make sure the computed size of the snapshot context we
+ 	 * allocate is representable in a size_t.
+ 	 */
+-	if (snap_count > (SIZE_MAX - sizeof (struct ceph_snap_context))
++	if ((size_t)snap_count > (SIZE_MAX - sizeof (struct ceph_snap_context))
+ 				 / sizeof (u64)) {
+ 		ret = -EINVAL;
+ 		goto out;
 -- 
-2.53.0
-
-
+2.54.0
 
