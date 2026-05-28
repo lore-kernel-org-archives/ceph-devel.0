@@ -1,74 +1,72 @@
-Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
+Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 950FE378832
-	for <ceph-devel@vger.kernel.org>; Thu, 28 May 2026 13:26:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FB443BD224
+	for <ceph-devel@vger.kernel.org>; Thu, 28 May 2026 14:37:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779974763; cv=none; b=XwycC0Uos7PN4mf99zMTVZTMm+g/TvN9cZYWLEe4qNesmaRv9/vDB9NC16kldiE2XsDsgnc+B8PT/igTNVG19WXmb2WJZrPf2yS2XPkL24Fl+Td005MDUeY9Lgg+YTT/HAr/GBE97YXEJ8H94LnxXAmhsgRfcq5kKggNet/7VOo=
+	t=1779979086; cv=none; b=MKzvk2e4Ska0TOpsJRilNuHIDowEUSz60iiYlvTho4Y9ZRN4Na9CcvuLLrb+L5oRBk2tlEdSdFyj+mfD1L2Bf2KWhyhlFeXxPWJwjawtESQK+b8a2ZcWml4nXuYB0vkwJg5ETxErR6G3N71V+mu3NjZ0d5jH5SA1QXdJA8vRr0w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779974763; c=relaxed/simple;
-	bh=QUR06i/oLQGVwvHm5+5o0AEps5inWNG8u6llh7dN7sI=;
+	s=arc-20240116; t=1779979086; c=relaxed/simple;
+	bh=l2Tt48p6srvUIVxy+xt+rEVv4o4oXz307I+CM2p8V4E=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=mVoUUR81jc0R4NztMTZ1d/y/2+Qm0kCLWARfTRRHOCDvfoIjMe2Wv3m4ZUWcrlqixmz936217SrdoqEmLGbHtVzGboZrbYP3ae906GH8VPA/u2MoiAEAm5QdTFGr1maKQ9fVe1yWHtlZ9JDAvw97TyNoaYJsAhJwzBg1XyveX2k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cBNDvI4V; arc=none smtp.client-ip=209.85.214.169
+	 MIME-Version; b=Tm3hB8VQLpFo/Y7hdTE3Not3vEgNEmKotYfQrLAvl05eF0OSFBpcpBE51iIsqYUNFtUijPyGCx5uuUg+s6d1e26DK7Z9KrcJuotAKYM/xZw/0fK94j/qGXIfJYj6Ztpvd7nWzC7SIIp1JNKDefVmQvLXdiBf41uGYdMl/+2ElG4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MNJL2v9h; arc=none smtp.client-ip=209.85.210.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cBNDvI4V"
-Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-2b9f8c2c950so9296975ad.2
-        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2026 06:26:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MNJL2v9h"
+Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-837b704783bso1141418b3a.0
+        for <ceph-devel@vger.kernel.org>; Thu, 28 May 2026 07:37:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779974762; x=1780579562; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1779979075; x=1780583875; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=97b/ycKTWwDTGkqz750uQ/lr8PRa7HdfY9OOwRMtKcU=;
-        b=cBNDvI4Vku9FaY2eMyqfilpEjG3e9WSgUIXkIErdKp/QAynmvwqe8PpWn6jHMNj3ST
-         R84nkQIR3to7giUUyRqSg/mkngLhZcmpJL4N1XwmkDiZ76c8Mw/oI8e1uZ7jrmHJ6YdE
-         CJu+94RHLHcjI5pAjom2aAdxvr99/DUYUDqTppCo6gHpq5tkbmpuzQLZljgd3lpg+EDY
-         Hc2dqT62eE9NIWsEgfybtUJliAxwOhwmlQol6ipcbXiX6Tjc33muMyXLkDLljZ1rm3o5
-         4UuiW+/aUfcX8MSQ+/cyMEz2UdO/rN+gvLJf21eMTC82ihiFHRoP7MWls4jtD7fE6ePG
-         N/8A==
+        bh=l2Tt48p6srvUIVxy+xt+rEVv4o4oXz307I+CM2p8V4E=;
+        b=MNJL2v9hjwORiihAZuoeNgCSTx5k4CWSnDuIBxWs+PFk+mP0FgCGOBQwuQCW4jlmjD
+         1uk98ZUe7gnjEjok9i5Zoqg+IyWTyY2cdtfaSPArP3dzzDg8PUpsX1Syjvnu3Fd2xvot
+         UFOvLcVoA7yoZOQd5kz3LMY8REr9mC9O/cqiTQE0U5a/oXwZX2F2yyLt0HaCw7U3dbSr
+         fv2NvJ00bXpPKENMyqngNSKF3mxVBC1glprhjWGd9jLzom00VlWEcFQ/iExlGuDyYWE+
+         /QIae7R5z8cvgEu3jMCkIDs8BjIyPEuc3ZG1hAlDOTksQyrYTvxJ18HAXlN7cUA99zn4
+         LREg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779974762; x=1780579562;
+        d=1e100.net; s=20251104; t=1779979075; x=1780583875;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=97b/ycKTWwDTGkqz750uQ/lr8PRa7HdfY9OOwRMtKcU=;
-        b=ijm7uIX8TtLoRd00RmoF8KVlwPYsZkSX7bAzMgOE3kP8dsY4wQul3rxlozMnAa35py
-         XH8ngKri8PXKPrHtvEi1ouGLqobCmDoEcSwJkz4u9ZtVwn4ps3AKPZ7wC2B4CCuEA//R
-         LcrdTsZkOj7rPfILjQ9m7yJMyNEnN3pk6VJ0nXILGQujzNzbby+zCsTqWiXV54r4sQIk
-         dAJ890dnw2oi1oyC1BZYmFkdH6P6s9swsCibicGM/M7k8ZxCwIUmb86khqokJtCLUk6K
-         440jBNLGIafWVxL2zd+HJ3s0jPor9lsI2HW4eKLNHF7qBooKZMana21l2UVN0iXJB/Ir
-         cUOA==
-X-Forwarded-Encrypted: i=1; AFNElJ8d2yxxnkdFK10X7NRiBGUL/K5dBfwmTyH/T3XCB8uoqVxG7fbMtQDFEZyx2+PLxyvrmsV6zGqrqZBG@vger.kernel.org
-X-Gm-Message-State: AOJu0YwFGDHtewtOPoM9ippJ88blEhT+FLZ4fWjJ81OnnG4BybaBprLe
-	GEOZVzqyYYH5c5M2B1TrbQAZKGGE1C2Y8eE4f26FZ497uG2UNyKp75kM
-X-Gm-Gg: Acq92OEgKY3vR+Gxm7ZdhV6w1L2jhdzjkstcc3OH1gBAm6qKjDKhSddoj4dESq7SK+K
-	vMF9jhSjDUYqusQZvLFnNJ9o/NiKKHIIu4DyLVZ1/0SaAPK+A5++Y3DW6q79lKXkaes2XORWRd9
-	Q2bnuqnMjA+JOY4oTrFzjcQNwn7aKSUGlTO3BaMbWxUCgz1NWuDAMQV2YVRevCWcsKR9XNgjXqM
-	KVBDtugP8IjKR+FUfpQTTp4brHCRux/BM5BSoEbhAsH2svgjbLi2J0GklmEy0wsSlnWlaE+yJtK
-	SpiAkRAJWA6l21AGFfQYmcJbykLqdJ8tjuoSRswucy31noye84o5POpyv0OuL/oLNj4yn0fx5mC
-	gpDuzmMIVvTGalZmFcBINUiUkjiVpsWY+nEAeF8JnMovnzXnhx3hgmjeuzTMpgOavcu+DFWvnJc
-	KwkJE09fSefams405Z5bj7eko2Bgk=
-X-Received: by 2002:a17:903:faf:b0:2b9:8f98:3ccc with SMTP id d9443c01a7336-2bf038379a9mr19947455ad.8.1779974761976;
-        Thu, 28 May 2026 06:26:01 -0700 (PDT)
+        bh=l2Tt48p6srvUIVxy+xt+rEVv4o4oXz307I+CM2p8V4E=;
+        b=QH3r3w4u0FVdcdgJtye3f/3gmAknzJymwAzAXiF95yHw/g1jGsQNRvhe9w2T/csFH2
+         A661UnMZCboDA1fIfz1O6zeZDPzqBHwmxJEmGRYsgM1JGX0giJ96g4g33Ia/WlQkpyky
+         MFeWCn2o/OrYuiAkOhFkyh2iuAPLZO0eseNFvOeKqL+c2k5H3vDlmrOQxhC3E2CdUhDU
+         afioKhQZlPvmZCiqWEB7slSd9XNOWxIuiLeduh/U44KubuvwGfs03eMoR0dfiANfXwV8
+         IyV7KCA03EFApwkfHTpTK0M0Nk4ckuG/RwmZifW39Hj34T/aoBqtr00XILCGEcLhNsPf
+         4dLg==
+X-Gm-Message-State: AOJu0Yxjv9XFWXr11VZkUpFr9QeIL0hFJH4mR8sYRRbGbNOvN6INyZVT
+	ltI033ackKmH63XtphelLmznOZP7MEE6k1s9+PF71zPskBeiV5LS5ZNcdv+vDTNX
+X-Gm-Gg: Acq92OFnEtjS1UvMa7dI4++B9sXVIWNA5tEFx6/WZmZQ+nFRqAPil6iM+mzxUzUKU2I
+	iBrltYh/CA5vXdsREZv0AFcuEjChMQDBEFWwiZjgQnZreQmeqjFQJCYCjsbm7rmCiwfN3mwX3Gp
+	YpF49iWUfuhHg/x1jA6rd3TwJOjBFWlYDdc8RS0Yg1gaCrJHx6WpxnFqULWxiR1Pc8h6Qla62Yr
+	1iGg0VbG+rB5u7+WA+RGaxEXZMHlX1DGQ/7ndA6Fufn0Wke38iTskEn0868PS+mX3DWrKIrclfY
+	A1rGlRdKH8UhLVaX/SRv8mFlL4QRXvFzTaxPHQGHGE51xpXf4H5aDaXkIGjK5w61mZo/AdTu1ma
+	Ksoe5cpfUjRxjv2gWP9vYyV5LpAMDzNNNoSA0Xf+abz63SfEjnCxEh+wL3BznhIZSebJlN/QKT4
+	oWQsWiiVoqr3FG/GDv5be8dUTtrSk=
+X-Received: by 2002:a05:6a21:b8a:b0:3a3:15e3:4e75 with SMTP id adf61e73a8af0-3b3f104d037mr2380395637.8.1779979074706;
+        Thu, 28 May 2026 07:37:54 -0700 (PDT)
 Received: from kali ([2402:e280:3d7c:a2:536a:b505:93f5:9d5d])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2beb56b51aesm234623465ad.19.2026.05.28.06.25.58
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-841d70ba03fsm6058393b3a.33.2026.05.28.07.37.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 May 2026 06:26:01 -0700 (PDT)
+        Thu, 28 May 2026 07:37:54 -0700 (PDT)
 From: Pavitra Jha <jhapavitra98@gmail.com>
-To: idryomov@gmail.com
-Cc: Slava.Dubeyko@ibm.com,
-	amarkuze@redhat.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
+To: ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org,
-	Pavitra Jha <jhapavitra98@gmail.com>
-Subject: [PATCH v2] ceph: fix bare ceph_decode_8 OOB in decode_lockers()
-Date: Thu, 28 May 2026 09:25:21 -0400
-Message-ID: <20260528132521.843004-1-jhapavitra98@gmail.com>
+	idryomov@gmail.com,
+	Slava.Dubeyko@ibm.com,
+	amarkuze@redhat.com
+Subject: Re: [PATCH] ceph: fix OOB read in decode_lockers() via missing bounds check
+Date: Thu, 28 May 2026 10:36:46 -0400
+Message-ID: <20260528143646.860883-1-jhapavitra98@gmail.com>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <50dc5a7472fb2d6da4ebb71cc659b03a5df06747.camel@ibm.com>
 References: <50dc5a7472fb2d6da4ebb71cc659b03a5df06747.camel@ibm.com>
@@ -80,66 +78,16 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-decode_lockers() in cls_lock_client.c contains a bare ceph_decode_8(p)
-call after the decode_locker() loop that has no preceding bounds check.
+The follow-up patch titled:
 
-If a malicious or compromised OSD sends a cls_lock_get_info_reply where
-num_lockers is crafted such that the decode_locker() loop advances p
-exactly to end (or if num_lockers=0 and p is already at end after
-ceph_start_decoding() accepts struct_len=0), the subsequent bare
-ceph_decode_8(p) reads one byte past the validated buffer boundary.
+"[PATCH v2] ceph: fix bare ceph_decode_8 OOB in decode_lockers()"
 
-The result is passed directly into *type, which is subsequently used as
-a lock type discriminator by callers. An OSD-controlled one-byte OOB
-read at this position gives an attacker influence over the lock type
-field with no further preconditions.
+was intended as the continuation of this review thread and addresses
+the additional bare decode site pointed out by Slava here:
 
-The safe variant ceph_decode_8_safe() already exists and is used
-consistently throughout the codebase. This site is the only remaining
-bare ceph_decode_8() in the decode_lockers() post-loop path.
+*type = ceph_decode_8(p);
 
-The goto target is err_free_lockers (not err_inval) because *lockers is
-already allocated at this point and must be freed on any decode failure.
+I accidentally sent it as a separate thread instead of a reply to this discussion.
 
-v1 of this series fixed the bare ceph_decode_32() before kzalloc_objs()
-and added the err_inval label. This v2 addresses the second bare decode
-identified by Viacheslav Dubeyko's review.
-
-Regarding the -EINVAL choice (raised in review): -EINVAL is correct for
-the err_inval path. The failure is structural malformation of OSD-supplied
-data, not a memory shortage. -ENOMEM would misrepresent the failure class
-to callers and to stable@ backporters triaging error paths.
-
-Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
-deployment can trigger this against any kernel client that issues the
-lock.get_info class method (e.g. during RBD exclusive lock acquisition)
-without any further privileges beyond OSD session establishment.
-
-Fixes: d4ed4a530562 ("libceph: support for lock.lock_info")
-Cc: stable@vger.kernel.org
-Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
----
-v2: Replace bare *type = ceph_decode_8(p) with ceph_decode_8_safe(),
-    goto err_free_lockers to correctly free *lockers on failure.
-    Address Viacheslav Dubeyko's review question about this site and
-    clarify -EINVAL rationale.
----
- net/ceph/cls_lock_client.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/net/ceph/cls_lock_client.c b/net/ceph/cls_lock_client.c
-index 4f27b3d15..c9183a348 100644
---- a/net/ceph/cls_lock_client.c
-+++ b/net/ceph/cls_lock_client.c
-@@ -314,7 +314,7 @@ static int decode_lockers(void **p, void *end, u8 *type, char **tag,
- 			goto err_free_lockers;
- 	}
- 
--	*type = ceph_decode_8(p);
-+	ceph_decode_8_safe(p, end, *type, err_free_lockers);
- 	s = ceph_extract_encoded_string(p, end, NULL, GFP_NOIO);
- 	if (IS_ERR(s)) {
- 		ret = PTR_ERR(s);
--- 
-2.53.0
-
+Thanks,
+Pavitra
