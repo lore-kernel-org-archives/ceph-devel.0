@@ -1,28 +1,28 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D9BE254B1F;
-	Thu, 28 May 2026 20:26:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 400022E7F25;
+	Thu, 28 May 2026 20:40:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780000016; cv=none; b=sq+llc+9fubqskBPQT6ydFGEw5ftuA5uClfhLjgiMzf3hxVcRGkF6qGd5qUAeJeZdL+wtF8Xc2wJgA+jVyrCikbmi7XCF1nA1BSqZHuLI4JjkKO6V7seStKPAnqrJthe5oppUg9JFodpGPMG7QpnZBZy8gtIqUE9EZXdGF1OEJw=
+	t=1780000849; cv=none; b=L6zpW6okDzyOuOlrE6VXnkre5rGIam5fSk2olb9UPXudI2ujb7YKM98OFzSD3B7y9SD0yH+U8b4ts/CeL7wWENKJLUcd2RlVHh4+FNMvNfamaZSjyCjzRWCo5rdXhL84YrqIm6aTWphA2ScyzgTE6iK9S6rsvN5zg3la8krH9Jg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780000016; c=relaxed/simple;
-	bh=RXtoEfrJWU2mA4nbEW50/kIGRg7UTH0nvB06f7k2KHU=;
+	s=arc-20240116; t=1780000849; c=relaxed/simple;
+	bh=luj56Kym4UHZlbJUyJuvZ2pTJwHcJmO20p/Fx0NT5O4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=WbNEBwu5OMlfcVCuuZE3gI7hXxrybLQuZJFc3zxmrZ8vwOzSfq6EE/gv8zXddS1W7wLJFZnyAmXXvzyvQwrvmUvpAWcdmqtzg2XClNftYAGvS4LSjXXPNGRpHoAEh+ZKOOzeOOvBxwLTCN4Fnow6xRnlTp/HGG1qmRW4tmawsHU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=AE0dzYh8; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version; b=s7ERUlYHsguRUG92Ucqn0woO2vJ3BDWCa/4iZYn9EhcZsAJsQkH/25WkRboXDaPnxx2LXF7p8VL0YSID5j5HGr00ddZ7UzCJRlLix1spmJ0tr2kmTVnHOaMQOM8Op6ctpO5qt5pdYh4jMfw2Fei1JESQyZuDMz2+5IGZ19/01Q8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=a5U7wdAj; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="AE0dzYh8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 736571F000E9;
-	Thu, 28 May 2026 20:26:54 +0000 (UTC)
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="a5U7wdAj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E45C1F00A3C;
+	Thu, 28 May 2026 20:40:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linuxfoundation.org;
-	s=korg; t=1780000014;
-	bh=6vy1EekCKk4hAT33qc9uLIQxbPhwhq/TYRwjWyIx0Ww=;
+	s=korg; t=1780000847;
+	bh=5TzIWPvwFghvvoKH0LwD6EJExdCpK08Ml/ojCZW2qUo=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=AE0dzYh8qOO/uEDDuYMxpMSop3QbvrCAbW7FFLrdtkqF1eF9Oxw0D7u4y0mhWDRej
-	 9dDljaA0rQZ+Cd4gjLDn7VG8SWXHxRNsZ33Idunn4cY2iBNngwp02+OCGN8g26gIPw
-	 dB7qI9OZWhUmLdMGX7dBYJ/EI/I9FNfLZDPgbD+s=
+	b=a5U7wdAjSnPGZPmbncKm2mN/mN8hQt7Fm2P0mqm+GBwnIrWcErtcByz2T9CL79Q53
+	 U284FrCldzjqhjSF6SLMi3FdNfJALQ3lwTqIqtbpjVAjc+Fyyf4SlYxMvh1nvTgP60
+	 Na1/6FLFj2wHl5rQZAGXoSCbadSNL7EWYDkwA83g=
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To: stable@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -35,12 +35,12 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
 	Ceph Development <ceph-devel@vger.kernel.org>,
 	Christian Brauner <brauner@kernel.org>,
 	Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 6.18 235/377] netfs: fix VM_BUG_ON_FOLIO() issue in netfs_write_begin() call
-Date: Thu, 28 May 2026 21:47:53 +0200
-Message-ID: <20260528194645.195418218@linuxfoundation.org>
+Subject: [PATCH 6.12 190/272] netfs: fix VM_BUG_ON_FOLIO() issue in netfs_write_begin() call
+Date: Thu, 28 May 2026 21:49:24 +0200
+Message-ID: <20260528194634.591394999@linuxfoundation.org>
 X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260528194638.371537336@linuxfoundation.org>
-References: <20260528194638.371537336@linuxfoundation.org>
+In-Reply-To: <20260528194629.379955525@linuxfoundation.org>
+References: <20260528194629.379955525@linuxfoundation.org>
 User-Agent: quilt/0.69
 X-stable: review
 X-Patchwork-Hint: ignore
@@ -52,7 +52,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-6.18-stable review patch.  If anyone has any objections, please let me know.
+6.12-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -196,10 +196,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/fs/netfs/read_retry.c b/fs/netfs/read_retry.c
-index cca9ac43c0773..68fc869513ef1 100644
+index 48fb0303f7eee..42abf574e6788 100644
 --- a/fs/netfs/read_retry.c
 +++ b/fs/netfs/read_retry.c
-@@ -288,8 +288,15 @@ void netfs_unlock_abandoned_read_pages(struct netfs_io_request *rreq)
+@@ -249,8 +249,15 @@ void netfs_unlock_abandoned_read_pages(struct netfs_io_request *rreq)
  			struct folio *folio = folioq_folio(p, slot);
  
  			if (folio && !folioq_is_marked2(p, slot)) {
