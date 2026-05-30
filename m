@@ -1,231 +1,176 @@
-Received: from mail-oa1-f43.google.com (mail-oa1-f43.google.com [209.85.160.43])
+Received: from mail-qt1-f173.google.com (mail-qt1-f173.google.com [209.85.160.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1F873469FC
-	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 03:07:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.43
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780110430; cv=none; b=JX5ot7ue8zKfJ1F4QW8jWWz28yZRpwWqyzB/qJpecYcbnODGRhEhehOYWZq/gAiE5dnvyoNClCyEq/Wjg4/fFNzumxdfQAgel+2miWcye+t9XCbnj1kXJHN/04iu3YeHB0mzVhjfwzdnIhUa/0tBHQpAgR/URGmbLoO95muQ2hM=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780110430; c=relaxed/simple;
-	bh=y9o5pE/t2QwB8acLQ6u3PuFsa7vnP5zDEEAoI8hWT6I=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=hp1wO/gk6pS9aZRhDPbk6YQReNb8K2KqJoh8RtJBNKmXYloCh05xnt+VkZFJA7iuoDCmarsrUxq8lDQ56OGsgutj6YB4oqkZb/FKWmWY0h7TKcUgFpkyIkhaLYwKZRO/NSdjldwau+TGxSW+qp6YU6AFUpiMGF+wDqV4J+68ia0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ye+po/QO; arc=none smtp.client-ip=209.85.160.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D0F72147E5
+	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 08:44:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.173
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1780130652; cv=pass; b=b1U8/yN9Lc4YbJU1ubYSycZgjmrKcCBHmcLpe6YUdzeuMUJh+PSmHdVRm3g1IZmJ2AWdBHKBI9FrRzscLRe5ZJEvMu48GAei9Cy1TNC8XeTGbUL+Uf/zG8EKCC0FI8MeGyQql8yUEcX77hpZ2ROL9XzIQvnbafwu4DnCHaPqHOc=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1780130652; c=relaxed/simple;
+	bh=TtjqVg+t7+jZd5EpEQZryjCRTaoD/2HCpShEKyZ8ozU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Mp7aqb3cFXP3YF/1LQT1WHSOah56AdelcUeh4Vboi4qr4EE7CrnFJwZtECwvFqn9YpXprTdz5GwCRFoofyOuy1LGM1U6msncTPhM+p2G7bsxI1mvL2A81E1+tfzPDzNril02kbANg/0wJG+Vj9IaVaI3rw804qUvWQc/Aa69PQg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FNXAafs3; arc=pass smtp.client-ip=209.85.160.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ye+po/QO"
-Received: by mail-oa1-f43.google.com with SMTP id 586e51a60fabf-43a2ad7bcc4so6722881fac.1
-        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2026 20:07:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FNXAafs3"
+Received: by mail-qt1-f173.google.com with SMTP id d75a77b69052e-5102582e23eso118173311cf.1
+        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 01:44:11 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1780130650; cv=none;
+        d=google.com; s=arc-20240605;
+        b=Fn/M6HT9f4L+STGrBHjJO+F1f+xHiU3mnmakDjs/BLQlxaxsi9GlV0yCESbKratsNL
+         VCbMixEa49eXxvGWhppti5R6HP2OQHwEERVBOFHpWH2C5EcyDCy5TOwV0ZBf86xphN+r
+         +LFvPuDXqJO+oNREVYlWKeSVbNP1JXVEScGceg8LItT0m3sYQOleanSvFai7DoPQUdLZ
+         E1ec/nOEayocfk+OZbylqjEmeF8oKJjjzeR6Cxio7/KOwC4QiM2Ut67ogPoBphcW8zFM
+         xFUnEOBSGXO2UU2BYKpuIXMkJyh9ni3lZdiW3N+w/1dQYeeSG9hpxAuIBBpJ7t99sY3l
+         +eog==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=eoSIRBsQ6mX4skycm85ySkNyyRi8BhFDv72ue7aCFn0=;
+        fh=3wvYS1BVFmqq6mb59H9VHM/+YIMjmR4fKJglXVHPJgo=;
+        b=avJaPcCcymUNj0ormoAns7iwjROyqPm76tGaYk5pb7osu3yNLwQBzdCiTKVI2oGmhS
+         zDrAemyo3VzX9l2m7t7nn6AqUPfhQPBzGMRmbehY/3tDKmtmk2EFknx3Vt9O2Gfrz5HL
+         JRrVTkLMHHf3x3MPNm9hLAdrmI1IcuHF/fJeVvt7lB3ZPFq+XGHUhnZw3PJ4U7yGrS78
+         U0iQgujn2FtKzIY8/OuzEywo0qIkVWFN/jpodjAQNsDObXl0PgJN/62BLJ0927OyxAoo
+         NYUYJI00xyzRbqPrEriRWv8c+9SvdTX2rNxJgU0UooG0/NI5VIMrXdkNbfhMeEyvDLYY
+         dd5Q==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780110428; x=1780715228; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1780130650; x=1780735450; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=dqjY4u9zUiWcPW2IlZPEJiw+YGemyDZucGA8LuuTFVU=;
-        b=Ye+po/QOHyRrLXjxUNfqlFfMKWiIN8ieXdmdhLpPaJtq6xv9K7Deg3yivJWcYk9Pp2
-         rbfgTZmho0TGBZwNGCkYWhs5K4m9Zx6JxyDwHaFt1CfXP/V4mGLuzvPiS1A91kHTpsNo
-         0N6z+Jk2/jQZZfYbnKQwA9pFztGYwc+2P8KgtBzHQ8ABDj8ZXbJlvwk0PJZM1E8X7v4k
-         Byj3WiRbbm0QSXf8bxWaBQGTTJlczvCBF7M1SuPCtJT7BRKPT4s2PL8IeR1fnhzujwdJ
-         WDdvjiJjQKm/UbF0hYGMPd1A4c9MAaFhoEIxSg0kohqUAJNcT3ER5O1wdlTP7SGvz5cr
-         AlDQ==
+        bh=eoSIRBsQ6mX4skycm85ySkNyyRi8BhFDv72ue7aCFn0=;
+        b=FNXAafs3HPOj0+xdF4KGKDky2odTsQ0dn2idZx7RX8iBwXscOUlyofQ8A+lWJoRZ35
+         71PcxYDaQ2NSljGq+/izpTMiJo5gL/cUZjpXtSS0M+TdTq1vGr9kZWAeqwZcvPdYzbKj
+         m0FX+9OqFWw8at51CeFWvEUgkfb+8lu8V7r0Wdjw7lkKhpGQ4NpAGBmkWPaC1gEGFR71
+         sRpS35Ncu3URikVbfS6AjwQwqcpKFQOUSmSQZ93TbQ+sarHGyU8vhuX+AUZKk5qqD4S7
+         rus5gaaV4jCKFLkb90QEOAIcZqtB83Xv4lhTHqdN+XeChmlLg6u37GV3d3gzo+MaO7mW
+         XK6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780110428; x=1780715228;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20251104; t=1780130650; x=1780735450;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=dqjY4u9zUiWcPW2IlZPEJiw+YGemyDZucGA8LuuTFVU=;
-        b=UjHl7l757ywyeh+6vsJy0q8bAoU2rMkbsnXhvDVYA0qxxW4kZrNRjuw31L4xDxjMU2
-         QSHTgygfAAIgkf7BfLEXbr+qsZx5SYmEVNHQJXabuFsUyOwa19fBmpi80LM3Fzilvtm3
-         ZONQ5fKCBCKrrwEF+bltJ4fDwWTQXRAVEhvwvkyDPYVgTC0NDjeJQj5ruKXuan/hlTTB
-         sNFl9MxjSDmW5BQMDexKxePAmtZXp/4tnwRov1vbFAaeqGXLxRf1mZBeTVNddc7MsIJz
-         Ebdlrdflqy+Dk8S8YDFFTa1fsEf3a/YVTCTGQmKuFVpsQ5P/JG//9D8q2hhRz4GRkY09
-         xW9Q==
-X-Forwarded-Encrypted: i=1; AFNElJ+yNybsKylhJ2Sis/bWaTxIXU8s2viw4hTW+A7qUHp52llpjqqetBxMan77sog/up+afoErfVZbQkAD@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxajy4RbdS5dnReiSA3acRpmX7CJwooKjd/OFlHX7zLvlor6kaF
-	+ilYoGhV6cfteNgXneHFhsNSfG0K50n1KRtdddhff6cyf/jtA13dwZXXwG7hDLb1
-X-Gm-Gg: Acq92OGSZ+pEQEE8kMDfne77RvIw80gGPi/t2jQf4pUCc4kqQy9C6PsxFdj+l21YxgV
-	g6/5CrXKa2iDAk4VPKU8bVXGHFT2XBHF52Dzkjc1AcpBV33+eobJsU1dO/TZNQMo627eDo1q5jC
-	uXTF6aDgeomPGUe+G5gsA12f/Opue9qJw8TRB0ssSWwLV3u9hBgvmnQ+4xKuBDaa88gJm3CEjuY
-	VQyfZcoQCD8vv0oYMO/S86ZMdzdpcMu68mfO2SZui55StSCwK4y/ZxNr61sAtfhQHducD+kuMz4
-	fKHR5Nh7LNS32KOJ59u+7jYnsdvJbEz8hSGCmBFFDEc9uBlJt3hMpziMSZR5ZNbxuperQPmlNq4
-	dhWqSWkHxKsXLmlM6C+Xx2EzLqxUGZOMzIkbFK1CnxjTQ5gc2IFDs7d78Mvu7OOsyGnRzbL+oDW
-	O2kyC0sblQ2YMHko8JqF+zd/e1E3VUBz/ixc1m8NHNXt/s9vIhwZPsBRNbwxTuhYEMjWspdA==
-X-Received: by 2002:a05:6870:1613:b0:43b:722c:d29 with SMTP id 586e51a60fabf-43ca42c5fd2mr1468423fac.25.1780110427609;
-        Fri, 29 May 2026 20:07:07 -0700 (PDT)
-Received: from localhost (static-23-234-115-121.cust.tzulo.com. [23.234.115.121])
-        by smtp.gmail.com with UTF8SMTPSA id 586e51a60fabf-43c93abfe02sm2549669fac.5.2026.05.29.20.07.05
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 29 May 2026 20:07:06 -0700 (PDT)
-From: Sam Edwards <cfsworks@gmail.com>
-X-Google-Original-From: Sam Edwards <CFSworks@gmail.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: Jeff Layton <jlayton@kernel.org>,
-	Xiubo Li <xiubli@redhat.com>,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Sam Edwards <CFSworks@gmail.com>,
-	stable@vger.kernel.org
-Subject: [PATCH v2 2/2] ceph: properly decrypt filenames in vmalloc() buffers
-Date: Fri, 29 May 2026 20:06:46 -0700
-Message-ID: <20260530030646.85589-3-CFSworks@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260530030646.85589-1-CFSworks@gmail.com>
-References: <20260530030646.85589-1-CFSworks@gmail.com>
+        bh=eoSIRBsQ6mX4skycm85ySkNyyRi8BhFDv72ue7aCFn0=;
+        b=NWyPUKfMBofuAyJLf0/G7DgDHK9Xfg9kL+bP1dNs4GoFAU8Uv9HnI6FUhQPUx94tVj
+         ufyukMJIZ2Vy8wag6xxB/Hv/K4hstUsqhhtSKVN5CvbPyQWhtF+u+oLJu2pQ/V2Jhlgp
+         abxhewpxyK/cUaOknbXSpSgxcwFPpfonQ8dPinAy87JvRJdjwaMl2Srg2+x99wmVSO+Y
+         YBHkRwlBTSEgQv25/dF1NSlo68mEEtsUQ5m3NuVM0kcAnM5zRTlRiXLwBxK3PATb9ADQ
+         Ap9bo0Kqlu3mdIEs2TrRZ/a3Fl6ZumM5VbeVlrOl9ealyllb/Fx9PE7MGZiyBZpBuBJa
+         96wQ==
+X-Forwarded-Encrypted: i=1; AFNElJ8T8LPgdhoBH0MDTLv3BBrf97SiiBxo1YL9zRIi9g+orXn4OcKrkOb8cZN+BImevqdx9sp1qDNiE9V7@vger.kernel.org
+X-Gm-Message-State: AOJu0YwMMkmFRahK1RY26pGvRsT+mPllvdg9zr3XkkDL3MTSV7IQ9zXg
+	nCyxWoWgkJ2pJD4ejkOOoErfUsspPsHWGgWz3E71rZmodx11CyDqLw1P8a30NVpFv4O3qA/pfif
+	FezAblHUPcFAMs9lXs37SXVi9WkITXKI=
+X-Gm-Gg: Acq92OH/FUE+TMce8BRV8BtEeRB2F4GyEv+9INyKaQ+IIpR5PhB1D5bcD7hpvn0INac
+	E1K83lNVVZa+fV/7AokMOSDTycqJMg41Chx3bXPmOi632gakDNyupNatphj0ekAr0DDkvsaBUk9
+	dABV0a4mZYBsDHMLD8Vdz6hGHaY0FeSm4fFK2ix0QYnwyzYDN1EyrRKh23myBYM4jzDEpUpOZzZ
+	9zfRDliGrOe/iMHQbpz5s9afV4kT7jo4qME29keKd2iEb+IT07mRiOwBKVxFtUwket8m5xn1/Z5
+	HRWlkQuch0Xirx2aaTbwqSTniG98vFxegTeEbaIoiMTjwxqBbEE=
+X-Received: by 2002:a05:620a:d87:b0:914:a054:c5fd with SMTP id
+ af79cd13be357-9153dc833b4mr460701785a.52.1780130650183; Sat, 30 May 2026
+ 01:44:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1779949116.git.ldy3087146292@gmail.com> <4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.1779949116.git.ldy3087146292@gmail.com>
+ <1cab97763b0564d03a583deb7eed485b68be6182.camel@redhat.com>
+In-Reply-To: <1cab97763b0564d03a583deb7eed485b68be6182.camel@redhat.com>
+From: Yuan Tan <yuantan098@gmail.com>
+Date: Sat, 30 May 2026 01:43:59 -0700
+X-Gm-Features: AVHnY4LYWH5G0XW0XKAiXpRsBL3MYmpJ567MD8I54TgxBufZ2rvq9V7ElSJca7M
+Message-ID: <CAPuPA7+n-pDuN5-y_QOd635-uZLrMkaxn=n-EHamJ9jDo1NDmQ@mail.gmail.com>
+Subject: Re: [PATCH 1/1] libceph: reject zero bucket types in crush_decode
+To: Viacheslav Dubeyko <vdubeyko@redhat.com>
+Cc: Ren Wei <n05ec@lzu.edu.cn>, ceph-devel@vger.kernel.org, idryomov@gmail.com, 
+	amarkuze@redhat.com, slava@dubeyko.com, sage@newdream.net, 
+	zcliangcn@gmail.com, bird@lzu.edu.cn, ldy3087146292@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-The fscrypt subsystem uses the scatterlist crypto API, inheriting its
-requirement that any buffers are in the linear mapping region. However,
-the messenger client uses kvmalloc() to create buffers for messages,
-which will occasionally place those buffers in the vmalloc() region when
-physical memory fragmentation doesn't permit a large enough kmalloc().
-The various callers of ceph_fname_to_usr() directly pass (slices of) raw
-messages from the MDS without considering that the messages may be in
-vmalloc() buffers, resulting in oopses especially on non-x86 platforms
-(see 'Closes:' for more details and a reproducer).
+On Fri, May 29, 2026 at 1:35=E2=80=AFPM Viacheslav Dubeyko <vdubeyko@redhat=
+.com> wrote:
+>
+> On Fri, 2026-05-29 at 16:11 +0800, Ren Wei wrote:
+> > From: Douya Le <ldy3087146292@gmail.com>
+> >
+> > CRUSH bucket type 0 is reserved for devices.  The mapper relies on
+> > that invariant and uses type 0 to identify leaf devices.
+> >
+> > If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
+> > can make the mapper treat a negative bucket ID as a device and pass it
+> > to is_out(), which then indexes the OSD weight array with a negative
+> > value.
+> >
+> > Reject zero bucket types while decoding the CRUSH map so the invalid
+> > state never reaches the mapper.
+> >
+> > Fixes: f24e9980eb86 ("ceph: OSD client")
+> > Cc: stable@kernel.org
+>
+> If I am not wrong, the correct email is stable@vger.kernel.org.
 
-Make ceph_fname_to_usr() explicitly tolerant of vmalloc()-allocated
-fname->ctext, fname->name, and/or oname->name buffers, using `tname`
-(which, when non-null, must be a linear address; when null, is briefly
-allocated as necessary) as a bounce buffer to avoid passing any
-inappropriate addresses to fscrypt_fname_disk_to_usr().
+In our previous patches submitted this way worked fine, and stable
+maintainers would help backport them.
 
-Additionally change parse_reply_info_readdir() -- the only function to
-supply its own `tname` -- to follow the new "tname must never come from
-vmalloc()" rule by passing NULL when the message is not in the linear
-region. Though this causes a per-dentry kmalloc()+kfree(), this overhead
-exists only when processing the minority of messages that spill into
-vmalloc(). My (crude) testing puts this at only about 1 in 8,000 readdir
-messages. Still, if the overhead proves unreasonable in the future, it
-is easy enough to mitigate: a future change could allocate a bounce
-buffer in parse_reply_info_readdir() and use that as `tname` instead.
+To be honest, I was also debating whether I should use
+stable@vger.kernel.org. My main concern was accidentally sending an
+unreviewed patch to stable@ and spamming their inbox.
+If you feel stable@vger.kernel.org is more appropriate, we will switch
+to it in the next version.
 
-Fixes: 457117f077c67 ("ceph: add helpers for converting names for userland presentation")
-Closes: https://lore.kernel.org/ceph-devel/CAH5Ym4ga7miUQE0K-cJA93Ya7w62P69MAN27R5cBiYnudoOHdA@mail.gmail.com/T/
-Cc: stable@vger.kernel.org # v6.6+
-Signed-off-by: Sam Edwards <CFSworks@gmail.com>
----
- fs/ceph/crypto.c     | 43 ++++++++++++++++++++++++++++++++++---------
- fs/ceph/mds_client.c |  8 ++++++--
- 2 files changed, 40 insertions(+), 11 deletions(-)
+>
+> > Reported-by: Yuan Tan <yuantan098@gmail.com>
+> > Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
+> > Reported-by: Xin Liu <bird@lzu.edu.cn>
+> > Assisted-by: Codex:GPT-5.4
+>
+> I am not sure that it's correct to mention it. But, maybe, my opinion is
+> slightly outdated.
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index 7493a3acd7d0..bc0a097a4cea 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -298,6 +298,10 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
-  * Otherwise, base64 decode the string, and then ask fscrypt to format it
-  * for userland presentation.
-  *
-+ * Though the fscrypt/crypto subsystems broadly expect all buffers to be in the
-+ * linear-mapped region, this function slightly relaxes those requirements:
-+ * fname->ctext, fname->name, and oname->name may be vmalloc(), but not tname.
-+ *
-  * Returns 0 on success or negative error code on error.
-  */
- int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
-@@ -305,11 +309,15 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- {
- 	struct inode *dir = fname->dir;
- 	struct fscrypt_str _tname = FSTR_INIT(NULL, 0);
-+	struct fscrypt_str _oname;
- 	struct fscrypt_str iname;
- 	char *name = fname->name;
- 	int name_len = fname->name_len;
- 	int ret;
- 
-+	if (WARN_ON_ONCE(tname && is_vmalloc_addr(tname)))
-+		return -EIO;
-+
- 	/* Sanity check that the resulting name will fit in the buffer */
- 	if (fname->name_len > NAME_MAX || fname->ctext_len > NAME_MAX)
- 		return -EIO;
-@@ -350,16 +358,18 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- 		goto out_inode;
- 	}
- 
-+	if (!tname && (fname->ctext_len == 0 ||
-+		       unlikely(is_vmalloc_addr(fname->ctext)) ||
-+		       unlikely(is_vmalloc_addr(oname->name)))) {
-+		ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
-+		if (ret)
-+			goto out_inode;
-+		tname = _tname.name;
-+	}
-+
- 	if (fname->ctext_len == 0) {
- 		int declen;
- 
--		if (!tname) {
--			ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
--			if (ret)
--				goto out_inode;
--			tname = _tname.name;
--		}
--
- 		declen = base64_decode(name, name_len, tname, false, BASE64_IMAP);
- 		if (declen <= 0) {
- 			ret = -EIO;
-@@ -367,13 +377,28 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- 		}
- 		iname.name = tname;
- 		iname.len = declen;
-+	} else if (unlikely(is_vmalloc_addr(fname->ctext))) {
-+		memcpy(tname, fname->ctext, fname->ctext_len);
-+
-+		iname.name = tname;
-+		iname.len = fname->ctext_len;
- 	} else {
- 		iname.name = fname->ctext;
- 		iname.len = fname->ctext_len;
- 	}
- 
--	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, oname);
--	if (!ret && (dir != fname->dir)) {
-+	_oname.name = unlikely(is_vmalloc_addr(oname->name)) ? tname : oname->name;
-+	_oname.len = oname->len;
-+
-+	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, &_oname);
-+	if (ret)
-+		goto out;
-+
-+	if (unlikely(is_vmalloc_addr(oname->name)))
-+		memcpy(oname->name, _oname.name, _oname.len);
-+	oname->len = _oname.len;
-+
-+	if (dir != fname->dir) {
- 		char tmp_buf[BASE64_CHARS(NAME_MAX)];
- 
- 		name_len = snprintf(tmp_buf, sizeof(tmp_buf), "_%.*s_%llu",
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index aa6730b48e97..8fcf185e3a82 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -538,9 +538,13 @@ static int parse_reply_info_readdir(void **p, void *end,
- 			 * to do the base64_decode in-place. It's
- 			 * safe because the decoded string should
- 			 * always be shorter, which is 3/4 of origin
--			 * string.
-+			 * string. If this message was allocated with
-+			 * vmalloc() (happens, but rarely), leave it
-+			 * NULL and let ceph_fname_to_usr() allocate
-+			 * suitable temporary working space instead.
- 			 */
--			tname = _name;
-+			if (likely(!is_vmalloc_addr(_name)))
-+				tname = _name;
- 
- 			/*
- 			 * Set oname to _name too, and this will be
--- 
-2.53.0
+We added Assisted-by: Codex:GPT-5.4 based on.
+https://www.kernel.org/doc/html/latest/process/coding-assistants.html#attri=
+bution
+Please correct us if there's something wrong with our understanding :)
 
+>
+> > Signed-off-by: Douya Le <ldy3087146292@gmail.com>
+> > Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+> > ---
+> >  net/ceph/osdmap.c | 2 ++
+> >  1 file changed, 2 insertions(+)
+> >
+> > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> > index 8b5b0587a0cf..226c9e0b7821 100644
+> > --- a/net/ceph/osdmap.c
+> > +++ b/net/ceph/osdmap.c
+> > @@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void *pbyval,=
+ void *end)
+> >               ceph_decode_need(p, end, 4*sizeof(u32), bad);
+> >               b->id =3D ceph_decode_32(p);
+> >               b->type =3D ceph_decode_16(p);
+> > +             if (b->type =3D=3D 0)
+>
+> I don't like of hardcoding the constant. Do we have named constant for de=
+vices
+> type? If we do not have, maybe, do we need to introduce some?
+
+I'll defer to Douya Le on this point.
+
+>
+> Thanks,
+> Slava.
+>
+> > +                     goto bad;
+> >               b->alg =3D ceph_decode_8(p);
+> >               if (b->alg !=3D alg) {
+> >                       b->alg =3D 0;
+>
