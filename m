@@ -1,125 +1,119 @@
-Received: from mail-ot1-f48.google.com (mail-ot1-f48.google.com [209.85.210.48])
+Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D97932F39C2
-	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 01:44:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95C35190462
+	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 03:07:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780105451; cv=none; b=goVbdPNfwuBzLB22XK10qhHzZUEnGBaKpdVUAAPFjNwggI1DvWOKXpVR7CWOsFEworQ93Y/efh12xLYY93lD4+Tg7YQrsTwF5oai6eVsv49daeqSC1doN2LBDKqkYpMv+xw9QPZ9iLl93F82FLfMQK5+DacrkrdIBSmPZCXJbn4=
+	t=1780110424; cv=none; b=VUItNo3B/30z42Rzkmzr3IxgZVRsPqCYeWcTLjEe1aaYLW2nvwGgwLEmjOPCkl0O36xbGJTPs6yR5fsi8Bg1erGzGBsLSnJTiWFKHw2pPemgeXCT6EMct/kmZrC3Z4gc+MZm2+U0um6+OGjDVCaVQSPZpcX6sRwsgY/Zcn6ief0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780105451; c=relaxed/simple;
-	bh=RoQnkjSAGQlltUOHi6qTBWzLW/MPRpTjVtIir1Bku8o=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=IhzwobvNmar14FXrFiLxNFT4iI0x/9FVwNdRZyKT2n4DF/NLfjL9S0Sqod2iZXaL0bYCLR9+ZsbDmy6XYK0r4XauYsNEIKyzPPEg1eqRVfWoZHYIAo9LA3XZ4vZvR0pIbQHf5ZLapQCukxbEJlqpR6jbEn3rCEChcam66PBuAk4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ieee.org; spf=pass smtp.mailfrom=ieee.org; dkim=pass (1024-bit key) header.d=ieee.org header.i=@ieee.org header.b=DxvId/bX; arc=none smtp.client-ip=209.85.210.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ieee.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ieee.org
+	s=arc-20240116; t=1780110424; c=relaxed/simple;
+	bh=Jo8C9fYgR8M+9qmgQGvTGQh0xayfuj60QKKA2cUXXLc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=N21Ud81nssRnFtUVq5egx52GwbVsc8azB+kV76e1jXhWn88dmpa2eFXHWuEEOpCmTdgePZdFPxToTgCY1dASOXDMh+jVMhFkGuM4KVitGmOnk3WN8FXWnnC0GVJq+xGgompUYlptdLmoqHSZYoYKV2zz9Rd7T56weKKbKZ10OSY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WYNE2AnN; arc=none smtp.client-ip=209.85.167.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ieee.org header.i=@ieee.org header.b="DxvId/bX"
-Received: by mail-ot1-f48.google.com with SMTP id 46e09a7af769-7e5fd39cf11so7171211a34.0
-        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2026 18:44:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WYNE2AnN"
+Received: by mail-oi1-f182.google.com with SMTP id 5614622812f47-47c7b282e21so5722421b6e.1
+        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2026 20:07:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ieee.org; s=google; t=1780105449; x=1780710249; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=X+zTIztgsGKEhgjsVhvr5Rv5TrBYFcWsdOmt+WZ+x9w=;
-        b=DxvId/bX6y9ovt3FpOHoF/jE8a+2ZK+wO1h+JJstdq1pihW80TGRlPSKVszpS7/Efj
-         YeVhEK5WftrE6UJNCse0z0hN9zhj2hOcNgzoo94sO2+Ifq5Yd1XkVNUYxyfEpqbe2JtU
-         BICSZC2kiX0GAWnMOs7u+/dJk0Gkpgz79rHqg=
+        d=gmail.com; s=20251104; t=1780110421; x=1780715221; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=pL8uMvAYVmFHlT5lD+kMaVasC/p+a5VnYewFeWxq91c=;
+        b=WYNE2AnNvM7/aaU05XKNzaOW02CQRIuP93mu4Y/4Y06DGSDHwe2IHsFZouST2E8cDT
+         14qGzgqUYhhYm3N9+9gCaqcm8Ug/sCkSJnLpQ+UYmq40aGyRzEJ0LpsuIoskUYaiz6Gw
+         Mj9X6RJlCqQ0qGHVsN1Gi9m/G2+zjTzTScAFZkz/O9b4tRI+w6bJd4mcnYIhZhK5P6S/
+         EItcsPExpFQZPTT8JLJFY4ZOXxHPJsCnBEKQTUUCfLFu+VY3g/gCsKemVALM7nOWWNDn
+         vHwHDYEWPiSsPjvDSseJ+KIfG1QBv55NGFIHMrmnZ8RKVTw8EmN+B5wy7GWSNF0w5iBo
+         jCBw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780105449; x=1780710249;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=X+zTIztgsGKEhgjsVhvr5Rv5TrBYFcWsdOmt+WZ+x9w=;
-        b=WTaeBHqJJ+8J+i8iOb/BBf7ewwh4xEt/HQBPzEYec3Ro1R/YWraw+o4EEvk8xZcfeJ
-         LW3RRTFNvAN4uyPgwVx6LDHH1KnxaQDwnHfNP7G7gXi1guO9/biNTj5ohPrCECSJG6CT
-         wNxAN3FxrM0BrICsXGSbXR0zXhQdq+ZyVXTdWyn2WLxRITTxMZlH5heIXysox7owgk8j
-         RgnA9lZtRfU8f4ZvO7a8dYyLiJhUmRxv3MjS8yACxe43egrQcgORmC10cAiEbBnLPG9r
-         T7OKZnS3s6kjwSVa0cD7fIDVK7QFnVDRqhEyP3OLv7kvLl/2dOkI2GdPz6+isIe3ameg
-         Ripw==
-X-Forwarded-Encrypted: i=1; AFNElJ+5RZKSxhKCac8a6yg3JXJvsiAwz3jJ7YzPu88x+3gvy+A/DVr5X9tLG5cB76WpcizZVvaGB0G9iGB3@vger.kernel.org
-X-Gm-Message-State: AOJu0YxvWgOGSnvHvyfCejXNn1uT0Ey37gHXfg4S5qqoS3Odk8xdFmUd
-	rM70KKEoqjyvUB8O4CmOXd29mqEynJc2Bfo2VU+bZbsPJH54Rg4B1jOoCUj+KRGmaScx8qlnvgD
-	Dy4WiMQ==
-X-Gm-Gg: Acq92OFxXFFBB+mlwXUmpxj+rVcVF94xYghtrOsDjTAMSzZrN9JAe2jxPyW8cS9WAYo
-	7/nihVlcG93IjrBOzvZ7F1wP3o61jfLQtjI+aM4a83Byau1HGMb/hWFYd11PRgcbs7vXvnUhq3x
-	A4u1Ee36qQbx62bJrPqLZSc9h1o/9eMsASj7hJrC46vVajfwADYhxEhaW0mf0HNoJcbHnkCbAHu
-	JxSZ4sYsv5wJv6EFeI9vG6Q0GJJIzo7FcijO78QJKqgzADSpHNa0hhRhFiSYoCgU/0Thu6dgv8Z
-	a6HohU6PfJckWrJEi2sB5Q2EGZSJWbPX7jj1oWqjURca3i18nW6dzFrKWGg2SZ8Mo45PYEz5tbM
-	2IOYEqI1KzBUkx9tpOCP5MALEU6MBJBHS/Qe1VDoXP1nPBj36a2tuknvAq7dx+Jc6ROgAuPbT0x
-	kzDvLOTJx2gvqtYVNtUcSOgIWIAwLH
-X-Received: by 2002:a05:6820:1996:b0:69d:795a:5e8b with SMTP id 006d021491bc7-69e105d4115mr948538eaf.60.1780105448859;
-        Fri, 29 May 2026 18:44:08 -0700 (PDT)
-Received: from [172.22.22.28] ([73.62.185.64])
-        by smtp.googlemail.com with ESMTPSA id 586e51a60fabf-43c94078170sm2262599fac.14.2026.05.29.18.44.07
+        d=1e100.net; s=20251104; t=1780110421; x=1780715221;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pL8uMvAYVmFHlT5lD+kMaVasC/p+a5VnYewFeWxq91c=;
+        b=ZRzsJ7EIn6knGx1859flU9of3QzMNybZk1CmAh5bxf7Nu7YHOFlVWUTjWiuX373AQ1
+         4w+5e9d1lfFbpp9I4HtKbD2HkTwoSnaAt5Xng56aVZfamLAcwNjm/W8h1fWxbpG7ASoO
+         rn0XNHXQ6HB0O1wdHywjiqfZaZzmVWZhMjpkLRbLZ4jar9QMTutL3DYdUFgHrF1iN06C
+         3meSoWfKxjcS9u+imCWAXYkaWZKiR7LbUzLSmNLLBYVQ27fpPt3KUlkfG8B9DOP0BIji
+         Kxoz1bYYy+lQCHioC1cqbpqFN1CnCndFLxUcIXQI0y4+iJdcllbqlbKQIeafe0d8dmia
+         g9yQ==
+X-Forwarded-Encrypted: i=1; AFNElJ9EEx1DApr3WTW7+lJ5UH6sIDG1y1F8gEYLXBT5BQvW9jrSo6LIdtKiP0HZA6mjivR7wFrPVrNItr5N@vger.kernel.org
+X-Gm-Message-State: AOJu0YyxG83NjE1btTlV9561Js4vl766eWsODQ8txbXNj+XKQeOc21cu
+	qsNQsWJMc/4HHzbd/mtP+AqlUYuc9IS7kImm2E4SosTJii5cmWtfGAkA
+X-Gm-Gg: Acq92OHSnCTIxmaUaL4vLcZ9R6rgp0iYWgKMsCxdTrn7a7NK3U+dITWIDoRdicRfzlY
+	QxmGG98jsTx2sn+or3rJ/bpOmImFwWGM3w0V2ky80vvOfDA5B4aZPxZ/ulSfCWcaLqldtx+BlGE
+	WV60OxGudP8VJ5MJSJzAUZd44XUnqTUCCCWCGUcrWd1AoXcGHSZKUnINPt4RFSMnSDQNsYMUOx9
+	YDUeLDkGXbul2wKdMMD6V0rPfmGq1kFezH3ldzYAN3gphFIp7SxMmZGdvuR5ydpjnWzX+LwL8ym
+	rveb2HYp7QrxcYNJbNckpKBIApC2f069rzFFG1drldCY6QwrcbrVxVeMNIgRNBjM4CzCUoWvzcv
+	CyI3ckkZR4k/P2X6e60ieo3ki4G2dtNH1uRR4WQ2jtiDYD5y85wPAORYktZ2HW3fxZs6urgRk9l
+	ETpfFly7QgPyh6whfaKgnGp8CXX4Eb4r0u/Buognun2iziThViDqegozRs871b1LgCAc/++Q==
+X-Received: by 2002:a05:6808:f0d:b0:485:5f3f:bd1b with SMTP id 5614622812f47-485fb2fca4emr1192006b6e.3.1780110421613;
+        Fri, 29 May 2026 20:07:01 -0700 (PDT)
+Received: from localhost (static-23-234-115-121.cust.tzulo.com. [23.234.115.121])
+        by smtp.gmail.com with UTF8SMTPSA id 5614622812f47-48606211a99sm37325b6e.17.2026.05.29.20.06.59
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 29 May 2026 18:44:08 -0700 (PDT)
-Message-ID: <284d5062-460e-496c-b700-2275deb7f8bb@ieee.org>
-Date: Fri, 29 May 2026 20:44:06 -0500
+        Fri, 29 May 2026 20:07:00 -0700 (PDT)
+From: Sam Edwards <cfsworks@gmail.com>
+X-Google-Original-From: Sam Edwards <CFSworks@gmail.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: Jeff Layton <jlayton@kernel.org>,
+	Xiubo Li <xiubli@redhat.com>,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Sam Edwards <CFSworks@gmail.com>
+Subject: [PATCH v2 0/2] Bounce buffer for mds client decryption when vmalloc()
+Date: Fri, 29 May 2026 20:06:44 -0700
+Message-ID: <20260530030646.85589-1-CFSworks@gmail.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] rbd: check snap_count against RBD_MAX_SNAP_COUNT
-To: Rosen Penev <rosenp@gmail.com>, linux-block@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>,
- Dongsheng Yang <dongsheng.yang@linux.dev>, Jens Axboe <axboe@kernel.dk>,
- Nathan Chancellor <nathan@kernel.org>,
- Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
- "open list:RADOS BLOCK DEVICE (RBD)" <ceph-devel@vger.kernel.org>,
- open list <linux-kernel@vger.kernel.org>,
- "open list:CLANG/LLVM BUILD SUPPORT:Keyword:b(?i:clang|llvm)b"
- <llvm@lists.linux.dev>
-References: <20260530011255.52916-1-rosenp@gmail.com>
-Content-Language: en-US
-From: Alex Elder <elder@ieee.org>
-In-Reply-To: <20260530011255.52916-1-rosenp@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 5/29/26 8:12 PM, Rosen Penev wrote:
-> snap_count is u32 but the comparison is against a SIZE_MAX-derived value
-> (~2^61 on 64-bit), which clang flags as always false with
-> -Wtautological-constant-out-of-range-compare.
-> 
-> The proper check here should be that snap_count does not go over
-> RBD_MAX_SNAP_COUNT.
-> 
-> Assisted-by: Opencode:Big-pickle
-> Signed-off-by: Rosen Penev <rosenp@gmail.com>
+Hi Ceph maintainers,
 
-Looks good to me.
+This is version 2 of my previous patchset to resolve fscrypt oops/panic when
+decrypting filenames from a MDS message that spilled into the vmalloc area. [1]
 
-Reviewed-by: Alex Elder <elder@riscstar.com>
+Cheers,
+Sam
 
-> ---
->   drivers/block/rbd.c | 7 ++-----
->   1 file changed, 2 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 94709466ad19..25215c209484 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -6075,12 +6075,9 @@ static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev,
->   
->   	/*
->   	 * Make sure the reported number of snapshot ids wouldn't go
-> -	 * beyond the end of our buffer.  But before checking that,
-> -	 * make sure the computed size of the snapshot context we
-> -	 * allocate is representable in a size_t.
-> +	 * beyond the end of our buffer.
->   	 */
-> -	if (snap_count > (SIZE_MAX - sizeof (struct ceph_snap_context))
-> -				 / sizeof (u64)) {
-> +	if (snap_count > RBD_MAX_SNAP_COUNT) {
->   		ret = -EINVAL;
->   		goto out;
->   	}
+Changes v1->v2:
+- As Slava pointed out, v1 was performing `snprintf(..., oname->name)` *before*
+  the memcpy() that makes `oname->name` valid. He also raised a great point
+  about the if/else-if block's complexity. This version simplifies the control
+  flow structure.
+- Reformat some whitespace and remove unnecessary linebreaks, going a little
+  over the 80-column soft limit, but improving readability.
+
+Feedback not addressed:
+- David shared some discomfort about fscrypt_fname_alloc_buffer() sometimes
+  changing the allocation length, but it only ever lengthens the allocation and
+  is therefore always at least NAME_MAX.
+- David also began some discussion around passing an explicit `tname` length;
+  I'm still open to the idea, but would like to get a consensus around that
+  first, because enforcing the buffer size will likely require changes to the
+  base64_{de,en}code() function prototypes to accept buffer sizes.
+
+[1] https://lore.kernel.org/ceph-devel/20260527025828.5966-1-CFSworks@gmail.com/
+
+Sam Edwards (2):
+  ceph: pass fscrypt `tname` buffers directly
+  ceph: properly decrypt filenames in vmalloc() buffers
+
+ fs/ceph/crypto.c     | 50 ++++++++++++++++++++++++++++++++------------
+ fs/ceph/crypto.h     |  4 ++--
+ fs/ceph/mds_client.c | 12 +++++++----
+ 3 files changed, 47 insertions(+), 19 deletions(-)
+
+-- 
+2.53.0
 
