@@ -1,118 +1,125 @@
-Received: from mail-pf1-f173.google.com (mail-pf1-f173.google.com [209.85.210.173])
+Received: from mail-ot1-f48.google.com (mail-ot1-f48.google.com [209.85.210.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD4371A6814
-	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 01:13:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D97932F39C2
+	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 01:44:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780103595; cv=none; b=jRR2q/YMSIcebaFxJLRRlw377fHHMUAZ9N1BFmasgB1f2MrRbnr6ICbYO6WMilsnVK8Aw/cYlFr9xd0TH5aBEF1zV7zxCiOiNqJ9zJbfAVxQE5O20zQjdvCPMQaYf6/L6sRsZ/VKNXTJp2lW6/9xrzQ3bSLSh/R3Y6AXoSJflgg=
+	t=1780105451; cv=none; b=goVbdPNfwuBzLB22XK10qhHzZUEnGBaKpdVUAAPFjNwggI1DvWOKXpVR7CWOsFEworQ93Y/efh12xLYY93lD4+Tg7YQrsTwF5oai6eVsv49daeqSC1doN2LBDKqkYpMv+xw9QPZ9iLl93F82FLfMQK5+DacrkrdIBSmPZCXJbn4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780103595; c=relaxed/simple;
-	bh=3UnX09p/RsUwab1+mBzMfqmj167P9iLQdXjXopkWBnA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=QvKOx7rb961VUHkJ9Xf6HDe/JeY+VpeBG/2kr3FRKY8XOWXG80ithFjgRbPkKiSjzXjpCcw23LhzrwnkUqO4K0UQGIkr9zpGd8Ayj+6TOycyJ4V5y6YxhCZU6dGha9voiDRfhGLiK3+Oc/y4ktxvuew+Se2U3PGKFFeEGpon3Mo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FPOkTn8y; arc=none smtp.client-ip=209.85.210.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1780105451; c=relaxed/simple;
+	bh=RoQnkjSAGQlltUOHi6qTBWzLW/MPRpTjVtIir1Bku8o=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=IhzwobvNmar14FXrFiLxNFT4iI0x/9FVwNdRZyKT2n4DF/NLfjL9S0Sqod2iZXaL0bYCLR9+ZsbDmy6XYK0r4XauYsNEIKyzPPEg1eqRVfWoZHYIAo9LA3XZ4vZvR0pIbQHf5ZLapQCukxbEJlqpR6jbEn3rCEChcam66PBuAk4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ieee.org; spf=pass smtp.mailfrom=ieee.org; dkim=pass (1024-bit key) header.d=ieee.org header.i=@ieee.org header.b=DxvId/bX; arc=none smtp.client-ip=209.85.210.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ieee.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ieee.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FPOkTn8y"
-Received: by mail-pf1-f173.google.com with SMTP id d2e1a72fcca58-835c98b659eso11376789b3a.0
-        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2026 18:13:14 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=ieee.org header.i=@ieee.org header.b="DxvId/bX"
+Received: by mail-ot1-f48.google.com with SMTP id 46e09a7af769-7e5fd39cf11so7171211a34.0
+        for <ceph-devel@vger.kernel.org>; Fri, 29 May 2026 18:44:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780103594; x=1780708394; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=rwoi+zIOmB8T48lEoYYS1b4s148mrV/1IF4tO/5dMRA=;
-        b=FPOkTn8yJwu4bPVA57zcs9Yzn91joNCncit+xAQ+c5ci0GXwwegZjtz59imDFM6fVK
-         Z8yqdEdubHX+xdlx2Ev9CpG2RrQAUmzYWqENSbrPtlmJf58SWqBSyILgz0vb1Kvy8wR1
-         a1e8icgMMh/l7GZbDCQrnFg32L0lyU+dHvWlVQB/76WpGSn5qsWpE3XZMTctpRIGaQuC
-         5GeFKBx12WWQdemtueEQiSC+5XvNfPWgf07J0Gp24Kgf87tR9ZDOQwMwP05jiF6lBYt0
-         qdar0+59TjX8R/evpm2CZzgdvY4oZOo0pEahjd8s4PnTjKFWZRavtNrNNfIl+t8fyNle
-         VV0Q==
+        d=ieee.org; s=google; t=1780105449; x=1780710249; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=X+zTIztgsGKEhgjsVhvr5Rv5TrBYFcWsdOmt+WZ+x9w=;
+        b=DxvId/bX6y9ovt3FpOHoF/jE8a+2ZK+wO1h+JJstdq1pihW80TGRlPSKVszpS7/Efj
+         YeVhEK5WftrE6UJNCse0z0hN9zhj2hOcNgzoo94sO2+Ifq5Yd1XkVNUYxyfEpqbe2JtU
+         BICSZC2kiX0GAWnMOs7u+/dJk0Gkpgz79rHqg=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780103594; x=1780708394;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=rwoi+zIOmB8T48lEoYYS1b4s148mrV/1IF4tO/5dMRA=;
-        b=KW8nWb6B2WQcomDDJP9AZ6e6ZIvzR4NmXLGVLPFOvfRE71a+wPC7XGdFQWQEICE/ao
-         EVj+lZs1cKN6raqr+95lk+EXu4kRrOYebg4Ei3ARg4FZ2zTpDiMJ88tTXTwpSvp1BajK
-         cs4XnJxOB9KUxSOr8Tzl13bV8KCNatM5nqLt4VoTqfPEakTe70KpH1AzqfPm9ZVxV7Da
-         caJagPJxYtvL/xnC/1qPYNzASfetEuMYjNJmR1cdJdRM44NNa7mkBgJfyyQqhmaPUiWv
-         1ft8jyL6ktKtKPYre+u4Ubp9fse9AsMsvkaJ+etR2/8ROdKPcW3V/WIDCAgnLpn84cg1
-         VOWg==
-X-Forwarded-Encrypted: i=1; AFNElJ+KgvnuvBuM6W8fi4maJuhMtrsoIv7GAcMwplUbhAl8eeNuU+P8KFuecWOp/bXgXge5TW/poENFB0C0@vger.kernel.org
-X-Gm-Message-State: AOJu0YwytUhyz0M1EV6IgRY3VUJ93cGT0wi7RxZo/SKDVm1DorxCtC3d
-	HbItRukVnv0Q6Sw5mQeH74XBziZgyxZJ9ZQh7ZZbJbMce95nklYESw0g
-X-Gm-Gg: Acq92OGZ8WfyH5oO97aJKWXfrmudAKPniG27BaAYdvjmj7W4r6FBQCvU2SI5uRoG6n2
-	05iWXY5SLe8tz7yMvjy1FBrvY8jGSqbldxVVltsYCn1ACB4sWghFKbYfGbF7hvTPUJzFjFnkjL0
-	2Og3tMEXrRMPbQfuQx+UN5eYRbuVtTWwhfk3fFMmhtyBc/jIKCezm8SIlO4GqXIyoBZ8b+Oe55D
-	9yg2k4uhWgVlUDlDoQ/2VutbSYCEsGIlCW2X8X1CKGHzywffCDlfyPB+HeUDlzB6mAloVg+SacE
-	hHB8xJnDW1gydmGkSsr4n669PFqRBPnQYeG6oPmQfBpLZwQ5xYu/OuYlFVCo57hk9lI53pmJ47B
-	P0UWgfmDC8f78MJeIz0Mu6akEY34CwLAPZglWXaxo307DdTTXmZFJaFJ4DkX1kYTiBHp/g2eE97
-	eAYKRYJ6eVNLDshVtXqZCMJE0Bdib3eF1NLKASFBH0QJEnw1UqTUeMagvwR8FoMFNjydnPJtDLz
-	MjJu85wiuwalnKHiSj6nZmndK98NWGoraI4ZS0tH2CPPQ==
-X-Received: by 2002:a05:6a00:9099:b0:82f:721f:10ea with SMTP id d2e1a72fcca58-8422578d9cbmr1736790b3a.18.1780103594025;
-        Fri, 29 May 2026 18:13:14 -0700 (PDT)
-Received: from ryzen ([2601:644:8000:5b5d:7285:c2ff:fe45:8a32])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-84214cba602sm3230843b3a.40.2026.05.29.18.13.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 29 May 2026 18:13:13 -0700 (PDT)
-From: Rosen Penev <rosenp@gmail.com>
-To: linux-block@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>,
-	Dongsheng Yang <dongsheng.yang@linux.dev>,
-	Jens Axboe <axboe@kernel.dk>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	ceph-devel@vger.kernel.org (open list:RADOS BLOCK DEVICE (RBD)),
-	linux-kernel@vger.kernel.org (open list),
-	llvm@lists.linux.dev (open list:CLANG/LLVM BUILD SUPPORT:Keyword:\b(?i:clang|llvm)\b)
-Subject: [PATCH] rbd: check snap_count against RBD_MAX_SNAP_COUNT
-Date: Fri, 29 May 2026 18:12:55 -0700
-Message-ID: <20260530011255.52916-1-rosenp@gmail.com>
-X-Mailer: git-send-email 2.54.0
+        d=1e100.net; s=20251104; t=1780105449; x=1780710249;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=X+zTIztgsGKEhgjsVhvr5Rv5TrBYFcWsdOmt+WZ+x9w=;
+        b=WTaeBHqJJ+8J+i8iOb/BBf7ewwh4xEt/HQBPzEYec3Ro1R/YWraw+o4EEvk8xZcfeJ
+         LW3RRTFNvAN4uyPgwVx6LDHH1KnxaQDwnHfNP7G7gXi1guO9/biNTj5ohPrCECSJG6CT
+         wNxAN3FxrM0BrICsXGSbXR0zXhQdq+ZyVXTdWyn2WLxRITTxMZlH5heIXysox7owgk8j
+         RgnA9lZtRfU8f4ZvO7a8dYyLiJhUmRxv3MjS8yACxe43egrQcgORmC10cAiEbBnLPG9r
+         T7OKZnS3s6kjwSVa0cD7fIDVK7QFnVDRqhEyP3OLv7kvLl/2dOkI2GdPz6+isIe3ameg
+         Ripw==
+X-Forwarded-Encrypted: i=1; AFNElJ+5RZKSxhKCac8a6yg3JXJvsiAwz3jJ7YzPu88x+3gvy+A/DVr5X9tLG5cB76WpcizZVvaGB0G9iGB3@vger.kernel.org
+X-Gm-Message-State: AOJu0YxvWgOGSnvHvyfCejXNn1uT0Ey37gHXfg4S5qqoS3Odk8xdFmUd
+	rM70KKEoqjyvUB8O4CmOXd29mqEynJc2Bfo2VU+bZbsPJH54Rg4B1jOoCUj+KRGmaScx8qlnvgD
+	Dy4WiMQ==
+X-Gm-Gg: Acq92OFxXFFBB+mlwXUmpxj+rVcVF94xYghtrOsDjTAMSzZrN9JAe2jxPyW8cS9WAYo
+	7/nihVlcG93IjrBOzvZ7F1wP3o61jfLQtjI+aM4a83Byau1HGMb/hWFYd11PRgcbs7vXvnUhq3x
+	A4u1Ee36qQbx62bJrPqLZSc9h1o/9eMsASj7hJrC46vVajfwADYhxEhaW0mf0HNoJcbHnkCbAHu
+	JxSZ4sYsv5wJv6EFeI9vG6Q0GJJIzo7FcijO78QJKqgzADSpHNa0hhRhFiSYoCgU/0Thu6dgv8Z
+	a6HohU6PfJckWrJEi2sB5Q2EGZSJWbPX7jj1oWqjURca3i18nW6dzFrKWGg2SZ8Mo45PYEz5tbM
+	2IOYEqI1KzBUkx9tpOCP5MALEU6MBJBHS/Qe1VDoXP1nPBj36a2tuknvAq7dx+Jc6ROgAuPbT0x
+	kzDvLOTJx2gvqtYVNtUcSOgIWIAwLH
+X-Received: by 2002:a05:6820:1996:b0:69d:795a:5e8b with SMTP id 006d021491bc7-69e105d4115mr948538eaf.60.1780105448859;
+        Fri, 29 May 2026 18:44:08 -0700 (PDT)
+Received: from [172.22.22.28] ([73.62.185.64])
+        by smtp.googlemail.com with ESMTPSA id 586e51a60fabf-43c94078170sm2262599fac.14.2026.05.29.18.44.07
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 29 May 2026 18:44:08 -0700 (PDT)
+Message-ID: <284d5062-460e-496c-b700-2275deb7f8bb@ieee.org>
+Date: Fri, 29 May 2026 20:44:06 -0500
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] rbd: check snap_count against RBD_MAX_SNAP_COUNT
+To: Rosen Penev <rosenp@gmail.com>, linux-block@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>,
+ Dongsheng Yang <dongsheng.yang@linux.dev>, Jens Axboe <axboe@kernel.dk>,
+ Nathan Chancellor <nathan@kernel.org>,
+ Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+ Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
+ "open list:RADOS BLOCK DEVICE (RBD)" <ceph-devel@vger.kernel.org>,
+ open list <linux-kernel@vger.kernel.org>,
+ "open list:CLANG/LLVM BUILD SUPPORT:Keyword:b(?i:clang|llvm)b"
+ <llvm@lists.linux.dev>
+References: <20260530011255.52916-1-rosenp@gmail.com>
+Content-Language: en-US
+From: Alex Elder <elder@ieee.org>
+In-Reply-To: <20260530011255.52916-1-rosenp@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-snap_count is u32 but the comparison is against a SIZE_MAX-derived value
-(~2^61 on 64-bit), which clang flags as always false with
--Wtautological-constant-out-of-range-compare.
+On 5/29/26 8:12 PM, Rosen Penev wrote:
+> snap_count is u32 but the comparison is against a SIZE_MAX-derived value
+> (~2^61 on 64-bit), which clang flags as always false with
+> -Wtautological-constant-out-of-range-compare.
+> 
+> The proper check here should be that snap_count does not go over
+> RBD_MAX_SNAP_COUNT.
+> 
+> Assisted-by: Opencode:Big-pickle
+> Signed-off-by: Rosen Penev <rosenp@gmail.com>
 
-The proper check here should be that snap_count does not go over
-RBD_MAX_SNAP_COUNT.
+Looks good to me.
 
-Assisted-by: Opencode:Big-pickle
-Signed-off-by: Rosen Penev <rosenp@gmail.com>
----
- drivers/block/rbd.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+Reviewed-by: Alex Elder <elder@riscstar.com>
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 94709466ad19..25215c209484 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -6075,12 +6075,9 @@ static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev,
- 
- 	/*
- 	 * Make sure the reported number of snapshot ids wouldn't go
--	 * beyond the end of our buffer.  But before checking that,
--	 * make sure the computed size of the snapshot context we
--	 * allocate is representable in a size_t.
-+	 * beyond the end of our buffer.
- 	 */
--	if (snap_count > (SIZE_MAX - sizeof (struct ceph_snap_context))
--				 / sizeof (u64)) {
-+	if (snap_count > RBD_MAX_SNAP_COUNT) {
- 		ret = -EINVAL;
- 		goto out;
- 	}
--- 
-2.54.0
+> ---
+>   drivers/block/rbd.c | 7 ++-----
+>   1 file changed, 2 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 94709466ad19..25215c209484 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -6075,12 +6075,9 @@ static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev,
+>   
+>   	/*
+>   	 * Make sure the reported number of snapshot ids wouldn't go
+> -	 * beyond the end of our buffer.  But before checking that,
+> -	 * make sure the computed size of the snapshot context we
+> -	 * allocate is representable in a size_t.
+> +	 * beyond the end of our buffer.
+>   	 */
+> -	if (snap_count > (SIZE_MAX - sizeof (struct ceph_snap_context))
+> -				 / sizeof (u64)) {
+> +	if (snap_count > RBD_MAX_SNAP_COUNT) {
+>   		ret = -EINVAL;
+>   		goto out;
+>   	}
 
