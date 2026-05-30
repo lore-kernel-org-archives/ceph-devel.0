@@ -1,176 +1,151 @@
-Received: from mail-qt1-f173.google.com (mail-qt1-f173.google.com [209.85.160.173])
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D0F72147E5
-	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 08:44:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.173
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780130652; cv=pass; b=b1U8/yN9Lc4YbJU1ubYSycZgjmrKcCBHmcLpe6YUdzeuMUJh+PSmHdVRm3g1IZmJ2AWdBHKBI9FrRzscLRe5ZJEvMu48GAei9Cy1TNC8XeTGbUL+Uf/zG8EKCC0FI8MeGyQql8yUEcX77hpZ2ROL9XzIQvnbafwu4DnCHaPqHOc=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780130652; c=relaxed/simple;
-	bh=TtjqVg+t7+jZd5EpEQZryjCRTaoD/2HCpShEKyZ8ozU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Mp7aqb3cFXP3YF/1LQT1WHSOah56AdelcUeh4Vboi4qr4EE7CrnFJwZtECwvFqn9YpXprTdz5GwCRFoofyOuy1LGM1U6msncTPhM+p2G7bsxI1mvL2A81E1+tfzPDzNril02kbANg/0wJG+Vj9IaVaI3rw804qUvWQc/Aa69PQg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FNXAafs3; arc=pass smtp.client-ip=209.85.160.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E8203AFCF3
+	for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 17:46:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1780163197; cv=none; b=MVB482+v1t9opa76WqolCEKG31naMKJ46HgU++tXGjsVSgNiRKtwIiDQu+U/psmaDTVrPvWykcoN6kCmJmYIrwVdFdv55iuWAZOxArjezHVSTqAMVvwLIOgYcTOSwZzD4ZHMj9qcR1tCTvzXMaJXwpVZpcqtOiXHV2BOLTOncXg=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1780163197; c=relaxed/simple;
+	bh=p9mmt+HC9BO3hUp9yEhHwEZiKKcOtn8P/wxRR15M1ZY=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=f7rn/o78HfXJq4s+P1qmKin4qlMSyM/uH/dlM834PZD1qDZWdXHsjHJRftpzgos3qcrKd9KOAG44hziqJ8HNa1TUeOLeQnHC7lz3O9lT4i9NyExIOjZyQU8KceATzf5WQFdNKmOoyOxMM6Unc/KxAtdC5ZblqUbqsE+kfzWI7aA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aX3RnmaE; arc=none smtp.client-ip=209.85.221.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FNXAafs3"
-Received: by mail-qt1-f173.google.com with SMTP id d75a77b69052e-5102582e23eso118173311cf.1
-        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 01:44:11 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1780130650; cv=none;
-        d=google.com; s=arc-20240605;
-        b=Fn/M6HT9f4L+STGrBHjJO+F1f+xHiU3mnmakDjs/BLQlxaxsi9GlV0yCESbKratsNL
-         VCbMixEa49eXxvGWhppti5R6HP2OQHwEERVBOFHpWH2C5EcyDCy5TOwV0ZBf86xphN+r
-         +LFvPuDXqJO+oNREVYlWKeSVbNP1JXVEScGceg8LItT0m3sYQOleanSvFai7DoPQUdLZ
-         E1ec/nOEayocfk+OZbylqjEmeF8oKJjjzeR6Cxio7/KOwC4QiM2Ut67ogPoBphcW8zFM
-         xFUnEOBSGXO2UU2BYKpuIXMkJyh9ni3lZdiW3N+w/1dQYeeSG9hpxAuIBBpJ7t99sY3l
-         +eog==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=eoSIRBsQ6mX4skycm85ySkNyyRi8BhFDv72ue7aCFn0=;
-        fh=3wvYS1BVFmqq6mb59H9VHM/+YIMjmR4fKJglXVHPJgo=;
-        b=avJaPcCcymUNj0ormoAns7iwjROyqPm76tGaYk5pb7osu3yNLwQBzdCiTKVI2oGmhS
-         zDrAemyo3VzX9l2m7t7nn6AqUPfhQPBzGMRmbehY/3tDKmtmk2EFknx3Vt9O2Gfrz5HL
-         JRrVTkLMHHf3x3MPNm9hLAdrmI1IcuHF/fJeVvt7lB3ZPFq+XGHUhnZw3PJ4U7yGrS78
-         U0iQgujn2FtKzIY8/OuzEywo0qIkVWFN/jpodjAQNsDObXl0PgJN/62BLJ0927OyxAoo
-         NYUYJI00xyzRbqPrEriRWv8c+9SvdTX2rNxJgU0UooG0/NI5VIMrXdkNbfhMeEyvDLYY
-         dd5Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aX3RnmaE"
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-45eedc94d37so1281383f8f.3
+        for <ceph-devel@vger.kernel.org>; Sat, 30 May 2026 10:46:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780130650; x=1780735450; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=eoSIRBsQ6mX4skycm85ySkNyyRi8BhFDv72ue7aCFn0=;
-        b=FNXAafs3HPOj0+xdF4KGKDky2odTsQ0dn2idZx7RX8iBwXscOUlyofQ8A+lWJoRZ35
-         71PcxYDaQ2NSljGq+/izpTMiJo5gL/cUZjpXtSS0M+TdTq1vGr9kZWAeqwZcvPdYzbKj
-         m0FX+9OqFWw8at51CeFWvEUgkfb+8lu8V7r0Wdjw7lkKhpGQ4NpAGBmkWPaC1gEGFR71
-         sRpS35Ncu3URikVbfS6AjwQwqcpKFQOUSmSQZ93TbQ+sarHGyU8vhuX+AUZKk5qqD4S7
-         rus5gaaV4jCKFLkb90QEOAIcZqtB83Xv4lhTHqdN+XeChmlLg6u37GV3d3gzo+MaO7mW
-         XK6Q==
+        d=gmail.com; s=20251104; t=1780163195; x=1780767995; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
+         :to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=HhbZmkaWK2d+OrlQbKHk4YxAXH5lr2lMy7P+sZtQEn8=;
+        b=aX3RnmaEQOsfwxbdzW9OMi4d6/XwsDgquP799aavhVNB76gN7UDnvAuEMH3WDT5seW
+         TscTdzsv/twUYKOyGc9pVj93yN8zbuD/doBSiVlatuUH+M7BrFke42GOSs1CnuP6LcIn
+         7IGTOdTjASbK1mogXbFSgP/2ikdckz5BjMceSDatw2BO5tr7RVrMW0qxrR4kF29xAl+h
+         tSDsuX77j1aNsSYC5EeGksYLOt4ISeEZYk58nPop93yqjfaPwvx7v+oUUkuO3Wk1kt8j
+         1EXVh/dX6pTayuGAEwXCEilfSXlWfEyF+bwa8UDNqCOwpSQkGRoAP3QstZZghNvCMhlo
+         UmXw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780130650; x=1780735450;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=eoSIRBsQ6mX4skycm85ySkNyyRi8BhFDv72ue7aCFn0=;
-        b=NWyPUKfMBofuAyJLf0/G7DgDHK9Xfg9kL+bP1dNs4GoFAU8Uv9HnI6FUhQPUx94tVj
-         ufyukMJIZ2Vy8wag6xxB/Hv/K4hstUsqhhtSKVN5CvbPyQWhtF+u+oLJu2pQ/V2Jhlgp
-         abxhewpxyK/cUaOknbXSpSgxcwFPpfonQ8dPinAy87JvRJdjwaMl2Srg2+x99wmVSO+Y
-         YBHkRwlBTSEgQv25/dF1NSlo68mEEtsUQ5m3NuVM0kcAnM5zRTlRiXLwBxK3PATb9ADQ
-         Ap9bo0Kqlu3mdIEs2TrRZ/a3Fl6ZumM5VbeVlrOl9ealyllb/Fx9PE7MGZiyBZpBuBJa
-         96wQ==
-X-Forwarded-Encrypted: i=1; AFNElJ8T8LPgdhoBH0MDTLv3BBrf97SiiBxo1YL9zRIi9g+orXn4OcKrkOb8cZN+BImevqdx9sp1qDNiE9V7@vger.kernel.org
-X-Gm-Message-State: AOJu0YwMMkmFRahK1RY26pGvRsT+mPllvdg9zr3XkkDL3MTSV7IQ9zXg
-	nCyxWoWgkJ2pJD4ejkOOoErfUsspPsHWGgWz3E71rZmodx11CyDqLw1P8a30NVpFv4O3qA/pfif
-	FezAblHUPcFAMs9lXs37SXVi9WkITXKI=
-X-Gm-Gg: Acq92OH/FUE+TMce8BRV8BtEeRB2F4GyEv+9INyKaQ+IIpR5PhB1D5bcD7hpvn0INac
-	E1K83lNVVZa+fV/7AokMOSDTycqJMg41Chx3bXPmOi632gakDNyupNatphj0ekAr0DDkvsaBUk9
-	dABV0a4mZYBsDHMLD8Vdz6hGHaY0FeSm4fFK2ix0QYnwyzYDN1EyrRKh23myBYM4jzDEpUpOZzZ
-	9zfRDliGrOe/iMHQbpz5s9afV4kT7jo4qME29keKd2iEb+IT07mRiOwBKVxFtUwket8m5xn1/Z5
-	HRWlkQuch0Xirx2aaTbwqSTniG98vFxegTeEbaIoiMTjwxqBbEE=
-X-Received: by 2002:a05:620a:d87:b0:914:a054:c5fd with SMTP id
- af79cd13be357-9153dc833b4mr460701785a.52.1780130650183; Sat, 30 May 2026
- 01:44:10 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1780163195; x=1780767995;
+        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
+         :to:from:date:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=HhbZmkaWK2d+OrlQbKHk4YxAXH5lr2lMy7P+sZtQEn8=;
+        b=CQLIgI1bV6/P4bBdHa5MkLQHy8Ww3ggWV7EgM+jcVxMTPU+sFLROp0x2OswY5A8JUh
+         iM8OztDhpnpeoR9FgGbVkMqXcUmjCr0tIzF0ub2qThG7pDLhl4ft4bWZ5BA5duxSmEge
+         e+Hraa387FUqoyXMihvqrgcjTBG/4yLg1ft0q7glmW/0o3OP6DAZaza6HUuXdWcNcX0T
+         4+bOue4m9IteF63I2fFC3e4Hs3xVkFAuk5lWm3YFKb7f1Ew0YYSeIwiV8Cw+V8jVhZNZ
+         UO/KrzotfoSKTSRgkC8f7+4GBbv5N3C4/ZBuj2PDuZIq8DxwIGgk7OYuZ0vC2lldZYO7
+         235Q==
+X-Forwarded-Encrypted: i=1; AFNElJ9RFnlxlaNEkG/NKNkux/12nsC+jlihQaWOcVf25eYEZ3A7Vl1dqwZVLg1PSsKk5tS5XQaheXRw+bEJ@vger.kernel.org
+X-Gm-Message-State: AOJu0YzCciHmzzdWX7SLat9bnaNaiGweSiTx9Td5lCUYDZoyBppNM/Z0
+	xC4FxvIl0H98jto5AIM6WHs0riOrFYX8hOrdZVfhkoNEfIMHWyQhkBNY
+X-Gm-Gg: Acq92OF2/Wulj9fLjsovL8a0Aws8vw1Xl14b+MdY/8cYKa3kA5q9x0yZB7pXTLzhFW2
+	aTbyELx5BYd/8L8vTGHdhOCG7mVjfH3CHCuXW4paqxZZ8nZKe0V5THCYDsZGQeH/hx0FBdXNWe+
+	u/dzjP42PI238SJmFTKAbE8gqNo+q3+i9vld3SzFAebvyJMnkzVQv91p59na/UkmscNS7B4yuiv
+	B40P0S06sybt8BH9nRK3+KWwYbdtr7To9D5cdvMBrk8WdGGIVyJVFFDNLuC3Q1H+yOkq9mt5Sw2
+	vOgH9+zNJw/Gkzip2bQxcDvx76kcvfybxzWlLRNl+/OOsOp++16ESErsYeSXBLYwyfq2PT/CITR
+	DEQsn9fk2L3sF3T+zPFNlCknAuU4D9uf8/NTxsUHJu4Hb7OMXwYgsMEDv2yEW8ElSsjvwJ3Ms+u
+	TSky/9OSdWBJsKFjQgOMB3viXrrZtD8MJndQ==
+X-Received: by 2002:adf:f190:0:b0:44f:9b70:2996 with SMTP id ffacd0b85a97d-45ef6b4f4f5mr5775458f8f.21.1780163194681;
+        Sat, 30 May 2026 10:46:34 -0700 (PDT)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-45ef354cd7csm12052902f8f.18.2026.05.30.10.46.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 30 May 2026 10:46:34 -0700 (PDT)
+Date: Sat, 30 May 2026 20:46:31 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: oe-kbuild@lists.linux.dev, Pavitra Jha <jhapavitra98@gmail.com>,
+	idryomov@gmail.com
+Cc: lkp@intel.com, oe-kbuild-all@lists.linux.dev, Slava.Dubeyko@ibm.com,
+	amarkuze@redhat.com, ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org,
+	Pavitra Jha <jhapavitra98@gmail.com>
+Subject: Re: [PATCH v2] ceph: fix bare ceph_decode_8 OOB in decode_lockers()
+Message-ID: <202605310022.LGyGb8eD-lkp@intel.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1779949116.git.ldy3087146292@gmail.com> <4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.1779949116.git.ldy3087146292@gmail.com>
- <1cab97763b0564d03a583deb7eed485b68be6182.camel@redhat.com>
-In-Reply-To: <1cab97763b0564d03a583deb7eed485b68be6182.camel@redhat.com>
-From: Yuan Tan <yuantan098@gmail.com>
-Date: Sat, 30 May 2026 01:43:59 -0700
-X-Gm-Features: AVHnY4LYWH5G0XW0XKAiXpRsBL3MYmpJ567MD8I54TgxBufZ2rvq9V7ElSJca7M
-Message-ID: <CAPuPA7+n-pDuN5-y_QOd635-uZLrMkaxn=n-EHamJ9jDo1NDmQ@mail.gmail.com>
-Subject: Re: [PATCH 1/1] libceph: reject zero bucket types in crush_decode
-To: Viacheslav Dubeyko <vdubeyko@redhat.com>
-Cc: Ren Wei <n05ec@lzu.edu.cn>, ceph-devel@vger.kernel.org, idryomov@gmail.com, 
-	amarkuze@redhat.com, slava@dubeyko.com, sage@newdream.net, 
-	zcliangcn@gmail.com, bird@lzu.edu.cn, ldy3087146292@gmail.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260528132521.843004-1-jhapavitra98@gmail.com>
 
-On Fri, May 29, 2026 at 1:35=E2=80=AFPM Viacheslav Dubeyko <vdubeyko@redhat=
-.com> wrote:
->
-> On Fri, 2026-05-29 at 16:11 +0800, Ren Wei wrote:
-> > From: Douya Le <ldy3087146292@gmail.com>
-> >
-> > CRUSH bucket type 0 is reserved for devices.  The mapper relies on
-> > that invariant and uses type 0 to identify leaf devices.
-> >
-> > If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
-> > can make the mapper treat a negative bucket ID as a device and pass it
-> > to is_out(), which then indexes the OSD weight array with a negative
-> > value.
-> >
-> > Reject zero bucket types while decoding the CRUSH map so the invalid
-> > state never reaches the mapper.
-> >
-> > Fixes: f24e9980eb86 ("ceph: OSD client")
-> > Cc: stable@kernel.org
->
-> If I am not wrong, the correct email is stable@vger.kernel.org.
+Hi Pavitra,
 
-In our previous patches submitted this way worked fine, and stable
-maintainers would help backport them.
+kernel test robot noticed the following build warnings:
 
-To be honest, I was also debating whether I should use
-stable@vger.kernel.org. My main concern was accidentally sending an
-unreviewed patch to stable@ and spamming their inbox.
-If you feel stable@vger.kernel.org is more appropriate, we will switch
-to it in the next version.
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
->
-> > Reported-by: Yuan Tan <yuantan098@gmail.com>
-> > Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-> > Reported-by: Xin Liu <bird@lzu.edu.cn>
-> > Assisted-by: Codex:GPT-5.4
->
-> I am not sure that it's correct to mention it. But, maybe, my opinion is
-> slightly outdated.
+url:    https://github.com/intel-lab-lkp/linux/commits/Pavitra-Jha/ceph-fix-bare-ceph_decode_8-OOB-in-decode_lockers/20260528-212749
+base:   https://github.com/ceph/ceph-client.git testing
+patch link:    https://lore.kernel.org/r/20260528132521.843004-1-jhapavitra98%40gmail.com
+patch subject: [PATCH v2] ceph: fix bare ceph_decode_8 OOB in decode_lockers()
+config: um-randconfig-r073-20260530 (https://download.01.org/0day-ci/archive/20260531/202605310022.LGyGb8eD-lkp@intel.com/config)
+compiler: gcc-14 (Debian 14.2.0-19) 14.2.0
+smatch: v0.5.0-9185-gbcc58b9c
 
-We added Assisted-by: Codex:GPT-5.4 based on.
-https://www.kernel.org/doc/html/latest/process/coding-assistants.html#attri=
-bution
-Please correct us if there's something wrong with our understanding :)
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Reported-by: Dan Carpenter <error27@gmail.com>
+| Closes: https://lore.kernel.org/r/202605310022.LGyGb8eD-lkp@intel.com/
 
->
-> > Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-> > Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
-> > ---
-> >  net/ceph/osdmap.c | 2 ++
-> >  1 file changed, 2 insertions(+)
-> >
-> > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> > index 8b5b0587a0cf..226c9e0b7821 100644
-> > --- a/net/ceph/osdmap.c
-> > +++ b/net/ceph/osdmap.c
-> > @@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void *pbyval,=
- void *end)
-> >               ceph_decode_need(p, end, 4*sizeof(u32), bad);
-> >               b->id =3D ceph_decode_32(p);
-> >               b->type =3D ceph_decode_16(p);
-> > +             if (b->type =3D=3D 0)
->
-> I don't like of hardcoding the constant. Do we have named constant for de=
-vices
-> type? If we do not have, maybe, do we need to introduce some?
+smatch warnings:
+net/ceph/cls_lock_client.c:313 decode_lockers() warn: missing error code 'ret'
 
-I'll defer to Douya Le on this point.
+vim +/ret +313 net/ceph/cls_lock_client.c
 
->
-> Thanks,
-> Slava.
->
-> > +                     goto bad;
-> >               b->alg =3D ceph_decode_8(p);
-> >               if (b->alg !=3D alg) {
-> >                       b->alg =3D 0;
->
+d4ed4a53056288 Douglas Fuller 2015-06-29  288  static int decode_lockers(void **p, void *end, u8 *type, char **tag,
+d4ed4a53056288 Douglas Fuller 2015-06-29  289  			  struct ceph_locker **lockers, u32 *num_lockers)
+d4ed4a53056288 Douglas Fuller 2015-06-29  290  {
+d4ed4a53056288 Douglas Fuller 2015-06-29  291  	u8 struct_v;
+d4ed4a53056288 Douglas Fuller 2015-06-29  292  	u32 struct_len;
+d4ed4a53056288 Douglas Fuller 2015-06-29  293  	char *s;
+d4ed4a53056288 Douglas Fuller 2015-06-29  294  	int i;
+d4ed4a53056288 Douglas Fuller 2015-06-29  295  	int ret;
+d4ed4a53056288 Douglas Fuller 2015-06-29  296  
+d4ed4a53056288 Douglas Fuller 2015-06-29  297  	ret = ceph_start_decoding(p, end, 1, "cls_lock_get_info_reply",
+d4ed4a53056288 Douglas Fuller 2015-06-29  298  				  &struct_v, &struct_len);
+d4ed4a53056288 Douglas Fuller 2015-06-29  299  	if (ret)
+d4ed4a53056288 Douglas Fuller 2015-06-29  300  		return ret;
+d4ed4a53056288 Douglas Fuller 2015-06-29  301  
+d4ed4a53056288 Douglas Fuller 2015-06-29  302  	*num_lockers = ceph_decode_32(p);
+69050f8d6d075d Kees Cook      2026-02-20  303  	*lockers = kzalloc_objs(**lockers, *num_lockers, GFP_NOIO);
+d4ed4a53056288 Douglas Fuller 2015-06-29  304  	if (!*lockers)
+d4ed4a53056288 Douglas Fuller 2015-06-29  305  		return -ENOMEM;
+d4ed4a53056288 Douglas Fuller 2015-06-29  306  
+d4ed4a53056288 Douglas Fuller 2015-06-29  307  	for (i = 0; i < *num_lockers; i++) {
+d4ed4a53056288 Douglas Fuller 2015-06-29  308  		ret = decode_locker(p, end, *lockers + i);
+d4ed4a53056288 Douglas Fuller 2015-06-29  309  		if (ret)
+d4ed4a53056288 Douglas Fuller 2015-06-29  310  			goto err_free_lockers;
+d4ed4a53056288 Douglas Fuller 2015-06-29  311  	}
+d4ed4a53056288 Douglas Fuller 2015-06-29  312  
+cff58e4599d8e1 Pavitra Jha    2026-05-28 @313  	ceph_decode_8_safe(p, end, *type, err_free_lockers);
+
+This macro has a goto err_free_lockers but the error code isn't set.
+
+d4ed4a53056288 Douglas Fuller 2015-06-29  314  	s = ceph_extract_encoded_string(p, end, NULL, GFP_NOIO);
+d4ed4a53056288 Douglas Fuller 2015-06-29  315  	if (IS_ERR(s)) {
+d4ed4a53056288 Douglas Fuller 2015-06-29  316  		ret = PTR_ERR(s);
+d4ed4a53056288 Douglas Fuller 2015-06-29  317  		goto err_free_lockers;
+d4ed4a53056288 Douglas Fuller 2015-06-29  318  	}
+d4ed4a53056288 Douglas Fuller 2015-06-29  319  
+d4ed4a53056288 Douglas Fuller 2015-06-29  320  	*tag = s;
+d4ed4a53056288 Douglas Fuller 2015-06-29  321  	return 0;
+d4ed4a53056288 Douglas Fuller 2015-06-29  322  
+d4ed4a53056288 Douglas Fuller 2015-06-29  323  err_free_lockers:
+d4ed4a53056288 Douglas Fuller 2015-06-29  324  	ceph_free_lockers(*lockers, *num_lockers);
+d4ed4a53056288 Douglas Fuller 2015-06-29  325  	return ret;
+d4ed4a53056288 Douglas Fuller 2015-06-29  326  }
+
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
+
