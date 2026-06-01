@@ -1,119 +1,154 @@
-Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [13.76.78.106])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 1C6BB27FB05
-	for <ceph-devel@vger.kernel.org>; Sun, 31 May 2026 10:02:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.76.78.106
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DCAC3D76
+	for <ceph-devel@vger.kernel.org>; Mon,  1 Jun 2026 07:27:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780221784; cv=none; b=nkMqMqwUrDnxJx+xLb2Ve8z38M3XmERdaEGiEajMQDqVL4T+yNlvTJ4OltcJ1ua3B3igtFTZP4wCDc3aXl+9JVNFlgiW30x8y6luxZimZlm8KOJOEZrwsyZrfh6VcEzQAMNFAGfzXI/qxPZuizxnIWHQ0ipEHjm5+7dnOHBE9iU=
+	t=1780298876; cv=none; b=o+3Y8Xk8iVQYHMmMiytqtmqMB8N+rS1WsX4jFJdaJHMoyx0hyJfWSrZBiP9+oy7yagKPVtsmBra4y4ry9h0EYZcLvyGamlFidqdAHO9cMSYUDUx3dJywQ2F6F9UhuA0JIxORRJKSQJdCKPgReN2R0OkMRUg6bkm6WYWKlnu2kTs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780221784; c=relaxed/simple;
-	bh=eHT9djEAKuP/Sb9Q6ZmRiNoCE/8Q2JPImO3nPP/yAsU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=izDka458oTsz+azFBU45d0K4W6H9YLWJ4QMMv/smQnSgTf50l5YHpNxdNBqzG34kHftgJxOQ+xp38rBPxR0c8WGbnavjyW7EG7sAD8cr5v2GOkbaX1QcE4ECwKYwFF/2mF2H0F2vXlPPCHvIdGEOcLdk/t0D30fvkF4SGIwX6H4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=13.76.78.106
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lzu.edu.cn
-Received: from enjou-Legion-Y7000P-2019.coin-barley.ts.net (unknown [172.23.56.36])
-	by app2 (Coremail) with SMTP id zQmowADngwtGBxxqsvIVAA--.43097S2;
-	Sun, 31 May 2026 18:02:46 +0800 (CST)
-From: Ren Wei <n05ec@lzu.edu.cn>
-To: ceph-devel@vger.kernel.org,
-	vdubeyko@redhat.com
-Cc: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	slava@dubeyko.com,
-	sage@newdream.net,
-	yuantan098@gmail.com,
-	zcliangcn@gmail.com,
-	bird@lzu.edu.cn,
-	ldy3087146292@gmail.com,
-	n05ec@lzu.edu.cn
-Subject: [PATCH v2 1/1] libceph: reject zero bucket types in crush_decode
-Date: Sun, 31 May 2026 18:02:45 +0800
-Message-ID: <3200151429f33554f06ced8a.1780197742.git.ldy3087146292@gmail.com>
-X-Mailer: git-send-email 2.51.0
+	s=arc-20240116; t=1780298876; c=relaxed/simple;
+	bh=mT6jsyBPOPOEHmCRASklBjxxuf03hwNfi4RPCLL2cPM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=p02Hw+cjOZv+vp5O7k7gW6sYp4J6MGKyZx3LQv+01e1INJRpP64rxNlbl+B9okh9OOsWRX3/oWJZXfTc2JEioXiqUwroxxLvcDfXSteirqxoqdg0J/ETn9T1P6TCrhO+ZWTtxmK2X3hNjNgvDy8/VKPttKVHzv9qJ7ZK4dT8mgQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=wvGMLpzO; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="wvGMLpzO"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1780298865; h=message-id
+ : date : mime-version : subject : to : cc : references : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=mT6jsyBPOPOEHmCRASklBjxxuf03hwNfi4RPCLL2cPM=;
+ b=wvGMLpzO+JoX+Dxe2QgLsYzBnZ4B1eLptum9S5DFiBv3lEEoxnab5Ye111qtzfzhxTpXP
+ bxEGkAs74b+PAgoE06kEyX1xVOI3FCBjz61/wZ6vGy3il6S9aG4EJInmNGfRQU7U5Pg3uR+
+ eGimUVSEmsnLsA/Ng/9MvtOIsJe2+qop4BKHeZnxUzF7VUCyHa/0DTzLCnWhRrFkGPtpMJk
+ I8W5/+GghHD04EX4mTWSw4YuXMVeHTdiwCXe7b2AeFoaoUZ0YwHtLR87zGeSECANntKWFUZ
+ sfGaBgJOMvYyzlWyv2oBglfplYkJhKKUcTnqNehA61GSYXBLRw/3zkn32JFQ==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 297605FC52;
+	Mon,  1 Jun 2026 09:27:44 +0200 (CEST)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 82FDE5FCAC;
+	Mon,  1 Jun 2026 09:27:44 +0200 (CEST)
+Message-ID: <93a0d6bf-31e5-43af-b20c-70f655b17094@tu-ilmenau.de>
+Date: Mon, 1 Jun 2026 09:27:44 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:zQmowADngwtGBxxqsvIVAA--.43097S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7tF43Kw43XFW7WFyrXw17Awb_yoW8ZFW7pw
-	srCrsrJr9ruryjqrn3Aa129r47G39xGFW7WrZxJ34Yv34Dtrn3Wrn7KF9IkrnrCFW8KF4a
-	qF929ryDuwn0yrDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUBj1xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
-	w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
-	IY67AKxVW5JVW7JwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwA2z4x0Y4vEx4A2
-	jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0oVCq3wAS0I0E0xvYzxvE52
-	x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWU
-	GwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI4
-	8JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwACI402YVCY1x02628vn2kIc2xKxwCY1x0262kK
-	e7AKxVWUtVW8ZwCY02Avz4vE-syl42xK82IYc2Ij64vIr41l42xK82IY6x8ErcxFaVAv8V
-	W8GwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r18MI8I3I0E7480
-	Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7
-	IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k2
-	6cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxV
-	AFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x0JUd-B_UUUUU=
-X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQEECWoanc8JKQAEsL
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] libceph: Handle rbtree insertion error in
+ handle_backoff_block()
+To: Viacheslav Dubeyko <vdubeyko@redhat.com>,
+ Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org
+References: <20260529082242.3726491-1-raphael.zimmer@tu-ilmenau.de>
+ <e02e1e589b3f77902435e5b062b60d1f419b8624.camel@redhat.com>
+Content-Language: en-US
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
+ 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
+In-Reply-To: <e02e1e589b3f77902435e5b062b60d1f419b8624.camel@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-From: Douya Le <ldy3087146292@gmail.com>
+On 29.05.26 10:41 PM, Viacheslav Dubeyko wrote:
+> On Fri, 2026-05-29 at 10:22 +0200, Raphael Zimmer wrote:
+>> A message of type CEPH_MSG_OSD_BACKOFF is used to block/unblock requests
+>> to specific PGs or objects. If this message has op code
+>> CEPH_OSD_BACKOFF_OP_BLOCK, handle_backoff_block() is called to block
+>> requests. In this function, a backoff struct is created and inserted
+>> into two rbtrees for tracking them. Both insertions use the asserting
+>> rbtree insertion function by calling insert_backoff(), respectively
+>> insert_backoff_by_id(). If a message contains a backoff with the same
+>> begin ceph_hobject_id or the same id as a previous one, the assertion in
+>> insert_backoff()/insert_backoff_by_id() triggers a kernel BUG when
+>> trying to insert the backoff.
+>>
+>> This patch fixes the issue by switching both calls to the non-asserting
+>> rbtree function and ignoring the message if one of the insertions fails.
+>>
+>> Fixes: a02a946dfe96 ("libceph: respect RADOS_BACKOFF backoffs")
+>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+>> ---
+>>  net/ceph/osd_client.c | 22 ++++++++++++++++++++--
+>>  1 file changed, 20 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> index 2ff00070c181..482b89009649 100644
+>> --- a/net/ceph/osd_client.c
+>> +++ b/net/ceph/osd_client.c
+>> @@ -4427,8 +4427,16 @@ static void handle_backoff_block(struct ceph_osd *osd, struct MOSDBackoff *m)
+>>  	backoff->end = m->end;
+>>  	m->end = NULL;   /* ditto */
+>>  
+>> -	insert_backoff(&spg->backoffs, backoff);
+>> -	insert_backoff_by_id(&osd->o_backoffs_by_id, backoff);
+>> +	if (__insert_backoff(&spg->backoffs, backoff)) {
+>> +		pr_err_ratelimited("%s failed to insert backoff\n", __func__);
+>> +		goto err_free_backoff;
+>> +	}
+>> +
+>> +	if (__insert_backoff_by_id(&osd->o_backoffs_by_id, backoff)) {
+>> +		pr_err_ratelimited("%s failed to insert backoff by id\n",
+>> +				   __func__);
+>> +		goto err_erase_backoff;
+>> +	}
+> 
+> I just realized that these checks have incorrect logic. We need to check that
+> __insert_backoff() and __insert_backoff_by_id() are failed:
+> 
+>   if (!__insert_backoff(&spg->backoffs, backoff)) {
+>       pr_err_ratelimited("%s failed to insert backoff\n", __func__);
+>       goto err_free_backoff;
+>   }
+> 
+>   if (!__insert_backoff_by_id(&osd->o_backoffs_by_id, backoff)) {
+>       pr_err_ratelimited("%s failed to insert backoff by id\n", __func__);
+>       goto err_erase_backoff;
+>   }
+> 
+> Am I right here?
+> 
 
-CRUSH bucket type 0 is reserved for devices.  The mapper relies on
-that invariant and uses type 0 to identify leaf devices.
+Of course, that's what it's meant to be. I somehow missed the "!".
+Thanks for pointing it out.  I'll send a corrected patch.
 
-If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
-can make the mapper treat a negative bucket ID as a device and pass it
-to is_out(), which then indexes the OSD weight array with a negative
-value.
-
-Reject zero bucket types while decoding the CRUSH map so the invalid
-state never reaches the mapper. 
-
-Fixes: f24e9980eb86 ("ceph: OSD client")
-Cc: stable@vger.kernel.org
-To: Viacheslav Dubeyko <vdubeyko@redhat.com>
-Reported-by: Yuan Tan <yuantan098@gmail.com>
-Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-Reported-by: Xin Liu <bird@lzu.edu.cn>
-Assisted-by: Codex:GPT-5.4
-Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
-
----
-Changes in v2:
-- use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
-- v1 Link: https://lore.kernel.org/all/1cab97763b0564d03a583deb7eed485b68be6182.camel@redhat.com/
-
----
- include/linux/crush/crush.h | 1 +
- net/ceph/osdmap.c           | 2 ++
- 2 files changed, 3 insertions(+)
-
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 30dba392b..eb469972f 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -111,6 +111,7 @@ struct crush_rule {
-  *  straw2          O(n)       optimal      optimal
-  */
- enum {
-+	CRUSH_ITEM_TYPE_DEVICE = 0,
- 	CRUSH_BUCKET_UNIFORM = 1,
- 	CRUSH_BUCKET_LIST = 2,
- 	CRUSH_BUCKET_TREE = 3,
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 8b5b0587a..21cdd33f2 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 		ceph_decode_need(p, end, 4*sizeof(u32), bad);
- 		b->id = ceph_decode_32(p);
- 		b->type = ceph_decode_16(p);
-+		if (b->type == CRUSH_ITEM_TYPE_DEVICE)
-+			goto bad;
- 		b->alg = ceph_decode_8(p);
- 		if (b->alg != alg) {
- 			b->alg = 0;
--- 
-2.47.3
+Best regards,
+Raphael
 
