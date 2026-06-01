@@ -1,78 +1,73 @@
-Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
+Received: from mail-oi1-f174.google.com (mail-oi1-f174.google.com [209.85.167.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A65F5340401
-	for <ceph-devel@vger.kernel.org>; Mon,  1 Jun 2026 18:48:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BAEE284B29
+	for <ceph-devel@vger.kernel.org>; Mon,  1 Jun 2026 18:55:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780339737; cv=none; b=qfUHzklLB6ZeNAmUPO9JDFBSnGlS2eL0YSUtONLTPS0VYGvOFeFgEnBGag/rKv938jKdOvn1ulFSEtnPQ2R8UEjJgbLQZfGd7bsuhUeV29SUA4PZgtzr2Ecwol63kpMW3R8QFzdPoZKdEO7L+7iv7NVmSO8O2TdWDUGBuLuBe1Y=
+	t=1780340157; cv=none; b=r3i7vM+yWu/HOIMs2cs5Zpin9yz4fq6ob9gR1Lf7isbYiZhAkZbhuMExTT42lP2fqr8+JkfVr053JqjcyhflII95dDE7dsid1vQfGcHzwJ58aNaLTwajUAIbPKYY5Df8sbNlvlCaT2nXl9QG8z7+wUUpoAEW7mj4FsaLmvGwb4A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780339737; c=relaxed/simple;
-	bh=SEDAX8kH+0Ds9fUaic49LXpaezHfqpt1iaHb4yoRQIY=;
+	s=arc-20240116; t=1780340157; c=relaxed/simple;
+	bh=doOQMnNcVaYWaBgPgmUVrVXGvrzEqsHddJ1hAwFmNjE=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=iGLmN8/Fe5IzP7r1fPlxwptmepMhE5yCq1QGGQ1spqEsFMQN3zFg3KXL4taOz3TXYQnXDDQTt685CUcepsqfEFaqB0+Ib4erVqd2Vy20vqY2M4uqlnMx/sjPwieIqFQlLwqDLefej0dvmimr23mic1ad2kjGCYpyLuFkXfUG9N4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=PzZw7wj1; arc=none smtp.client-ip=209.85.167.169
+	 Content-Type:MIME-Version; b=H1CxLodUD+/JmgQD6ah/ID712s8Z1p1pOf7mDh1L1Yq6ZLds3L/VH2WvmTBqM5gJEQBJy4hZ0mhgBAW4IdF9soT7CUN8slSQylfiiEzPL7jnhEU52cALPFoh9An/cIWWthiZnodJpfeJO/4NH+YZZb573iqcV7Uk3HRU8MuDMQ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=hPUrPGex; arc=none smtp.client-ip=209.85.167.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="PzZw7wj1"
-Received: by mail-oi1-f169.google.com with SMTP id 5614622812f47-485621336easo4046955b6e.2
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2026 11:48:55 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="hPUrPGex"
+Received: by mail-oi1-f174.google.com with SMTP id 5614622812f47-4854d5cc708so7096574b6e.2
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2026 11:55:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780339734; x=1780944534; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780340155; x=1780944955; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=0L50cSK1nxdDSHByZeIkMXSHhk2AeadI/Jprs9UE4Ks=;
-        b=PzZw7wj1uICyRl4Z62RDWM5mpNYfPxVhvLPmlvncvsQnVjerevHqDzf1A3GLZVxyKB
-         BaNwJ0Vf2V3GbTiWcfSAZvou9qvW9dnb+P2iVxTOyLAn3mrO21OVe9z9O/HmYlkdTv+T
-         E/iCN3xWEVOojddnZMMJjZN3Izx8WOCv4eJLywvJa/JrrD8FNCZQAYVGRADx27WAtlhM
-         r5WMECX0mWISWPp7aV2cLwu9eX59vpl7QdEGGNq5LebyN7RrkV7W2ziqw3OwCnLV/7se
-         tL0ZH6ETeGLaSon/cGC8iNsWa4I1IZAqjSl6Awkz5HXYh+uVEgttU3WLEGBCwT7FWiJT
-         kvRA==
+        bh=oG1LxZ8CqrU+63v1aB1WRuPWyjhZAZrK1u9WutDY3fI=;
+        b=hPUrPGex/jYFLMcUNmksZezXpipVqA54CRrCaMawp5+nTcHyjmz37w+XzlGb1WND9q
+         1f8oivCA/Is73w185DsjTtbN+dxysQeN5cc9Z1OBqSbhbbMkeNxu9ELvUcX4tRYR4YuT
+         uwNU1hdb8RMMj0V+6G6l8+Gi22u1tA4UVuMpylMMABauwTqT7SlrxeWFi1hk/8zMevRu
+         5ydctQ3F4+vLXARVdlG3CAmmFjHJKNhoArycJYDFl7QZ4NW0eqELotnFLKoylStZM/xN
+         RuoJxc5SZP4BiQb10e85l90MQMXaMd+qGng8Kr8XUxjcTNdsfV88Btoa4KxIOHWRKIxn
+         BF0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780339734; x=1780944534;
+        d=1e100.net; s=20251104; t=1780340155; x=1780944955;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=0L50cSK1nxdDSHByZeIkMXSHhk2AeadI/Jprs9UE4Ks=;
-        b=aQg9W60UoSvpNu23RXHvAPT4U0J2pw6oKQ0/5HOEGoJ65msOWYUHKdDcX6JELAwjMR
-         yzg06btnkM9jE/9Pt8JjeXiK7VLT3RSqAXB4yyVp/7+p3v1DNeQdFsHb4pnQl2rQDHve
-         SFbwWjJjOi3V7WwhVgfjcOO3vNtgtmNCE3zQ0/lBEEcpJ4rhRFG5Vru0Eg+ha0GgNHAC
-         tiYAN6J0WaZBCa/AEbeWOQUiaL7Ohs3m+zZRDqh39Tuu+7mpCugMlUibzDPJjd9If9KD
-         k7P7NGY6T79vlPD55xkpKk2CTQTyHraYB37T1Y5CEWqTlo1CHBe+Y5GlbcQd0RKUuQbH
-         w8fw==
-X-Gm-Message-State: AOJu0YyVR8D1XcbDCoaxNsK9mrWjQPJLLxZ6A93KPm5vHum2bN5ckA+0
-	b7WQaDcjyazdonlXPv04Yeu6dM8QW8kebdsrb2yjQNJll2188aOR4DlYeFlQJuzIgxF6VMR+czq
-	TRh0HjpLwdw==
-X-Gm-Gg: Acq92OGIdwqFWnW7/zE9rJrj0auh9VfE4pJ31xNdiQOBXNvSebXn8+Gr+m87oDtCu+e
-	WyIS6RrYT6uMuDcL5ObCH3ahLZtw7nHcqKbyT8fIw6mZzeX6MAoUxiE1b6EfXcmt/hjm7+s+ecH
-	t7pWMSnaWJWSUuo/6ZvuRGSLwLCmetNsXQFNqUe6386byLSZbgWZxUFxf0YEZ9q9Z/umzqvgUrK
-	5Fk9SGET7Y0dBLp8c3at/vVT1lOT+mLNlSSgEYHiUipIZ4/T7rc1QRIX3LdQJxN+8KPJF41ERqB
-	sZE91SRqpAkC05Ov5xLUpQ1zkakIgpr+XzzJX76sU2tZJKwq4gGTxxKiVI0UbIjOyaGM0pyC8gn
-	sC4u5nlbBKmM0teglk1jnwJ0uiwy+aM9sc7DE2Y3XlTopgQT0ZgPKMpV4xZaX8yLHEi2x99axeM
-	Wz88vXb6Vs95Wi7KqxoLbUi6/G9+QTS8TiYkUhFLxdpW+vkDKFy2SeeDiiKODS0egU1fPnxkkO2
-	e4j52KkYj4hPd832AG/aNBxmKOAkeeEf2Nda9339w7HjGJPY8cWv1j5TiHfjoJD6KEtzslvD9er
-	pzs5Yg==
-X-Received: by 2002:a05:6808:221d:b0:479:ffcf:52e7 with SMTP id 5614622812f47-485fbd5cfe6mr6378574b6e.45.1780339734541;
-        Mon, 01 Jun 2026 11:48:54 -0700 (PDT)
+        bh=oG1LxZ8CqrU+63v1aB1WRuPWyjhZAZrK1u9WutDY3fI=;
+        b=cRX//dGE+/xIt/67Y9BTK1egGAJcy5lblCaO0zMMnuOd2Gja48DmtFYK64O9feGwkC
+         msmk4Gwg1yKflwpQtL7mCdXMe1VDoNUkKlKl12uwPJvdTWLVLWnfW6co06gOzqUj9rcD
+         A6B+eZ5IJ66OBjtTtkIj0qBxwspyc4j0IgPboRm7/2KU2noX+43pLEtXz7aUw5BEhMz9
+         RRMRk688s2fnZeF1xZGSkL2HQsJQmSLGX5QfjeB4/7VTGgsKcHY+grYA+wIgtNcmjf3v
+         cbazc7X2Eok41IzhQ58q3XPpDuCowDOJqCHI00iA7B1d4cb+xRfCNeQSKZMSj9CMA3LH
+         0NcQ==
+X-Gm-Message-State: AOJu0YzIQ7hDMRPM5cNtlHe5jiq4Di7+4slz7/TGDTe+PqcRUWXLsn7Z
+	32t3UMNEIbwUtLVk83N9B5cXZexhq9JIMY4DKai4XR9p12GgQPLyjNgYaHJJ9TLV4NI=
+X-Gm-Gg: Acq92OER9nOTDtOSZbfkKc/JWG8/A3gnz5HhAusTCXgvCudDDcFqoaN8y2WAwRoI50a
+	bWP7ro7w4wL0tEq/cdLV4Tes4stwjb/4aM7RQ1Dy0eLBkYHUGR4Ri/avOEUqItxCqSgicwoQ3ey
+	aq1i8/HjRgAjX7jInCUiesfAl3HNjgAKbzpr1XBYPBKS4rqJyuug0C/Zd9osij8c/y3qgBLwpMA
+	ofEnctShZ506s6YkCI0udmqMTew3fUwvMww5nqmOFLVbIXQPsR9I/EoZ0pnTtNq4BNXG34Oqf41
+	MdwJdXoAd2n3LV8OVW7CLZIXwz4wPZHaK9fj9c9fJx3eouJgQU70rmdSeeJDoEghTWL3rULsxKT
+	YDG6m8u/5+TyIykvoLRC/nSSWyolH2M2TY+xu4xNglogm94deJsxJE0kQAXX+iEhVssV5F9DHjs
+	9AjHiERRv0OsX5yJjc9+P2duszbGLvJRjejXSWEK5bPtpfygYKmNsBSi7lbS3arbalUYMhacga1
+	9vZSybcYq3m+tKpoPGfUzr0G+xo/dVbGAPpRILLhunD3L87nxABZVJ3fOf73JOugMATULY=
+X-Received: by 2002:a05:6808:1247:b0:485:41fc:71e1 with SMTP id 5614622812f47-485fb701f84mr6950718b6e.21.1780340154971;
+        Mon, 01 Jun 2026 11:55:54 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:7a3e:ac53:80f8:78b4? ([2600:1700:6476:1430:7a3e:ac53:80f8:78b4])
-        by smtp.gmail.com with ESMTPSA id 5614622812f47-48605f6a2c6sm4784623b6e.3.2026.06.01.11.48.53
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7e695bef47fsm8163997a34.12.2026.06.01.11.55.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 01 Jun 2026 11:48:53 -0700 (PDT)
-Message-ID: <59e4398323951683b891eb82274a4d5a14240519.camel@dubeyko.com>
-Subject: Re: [PATCH v3] libceph: Fix out-of-bounds writes with oversized
- monitor reply messages
+        Mon, 01 Jun 2026 11:55:53 -0700 (PDT)
+Message-ID: <ae39b876e5def88318b15b1e289ed60824ecbc4f.camel@dubeyko.com>
+Subject: Re: [PATCH v3] libceph: Handle rbtree insertion error in
+ handle_backoff_block()
 From: slava@dubeyko.com
-To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Viacheslav Dubeyko
-	 <Slava.Dubeyko@ibm.com>, "idryomov@gmail.com" <idryomov@gmail.com>, Alex
- Markuze <amarkuze@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Date: Mon, 01 Jun 2026 11:48:52 -0700
-In-Reply-To: <f331e0cd-9b09-49db-a17e-f80a3bf64339@tu-ilmenau.de>
-References: <20260521121424.2869056-1-raphael.zimmer@tu-ilmenau.de>
-	 <41e9c36c9a05c8239177cee688cfddcebfd6455f.camel@ibm.com>
-	 <f331e0cd-9b09-49db-a17e-f80a3bf64339@tu-ilmenau.de>
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
+	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Date: Mon, 01 Jun 2026 11:55:52 -0700
+In-Reply-To: <20260601073216.3828014-1-raphael.zimmer@tu-ilmenau.de>
+References: <20260601073216.3828014-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,117 +122,83 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Mon, 2026-06-01 at 12:22 +0200, Raphael Zimmer wrote:
-> On 21.05.26 11:58 PM, Viacheslav Dubeyko wrote:
-> > On Thu, 2026-05-21 at 14:14 +0200, Raphael Zimmer wrote:
-> > > When processing an incoming reply message of type
-> > > CEPH_MSG_STATFS_REPLY,
-> > > CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on
-> > > the
-> > > monitor connection, an already allocated reply message for the
-> > > given
-> > > transaction ID is used (if existing). Such a message has a
-> > > preallocated
-> > > front segment with a fixed length of 64, 512, or 32 bytes,
-> > > depending on
-> > > the message type it was allocated for. The actual length to
-> > > receive into
-> > > this buffer is read from the message. If this value exceeds the
-> > > allocation size, data received from the network is written beyond
-> > > the
-> > > end of the allocated buffer.
-> > >=20
-> > > This patch fixes the issue by adding a check that compares the
-> > > needed
-> > > front segment length to the previously allocated length when
-> > > retrieving
-> > > the message buffer. If the needed length exceeds the allocation,
-> > > a new
-> > > message buffer with the needed size is allocated to replace the
-> > > previous
-> > > one.
-> > >=20
-> > > Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-> > > ---
-> > > =C2=A0net/ceph/mon_client.c | 13 +++++++++++++
-> > > =C2=A01 file changed, 13 insertions(+)
-> > >=20
-> > > diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> > > index 66c0d6d6b33d..852ed0cae660 100644
-> > > --- a/net/ceph/mon_client.c
-> > > +++ b/net/ceph/mon_client.c
-> > > @@ -712,6 +712,8 @@ static struct ceph_msg
-> > > *get_generic_reply(struct ceph_connection *con,
-> > > =C2=A0	struct ceph_mon_client *monc =3D con->private;
-> > > =C2=A0	struct ceph_mon_generic_request *req;
-> > > =C2=A0	u64 tid =3D le64_to_cpu(hdr->tid);
-> > > +	int type =3D le16_to_cpu(hdr->type);
-> > > +	int front_len =3D le32_to_cpu(hdr->front_len);
-> > > =C2=A0	u32 data_len =3D le32_to_cpu(hdr->data_len);
-> > > =C2=A0	struct ceph_msg *m;
-> > > =C2=A0
-> > > @@ -721,6 +723,17 @@ static struct ceph_msg
-> > > *get_generic_reply(struct ceph_connection *con,
-> > > =C2=A0		dout("get_generic_reply %lld dne\n", tid);
-> > > =C2=A0		*skip =3D 1;
-> > > =C2=A0		m =3D NULL;
-> > > +	} else if (front_len > req->reply->front_alloc_len) {
-> > > +		pr_warn_ratelimited("tid %llu front %d >
-> > > prealloc %d\n",
-> > > +				=C2=A0=C2=A0=C2=A0 tid, front_len,
-> > > +				=C2=A0=C2=A0=C2=A0 req->reply-
-> > > >front_alloc_len);
-> > > +		*skip =3D 0;
-> > > +		m =3D ceph_msg_new(type, front_len, GFP_NOFS,
-> > > false);
-> > > +		if (m) {
-> > > +			ceph_msg_put(req->reply);
-> > > +			req->reply =3D m;
-> > > +			m =3D ceph_msg_get(req->reply);
-> > > +		}
-> > > =C2=A0	} else if (data_len > req->reply->data_length) {
-> > > =C2=A0		pr_warn_ratelimited("mon generic reply tid %llu
-> > > data %u > preallocated %zu, skipping\n",
-> > > =C2=A0				=C2=A0=C2=A0=C2=A0 tid, data_len, req->reply-
-> > > >data_length);
-> >=20
-> > Looks good.
-> >=20
-> > Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-> >=20
-> > Thanks,
-> > Slava.
+On Mon, 2026-06-01 at 09:32 +0200, Raphael Zimmer wrote:
+> A message of type CEPH_MSG_OSD_BACKOFF is used to block/unblock
+> requests
+> to specific PGs or objects. If this message has op code
+> CEPH_OSD_BACKOFF_OP_BLOCK, handle_backoff_block() is called to block
+> requests. In this function, a backoff struct is created and inserted
+> into two rbtrees for tracking them. Both insertions use the asserting
+> rbtree insertion function by calling insert_backoff(), respectively
+> insert_backoff_by_id(). If a message contains a backoff with the same
+> begin ceph_hobject_id or the same id as a previous one, the assertion
+> in
+> insert_backoff()/insert_backoff_by_id() triggers a kernel BUG when
+> trying to insert the backoff.
 >=20
-> Hi,
-> I noticed a problem with this patch. I based it on the testing branch
-> of
-> the ceph-client repository, which contains commit 2b79b1b ("libceph,
-> ceph: reject oversized mon and MDS data segments") that is not yet on
-> the master branch. This commit adds the lines:
-> 	} else if (data_len > req->reply->data_length) {
-> 		pr_warn_ratelimited("mon generic reply tid %llu data
-> %u > preallocated
-> %zu, skipping\n",
-> 				=C2=A0=C2=A0=C2=A0 tid, data_len, req->reply-
-> >data_length);
-> 		*skip =3D 1;
-> 		m =3D NULL;
-> that check for messages with oversized data segments and discard/skip
-> them. Due to the use of multiple else if statements, the current
-> patch
-> shadows this added logic in case where both front_len >
-> req->reply->front_alloc_len and data_len > req->reply->data_length.
-> Therefore, this patch needs to be adapted to the other patch by
-> either
-> reversing the order of these two checks (since skipping the message
-> makes reallocating a new message with a different front_len obsolete)
-> or
-> reworking the logic to not use else if statements.
-> Would one of these options be preferred?
+> This patch fixes the issue by switching both calls to the non-
+> asserting
+> rbtree function and ignoring the message if one of the insertions
+> fails.
 >=20
+> Fixes: a02a946dfe96 ("libceph: respect RADOS_BACKOFF backoffs")
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+> =C2=A0net/ceph/osd_client.c | 22 ++++++++++++++++++++--
+> =C2=A01 file changed, 20 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 2ff00070c181..1b31e2d50ec6 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -4427,8 +4427,16 @@ static void handle_backoff_block(struct
+> ceph_osd *osd, struct MOSDBackoff *m)
+> =C2=A0	backoff->end =3D m->end;
+> =C2=A0	m->end =3D NULL;=C2=A0=C2=A0 /* ditto */
+> =C2=A0
+> -	insert_backoff(&spg->backoffs, backoff);
+> -	insert_backoff_by_id(&osd->o_backoffs_by_id, backoff);
+> +	if (!__insert_backoff(&spg->backoffs, backoff)) {
+> +		pr_err_ratelimited("%s failed to insert backoff\n",
+> __func__);
+> +		goto err_free_backoff;
+> +	}
+> +
+> +	if (!__insert_backoff_by_id(&osd->o_backoffs_by_id,
+> backoff)) {
+> +		pr_err_ratelimited("%s failed to insert backoff by
+> id\n",
+> +				=C2=A0=C2=A0 __func__);
+> +		goto err_erase_backoff;
+> +	}
+> =C2=A0
+> =C2=A0	/*
+> =C2=A0	 * Ack with original backoff's epoch so that the OSD can
+> @@ -4440,6 +4448,16 @@ static void handle_backoff_block(struct
+> ceph_osd *osd, struct MOSDBackoff *m)
+> =C2=A0		return;
+> =C2=A0	}
+> =C2=A0	ceph_con_send(&osd->o_con, msg);
+> +	return;
+> +
+> +err_erase_backoff:
+> +	erase_backoff(&spg->backoffs, backoff);
+> +err_free_backoff:
+> +	free_backoff(backoff);
+> +	if (RB_EMPTY_ROOT(&spg->backoffs)) {
+> +		erase_spg_mapping(&osd->o_backoff_mappings, spg);
+> +		free_spg_mapping(spg);
+> +	}
+> =C2=A0}
+> =C2=A0
+> =C2=A0static bool target_contained_by(const struct ceph_osd_request_targe=
+t
+> *t,
 
-I think it will be better if you share your vision of the corrected
-patch and we can review it again.
+
+Looks good.
+
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
 Thanks,
 Slava.
