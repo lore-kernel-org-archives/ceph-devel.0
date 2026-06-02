@@ -1,35 +1,33 @@
-Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [13.76.78.106])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 205863BB126
-	for <ceph-devel@vger.kernel.org>; Tue,  2 Jun 2026 08:01:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.76.78.106
+Received: from cstnet.cn (smtp81.cstnet.cn [159.226.251.81])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86CC02248A8;
+	Tue,  2 Jun 2026 09:08:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.81
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780387316; cv=none; b=Bb7w8bLzfDCbUHVQpgmkmRKAUTtCeC7H5P+OL8sJrp+cAQZ8XYw00VUQ42jvO3QJbF6Eqm70hy4mSA3dwsp/5DOnGnpqQyqUEok0DNA2aM34zydj3Vd1Ol+CBbUVTkVPlPCfYi/rr6rM8N0/UqlwkXCmTK+W1s6Ykop3ngkigdM=
+	t=1780391291; cv=none; b=pur0mNSWYz4lvkyOxbj99wwVRc8qQsvbDnEj48l+51v1BxKizuMHSe2sIEmgejkzXlMVhaL66bM9/V6UfhD63uHtZ5zstXAdEfNXFHM0cAdFeSKXAHVj3ceQI2tb5T6eea5T01OHPA55DXS55+TBu32201f5XJS9qUTn46s/YT0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780387316; c=relaxed/simple;
-	bh=A+rWdpv3mL2HutPWyv08rVN6lXBs5QmF8eVsi5J/vvw=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PS8FBp3R0JL5z5t7IE7aIsCsq8vCmtdJH0o4rZmO0ttTYq0cetGmDjDJd2WlY5EytJcbmRvfH1IKItKwGvOTdnn25GiOEb9DcKGzyVxjcMD5U+gHhM+Vuvg+rqtJdMg8bv9vcJvG3iJbGEDqICV+WDocPwsFenXcZ5Jx/GQccK4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=13.76.78.106
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lzu.edu.cn
-Received: from enjou-Legion-Y7000P-2019 (unknown [172.23.56.36])
-	by app1 (Coremail) with SMTP id ygmowADH6sTbjR5qy7VPAA--.9728S2;
-	Tue, 02 Jun 2026 16:01:31 +0800 (CST)
-From: Ren Wei <n05ec@lzu.edu.cn>
-To: Viacheslav Dubeyko <vdubeyko@redhat.com>,
-	ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
+	s=arc-20240116; t=1780391291; c=relaxed/simple;
+	bh=RLHqs4ruFHCdEfMVhzZ4nPP3z3y2MP3bCIMu2ejcYdA=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=ZVb9d/Ls70oBxut9TOiuo5/GJIsjN6oXdVKtFVeC8z0iWylgxj8wPnFdTIE4N8XPRd+FY1fzavXwuyFiejBg9f3UisTD4l2QveTSy8NML+YMAKY6E/Glyau139e9OmzFI+lSTbAZrIFKwc/Zdpo/2WUWj+HiPuV1fs8NYiltCYQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.81
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
+Received: from dfae2b116770.home.arpa (unknown [36.110.52.2])
+	by APP-03 (Coremail) with SMTP id rQCowADnCOB1nR5qQe5ZEw--.8153S2;
+	Tue, 02 Jun 2026 17:08:05 +0800 (CST)
+From: Wentao Liang <vulab@iscas.ac.cn>
+To: idryomov@gmail.com,
 	amarkuze@redhat.com,
-	slava@dubeyko.com,
-	sage@newdream.net,
-	yuantan098@gmail.com,
-	zcliangcn@gmail.com,
-	bird@lzu.edu.cn,
-	ldy3087146292@gmail.com,
-	n05ec@lzu.edu.cn
-Subject: [PATCH v3 1/1] libceph: reject zero bucket types in crush_decode
-Date: Tue,  2 Jun 2026 16:01:26 +0800
-Message-ID: <d21e2f97dfe6f250.1780369814.git.ldy3087146292@gmail.com>
-X-Mailer: git-send-email 2.51.0
+	slava@dubeyko.com
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Wentao Liang <vulab@iscas.ac.cn>,
+	stable@vger.kernel.org
+Subject: [PATCH v2] ceph: fix writeback_count leak in write_folio_nounlock()
+Date: Tue,  2 Jun 2026 09:07:54 +0000
+Message-Id: <20260602090754.3678981-1-vulab@iscas.ac.cn>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -37,86 +35,86 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:ygmowADH6sTbjR5qy7VPAA--.9728S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7tF43Kw43XFW7WFyrXw17Awb_yoW8KrWkpa
-	nrCr4DWr9ruryUXr10ka129r4xJws3Wr1xWrn8X34Yv34qqrn8Wwn2kFZIgrnxCFW8KFWI
-	qF97WryDuwn0vFDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUBY1xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
-	w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
-	IY67AKxVW7JVWDJwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVW8Jr0_Cr1UM28EF7xvwVC2
-	z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s0DM2AIxVAIcxkEcV
-	Aq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j
-	6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64
-	vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7M4IIrI8v6xkF7I0E8cxan2IY04v7MxkF7I0E
-	n4kS14v26r1q6r43MxkIecxEwVCm-wCF04k20xvY0x0EwIxGrwCF04k20xvE74AGY7Cv6c
-	x26r48MxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCj
-	r7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI42IY6x
-	IIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42IY6xAI
-	w20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z280aVCY1x
-	0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7VUbGQ6JUUUUU==
-X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQsECWob708A3gAKsC
+X-CM-TRANSID:rQCowADnCOB1nR5qQe5ZEw--.8153S2
+X-Coremail-Antispam: 1UD129KBjvJXoWxJr4UXF4xKw4fKrWDtrW3Awb_yoW5Jry7pr
+	Wjk34qkr40vr1xGr98Cas5t3W5C3y8CrWfKF4UJF17ZFn5Xr4jgayjq34YqF13JryfJa9a
+	qF4qkry8uayqyFJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUkG14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
+	6F4UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s
+	0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xII
+	jxv20xvE14v26r126r1DMcIj6I8E87Iv67AKxVW8Jr0_Cr1UMcvjeVCFs4IE7xkEbVWUJV
+	W8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lc7CjxVAaw2AFwI0_
+	JF0_Jw1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67
+	AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r126r1DMIIY
+	rxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14
+	v26r1j6r4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWUJVW8
+	JwCI42IY6I8E87Iv6xkF7I0E14v26r1j6r4UYxBIdaVFxhVjvjDU0xZFpf9x0JUHpBfUUU
+	UU=
+X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiBwsGA2oeXMX2VwAAsF
 
-From: Douya Le <ldy3087146292@gmail.com>
+write_folio_nounlock() increments fsc->writeback_count to track
+in-flight writeback operations. On several error paths where the
+function returns early (folio lookup failure, snapshot context
+allocation failure, and writepages submission failure), the function
+returns without calling atomic_long_dec() to decrement the counter.
 
-CRUSH bucket type 0 is reserved for devices.  The mapper relies on
-that invariant and uses type 0 to identify leaf devices.
+Each leaked increment keeps the counter above zero, which can prevent
+the filesystem from cleanly unmounting or suspending writes.
 
-If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
-can make the mapper treat a negative bucket ID as a device and pass it
-to is_out(), which then indexes the OSD weight array with a negative
-value.
+Add atomic_long_dec() calls on all error paths that currently return
+without decrementing the counter.
 
-Reject zero bucket types while decoding the CRUSH map so the invalid
-state never reaches the mapper.
-
-Fixes: f24e9980eb86 ("ceph: OSD client")
+Fixes: d55207717ded ("ceph: add encryption support to writepage and writepages")
 Cc: stable@vger.kernel.org
-Reported-by: Yuan Tan <yuantan098@gmail.com>
-Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-Reported-by: Xin Liu <bird@lzu.edu.cn>
-Assisted-by: Codex:GPT-5.4
-Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+Signed-off-by: Wentao Liang <vulab@iscas.ac.cn>
 
 ---
-Changes in v3:
-- use CRUSH_BUCKET_DEVICE instead of CRUSH_ITEM_TYPE_DEVICE
-- v2 Link: https://lore.kernel.org/all/3200151429f33554f06ced8a.1780197742.git.ldy3087146292@gmail.com/
-
-Changes in v2:
-- use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
-- v1 Link: https://lore.kernel.org/all/4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.1779949116.git.ldy3087146292@gmail.com/
-
+Change in v2:
+- Also clear write_congested flag when decrementing writeback_count
+  on error paths, as suggested by Viacheslav Dubeyko.
 ---
- include/linux/crush/crush.h | 1 +
- net/ceph/osdmap.c           | 2 ++
- 2 files changed, 3 insertions(+)
+ fs/ceph/addr.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
 
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 30dba392b7302de3e14861f8b769242cd8cbac9e..ea0b1de2902585ba9a63566cfbb2b0569846a00b 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -111,6 +111,7 @@ struct crush_rule {
-  *  straw2          O(n)       optimal      optimal
-  */
- enum {
-+	CRUSH_BUCKET_DEVICE = 0,
- 	CRUSH_BUCKET_UNIFORM = 1,
- 	CRUSH_BUCKET_LIST = 2,
- 	CRUSH_BUCKET_TREE = 3,
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 8b5b0587a0cfa2c437b76c8c87251199efe20291..f6cc93939907bc61943069c462cb752d13c8b3ed 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 		ceph_decode_need(p, end, 4*sizeof(u32), bad);
- 		b->id = ceph_decode_32(p);
- 		b->type = ceph_decode_16(p);
-+		if (b->type == CRUSH_BUCKET_DEVICE)
-+			goto bad;
- 		b->alg = ceph_decode_8(p);
- 		if (b->alg != alg) {
- 			b->alg = 0;
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index a606378649c3..7fab73874068 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -790,7 +790,9 @@ static int write_folio_nounlock(struct folio *folio,
+ 				    ceph_wbc.truncate_size, true);
+ 	if (IS_ERR(req)) {
+ 		folio_redirty_for_writepage(wbc, folio);
+-		atomic_long_dec(&fsc->writeback_count);
++		if (atomic_long_dec_return(&fsc->writeback_count) <
++				CONGESTION_OFF_THRESH(fsc->mount_options->congestion_kb))
++			fsc->write_congested = false;
+ 		return PTR_ERR(req);
+ 	}
+ 
+@@ -810,7 +812,9 @@ static int write_folio_nounlock(struct folio *folio,
+ 			folio_redirty_for_writepage(wbc, folio);
+ 			folio_end_writeback(folio);
+ 			ceph_osdc_put_request(req);
+-			atomic_long_dec(&fsc->writeback_count);
++			if (atomic_long_dec_return(&fsc->writeback_count) <
++					CONGESTION_OFF_THRESH(fsc->mount_options->congestion_kb))
++				fsc->write_congested = false;
+ 			return PTR_ERR(bounce_page);
+ 		}
+ 	}
+@@ -849,7 +853,9 @@ static int write_folio_nounlock(struct folio *folio,
+ 			      ceph_vinop(inode), folio);
+ 			folio_redirty_for_writepage(wbc, folio);
+ 			folio_end_writeback(folio);
+-			atomic_long_dec_return(&fsc->writeback_count);
++			if (atomic_long_dec_return(&fsc->writeback_count) <
++					CONGESTION_OFF_THRESH(fsc->mount_options->congestion_kb))
++				fsc->write_congested = false;
+ 			return err;
+ 		}
+ 		if (err == -EBLOCKLISTED)
 -- 
-2.47.3
+2.34.1
 
