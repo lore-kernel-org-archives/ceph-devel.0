@@ -1,76 +1,78 @@
-Received: from mail-ot1-f44.google.com (mail-ot1-f44.google.com [209.85.210.44])
+Received: from mail-oa1-f52.google.com (mail-oa1-f52.google.com [209.85.160.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FF40384CEC
-	for <ceph-devel@vger.kernel.org>; Tue,  2 Jun 2026 16:53:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEE3238C2C0
+	for <ceph-devel@vger.kernel.org>; Tue,  2 Jun 2026 16:57:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780419219; cv=none; b=Xx1+x6XarQXlh40V1xfABCVF0NujehHNlKMdZ0fEe9Ix8Tsr+LbiAJROZfS7BjrNO1xpz6WuvNpaYzpNsCE1SqLhA+yJ4X/IUgM+BKkKquBeSM6f4s8bGj20g1KdMrj6OHous3Bzl5/DfA1+7rmgCZcD9u53/e29rGKf3tn/aPI=
+	t=1780419446; cv=none; b=Xgi8gkc1Ul5VVBfL1qJZMufAX2rrJAGZHRaLfuQxN/J/05SltVy2UHfGHuyE5bmO/5Z6ZR6PcZ9w5A3uOsrey+2Tx7GFB6jrSUSrJ/uVBwF1vyII5F6DZ2NhjaXNX4fw6yOFuQRzi4Y6GgAAvsiewtUQoOUKlFUrPdPrG5D+2cM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780419219; c=relaxed/simple;
-	bh=iKCPs+wSa5lrYhxBuyd0KhvQmvJs0/Pw5s0l/8zfC5w=;
+	s=arc-20240116; t=1780419446; c=relaxed/simple;
+	bh=QtiYBOnywaGXGIK3J8qE+d5Q2yR9zG0izvjfEZE/b68=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=dw0h3iIigxMOQn4z4JJTltgbvYRAlKgWMFkmVy1KFjk4V/FiHdWnwuZqk0IAxghbgsXbCioB1ztqxZCRV2niYDX9pf6bpkytKP3oH9hOFtP2d5AZi2gbfS74NfrWQkZEieMKFItHgN2wXhehUUqphEbNdOQzNyhhTVEU5EFDyW8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=A121rYVj; arc=none smtp.client-ip=209.85.210.44
+	 Content-Type:MIME-Version; b=uDg46yjaaE9fFkBeucyu98OeyQtEhoH02r7lOO8udW7kABnzY6Ice+AuBdRdoz19KxW1tc9lNZF/+Pdg2gp7NUQbUEPU2Io08XTe4CjRKBumoGvFfO2MaN4Vmh//S/r0BxjJni4fMuTYLaf9Y47aV1L79T99b8nzYkZHPZG0Ogg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=aBswvo+N; arc=none smtp.client-ip=209.85.160.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="A121rYVj"
-Received: by mail-ot1-f44.google.com with SMTP id 46e09a7af769-7e6d991991dso719461a34.3
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Jun 2026 09:53:37 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="aBswvo+N"
+Received: by mail-oa1-f52.google.com with SMTP id 586e51a60fabf-43bf6230cffso5682658fac.0
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jun 2026 09:57:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780419216; x=1781024016; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780419443; x=1781024243; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=d354Uv2MU3X1Ggc+z6jYavsaIoozUFQzwD4VhA8Gv0I=;
-        b=A121rYVjXKvjj5vFC0BA6rcZmpVpqkQ+sAzUmHK12tMkUcKDPoU9GJ4bGCUse5UqKn
-         CeLmWivwgR53+h3hfkd7KWwiQGAREsBEyOD0MmYyE6cGlCTWzHPXyyBeISU29YCjFc8I
-         cYCxeywi9eOLXlqiyGCvYCOr5ILt/zAaQviCE2GU1vDgCe8bDqJXbenB9NnS4K6rOIaN
-         CXmVwCNZeTNkjawA4BPqAR9G7VAfe3AJ1oCm52mIfk/XmmHNZfYfX9v74NVCv+AT6eCY
-         VTAyL5VLxFtKGLz2i1iHJLQWrdaL+/8dDmPoNUSUDGM91LoTXdS+Z6WluoZlMLq+0lT6
-         TdhA==
+        bh=t4fV8gn7VC/KWcxzJDuPOHnzy2hHUCpvH3Iq4Xii4vw=;
+        b=aBswvo+NE+OxN37GRYpze/bTj6w/J8+YtQJbjwNiIwm7+nbt2v3f8oljy/TPY+f8In
+         r5l9EUl9CrJk0FTsFn61wk8m7Hc9oP7xJnSC8BEL0hgEtuc+5OSsyf2tgXnCNFX2p9+t
+         t2TUWzwgmJ+YIRM5v2kQ0V8GIXeR54eoIcjfJLgfGWRSIdrZGl2hm3A2/T5q3K6IxXVJ
+         VPTpkcUxMTWWUZlS39B4cc8qBMys2lI19LLJY/RR8Fr7im5FSYy8sqi+ZIqJM9EOz+BR
+         vbz7Zg8PHuUIIrhLuZ2KfcCSEMHUViuQzA3Th8KXPfR9Wtv+OKNRGqPr4KSbP4iHR6YK
+         gABg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780419216; x=1781024016;
+        d=1e100.net; s=20251104; t=1780419443; x=1781024243;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=d354Uv2MU3X1Ggc+z6jYavsaIoozUFQzwD4VhA8Gv0I=;
-        b=pBcewZ1MwMC3BaNxz1wV4lO6keJ6UvtwuEyKfRXFCBxe19TnN3P9ZYhSsAEA5yRsQY
-         UznNd+KFPWrp/9JXaNX+eKo5gXN4w3qoPWLRvWj2WeEf858zIfI9a1tKUTNYek8JwgDg
-         DJb9xD9o80Rbqn9kBAyjRQGN1LAmoFWJvZe7R0DMrpVR/otdINTVvjfjbYiQYohxASES
-         orbPWjiNK1JNF86Rpr3uGQtxzSknghMJYyFJx0xEJssPk9d1TsSDs87hMQeNTfXJ4gbj
-         84FPJJV/OMrcW9ky7easprn4WEQMmsE1FEanhck3UwZcgGumI1ZlYRbsDzDyFdVnTV7O
-         GCrw==
-X-Gm-Message-State: AOJu0YxrP9pECJwl7+2xEAT3Fufu9wrfsoAAtRJzX2IsnkECnGEOKtUy
-	PaRGbqyXXDzVn99NUxbZwaslOyw766/IuBRxNxjyDp/X6jiv6q5/ixvM+sucwCOS/mA=
-X-Gm-Gg: Acq92OEn5gtUDs7zG0LVxKZC9RI565YQ3USF8d8XMxFzCjTJIS1z9A+XvckWYnsK9aH
-	7i11bflXh7BF6fpQ4xbcLonX7mNKKh8xl4W4e262CBwAfTCKK9Pydm3bH3aLqfaucG2quwqsb8c
-	VcGXqbKJNPBgHEAHPktmnONhjwBbCa0sXXfWN83EhJhLa3wLQ5AYAsxFuOWNo5RnqpNhYx7B7Mg
-	5UjiAHF60E7WYjrBYtY+AUdGRDdmZwgJbxPq9ZCOg6jXARiaSgxmnQT8pnrqBjNKWq82e0TF6y8
-	+TzDMIH26nqqD5Rs+/m2aVxorjYWhy646pKOQ/KuBrp/PrEF+b+qYFnVyteqAr5jTRQJGVC1aBH
-	YEFOnFdnOcWVUs7LUuUgWGLulBIJ+oNcua7mlX7yUy4OX5PlQard1+8rllqmaSnE9tc1R80QXsa
-	23w9YEI6BE5+5p9kA9vFJz3SfImvYcTSD+KMESdVa0pOOXy9JpLVmU6VKyNrlyLRkyDyH9eAdEX
-	mpcP2ShZsBLnVwegY5hLliJloJ+pFV0jKYKVTzOT5V/KQd8lvO/ZHKmbZoK/yAX3rBx3prZa4FB
-	H3F8/A==
-X-Received: by 2002:a4a:e90a:0:b0:69c:2c20:ddbc with SMTP id 006d021491bc7-69e467424dbmr344191eaf.0.1780419216326;
-        Tue, 02 Jun 2026 09:53:36 -0700 (PDT)
+        bh=t4fV8gn7VC/KWcxzJDuPOHnzy2hHUCpvH3Iq4Xii4vw=;
+        b=a6AHArIJ2aWi7PU9+7fFWBqfPjRSZSBFm+o+l0M/AsQJk/LLgxorqGlusWLRhTvbC6
+         KN0mdLoSKpJKZT7Cn/gNodKzkoZqKcBYkigWN8vNwA4bTnaSixrQQsgr7LANqLvOZ/ig
+         Jrc/CieR8FruWUMRg6UWSZg6l4Bsptpi5xS9KB3zBKUcUGjnMD7WewozCS9qahqnNRaj
+         FOasr8mV8A3Mxq2vBuFaEkgdjcG0t3VfcBRvnmE+uIDjhzLPN8Fjwz1Yp2u7xOCctz8X
+         Y7CfIAM4QAfKshGzB+h3Lzj1kvHzqInVZv9sRM7shluOKdMGcl3UocoNhLfzHnO9nf8X
+         N+3w==
+X-Forwarded-Encrypted: i=1; AFNElJ85j1J6g4FosD0pxgwLgX9cJkbPmnu80+HxONpe5eKqlYUWMmRZ3Xql6BIR7/W1TLSqiUztF/iX4yjn@vger.kernel.org
+X-Gm-Message-State: AOJu0YyOzJCXPZhle0s+9z9V5ae3+crtciCkMfNksyifb0vHjmxPCB1E
+	UhsZO7EJz8RtkCOvsSrECbVR1L9wIya/pDuEY7/Hok+aFFlPwVHdBGq/N0Q/k6XGlP8=
+X-Gm-Gg: Acq92OGaKjl/aZtNY9T/i1mT6P7YMUAgr/RgnMKjVoL0D0ydnfDGXbdIiwrRhhNaPMW
+	TyXogsuS9qntalAa4z8QkEVSjOqzPILW+uC5rUQHQwRhLmf7ABeEGhl9Zune5nAO2hPjcJrxvwy
+	OInakbHs0AHuIohDeUYbOPaVeevbuC8ZdU/S3LDS/noKVhTECkc6oIX5Dnewkb2snT6hyoBSrlf
+	O+j5soyeccK3yRaGRNL4d4GEueBsvIVrnSUv0LV4c5+N88BvFPrQOn+JUWlD0+eJr9c3o/e2NoE
+	VpjwXxpaavgobkMw2Vt49/vZb+99Brr0PHibDcLSlJg8mgvI50OYGDGcxWM8kgOeKm4fwt1PLZA
+	zCYQNwO8cmB1HPOLTwYi8t9u4IQR+XL8jhU7Q8H/Twr9vo16JHYxlRcpZIJ3bnSJZLGQsyEXmKn
+	0P2Y+CGCgUxBPrf5vRil95sllO5g+HH1+QrAu/L5vcIV+EWGMcO2Me8B24QfmsxRuyH0T9hEJVQ
+	lOkgKX2knNJDMl9a9+YpsmeR2TQjIyXs/VntCpKWPZf0oD2kO7YOoE+BRXEFFXSxM+wZTGzi0zT
+	nWuf2g==
+X-Received: by 2002:a05:6820:4d06:b0:69d:5138:5540 with SMTP id 006d021491bc7-69e368628ecmr2353683eaf.9.1780419442613;
+        Tue, 02 Jun 2026 09:57:22 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:7a3e:ac53:80f8:78b4? ([2600:1700:6476:1430:7a3e:ac53:80f8:78b4])
-        by smtp.gmail.com with ESMTPSA id 006d021491bc7-69e464743f8sm233186eaf.15.2026.06.02.09.53.34
+        by smtp.gmail.com with ESMTPSA id 586e51a60fabf-440d7d4f449sm132744fac.8.2026.06.02.09.57.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Jun 2026 09:53:35 -0700 (PDT)
-Message-ID: <27e15cffb5d346a19a45efc88a722a3d6abd5c7a.camel@dubeyko.com>
-Subject: Re: [PATCH v3] ceph: fix OOB read in ceph_osdc_list_watchers via
- uncapped outdata_len
+        Tue, 02 Jun 2026 09:57:21 -0700 (PDT)
+Message-ID: <50a7cd9d731e96f9fcbd86628c0037be3dbc9c3a.camel@dubeyko.com>
+Subject: Re: [PATCH v3 1/1] libceph: reject zero bucket types in crush_decode
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Pavitra Jha <jhapavitra98@gmail.com>, idryomov@gmail.com, 
-	Slava.Dubeyko@ibm.com
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org
-Date: Tue, 02 Jun 2026 09:53:34 -0700
-In-Reply-To: <20260602045432.1038887-1-jhapavitra98@gmail.com>
-References: <5b7d6b21f7c34661fc9430b828b4c5a3be6446b4.camel@ibm.com>
-	 <20260602045432.1038887-1-jhapavitra98@gmail.com>
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ren Wei
+ <n05ec@lzu.edu.cn>,  Viacheslav Dubeyko	 <vdubeyko@redhat.com>,
+ ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net, 
+	yuantan098@gmail.com, zcliangcn@gmail.com, bird@lzu.edu.cn, 
+	ldy3087146292@gmail.com
+Date: Tue, 02 Jun 2026 09:57:20 -0700
+In-Reply-To: <80dbf895-2406-4695-a89a-6d0201c948ac@tu-ilmenau.de>
+References: <d21e2f97dfe6f250.1780369814.git.ldy3087146292@gmail.com>
+	 <80dbf895-2406-4695-a89a-6d0201c948ac@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -125,185 +127,92 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Tue, 2026-06-02 at 00:54 -0400, Pavitra Jha wrote:
-> The OSD reply header field op->payload_len is wire-controlled and is
-> copied directly into m->outdata_len[i] without any bounds check:
+On Tue, 2026-06-02 at 16:37 +0200, Raphael Zimmer wrote:
+> On 02.06.26 10:01 AM, Ren Wei wrote:
+> > From: Douya Le <ldy3087146292@gmail.com>
+> >=20
+> > CRUSH bucket type 0 is reserved for devices.=C2=A0 The mapper relies on
+> > that invariant and uses type 0 to identify leaf devices.
+> >=20
+> > If crush_decode() accepts a bucket with type 0, a malformed CRUSH
+> > map
+> > can make the mapper treat a negative bucket ID as a device and pass
+> > it
+> > to is_out(), which then indexes the OSD weight array with a
+> > negative
+> > value.
+> >=20
+> > Reject zero bucket types while decoding the CRUSH map so the
+> > invalid
+> > state never reaches the mapper.
+> >=20
+> > Fixes: f24e9980eb86 ("ceph: OSD client")
+> > Cc: stable@vger.kernel.org
+> > Reported-by: Yuan Tan <yuantan098@gmail.com>
+> > Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
+> > Reported-by: Xin Liu <bird@lzu.edu.cn>
+> > Assisted-by: Codex:GPT-5.4
+> > Signed-off-by: Douya Le <ldy3087146292@gmail.com>
+> > Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+> >=20
+> > ---
+> > Changes in v3:
+> > - use CRUSH_BUCKET_DEVICE instead of CRUSH_ITEM_TYPE_DEVICE
+> > - v2 Link:
+> > https://lore.kernel.org/all/3200151429f33554f06ced8a.1780197742.git.ldy=
+3087146292@gmail.com/
+> >=20
+> > Changes in v2:
+> > - use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
+> > - v1 Link:
+> > https://lore.kernel.org/all/4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.17=
+79949116.git.ldy3087146292@gmail.com/
+> >=20
+> > ---
+> > =C2=A0include/linux/crush/crush.h | 1 +
+> > =C2=A0net/ceph/osdmap.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 | 2 ++
+> > =C2=A02 files changed, 3 insertions(+)
+> >=20
+> > diff --git a/include/linux/crush/crush.h
+> > b/include/linux/crush/crush.h
+> > index
+> > 30dba392b7302de3e14861f8b769242cd8cbac9e..ea0b1de2902585ba9a63566cf
+> > bb2b0569846a00b 100644
+> > --- a/include/linux/crush/crush.h
+> > +++ b/include/linux/crush/crush.h
+> > @@ -111,6 +111,7 @@ struct crush_rule {
+> > =C2=A0 *=C2=A0 straw2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0 O(n)=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 optimal=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 optimal
+> > =C2=A0 */
+> > =C2=A0enum {
+> > +	CRUSH_BUCKET_DEVICE =3D 0,
+> > =C2=A0	CRUSH_BUCKET_UNIFORM =3D 1,
+> > =C2=A0	CRUSH_BUCKET_LIST =3D 2,
+> > =C2=A0	CRUSH_BUCKET_TREE =3D 3,
 >=20
-> =C2=A0 m->outdata_len[i] =3D le32_to_cpu(op->payload_len);
+> Hi,
 >=20
-> This value propagates unchecked to req->r_ops[0].outdata_len and is
-> then used to set the decode boundary in ceph_osdc_list_watchers():
+> this enum contains all existing bucket algorithms. Type and algorithm
+> are different things and should not be mixed up. Therefore, this is
+> the
+> wrong place for this definition. If necessary, I would instead
+> suggest
+> defining it as a single new named constant. The previous name from v2
+> of
+> the patch would also be more appropriate for this as CRUSH_BUCKET_*
+> currently refers exclusively to bucket algorithms.
 >=20
-> =C2=A0 void *const end =3D p + req->r_ops[0].outdata_len;
+> Also, when creating this constant, it would be good to use it
+> consistently rather than only for one occurrence of type 0. However,
+> I
+> wouldn't say that this has to be done in this specific bugfix patch.
 >=20
-> The actual data allocation is always exactly one page:
-> =C2=A0 ceph_alloc_page_vector(1, GFP_NOIO)
-> =C2=A0 ceph_osd_data_pages_init(..., PAGE_SIZE, ...)
 >=20
-> The messenger caps the copy to PAGE_SIZE bytes, but the decode window
-> end is set from the uncapped wire value. A malicious OSD can send
-> outdata_len=3D0x10000, causing _safe decoder boundary checks to pass
-> while the physical reads cross the slab allocation boundary.
->=20
-> KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
->=20
-> =C2=A0 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> =C2=A0 BUG: KASAN: slab-out-of-bounds in ceph_oob2_init+0x23d/0xff0
-> [ceph_oob2_poc]
-> =C2=A0 Read of size 4 at addr ffff88800a229f9e by task insmod/57
->=20
-> =C2=A0 CPU: 0 UID: 0 PID: 57 Comm: insmod Tainted: G=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 O=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0
-> 7.0.0-rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
-> =C2=A0 Tainted: [O]=3DOOT_MODULE
-> =C2=A0 Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0=
--
-> debian-1.17.0-1 04/01/2014
-> =C2=A0 Call Trace:
-> =C2=A0=C2=A0 <TASK>
-> =C2=A0=C2=A0 dump_stack_lvl+0x4d/0x70
-> =C2=A0=C2=A0 print_report+0x170/0x4f3
-> =C2=A0=C2=A0 ? __pfx__raw_spin_lock_irqsave+0x10/0x10
-> =C2=A0=C2=A0 kasan_report+0xda/0x110
-> =C2=A0=C2=A0 ? ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
-> =C2=A0=C2=A0 ? ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
-> =C2=A0=C2=A0 ? __pfx_ceph_oob2_init+0x10/0x10 [ceph_oob2_poc]
-> =C2=A0=C2=A0 ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
-> =C2=A0=C2=A0 do_one_initcall+0x9a/0x3a0
-> =C2=A0=C2=A0 ? __pfx_do_one_initcall+0x10/0x10
-> =C2=A0=C2=A0 ? kasan_unpoison+0x44/0x70
-> =C2=A0=C2=A0 do_init_module+0x27c/0x790
-> =C2=A0=C2=A0 ? __pfx_do_init_module+0x10/0x10
-> =C2=A0=C2=A0 ? __kasan_slab_free+0x47/0x70
-> =C2=A0=C2=A0 ? kfree+0x15f/0x3b0
-> =C2=A0=C2=A0 load_module+0x4a9a/0x6350
-> =C2=A0=C2=A0 ? __pfx_load_module+0x10/0x10
-> =C2=A0=C2=A0 ? security_file_permission+0x24/0x50
-> =C2=A0=C2=A0 ? kernel_read_file+0x2ed/0x770
-> =C2=A0=C2=A0 ? init_module_from_file+0x15c/0x180
-> =C2=A0=C2=A0 init_module_from_file+0x15c/0x180
-> =C2=A0=C2=A0 ? __pfx_init_module_from_file+0x10/0x10
-> =C2=A0=C2=A0 ? tick_nohz_handler+0x2a3/0x640
-> =C2=A0=C2=A0 ? _raw_spin_lock+0x7e/0xd0
-> =C2=A0=C2=A0 idempotent_init_module+0x21f/0x750
-> =C2=A0=C2=A0 ? __pfx_idempotent_init_module+0x10/0x10
-> =C2=A0=C2=A0 ? fdget+0x4e/0x4a0
-> =C2=A0=C2=A0 ? fdget+0x4e/0x4a0
-> =C2=A0=C2=A0 __x64_sys_finit_module+0xba/0x120
-> =C2=A0=C2=A0 do_syscall_64+0xe2/0x570
-> =C2=A0=C2=A0 ? exc_page_fault+0x66/0xb0
-> =C2=A0=C2=A0 entry_SYSCALL_64_after_hwframe+0x77/0x7f
->=20
-> =C2=A0 Allocated by task 57:
-> =C2=A0=C2=A0 kasan_save_stack+0x30/0x50
-> =C2=A0=C2=A0 kasan_save_track+0x14/0x30
-> =C2=A0=C2=A0 __kasan_kmalloc+0x7f/0x90
-> =C2=A0=C2=A0 ceph_oob2_init+0x44/0xff0 [ceph_oob2_poc]
-> =C2=A0=C2=A0 do_one_initcall+0x9a/0x3a0
-> =C2=A0=C2=A0 do_init_module+0x27c/0x790
-> =C2=A0=C2=A0 load_module+0x4a9a/0x6350
-> =C2=A0=C2=A0 init_module_from_file+0x15c/0x180
-> =C2=A0=C2=A0 idempotent_init_module+0x21f/0x750
-> =C2=A0=C2=A0 __x64_sys_finit_module+0xba/0x120
-> =C2=A0=C2=A0 do_syscall_64+0xe2/0x570
-> =C2=A0=C2=A0 entry_SYSCALL_64_after_hwframe+0x77/0x7f
->=20
-> =C2=A0 The buggy address belongs to the object at ffff88800a229000
-> =C2=A0=C2=A0 which belongs to the cache kmalloc-4k of size 4096
-> =C2=A0 The buggy address is located 3998 bytes inside of
-> =C2=A0=C2=A0 allocated 4000-byte region [ffff88800a229000, ffff88800a229f=
-a0)
->=20
-> =C2=A0 Memory state around the buggy address:
-> =C2=A0=C2=A0 ffff88800a229e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 =
-00 00
-> =C2=A0=C2=A0 ffff88800a229f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 =
-00 00
-> =C2=A0 >ffff88800a229f80: 00 00 00 00 fc fc fc fc fc fc fc fc fc fc fc fc
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ^
-> =C2=A0=C2=A0 ffff88800a22a000: fc fc fc fc fc fc fc fc fc fc fc fc fc fc =
-fc fc
-> =C2=A0=C2=A0 ffff88800a22a080: fc fc fc fc fc fc fc fc fc fc fc fc fc fc =
-fc fc
-> =C2=A0 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->=20
-> =C2=A0 val=3D0xccccaaaa (OOB garbage from KASAN redzone)
->=20
-> Fix by introducing buf_len to hold the allocation size, using it in
-> both ceph_osd_data_pages_init() and the min_t() decode boundary cap,
-> so the two are guaranteed to stay in sync if the buffer size changes.
->=20
-> Attacker model: a malicious or compromised OSD in a multi-tenant
-> Ceph deployment can trigger this against any client issuing
-> CEPH_OSD_OP_LIST_WATCHERS without further privileges beyond OSD
-> session establishment.
->=20
-> Fixes: a4ed38d7a180 ("libceph: support for
-> CEPH_OSD_OP_LIST_WATCHERS")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
-> ---
-> v3: Split overlong min_t() line to fit 80-column limit,
-> =C2=A0=C2=A0=C2=A0 per Viacheslav Dubeyko's review of v2.
-> v2: Introduce buf_len variable instead of hardcoding PAGE_SIZE
-> =C2=A0=C2=A0=C2=A0 independently in ceph_osd_data_pages_init() and the mi=
-n_t() cap,
-> =C2=A0=C2=A0=C2=A0 per Viacheslav Dubeyko's review.
-> ---
-> =C2=A0net/ceph/osd_client.c | 6 ++++--
-> =C2=A01 file changed, 4 insertions(+), 2 deletions(-)
->=20
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index a67093cf4..0a55bc1f9 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -5063,6 +5063,7 @@ int ceph_osdc_list_watchers(struct
-> ceph_osd_client *osdc,
-> =C2=A0	struct ceph_osd_request *req;
-> =C2=A0	struct page **pages;
-> =C2=A0	int ret;
-> +	const size_t buf_len =3D PAGE_SIZE;
-> =C2=A0
-> =C2=A0	req =3D ceph_osdc_alloc_request(osdc, NULL, 1, false,
-> GFP_NOIO);
-> =C2=A0	if (!req)
-> @@ -5081,7 +5082,7 @@ int ceph_osdc_list_watchers(struct
-> ceph_osd_client *osdc,
-> =C2=A0	osd_req_op_init(req, 0, CEPH_OSD_OP_LIST_WATCHERS, 0);
-> =C2=A0	ceph_osd_data_pages_init(osd_req_op_data(req, 0,
-> list_watchers,
-> =C2=A0						 response_data),
-> -				 pages, PAGE_SIZE, 0, false, true);
-> +				 pages, buf_len, 0, false, true);
-> =C2=A0
-> =C2=A0	ret =3D ceph_osdc_alloc_messages(req, GFP_NOIO);
-> =C2=A0	if (ret)
-> @@ -5091,7 +5092,8 @@ int ceph_osdc_list_watchers(struct
-> ceph_osd_client *osdc,
-> =C2=A0	ret =3D ceph_osdc_wait_request(osdc, req);
-> =C2=A0	if (ret >=3D 0) {
-> =C2=A0		void *p =3D page_address(pages[0]);
-> -		void *const end =3D p + min_t(u32, req-
-> >r_ops[0].outdata_len, PAGE_SIZE);
-> +		void *const end =3D p +
-> +			min_t(u32, req->r_ops[0].outdata_len,
-> buf_len);
 
-Now, min_t() worries me slightly because req->r_ops[0].outdata_len is
-u32 data type, but buf_len is size_t. Could we have the same data type
-for both variables?
+Yeah, you are right here. I didn't double check the constant
+declarations. My bad. :)
 
 Thanks,
 Slava.
-
-> =C2=A0
-> =C2=A0		ret =3D decode_watchers(&p, end, watchers,
-> num_watchers);
-> =C2=A0	}
