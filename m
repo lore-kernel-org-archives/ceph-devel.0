@@ -1,78 +1,73 @@
-Received: from mail-oa1-f52.google.com (mail-oa1-f52.google.com [209.85.160.52])
+Received: from mail-ot1-f50.google.com (mail-ot1-f50.google.com [209.85.210.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEE3238C2C0
-	for <ceph-devel@vger.kernel.org>; Tue,  2 Jun 2026 16:57:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C32873F4DF3
+	for <ceph-devel@vger.kernel.org>; Tue,  2 Jun 2026 17:15:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780419446; cv=none; b=Xgi8gkc1Ul5VVBfL1qJZMufAX2rrJAGZHRaLfuQxN/J/05SltVy2UHfGHuyE5bmO/5Z6ZR6PcZ9w5A3uOsrey+2Tx7GFB6jrSUSrJ/uVBwF1vyII5F6DZ2NhjaXNX4fw6yOFuQRzi4Y6GgAAvsiewtUQoOUKlFUrPdPrG5D+2cM=
+	t=1780420525; cv=none; b=lJUQ9jh4rnzpKuAJDbrRoqDF6znEih3eu3Ek+DZeyXxavFCehFqZTC+HetQWzCcMcT4FnRjsx3TDNRX4RMbX6vr3hnpac6u7NBzwHsx3IJYJTRkS7ihaKyQEBBWtMsk4gKTzqqaz3Y+hNXVR6Ex3wp+OTr17PYo1hxGGZl5t6Do=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780419446; c=relaxed/simple;
-	bh=QtiYBOnywaGXGIK3J8qE+d5Q2yR9zG0izvjfEZE/b68=;
+	s=arc-20240116; t=1780420525; c=relaxed/simple;
+	bh=A0+lm0dDHWU1wbZQUROQDMPr/62FPKccAqKYcpfw51o=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=uDg46yjaaE9fFkBeucyu98OeyQtEhoH02r7lOO8udW7kABnzY6Ice+AuBdRdoz19KxW1tc9lNZF/+Pdg2gp7NUQbUEPU2Io08XTe4CjRKBumoGvFfO2MaN4Vmh//S/r0BxjJni4fMuTYLaf9Y47aV1L79T99b8nzYkZHPZG0Ogg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=aBswvo+N; arc=none smtp.client-ip=209.85.160.52
+	 Content-Type:MIME-Version; b=k/EnL/4KR9NlrYKfxPjZwbajmwYkxkPTGZ9lSrhYXTatCSbfunpY2K4rJ0YWsf4ce+2kaNkbm6wk+rDo+xdX7XFdGZ2weEqzdoFy8saFCObrQDYmS073T206ePY4Jy/bk8boGOxuc+2AVKEH5Ks/xdK3FdyeFENaiiBLaFgZETQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=ZzS06TMp; arc=none smtp.client-ip=209.85.210.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="aBswvo+N"
-Received: by mail-oa1-f52.google.com with SMTP id 586e51a60fabf-43bf6230cffso5682658fac.0
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Jun 2026 09:57:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="ZzS06TMp"
+Received: by mail-ot1-f50.google.com with SMTP id 46e09a7af769-7e61e25199bso4212150a34.1
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Jun 2026 10:15:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780419443; x=1781024243; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780420523; x=1781025323; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=t4fV8gn7VC/KWcxzJDuPOHnzy2hHUCpvH3Iq4Xii4vw=;
-        b=aBswvo+NE+OxN37GRYpze/bTj6w/J8+YtQJbjwNiIwm7+nbt2v3f8oljy/TPY+f8In
-         r5l9EUl9CrJk0FTsFn61wk8m7Hc9oP7xJnSC8BEL0hgEtuc+5OSsyf2tgXnCNFX2p9+t
-         t2TUWzwgmJ+YIRM5v2kQ0V8GIXeR54eoIcjfJLgfGWRSIdrZGl2hm3A2/T5q3K6IxXVJ
-         VPTpkcUxMTWWUZlS39B4cc8qBMys2lI19LLJY/RR8Fr7im5FSYy8sqi+ZIqJM9EOz+BR
-         vbz7Zg8PHuUIIrhLuZ2KfcCSEMHUViuQzA3Th8KXPfR9Wtv+OKNRGqPr4KSbP4iHR6YK
-         gABg==
+        bh=s10iaWznmozqSUv2b4joAOXgh4H4JNnwXdmB6d45Dio=;
+        b=ZzS06TMp9h8elPusUMwhVa07n1qQp/hQf6LpCWljoACQNYu6c7JeQoQyowHobTCErc
+         6moASQI7rfFnIatiiPIrYGS6BxEzKFyO9jj3Hi/paEl7bPc0TSkXUuQ4Ogxn5BsGUq0c
+         6bCr/A7RahAjeAG1YUenM7mKGsx4sfQ1qGFIoy75iZktf8dzLnmFy763SpTNAY2+MWV/
+         R6Af6iMFC6wPskGQ86JRVDbQDfe39Pj0IHoI6HnmTMfykTOURtkB9m5lcB/nbH6wE87V
+         1pR/+22s5EfFl5EDZmnUlFNw8D7rTQNRQCGOIdewvAlUYUTIDEC6aRVMzzDbckU0QH52
+         /pag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780419443; x=1781024243;
+        d=1e100.net; s=20251104; t=1780420523; x=1781025323;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=t4fV8gn7VC/KWcxzJDuPOHnzy2hHUCpvH3Iq4Xii4vw=;
-        b=a6AHArIJ2aWi7PU9+7fFWBqfPjRSZSBFm+o+l0M/AsQJk/LLgxorqGlusWLRhTvbC6
-         KN0mdLoSKpJKZT7Cn/gNodKzkoZqKcBYkigWN8vNwA4bTnaSixrQQsgr7LANqLvOZ/ig
-         Jrc/CieR8FruWUMRg6UWSZg6l4Bsptpi5xS9KB3zBKUcUGjnMD7WewozCS9qahqnNRaj
-         FOasr8mV8A3Mxq2vBuFaEkgdjcG0t3VfcBRvnmE+uIDjhzLPN8Fjwz1Yp2u7xOCctz8X
-         Y7CfIAM4QAfKshGzB+h3Lzj1kvHzqInVZv9sRM7shluOKdMGcl3UocoNhLfzHnO9nf8X
-         N+3w==
-X-Forwarded-Encrypted: i=1; AFNElJ85j1J6g4FosD0pxgwLgX9cJkbPmnu80+HxONpe5eKqlYUWMmRZ3Xql6BIR7/W1TLSqiUztF/iX4yjn@vger.kernel.org
-X-Gm-Message-State: AOJu0YyOzJCXPZhle0s+9z9V5ae3+crtciCkMfNksyifb0vHjmxPCB1E
-	UhsZO7EJz8RtkCOvsSrECbVR1L9wIya/pDuEY7/Hok+aFFlPwVHdBGq/N0Q/k6XGlP8=
-X-Gm-Gg: Acq92OGaKjl/aZtNY9T/i1mT6P7YMUAgr/RgnMKjVoL0D0ydnfDGXbdIiwrRhhNaPMW
-	TyXogsuS9qntalAa4z8QkEVSjOqzPILW+uC5rUQHQwRhLmf7ABeEGhl9Zune5nAO2hPjcJrxvwy
-	OInakbHs0AHuIohDeUYbOPaVeevbuC8ZdU/S3LDS/noKVhTECkc6oIX5Dnewkb2snT6hyoBSrlf
-	O+j5soyeccK3yRaGRNL4d4GEueBsvIVrnSUv0LV4c5+N88BvFPrQOn+JUWlD0+eJr9c3o/e2NoE
-	VpjwXxpaavgobkMw2Vt49/vZb+99Brr0PHibDcLSlJg8mgvI50OYGDGcxWM8kgOeKm4fwt1PLZA
-	zCYQNwO8cmB1HPOLTwYi8t9u4IQR+XL8jhU7Q8H/Twr9vo16JHYxlRcpZIJ3bnSJZLGQsyEXmKn
-	0P2Y+CGCgUxBPrf5vRil95sllO5g+HH1+QrAu/L5vcIV+EWGMcO2Me8B24QfmsxRuyH0T9hEJVQ
-	lOkgKX2knNJDMl9a9+YpsmeR2TQjIyXs/VntCpKWPZf0oD2kO7YOoE+BRXEFFXSxM+wZTGzi0zT
-	nWuf2g==
-X-Received: by 2002:a05:6820:4d06:b0:69d:5138:5540 with SMTP id 006d021491bc7-69e368628ecmr2353683eaf.9.1780419442613;
-        Tue, 02 Jun 2026 09:57:22 -0700 (PDT)
+        bh=s10iaWznmozqSUv2b4joAOXgh4H4JNnwXdmB6d45Dio=;
+        b=jJ71wVGD0KlbQY5udjO0NjcINEyEGAXBobF88x4GXGa56BrXSWFdOw0LwTu3JFRVvf
+         i+tJ4Z+IRl8ZzAQNEy69a8uTa4MHcltrwqJUdyw8iujhuA0QCKw4opej0kbBou+Guu4N
+         NwNsePhO7X4/OXT2PDC5kAfhoV0kvtQivG4biC2J72zQyPhK4GCpXjmTYaRCj0F7TavN
+         rR17GPgZTNM1poHvigUQteWvV4GcC4dnJlS8aAeumRVe0scjIUJkzfukE5dOv2Se2Xje
+         Itv44CtcWeRdOjYk3n2IfqIHgNnwIFT56cAb46VuojGmT9+vyJV7XC85Pvjb6hmp1fik
+         r8Lw==
+X-Gm-Message-State: AOJu0YwGXacKpWZ3muUdxJW0tp0Vui3PbTXN5za3z3JSeNbYRB5fIb7c
+	Fl+wYwxhNTEjCWs82Zpqhw3tNJmCn+ajWxF+aZDMu6ZwrX3mV2wgdIV6pJlLu9Pn2Z8=
+X-Gm-Gg: Acq92OGj7deXJVqsGN3n7MhYMzCSHstazMCFQBYEnbj6rOmcjAjq60cZlraDQS9m+Fc
+	hTqImnb3/YhZm2mvtnff0cdHo8ilJt7v+xOM3YD1wKEicbaXHeIt4xrAKDhfoLlCqAvmBaRt8C0
+	lysKpB1VNTqhzLS9W3VqUDL6x30MmH8607sooONXcWgHCuGc95KwSsjMushK4B6+MMRqTCtUwx+
+	t6RrVhlZxq+qKewez985Y1HnsmW99tXZTrt2FY1YSgHHdIYJcjrxA5daV/COAxmXlL48yRLfUn1
+	ptpBXdME7LxoCegQynP9t+6kHrq4WqD6CAW4PJy2UOWi9CEsXPmxBh4TabDL5bNRgGnYVOzwttP
+	nPqA1O6l45YJLExDd78rIEupFKP9h81CUWMdSZopW4QGQucea+WFpHs8XVTNPLmD0cK8oC4ABgk
+	Dxa/Bcg+KSmexybkNzX3cDS5ku1aFYZRtAl9XOc3fmL6OppF6m72ROm88HXlHYQNXJ3MjxHX8R+
+	ZCEswQQF0nSWQ/+DfnRWp0ILtSdxqYtMRFn5gR6Ezcxt/tPvEOa0vMmEG51lW0L6EMvI4s=
+X-Received: by 2002:a05:6830:610f:b0:7e5:6c74:b295 with SMTP id 46e09a7af769-7e6e639039dmr188512a34.14.1780420522602;
+        Tue, 02 Jun 2026 10:15:22 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:7a3e:ac53:80f8:78b4? ([2600:1700:6476:1430:7a3e:ac53:80f8:78b4])
-        by smtp.gmail.com with ESMTPSA id 586e51a60fabf-440d7d4f449sm132744fac.8.2026.06.02.09.57.20
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7e695d918cfsm10477438a34.26.2026.06.02.10.15.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Jun 2026 09:57:21 -0700 (PDT)
-Message-ID: <50a7cd9d731e96f9fcbd86628c0037be3dbc9c3a.camel@dubeyko.com>
-Subject: Re: [PATCH v3 1/1] libceph: reject zero bucket types in crush_decode
+        Tue, 02 Jun 2026 10:15:21 -0700 (PDT)
+Message-ID: <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
+Subject: Re: [PATCH v4] libceph: Fix out-of-bounds writes with oversized
+ monitor reply messages
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ren Wei
- <n05ec@lzu.edu.cn>,  Viacheslav Dubeyko	 <vdubeyko@redhat.com>,
- ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net, 
-	yuantan098@gmail.com, zcliangcn@gmail.com, bird@lzu.edu.cn, 
-	ldy3087146292@gmail.com
-Date: Tue, 02 Jun 2026 09:57:20 -0700
-In-Reply-To: <80dbf895-2406-4695-a89a-6d0201c948ac@tu-ilmenau.de>
-References: <d21e2f97dfe6f250.1780369814.git.ldy3087146292@gmail.com>
-	 <80dbf895-2406-4695-a89a-6d0201c948ac@tu-ilmenau.de>
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
+	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Date: Tue, 02 Jun 2026 10:15:20 -0700
+In-Reply-To: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
+References: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,92 +122,119 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Tue, 2026-06-02 at 16:37 +0200, Raphael Zimmer wrote:
-> On 02.06.26 10:01 AM, Ren Wei wrote:
-> > From: Douya Le <ldy3087146292@gmail.com>
-> >=20
-> > CRUSH bucket type 0 is reserved for devices.=C2=A0 The mapper relies on
-> > that invariant and uses type 0 to identify leaf devices.
-> >=20
-> > If crush_decode() accepts a bucket with type 0, a malformed CRUSH
-> > map
-> > can make the mapper treat a negative bucket ID as a device and pass
-> > it
-> > to is_out(), which then indexes the OSD weight array with a
-> > negative
-> > value.
-> >=20
-> > Reject zero bucket types while decoding the CRUSH map so the
-> > invalid
-> > state never reaches the mapper.
-> >=20
-> > Fixes: f24e9980eb86 ("ceph: OSD client")
-> > Cc: stable@vger.kernel.org
-> > Reported-by: Yuan Tan <yuantan098@gmail.com>
-> > Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-> > Reported-by: Xin Liu <bird@lzu.edu.cn>
-> > Assisted-by: Codex:GPT-5.4
-> > Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-> > Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
-> >=20
-> > ---
-> > Changes in v3:
-> > - use CRUSH_BUCKET_DEVICE instead of CRUSH_ITEM_TYPE_DEVICE
-> > - v2 Link:
-> > https://lore.kernel.org/all/3200151429f33554f06ced8a.1780197742.git.ldy=
-3087146292@gmail.com/
-> >=20
-> > Changes in v2:
-> > - use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
-> > - v1 Link:
-> > https://lore.kernel.org/all/4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.17=
-79949116.git.ldy3087146292@gmail.com/
-> >=20
-> > ---
-> > =C2=A0include/linux/crush/crush.h | 1 +
-> > =C2=A0net/ceph/osdmap.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0 | 2 ++
-> > =C2=A02 files changed, 3 insertions(+)
-> >=20
-> > diff --git a/include/linux/crush/crush.h
-> > b/include/linux/crush/crush.h
-> > index
-> > 30dba392b7302de3e14861f8b769242cd8cbac9e..ea0b1de2902585ba9a63566cf
-> > bb2b0569846a00b 100644
-> > --- a/include/linux/crush/crush.h
-> > +++ b/include/linux/crush/crush.h
-> > @@ -111,6 +111,7 @@ struct crush_rule {
-> > =C2=A0 *=C2=A0 straw2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0 O(n)=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 optimal=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0 optimal
-> > =C2=A0 */
-> > =C2=A0enum {
-> > +	CRUSH_BUCKET_DEVICE =3D 0,
-> > =C2=A0	CRUSH_BUCKET_UNIFORM =3D 1,
-> > =C2=A0	CRUSH_BUCKET_LIST =3D 2,
-> > =C2=A0	CRUSH_BUCKET_TREE =3D 3,
+On Tue, 2026-06-02 at 17:10 +0200, Raphael Zimmer wrote:
+> When processing an incoming reply message of type
+> CEPH_MSG_STATFS_REPLY,
+> CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on the
+> monitor connection, an already allocated reply message for the given
+> transaction ID is used (if existing). Such a message has a
+> preallocated
+> front segment with a fixed length of 64, 512, or 32 bytes, depending
+> on
+> the message type it was allocated for. The actual length to receive
+> into
+> this buffer is read from the message. If this value exceeds the
+> allocation size, data received from the network is written beyond the
+> end of the allocated buffer.
 >=20
-> Hi,
+> This patch fixes the issue by adding a check that compares the needed
+> front segment length to the previously allocated length when
+> retrieving
+> the message buffer. If the needed length exceeds the allocation, a
+> new
+> message buffer with the needed size is allocated to replace the
+> previous
+> one.
 >=20
-> this enum contains all existing bucket algorithms. Type and algorithm
-> are different things and should not be mixed up. Therefore, this is
-> the
-> wrong place for this definition. If necessary, I would instead
-> suggest
-> defining it as a single new named constant. The previous name from v2
-> of
-> the patch would also be more appropriate for this as CRUSH_BUCKET_*
-> currently refers exclusively to bucket algorithms.
->=20
-> Also, when creating this constant, it would be good to use it
-> consistently rather than only for one occurrence of type 0. However,
-> I
-> wouldn't say that this has to be done in this specific bugfix patch.
->=20
->=20
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
 
-Yeah, you are right here. I didn't double check the constant
-declarations. My bad. :)
+What's about Fixes here?
+
+> ---
+> =C2=A0net/ceph/mon_client.c | 24 ++++++++++++++++++++++--
+> =C2=A01 file changed, 22 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index 66c0d6d6b33d..b33ae17546f8 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -712,6 +712,8 @@ static struct ceph_msg *get_generic_reply(struct
+> ceph_connection *con,
+> =C2=A0	struct ceph_mon_client *monc =3D con->private;
+> =C2=A0	struct ceph_mon_generic_request *req;
+> =C2=A0	u64 tid =3D le64_to_cpu(hdr->tid);
+> +	int type =3D le16_to_cpu(hdr->type);
+> +	int front_len =3D le32_to_cpu(hdr->front_len);
+> =C2=A0	u32 data_len =3D le32_to_cpu(hdr->data_len);
+> =C2=A0	struct ceph_msg *m;
+> =C2=A0
+> @@ -721,14 +723,30 @@ static struct ceph_msg
+> *get_generic_reply(struct ceph_connection *con,
+> =C2=A0		dout("get_generic_reply %lld dne\n", tid);
+> =C2=A0		*skip =3D 1;
+> =C2=A0		m =3D NULL;
+> -	} else if (data_len > req->reply->data_length) {
+> +		goto out;
+> +	}
+> +
+> +	if (data_len > req->reply->data_length) {
+> =C2=A0		pr_warn_ratelimited("mon generic reply tid %llu data
+> %u > preallocated %zu, skipping\n",
+> =C2=A0				=C2=A0=C2=A0=C2=A0 tid, data_len, req->reply-
+> >data_length);
+> =C2=A0		*skip =3D 1;
+> =C2=A0		m =3D NULL;
+> +		goto out;
+> +	}
+> +
+> +	*skip =3D 0;
+> +	if (front_len > req->reply->front_alloc_len) {
+> +		pr_warn_ratelimited("tid %llu front %d > prealloc
+> %d\n",
+> +				=C2=A0=C2=A0=C2=A0 tid, front_len,
+> +				=C2=A0=C2=A0=C2=A0 req->reply->front_alloc_len);
+> +		m =3D ceph_msg_new(type, front_len, GFP_NOFS, false);
+
+Does false is correct here? If we provide can_fail =3D=3D false, then
+allocation failure results it:
+
+	if (!can_fail) {
+		pr_err("msg_new can't create type %d front %d\n",
+type,
+		       front_len);
+		WARN_ON(1);
+	} else {
+		dout("msg_new can't create type %d front %d\n", type,
+		     front_len);
+	}
+	return NULL;
+
+The can_fail =3D true would suppress the WARN, matching the intent of a
+graceful degradation path.
 
 Thanks,
 Slava.
+
+> +		if (m) {
+> +			ceph_msg_put(req->reply);
+> +			req->reply =3D m;
+> +			m =3D ceph_msg_get(req->reply);
+> +		}
+> =C2=A0	} else {
+> =C2=A0		dout("get_generic_reply %lld got %p\n", tid, req-
+> >reply);
+> -		*skip =3D 0;
+> =C2=A0		m =3D ceph_msg_get(req->reply);
+> =C2=A0		/*
+> =C2=A0		 * we don't need to track the connection reading
+> into
+> @@ -736,6 +754,8 @@ static struct ceph_msg *get_generic_reply(struct
+> ceph_connection *con,
+> =C2=A0		 * at a time, ever.
+> =C2=A0		 */
+> =C2=A0	}
+> +
+> +out:
+> =C2=A0	mutex_unlock(&monc->mutex);
+> =C2=A0	return m;
+> =C2=A0}
