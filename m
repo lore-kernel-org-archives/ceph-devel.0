@@ -1,202 +1,239 @@
-Received: from mail-oo1-f45.google.com (mail-oo1-f45.google.com [209.85.161.45])
+Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B543035202D
-	for <ceph-devel@vger.kernel.org>; Mon,  1 Jun 2026 18:58:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1B6B33BBCC
+	for <ceph-devel@vger.kernel.org>; Tue,  2 Jun 2026 04:18:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780340340; cv=none; b=hr2PgrfNPqnY0sffPZHEdP0dOBiMDyhmjKeWYUyRzfVfq88B/KXwfNJ5+00uV/NXc/0GON3vT2jsowtxaO6XLAPKMcLXn+PnzYkxMA2oxNW3maSZR8iNkyFqEbTk5rzzc5smseAzkE0LzSfoo1sHQoIzZMFq7+shuiMLe4YAd3M=
+	t=1780373885; cv=none; b=hcxnlIzk3R4Gc6mI6Tolwl8n/k8MXEOC5CNozJEFFBoGilU3oliV4LKx9zX+AZxUrBcXIOsVPM862v5SdY83kxnIEL4QxGbrN9x34zaVPXJMR7Gia+Tim9lSq1d6UK3k6PGI2X8Qei1YgNqiLcUFXneHbhweQ7XgTNgSt+hBoeg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780340340; c=relaxed/simple;
-	bh=NttjgTL0KkfxNDp9FTVR9xesgewRUBwVBrX+BvhDvf0=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=khgb6TyZoz4AsGPdyF8DxkiFgcKDmsyB4UZYVZSooGdTq06u/6g27wN/nfPX/B46q85v7sJjjCP6pkcs/Hfkm4+e0MIsPwcgXdDd8n1jTYnNIFLoygN19+e/UKKtYNJgKukl2ZkqOO6qLk9LdtPZfl5dzmIDNxmXnbGAuVEtsw8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=W2CCyGUh; arc=none smtp.client-ip=209.85.161.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
+	s=arc-20240116; t=1780373885; c=relaxed/simple;
+	bh=wjsgzb5f0i2GceW55gjwOFYg1nJd8WVGttnpZFp2x0o=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=kI6sD94dg+VvUaq8SBgudCfFXDeWV9nJEuSCU8Gr5guy6NxWvP1/2G81F9aoHO4qXh13+Vr3B7EYPKBnu6zcGK6N5uiDKwOK5wo87vih8Zdop3GV68LsIdF3a4R9a3/oeeaEwOm+Tc99P4OfF3ICA3tvd4Q0l8VAfOLee8kgpus=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Bfi79pRU; arc=none smtp.client-ip=209.85.216.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="W2CCyGUh"
-Received: by mail-oo1-f45.google.com with SMTP id 006d021491bc7-69de237f0a3so3481178eaf.1
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2026 11:58:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Bfi79pRU"
+Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-36bcd5f40b1so584075a91.3
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Jun 2026 21:18:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780340338; x=1780945138; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:autocrypt
-         :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=bW0FmlfQ+vNfSZLBSaLUH+ngZvp00QMDb1Rd0LqLyfw=;
-        b=W2CCyGUhoUqWfB8kU6hrZocHlFfjwkMqA9DQHoBfEhCxVgH6ymPAPKCGhMKXWMecxP
-         D8BXL33oyVaDuPN1o4O/Pej372zCSwpefPXz/kcSLey5tr5TjFf1CQEIXQ3lZ2adeNaj
-         Q2xLpYXJdJNLCV0/9nBECGx3AGzWmklCJuuCweIXI5aBsmjVt70w3n6cXuwQ3OfnYK97
-         zCa7aZvx9T0x4zrZ/TJMMW60X2NUKlsfui4GP9DJUHVAEB4gYVhVShP+fuY6VkU1mg45
-         SY22Bi1adOjP5qQyLN+TDh2r18Gd1L/V53ZphwK3Oxtt0EqpiMfwlY0bGVMq8cNaGUCm
-         QdbQ==
+        d=gmail.com; s=20251104; t=1780373883; x=1780978683; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2u/sXbb1d4QFDg/pusKeKJpTffkT9R2yLxVJHbJkuC0=;
+        b=Bfi79pRUi5AnVU56nuFRLOZ1FMBO9QkLBiL0S8EyQW+rRqAq1H/kQZMx62SKUzEJwo
+         hkYCE872cXjy8ucmlBP9e9nZd1Rj/UxWowmaFscbgTBjYQNaRFyyJ+iu2r4clB61m8Dx
+         QzSTFyztXjSvXH3sG3jVrGBmwfM2zVQX/QKH+4SJ04+8tjIgN3NpSyqFSapI8OoN7b0z
+         I3Ucp6Swr8gtAdeyVZuwTM09IXAk32GQmlIDZEOHm8QqR1gSTs7gY0WEfliZ7tZg/OHa
+         tLVAr+nBwkI+4gYJICNkhFG2Mi7XooDbk3z+Eue5V+KW58vyR+TxhG70CRhqfFxRSHir
+         4MbA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780340338; x=1780945138;
-        h=mime-version:user-agent:content-transfer-encoding:autocrypt
-         :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=bW0FmlfQ+vNfSZLBSaLUH+ngZvp00QMDb1Rd0LqLyfw=;
-        b=M+dgd+4eIxuHHxHY5wVoogDxSbtYt3XZxpYqCk2EL9kLzIuphudncMm0XnAwpvRZhM
-         3ufJ+lEilffYFOegIcfNDWmlPbVFfaeHNG2/+6cD6COpPQxuGX084QOnrbRrUL25Zzxs
-         ORIUSkfpNC5kFCVh6kQ7AMQI6hNkUT2tDGwDoBrQULqqS0Zckb+uoTjo1n1iw+31Jc74
-         q0vXvJgm99KbBs2EqFMu4SyVC8soXpCZHTdbOitV+In1vrJH+fi4R1guJOAPJvzyEnXB
-         AnTGGdZTxLqKRHcEck/edGdhV7jUVucbZGLf1KsYMypYdbRUew5++AAf91xbNCe3AOji
-         w2PQ==
-X-Forwarded-Encrypted: i=1; AFNElJ8pSF+GJ+sMZ2Rg3BwwYbhvcdF7kpHS1aJN3vAImvD1PlvmSzlo8Eif1J7DPXBNrFfRTY055dYu1fT/@vger.kernel.org
-X-Gm-Message-State: AOJu0Yym9m0N7uRav0gNc+P5BisUbVhIbd6AP6Wd9gw9OEr3L5tySiBy
-	m2qvk8J3PdWNVDLkEv06+diVdRvRoGFBNuc5ERBCScuTf21d3JU3+uZJAdV+ZE4v2frKtKu18MH
-	6BKh5DDkxPA==
-X-Gm-Gg: Acq92OHOz1zSNpmo/AWiKWVREBRDXm/VhUw/Y/OrqVS571zhgMa3TQB94LsqP+BXuSK
-	/g2j9r2BvxhkVlv1UfarDIcGln0UGVOzHGbb9wQKAvJJsgEvDWoIPVM+abwfSlHNj1skLev24WY
-	QFDaQHgBH/i3nD7u1FNFNLnzJUhG/52KVNlrY99A5REwK/sSrMMf+ABhfXOLqhN7DvOUbcBpsQF
-	NznrGeUkDCeMpZrmuzCdKdg2zkSBZDSJHHLXozbrPbAQ3NqYa8fO8/BpJwfT0fhY65M/opOaIAi
-	JquLaGm6pZBmtG6nKPcqnp9Ykiq/i6T18MocBg9/2OvgNeNBfPMTc4ldkilcsxKKJxX8kXme+HT
-	q/tPsgdILePPx0/TIPagiAdktG/ZMUIb6Bx9725e2Bygj8BfaMe1d02AiwpwTsqkCreQUEwUdHW
-	hVx+RkGJ6asoexbocHW1cMhmPYPhij5d+R+Tk6ddO9Mg6a0RO1ULBmcgJaVYEXgl2Y+bsPohgQn
-	bV9QJ6frrLpANwMwK/Y7xr8SrJikJ0AY7fUYKYfLt64UldmQKJr3aRlo5MiyCXPe5L7if4=
-X-Received: by 2002:a05:6820:5716:10b0:69e:264b:ccd9 with SMTP id 006d021491bc7-69e264bd199mr2239800eaf.39.1780340337703;
-        Mon, 01 Jun 2026 11:58:57 -0700 (PDT)
-Received: from ?IPv6:2600:1700:6476:1430:7a3e:ac53:80f8:78b4? ([2600:1700:6476:1430:7a3e:ac53:80f8:78b4])
-        by smtp.gmail.com with ESMTPSA id 006d021491bc7-69e069ba3c6sm7321172eaf.14.2026.06.01.11.58.56
+        d=1e100.net; s=20251104; t=1780373883; x=1780978683;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=2u/sXbb1d4QFDg/pusKeKJpTffkT9R2yLxVJHbJkuC0=;
+        b=XTD1Lv5pURaVNgGAKiUofrHdCB2fSPhWNBBB+cC0KODXSEHT52QaUvsPyvljzyrHny
+         c2376fw2zKjwyqbRJpzIKvR1MkgIutC3sKoSOWB5njL+V7DWggtKOqElyQrj9LR6q/if
+         YRKpf6sW0t6VbRyoVVBaCX7H2jQexFMSVE1WeIRGu3yWrOAsIU8QcAAY7/t6bXdHE0lc
+         5mWO5b7dgChvlhl/mDjQL9OnJiRR/67cQ+Fqvu8OgFXd+UNI8x4AZ4cQTHuKAmPKyb/J
+         lVms9Hur9+euQo+VAz1qz/inHQ02fEuVCh5qyatCvK1f3ikxc/XTBp4PTjjyufW3zoQ2
+         BvjA==
+X-Forwarded-Encrypted: i=1; AFNElJ8WqH1CnLF/qGxpf27KtgZ7ZkFS8oEVNwWI5ldwfWufjA3IxLyv/lywrQd/lsi5X2LP8MC2RoR5so8V@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy8OH/UARxGvPCO9nX/pFK3WAmE6b9HjCup3N1moXnj/7wAG7S8
+	zJ0aubpXWi0b6Te8yyh1kle2nGakEf3OEHUU2E6tPNZamXuEfnMOzedEyfockA2p
+X-Gm-Gg: Acq92OHlFBH16Na8kdsbU+OyHfgYeFzWNBXQVZP+bj0tnXUv45M516fSSqXiVWgu3BB
+	gfNB/ejccZip5w2qSSVBeQIn/bKn6e9Lw9QbE5NBp1bHoEhvK0pb5lo48M4N4gLqPSBTzPTomVL
+	XTSSj1bDJJ08K+tpBEWTCMccfOrD8Z7nkTe/oqAo0tQADOAZ29GFENx0glgT7b5xGkF1Iw+7GOS
+	QohGOrAj4lp+O2TH5jGAA5ulMlAu2IJI1v2uLLyJUOfFJrqfAekocVwW8lfgyy7YZaUig2J+P83
+	f8s8Dl2FaPnI1QUJmWsttwCxIYsodSgH4dxWVZ0+0M2hxa1t5MYRoR4ctFeR/2N7mg+x8RQhuYK
+	p9AuqwT1gsCZrOV7NbDzaiRVYiPFhTxDiJkujKj9xWFuLbIq0Lx2FzNpy0HsS5M7GXiKwwvTnyM
+	gLNmJXulFjyyKcMhu/yOgmivO+IRb/
+X-Received: by 2002:a17:90b:2e06:b0:36a:c208:7e63 with SMTP id 98e67ed59e1d1-36ddbe58149mr994830a91.8.1780373882806;
+        Mon, 01 Jun 2026 21:18:02 -0700 (PDT)
+Received: from kali ([2402:e280:3d7c:a2:536a:b505:93f5:9d5d])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-36dd91c8687sm1167910a91.8.2026.06.01.21.17.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 01 Jun 2026 11:58:57 -0700 (PDT)
-Message-ID: <5d664a6f05db3559a85e4da4c482888dfcb930f5.camel@dubeyko.com>
-Subject: Re: [PATCH v2 1/1] libceph: reject zero bucket types in crush_decode
-From: slava@dubeyko.com
-To: Ren Wei <n05ec@lzu.edu.cn>, ceph-devel@vger.kernel.org,
- vdubeyko@redhat.com
-Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net, 
-	yuantan098@gmail.com, zcliangcn@gmail.com, bird@lzu.edu.cn, 
-	ldy3087146292@gmail.com
-Date: Mon, 01 Jun 2026 11:58:55 -0700
-In-Reply-To: <3200151429f33554f06ced8a.1780197742.git.ldy3087146292@gmail.com>
-References: 
-	<3200151429f33554f06ced8a.1780197742.git.ldy3087146292@gmail.com>
-Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
- keydata=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
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.60.1 (by Flathub.org) 
+        Mon, 01 Jun 2026 21:18:02 -0700 (PDT)
+From: Pavitra Jha <jhapavitra98@gmail.com>
+To: idryomov@gmail.com
+Cc: Slava.Dubeyko@ibm.com,
+	amarkuze@redhat.com,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org,
+	Pavitra Jha <jhapavitra98@gmail.com>
+Subject: [PATCH v3] ceph: fix two unsafe bare decodes in decode_lockers()
+Date: Tue,  2 Jun 2026 00:17:35 -0400
+Message-ID: <20260602041735.1023057-1-jhapavitra98@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <202605310022.LGyGb8eD-lkp@intel.com>
+References: <202605310022.LGyGb8eD-lkp@intel.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-On Sun, 2026-05-31 at 18:02 +0800, Ren Wei wrote:
-> From: Douya Le <ldy3087146292@gmail.com>
->=20
-> CRUSH bucket type 0 is reserved for devices.=C2=A0 The mapper relies on
-> that invariant and uses type 0 to identify leaf devices.
->=20
-> If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
-> can make the mapper treat a negative bucket ID as a device and pass
-> it
-> to is_out(), which then indexes the OSD weight array with a negative
-> value.
->=20
-> Reject zero bucket types while decoding the CRUSH map so the invalid
-> state never reaches the mapper.=20
->=20
-> Fixes: f24e9980eb86 ("ceph: OSD client")
-> Cc: stable@vger.kernel.org
-> To: Viacheslav Dubeyko <vdubeyko@redhat.com>
-> Reported-by: Yuan Tan <yuantan098@gmail.com>
-> Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-> Reported-by: Xin Liu <bird@lzu.edu.cn>
-> Assisted-by: Codex:GPT-5.4
-> Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-> Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
->=20
-> ---
-> Changes in v2:
-> - use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
-> - v1 Link:
-> https://lore.kernel.org/all/1cab97763b0564d03a583deb7eed485b68be6182.came=
-l@redhat.com/
->=20
-> ---
-> =C2=A0include/linux/crush/crush.h | 1 +
-> =C2=A0net/ceph/osdmap.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0 | 2 ++
-> =C2=A02 files changed, 3 insertions(+)
->=20
-> diff --git a/include/linux/crush/crush.h
-> b/include/linux/crush/crush.h
-> index 30dba392b..eb469972f 100644
-> --- a/include/linux/crush/crush.h
-> +++ b/include/linux/crush/crush.h
-> @@ -111,6 +111,7 @@ struct crush_rule {
-> =C2=A0 *=C2=A0 straw2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0 O(n)=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 optimal=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0 optimal
-> =C2=A0 */
-> =C2=A0enum {
-> +	CRUSH_ITEM_TYPE_DEVICE =3D 0,
+decode_lockers() in cls_lock_client.c contains two bare decode operations
+that allow a malicious or compromised OSD to trigger slab-out-of-bounds
+reads:
 
-Let's be consistent with other declarations. What's about
-CRUSH_BUCKET_DEVICE?
+1. ceph_decode_32(p) at the num_lockers field has no preceding bounds
+   check. ceph_start_decoding() accepts struct_len=0 as valid -- the
+   internal ceph_decode_need(p, end, 0, bad) always passes -- so when an
+   OSD sends struct_len=0, ceph_start_decoding() returns success with
+   p == end. The immediately following bare ceph_decode_32(p) then reads
+   4 bytes past the validated buffer boundary. The garbage value is
+   passed directly to kzalloc_objs() as the locker count.
 
-Thanks,
-Slava.
+   The sibling function decode_watchers() in osd_client.c already uses
+   ceph_decode_32_safe() after its own ceph_start_decoding() call.
+   decode_lockers() was the only site using the bare variant.
 
-> =C2=A0	CRUSH_BUCKET_UNIFORM =3D 1,
-> =C2=A0	CRUSH_BUCKET_LIST =3D 2,
-> =C2=A0	CRUSH_BUCKET_TREE =3D 3,
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 8b5b0587a..21cdd33f2 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void
-> *pbyval, void *end)
-> =C2=A0		ceph_decode_need(p, end, 4*sizeof(u32), bad);
-> =C2=A0		b->id =3D ceph_decode_32(p);
-> =C2=A0		b->type =3D ceph_decode_16(p);
-> +		if (b->type =3D=3D CRUSH_ITEM_TYPE_DEVICE)
-> +			goto bad;
-> =C2=A0		b->alg =3D ceph_decode_8(p);
-> =C2=A0		if (b->alg !=3D alg) {
-> =C2=A0			b->alg =3D 0;
+2. ceph_decode_8(p) after the decode_locker() loop has no preceding
+   bounds check. If an OSD crafts num_lockers such that the loop
+   advances p exactly to end, the subsequent bare ceph_decode_8(p) reads
+   one byte past the validated buffer boundary. The result is passed
+   directly into *type, which is used as a lock type discriminator by
+   callers, giving an OSD-controlled one-byte OOB read with direct
+   influence over the lock type field.
+
+Fix both by replacing bare operations with their safe variants:
+  ceph_decode_32(p) -> ceph_decode_32_safe(p, end, *num_lockers,
+                                           err_inval)
+  ceph_decode_8(p)  -> ceph_decode_8_safe(p, end, *type,
+                                          err_free_lockers)
+
+The goto targets differ intentionally:
+  err_inval: is a new label returning -EINVAL directly. It is used for
+  the pre-allocation failure path where *lockers is not yet allocated
+  and must not be passed to ceph_free_lockers().
+
+  err_free_lockers: is the existing label. It is used for the
+  post-allocation failure path where *lockers is allocated and must
+  be freed.
+
+ret is set to -EINVAL before ceph_decode_8_safe() so that
+err_free_lockers returns the correct error code on bounds violation.
+Without this, err_free_lockers would return a stale ret value (0 from
+the successful decode_locker() loop), silently swallowing the error.
+
+-EINVAL is correct for both failure paths. The data received from the
+OSD is structurally malformed. -ENOMEM would misrepresent the failure
+class to callers and to stable@ backporters triaging error paths.
+
+KASAN report for bug 1 (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
+  ==================================================================
+  BUG: KASAN: slab-out-of-bounds in ceph_oob3_init+0x251/0xff0 [ceph_oob3_poc]
+  Read of size 4 at addr ffff88800a29b76e by task insmod/58
+
+  CPU: 0 UID: 0 PID: 58 Comm: insmod Tainted: G           O        7.0.0-rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
+  Tainted: [O]=OOT_MODULE
+  Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-debian-1.17.0-1 04/01/2014
+  Call Trace:
+   <TASK>
+   dump_stack_lvl+0x4d/0x70
+   print_report+0x170/0x4f3
+   kasan_report+0xda/0x110
+   ceph_oob3_init+0x251/0xff0 [ceph_oob3_poc]
+   do_one_initcall+0x9a/0x3a0
+   do_init_module+0x27c/0x790
+   load_module+0x4a9a/0x6350
+   init_module_from_file+0x15c/0x180
+   idempotent_init_module+0x21f/0x750
+   __x64_sys_finit_module+0xba/0x120
+   do_syscall_64+0xe2/0x570
+   entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+  Allocated by task 58:
+   kasan_save_stack+0x30/0x50
+   kasan_save_track+0x14/0x30
+   __kasan_kmalloc+0x7f/0x90
+   ceph_oob3_init+0x4d/0xff0 [ceph_oob3_poc]
+   do_one_initcall+0x9a/0x3a0
+   do_init_module+0x27c/0x790
+   load_module+0x4a9a/0x6350
+   init_module_from_file+0x15c/0x180
+   idempotent_init_module+0x21f/0x750
+   __x64_sys_finit_module+0xba/0x120
+   do_syscall_64+0xe2/0x570
+   entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+  The buggy address belongs to the object at ffff88800a29a000
+   which belongs to the cache kmalloc-8k of size 8192
+  The buggy address is located 5998 bytes inside of
+   allocated 6000-byte region [ffff88800a29a000, ffff88800a29b770)
+
+  Memory state around the buggy address:
+   ffff88800a29b600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   ffff88800a29b680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  >ffff88800a29b700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fc fc
+                                                               ^
+   ffff88800a29b780: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+  ==================================================================
+
+  num_lockers=0xccccaaaa (OOB garbage from KASAN redzone)
+
+Bug 2 (ceph_decode_8) follows from the identical precondition. A
+dedicated PoC is available on request.
+
+Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
+deployment can trigger this against any kernel client that issues the
+lock.get_info class method (e.g. during RBD exclusive lock acquisition)
+without any further privileges beyond OSD session establishment.
+
+Fixes: d4ed4a530562 ("libceph: support for lock.lock_info")
+Cc: stable@vger.kernel.org
+Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
+---
+v3: Combine both fixes (ceph_decode_32 and ceph_decode_8) into a single
+    patch per Viacheslav Dubeyko's review. Set ret = -EINVAL before
+    ceph_decode_8_safe() so err_free_lockers returns the correct error
+    code, not stale ret (caught by Dan Carpenter / smatch). Clarify
+    err_inval vs err_free_lockers goto selection rationale and
+    -EINVAL justification.
+---
+ net/ceph/cls_lock_client.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/net/ceph/cls_lock_client.c b/net/ceph/cls_lock_client.c
+index c6956f1df..4e6a6d3e4 100644
+--- a/net/ceph/cls_lock_client.c
++++ b/net/ceph/cls_lock_client.c
+@@ -299,7 +299,7 @@ static int decode_lockers(void **p, void *end, u8 *type, char **tag,
+ 	if (ret)
+ 		return ret;
+ 
+-	*num_lockers = ceph_decode_32(p);
++	ceph_decode_32_safe(p, end, *num_lockers, err_inval);
+ 	*lockers = kzalloc_objs(**lockers, *num_lockers, GFP_NOIO);
+ 	if (!*lockers)
+ 		return -ENOMEM;
+@@ -310,7 +310,8 @@ static int decode_lockers(void **p, void *end, u8 *type, char **tag,
+ 			goto err_free_lockers;
+ 	}
+ 
+-	*type = ceph_decode_8(p);
++	ret = -EINVAL;
++	ceph_decode_8_safe(p, end, *type, err_free_lockers);
+ 	s = ceph_extract_encoded_string(p, end, NULL, GFP_NOIO);
+ 	if (IS_ERR(s)) {
+ 		ret = PTR_ERR(s);
+@@ -320,6 +321,8 @@ static int decode_lockers(void **p, void *end, u8 *type, char **tag,
+ 	*tag = s;
+ 	return 0;
+ 
++err_inval:
++	return -EINVAL;
+ err_free_lockers:
+ 	ceph_free_lockers(*lockers, *num_lockers);
+ 	return ret;
+-- 
+2.53.0
+
