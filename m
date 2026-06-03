@@ -1,116 +1,205 @@
-Received: from mail-qv1-f51.google.com (mail-qv1-f51.google.com [209.85.219.51])
+Received: from mail-ot1-f54.google.com (mail-ot1-f54.google.com [209.85.210.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF0D43DC4D0
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2026 15:50:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 808372C21F2
+	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2026 17:00:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780501820; cv=none; b=EkHZUreXqca/5KSbnIzEun4/aZVWZ0sVwj5NEXoYiCN6dj3FCu2ynNF5XABB2qFutpIQbKBAkUcr7ffOf3wfeSEaKDLowujjda3bL+x2LsUwZMp+UtBRssMNNVDLsFHVqvKH82A5undECKmLiQv+41+B78FDXq0u6YqCjKKoSHE=
+	t=1780506046; cv=none; b=N0eG+VPY2athGYQRs7hD+TwonDpA6NRG9oeBofvtGWcJR/xk3G7i2ObBpr+n3fyx0UpLF2FKb0+5pRFHygN2x0Aw8dRlnmbynSRDGYTcSSDWUm7xhatfNcDyu8UFT+zospV8i0CeGaINE0kkz+F1zy/4MToU9yw7l5TZe8/olv0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780501820; c=relaxed/simple;
-	bh=8NjgZt2ufUAKT0v0bEDjkuL9dEknYB921yRBkS4Ekhg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=EeTW4HHjrTdglkTuob5rkUKhBeTUfyDwu9Km8PRp8Zaw83womkUJT6r1jPESg++6bqJrgsnZ6hwDgjpyywQ41x0p0M33lGct06Hc+GQSd7OcUa82YdoM0iKsX0dwkMOQ8cY6iLgsVpflVlk58Xz4QzcsQMaobgvker4cHjXRyDk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=a9vX5dMu; arc=none smtp.client-ip=209.85.219.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1780506046; c=relaxed/simple;
+	bh=C+atMj8E0VeFS8Jwo86eg+YRLRoqAUV9YsabUhuPPBw=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=aA1Uj5sCWYTkr6CFVvXVR4I9KOD1AHKF5ek4RU9bnKy2m1D07QcAtVTrufXnilRa9Qomz9kNsIS7PVgnjfR1n9Z8ZjGvA4VcE5ykqOvJvY5Zaw++9bG3oSkABCCT5m+4po/4NGTwmTZQT+KOupbsjYZeZBzA/wNlLsTJRUkeAIk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=sbHvG4Ic; arc=none smtp.client-ip=209.85.210.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="a9vX5dMu"
-Received: by mail-qv1-f51.google.com with SMTP id 6a1803df08f44-8cce26ee1e9so89661416d6.2
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jun 2026 08:50:17 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="sbHvG4Ic"
+Received: by mail-ot1-f54.google.com with SMTP id 46e09a7af769-7e6d2f297f4so1434368a34.2
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Jun 2026 10:00:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780501817; x=1781106617; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=jloqLgrwKVIF8BOkstk2Z6hbrUd4wWC+As7piYPUuNE=;
-        b=a9vX5dMuynpRaAkJik8o4navhUrQ8NM2A4PoKipy82rmGpcjFuL//U48zvk/GRQrGa
-         /Lj/+F20oB97o3niHKAWc3DBt6Togx7Oydky0uDm9Ukx2P0bwxT0gHtl9rVhxTYPhJ5l
-         RkxTblgCtZX5WUu6LrUAcsFv2VZJI2HFglI27mKmssU3hCBWz1sN684tu7JXrlq9nMVy
-         qcADAHPNwnkpy+y/NHVC1UoETIB5gYPhTXZ2wGjHMhV1roMIPjmBathS880Sb6oBWELC
-         2lRN16nifRraJe7ZEkALsAJjXfjjguPVNMR3WedG8VAl7YnZFGOHEATMBDIoYxs4bm+u
-         9+lA==
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780506042; x=1781110842; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:autocrypt
+         :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=8BNbn8Gw6ErCpk7zWof03GfRzDK3VA/rjGXDP/C41+8=;
+        b=sbHvG4IcfVxwht39DzOpBoHp3xl3f3VolmILIYYFrenie2UtYcTmT0BCofCVn6gYo3
+         xS/QgmwOZBOloGR6vqYzAKuKBt80I0MCP+yTmrKq05xM7NQtA7vB+5K/dMTlFtdS4ocu
+         Mme/sCJAY7BuSyCMCQNksXauoZz78WWvn5TPj7J5fnoS0IGxq57IVCYvTub5USk87Vpw
+         BDBP5vpSk+8mBDF2Hxgh+NbFUAVXk09wqLGYooP1GFkqY+rm6aAZ5khbQ16gNcwNKeCH
+         NVlZlPXhnq6MYS4VyBLhTvJN3j/TUKFsvrZhm5vs4TJKhErOmG2eo3e8KGc3xtqs6G80
+         NzNg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780501817; x=1781106617;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=jloqLgrwKVIF8BOkstk2Z6hbrUd4wWC+As7piYPUuNE=;
-        b=av1RsHB5fUkZ0rgpLOD/zFh6J9rVySDpeYWd7m83HD4aF/nKDqTfdnrhpcGyyG1+Kl
-         D9fgljc16jOUtA2a43Pohn4wLZ6ip924bDGBH7dTAPfoBwBkvXX5l3n3gJB798OyD2U6
-         8UyXY5Xtk+ef2km+n7fG7EyeuADBJ5wVcfXvMspGgvEZTBA+ZJawun6T29T+V8fNs9vD
-         nRT0vJl4So00OaYNmLQPXsXkCjW+65GcqWj6Ty8rJLBQB6zs3x/Qqa8yW3l8wdnw5v5Z
-         uljXUWxmQiSG/SQouBceoLs9lkoOyLbxpywLqR2BB1LSpv9oYCZJyBzic6aqYS522Rjs
-         6ZsA==
-X-Forwarded-Encrypted: i=1; AFNElJ8tBfpsZWMQfjKIv2codvqc78+3BY5fF8CUuyx4IXPYI/OCNXSWJBZ27vSHJ7i/MrF8m+kpOL+cOQY6@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx427oGY6pUSdplljosk2JFRFJc9A4yXgqdyVWQ/M+ZCFEnKLZH
-	NUtGtLfzRh4TL7D9IOF9hmIUtufqCqIe+cbAoqNgBbBeOoGD4wJPllvW
-X-Gm-Gg: Acq92OFlt3EPx2nWjpF4oIANO7OiqsybTEEnNbyW0cPekyce5i3roACUDvSwroKlDu2
-	fiWjiKVRL9FvnJGnCaJhEbIU7roaho9iff+sA/70eSCgkHoTuqk0Bu9pYoDvGGBkn3J4qKbwEjF
-	rtytD9n4O0Py9vqMbPdM1Rjo1yEP4gtEE93yi8TH0GHT4jELPMEarrfEvR0pqHYP+Qqxyq1b3T/
-	5bukcaAM3GilWB6RyAFA0F5iOKR9KriC9AnrsRjh/avU6Gy+5wnaR0oBrhL3ajcSEe8jszkf9mC
-	zIIJBFsYyLOlKkaLRgFdzftek9npR/wndOMgUmR6xVA/+K1E2hfrnAv7xApGd4fo2KCa93hp/ZK
-	mb/yzUTQqTJlHLRVRB6fa6KQbyaO3PTZTYsEYrK3cawOqkEnaPK98KitMm2wJrbIm3whJRknJ62
-	3gezodmCnmYUHrzgubDqZTAQP0FoLdFtuyt6oMUCZMY/qqWB7gKxIJVGMdsOHayfnwo7HBz5Twf
-	W4/RdeGsSMRK7w=
-X-Received: by 2002:a05:6214:2589:b0:899:efbf:9292 with SMTP id 6a1803df08f44-8cece16190emr48394546d6.43.1780501816523;
-        Wed, 03 Jun 2026 08:50:16 -0700 (PDT)
-Received: from zambezi.front.sepia.ceph.com (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8ceccd9fc7dsm23645436d6.5.2026.06.03.08.50.15
+        d=1e100.net; s=20251104; t=1780506042; x=1781110842;
+        h=mime-version:user-agent:content-transfer-encoding:autocrypt
+         :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=8BNbn8Gw6ErCpk7zWof03GfRzDK3VA/rjGXDP/C41+8=;
+        b=sTgzO1Bs5qUWIuaKJW3188oNTQ5folYeGAOsdo/+TUvQxvkF5I6EGytHpAGQvHDUxz
+         RK0YEvWEhapyYqHjehqmNmiAUkaE2GXiadKpeAJKu5HjHTT/iQGzfK/YAm6rm5n2xVcF
+         3tK35yTy8UvE9WH9qlyDwc3GTcEG4XXrIHSAb9AWqo1qwQ3WPv0mcDSZtqq3vOAnbBMo
+         +BGhvU8NfTNbnjsFkT/8yfDxWEYEzrHGKESdnOaduIjxfBis/rHDgj2ym4+zwxWP8NW2
+         Ba46NYCENJIIw2bMSVWDAmd2dqWfqC2H0qVhqGStptQ6bemif4u9BxgJL1bcxEC5M3ky
+         aQfQ==
+X-Gm-Message-State: AOJu0Yyb/7ArEZDfRp3iICqVMUYLTMu15YNx0c7bh9ZI6HinMBt2+ZHc
+	A3Iw2fmCKODlqW2S2zMjW8Nzha70nyvxxhbO41dkLcvUUgz0orchzFir3XgqTM7G5Jw=
+X-Gm-Gg: Acq92OE9M2bNl3Ypkocm4CLxvU6++yLsufNaULGAnEBhrU0dhAxF79aHKdtuIQOY+Es
+	1Pg2JdcZDd8tzLb5iNcYYBTG7iDdV6Dq3afQsmUQdkBJWGgioC1MNaNXlK+/n8TiajMnlRegc5S
+	2Epp58izvJMA5UhTnmBBSX2F/Zbu3Z390BDk7ev5/8qEDsGOovYZ/54KD2y3Ri7KnHQhh4ZQZ+G
+	CI/1StoungCTH2rHtzzptST4IqX2dfEdEqkJzCxND9VHdLgWAGMdS4yQ/YKaJ3Xzg51dSbhZ8ho
+	Y5Sw0VwEoYEUfabBPCKq0QO6YFBsZw9nC2Lvb0QMqVTFkci+HI/izOBrk0pEoy62lrfmkRNOBI8
+	S77pE+s9Uq8S40JWeDv3bl5XcJuLtQEuRBBHV4H3iYYuFpfqV9XcTa6I8iXUmwcOmdhJ3NKM226
+	1v8kMzDg/E9HyammJY01DnYco9JoILGEqZgVHR/qQ7mGQ+Mto0IfKUFoCNv3uogakZqhSgORVja
+	Qo1KWb5yXc7ZrRghetObXEFgPw8MdphTYRM6f5guSVAQodl9N1QiGvK0659MAYgbu75
+X-Received: by 2002:a05:6830:628c:b0:7dc:e30d:6498 with SMTP id 46e09a7af769-7e6e9460e83mr2502186a34.1.1780506041996;
+        Wed, 03 Jun 2026 10:00:41 -0700 (PDT)
+Received: from ?IPv6:2600:1700:6476:1430:9912:77fa:9c5:3949? ([2600:1700:6476:1430:9912:77fa:9c5:3949])
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7e6e78e7f9csm2086785a34.17.2026.06.03.10.00.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Jun 2026 08:50:15 -0700 (PDT)
-From: Ilya Dryomov <idryomov@gmail.com>
-To: Herbert Xu <herbert@gondor.apana.org.au>
-Cc: David Howells <dhowells@redhat.com>,
-	linux-crypto@vger.kernel.org,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] crypto: testmgr - allow authenc(hmac(sha{256,384}),cts(cbc(aes))) in FIPS mode
-Date: Wed,  3 Jun 2026 17:50:04 +0200
-Message-ID: <20260603155008.736872-1-idryomov@gmail.com>
-X-Mailer: git-send-email 2.54.0
+        Wed, 03 Jun 2026 10:00:41 -0700 (PDT)
+Message-ID: <f4c297b40c443347dde71e4d7ee3d08b9c95c0be.camel@dubeyko.com>
+Subject: Re: [PATCH v3] ceph: fix writeback_count leak in
+ write_folio_nounlock()
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: Wentao Liang <vulab@iscas.ac.cn>, idryomov@gmail.com, amarkuze@redhat.com
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	stable@vger.kernel.org
+Date: Wed, 03 Jun 2026 10:00:40 -0700
+In-Reply-To: <20260603012500.3688976-1-vulab@iscas.ac.cn>
+References: <20260603012500.3688976-1-vulab@iscas.ac.cn>
+Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
+ keydata=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
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.60.1 (by Flathub.org) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-hmac(sha256), hmac(sha384) and cts(cbc(aes)) algorithms have been
-marked as FIPS allowed for years.  Mark the respective authenc()
-constructions per RFC 8009 ("AES Encryption with HMAC-SHA2 for
-Kerberos 5") as such as well.
+On Wed, 2026-06-03 at 01:25 +0000, Wentao Liang wrote:
+> write_folio_nounlock() increments fsc->writeback_count to track
+> in-flight writeback operations. On several error paths where the
+> function returns early (folio lookup failure, snapshot context
+> allocation failure, and writepages submission failure), the function
+> returns without calling atomic_long_dec_return() to decrement the
+> counter.
+>=20
+> Each leaked increment keeps the counter above zero, which can prevent
+> the filesystem from cleanly unmounting or suspending writes.
+>=20
+> Add atomic_long_dec_return() calls on all error paths that currently
+> return without decrementing the counter.
+>=20
+> Fixes: d55207717ded ("ceph: add encryption support to writepage and
+> writepages")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Wentao Liang <vulab@iscas.ac.cn>
+>=20
+> ---
+> Changes in v3:
+> - Also clear write_congested flag when decrementing writeback_count
+> =C2=A0 on error paths, as suggested by Viacheslav Dubeyko.
+> - Fix typo error.
+> ---
+> =C2=A0fs/ceph/addr.c | 12 +++++++++---
+> =C2=A01 file changed, 9 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index a606378649c3..7fab73874068 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -790,7 +790,9 @@ static int write_folio_nounlock(struct folio
+> *folio,
+> =C2=A0				=C2=A0=C2=A0=C2=A0 ceph_wbc.truncate_size, true);
+> =C2=A0	if (IS_ERR(req)) {
+> =C2=A0		folio_redirty_for_writepage(wbc, folio);
+> -		atomic_long_dec(&fsc->writeback_count);
 
-SP 800-57 Part 3 Rev. 1 from Jan 2015 [1] links the draft of what
-became RFC 8009 in Oct 2016 as approved in section 6.3 Procurement
-Guidance (item/recommendation 3).
+Patch is not correctly prepared. Because, current state of the code
+hasn't atomic_long_dec().
 
-[1] https://csrc.nist.gov/pubs/sp/800/57/pt3/r1/final
+Thanks,
+Slava.
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- crypto/testmgr.c | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 4d86efae65b2..7788e6fa80ce 100644
---- a/crypto/testmgr.c
-+++ b/crypto/testmgr.c
-@@ -4215,6 +4215,7 @@ static const struct alg_test_desc alg_test_descs[] = {
- 		.alg = "authenc(hmac(sha256),cts(cbc(aes)))",
- 		.generic_driver = "authenc(hmac-sha256-lib,cts(cbc(aes-lib)))",
- 		.test = alg_test_aead,
-+		.fips_allowed = 1,
- 		.suite = {
- 			.aead = __VECS(krb5_test_aes128_cts_hmac_sha256_128)
- 		}
-@@ -4256,6 +4257,7 @@ static const struct alg_test_desc alg_test_descs[] = {
- 		.alg = "authenc(hmac(sha384),cts(cbc(aes)))",
- 		.generic_driver = "authenc(hmac-sha384-lib,cts(cbc(aes-lib)))",
- 		.test = alg_test_aead,
-+		.fips_allowed = 1,
- 		.suite = {
- 			.aead = __VECS(krb5_test_aes256_cts_hmac_sha384_192)
- 		}
--- 
-2.54.0
-
+> +		if (atomic_long_dec_return(&fsc->writeback_count) <
+> +				CONGESTION_OFF_THRESH(fsc-
+> >mount_options->congestion_kb))
+> +			fsc->write_congested =3D false;
+> =C2=A0		return PTR_ERR(req);
+> =C2=A0	}
+> =C2=A0
+> @@ -810,7 +812,9 @@ static int write_folio_nounlock(struct folio
+> *folio,
+> =C2=A0			folio_redirty_for_writepage(wbc, folio);
+> =C2=A0			folio_end_writeback(folio);
+> =C2=A0			ceph_osdc_put_request(req);
+> -			atomic_long_dec(&fsc->writeback_count);
+> +			if (atomic_long_dec_return(&fsc-
+> >writeback_count) <
+> +					CONGESTION_OFF_THRESH(fsc-
+> >mount_options->congestion_kb))
+> +				fsc->write_congested =3D false;
+> =C2=A0			return PTR_ERR(bounce_page);
+> =C2=A0		}
+> =C2=A0	}
+> @@ -849,7 +853,9 @@ static int write_folio_nounlock(struct folio
+> *folio,
+> =C2=A0			=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ceph_vinop(inode), folio);
+> =C2=A0			folio_redirty_for_writepage(wbc, folio);
+> =C2=A0			folio_end_writeback(folio);
+> -			atomic_long_dec_return(&fsc-
+> >writeback_count);
+> +			if (atomic_long_dec_return(&fsc-
+> >writeback_count) <
+> +					CONGESTION_OFF_THRESH(fsc-
+> >mount_options->congestion_kb))
+> +				fsc->write_congested =3D false;
+> =C2=A0			return err;
+> =C2=A0		}
+> =C2=A0		if (err =3D=3D -EBLOCKLISTED)
