@@ -1,196 +1,116 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f51.google.com (mail-qv1-f51.google.com [209.85.219.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EB8A39A4CE
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2026 08:58:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF0D43DC4D0
+	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2026 15:50:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780477084; cv=none; b=PNRW41JlDloWi+L34ldD3OJcP4Hf5euwbZPv8ekREg3p1Mw56q8UNyvlPWsISGvny3Hj7KPd2JmSIn/xZStAWstwHrP26Jw3b4TvOzJTYOKWOqU04XQNRunNczOBGwerd0eYG5bcP8dAD1jltxBDSLdCbIJgIwpkEH6mCQdbzss=
+	t=1780501820; cv=none; b=EkHZUreXqca/5KSbnIzEun4/aZVWZ0sVwj5NEXoYiCN6dj3FCu2ynNF5XABB2qFutpIQbKBAkUcr7ffOf3wfeSEaKDLowujjda3bL+x2LsUwZMp+UtBRssMNNVDLsFHVqvKH82A5undECKmLiQv+41+B78FDXq0u6YqCjKKoSHE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780477084; c=relaxed/simple;
-	bh=CrpXjK9TmOb4WGCATTvxK/i7LmGiaQqKF8WzwSEj8q8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=lJubRDN/exlG58JEaM+TyVX08K63+9d/iwQNsVyFrXpF5Y2LlyYtJ0r2MW3kqiHf9FYiB4SK/1Lmar/shmBz+HXLh9Hag6jgvkVVPQV+/B3zZ56EfGM3Kkr37uzUc8KaMnUmC7eZKGooFQ+yjoK8OgPABVGRIldQrmSaaaLk9KY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=lkC4xarn; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1780501820; c=relaxed/simple;
+	bh=8NjgZt2ufUAKT0v0bEDjkuL9dEknYB921yRBkS4Ekhg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=EeTW4HHjrTdglkTuob5rkUKhBeTUfyDwu9Km8PRp8Zaw83womkUJT6r1jPESg++6bqJrgsnZ6hwDgjpyywQ41x0p0M33lGct06Hc+GQSd7OcUa82YdoM0iKsX0dwkMOQ8cY6iLgsVpflVlk58Xz4QzcsQMaobgvker4cHjXRyDk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=a9vX5dMu; arc=none smtp.client-ip=209.85.219.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="lkC4xarn"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1780477078; h=message-id
- : date : mime-version : subject : to : cc : references : from :
- in-reply-to : content-type : content-transfer-encoding : from;
- bh=CrpXjK9TmOb4WGCATTvxK/i7LmGiaQqKF8WzwSEj8q8=;
- b=lkC4xarnaVlwuVEulk2/oE6qQVYjzLmuD0Jjr27HFYieEjg5Dv3j7CiH9dmDmL52NXTvd
- 30ttaLcPOe78U6e28VfOuooBxqFPF+xH/GjiZvSpHB063J9zMy72JP6cjZu2E1WCKTf+Lkz
- qMJGMSXZfetx1Eu8XMNVApvWcZf6XUGHGFB2Bonm6EsqI339GXz9+Y0ak803vNE56Wo0mA/
- zYRWZIKdof0HBy3ZqOY3WKmUYFseRaOMkEP8zqZ4qNP6DAmWuUbDDEpUNddZJtrfIy1XQYB
- ITgOnFs6n6o+S1LYwbgAX1PZD4+FbJ+aEy1xvYECBYLDIPZMJwqd50/0rTRg==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id B877D5FC42;
-	Wed,  3 Jun 2026 10:57:58 +0200 (CEST)
-Received: from [141.24.212.106] (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 7357E5FC93;
-	Wed,  3 Jun 2026 10:57:56 +0200 (CEST)
-Message-ID: <9dbe4363-85cc-47da-bc16-abe6dd8d7d07@tu-ilmenau.de>
-Date: Wed, 3 Jun 2026 10:57:56 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="a9vX5dMu"
+Received: by mail-qv1-f51.google.com with SMTP id 6a1803df08f44-8cce26ee1e9so89661416d6.2
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Jun 2026 08:50:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1780501817; x=1781106617; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=jloqLgrwKVIF8BOkstk2Z6hbrUd4wWC+As7piYPUuNE=;
+        b=a9vX5dMuynpRaAkJik8o4navhUrQ8NM2A4PoKipy82rmGpcjFuL//U48zvk/GRQrGa
+         /Lj/+F20oB97o3niHKAWc3DBt6Togx7Oydky0uDm9Ukx2P0bwxT0gHtl9rVhxTYPhJ5l
+         RkxTblgCtZX5WUu6LrUAcsFv2VZJI2HFglI27mKmssU3hCBWz1sN684tu7JXrlq9nMVy
+         qcADAHPNwnkpy+y/NHVC1UoETIB5gYPhTXZ2wGjHMhV1roMIPjmBathS880Sb6oBWELC
+         2lRN16nifRraJe7ZEkALsAJjXfjjguPVNMR3WedG8VAl7YnZFGOHEATMBDIoYxs4bm+u
+         9+lA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780501817; x=1781106617;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jloqLgrwKVIF8BOkstk2Z6hbrUd4wWC+As7piYPUuNE=;
+        b=av1RsHB5fUkZ0rgpLOD/zFh6J9rVySDpeYWd7m83HD4aF/nKDqTfdnrhpcGyyG1+Kl
+         D9fgljc16jOUtA2a43Pohn4wLZ6ip924bDGBH7dTAPfoBwBkvXX5l3n3gJB798OyD2U6
+         8UyXY5Xtk+ef2km+n7fG7EyeuADBJ5wVcfXvMspGgvEZTBA+ZJawun6T29T+V8fNs9vD
+         nRT0vJl4So00OaYNmLQPXsXkCjW+65GcqWj6Ty8rJLBQB6zs3x/Qqa8yW3l8wdnw5v5Z
+         uljXUWxmQiSG/SQouBceoLs9lkoOyLbxpywLqR2BB1LSpv9oYCZJyBzic6aqYS522Rjs
+         6ZsA==
+X-Forwarded-Encrypted: i=1; AFNElJ8tBfpsZWMQfjKIv2codvqc78+3BY5fF8CUuyx4IXPYI/OCNXSWJBZ27vSHJ7i/MrF8m+kpOL+cOQY6@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx427oGY6pUSdplljosk2JFRFJc9A4yXgqdyVWQ/M+ZCFEnKLZH
+	NUtGtLfzRh4TL7D9IOF9hmIUtufqCqIe+cbAoqNgBbBeOoGD4wJPllvW
+X-Gm-Gg: Acq92OFlt3EPx2nWjpF4oIANO7OiqsybTEEnNbyW0cPekyce5i3roACUDvSwroKlDu2
+	fiWjiKVRL9FvnJGnCaJhEbIU7roaho9iff+sA/70eSCgkHoTuqk0Bu9pYoDvGGBkn3J4qKbwEjF
+	rtytD9n4O0Py9vqMbPdM1Rjo1yEP4gtEE93yi8TH0GHT4jELPMEarrfEvR0pqHYP+Qqxyq1b3T/
+	5bukcaAM3GilWB6RyAFA0F5iOKR9KriC9AnrsRjh/avU6Gy+5wnaR0oBrhL3ajcSEe8jszkf9mC
+	zIIJBFsYyLOlKkaLRgFdzftek9npR/wndOMgUmR6xVA/+K1E2hfrnAv7xApGd4fo2KCa93hp/ZK
+	mb/yzUTQqTJlHLRVRB6fa6KQbyaO3PTZTYsEYrK3cawOqkEnaPK98KitMm2wJrbIm3whJRknJ62
+	3gezodmCnmYUHrzgubDqZTAQP0FoLdFtuyt6oMUCZMY/qqWB7gKxIJVGMdsOHayfnwo7HBz5Twf
+	W4/RdeGsSMRK7w=
+X-Received: by 2002:a05:6214:2589:b0:899:efbf:9292 with SMTP id 6a1803df08f44-8cece16190emr48394546d6.43.1780501816523;
+        Wed, 03 Jun 2026 08:50:16 -0700 (PDT)
+Received: from zambezi.front.sepia.ceph.com (ip-94-112-167-15.bb.vodafone.cz. [94.112.167.15])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8ceccd9fc7dsm23645436d6.5.2026.06.03.08.50.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 03 Jun 2026 08:50:15 -0700 (PDT)
+From: Ilya Dryomov <idryomov@gmail.com>
+To: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: David Howells <dhowells@redhat.com>,
+	linux-crypto@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] crypto: testmgr - allow authenc(hmac(sha{256,384}),cts(cbc(aes))) in FIPS mode
+Date: Wed,  3 Jun 2026 17:50:04 +0200
+Message-ID: <20260603155008.736872-1-idryomov@gmail.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4] libceph: Fix out-of-bounds writes with oversized
- monitor reply messages
-To: Viacheslav Dubeyko <slava@dubeyko.com>, Ilya Dryomov
- <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-References: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
- <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
-Content-Language: en-US
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
- 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
-In-Reply-To: <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-On 02.06.26 7:15 PM, Viacheslav Dubeyko wrote:
-> On Tue, 2026-06-02 at 17:10 +0200, Raphael Zimmer wrote:
->> When processing an incoming reply message of type
->> CEPH_MSG_STATFS_REPLY,
->> CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on the
->> monitor connection, an already allocated reply message for the given
->> transaction ID is used (if existing). Such a message has a
->> preallocated
->> front segment with a fixed length of 64, 512, or 32 bytes, depending
->> on
->> the message type it was allocated for. The actual length to receive
->> into
->> this buffer is read from the message. If this value exceeds the
->> allocation size, data received from the network is written beyond the
->> end of the allocated buffer.
->>
->> This patch fixes the issue by adding a check that compares the needed
->> front segment length to the previously allocated length when
->> retrieving
->> the message buffer. If the needed length exceeds the allocation, a
->> new
->> message buffer with the needed size is allocated to replace the
->> previous
->> one.
->>
->> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-> 
-> What's about Fixes here?
-> 
->> ---
->>  net/ceph/mon_client.c | 24 ++++++++++++++++++++++--
->>  1 file changed, 22 insertions(+), 2 deletions(-)
->>
->> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
->> index 66c0d6d6b33d..b33ae17546f8 100644
->> --- a/net/ceph/mon_client.c
->> +++ b/net/ceph/mon_client.c
->> @@ -712,6 +712,8 @@ static struct ceph_msg *get_generic_reply(struct
->> ceph_connection *con,
->>  	struct ceph_mon_client *monc = con->private;
->>  	struct ceph_mon_generic_request *req;
->>  	u64 tid = le64_to_cpu(hdr->tid);
->> +	int type = le16_to_cpu(hdr->type);
->> +	int front_len = le32_to_cpu(hdr->front_len);
->>  	u32 data_len = le32_to_cpu(hdr->data_len);
->>  	struct ceph_msg *m;
->>  
->> @@ -721,14 +723,30 @@ static struct ceph_msg
->> *get_generic_reply(struct ceph_connection *con,
->>  		dout("get_generic_reply %lld dne\n", tid);
->>  		*skip = 1;
->>  		m = NULL;
->> -	} else if (data_len > req->reply->data_length) {
->> +		goto out;
->> +	}
->> +
->> +	if (data_len > req->reply->data_length) {
->>  		pr_warn_ratelimited("mon generic reply tid %llu data
->> %u > preallocated %zu, skipping\n",
->>  				    tid, data_len, req->reply-
->>> data_length);
->>  		*skip = 1;
->>  		m = NULL;
->> +		goto out;
->> +	}
->> +
->> +	*skip = 0;
->> +	if (front_len > req->reply->front_alloc_len) {
->> +		pr_warn_ratelimited("tid %llu front %d > prealloc
->> %d\n",
->> +				    tid, front_len,
->> +				    req->reply->front_alloc_len);
->> +		m = ceph_msg_new(type, front_len, GFP_NOFS, false);
-> 
-> Does false is correct here? If we provide can_fail == false, then
-> allocation failure results it:
-> 
-> 	if (!can_fail) {
-> 		pr_err("msg_new can't create type %d front %d\n",
-> type,
-> 		       front_len);
-> 		WARN_ON(1);
-> 	} else {
-> 		dout("msg_new can't create type %d front %d\n", type,
-> 		     front_len);
-> 	}
-> 	return NULL;
-> 
-> The can_fail = true would suppress the WARN, matching the intent of a
-> graceful degradation path.
-> 
+hmac(sha256), hmac(sha384) and cts(cbc(aes)) algorithms have been
+marked as FIPS allowed for years.  Mark the respective authenc()
+constructions per RFC 8009 ("AES Encryption with HMAC-SHA2 for
+Kerberos 5") as such as well.
 
-I chose this to be consistent with the handling of reply messages on OSD
-connections [1] as well as the handling of other messages in
-mon_alloc_msg() [2]. I'm not sure about the graceful degradation path.
-If this allocation fails, it's an unexpected out-of-memory error.
-However, it's no functional difference and only affects the
-logging/WARN_ON(). So both options would be fine with me. If you think
-it's not a problem to not be completely consistent with other similar
-code paths, I can change it to can_fail == true.
+SP 800-57 Part 3 Rev. 1 from Jan 2015 [1] links the draft of what
+became RFC 8009 in Oct 2016 as approved in section 6.3 Procurement
+Guidance (item/recommendation 3).
 
-Best regards,
-Raphael
+[1] https://csrc.nist.gov/pubs/sp/800/57/pt3/r1/final
 
-[1]
-https://elixir.bootlin.com/linux/v7.1-rc6/source/net/ceph/osd_client.c#L5446-L5447
-[2]
-https://elixir.bootlin.com/linux/v7.1-rc6/source/net/ceph/mon_client.c#L1530
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ crypto/testmgr.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/crypto/testmgr.c b/crypto/testmgr.c
+index 4d86efae65b2..7788e6fa80ce 100644
+--- a/crypto/testmgr.c
++++ b/crypto/testmgr.c
+@@ -4215,6 +4215,7 @@ static const struct alg_test_desc alg_test_descs[] = {
+ 		.alg = "authenc(hmac(sha256),cts(cbc(aes)))",
+ 		.generic_driver = "authenc(hmac-sha256-lib,cts(cbc(aes-lib)))",
+ 		.test = alg_test_aead,
++		.fips_allowed = 1,
+ 		.suite = {
+ 			.aead = __VECS(krb5_test_aes128_cts_hmac_sha256_128)
+ 		}
+@@ -4256,6 +4257,7 @@ static const struct alg_test_desc alg_test_descs[] = {
+ 		.alg = "authenc(hmac(sha384),cts(cbc(aes)))",
+ 		.generic_driver = "authenc(hmac-sha384-lib,cts(cbc(aes-lib)))",
+ 		.test = alg_test_aead,
++		.fips_allowed = 1,
+ 		.suite = {
+ 			.aead = __VECS(krb5_test_aes256_cts_hmac_sha384_192)
+ 		}
+-- 
+2.54.0
+
