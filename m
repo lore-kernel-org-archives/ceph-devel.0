@@ -1,75 +1,75 @@
-Received: from mail-oi1-f170.google.com (mail-oi1-f170.google.com [209.85.167.170])
+Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6BA244DB73
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2026 17:12:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C865126BF7
+	for <ceph-devel@vger.kernel.org>; Wed,  3 Jun 2026 17:16:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780506770; cv=none; b=WPR2iDU8RQvt3gFyOHXN+FMV1AJGv3JBLO88JO8ZE9wQuyDCb8rYRSV3ijC100FN5PLE/lPD0yKIpcCatzAvGn6yA+aqQTMnBDyITd50Cai2BaxLHuB2+cE8w4T8a557YrjRZLDnUtdPYkwfiUtu/nUw7HLBhCUhRJK9oYgISMY=
+	t=1780507003; cv=none; b=pd1VmI8Yx7rw85ElbpVV173KdG+0DxdWQGplnsjh6PXsg1qrE3j+XqboNPqS8g2NL3lKD5U2Bydd6o3FP2Lad5nxKMC/7Wo2oouHNZ3zvQhj+VPgLUyVnjz+JlhZ8C3zZHcoDbsOS+9Q8aGNaUqGLGrscswhjebM6sVfw86815o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780506770; c=relaxed/simple;
-	bh=wsWpWEvQNhVUUEykAzMjrJBZpET9UbIt3zo6SgrnxFw=;
+	s=arc-20240116; t=1780507003; c=relaxed/simple;
+	bh=ngTCR9eiwJrkT1f/GsreUaKcuCcRtO+RjsZzwv67e5M=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=p+ZIGDF3fPA1wTX3KiBfafiSWDvhHy4krpztqDLA1A5TBhDW8b4chI5gtKK+Nuw6uCuw+px+pGp7Tt0cAFdfEwvP/L/y6h445tjKcdxD7X5fylsq1UQYJOtLcI7aiLCkEhHkUD8kd++Q5Z5B0+KIa8jxqa7buhzSRNGK5eItgoU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=Gmnzx+V6; arc=none smtp.client-ip=209.85.167.170
+	 Content-Type:MIME-Version; b=RjWh1vFQXCYT+eNVEfz0/3ZDXlFzjnLFWD+K0zThQo4/tZt9GANiLa+94uUcvBwKze3wxcOO8I23uSxHShOReY4Rs1o3xRwTDra1/uxO4snEG5koL8llxvklI7gi/r066Nrh8DWtNNiaw1BcsqZ2Oq5wK0fScpNKYVFNUa64PDQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=Cj1T0J9S; arc=none smtp.client-ip=209.85.167.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="Gmnzx+V6"
-Received: by mail-oi1-f170.google.com with SMTP id 5614622812f47-48670d35a87so15194b6e.1
-        for <ceph-devel@vger.kernel.org>; Wed, 03 Jun 2026 10:12:48 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="Cj1T0J9S"
+Received: by mail-oi1-f169.google.com with SMTP id 5614622812f47-4854166e1efso11518271b6e.3
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Jun 2026 10:16:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780506767; x=1781111567; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780507001; x=1781111801; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=sdJos9DxFWNEwtNb73fnv381GQri8Si62f+7n/hMFzg=;
-        b=Gmnzx+V62a9gHMMYPLnCBryteI326RAApVLpuNrO5Bojm2iGvbAjh4ybuWAkYhNbtL
-         cZfcB2ddMfC/3dmjfHCLC27ONRyVc6+3T5A5r7P23Em8+HNMUM2WN86fHMp6XJvjdMDI
-         iAZ15gx8YooszW2wCJtq8mW1EGjBtofKTYE+KvCQ2rSTninmqBJFcJXkBeHyE/8JQVbo
-         BlZ2UWmZW6dtsDTdpctUP5DLMD3UT6T4PFuz2faCd/UD6B1BRMtdaNk8KN5HwietBQ17
-         fuYOSw/EGlHMBtA64fI4aHWBRet6ArQWqSwiJ9SPaEZwlzkTwZDt7d1fU8eUxTcWNMsO
-         749g==
+        bh=YJNX1h2gxcWdqUcCrra8ZK/3LsYoZmD7kJVoNn5llxU=;
+        b=Cj1T0J9SevtYp9VFMKBLu1ZnYoCxCsLmWIyHy6naOzdWXH4j3So6sJMP6cqO7vUZci
+         IkahU3P8mc6MoFjKUUzlJJkw43EyZHPKVc3V2YJtBFfhtS1a+oIXZBOdBrCLaVEfyWdn
+         u1+BuMUzj0HapXTFVzMF2CGBxWKA0ZSzLj5tuNp0lQjfqDZ95aRdGDADuAzFPDiUSTw0
+         aA4kR030Qk3Edk52MzfHue2qXOqcgLbfGxiCkYMvdVQ1wC7EXt6l8BCNunDQQXkEnehI
+         anzcEfkHfNpYYaNinyd9lLXDgmGaajPZZKEuQMAVKPv/bZRtsj2TtrTN3dmrcXkzkV5S
+         MX5g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780506767; x=1781111567;
+        d=1e100.net; s=20251104; t=1780507001; x=1781111801;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=sdJos9DxFWNEwtNb73fnv381GQri8Si62f+7n/hMFzg=;
-        b=cL+Dvtg/dkQZ8ANg83MsR/4TGJKnt29QCoZ/XPRFIfaFdtVdB3UEK8nQEm2eWZfnV/
-         j+Nznmsa/UQ871lbHAL3MD+j+ar/pqjaTVrXqGg1KwBgUC0mDjWPTFUAiIG5l5eoEFFY
-         xoe4pHKxYJSD3Al2bTmo7+5Hq9nKL+pOu4MAR7ivE9Ct5rkqVC4FwcfiJqg/BxLEEDL5
-         IvCV5gfSHW/QNSwcHuKYXHThjmdb1oJ3CdF3fvx55sL3L/leqWRFPa0DdbBjDq6csZdf
-         4I2217gfNFGnsWmTZAZ6ZXan48ExrWNYNGFTSNLw2m7KfpJXl2q+diJD3O/xob7UEmb1
-         APLQ==
-X-Forwarded-Encrypted: i=1; AFNElJ+ia0dBBnn6a0fI3dZUP+xZzfse0r8HlU4wbnu+EqYqD/ynQbbEJEctBdy2HwvTvb2vJo3A8AiD2KfU@vger.kernel.org
-X-Gm-Message-State: AOJu0YxxNpbt5Nr+BwErzJvecahutgQ2Qot5AYx44a2rp6ZNuMMqrf0Z
-	3o392s1gTWw0IFdsdp82mMg3vLcSZDR+hOGDphzqhsLigBvmi2su0OlSaW0wcFYQshQ=
-X-Gm-Gg: Acq92OGhogXIT/oWNuDB3hYNyAxbRuyTKxc/sYooQsfVmcjWiBhtt1q4nD8fOlQSgLS
-	VQWl1coWCvrnEKeFgQJXM+I0QUmV//ZDeONiPvHunvgmWS24Mf58TE0z/T3mXifC0DCCvNLMYEL
-	K1hcHerSN3Gl6/udnfWQ6q11JLk5pXxv2sM/c7sttrUbCQZorAm7A/IDfnnQmPMh4GDiGJKvRgm
-	WGMvl9U2Ao0K4KEzRuZMhjaVvyKvqWyuXSEpB2/bgzlgdjfQH0kvWEfkrNYmR/VNQQK4DIbVxE/
-	lkQoEuoWp5+AR/ys7NQtXXalfCf2ON9xXTsLjY6GCKcS8sqb7K9hCpIBKhEn21v8nYcIoB83rLP
-	h8ATzFAO3hppwKbPFScmpJnuTKu1CNO8rUmSznx9obmalukjfexepzpvIiXACKIW76kGQHBa279
-	bMJ5mIkMtB866IxsltmylkQGB3U18gmzd5VL0E9y6GTvRvLoVcWFrjUwyauIf3/wn+BcZlNdwic
-	04lSg5500zf9CLQ0bRf7zwF+SASs9/Ih3rOR7gSSLu3DUlOtjUf9G3dRBZKNkse6tmf
-X-Received: by 2002:a05:6808:199f:b0:485:5430:2ba9 with SMTP id 5614622812f47-4866fee57eamr156538b6e.22.1780506767632;
-        Wed, 03 Jun 2026 10:12:47 -0700 (PDT)
+        bh=YJNX1h2gxcWdqUcCrra8ZK/3LsYoZmD7kJVoNn5llxU=;
+        b=hB+MTjVAeA5Z0scbr12o55/bCM5iTNjdujNl/JCJ5+7pD0UMztGpIvNgUy7q8MDXRF
+         m/Ak/2AE8jXHgSyQOk7hDIQFWq2sLpk+SXL5c7aAi1611JvvHSICVc/O9Rdy/27jCvKY
+         /wrnU2RWZ4MYsv0L9rI413A1glP52A8/4UptG3ljkBqj9axLZyXcKvzl+nJUxpTo/sXd
+         EWiPEFd7ADUjNTMDmO6y7p+1J8sz10JjRtaagOoJ2+7fVmcueiw4nVT5xLlhwtgf+npc
+         HfPMFEaZYvIlpLLfRdFjOhIzgTWWqhDadeo+cRpliQJEwORK3ZBvBaCOmeK69l9+tnyv
+         axww==
+X-Gm-Message-State: AOJu0YxeSB4ZL4i5kUPY9hH79BGYCX2K7uoQEO++rff6f0ejgo9wcBQI
+	UNQzH95lzA2FWPZgdSYWappv54/5fv3DKu0Mq7etjPvoiviI0n91rMFeaBqDId8DtbI=
+X-Gm-Gg: Acq92OGPeYRSC0icfCdT5w98MXqIrVNTSsXzdX/5tAV8FX3AUk2hTyTrlOvemWNkaPB
+	c88WuitZs4T0nzmN0UAiSZaBDWmVZNfKpKPHBcUNoK8VOrs8/5X5nSCf7Kl9kgSkHIDIpSIduVZ
+	uBZYmOHgsCNwOXwiX9WCv3xIPra7jhHYoNtQZjONirYaOjXcHmqiby1+PTlbHm3PkA9gmW5agTP
+	6ImW9B5R59gBonrRx+N6myVMQlgFx/deyfMoDxGUDb1u+PgG0RSGAXO92TuR1T6QQzHWQU4Woqy
+	uzrYjH7msJqeOhL67y//0uI+aUsdAGl+j7OPHYPN4mQajkoGMdoO15HOb4YGuGH2XEZeS9yAq3J
+	j0kBgrB37bztHHUX7WjSkERnahEG/ECqMrOhig31SgqoILUaTzmw8jOJbFfF/pSsguDRTHGGWX3
+	/JI8wYoEi2mlLqtJRq5bkrwTne5KrCxOZqdXnww7RY3mnqydBGzm+DYOIiztCldP8/GphdPYOza
+	yUE5HGnBxHPTM//gqjZkRcxVSqQjJEoAjFHD3HIBYDWYioESPVbGs1kP9yCKiOv2YM0
+X-Received: by 2002:a05:6808:17a2:b0:486:5115:6c0 with SMTP id 5614622812f47-4865aa254f0mr2609366b6e.14.1780507001253;
+        Wed, 03 Jun 2026 10:16:41 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:9912:77fa:9c5:3949? ([2600:1700:6476:1430:9912:77fa:9c5:3949])
-        by smtp.gmail.com with ESMTPSA id 5614622812f47-4865b91f944sm2177130b6e.9.2026.06.03.10.12.46
+        by smtp.gmail.com with ESMTPSA id 5614622812f47-4865b91f944sm2184557b6e.9.2026.06.03.10.16.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Jun 2026 10:12:46 -0700 (PDT)
-Message-ID: <55ec2272160ed73a2a376cf7400e2f87b7dcb34c.camel@dubeyko.com>
-Subject: Re: [PATCH] crypto: testmgr - allow
- authenc(hmac(sha{256,384}),cts(cbc(aes))) in FIPS mode
+        Wed, 03 Jun 2026 10:16:40 -0700 (PDT)
+Message-ID: <7973116eb155a81f8e886028318904c3ce5b7524.camel@dubeyko.com>
+Subject: Re: [PATCH v4] libceph: Fix out-of-bounds writes with oversized
+ monitor reply messages
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Ilya Dryomov <idryomov@gmail.com>, Herbert Xu
- <herbert@gondor.apana.org.au>
-Cc: David Howells <dhowells@redhat.com>, linux-crypto@vger.kernel.org, 
-	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date: Wed, 03 Jun 2026 10:12:45 -0700
-In-Reply-To: <20260603155008.736872-1-idryomov@gmail.com>
-References: <20260603155008.736872-1-idryomov@gmail.com>
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
+	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Date: Wed, 03 Jun 2026 10:16:39 -0700
+In-Reply-To: <9dbe4363-85cc-47da-bc16-abe6dd8d7d07@tu-ilmenau.de>
+References: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
+	 <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
+	 <9dbe4363-85cc-47da-bc16-abe6dd8d7d07@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -124,53 +124,129 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Wed, 2026-06-03 at 17:50 +0200, Ilya Dryomov wrote:
-> hmac(sha256), hmac(sha384) and cts(cbc(aes)) algorithms have been
-> marked as FIPS allowed for years.=C2=A0 Mark the respective authenc()
-> constructions per RFC 8009 ("AES Encryption with HMAC-SHA2 for
-> Kerberos 5") as such as well.
+On Wed, 2026-06-03 at 10:57 +0200, Raphael Zimmer wrote:
+> On 02.06.26 7:15 PM, Viacheslav Dubeyko wrote:
+> > On Tue, 2026-06-02 at 17:10 +0200, Raphael Zimmer wrote:
+> > > When processing an incoming reply message of type
+> > > CEPH_MSG_STATFS_REPLY,
+> > > CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on
+> > > the
+> > > monitor connection, an already allocated reply message for the
+> > > given
+> > > transaction ID is used (if existing). Such a message has a
+> > > preallocated
+> > > front segment with a fixed length of 64, 512, or 32 bytes,
+> > > depending
+> > > on
+> > > the message type it was allocated for. The actual length to
+> > > receive
+> > > into
+> > > this buffer is read from the message. If this value exceeds the
+> > > allocation size, data received from the network is written beyond
+> > > the
+> > > end of the allocated buffer.
+> > >=20
+> > > This patch fixes the issue by adding a check that compares the
+> > > needed
+> > > front segment length to the previously allocated length when
+> > > retrieving
+> > > the message buffer. If the needed length exceeds the allocation,
+> > > a
+> > > new
+> > > message buffer with the needed size is allocated to replace the
+> > > previous
+> > > one.
+> > >=20
+> > > Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> >=20
+> > What's about Fixes here?
+> >=20
+> > > ---
+> > > =C2=A0net/ceph/mon_client.c | 24 ++++++++++++++++++++++--
+> > > =C2=A01 file changed, 22 insertions(+), 2 deletions(-)
+> > >=20
+> > > diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> > > index 66c0d6d6b33d..b33ae17546f8 100644
+> > > --- a/net/ceph/mon_client.c
+> > > +++ b/net/ceph/mon_client.c
+> > > @@ -712,6 +712,8 @@ static struct ceph_msg
+> > > *get_generic_reply(struct
+> > > ceph_connection *con,
+> > > =C2=A0	struct ceph_mon_client *monc =3D con->private;
+> > > =C2=A0	struct ceph_mon_generic_request *req;
+> > > =C2=A0	u64 tid =3D le64_to_cpu(hdr->tid);
+> > > +	int type =3D le16_to_cpu(hdr->type);
+> > > +	int front_len =3D le32_to_cpu(hdr->front_len);
+> > > =C2=A0	u32 data_len =3D le32_to_cpu(hdr->data_len);
+> > > =C2=A0	struct ceph_msg *m;
+> > > =C2=A0
+> > > @@ -721,14 +723,30 @@ static struct ceph_msg
+> > > *get_generic_reply(struct ceph_connection *con,
+> > > =C2=A0		dout("get_generic_reply %lld dne\n", tid);
+> > > =C2=A0		*skip =3D 1;
+> > > =C2=A0		m =3D NULL;
+> > > -	} else if (data_len > req->reply->data_length) {
+> > > +		goto out;
+> > > +	}
+> > > +
+> > > +	if (data_len > req->reply->data_length) {
+> > > =C2=A0		pr_warn_ratelimited("mon generic reply tid %llu
+> > > data
+> > > %u > preallocated %zu, skipping\n",
+> > > =C2=A0				=C2=A0=C2=A0=C2=A0 tid, data_len, req->reply-
+> > > > data_length);
+> > > =C2=A0		*skip =3D 1;
+> > > =C2=A0		m =3D NULL;
+> > > +		goto out;
+> > > +	}
+> > > +
+> > > +	*skip =3D 0;
+> > > +	if (front_len > req->reply->front_alloc_len) {
+> > > +		pr_warn_ratelimited("tid %llu front %d >
+> > > prealloc
+> > > %d\n",
+> > > +				=C2=A0=C2=A0=C2=A0 tid, front_len,
+> > > +				=C2=A0=C2=A0=C2=A0 req->reply-
+> > > >front_alloc_len);
+> > > +		m =3D ceph_msg_new(type, front_len, GFP_NOFS,
+> > > false);
+> >=20
+> > Does false is correct here? If we provide can_fail =3D=3D false, then
+> > allocation failure results it:
+> >=20
+> > 	if (!can_fail) {
+> > 		pr_err("msg_new can't create type %d front %d\n",
+> > type,
+> > 		=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 front_len);
+> > 		WARN_ON(1);
+> > 	} else {
+> > 		dout("msg_new can't create type %d front %d\n",
+> > type,
+> > 		=C2=A0=C2=A0=C2=A0=C2=A0 front_len);
+> > 	}
+> > 	return NULL;
+> >=20
+> > The can_fail =3D true would suppress the WARN, matching the intent of
+> > a
+> > graceful degradation path.
+> >=20
 >=20
-> SP 800-57 Part 3 Rev. 1 from Jan 2015 [1] links the draft of what
-> became RFC 8009 in Oct 2016 as approved in section 6.3 Procurement
-> Guidance (item/recommendation 3).
->=20
-> [1] https://csrc.nist.gov/pubs/sp/800/57/pt3/r1/final
->=20
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
-> =C2=A0crypto/testmgr.c | 2 ++
-> =C2=A01 file changed, 2 insertions(+)
->=20
-> diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-> index 4d86efae65b2..7788e6fa80ce 100644
-> --- a/crypto/testmgr.c
-> +++ b/crypto/testmgr.c
-> @@ -4215,6 +4215,7 @@ static const struct alg_test_desc
-> alg_test_descs[] =3D {
-> =C2=A0		.alg =3D "authenc(hmac(sha256),cts(cbc(aes)))",
-> =C2=A0		.generic_driver =3D "authenc(hmac-sha256-
-> lib,cts(cbc(aes-lib)))",
-> =C2=A0		.test =3D alg_test_aead,
-> +		.fips_allowed =3D 1,
-> =C2=A0		.suite =3D {
-> =C2=A0			.aead =3D
-> __VECS(krb5_test_aes128_cts_hmac_sha256_128)
-> =C2=A0		}
-> @@ -4256,6 +4257,7 @@ static const struct alg_test_desc
-> alg_test_descs[] =3D {
-> =C2=A0		.alg =3D "authenc(hmac(sha384),cts(cbc(aes)))",
-> =C2=A0		.generic_driver =3D "authenc(hmac-sha384-
-> lib,cts(cbc(aes-lib)))",
-> =C2=A0		.test =3D alg_test_aead,
-> +		.fips_allowed =3D 1,
-> =C2=A0		.suite =3D {
-> =C2=A0			.aead =3D
-> __VECS(krb5_test_aes256_cts_hmac_sha384_192)
-> =C2=A0		}
+> I chose this to be consistent with the handling of reply messages on
+> OSD
+> connections [1] as well as the handling of other messages in
+> mon_alloc_msg() [2]. I'm not sure about the graceful degradation
+> path.
+> If this allocation fails, it's an unexpected out-of-memory error.
+> However, it's no functional difference and only affects the
+> logging/WARN_ON(). So both options would be fine with me. If you
+> think
+> it's not a problem to not be completely consistent with other similar
+> code paths, I can change it to can_fail =3D=3D true.
 
-Makes sense.
-
-Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+I already lost myself in all possible combinations of various
+arguments. :) You set *skip =3D 0 and if it means that we would like not
+see BUG_ON(), then we need to set can_fail =3D true. Otherwise, can_fail
+can have false value.
 
 Thanks,
 Slava.
