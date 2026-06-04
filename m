@@ -1,74 +1,76 @@
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D05D6175A70
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:21:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DC183C276F
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:28:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780600920; cv=none; b=Vdt/oAgeT+LbExL4VrzRROQdmZg8z9jF/MZWa+b42VYfj7l04t1y67F3NjDk9OOKSqtIWSipC873FhXB52Rd67lteUOBaBOcf555Z7j9EgnqcFHLyAxL26dfJFEnMEFt6BtIdEelK/NIA5tISYqRfH5KHG8A090f2xSBIobg4f0=
+	t=1780601312; cv=none; b=CycFmJzTCpuUx6zU0WVwG21qjwxNaIuj8uJUqplVYm43+vERI+j7qnfbt9AHYLgLoVIZhbelXrBSSYpy+FCE+zcSQesuu04Anp2FKZ0vbX5C7o0InDJ2bBjIRnHfcR+8Lb8fvTxlfUkDtBlm8bv8uaDvReQBJ6X6FvdFld/5060=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780600920; c=relaxed/simple;
-	bh=D+B46+kztZoRfRolR7Jt51wzkhaDVreQ7b6TY6p0T2s=;
+	s=arc-20240116; t=1780601312; c=relaxed/simple;
+	bh=TItzyWNZgOo/nbUaA7wdNW1r8/Z3HDCGHgSAfgA67pQ=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=G2nyXLAvPjiUfxI/qPm9LqxuMKtXby71nuuf1+KT6vGYzPIxTZfBHKeO/pdZz8h/F3ukiOy8c5XI8tdAbi7pgXLmn7Fs8wiRYv+Rnbjjvs0oFo3Dzd9kbueoZntUG+cRiFRM7IfvPp/RIcBV4p/pkHDgRq1bfpMw84OblNZ72bc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=VHwNmPOT; arc=none smtp.client-ip=209.85.128.175
+	 Content-Type:MIME-Version; b=KRPiUC4TmhSvIuiWB7ITjcqILOg0Jr8BS75h5rWdoS7oXiC8lVsVEf5pIBiXPfYKSypn1oNIgx1nvdeVe9bP5lA7/UQBYRFg/pd4oiZbHpQrme8I10iONvoCYoNAONOEAc1jsViZzxmTS54yOSA/qSs7gQUEvY0SBGaYj57MNh4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=lhYnHcYp; arc=none smtp.client-ip=209.85.128.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="VHwNmPOT"
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-7e2fd65f968so10728037b3.3
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:21:57 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="lhYnHcYp"
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-7e2fa3062easo11996667b3.2
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:28:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780600917; x=1781205717; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780601309; x=1781206109; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=+coeGXnnITnN1q6Wtsx1WTv71YYvQ9kaZogeVQjE5sc=;
-        b=VHwNmPOTciMymZxKURuTPzC5VqERX0GsP6QgQi4NEYMIppulAon0pkr20Hd8PvL1nK
-         2LF3UJEZvi/gzEZAt+uh4XnVFf8NOFM0DOoJE0M1kU5R2hHJrS7jyPiGM+6vrZ5nJ+wN
-         OjbUWhyZqCbnqWVzI12N/QEeIqxes8r58nxbafISdKTZtLXT9jW0LeT+39J9a4kppLC7
-         ShwQrYvzljVdYcT7S0NmlUdcTtDfTB04X/fwfREBrHoqToaut66xtHZdUA8HjoHNklbX
-         Qeq4r1HbgvdlN7NxP3QV295ayEqKK+KN7wqZEC7XnsfnDYaw6wCaCubMATS7a5+botLa
-         XGhA==
+        bh=KCjs80ykOUdYOov1ibREWQaylg8Gs47dTBWxVYP5wQU=;
+        b=lhYnHcYpgcKwjQnM83iuacqgYSTN5axg/MTf2OxyHu1eYm7GtFEWYpLBf2Zjw8qF6R
+         RjWn3ZWdzrjD6DKylKXFtPsQN/DEJ0Xhi0i4nPMgi9zN9VagDe/z9i578FrXFPcxq+/x
+         mENTQ2hOkz4JZDygJk4srfpz7tRrvQEoI7Kpr4MfVI25PjDvXKar0Kyc1KzpMWVAU6q+
+         7yvSLK00taCqEjNt01uEQAxyvTCBlPFERJQvF8BUG7yxqy2hQTZzORD/ryvDP4G1e3mY
+         X2h0ZrUNNdT9VxQyG2dimHwFy4mI43Al5fNV5C0tFUy7+XazgFpkp821kC6cAaU+KFnC
+         3lLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780600917; x=1781205717;
+        d=1e100.net; s=20251104; t=1780601309; x=1781206109;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=+coeGXnnITnN1q6Wtsx1WTv71YYvQ9kaZogeVQjE5sc=;
-        b=cIuJ3gdaP8D62K+E9W4EoAQ4q+7TWKNzfbx0YzfcYlyJ4jQ1HQ3OMD1AHF5VXt0jxQ
-         9F12emKoGsgjQWljQEfvwnmk5jZE+JQi9f0L7QxGDYpZcuRBX3ODVvauYY5NQRIKQxKP
-         XXos8ejBn2cm0aY9DJsAmWgRkefjtjcu/bKpvqdeBOza05FShqMv00MlkJzwbLoiIQx9
-         y/TSkaLMI5+YYFbnP+wyV3iTEDvdHUNzSqIaLldTU/6TLX9HmZRHqn7wcmdRqLVBnXVi
-         GdunOo170sQOC8Zs+ZuScDM1cY1PDlXZl7WVXWIVySBrP5j8DJw9AcTYadwL/oK3Y8Qx
-         vf7g==
-X-Gm-Message-State: AOJu0YyrxzNZCfhwhcZJkguj7+c0ixhkI7h9ZOyVrq8AiPPfyLh3y5cX
-	YYwqr94Snqk1SgGaJu4UqKJNUfZGuWiysspfsrY07OiZLWKJyqeScu9NDOU5we0IUcBuh440iVg
-	AzxsdYLg=
-X-Gm-Gg: Acq92OF6IBkQjKOBtuuNChnJbAIgAdVbIDBmnA2FmHKHbSDGet7C2N1STzxlykFFGW2
-	DQ36ZwxTkvOwUIVdrn1ZL00JxLE8r/7SyAxXW3/Yg1p6mHQyi5sjufPMxdPj93d2nzKCDFLvOyQ
-	RJS5yevXuBrGFMHUgWVchw/hKusmvI6UMCtV865cQdV2/bQY5XBI6SjggbaiyQw6hbEsT5rGSAj
-	2kc9xGoqzHzx12a1QHQJHYpQ75ooOtcEPnWYJrRjdgwAOaW73VHCXOYPK0+Rs8Tc9LgWt5GoZPL
-	JZmwbj4w8v9cJjJV0sFjIZ3Jq8jXtF/AAcFyowQkDy6JOONuRBUSthgijqyJccxO1O7cp8tp/GH
-	Crjk8UiN4hMdvlYasvz+3Xx5u1DuRxEdJUcMrqpmPtg99GS8jbDrDk5sc6Eh9aWpbM5XfDlDVTP
-	6YD3VOrmUC6VEjHcsLmBJ+l2jZU+WOgPrkN8snNXXwnvuPbC/ofmcTeH6XG3YHLGIlPDSOJ0mue
-	0xXtcbZZSTN3/N44ektuYcKwJhXZ6nrZK0GQ04DOvIDZx+l+VpcZ7oRTPEFGb1kPB3Xvew=
-X-Received: by 2002:a05:690c:48c6:b0:7dc:de6a:da63 with SMTP id 00721157ae682-7ed0de8d7bfmr2666637b3.49.1780600916810;
-        Thu, 04 Jun 2026 12:21:56 -0700 (PDT)
+        bh=KCjs80ykOUdYOov1ibREWQaylg8Gs47dTBWxVYP5wQU=;
+        b=aZ9KsKiMAEyE864+Qff5vNftwXGygAAB+Mgqmge4LVCH1X/QBPGFvNSpF7nEfaUGke
+         R+HBFSHDTihs0clm9/a/hBMWuf+WN1Aa/shVeghdXyU5tUpJdO/AHvf84O/Laff4XZbW
+         smGaiMJu8Ip0eWGelUnYpBqe0+5r6Vzpgtf8zO33aXS82AQuC9r2OT8IfOsDOjD8UV1U
+         B10pVW32XO9xCE462yINsy1/WTGqvzt7XBd9Q2GDE8p8egSFhGQhoSTcVpiGq3yLN0X2
+         lc1s3ui/j/Ca4aZh0KT34qvHaIf/Qg87z5U2PWFeydvA31V6fNlCK5c+vD2KZA+3qdln
+         VhYg==
+X-Forwarded-Encrypted: i=1; AFNElJ+SZcBmkfVPx2UWsUr6YTRKZOrs2JMuTk9aIWx8DwfQ1GkiD5MyphjGK2Q6RJAviba9HrCeyeYQlo0s@vger.kernel.org
+X-Gm-Message-State: AOJu0YzDGTmHzoOaPJA2zjqmKmuJ2X4LQ+S/H05WlECnH592s48BMg02
+	q6wpPVqHjku0Lux7hm9e8SXeQz5JJ9zcIdqczpeEzLXJNaPYZ5C5DceHSHyZKGfPeFvtwk1/nI1
+	4CNAicrc=
+X-Gm-Gg: Acq92OGEx9pte+o9vMzcWRoNeUoptXqsXE8I90XvWWMGFcNnoYnIwUk9H2zqcU7WABw
+	PFdTPCNm0CTV9jfIIOH0Qnht8bUxl0PFI08VKhL67Giy+nzmc6FTK0/vkV6WWcGxCGPIMUKHG9a
+	f2mRML/8VJWzoC2Qe7cG276Ycdh4Qkm2nh10oLB/caU2UhEEijyrdYhZ0+51THVa+w2N7IVl1Ze
+	J5KfqY01xeaAxtX3xf81DDC2PbZmROfxR0PyEFKQw2qBW/LSFaas3rb/EujgSAEwj8IlUFseNMM
+	RYoGalFaeY3/c1HSmk6PU5mXcvASs0X0RO8qfD/3Yx/aeCrXyA+igCwwDUuqTElU17BNwu3hK1x
+	R68iiTgSRvzhUSdgZfz8spQZvGaG3bJlaQs25STr0DaFL4JeLMqMeHRsDe44o4ydnfhU9yZT61o
+	15y6S1IQmHf/oY8ywf7XIdjObKnj4dKzYfmKTNeKET8bVAT4I7513cg7ih3mFqKHhiVTCBcYked
+	v/g4NFHVfvlsOEeT71npvaLwnvmp9dus1DSOnkhs4/3VM+aNwXjR9vtyHEpQYS5J7z3+hQ=
+X-Received: by 2002:a05:690c:4b81:b0:79a:6249:a046 with SMTP id 00721157ae682-7ed0a4f27b3mr3429587b3.9.1780601309252;
+        Thu, 04 Jun 2026 12:28:29 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:ae19:b6b2:5990:ed2a? ([2600:1700:6476:1430:ae19:b6b2:5990:ed2a])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea23492a24sm38618937b3.27.2026.06.04.12.21.54
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea20ea819esm39323027b3.10.2026.06.04.12.28.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jun 2026 12:21:55 -0700 (PDT)
-Message-ID: <da52131887fd085e7d21036a6b67d6795a64bb6b.camel@dubeyko.com>
-Subject: Re: [PATCH v4] ceph: fix writeback_count leak in
- write_folio_nounlock()
+        Thu, 04 Jun 2026 12:28:28 -0700 (PDT)
+Message-ID: <85dea67ad1983eab5b9ca7735d385f6a1e681e85.camel@dubeyko.com>
+Subject: Re: [PATCH v2] libceph: tolerate addrvecs with multiple entries of
+ the same type
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Wentao Liang <vulab@iscas.ac.cn>, idryomov@gmail.com, amarkuze@redhat.com
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org
-Date: Thu, 04 Jun 2026 12:21:53 -0700
-In-Reply-To: <20260604021951.3761714-1-vulab@iscas.ac.cn>
-References: <20260604021951.3761714-1-vulab@iscas.ac.cn>
+To: Kefu Chai <k.chai@proxmox.com>, ceph-devel@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	linux-kernel@vger.kernel.org
+Date: Thu, 04 Jun 2026 12:28:27 -0700
+In-Reply-To: <20260604140231.2759025-1-k.chai@proxmox.com>
+References: <20260423100904.2336750-1-k.chai@proxmox.com>
+	 <20260604140231.2759025-1-k.chai@proxmox.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -123,81 +125,107 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Thu, 2026-06-04 at 02:19 +0000, Wentao Liang wrote:
-> write_folio_nounlock() increments fsc->writeback_count to track
-> in-flight writeback operations. On several error paths where the
-> function returns early (folio lookup failure, snapshot context
-> allocation failure, and writepages submission failure), the function
-> returns without calling atomic_long_dec_return() to decrement the
-> counter.
+On Thu, 2026-06-04 at 22:02 +0800, Kefu Chai wrote:
+> ceph_decode_entity_addrvec() rejects any addrvec containing more than
+> one entry that matches the requested msgr type (LEGACY or MSGR2),
+> logging "another match of type N in addrvec" and returning -EINVAL.
 >=20
-> Each leaked increment keeps the counter above zero, which can prevent
-> the filesystem from cleanly unmounting or suspending writes.
+> Some admin tooling (e.g. pveceph mon create from Proxmox VE)
+> generates
+> addrvecs with multiple same-type entries when public_network lists
+> more
+> than one CIDR: it picks one local IP per subnet and emits both a v2
+> and
+> a v1 entry for each IP.=C2=A0 Monmaps shaped this way cause:
 >=20
-> Add atomic_long_dec_return() calls on all error paths that currently
-> return without decrementing the counter.
+> =C2=A0 libceph: mon0 (1)10.10.10.15:6789 session established
+> =C2=A0 libceph: another match of type 1 in addrvec
+> =C2=A0 libceph: problem decoding monmap, -22
 >=20
-> Fixes: d55207717ded ("ceph: add encryption support to writepage and
-> writepages")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Wentao Liang <vulab@iscas.ac.cn>
+> No Ceph code uses the extra entries: since Nautilus, the userspace
+> messenger (AsyncMessenger) unconditionally picks the first address of
+> the requested type and ignores any subsequent matches.
 >=20
+> Match that behavior: use the first matching entry and silently skip
+> any
+> subsequent ones.=C2=A0 This is a compatibility fix for existing
+> deployments
+> and does not enable dual-stack or multi-subnet address selection.
+>=20
+> Link: https://bugzilla.proxmox.com/show_bug.cgi?id=3D7518
+> Signed-off-by: Kefu Chai <k.chai@proxmox.com>
 > ---
-> Changes in v4:
-> - Also clear write_congested flag when decrementing writeback_count
-> =C2=A0 on error paths, as suggested by Viacheslav Dubeyko.
-> - Fix typo error.
-> - Fix diff error
-> ---
-> =C2=A0fs/ceph/addr.c | 9 +++++++++
-> =C2=A01 file changed, 9 insertions(+)
+> Changes since v1:
+> - Rewrite commit message to frame as compatibility fix; drop dual-
+> stack/
+> =C2=A0 multi-subnet framing and the two ceph tracker links
+> - Simplify comment in ceph_decode_entity_addrvec()
 >=20
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 0a86f672cc09..7fab73874068 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -790,6 +790,9 @@ static int write_folio_nounlock(struct folio
-> *folio,
-> =C2=A0				=C2=A0=C2=A0=C2=A0 ceph_wbc.truncate_size, true);
-> =C2=A0	if (IS_ERR(req)) {
-> =C2=A0		folio_redirty_for_writepage(wbc, folio);
-> +		if (atomic_long_dec_return(&fsc->writeback_count) <
-> +				CONGESTION_OFF_THRESH(fsc-
-> >mount_options->congestion_kb))
-> +			fsc->write_congested =3D false;
-> =C2=A0		return PTR_ERR(req);
-> =C2=A0	}
+> Tested by reproducing the Proxmox BZ 7518 scenario against a vstart
+> cluster whose mon addrvec was edited to contain two v1 + two v2
+> entries:
+>=20
+> =C2=A0=C2=A0=C2=A0 ceph mon set-addrs a \
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 '[v2:$ip1:$p2/0,v1:$ip1:$p1/0,=
+v2:$ip2:$p2/0,v1:$ip2:$p1/0]'
+>=20
+> A Debian VM booted with the patched kernel via 'qemu -kernel' then
+> ran 'mount -t ceph ...:$p1:/ /mnt -o name=3Dadmin'.=C2=A0 Pre-patch kerne=
+ls
+> fail at monmap decode with "another match of type 1 in addrvec"
+> (-EINVAL).=C2=A0 Post-patch, decode succeeds and the mount proceeds to
+> the auth / MDS-discovery stages.
+>=20
+> Also verified the decoder logic on the monmap.bin attached to BZ 7518
+> using a userspace port of ceph_decode_entity_addrvec(): the pre-patch
+> form returns -EINVAL on both msgr1 and msgr2 lookups; the post-patch
+> form returns 0 and picks the first matching entry.
+>=20
+> =C2=A0net/ceph/decode.c | 13 ++++---------
+> =C2=A01 file changed, 4 insertions(+), 9 deletions(-)
+>=20
+> diff --git a/net/ceph/decode.c b/net/ceph/decode.c
+> index bc109a1a4616..18f0a7c71950 100644
+> --- a/net/ceph/decode.c
+> +++ b/net/ceph/decode.c
+> @@ -87,8 +87,9 @@ ceph_decode_entity_addr(void **p, void *end, struct
+> ceph_entity_addr *addr)
+> =C2=A0EXPORT_SYMBOL(ceph_decode_entity_addr);
 > =C2=A0
-> @@ -809,6 +812,9 @@ static int write_folio_nounlock(struct folio
-> *folio,
-> =C2=A0			folio_redirty_for_writepage(wbc, folio);
-> =C2=A0			folio_end_writeback(folio);
-> =C2=A0			ceph_osdc_put_request(req);
-> +			if (atomic_long_dec_return(&fsc-
-> >writeback_count) <
-> +					CONGESTION_OFF_THRESH(fsc-
-> >mount_options->congestion_kb))
-> +				fsc->write_congested =3D false;
-> =C2=A0			return PTR_ERR(bounce_page);
-> =C2=A0		}
-> =C2=A0	}
-> @@ -847,6 +853,9 @@ static int write_folio_nounlock(struct folio
-> *folio,
-> =C2=A0			=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ceph_vinop(inode), folio);
-> =C2=A0			folio_redirty_for_writepage(wbc, folio);
-> =C2=A0			folio_end_writeback(folio);
-> +			if (atomic_long_dec_return(&fsc-
-> >writeback_count) <
-> +					CONGESTION_OFF_THRESH(fsc-
-> >mount_options->congestion_kb))
-> +				fsc->write_congested =3D false;
-> =C2=A0			return err;
-> =C2=A0		}
-> =C2=A0		if (err =3D=3D -EBLOCKLISTED)
+> =C2=A0/*
+> - * Return addr of desired type (MSGR2 or LEGACY) or error.
+> - * Make sure there is only one match.
+> + * Return addr of desired type (MSGR2 or LEGACY) or error.=C2=A0 If
+> multiple
+> + * entries of the desired type are present, use the first one for
+> + * compatibility with existing deployments.
+> =C2=A0 *
+> =C2=A0 * Assume encoding with MSG_ADDR2.
+> =C2=A0 */
+> @@ -120,13 +121,7 @@ int ceph_decode_entity_addrvec(void **p, void
+> *end, bool msgr2,
+> =C2=A0			return ret;
+> =C2=A0
+> =C2=A0		dout("%s i %d addr %s\n", __func__, i,
+> ceph_pr_addr(&tmp_addr));
+> -		if (tmp_addr.type =3D=3D my_type) {
+> -			if (found) {
+> -				pr_err("another match of type %d in
+> addrvec\n",
+> -				=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 le32_to_cpu(my_type));
 
-Looks good.
-
-Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Maybe, we still need to have some debugging output here? What's about
+dout()?
 
 Thanks,
 Slava.
+
+> -				return -EINVAL;
+> -			}
+> -
+> +		if (tmp_addr.type =3D=3D my_type && !found) {
+> =C2=A0			memcpy(addr, &tmp_addr, sizeof(*addr));
+> =C2=A0			found =3D true;
+> =C2=A0		}
+> --
+> 2.47.3
