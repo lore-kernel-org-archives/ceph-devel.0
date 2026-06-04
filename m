@@ -1,39 +1,54 @@
-Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [4.193.249.245])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id CA23F36AF6
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 03:19:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=4.193.249.245
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DCA03CDBDF;
+	Thu,  4 Jun 2026 07:43:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780543169; cv=none; b=MMGmBxahvy+Zf17eGNT9iJ0Rvrcqr2cRbOVYuW/QqXtWlxxquXmXqNVLoznQNuIvZKqH1TO6DeVrJaifNUKHhlubD8auSqdwyK2h4TvztLLNu5hR4lDZ9/dfYedcs5HEsSyY04ogxg/U5qO8v0uJLwH7Ir1vtmcJeTokpXfQIMo=
+	t=1780559018; cv=none; b=mSKIUDc50f9/rDjA8KeUWVyM+GcCOcHXJgOJwSoEFwr8rMDZrSO+R8AYj/NOdbpFt01oWBZbshtBSOQP8CenUt7UlfQYU3fq9Ab7wb0zykP+ZE1TKDrvzOtsSMVpZZSjUbZtap94ja9uGl5sh03vNLmOzb8mwtH8c74I3zw0uJQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780543169; c=relaxed/simple;
-	bh=VH5SzsiTnzAS9CfGPt2hLOIDvgpuwiWXfuvvWlqBdFI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=IrP3NuT/kb02JQ1m64ovOGekOGlChFNCnOnwgFK0U6AHFPOH4mo5t2F7fIf78K4NF+MMy5k4Aubw99ocHEspo44aKd0/tdrXe+O2xvCnQ+3Mmmmx+6OtYnX9gjwVddKxJPK0c7LUEy926Il5bpHed3YqDkS1wWrOpEmVqZjK500=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=4.193.249.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lzu.edu.cn
-Received: from enjou-Legion-Y7000P-2019 (unknown [172.23.56.36])
-	by app1 (Coremail) with SMTP id ygmowAD3E76t7iBq7vVYAA--.47646S3;
-	Thu, 04 Jun 2026 11:19:19 +0800 (CST)
-From: Ren Wei <n05ec@lzu.edu.cn>
-To: Viacheslav Dubeyko <vdubeyko@redhat.com>,
-	ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
+	s=arc-20240116; t=1780559018; c=relaxed/simple;
+	bh=sz9IUhwbmqR2n493Ci0EJdXpR3CejCN0rrlv54recvM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=MWCXQGgLe7FlgZQ2OC6rNQ5Uolsil4crxCk3j0MXpaleqtHTn5FKmIm/WpBdhspMPpj1wnte+UcvqNuHRXwM2EzXMYH9E2HqRQlDHjUBcr+eAhDbrG3NOaCg5ONbcclP51LkN4tgP6F34LDmVhWP9SY8tggzaJ4Oe1K//dK9RmA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: 14f934cc5fe911f1aa26b74ffac11d73-20260604
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.12,REQID:85391fbd-1ca0-4273-b394-82764f6ea626,IP:0,U
+	RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+	release,TS:0
+X-CID-META: VersionHash:e7bac3a,CLOUDID:09b0a0dd42006a51df36776c1e2f4c9e,BulkI
+	D:nil,BulkQuantity:0,Recheck:0,SF:102|850|865|898,TC:nil,Content:0|15|50,E
+	DM:-3,IP:nil,URL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA
+	:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: 14f934cc5fe911f1aa26b74ffac11d73-20260604
+X-User: zenghongling@kylinos.cn
+Received: from localhost.localdomain [(10.44.16.150)] by mailgw.kylinos.cn
+	(envelope-from <zenghongling@kylinos.cn>)
+	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
+	with ESMTP id 667632569; Thu, 04 Jun 2026 15:43:30 +0800
+From: Hongling Zeng <zenghongling@kylinos.cn>
+To: idryomov@gmail.com,
 	amarkuze@redhat.com,
 	slava@dubeyko.com,
-	sage@newdream.net,
-	Slava.Dubeyko@ibm.com,
-	yuantan098@gmail.com,
-	zcliangcn@gmail.com,
-	bird@lzu.edu.cn,
-	ldy3087146292@gmail.com,
-	n05ec@lzu.edu.cn
-Subject: [PATCH v4 2/2] libceph: crush: use CRUSH_ITEM_TYPE_DEVICE for leaf device checks
-Date: Thu,  4 Jun 2026 11:18:47 +0800
-Message-ID: <062971a5852907a5.1780473721.git.ldy3087146292@gmail.com>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
-References: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
+	jlayton@kernel.org,
+	jack@suse.cz,
+	neil@brown.name,
+	brauner@kernel.org
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	zhongling0719@126.com,
+	Hongling Zeng <zenghongling@kylinos.cn>,
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Subject: [PATCH v2] ceph: Fix ERR_PTR(0) in ceph_mkdir()
+Date: Thu,  4 Jun 2026 15:43:25 +0800
+Message-Id: <20260604074325.214093-1-zenghongling@kylinos.cn>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -41,79 +56,34 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:ygmowAD3E76t7iBq7vVYAA--.47646S3
-X-Coremail-Antispam: 1UD129KBjvJXoW7CrWrCw4kJr4kWrW7tF1xAFb_yoW8Ww4rpr
-	42g39FqFs7Zr13tFs3t3s29r12krZ0krWUZrn8X3ZFk3s7Gr93Gr43Ka9xtry7CayrCF92
-	vr1UAryDGw47GwUanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUBY1xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
-	w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
-	IY67AKxVW7JVWDJwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVW8Jr0_Cr1UM28EF7xvwVC2
-	z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s0DM2AIxVAIcxkEcV
-	Aq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j
-	6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64
-	vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7M4IIrI8v6xkF7I0E8cxan2IY04v7MxkF7I0E
-	n4kS14v26r1q6r43MxkIecxEwVCm-wCF04k20xvY0x0EwIxGrwCF04k20xvE74AGY7Cv6c
-	x26r48MxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCj
-	r7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI42IY6x
-	IIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42IY6xAI
-	w20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z280aVCY1x
-	0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7VUbGQ6JUUUUU==
-X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQAICWof488OKQAAs+
 
-From: Douya Le <ldy3087146292@gmail.com>
+When mkdir succeeds, ceph_mkdir() sets ret to ERR_PTR(0) which is
+incorrect. It should return NULL instead for success.
 
-The CRUSH mapper uses type 0 to identify leaf devices in several paths.
-
-Replace those hardcoded checks with CRUSH_ITEM_TYPE_DEVICE so the code
-uses the named device-type constant consistently.
-
-Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+Fixes: 88d5baf69082 ("Change inode_operations.mkdir to return struct dentry *")
+Signed-off-by: Hongling Zeng <zenghongling@kylinos.cn>
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
 ---
- net/ceph/crush/mapper.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Change in v2:
+ -Add pre-reviewer
+---
+ fs/ceph/dir.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 17b041779fb9da2deb8cdbf58439392d7fa2e8ef..00e139efd54eae36f75ed7cebd79ac9b0dc27262 100644
---- a/net/ceph/crush/mapper.c
-+++ b/net/ceph/crush/mapper.c
-@@ -530,7 +530,7 @@ static int crush_choose_firstn(const struct crush_map *map,
- 				if (item < 0)
- 					itemtype = map->buckets[-1-item]->type;
- 				else
--					itemtype = 0;
-+					itemtype = CRUSH_ITEM_TYPE_DEVICE;
- 				dprintk("  item %d type %d\n", item, itemtype);
- 
- 				/* keep going? */
-@@ -588,7 +588,7 @@ static int crush_choose_firstn(const struct crush_map *map,
- 
- 				if (!reject && !collide) {
- 					/* out? */
--					if (itemtype == 0)
-+					if (itemtype == CRUSH_ITEM_TYPE_DEVICE)
- 						reject = is_out(map, weight,
- 								weight_max,
- 								item, x);
-@@ -743,7 +743,7 @@ static void crush_choose_indep(const struct crush_map *map,
- 				if (item < 0)
- 					itemtype = map->buckets[-1-item]->type;
- 				else
--					itemtype = 0;
-+					itemtype = CRUSH_ITEM_TYPE_DEVICE;
- 				dprintk("  item %d type %d\n", item, itemtype);
- 
- 				/* keep going? */
-@@ -796,7 +796,7 @@ static void crush_choose_indep(const struct crush_map *map,
- 				}
- 
- 				/* out? */
--				if (itemtype == 0 &&
-+				if (itemtype == CRUSH_ITEM_TYPE_DEVICE &&
- 				    is_out(map, weight, weight_max, item, x))
- 					break;
- 
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 27ce9e55e947..7acd4353a7a7 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1169,7 +1169,7 @@ static struct dentry *ceph_mkdir(struct mnt_idmap *idmap, struct inode *dir,
+ 	    !req->r_reply_info.head->is_target &&
+ 	    !req->r_reply_info.head->is_dentry)
+ 		err = ceph_handle_notrace_create(dir, dentry);
+-	ret = ERR_PTR(err);
++	ret = err ? ERR_PTR(err) : NULL;
+ out_req:
+ 	if (!IS_ERR(ret) && req->r_dentry != dentry)
+ 		/* Some other dentry was spliced in */
 -- 
-2.47.3
+2.25.1
 
