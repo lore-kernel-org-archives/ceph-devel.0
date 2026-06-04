@@ -1,75 +1,77 @@
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FFFA3C09E2
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:40:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6EF937CD2B
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:43:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780602004; cv=none; b=Lwlc7NWDuHyQ81Jwe7u5rExdMtjXCFwvzOybQ4prJYkGsQLD6eIEzMg4oTjG0AikKGlR2EJNfZrUVv3rR4t/QKrwID3UWbzHXRA4QIz3doSwf5vBLm8g5/tqXXFcc5jhcrmczJUwzByeTBBRsy/uen7eQp7LzVti0vDREpWIcag=
+	t=1780602208; cv=none; b=EYLwsm1BpJx23C3Yj6RChtsRQ63rZ4h5VP1iXYC+NqY3fNYTegxHo0NpS8m2IrmUw3Hxjq8TPpjcduhT4/DBMF/47F+eUvZfcvg/6tGHN1UDbOeTcy8W+Kk7zJnp5M+KCGWKFSF5irtAD4p10OVq8Llo6wHx5OKzp3tIy9HYAKQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780602004; c=relaxed/simple;
-	bh=8qEtAfPXFzrOiS3Nor1eRFsLcwkGirTWHx1OkNW/w0c=;
+	s=arc-20240116; t=1780602208; c=relaxed/simple;
+	bh=Sx9tVgP16+DYfMS/9DzDegCfBu4NHf8XfbDUDkdOCBU=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=u/x1iCCv2Ca86smLX49/NXP/Wx6+BGDNW0jr0qzohmbYEeFvEDDvhNtzbVkoK/aZYeShH6+GCTL+eKj4/v+cHEc9VOoxxfK1+zzIaqn7tb+XeznomrR/8frFbZhZjU65Xd+BUmp2+tRp85SDPt90YK72a/XSBxTIACZAs6LTsiM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=JODvaTMn; arc=none smtp.client-ip=209.85.128.174
+	 Content-Type:MIME-Version; b=HikbQVoEPQ3WlFaQ5YJ60H34JBx26jBN4XQifi2aHws9iNLxy5NQbLRFt8gARprKeIS59KwO+TgbYTqVfzf00sQ69Qaw7zCwcsDk9unMhJMEkj0IFE+31lylq0H+Z1smNMlAKhv+iu2s6aKEUcUT5fw7NDA0KQT2B3NpO171rgs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=W3m48sEt; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="JODvaTMn"
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-7dc67a5e102so12904167b3.1
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:40:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="W3m48sEt"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-7e86d46b02dso12795017b3.3
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:43:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780602001; x=1781206801; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780602206; x=1781207006; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=SRDNF4XRsMILyeqd8pnV5EZ+1ao3z9JQnVe7XDtSGA4=;
-        b=JODvaTMn8TtbkSaHQ8oXNhena2H0/y0DT7nUklBbRl9DUENsKeE4QrXAz+HKM80EpZ
-         EBdilWaqc28Yp1T4t1V61M1bNj2Ho7B3pG2jqBEKo/VW1Nmg8yEtOrXh0nhQY3kD2MsR
-         KpznZuACjiAme0BIAzQSar/uIG7UZ/UopXx6FaiSuRdt1vAFdNGNMY0z4C32c6n+nap/
-         4n8kRcN5k8HjgHo8+5oSjIyhL/5D5mUDdIbsVM4x1205kuS68s8d+ni30P7xRGpUMKMe
-         8e3/9+U+Ke5aVPJlpGcPdpr29zZFaqbr5JlawbqOqBnTTFd3R+soXlFf4uDuMymu2R2S
-         lxZg==
+        bh=1aoZKPb94EwhP9d/m//IZ4XA84AB3htmBZebjWtsLJ8=;
+        b=W3m48sEt4bV1Bg/fPvz/w4erCvFZDxzt1i5OujlXC2Ronh9ZIhLeDk5o/rTakyJABr
+         ES3y424CdMYG3ItXz78M+Kzbk9p2RqqD3Czdm6d3AFF/vkRl1UfdL+BOHeCfacz3hXD3
+         UeUSt97Xu0IUK0IlXq5Fnk6fNLE+zduy9kELKBXuIfeq6kfAeUzN7vGFpRW225p83345
+         Nh9Pv+ygDLZ/+Eeiip8tfl+xttagkjTeRL5YKEOUMkEHplOoUSMPkdyRqln7/dy/QfCa
+         Z36ULVEl20T5fFn0eeN53aVDtg2CR6YV2bgVd1faLW7YwlHgBGQXRRgvvhHZZd8qoSJj
+         +QLg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780602001; x=1781206801;
+        d=1e100.net; s=20251104; t=1780602206; x=1781207006;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=SRDNF4XRsMILyeqd8pnV5EZ+1ao3z9JQnVe7XDtSGA4=;
-        b=Ma5kAOdoGN6bgpmZDiVw1ZXf4XTzWqwZhPXRpilCSwjwBsShDKYRYcYFGUQneFXNud
-         Now34CsulsrVXJ6V/P4TxrhXHpxT+GqpM4vpKn/hjjZG0zJB6UsrCdeoin4j0v9XZn0i
-         0MDYxP8eGbxuzOnTejIdBVmsJpVLvrBGxcelL1f9wN41gkyehwF1NuWcK0wDhAMUd02+
-         U4w7m2jKfhgvglvuWwTGQMIvODiX0dv3iSxKLoYCjwGkBp73NtHnX0bVnAB07302836k
-         xdUa6Ti6doozSTxm0S+m54EVQG1q3eibew7uFevwwLFdFmko66acMNVEBkhmtGOnp5tX
-         AsIA==
-X-Forwarded-Encrypted: i=1; AFNElJ9OhWUXUwSAF57urZQQ9eEwh2tzbhdPQr9t6baaADqbfogTlxGWBnhm7KvmPafPz+achQh+z8RAr5WG@vger.kernel.org
-X-Gm-Message-State: AOJu0YwhiQAuRlOZeRp6C/VC1/qxyHHul4Es4noT+heJT/av74hZh3wL
-	PSyEqOw3cH4RVarvWenXl6YBhKUOmXXQIr+NFKPiXSN+2kaQ0b1vSQQLyueQaP0IweE=
-X-Gm-Gg: Acq92OGXCvACo10/Jxy/5wTyQ3UBkHcMR+w6c/LOEY/OiMl2gG/waFoDWYm2DkD4V8s
-	SXfEZuJq0pF7H2HQ+U+7Qj1KcQZUNNE87eeSan9AAMmaU1coLvolzTLIxiLYb7L3HostOhY2WhD
-	u9Om8q+VX/QHo72WTAecQam6HxO3g24ScCizOybiX5oBQ8j/uYSiaL8VZByQzTnzQkTH/JLJiLL
-	xTtvBdDg1zOp7eoSeUU0w9ODxM/OXq5LkFJN7/1fJcPRpUc5RRBPtvmv1Rztiby8hcH9+QftV8G
-	iZNX1MpZtRENJFa0ixzdWPy6KL51rtzxItcjVJegOKnRDbhLsqYXcqVLEEUT1IGH0PTZPqUmWvq
-	KMJfZlrknF9YGqVoyGX+5ulvdr9ZcQIfdSn+TwpLKXniXAC9d8/birVNJTKjOYsg0iV1GKURRTm
-	d+k/dykhbvHBGHnckKHeP8dbgMdpgj9oJ4AhzgZ0GLxg9pBBokZxNnt4AiVSb6sdUlorqlTMK22
-	+9PmCDYgV1vUYEQgZ/8kNyJIrm3tkGnei4ThXBiIU/sTaFU15thdacbsdkBCwsgCIU8tjc=
-X-Received: by 2002:a05:690c:6a8a:b0:7bd:7e01:8d53 with SMTP id 00721157ae682-7ed0d7b44acmr3408487b3.19.1780602001421;
-        Thu, 04 Jun 2026 12:40:01 -0700 (PDT)
+        bh=1aoZKPb94EwhP9d/m//IZ4XA84AB3htmBZebjWtsLJ8=;
+        b=LKp0ZGK4wdzGBr/UckAEnol53eqQKrHcRyqlDFxDh3HmE2MXmjtw0EWNHkyQ3bSWOb
+         oz2kwO5n25Z5A1V74Z4c6iVMUbSPIMRCNjszEktmzQAtomyB9naXM2+GXlEPFZp4c5un
+         dPu7m1NAtk0fvqutOE+iJp2hjKjsBXCCA68okLHf3/WkG4LhZFF81WL5W4PtAN8TSM1A
+         ACgXIBCRIdVGb5G8PQsZatvkaaynr8INhAB/WPSIH6KFEHv/TNsSyTsDj1Q78mYXK7RZ
+         DgV/dU0wdhyiNOuY/K3L/ENYZImlJT7wCcQKSl8sl//fjb2fPqK8756VEmrgeoU5Dc7O
+         7OWg==
+X-Forwarded-Encrypted: i=1; AFNElJ/QG+Mw8Snstnd8gcuNhpeKO29h1v0Zqi2oVGwrfRZxgdJCnHRhi/gpgHcZxght8k4aZ8Aw3tzKODYJ@vger.kernel.org
+X-Gm-Message-State: AOJu0YzDhpoIWqZ/SpmgY5qr5YlV6vK3lVd1G+s8sfhFeN6mhVB2BDaf
+	LkZdp0WlY8X/a2LrowWkJNc+XY3/XNChW/SqEn/AUFccL2y/LjWhHPKvc1tAMxILUNk=
+X-Gm-Gg: Acq92OExkKHy3qGtJrhMQlUYJI62aWsDboSyUMDR3DooZnctQVvaooVXWHBRZFPAs5m
+	g2knqYtbaetpudIRBKlbn06LoFetnkV/iak8n/z1iTmC4Ai9rjP83ZvFOOTt16hFJkwYpljmOwH
+	Pg+iGdkse8F31jJiMg4RGfLgjPM/RxjsgThipCZvgjBzlCqO+sQKhe30ezp9ju6NA2ty/OjEfRR
+	BdzeItsWUUeKdSHs8Rq7QBF3ZcKEqdwevTHoa1Lpjj8PAO+5MHcO1IFU++sBeGn2mTfnG1n9e++
+	u3qZF4q6nbqZw8B7coDZVM5aCKMycpoYYjxzhnaPAemrK1u8N1XRsTKUDNQGKLRTyJpWWmqAVvg
+	9oVqcvJQVcRSdpU4jFWcrut8H1owv9o9n1MMRtLjfcQd7ay0Tlfoe3HxgfJg2CWdaABcI/elGk9
+	W6jWDXNGrtVLhw35QX87f1Qs2HCnNlMM1IwooAtN1p7JGudLf4L9ccN+lnYG8KzNK4AeTLO79u1
+	+G+6PEDWdAFXhxwlhMhXYpMQYmCi+0X79rBl1b2J4JscLezNK2OhWOrnlHNMSvt4sM8+4w=
+X-Received: by 2002:a05:690c:63c6:b0:7d0:1583:4cb3 with SMTP id 00721157ae682-7ed0fd13d79mr3430127b3.45.1780602205879;
+        Thu, 04 Jun 2026 12:43:25 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:ae19:b6b2:5990:ed2a? ([2600:1700:6476:1430:ae19:b6b2:5990:ed2a])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea2409db52sm38739517b3.44.2026.06.04.12.40.00
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea23a99b72sm38606887b3.38.2026.06.04.12.43.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jun 2026 12:40:00 -0700 (PDT)
-Message-ID: <d00df2ed85205662ba17a3f9a37b273277db8528.camel@dubeyko.com>
-Subject: Re: [PATCH v4 1/2] libceph: reject zero bucket types in crush_decode
+        Thu, 04 Jun 2026 12:43:25 -0700 (PDT)
+Message-ID: <db9f3f42af6a0a1d9a65eb90b605f4f9c971f46d.camel@dubeyko.com>
+Subject: Re: [PATCH v4 2/2] libceph: crush: use CRUSH_ITEM_TYPE_DEVICE for
+ leaf device checks
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Ren Wei <n05ec@lzu.edu.cn>, Viacheslav Dubeyko <vdubeyko@redhat.com>, 
 	ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net, 
 	Slava.Dubeyko@ibm.com, yuantan098@gmail.com, zcliangcn@gmail.com,
  bird@lzu.edu.cn, 	ldy3087146292@gmail.com
-Date: Thu, 04 Jun 2026 12:39:59 -0700
-In-Reply-To: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
+Date: Thu, 04 Jun 2026 12:43:23 -0700
+In-Reply-To: <062971a5852907a5.1780473721.git.ldy3087146292@gmail.com>
 References: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
+	 <062971a5852907a5.1780473721.git.ldy3087146292@gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,118 +129,83 @@ MIME-Version: 1.0
 On Thu, 2026-06-04 at 11:18 +0800, Ren Wei wrote:
 > From: Douya Le <ldy3087146292@gmail.com>
 >=20
-> CRUSH bucket type 0 is reserved for devices.=C2=A0 The mapper relies on
-> that invariant and uses type 0 to identify leaf devices.
+> The CRUSH mapper uses type 0 to identify leaf devices in several
+> paths.
 >=20
-> If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
-> can make the mapper treat a negative bucket ID as a device and pass
-> it
-> to is_out(), causing an out-of-bounds access when indexing the OSD
-> weight array with a negative value.
->=20
-> Reject zero bucket types while decoding the CRUSH map so the invalid
-> state never reaches the mapper.
->=20
-> Define the reserved device type as a standalone named constant
-> instead
-> of mixing it into the bucket algorithm enum.
->=20
-> Fixes: f24e9980eb86 ("ceph: OSD client")
-> Cc: stable@vger.kernel.org
-> Reported-by: Yuan Tan <yuantan098@gmail.com>
-> Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-> Reported-by: Xin Liu <bird@lzu.edu.cn>
-> Assisted-by: Codex:GPT-5.4
-> Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-> Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
->=20
-> ---
-> Changes in v4:
-> - define CRUSH_ITEM_TYPE_DEVICE as a standalone constant instead of
-> =C2=A0 putting it in the bucket algorithm enum
-> - move the remaining type-0-to-constant cleanups into a separate
-> patch
-> - v3 Link:
-> https://lore.kernel.org/all/d21e2f97dfe6f250.1780369814.git.ldy3087146292=
-@gmail.com/
->=20
-> Changes in v3:
-> - use CRUSH_BUCKET_DEVICE instead of CRUSH_ITEM_TYPE_DEVICE
-> - v2 Link:
-> https://lore.kernel.org/all/3200151429f33554f06ced8a.1780197742.git.ldy30=
-87146292@gmail.com/
->=20
-> Changes in v2:
-> - use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
-> - v1 Link:
-> https://lore.kernel.org/all/4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.1779=
-949116.git.ldy3087146292@gmail.com/
->=20
-> ---
-> =C2=A0include/linux/crush/crush.h | 4 +++-
-> =C2=A0net/ceph/osdmap.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0 | 2 ++
-> =C2=A02 files changed, 5 insertions(+), 1 deletion(-)
->=20
-> diff --git a/include/linux/crush/crush.h
-> b/include/linux/crush/crush.h
-> index
-> 30dba392b7302de3e14861f8b769242cd8cbac9e..76bd1fa036538df86d548b1c668
-> 163035c30ade6 100644
-> --- a/include/linux/crush/crush.h
-> +++ b/include/linux/crush/crush.h
-> @@ -110,6 +110,8 @@ struct crush_rule {
-> =C2=A0 *=C2=A0 straw=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0 O(n)=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 better=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 better
-> =C2=A0 *=C2=A0 straw2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0 O(n)=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 optimal=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0 optimal
-> =C2=A0 */
-> +#define CRUSH_ITEM_TYPE_DEVICE 0
+> Replace those hardcoded checks with CRUSH_ITEM_TYPE_DEVICE so the
+> code
+> uses the named device-type constant consistently.
 
-If I understood correctly, the b->type field encodes the CRUSH topology
-type (host, rack, row, datacenter, etc.). So, I think to have enum will
-be much better here.
+Usually, patchset requires a cover letter. The patch itself looks good.
+
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
 Thanks,
 Slava.
 
-> +
-> =C2=A0enum {
-> =C2=A0	CRUSH_BUCKET_UNIFORM =3D 1,
-> =C2=A0	CRUSH_BUCKET_LIST =3D 2,
-> @@ -130,7 +132,7 @@ extern const char *crush_bucket_alg_name(int
-> alg);
-> =C2=A0
-> =C2=A0struct crush_bucket {
-> =C2=A0	__s32 id;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* this'll be =
-negative */
-> -	__u16 type;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* non-zero; type=3D0 is rese=
-rved for devices
-> */
-> +	__u16 type;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* non-zero; CRUSH_ITEM_TYPE_=
-DEVICE is
-> reserved */
-> =C2=A0	__u8 alg;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* one of CRUS=
-H_BUCKET_* */
-> =C2=A0	__u8 hash;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* which hash funct=
-ion to use, CRUSH_HASH_*
-> */
-> =C2=A0	__u32 weight;=C2=A0=C2=A0=C2=A0 /* 16-bit fixed point */
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+>=20
+> Signed-off-by: Douya Le <ldy3087146292@gmail.com>
+> Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+>=20
+> ---
+> =C2=A0net/ceph/crush/mapper.c | 8 ++++----
+> =C2=A01 file changed, 4 insertions(+), 4 deletions(-)
+>=20
+> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
 > index
-> 8b5b0587a0cfa2c437b76c8c87251199efe20291..21cdd33f2945e0c1f45277ac05f
-> da373bf217586 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void
-> *pbyval, void *end)
-> =C2=A0		ceph_decode_need(p, end, 4*sizeof(u32), bad);
-> =C2=A0		b->id =3D ceph_decode_32(p);
-> =C2=A0		b->type =3D ceph_decode_16(p);
-> +		if (b->type =3D=3D CRUSH_ITEM_TYPE_DEVICE)
-> +			goto bad;
-> =C2=A0		b->alg =3D ceph_decode_8(p);
-> =C2=A0		if (b->alg !=3D alg) {
-> =C2=A0			b->alg =3D 0;
+> 17b041779fb9da2deb8cdbf58439392d7fa2e8ef..00e139efd54eae36f75ed7cebd7
+> 9ac9b0dc27262 100644
+> --- a/net/ceph/crush/mapper.c
+> +++ b/net/ceph/crush/mapper.c
+> @@ -530,7 +530,7 @@ static int crush_choose_firstn(const struct
+> crush_map *map,
+> =C2=A0				if (item < 0)
+> =C2=A0					itemtype =3D map->buckets[-1-
+> item]->type;
+> =C2=A0				else
+> -					itemtype =3D 0;
+> +					itemtype =3D
+> CRUSH_ITEM_TYPE_DEVICE;
+> =C2=A0				dprintk("=C2=A0 item %d type %d\n", item,
+> itemtype);
+> =C2=A0
+> =C2=A0				/* keep going? */
+> @@ -588,7 +588,7 @@ static int crush_choose_firstn(const struct
+> crush_map *map,
+> =C2=A0
+> =C2=A0				if (!reject && !collide) {
+> =C2=A0					/* out? */
+> -					if (itemtype =3D=3D 0)
+> +					if (itemtype =3D=3D
+> CRUSH_ITEM_TYPE_DEVICE)
+> =C2=A0						reject =3D is_out(map,
+> weight,
+> =C2=A0								weig
+> ht_max,
+> =C2=A0								item
+> , x);
+> @@ -743,7 +743,7 @@ static void crush_choose_indep(const struct
+> crush_map *map,
+> =C2=A0				if (item < 0)
+> =C2=A0					itemtype =3D map->buckets[-1-
+> item]->type;
+> =C2=A0				else
+> -					itemtype =3D 0;
+> +					itemtype =3D
+> CRUSH_ITEM_TYPE_DEVICE;
+> =C2=A0				dprintk("=C2=A0 item %d type %d\n", item,
+> itemtype);
+> =C2=A0
+> =C2=A0				/* keep going? */
+> @@ -796,7 +796,7 @@ static void crush_choose_indep(const struct
+> crush_map *map,
+> =C2=A0				}
+> =C2=A0
+> =C2=A0				/* out? */
+> -				if (itemtype =3D=3D 0 &&
+> +				if (itemtype =3D=3D
+> CRUSH_ITEM_TYPE_DEVICE &&
+> =C2=A0				=C2=A0=C2=A0=C2=A0 is_out(map, weight, weight_max,
+> item, x))
+> =C2=A0					break;
+> =C2=A0
