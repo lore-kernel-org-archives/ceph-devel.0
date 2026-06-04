@@ -1,226 +1,132 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f169.google.com (mail-qt1-f169.google.com [209.85.160.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B080630C62D
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 16:03:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51B8B386429
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 18:09:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780589010; cv=none; b=nU+1IJ0UviGOqXqXJbT1FXYApMMLQfxEUfds3F/MsBuNoprxaSb7aUKTx07T5VojxCDdEZPvmWU8pAsgel+0k43LLwFxK8NRDNn559nHJGgXtTx3D/SHpJbDng9Mk1RIvfPSIzbH/cufEstgF10cIVJD/fgYo/Eu6pgXpsEKqik=
+	t=1780596551; cv=none; b=iw4yHlMJaiuPnvtXI1Xlm+RiI37NIqyxk+u/rtfJXmzvB8weS3eTt9zLy+C0WsWIOBaGwqKfrvjphp3rdwpivJtVwBOTh1AYLBducpAGcCnXYefd16XcigRDSj2ahesBU15QYfRHWMepuvpcMuqbHsL9OaXrMbVhiny1UbRNtlY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780589010; c=relaxed/simple;
-	bh=K/zMQHFhNL6ODwHmJsXggivkNao1W+gcQaQfD19anPo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=OIm0t15rJHrsoBetE6T91Pwwl7Y3VGj2LFSEw37OjHykBh8AB4jPZaSnYQ28d4jPiRWTQcIMh6ccxYBjMqSZQe0tLnirbcB1MAWJ3NUqUf/aIm1k/0pAGaAgyA1V2SAxdLZfrszFIX1ifoqnLkdtwKbnqIyxlJWeU/UrHLi0a9w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=QeNWkMjR; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1780596551; c=relaxed/simple;
+	bh=i0ujoMB3NYlsNFPdP9lq7RAdOjAOpDttICbVjZBocZM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mmyZeBzpWo4kpbXTQ4z2NxTth60bbQ0/kSkEjCSfua5R101ZKT1iR1zJDvAlieE6+GNpDpAl1/juAkXdEV8m2KG9omizsqHLJtErT9OVRAg7r72AVA9JznwodiQOJEorR1qgDJzvsl7AyRVRGgVeaTKCxY1h4so7+4mIv0PZ7g0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NsYFv2Px; arc=none smtp.client-ip=209.85.160.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="QeNWkMjR"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1780588999; h=message-id
- : date : mime-version : subject : to : cc : references : from :
- in-reply-to : content-type : content-transfer-encoding : from;
- bh=K/zMQHFhNL6ODwHmJsXggivkNao1W+gcQaQfD19anPo=;
- b=QeNWkMjR+KIjyOxsShJv4gS04JtV3pFYIqKZ9W+o+u6TS5OPVhqVsbdCIsyQKSrYVVlcQ
- b3MnG4KUL8xTXWGBfc4fL9AIb4mnzjOrlC19U4CNf7iUacujzp1NeAFRpg/L8NpPKmryCBR
- bwB2LdnWrEbGiTnoJQqMYOkrxV7Ds+c7PGbIiP0zLs7DS7IsvFK6WVs2m22T1JUS178dIU1
- PmpejjLpedrnGbogQyzyTLIqaY4vuA+vbhTyDzfuX2ndLJBftX9y4SB5f55CoQb+WRBb1UX
- R+VfBF/0jRYxyqGYzDiUnjpWIUiKQ6/SVTrtHH+LWbZ04wCGmgabEAGGSAYw==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 0F5EB5FD56;
-	Thu,  4 Jun 2026 18:03:18 +0200 (CEST)
-Received: from [141.24.212.106] (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id A95FE5FB6E;
-	Thu,  4 Jun 2026 18:03:18 +0200 (CEST)
-Message-ID: <a2022028-8290-45ee-b7a3-312fc56010ee@tu-ilmenau.de>
-Date: Thu, 4 Jun 2026 18:03:18 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NsYFv2Px"
+Received: by mail-qt1-f169.google.com with SMTP id d75a77b69052e-5175cb5946dso5998181cf.0
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 11:09:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1780596549; x=1781201349; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=xYChz5dDOhgIdKBmtje4M1+cRrICz03eZkA2AVEvq/0=;
+        b=NsYFv2Px1kAoV9ML90XZPwqfYwgiarGwouElc8OeyCjAjvkOdw6Tju0OqOfut74+RY
+         FhOOz6wV31fH7sbaERdwcsNyLC89JX+oEOoXOPAZCXF4uiuMBQGAzgzV+G9MBRtBudUW
+         HMG2jHnbCkaeZoqJXQP2VVnM/QEdhO3IQ8CKffHw3L8OeMtcMUyf4C5KN/6TInpdqQD5
+         41O+EUoim1TtcRVWMZ/q+8yVBVw+/6MCKBX+SVTXAqIXT5lfg0HAslYdlsxNbJNPTpr0
+         VjyFFg0y0SeAhzMWw4t5OJKAnVEMT0PQDKw+ASbxKrvUM5QuljSFHHLcmeGgS1JNg4x1
+         vukQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780596549; x=1781201349;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=xYChz5dDOhgIdKBmtje4M1+cRrICz03eZkA2AVEvq/0=;
+        b=UKRS3oeNCcb5M4H8SmWnP//wYWifYxqSmaDU7Z5XmhOJQNM570Om58b4Xqps+YZbdR
+         FxoD1Kqb7EopTWCHIJtjGkGHohk/CJON+Mt3R1x1tbyre6J/yUp24T2FNDDEIbxzG7P0
+         4WHh0cgFl/m2FZIvem4iFPnDPHZyk9caoYueFTeulJxOUy4IQI6F3yFO4P29fLNdICS5
+         If7INdNhc9ITOZPsSSeecCJBTbD5Adh/flAlxEckcGI1MVotFicJEFlfSI2IFDoeWgRb
+         Y7Tec9w5MjCXDYt+FQvv4LdZ1Q26kc4qqeKdbpvcFt8gLMvqqam12Mc6gVldHARinG37
+         lruA==
+X-Gm-Message-State: AOJu0YxvyWnpoGUFDjE/jQgPnm2MAd0C8IU3cv46uwGtJ19ANoqtDP1e
+	AaRCKy5sA0ft3fyfBaGmwf6LQpHrQAVpfszS/X9HiscxQ3vOJy9yuGAB
+X-Gm-Gg: Acq92OFHK8Y21s4yeCUJL0iMJg8U+Cg9hU9JXq2yv3r/vhMictWiYE2xVUfJYoEKj1f
+	Ot5tRgSIOCEEGN4W+05CDzfYK9i8T3kR8P0i54lmnHtpNdXOllp7iRgfy+Flb3NHNtwwmeI0aQT
+	EUdcZ1eNgsjdLDxxr86aEeIBP3INTzJR7U76yVHAbKnKAszef2U5Oxm6odGhA0R2lF1jNatJ4c8
+	1j5AcnulAwqBWE7sRaRZKiutZrhpby7KeVvbEn4k2jeDp7KTMoTsovtaXQhfY4X+zfVoeCxNbWG
+	07rAluNNUas6Dst0pfIJKCBcjx1ElXHv3Tp+fkKlAWtUTGAr8cZM6RQm7m3ZNSzbDOdDP5ntisW
+	dMoSVQ6zHigbQKPALQEU/dC7dSmZQXGRuzur1KB+4IEX0COAbMHS4oOMn9FLwBTJwbLiRvNX7CE
+	tIFaCdblcGGj0lAQL1yAbUCaKL7dA1RhPvvNHEanscIzRCXhU//Sjpn2EF8tQX3TNEMaCgvITpl
+	s4F4N9dFL99Y4jBZNxuncqvrxPC1/s=
+X-Received: by 2002:a05:622a:4e89:b0:517:8bc0:9b5e with SMTP id d75a77b69052e-5178bc09ee5mr52725101cf.47.1780596548942;
+        Thu, 04 Jun 2026 11:09:08 -0700 (PDT)
+Received: from server0 (c-68-48-65-54.hsd1.mi.comcast.net. [68.48.65.54])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-51775dbd2c9sm59020961cf.23.2026.06.04.11.09.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 04 Jun 2026 11:09:07 -0700 (PDT)
+From: Michael Bommarito <michael.bommarito@gmail.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 0/4] ceph: bound untrusted MDS and monitor reply decoders
+Date: Thu,  4 Jun 2026 14:08:56 -0400
+Message-ID: <cover.1780596023.git.michael.bommarito@gmail.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4] libceph: Fix out-of-bounds writes with oversized
- monitor reply messages
-To: Viacheslav Dubeyko <slava@dubeyko.com>, Ilya Dryomov
- <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-References: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
- <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
- <9dbe4363-85cc-47da-bc16-abe6dd8d7d07@tu-ilmenau.de>
- <7973116eb155a81f8e886028318904c3ce5b7524.camel@dubeyko.com>
-Content-Language: en-US
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
- 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
-In-Reply-To: <7973116eb155a81f8e886028318904c3ce5b7524.camel@dubeyko.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 
-On 03.06.26 7:16 PM, Viacheslav Dubeyko wrote:
-> On Wed, 2026-06-03 at 10:57 +0200, Raphael Zimmer wrote:
->> On 02.06.26 7:15 PM, Viacheslav Dubeyko wrote:
->>> On Tue, 2026-06-02 at 17:10 +0200, Raphael Zimmer wrote:
->>>> When processing an incoming reply message of type
->>>> CEPH_MSG_STATFS_REPLY,
->>>> CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on
->>>> the
->>>> monitor connection, an already allocated reply message for the
->>>> given
->>>> transaction ID is used (if existing). Such a message has a
->>>> preallocated
->>>> front segment with a fixed length of 64, 512, or 32 bytes,
->>>> depending
->>>> on
->>>> the message type it was allocated for. The actual length to
->>>> receive
->>>> into
->>>> this buffer is read from the message. If this value exceeds the
->>>> allocation size, data received from the network is written beyond
->>>> the
->>>> end of the allocated buffer.
->>>>
->>>> This patch fixes the issue by adding a check that compares the
->>>> needed
->>>> front segment length to the previously allocated length when
->>>> retrieving
->>>> the message buffer. If the needed length exceeds the allocation,
->>>> a
->>>> new
->>>> message buffer with the needed size is allocated to replace the
->>>> previous
->>>> one.
->>>>
->>>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
->>>
->>> What's about Fixes here?
->>>
->>>> ---
->>>>  net/ceph/mon_client.c | 24 ++++++++++++++++++++++--
->>>>  1 file changed, 22 insertions(+), 2 deletions(-)
->>>>
->>>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
->>>> index 66c0d6d6b33d..b33ae17546f8 100644
->>>> --- a/net/ceph/mon_client.c
->>>> +++ b/net/ceph/mon_client.c
->>>> @@ -712,6 +712,8 @@ static struct ceph_msg
->>>> *get_generic_reply(struct
->>>> ceph_connection *con,
->>>>  	struct ceph_mon_client *monc = con->private;
->>>>  	struct ceph_mon_generic_request *req;
->>>>  	u64 tid = le64_to_cpu(hdr->tid);
->>>> +	int type = le16_to_cpu(hdr->type);
->>>> +	int front_len = le32_to_cpu(hdr->front_len);
->>>>  	u32 data_len = le32_to_cpu(hdr->data_len);
->>>>  	struct ceph_msg *m;
->>>>  
->>>> @@ -721,14 +723,30 @@ static struct ceph_msg
->>>> *get_generic_reply(struct ceph_connection *con,
->>>>  		dout("get_generic_reply %lld dne\n", tid);
->>>>  		*skip = 1;
->>>>  		m = NULL;
->>>> -	} else if (data_len > req->reply->data_length) {
->>>> +		goto out;
->>>> +	}
->>>> +
->>>> +	if (data_len > req->reply->data_length) {
->>>>  		pr_warn_ratelimited("mon generic reply tid %llu
->>>> data
->>>> %u > preallocated %zu, skipping\n",
->>>>  				    tid, data_len, req->reply-
->>>>> data_length);
->>>>  		*skip = 1;
->>>>  		m = NULL;
->>>> +		goto out;
->>>> +	}
->>>> +
->>>> +	*skip = 0;
->>>> +	if (front_len > req->reply->front_alloc_len) {
->>>> +		pr_warn_ratelimited("tid %llu front %d >
->>>> prealloc
->>>> %d\n",
->>>> +				    tid, front_len,
->>>> +				    req->reply-
->>>>> front_alloc_len);
->>>> +		m = ceph_msg_new(type, front_len, GFP_NOFS,
->>>> false);
->>>
->>> Does false is correct here? If we provide can_fail == false, then
->>> allocation failure results it:
->>>
->>> 	if (!can_fail) {
->>> 		pr_err("msg_new can't create type %d front %d\n",
->>> type,
->>> 		       front_len);
->>> 		WARN_ON(1);
->>> 	} else {
->>> 		dout("msg_new can't create type %d front %d\n",
->>> type,
->>> 		     front_len);
->>> 	}
->>> 	return NULL;
->>>
->>> The can_fail = true would suppress the WARN, matching the intent of
->>> a
->>> graceful degradation path.
->>>
->>
->> I chose this to be consistent with the handling of reply messages on
->> OSD
->> connections [1] as well as the handling of other messages in
->> mon_alloc_msg() [2]. I'm not sure about the graceful degradation
->> path.
->> If this allocation fails, it's an unexpected out-of-memory error.
->> However, it's no functional difference and only affects the
->> logging/WARN_ON(). So both options would be fine with me. If you
->> think
->> it's not a problem to not be completely consistent with other similar
->> code paths, I can change it to can_fail == true.
-> 
-> I already lost myself in all possible combinations of various
-> arguments. :) You set *skip = 0 and if it means that we would like not
-> see BUG_ON(), then we need to set can_fail = true. Otherwise, can_fail
-> can have false value.
-> 
-> Thanks,
-> Slava.
+The CephFS client decodes several variable-length fields from MDS and
+monitor replies without checking the declared length against the bytes
+actually present in the message. Each of the four sites below trusts a
+32-bit or 64-bit length from the wire and then copies, advances over, or
+loops on it. A malicious or compromised server (or, for the monitor map,
+an on-path attacker on an unsigned messenger session) can drive an
+out-of-bounds read or an unbounded loop in the client kernel. The fixes
+add the missing ceph_decode_need()/ceph_decode_copy_safe() bound or an
+explicit count cap, matching the idioms already used elsewhere in the
+same decoders.
 
-I'm sorry, but I don't really understand what you mean by "we would like
-not see BUG_ON()". I don't see that setting *skip = 0 in this specific
-case is related to a BUG_ON(). Can you please explain once more what
-exactly you mean by this?
+Patch 1 is the most serious: the over-read value is returned to user
+space through getxattr(2), so it is a kernel-heap information leak
+(AC:H, requires a user to read the attribute). Patches 2-4 are
+out-of-bounds reads / an unbounded loop that crash or wedge the client
+(denial of service, no information disclosure). For patch 3 the supplier
+is the monitor, a more privileged cluster role than the MDS; it is
+included as a hardening fix for the info_v 2/3 compatibility path.
 
-Best regards,
-Raphael
+All four were reproduced on x86_64 QEMU with CONFIG_KASAN=y by calling
+the real decoder via an in-tree debugfs harness, and re-run with the
+patch applied:
+
+  patch 1: stock - __build_xattrs() stores val_len=304 from a 256-byte
+           blob, then the getxattr memcpy is a slab-out-of-bounds read of
+           304 bytes; patched - decode returns -EIO, no value stored.
+  patch 2: stock - slab-out-of-bounds read of 512 bytes in
+           handle_session(); patched - the bound rejects the record.
+  patch 3: stock - slab-out-of-bounds read in ceph_mdsmap_decode();
+           patched - decode returns -EINVAL.
+  patch 4: stock - ceph_parse_deleg_inos() runs 1048640 iterations on a
+           crafted len; patched - returns -EIO before the loop.
+
+Well-formed replies still decode in every case (valid xattr value,
+in-range delegation, in-bounds export-target array). These bugs were
+found with AI assistance and are reported on the public list
+accordingly, especially since they are mostly about a malicious
+trusted server.
+
+Michael Bommarito (4):
+  ceph: bound xattr value length in __build_xattrs()
+  ceph: bound MDSCapAuth path and fs_name decode in handle_session()
+  ceph: bound num_export_targets array for mds info v2/v3
+  ceph: cap delegated inode count in ceph_parse_deleg_inos()
+
+ fs/ceph/mds_client.c | 22 ++++++++++++++++++++--
+ fs/ceph/mdsmap.c     |  2 ++
+ fs/ceph/super.h      |  9 +++++++++
+ fs/ceph/xattr.c      |  1 +
+ 4 files changed, 32 insertions(+), 2 deletions(-)
+
+
+base-commit: f72c95f3a516d87483e225ae081a402a09fd0127
+-- 
+2.53.0
 
