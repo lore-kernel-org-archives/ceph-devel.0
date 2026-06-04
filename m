@@ -1,33 +1,36 @@
-Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B08D340403;
-	Thu,  4 Jun 2026 02:20:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.21
+Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [52.175.55.52])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 1F4B738886B
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 03:19:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=52.175.55.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780539617; cv=none; b=Jy0nBNbQeZU93Jx5mUKytgvn5z8YRYxg0J3mp1kw4OMxfSfH+Fe/QW8QXlqMOZthf0Kc+7TSLConXItFMmblhlD+pq5+eZgPFjoc2KVygXdpOKIcadpo9RGnQ/yAvqOBVlpwzawCpgKGHRj/tNE9Kkd3BbU/HthIlrkj5QZyinc=
+	t=1780543166; cv=none; b=AJaO6yQ22Oto58473X5iAx/wJ03zkkxZfl5XHqXKgCqJw8YJVxTxGRZnltbDjgJ7okYaCVY1DnEMCUU4Ci3YjGhCPJFAxtyO0pKQqUbnZIH+X6ErRNAvaJ2GBPSiQzPxTTrCFyL3co8PL+aWyQRaWOLA3ISrxwh3r6R2I4INJAI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780539617; c=relaxed/simple;
-	bh=aJWleBx/5Dcu19+quRXRZYQfmXahNHmM0M9vSy1P+vw=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Mw0GxPVzyJb2Xi6rTimEVyE3v528eIO1nnlFp/3hrJGaCGKTRDuIN31rHB76y8tmTopYanhwbwqDuo2FMqfKPv7O1hmDtcG26pulUAy5WF8+9zpKZa3qZfz5gmBSFLyF0x/A6gOLQhLXwCa0OgSzjCrzsRmskqU4gdQrVpVMiRw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
-Received: from dfae2b116770.home.arpa (unknown [36.110.52.2])
-	by APP-01 (Coremail) with SMTP id qwCowACnR9DX4CBqcMaQAA--.8961S2;
-	Thu, 04 Jun 2026 10:20:07 +0800 (CST)
-From: Wentao Liang <vulab@iscas.ac.cn>
-To: idryomov@gmail.com,
+	s=arc-20240116; t=1780543166; c=relaxed/simple;
+	bh=uk5eazkFzj3iJU4CG+a6HiQHKT7Qe7d1XUfdl4RgkfA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=s/wii60kOZGT5k5GtyFEZNSXwye2DnzeJCd4M5Rymzr5A7umK9yEq1KAfewBm5PRpNCbF/ssSoKXs/3CD9lWte/uoPQK3C2xlC/e912BmtO0l9RA5QlLvaCdqkqVnnav7v2ZjgnAHTBD7fA6HNbcerwD5c/47ud5NRYYrLQlEeA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=52.175.55.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lzu.edu.cn
+Received: from enjou-Legion-Y7000P-2019 (unknown [172.23.56.36])
+	by app1 (Coremail) with SMTP id ygmowAD3E76t7iBq7vVYAA--.47646S2;
+	Thu, 04 Jun 2026 11:19:09 +0800 (CST)
+From: Ren Wei <n05ec@lzu.edu.cn>
+To: Viacheslav Dubeyko <vdubeyko@redhat.com>,
+	ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
 	amarkuze@redhat.com,
-	slava@dubeyko.com
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Wentao Liang <vulab@iscas.ac.cn>,
-	stable@vger.kernel.org
-Subject: [PATCH v4] ceph: fix writeback_count leak in write_folio_nounlock()
-Date: Thu,  4 Jun 2026 02:19:51 +0000
-Message-Id: <20260604021951.3761714-1-vulab@iscas.ac.cn>
-X-Mailer: git-send-email 2.34.1
+	slava@dubeyko.com,
+	sage@newdream.net,
+	Slava.Dubeyko@ibm.com,
+	yuantan098@gmail.com,
+	zcliangcn@gmail.com,
+	bird@lzu.edu.cn,
+	ldy3087146292@gmail.com,
+	n05ec@lzu.edu.cn
+Subject: [PATCH v4 1/2] libceph: reject zero bucket types in crush_decode
+Date: Thu,  4 Jun 2026 11:18:46 +0800
+Message-ID: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -35,86 +38,105 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qwCowACnR9DX4CBqcMaQAA--.8961S2
-X-Coremail-Antispam: 1UD129KBjvJXoWxJr4UXF4xKw4fKrWDtrW3Awb_yoW8Kry8pr
-	Wjk34DKr40vr1xGr9xCasYq3WYk3y8Cr4fKF4UXF13uFn5Xr42ga4jq3yYqF13AryfJa9a
-	qF4vkrykuayDAFJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUkK14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-	1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
-	6F4UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AKxVWxJr
-	0_GcWle2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
-	2Ix0cI8IcVAFwI0_JF0_Jw1lYx0Ex4A2jsIE14v26r4UJVWxJr1lOx8S6xCaFVCjc4AY6r
-	1j6r4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwCY1x0262kKe7AK
-	xVWUAVWUtwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F4
-	0E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_JF0_Jw1l
-	IxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxV
-	AFwI0_Jr0_Gr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j
-	6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Jr0_GrUvcSsGvfC2KfnxnUUI43ZEXa7VUbLiSJ
-	UUUUU==
-X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiBgoIA2ogubF-3gABsl
+X-CM-TRANSID:ygmowAD3E76t7iBq7vVYAA--.47646S2
+X-Coremail-Antispam: 1UD129KBjvJXoWxGrykur1ktr4rtw15tw1xGrg_yoW5ZFW7pa
+	9rAr4DWr97uryUtFsYka17ur4UJanxG34xWr98X34jv3yqgrn5Ww4IkFZ09rnrCFWrKF4I
+	qF97Wryq9wn0vFDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUB01xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
+	w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
+	IY67AKxVW7JVWDJwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVWxJVW8Jr1l84ACjcxK6I8E
+	87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_GcCE3s1le2I262IYc4CY6c
+	8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jr0_
+	Jr4lYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwI
+	xGrwACjI8F5VA0II8E6IAqYI8I648v4I1lFIxGxcIEc7CjxVA2Y2ka0xkIwI1lc7CjxVAa
+	w2AFwI0_Jw0_GFylc2xSY4AK6svPMxAIw28IcxkI7VAKI48JMxAIw28IcVCjz48v1sIEY2
+	0_Gr4l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8G
+	jcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2I
+	x0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK
+	8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I
+	0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfUonmRUUUUU
+X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQAHCWof488ItgAFst
 
-write_folio_nounlock() increments fsc->writeback_count to track
-in-flight writeback operations. On several error paths where the
-function returns early (folio lookup failure, snapshot context
-allocation failure, and writepages submission failure), the function
-returns without calling atomic_long_dec_return() to decrement the
-counter.
+From: Douya Le <ldy3087146292@gmail.com>
 
-Each leaked increment keeps the counter above zero, which can prevent
-the filesystem from cleanly unmounting or suspending writes.
+CRUSH bucket type 0 is reserved for devices.  The mapper relies on
+that invariant and uses type 0 to identify leaf devices.
 
-Add atomic_long_dec_return() calls on all error paths that currently
-return without decrementing the counter.
+If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
+can make the mapper treat a negative bucket ID as a device and pass it
+to is_out(), causing an out-of-bounds access when indexing the OSD
+weight array with a negative value.
 
-Fixes: d55207717ded ("ceph: add encryption support to writepage and writepages")
+Reject zero bucket types while decoding the CRUSH map so the invalid
+state never reaches the mapper.
+
+Define the reserved device type as a standalone named constant instead
+of mixing it into the bucket algorithm enum.
+
+Fixes: f24e9980eb86 ("ceph: OSD client")
 Cc: stable@vger.kernel.org
-Signed-off-by: Wentao Liang <vulab@iscas.ac.cn>
+Reported-by: Yuan Tan <yuantan098@gmail.com>
+Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
+Reported-by: Xin Liu <bird@lzu.edu.cn>
+Assisted-by: Codex:GPT-5.4
+Signed-off-by: Douya Le <ldy3087146292@gmail.com>
+Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
 
 ---
 Changes in v4:
-- Also clear write_congested flag when decrementing writeback_count
-  on error paths, as suggested by Viacheslav Dubeyko.
-- Fix typo error.
-- Fix diff error
----
- fs/ceph/addr.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+- define CRUSH_ITEM_TYPE_DEVICE as a standalone constant instead of
+  putting it in the bucket algorithm enum
+- move the remaining type-0-to-constant cleanups into a separate patch
+- v3 Link: https://lore.kernel.org/all/d21e2f97dfe6f250.1780369814.git.ldy3087146292@gmail.com/
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 0a86f672cc09..7fab73874068 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -790,6 +790,9 @@ static int write_folio_nounlock(struct folio *folio,
- 				    ceph_wbc.truncate_size, true);
- 	if (IS_ERR(req)) {
- 		folio_redirty_for_writepage(wbc, folio);
-+		if (atomic_long_dec_return(&fsc->writeback_count) <
-+				CONGESTION_OFF_THRESH(fsc->mount_options->congestion_kb))
-+			fsc->write_congested = false;
- 		return PTR_ERR(req);
- 	}
+Changes in v3:
+- use CRUSH_BUCKET_DEVICE instead of CRUSH_ITEM_TYPE_DEVICE
+- v2 Link: https://lore.kernel.org/all/3200151429f33554f06ced8a.1780197742.git.ldy3087146292@gmail.com/
+
+Changes in v2:
+- use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
+- v1 Link: https://lore.kernel.org/all/4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.1779949116.git.ldy3087146292@gmail.com/
+
+---
+ include/linux/crush/crush.h | 4 +++-
+ net/ceph/osdmap.c           | 2 ++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
+index 30dba392b7302de3e14861f8b769242cd8cbac9e..76bd1fa036538df86d548b1c668163035c30ade6 100644
+--- a/include/linux/crush/crush.h
++++ b/include/linux/crush/crush.h
+@@ -110,6 +110,8 @@ struct crush_rule {
+  *  straw           O(n)       better       better
+  *  straw2          O(n)       optimal      optimal
+  */
++#define CRUSH_ITEM_TYPE_DEVICE 0
++
+ enum {
+ 	CRUSH_BUCKET_UNIFORM = 1,
+ 	CRUSH_BUCKET_LIST = 2,
+@@ -130,7 +132,7 @@ extern const char *crush_bucket_alg_name(int alg);
  
-@@ -809,6 +812,9 @@ static int write_folio_nounlock(struct folio *folio,
- 			folio_redirty_for_writepage(wbc, folio);
- 			folio_end_writeback(folio);
- 			ceph_osdc_put_request(req);
-+			if (atomic_long_dec_return(&fsc->writeback_count) <
-+					CONGESTION_OFF_THRESH(fsc->mount_options->congestion_kb))
-+				fsc->write_congested = false;
- 			return PTR_ERR(bounce_page);
- 		}
- 	}
-@@ -847,6 +853,9 @@ static int write_folio_nounlock(struct folio *folio,
- 			      ceph_vinop(inode), folio);
- 			folio_redirty_for_writepage(wbc, folio);
- 			folio_end_writeback(folio);
-+			if (atomic_long_dec_return(&fsc->writeback_count) <
-+					CONGESTION_OFF_THRESH(fsc->mount_options->congestion_kb))
-+				fsc->write_congested = false;
- 			return err;
- 		}
- 		if (err == -EBLOCKLISTED)
+ struct crush_bucket {
+ 	__s32 id;        /* this'll be negative */
+-	__u16 type;      /* non-zero; type=0 is reserved for devices */
++	__u16 type;      /* non-zero; CRUSH_ITEM_TYPE_DEVICE is reserved */
+ 	__u8 alg;        /* one of CRUSH_BUCKET_* */
+ 	__u8 hash;       /* which hash function to use, CRUSH_HASH_* */
+ 	__u32 weight;    /* 16-bit fixed point */
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 8b5b0587a0cfa2c437b76c8c87251199efe20291..21cdd33f2945e0c1f45277ac05fda373bf217586 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ 		ceph_decode_need(p, end, 4*sizeof(u32), bad);
+ 		b->id = ceph_decode_32(p);
+ 		b->type = ceph_decode_16(p);
++		if (b->type == CRUSH_ITEM_TYPE_DEVICE)
++			goto bad;
+ 		b->alg = ceph_decode_8(p);
+ 		if (b->alg != alg) {
+ 			b->alg = 0;
 -- 
-2.34.1
+2.47.3
 
