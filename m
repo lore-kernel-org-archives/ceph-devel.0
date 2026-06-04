@@ -1,78 +1,73 @@
-Received: from mail-yx1-f45.google.com (mail-yx1-f45.google.com [74.125.224.45])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4A9C39BFE0
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:46:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F79627AC4D
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:50:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780602378; cv=none; b=EClFJPi7rlbsjTf4ECIQsn/JsGQSi0NJfpGo2S4+sRsW/eXufIF36r8g4MCnPhRzqAbJI4hGZgS8Jyykjew+EobSK9POFDZ99SPyxqMAJLuQYxGEJfTUDVRZuOX9NzBif49yUeL0il8CZeHQ+L52ztflMUg8UJYjQcApJxJaCR8=
+	t=1780602615; cv=none; b=QULRFBgjHSSjrTZ+GONvjaqG17wuYZmjQV+WCzYEHWPyuSUtyg59yY6tosb88yPlIteDOo85B6SllNDhgGRTRPIp5fih2DYAfh91qM4dGOG+3eTYcGVRUGhSDTjbpKa/358J6Y5pYeqqOPuUfM+VjLPuOOcYG/umruW9iVuuQUo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780602378; c=relaxed/simple;
-	bh=Dazbk/dpGlZhfaT8JiAxekZFVNxl5a78e2S6P7cJ4S4=;
+	s=arc-20240116; t=1780602615; c=relaxed/simple;
+	bh=vc5CloJP3iwGQJfVe1DwrpQ7ImQBwnfgauprD3QCFas=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=C+t1ae53v+6NfckFznGw9yIYS5zhhkbJJOe6q7WLyAqqLX4BSKukJqxPIz4tFkrCDFExKQU7dkLHg3jcYPqjAanFkPu/eS8mB28yP5bazrQAYQVmXACrhCu4kJZAls3NogNqowZfrmDPPiJNYCMT2Hx9f37i9PFGW39Wjp83a7k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=NTrIWbjp; arc=none smtp.client-ip=74.125.224.45
+	 Content-Type:MIME-Version; b=HSW6vZgSL102PWiyJBeROB+0OBrE2+gMHPnjxKoGNBkg2off62tkL/ZKHnnBkpfxqS/6s0HtwL0vYkKPt7mCO4icztMAyBHzAkXhX/vSB9M2GzbwmZhfXZYgTcQ5WKCl1LVtAZuvwfqLfaVWN+st5QarFzwSJdxEImmgWpuRvnY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=Nc72oNFd; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="NTrIWbjp"
-Received: by mail-yx1-f45.google.com with SMTP id 956f58d0204a3-6608c1a4215so1525708d50.0
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:46:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="Nc72oNFd"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-7dc6fbf3e86so14178797b3.3
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:50:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780602375; x=1781207175; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780602613; x=1781207413; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=eOC0RAwW0a1sAHbzoBXkbWqyQuwiZjtVEvE9tr60Wls=;
-        b=NTrIWbjphZsN771qdnvALq+kj8ZozUJtJkraMp8nIUuszh+THSW+NFswWsKbPwaeFC
-         0IxoMMdfcwp9EmoYTJ+bJfmWL6isvr6EAL84UB48Fxw8Kb31E7JC3UxfaSLrnJmT4z6r
-         v/SkU2m3PrF6jIuRIoU2NBQuiy4RXjwkFV8Ac1Lf3veRN4k8w3/HEOgtRCnK5tNS9Bxd
-         IRqwugLHmy4lPUbTfp71zcVkPf8xGE7/7FcYK3kjL1hN/EIxmPVd0+GsWaQiQyoySxIZ
-         wpNx2eyTyKvyJhObHZmM8jdZtTHxH29e1vsLqmhkPfc78cDFdRIzwCNon7VJFAXABSOu
-         Klyg==
+        bh=+0N+J7SEZ+XonbXnjCWL+A+FfzC//efRIvTT4+t6kWU=;
+        b=Nc72oNFdzujoCOihaPhfk1gs9awPLi0FnYttKpMpKoL6aND83TdmVSepbtmonCwQSF
+         KV0r2eEVgb6lfXLDvIXSSB6iS8WEzU3mNZbvOhgoc3XUboZFBJW34TSf2mH9tr49MEq5
+         wBgwkxhOVRLjh7mLf9OVh9ngRsu3ba29mCKojMJtI0rh9juKwZQYeKnTFvlmiGMOFxWi
+         JUtthDGOSgXDy4KVmniSDsuTAVGBJvapUA7O85ZCZ2WsTCMVvGZAIICV1nDFXVgb0Lem
+         M9RG6kEU+Fea+pTLrL7CNSCK/XxyJMbJeQ9+G26Yo0FFfSe26RPswNsWgqrRCjoEdR7v
+         XApA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780602375; x=1781207175;
+        d=1e100.net; s=20251104; t=1780602613; x=1781207413;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=eOC0RAwW0a1sAHbzoBXkbWqyQuwiZjtVEvE9tr60Wls=;
-        b=WdYn5YFcsFrXtnz7pDep/lxj+SFsd8/1AMY/toTJxGRWB7TDMBK+Q2s7GPvvmCzhaI
-         JON5LURiSw31SS2Lr9GhHUo7ctcFrohzH8OQLb9DcA1lUbFbAbLldVuUTdWe7+r24UIF
-         jAx/99274It6Ybz2549XvKoVXGf/gWGZQHxWuftdcSeyjAdTTD0oTzPDANu5S737qD7o
-         62Q7IuwOzEqnlkw9iExlrdoI8RVqvYwy2vgMtGQu4k4krxpJaIlseRPpWPAXLjmGISv7
-         bPGdtl3oVSNFzl1nFeYyu+6C3z5skhPOybjDCwynpqmxGYWuF+Rtb7bI6mU6urED6vvZ
-         KpmQ==
-X-Gm-Message-State: AOJu0YywaTN/791VcVIZ2jccR26Z7AlMIUgK98s6K97hlOawmJw3vzgC
-	NwJJYRbcvB4I7s5ZJ8hSokf7wj4B0Z1UQ3sF16sqhjaIgWoVeDc83CTjHOyVubzCQdY=
-X-Gm-Gg: Acq92OHFvg+AXIN9dewihJN79w5tsDvsIxUPw9LRZSuWaP78irK7OC9Q8Xl8XEm7mux
-	I7f2xZFeg9TTkkJFXo8yJnkUnYAsDwAc6IYwTk5J6jGS/NjVIyBLJMQdzOjGjAlsOfHqCXQjBHd
-	jyvX4CZ6j+6sic5DjrIM3ZGK6ilpglKm3gBj/93RJSwA/DJOZ39dVADNMQYRVD2TwxeOt66EF3g
-	3EGyBgYAwi+4y6mtB2XCLqrco4TZ/xZYIg/Q8ncxME27TC8BUQLEDBHPfglA4cphpBM0DgZ7tye
-	rojPTZILZzgDuJcemHfDg8PMXRONiKs0TS18C8uEaghVqBsQRtC0JAQ6XBkHFgjuVs1WTIUeDVq
-	Ny7zkxwPLgyA2UMIuFmeRhc/vuqTmee11PmAePIgA8+Hkb/r1IfYBmzlKI2i4mQGv25K+6ytJd9
-	grb6xwb543hOXLAUsFr0TxXPO1zVWJY2SyzvMvacN2rDAgDAdUG3Gn7zy0jC2YoO7TLdX5KgguS
-	HplUx3fxLM2bfXxQeUOH2KK7wLMrnyJU4iSk56kUe9cryFlEEpO6xTswUjWKGyZuT7SJZJEggqN
-	cKv8YA==
-X-Received: by 2002:a05:690e:1447:b0:660:867c:bef3 with SMTP id 956f58d0204a3-660f122a4c6mr3782614d50.36.1780602375550;
-        Thu, 04 Jun 2026 12:46:15 -0700 (PDT)
+        bh=+0N+J7SEZ+XonbXnjCWL+A+FfzC//efRIvTT4+t6kWU=;
+        b=QFUdEDaj5nqqsGlRNtOGzRz74Wa6LJBJ4uTxBJsJyRdjmXnocTHPrV2+FwF0Qktm/V
+         gM51M60+sthr1quW0GWjygOovzFsPTUmUaPMuS+p7wrbFWz1Qm8G3g/SuUuqyF4zGybk
+         oYVuXD833/0R/QWcWLkThVsGFy1vngR4UGKq3jLCQ3x+OPjcbacN6kibyI9QH3L5xkZO
+         sge7kCyArLiwih1xuNJ98jpiLw8Nw9C+ewFQywgQRlZZT6uNWv8ZTkCcUFgdsWebdNr/
+         P7/FuJtL9v7oN1paYByWHhzgs2EGk8k4d2DSi3KclQ5766AJVos8W+RJZTJczx/HQT7i
+         siAg==
+X-Gm-Message-State: AOJu0YyqqhNbDunLaJ77oxMlVkMGvKDU6F//B9YLlPCZL37UUufzClxP
+	iiZRItrgwYricjJF3miF23eusuBnTqkv6UtKgW31DCNu5ornLhPPIGyVYupL+UEB850=
+X-Gm-Gg: Acq92OGbs4YngZra/L4cUwQ6SLRMt/GVHN0ti3y2/PwiviDQ1a5aXc3YgSM6CjTgU68
+	hvgkYyg03725i8Z+xYDHgNsX+Jazi2+2+mAUDlarQ4Jf9nCpHjUIz94Ag0NAnPN+cKQCJWxt5zx
+	hogApw5KmzSHvBo7HmAm617NOM1r/lJQYoepcf1Pso5g2f9/d1i+tHncPa0SdG2bKARdpyrtWCh
+	kVb7TCxJx+TvBrjcp5n/WOwDPh3t7zoPr61G3/0RFNIHQ+ZILQ1JX7JWvbsIkjZLIKOUS8B57b0
+	Ra73ZsA/VxiN4MS6dP2jRTsCzthzxgEYmK3fmRuGY0iwWweG6dCOQLIA59ap4/pI3vOmJF+xVEJ
+	ls4IyCJ6yfw9UwfG16MZnWXOMgipf22nsKXqTWWya0iIQKqL6FCQARemvjcIlOfor99aZ/nz+jt
+	Fd/vLTLJOcL7QHSlzoSp2aR2WyqwpAdApb/RmtjFmINWxiJ+IUeV2yHD7Tdqmrk1KQoBj+SJDQC
+	gr9ZmB4AfvWAhPmdrvLC3fCaIP0nqWQXs0PS/mo8ghhjcdGM+BaVrws6xcr50U8HI1JaGc=
+X-Received: by 2002:a05:690c:45c4:b0:7b4:6f40:635 with SMTP id 00721157ae682-7ed0ef4c22fmr3364177b3.16.1780602613472;
+        Thu, 04 Jun 2026 12:50:13 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:ae19:b6b2:5990:ed2a? ([2600:1700:6476:1430:ae19:b6b2:5990:ed2a])
-        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-660d644a68fsm4417120d50.14.2026.06.04.12.46.13
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea2399ab1fsm39834287b3.33.2026.06.04.12.50.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jun 2026 12:46:14 -0700 (PDT)
-Message-ID: <03a15ae6cdeba53b1a27000d71415fc7fd949576.camel@dubeyko.com>
-Subject: Re: [PATCH v4] libceph: Fix out-of-bounds writes with oversized
- monitor reply messages
+        Thu, 04 Jun 2026 12:50:12 -0700 (PDT)
+Message-ID: <3f1bfd3ef4a83e02ee9e5886bb78c5b9b188c01b.camel@dubeyko.com>
+Subject: Re: [PATCH 1/4] ceph: bound xattr value length in __build_xattrs()
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
+To: Michael Bommarito <michael.bommarito@gmail.com>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Date: Thu, 04 Jun 2026 12:46:13 -0700
-In-Reply-To: <a2022028-8290-45ee-b7a3-312fc56010ee@tu-ilmenau.de>
-References: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
-	 <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
-	 <9dbe4363-85cc-47da-bc16-abe6dd8d7d07@tu-ilmenau.de>
-	 <7973116eb155a81f8e886028318904c3ce5b7524.camel@dubeyko.com>
-	 <a2022028-8290-45ee-b7a3-312fc56010ee@tu-ilmenau.de>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Thu, 04 Jun 2026 12:50:11 -0700
+In-Reply-To: <97a34ff3743172b1278f211d47a500a07eb25732.1780596023.git.michael.bommarito@gmail.com>
+References: <cover.1780596023.git.michael.bommarito@gmail.com>
+	 <97a34ff3743172b1278f211d47a500a07eb25732.1780596023.git.michael.bommarito@gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,162 +122,70 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Thu, 2026-06-04 at 18:03 +0200, Raphael Zimmer wrote:
-> On 03.06.26 7:16 PM, Viacheslav Dubeyko wrote:
-> > On Wed, 2026-06-03 at 10:57 +0200, Raphael Zimmer wrote:
-> > > On 02.06.26 7:15 PM, Viacheslav Dubeyko wrote:
-> > > > On Tue, 2026-06-02 at 17:10 +0200, Raphael Zimmer wrote:
-> > > > > When processing an incoming reply message of type
-> > > > > CEPH_MSG_STATFS_REPLY,
-> > > > > CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY
-> > > > > on
-> > > > > the
-> > > > > monitor connection, an already allocated reply message for
-> > > > > the
-> > > > > given
-> > > > > transaction ID is used (if existing). Such a message has a
-> > > > > preallocated
-> > > > > front segment with a fixed length of 64, 512, or 32 bytes,
-> > > > > depending
-> > > > > on
-> > > > > the message type it was allocated for. The actual length to
-> > > > > receive
-> > > > > into
-> > > > > this buffer is read from the message. If this value exceeds
-> > > > > the
-> > > > > allocation size, data received from the network is written
-> > > > > beyond
-> > > > > the
-> > > > > end of the allocated buffer.
-> > > > >=20
-> > > > > This patch fixes the issue by adding a check that compares
-> > > > > the
-> > > > > needed
-> > > > > front segment length to the previously allocated length when
-> > > > > retrieving
-> > > > > the message buffer. If the needed length exceeds the
-> > > > > allocation,
-> > > > > a
-> > > > > new
-> > > > > message buffer with the needed size is allocated to replace
-> > > > > the
-> > > > > previous
-> > > > > one.
-> > > > >=20
-> > > > > Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-> > > >=20
-> > > > What's about Fixes here?
-> > > >=20
-> > > > > ---
-> > > > > =C2=A0net/ceph/mon_client.c | 24 ++++++++++++++++++++++--
-> > > > > =C2=A01 file changed, 22 insertions(+), 2 deletions(-)
-> > > > >=20
-> > > > > diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> > > > > index 66c0d6d6b33d..b33ae17546f8 100644
-> > > > > --- a/net/ceph/mon_client.c
-> > > > > +++ b/net/ceph/mon_client.c
-> > > > > @@ -712,6 +712,8 @@ static struct ceph_msg
-> > > > > *get_generic_reply(struct
-> > > > > ceph_connection *con,
-> > > > > =C2=A0	struct ceph_mon_client *monc =3D con->private;
-> > > > > =C2=A0	struct ceph_mon_generic_request *req;
-> > > > > =C2=A0	u64 tid =3D le64_to_cpu(hdr->tid);
-> > > > > +	int type =3D le16_to_cpu(hdr->type);
-> > > > > +	int front_len =3D le32_to_cpu(hdr->front_len);
-> > > > > =C2=A0	u32 data_len =3D le32_to_cpu(hdr->data_len);
-> > > > > =C2=A0	struct ceph_msg *m;
-> > > > > =C2=A0
-> > > > > @@ -721,14 +723,30 @@ static struct ceph_msg
-> > > > > *get_generic_reply(struct ceph_connection *con,
-> > > > > =C2=A0		dout("get_generic_reply %lld dne\n", tid);
-> > > > > =C2=A0		*skip =3D 1;
-> > > > > =C2=A0		m =3D NULL;
-> > > > > -	} else if (data_len > req->reply->data_length) {
-> > > > > +		goto out;
-> > > > > +	}
-> > > > > +
-> > > > > +	if (data_len > req->reply->data_length) {
-> > > > > =C2=A0		pr_warn_ratelimited("mon generic reply tid
-> > > > > %llu
-> > > > > data
-> > > > > %u > preallocated %zu, skipping\n",
-> > > > > =C2=A0				=C2=A0=C2=A0=C2=A0 tid, data_len, req-
-> > > > > >reply-
-> > > > > > data_length);
-> > > > > =C2=A0		*skip =3D 1;
-> > > > > =C2=A0		m =3D NULL;
-> > > > > +		goto out;
-> > > > > +	}
-> > > > > +
-> > > > > +	*skip =3D 0;
-> > > > > +	if (front_len > req->reply->front_alloc_len) {
-> > > > > +		pr_warn_ratelimited("tid %llu front %d >
-> > > > > prealloc
-> > > > > %d\n",
-> > > > > +				=C2=A0=C2=A0=C2=A0 tid, front_len,
-> > > > > +				=C2=A0=C2=A0=C2=A0 req->reply-
-> > > > > > front_alloc_len);
-> > > > > +		m =3D ceph_msg_new(type, front_len, GFP_NOFS,
-> > > > > false);
-> > > >=20
-> > > > Does false is correct here? If we provide can_fail =3D=3D false,
-> > > > then
-> > > > allocation failure results it:
-> > > >=20
-> > > > 	if (!can_fail) {
-> > > > 		pr_err("msg_new can't create type %d front
-> > > > %d\n",
-> > > > type,
-> > > > 		=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 front_len);
-> > > > 		WARN_ON(1);
-> > > > 	} else {
-> > > > 		dout("msg_new can't create type %d front
-> > > > %d\n",
-> > > > type,
-> > > > 		=C2=A0=C2=A0=C2=A0=C2=A0 front_len);
-> > > > 	}
-> > > > 	return NULL;
-> > > >=20
-> > > > The can_fail =3D true would suppress the WARN, matching the
-> > > > intent of
-> > > > a
-> > > > graceful degradation path.
-> > > >=20
-> > >=20
-> > > I chose this to be consistent with the handling of reply messages
-> > > on
-> > > OSD
-> > > connections [1] as well as the handling of other messages in
-> > > mon_alloc_msg() [2]. I'm not sure about the graceful degradation
-> > > path.
-> > > If this allocation fails, it's an unexpected out-of-memory error.
-> > > However, it's no functional difference and only affects the
-> > > logging/WARN_ON(). So both options would be fine with me. If you
-> > > think
-> > > it's not a problem to not be completely consistent with other
-> > > similar
-> > > code paths, I can change it to can_fail =3D=3D true.
-> >=20
-> > I already lost myself in all possible combinations of various
-> > arguments. :) You set *skip =3D 0 and if it means that we would like
-> > not
-> > see BUG_ON(), then we need to set can_fail =3D true. Otherwise,
-> > can_fail
-> > can have false value.
-> >=20
-> > Thanks,
-> > Slava.
+On Thu, 2026-06-04 at 14:08 -0400, Michael Bommarito wrote:
+> __build_xattrs() decodes the MDS-supplied xattr blob one attribute at
+> a
+> time. For each attribute it reads a 32-bit name length, advances past
+> the
+> name bytes, reads a 32-bit value length, records the value pointer,
+> and
+> advances past the value bytes. The two length fields are read with
+> ceph_decode_32_safe(), but the value bytes themselves are advanced
+> over
+> with a bare "p +=3D len" and no ceph_decode_need() check that "len"
+> bytes
+> remain in the blob.
 >=20
-> I'm sorry, but I don't really understand what you mean by "we would
-> like
-> not see BUG_ON()". I don't see that setting *skip =3D 0 in this
-> specific
-> case is related to a BUG_ON(). Can you please explain once more what
-> exactly you mean by this?
+> For every attribute except the last, the next iteration's
+> ceph_decode_32_safe() on the following name length implicitly
+> verifies
+> that the previous value did not run past the blob end. The final
+> attribute has no successor, so its decoded value length is never
+> checked
+> against the blob bounds. A malicious or compromised metadata server
+> can
+> set the last attribute's value length larger than the bytes actually
+> present in the blob.
 >=20
+> The blob is a dedicated kvmalloc() allocation sized to the wire
+> length
+> (ceph_buffer_new() in ceph_fill_inode()). __set_xattr() records the
+> oversized length in xattr->val_len verbatim, and a later getxattr(2)
+> runs
+> memcpy(value, xattr->val, xattr->val_len) into a user-supplied
+> buffer,
+> copying bytes past the end of the allocation back to user space.
+>=20
+> Impact: a malicious metadata server discloses adjacent kernel heap
+> bytes
+> to a local user via getxattr(2) on a CephFS file. Add the missing
+> ceph_decode_need() so an out-of-bounds value length on the final
+> attribute fails the decode and returns -EIO instead of being stored.
+>=20
+> Fixes: 355da1eb7a1f ("ceph: inode operations")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
+> Assisted-by: Claude:claude-opus-4-8
+> ---
+> =C2=A0fs/ceph/xattr.c | 1 +
+> =C2=A01 file changed, 1 insertion(+)
+>=20
+> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> index e773be07f7674..d488bb8fc00ba 100644
+> --- a/fs/ceph/xattr.c
+> +++ b/fs/ceph/xattr.c
+> @@ -848,6 +848,7 @@ static int __build_xattrs(struct inode *inode)
+> =C2=A0			name =3D p;
+> =C2=A0			p +=3D len;
+> =C2=A0			ceph_decode_32_safe(&p, end, len, bad);
+> +			ceph_decode_need(&p, end, len, bad);
+> =C2=A0			val =3D p;
+> =C2=A0			p +=3D len;
+> =C2=A0
 
-My point was simple. If *skip =3D=3D 0 means that we could have the
-BUG_ON() triggered, then can_fail =3D=3D false is OK.
+Makes sense.
+
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 
 Thanks,
 Slava.
