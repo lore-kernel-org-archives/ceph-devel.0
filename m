@@ -1,126 +1,158 @@
-Received: from proxmox-new.maurer-it.com (proxmox-new.maurer-it.com [94.136.29.106])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1328742DFF1;
-	Thu,  4 Jun 2026 14:02:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=94.136.29.106
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17F2147B429
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 14:26:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780581772; cv=none; b=TRvWRdW484Raqr1cqY/NIqn3p9rHuQykJm0RNYu8sQw8P2fviEYZtRtcTsdWUDJ4XfLNIHPdYsiengMJmEUBtFAeQnmJgnxlobaIWGahW2ucYMhqFcVdYDYwAEMMHt6uZsmCMHn/srhrdLwJQvnkWxlReOgPdmyiFcEUB/go83g=
+	t=1780583167; cv=none; b=BHGvjbPu1KyNzYydHpScPzYpzBWd9xQeWWgKDvCex9n2zG8ysL/Mtsw94BbPlx0poPqoc9ugtPOpIhMcjF4WoOMW1UWvalWtGzgVFDzNNmwQaPXiZ8m5XlOmNVWKPDBxDAJHjkqjOq2un0KkNQN+eRej8R0Vts9tJ3ves4VOWM0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780581772; c=relaxed/simple;
-	bh=J9IsqTty8n2zTP4ly0p5XZKmjS2l25ZJ0xTIfWjQ95I=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=hwbANkF9ysSgKPpElSSCWp0ou7DvuBYCeY4ogDaypxY+cqt+mgIQJm3XAsi0ypKMzGaHofFcwyqSRVcU05WZcXwdObFvgu6DCLeAIgPef96gsPGdL3NrFsrPqbKwtOdQmzaB1/tp/r4AMYfuJ9JGLWT75dITlzBlaD6oPZpaIaA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com; spf=pass smtp.mailfrom=proxmox.com; arc=none smtp.client-ip=94.136.29.106
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=proxmox.com
-Received: from proxmox-new.maurer-it.com (localhost.localdomain [127.0.0.1])
-	by proxmox-new.maurer-it.com (Proxmox) with ESMTP id 16D5D8093B;
-	Thu, 04 Jun 2026 16:02:41 +0200 (CEST)
-From: Kefu Chai <k.chai@proxmox.com>
-To: ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>,
-	linux-kernel@vger.kernel.org,
-	Kefu Chai <k.chai@proxmox.com>
-Subject: [PATCH v2] libceph: tolerate addrvecs with multiple entries of the same type
-Date: Thu,  4 Jun 2026 22:02:31 +0800
-Message-ID: <20260604140231.2759025-1-k.chai@proxmox.com>
-X-Mailer: git-send-email 2.47.3
-In-Reply-To: <20260423100904.2336750-1-k.chai@proxmox.com>
-References: <20260423100904.2336750-1-k.chai@proxmox.com>
+	s=arc-20240116; t=1780583167; c=relaxed/simple;
+	bh=Twt+eDHBoEludCqGvDcVV+Ad8p7sVgzFKO5UzAtXH44=;
+	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
+	 Content-Type:Date:Message-ID; b=dfMDQ6rcFATfglrUZ38+0rlxaJKifFxbnkEbo3BheKu/42TP/0d2AQTDQXhjX7URH4fY1kTCck/oZzkqYRGtwlvaIIy9Hy+fCpZEAjOOa2dZogtGx+cddU4vSc5OhXbcftwpC3Pv6RCPipB9+ZauQBfO0ixWbSYBWdaSxc3EbYo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Mgp44RCr; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Mgp44RCr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1780583165;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WtAwq+kBbu0Jre6SowbAzwYpDgzV/li3NBaF67YwMAg=;
+	b=Mgp44RCrskxTkvyUL5u9FNiAzvCmIxGfdAyW1o73cK58e2SmYIKyG2XWJNuJTJZi09j96z
+	r4AoOFqpkC8RwuHedGcRyaKZ0xrSyu32vbqaSp508uPyXN147yesLM8Grzze4o0iYvt9Ca
+	RyGcY6+ZtHpmrh/SeWm7gxO1xCWStgo=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-154-010EzjtuPq6sAk9ZnnOTDQ-1; Thu,
+ 04 Jun 2026 10:26:00 -0400
+X-MC-Unique: 010EzjtuPq6sAk9ZnnOTDQ-1
+X-Mimecast-MFC-AGG-ID: 010EzjtuPq6sAk9ZnnOTDQ_1780583158
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 2813A1956094;
+	Thu,  4 Jun 2026 14:25:56 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.44.50.14])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id F3B2130001A1;
+	Thu,  4 Jun 2026 14:25:47 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+	Kingdom.
+	Registered in England and Wales under Company Registration No. 3798903
+From: David Howells <dhowells@redhat.com>
+In-Reply-To: <ahPodavlA-gt44FO@infradead.org>
+References: <ahPodavlA-gt44FO@infradead.org> <20260518222959.488126-1-dhowells@redhat.com> <20260518222959.488126-6-dhowells@redhat.com>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: dhowells@redhat.com, Christian Brauner <christian@brauner.io>,
+    Matthew Wilcox <willy@infradead.org>,
+    Paulo Alcantara <pc@manguebit.org>, Jens Axboe <axboe@kernel.dk>,
+    Leon Romanovsky <leon@kernel.org>, Steve French <sfrench@samba.org>,
+    ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
+    Marc Dionne <marc.dionne@auristor.com>,
+    Eric Van Hensbergen <ericvh@kernel.org>,
+    Dominique Martinet <asmadeus@codewreck.org>,
+    Ilya Dryomov <idryomov@gmail.com>,
+    Trond Myklebust <trondmy@kernel.org>, netfs@lists.linux.dev,
+    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
+    linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+    v9fs@lists.linux.dev, linux-erofs@lists.ozlabs.org,
+    linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+    linux-block@vger.kernel.org
+Subject: Re: [PATCH v2 05/21] Add a function to kmap one page of a multipage bio_vec
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Bm-Milter-Handled: 55990f41-d878-4baa-be0a-ee34c49e34d2
-X-Bm-Transport-Timestamp: 1780581722107
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <127137.1780583146.1@warthog.procyon.org.uk>
+Content-Transfer-Encoding: quoted-printable
+Date: Thu, 04 Jun 2026 15:25:46 +0100
+Message-ID: <127138.1780583146@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-ceph_decode_entity_addrvec() rejects any addrvec containing more than
-one entry that matches the requested msgr type (LEGACY or MSGR2),
-logging "another match of type N in addrvec" and returning -EINVAL.
+Christoph Hellwig <hch@infradead.org> wrote:
 
-Some admin tooling (e.g. pveceph mon create from Proxmox VE) generates
-addrvecs with multiple same-type entries when public_network lists more
-than one CIDR: it picks one local IP per subnet and emits both a v2 and
-a v1 entry for each IP.  Monmaps shaped this way cause:
+> > +static inline void *kmap_local_bvec(struct bio_vec *bvec, size_t offs=
+et)
+> =
 
-  libceph: mon0 (1)10.10.10.15:6789 session established
-  libceph: another match of type 1 in addrvec
-  libceph: problem decoding monmap, -22
+> The name is rather confusing for something that does not map the entire
+> bvec, and is an anagram of the existing bvec_kmap_local.  So please
+> rename it to bvec_kmap_partial or something.
 
-No Ceph code uses the extra entries: since Nautilus, the userspace
-messenger (AsyncMessenger) unconditionally picks the first address of
-the requested type and ignores any subsequent matches.
+Sure...  But it then differs in pattern from the various kmap_local_*() th=
+at
+we have.
 
-Match that behavior: use the first matching entry and silently skip any
-subsequent ones.  This is a compatibility fix for existing deployments
-and does not enable dual-stack or multi-subnet address selection.
+> > +{
+> > +	offset +=3D bvec->bv_offset;
+> > +
+> > +	return kmap_local_page(bvec->bv_page + offset / PAGE_SIZE) + offset =
+% PAGE_SIZE;
+> =
 
-Link: https://bugzilla.proxmox.com/show_bug.cgi?id=7518
-Signed-off-by: Kefu Chai <k.chai@proxmox.com>
----
-Changes since v1:
-- Rewrite commit message to frame as compatibility fix; drop dual-stack/
-  multi-subnet framing and the two ceph tracker links
-- Simplify comment in ceph_decode_entity_addrvec()
+> ...  Also this can use shits and byte masking to be a tad more efficient=
+ and
+> matching the rest of the bvec code.
 
-Tested by reproducing the Proxmox BZ 7518 scenario against a vstart
-cluster whose mon addrvec was edited to contain two v1 + two v2 entries:
+PAGE_SIZE is a constant power-of-2, so it shouldn't make a difference if t=
+he
+compiler is doing its job properly, but okay.
 
-    ceph mon set-addrs a \
-        '[v2:$ip1:$p2/0,v1:$ip1:$p1/0,v2:$ip2:$p2/0,v1:$ip2:$p1/0]'
+One thought: I could just give bvec_kmap_local() an offset parameter and u=
+se
+that instead.
 
-A Debian VM booted with the patched kernel via 'qemu -kernel' then
-ran 'mount -t ceph ...:$p1:/ /mnt -o name=admin'.  Pre-patch kernels
-fail at monmap decode with "another match of type 1 in addrvec"
-(-EINVAL).  Post-patch, decode succeeds and the mount proceeds to
-the auth / MDS-discovery stages.
+> Users of this would be interesting
 
-Also verified the decoder logic on the monmap.bin attached to BZ 7518
-using a userspace port of ceph_decode_entity_addrvec(): the pre-patch
-form returns -EINVAL on both msgr1 and msgr2 lookups; the post-patch
-form returns 0 and picks the first matching entry.
+It's used four times in patch 10 ("afs: Use a bvecq to hold dir content ra=
+ther
+than folioq").  I could merge this patch (patch 5) into one of the other
+patches, it's just been more convenient for it not be in a later patch whe=
+n
+flipping backwards and forwards to cut down on recompiling.
 
- net/ceph/decode.c | 13 ++++---------
- 1 file changed, 4 insertions(+), 9 deletions(-)
+> and why you're not simply using a bvec_iter at page granularity, which i=
+s
+> what other block kmap code does.
 
-diff --git a/net/ceph/decode.c b/net/ceph/decode.c
-index bc109a1a4616..18f0a7c71950 100644
---- a/net/ceph/decode.c
-+++ b/net/ceph/decode.c
-@@ -87,8 +87,9 @@ ceph_decode_entity_addr(void **p, void *end, struct ceph_entity_addr *addr)
- EXPORT_SYMBOL(ceph_decode_entity_addr);
- 
- /*
-- * Return addr of desired type (MSGR2 or LEGACY) or error.
-- * Make sure there is only one match.
-+ * Return addr of desired type (MSGR2 or LEGACY) or error.  If multiple
-+ * entries of the desired type are present, use the first one for
-+ * compatibility with existing deployments.
-  *
-  * Assume encoding with MSG_ADDR2.
-  */
-@@ -120,13 +121,7 @@ int ceph_decode_entity_addrvec(void **p, void *end, bool msgr2,
- 			return ret;
- 
- 		dout("%s i %d addr %s\n", __func__, i, ceph_pr_addr(&tmp_addr));
--		if (tmp_addr.type == my_type) {
--			if (found) {
--				pr_err("another match of type %d in addrvec\n",
--				       le32_to_cpu(my_type));
--				return -EINVAL;
--			}
--
-+		if (tmp_addr.type == my_type && !found) {
- 			memcpy(addr, &tmp_addr, sizeof(*addr));
- 			found = true;
- 		}
--- 
-2.47.3
+Because for the most part I don't want to do linear iteration.  There are =
+a
+number of cases:
 
+ (*) Read-link and follow-link: For symlinks, there will only be a single
+     block and it will fit within PAGE_SIZE.
+
+ (*) Readdir and dir checking: I iterate over the directory contents using
+     iov_iter and iterate_bvecq(), though I could also use bvec_iter insid=
+e a
+     loop to step through the bvecq chain.
+
+ (*) Lookup: Follows the hash chain in the directory rather than searching
+     linearly.
+
+ (*) Editing of local directory copy: Doesn't do linear iteration, but rat=
+her
+     does random access of blocks in the directory.  (This is to avoid hav=
+ing
+     to reload the dir from the server when doing mkdir, rename, etc.)
+
+Note that directories are 2K, not PAGE_SIZE, and, when editing, I may need=
+ to
+modify more than one block in a directory operation and they may share a p=
+age
+(which may be part of a higher order page).  Can we drop 32-bit arches yet=
+ -
+or, at least, highem support?
+
+David
 
