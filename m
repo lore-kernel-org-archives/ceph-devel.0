@@ -1,72 +1,72 @@
-Received: from mail-qt1-f172.google.com (mail-qt1-f172.google.com [209.85.160.172])
+Received: from mail-qt1-f178.google.com (mail-qt1-f178.google.com [209.85.160.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 035973C0605
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 18:09:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DBA83BE174
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 18:09:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780596556; cv=none; b=S/0qDnM/QNbvW21dIJMaymfjwJ//3mlCi7/oi0l5a+94BImHlGPpjXo3L/ujDwsMf2D70n27lci/OdZlIO6ZWJo5ZKUZCCbsSKJSpoHeIHwb0GJNNxipCDnzHlJY1SGcpv5BNYLGzLAPxuMgRM9RjAQxGFIGFaFStPKUb26Pbsw=
+	t=1780596568; cv=none; b=Q06rcLnOADOKu1u1b+NbZfBVNmqsRomKxhE4qlXZdS6woCZu6jPqbmLs82Yhk8a0vLdiUYqSaDbzO7rqMJeDr3WnMzozxx8qM4g57Jy5AyWVdcfKS86A1JJF2Tg4eSvBtl3dRSt/JqbIOQ/6WUJgZD/ODVwzzFxVEP3cs1ILXT8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780596556; c=relaxed/simple;
-	bh=iRGl+Zcv8CCCaVj7l7eFQI316DRL7nx4+17jWOdN+ZQ=;
+	s=arc-20240116; t=1780596568; c=relaxed/simple;
+	bh=fX7fFsPfEFC3JMips9J8bHVCCgmHkm5jA9KcnfjY+8A=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=JwWEk9ZMLvM8U0Y9a0OZICMAXmksWVnevhombMwpoNiNjplgOuy6Wwm2DX+wo7y4S043Z4dV/qx+6+M4zISsZ//38D5LjiG9NUlU5OqQxm0mkITb70Caha19+v9FTKn2ky8/Q5kT60FOyAnbPRXM6Tx1HM0q+e+1i3IpSJd3F1U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kiXwoAM8; arc=none smtp.client-ip=209.85.160.172
+	 MIME-Version; b=bNeYfH68t4zDczBRZwRGXMgj/a2+i5VA4jn5sAeLUsinS10061MtvUnL1dWQwAn2uD51UOsYHgGS2zmQIfAVl8A9MkWVYTcTI1QkH+aRZpsiqS4u3BlsHyLcPYxdqsiJRtJylGUItCQP1zVOm0vGsNOXGwJXCu0II7tdm8EOBu0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jwCstpsJ; arc=none smtp.client-ip=209.85.160.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kiXwoAM8"
-Received: by mail-qt1-f172.google.com with SMTP id d75a77b69052e-5177945a279so10284451cf.0
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 11:09:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jwCstpsJ"
+Received: by mail-qt1-f178.google.com with SMTP id d75a77b69052e-5174a3d9598so9451791cf.3
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 11:09:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780596554; x=1781201354; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1780596555; x=1781201355; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=MyP4o+dWT8qg11HXzsRqDPlFSQhGfJVHTkPwzcA0P6E=;
-        b=kiXwoAM8Zf0OUn66TNmFK+ONm02GJHbG/GIgTMf14eIh6uH35dJOW9WA6q2UW8gPgy
-         qK5PBwLhydAH8NBt7QRmZS+GE7zSCrWGHNGOdxtdwyXazCRrhSkwaHy0R3jOwuFbJ0ZW
-         BqjFFaiJfy4z64pg0N/LR1kBGAuXGo1myq5qJc8kyAsMv1B4ELmgb9aZdFvwvo7pNh8u
-         s6sWYHkgfQ3bgYqr8im6w1RCiyo5nEtRWYygRWjyeBzansWyVEkgRy7Z/b0gCiSQmzAq
-         zg+Px0tXcI42sh9G5aNwUinzzT7qhpA7ldMMLkaEgwZ4UCP+ny4fvBujQdLS+qvf8FQC
-         X85Q==
+        bh=BX4HzXJ3JGZjJL5r8tJ9uzkaLb8khgmN8CTpb058st8=;
+        b=jwCstpsJWJ2drukiVKXlyhm02GTMHoz/lPbmvi0p96clarOMmkDLIJE+pIgpGviwIo
+         uPk0m4WHDzMa2i1nY+hQ2HSL3yvnmgiVRruhlTOxr7Fdk6IVDq8sDVOsHfKJNcEiGLcK
+         KcYqc20zaGvwsJ5KiQe0iSgRYARAeDFzJreZjTmPPOpd0CDe9GpxSgqZek7E3qmoZxKs
+         utKAjX86hvcSHUEIAY6mlEVm69djfFLqDPn+9jMGflvKUjr2p1yUnIjXbPH6bc/LsQQM
+         TKA7hLjQmjV5o3Bu74Q2ASWIRtqh5THhNz4C/a14kQAXrH2ia7NU2nPo9G55TXWmEd2o
+         +pJw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780596554; x=1781201354;
+        d=1e100.net; s=20251104; t=1780596555; x=1781201355;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=MyP4o+dWT8qg11HXzsRqDPlFSQhGfJVHTkPwzcA0P6E=;
-        b=E/PnFzA11caRj0mdv1zz4wVa2oxV/PnGxxR0ybW3nL9XIW1yp/1PRkEKOevyd1avAB
-         SECl/U7EE0ScM+DIGLLn33DxKlszbfgQAsfBd3gmuSSOEM0pGW7GhB3l+alj3cmX1gA2
-         V+yN0d0GJ8B/Nse1b7xDH2myBb68i1yWDoAEC6knT725Uxx9zpBOutElqk633OJJ2uJd
-         8V6Hay4yoOD3xsu0Brt/w2POsGt5FMpRCFdltaBE2Ut2EwhMbLfjyyzYcknWMzE3Sh2P
-         iOkXd2I55Em5mLD3Dx5mtBkFL+E2DRk07KDCMVgHtwCQ+oj/frkY6nplcoZC39FytE0G
-         pswQ==
-X-Gm-Message-State: AOJu0YxduZUarf0Ax9xgUjozV/0EqnKEvvwajlGf0N1tjI5wFCEY8VC4
-	lFUwDb9tF2ZCoRkrdYd2O4tbsnbIYs4hOh9rs0iZ17KRFdJMjy7w01am
-X-Gm-Gg: Acq92OEWKyUVEgMWqfPiYfo6+NpYJEeYGd6eIDcG3Dz0I5hGlWRJfkGGJEIwmS9FDXk
-	Iy3Ibz0OHeGSxH1NVquZnsxY+VRbj5PaFiBEnv9WbCzbQuZzGqtu+WBwCdC62tkh+FafGhm8JVz
-	eyfAb2eUvRYckQQFcJZU45qnZlAVZ7TWnGH6gtfExONYeLJ5MFczaqJmVvgPnYVfMahW1dY71Ck
-	qPZPpKn/VpNLCzGCe6Sf7J15UFiGG0c+nS+AejW7MKa07cLp6pFDhHuh6NMq8GWGDyT6mrriytb
-	ZGOHnpfKlx2pEUMNTvNNj4Dn7tFQYlsT8HCoQcUpW1iOAx/jjGiWjGO7oQCI7NgRV5t94wtd/j4
-	E9yBjv8xDvgVQ2hZQP0zqFZm/tGcU0e6Dszc5CTJQiodN6vIyJ1234Olbfn8kEsA6UDptm9s0vu
-	LRSDE7tlb3PyfNzU70bcQWe80Y6mrVqwj8AJTey03FD0SyQHUkTBUhq8PIl2Aepua8NrC1NOexN
-	EqhkplRUPFX6A5LtmYbP9QK2GpbA/k=
-X-Received: by 2002:a05:622a:d17:b0:517:61d5:2f85 with SMTP id d75a77b69052e-517786c8788mr115781731cf.33.1780596553790;
-        Thu, 04 Jun 2026 11:09:13 -0700 (PDT)
+        bh=BX4HzXJ3JGZjJL5r8tJ9uzkaLb8khgmN8CTpb058st8=;
+        b=JgU6uoMGhw6wE8PYUZzsWzFmKuGM3EGktCSxlLNbK/85HMD5vs99wMt+AfVdixXcJb
+         W/MaEEE9del3G+7zSoHXQ2OafCaebqVoxt3PaeKQSJRQKAwJnPUwQxoDQy7dF0YKSNAs
+         kpz7QaH6kkuaQweP0ZtyMTwY/OA0lQAUzAl/kcGRj1MZQk0+tXy1MNCtYTYxUAf/PCCm
+         dLciCC945bYfHwtoXgDZ/elkBa67jPRd3ie3mU53a2vz/X8BoyKxDVnmvXh0rXjILCBi
+         omX0sJww7Bou6zIyQrQs7rFBw3SpacIiXKqHWIrzv7Jvo3si6rpGMhrZ782jaWKhbGbC
+         41Sw==
+X-Gm-Message-State: AOJu0Ywot30T9iFjsJBobQQR3mAGpTwM+wE6IjipszWwdzIl+tjL+s3W
+	YZaNTa/QdsiFRY8BO8LG51qsN6HHY2eQQVSANIc8Zp5uqQuth39AVV/QckN17O7CBPs=
+X-Gm-Gg: Acq92OEKy0cT2S129CWFnDrkIU79a2OBrzE37SixqDXeqqL1V3EacvenqW29kWDsDZ6
+	1w9cuMQI1ApjcArUWxLA518xqVM8ZAFnRSzlqZTg5g8d3/6z8QYjMNFDE6YtTSI2h3xrU5H7Bzi
+	3ECQ8m2B5+DLZvJExRXveqH8+W7claGvzSnRIPuyK786eqv+6P6x2kmRJ6izzHPIeI11GRBtEp4
+	3wOau2263Zfn7YIG/k4bdH+Ccxrg5eIITioEjFbEWTytgpWKsUIpH+7nUcUSJfFOg1DWUK93oWZ
+	5hFOK+oPzDeKLO612mnEqXfjUqQhHf+swK0SwsmzmSuyVpyxq7yZNahUcppjSdsjfkJ2NY4V8ZE
+	kgo2t71wIxKXWvofrA5JoE0cusYg+7X1hehIO+1sWbyuPl9OH4/i8rJEs2UZRS5rZtOpuQrrPuB
+	UdL3ZXEEOa/4RX+63AKWMWa6P3uxemsLdErFMGVnxUd0mnAVmVjaT1HktcQt049nUgiYT/Ko3O3
+	aOkuHo/xD+OQD5w+5wKgbN1pZXaMyfYyz0cBrmBaA==
+X-Received: by 2002:ac8:5881:0:b0:517:82bd:46ff with SMTP id d75a77b69052e-51782bd4a4fmr96126461cf.26.1780596555207;
+        Thu, 04 Jun 2026 11:09:15 -0700 (PDT)
 Received: from server0 (c-68-48-65-54.hsd1.mi.comcast.net. [68.48.65.54])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-51775dbd2c9sm59020961cf.23.2026.06.04.11.09.12
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-51775dbd2c9sm59020961cf.23.2026.06.04.11.09.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jun 2026 11:09:12 -0700 (PDT)
+        Thu, 04 Jun 2026 11:09:14 -0700 (PDT)
 From: Michael Bommarito <michael.bommarito@gmail.com>
 To: Ilya Dryomov <idryomov@gmail.com>,
 	Alex Markuze <amarkuze@redhat.com>,
 	Viacheslav Dubeyko <slava@dubeyko.com>
 Cc: ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 3/4] ceph: bound num_export_targets array for mds info v2/v3
-Date: Thu,  4 Jun 2026 14:08:59 -0400
-Message-ID: <4ac3b57dcf0fba1dc5cc08bfb9a453be55cc465d.1780596023.git.michael.bommarito@gmail.com>
+Subject: [PATCH 4/4] ceph: cap delegated inode count in ceph_parse_deleg_inos()
+Date: Thu,  4 Jun 2026 14:09:00 -0400
+Message-ID: <8f25e9ac54cb3c408d061993a5a797186aa50506.1780596023.git.michael.bommarito@gmail.com>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <cover.1780596023.git.michael.bommarito@gmail.com>
 References: <cover.1780596023.git.michael.bommarito@gmail.com>
@@ -78,57 +78,86 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-ceph_mdsmap_decode() in fs/ceph/mdsmap.c reads num_export_targets from
-each per-mds info record and advances the decode cursor by
-num_export_targets * sizeof(u32) without first checking that many bytes
-remain. The only upper-bound check that catches a runaway cursor
-(*p > info_end) is gated on info_v >= 4, because info_end is left NULL
-for info_v 2 and 3. When the monitor sends an MDS map whose per-mds
-info version is 2 or 3 with an oversized num_export_targets, the cursor
-moves past the message front buffer and the later export-targets loop
-calls the unchecked ceph_decode_32() on out-of-bounds memory.
+ceph_parse_deleg_inos() decodes interval sets of delegated inode numbers
+from an MDS create-with-delegation reply. For each set it reads a 64-bit
+start and a 64-bit len with ceph_decode_64_safe(), which only validates
+that the eight bytes are present in the message, not the value, and then
+loops:
 
-A kernel client processes CEPH_MSG_MDS_MAP from its monitor session
-(net/ceph/mon_client.c dispatches it; fs/ceph/super.c routes it to
-ceph_mdsc_handle_mdsmap(), which sets end to the front buffer bound and
-calls ceph_mdsmap_decode()). A malicious or compromised monitor, or an
-on-path attacker on an unsigned/unencrypted messenger session, can
-therefore drive an out-of-bounds read in the client kernel; on x86_64
-with KASAN it is reported as a slab-out-of-bounds read in
-ceph_mdsmap_decode(). The decoded values land in the internal
-info->export_targets[] array, so the consequence is a kernel
-out-of-bounds read, not an information leak to the attacker.
+	while (len--) {
+		xa_insert(&s->s_delegated_inos, start++,
+			  DELEGATED_INO_AVAILABLE, GFP_KERNEL);
+		...
+	}
 
-Impact: a malicious or compromised Ceph monitor sending an MDS map with
-a per-mds info version of 2 or 3 and an oversized num_export_targets
-field triggers an out-of-bounds read in the CephFS client kernel.
+len is fully attacker controlled. A malicious or compromised MDS can send
+a create reply whose interval set declares len near 2^63, driving an
+effectively unbounded loop that performs a GFP_KERNEL xarray insert on
+each iteration. This spins a kernel thread in the reply dispatch path and
+exhausts memory; on a client that has negotiated CEPHFS_FEATURE_DELEG_INO
+(enabled by default) a single reply is enough to wedge the mount.
 
-Add a ceph_decode_need() for num_export_targets * sizeof(u32) before
-advancing the cursor, so the bound is enforced for every info_v >= 2,
-not only info_v >= 4. This mirrors the count-then-need idiom already
-used for m_data_pg_pools later in the same function.
+A legitimate MDS delegates only a small range per set (the userspace MDS
+prealloc window, mds_client_prealloc_inos, defaults to 1000). Reject any
+set whose len exceeds CEPH_MAX_DELEG_INOS (1M, far above any legitimate
+value) by treating the reply as malformed and returning -EIO, consistent
+with the existing decode error handling. Normal delegations are well under
+the cap and are unaffected.
 
-Fixes: d463a43d69f4 ("ceph: CEPH_FEATURE_MDSENC support")
+Fixes: d4846487870897 ("ceph: decode interval_sets for delegated inos")
 Cc: stable@vger.kernel.org
-Assisted-by: Claude:claude-opus-4-8
 Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
+Assisted-by: Claude:claude-opus-4-8
 ---
- fs/ceph/mdsmap.c | 2 ++
- 1 file changed, 2 insertions(+)
+ fs/ceph/mds_client.c | 14 ++++++++++++++
+ fs/ceph/super.h      |  9 +++++++++
+ 2 files changed, 23 insertions(+)
 
-diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
-index d8e46eb7e5eb5..7cb65f9f4783c 100644
---- a/fs/ceph/mdsmap.c
-+++ b/fs/ceph/mdsmap.c
-@@ -224,6 +224,8 @@ struct ceph_mdsmap *ceph_mdsmap_decode(struct ceph_mds_client *mdsc, void **p,
- 		*p += namelen;
- 		if (info_v >= 2) {
- 			ceph_decode_32_safe(p, end, num_export_targets, bad);
-+			ceph_decode_need(p, end,
-+					 num_export_targets * sizeof(u32), bad);
- 			pexport_targets = *p;
- 			*p += num_export_targets * sizeof(u32);
- 		} else {
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 4f36ac73305dc..0a084c4f3aae2 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -633,6 +633,20 @@ static int ceph_parse_deleg_inos(void **p, void *end,
+ 				start, len);
+ 			continue;
+ 		}
++
++		/*
++		 * A legitimate MDS delegates a small range per set. Treat a
++		 * count larger than any plausible delegation window as a
++		 * malformed reply rather than spinning while(len--) and
++		 * inserting unbounded xarray entries.
++		 */
++		if (len > CEPH_MAX_DELEG_INOS) {
++			pr_warn_ratelimited_client(cl,
++				"rejecting oversized inode range delegation (start=0x%llx len=0x%llx)\n",
++				start, len);
++			return -EIO;
++		}
++
+ 		while (len--) {
+ 			int err = xa_insert(&s->s_delegated_inos, start++,
+ 					    DELEGATED_INO_AVAILABLE,
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index afc89ce91804e..43a9b075f344c 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -634,6 +634,15 @@ static inline int ceph_ino_compare(struct inode *inode, void *data)
+ #define CEPH_MDS_INO_LOG_OFFSET		(2 * CEPH_MAX_MDS)
+ #define CEPH_INO_SYSTEM_BASE		((6*CEPH_MAX_MDS) + (CEPH_MAX_MDS * CEPH_NUM_STRAY))
+ 
++/*
++ * Upper bound on the number of inodes the MDS may delegate to a client in a
++ * single interval set. The userspace MDS hands out at most a few thousand
++ * (mds_client_prealloc_inos, default 1000); 1M is far above any legitimate
++ * value and guards ceph_parse_deleg_inos() against an unbounded loop driven
++ * by an attacker controlled 64-bit length.
++ */
++#define CEPH_MAX_DELEG_INOS		(1024 * 1024)
++
+ static inline bool ceph_vino_is_reserved(const struct ceph_vino vino)
+ {
+ 	if (vino.ino >= CEPH_INO_SYSTEM_BASE ||
 -- 
 2.53.0
 
