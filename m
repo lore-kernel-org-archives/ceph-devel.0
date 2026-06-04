@@ -1,76 +1,75 @@
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DC183C276F
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:28:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FFFA3C09E2
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:40:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780601312; cv=none; b=CycFmJzTCpuUx6zU0WVwG21qjwxNaIuj8uJUqplVYm43+vERI+j7qnfbt9AHYLgLoVIZhbelXrBSSYpy+FCE+zcSQesuu04Anp2FKZ0vbX5C7o0InDJ2bBjIRnHfcR+8Lb8fvTxlfUkDtBlm8bv8uaDvReQBJ6X6FvdFld/5060=
+	t=1780602004; cv=none; b=Lwlc7NWDuHyQ81Jwe7u5rExdMtjXCFwvzOybQ4prJYkGsQLD6eIEzMg4oTjG0AikKGlR2EJNfZrUVv3rR4t/QKrwID3UWbzHXRA4QIz3doSwf5vBLm8g5/tqXXFcc5jhcrmczJUwzByeTBBRsy/uen7eQp7LzVti0vDREpWIcag=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780601312; c=relaxed/simple;
-	bh=TItzyWNZgOo/nbUaA7wdNW1r8/Z3HDCGHgSAfgA67pQ=;
+	s=arc-20240116; t=1780602004; c=relaxed/simple;
+	bh=8qEtAfPXFzrOiS3Nor1eRFsLcwkGirTWHx1OkNW/w0c=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=KRPiUC4TmhSvIuiWB7ITjcqILOg0Jr8BS75h5rWdoS7oXiC8lVsVEf5pIBiXPfYKSypn1oNIgx1nvdeVe9bP5lA7/UQBYRFg/pd4oiZbHpQrme8I10iONvoCYoNAONOEAc1jsViZzxmTS54yOSA/qSs7gQUEvY0SBGaYj57MNh4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=lhYnHcYp; arc=none smtp.client-ip=209.85.128.179
+	 Content-Type:MIME-Version; b=u/x1iCCv2Ca86smLX49/NXP/Wx6+BGDNW0jr0qzohmbYEeFvEDDvhNtzbVkoK/aZYeShH6+GCTL+eKj4/v+cHEc9VOoxxfK1+zzIaqn7tb+XeznomrR/8frFbZhZjU65Xd+BUmp2+tRp85SDPt90YK72a/XSBxTIACZAs6LTsiM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=JODvaTMn; arc=none smtp.client-ip=209.85.128.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="lhYnHcYp"
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-7e2fa3062easo11996667b3.2
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:28:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="JODvaTMn"
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-7dc67a5e102so12904167b3.1
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:40:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780601309; x=1781206109; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780602001; x=1781206801; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=KCjs80ykOUdYOov1ibREWQaylg8Gs47dTBWxVYP5wQU=;
-        b=lhYnHcYpgcKwjQnM83iuacqgYSTN5axg/MTf2OxyHu1eYm7GtFEWYpLBf2Zjw8qF6R
-         RjWn3ZWdzrjD6DKylKXFtPsQN/DEJ0Xhi0i4nPMgi9zN9VagDe/z9i578FrXFPcxq+/x
-         mENTQ2hOkz4JZDygJk4srfpz7tRrvQEoI7Kpr4MfVI25PjDvXKar0Kyc1KzpMWVAU6q+
-         7yvSLK00taCqEjNt01uEQAxyvTCBlPFERJQvF8BUG7yxqy2hQTZzORD/ryvDP4G1e3mY
-         X2h0ZrUNNdT9VxQyG2dimHwFy4mI43Al5fNV5C0tFUy7+XazgFpkp821kC6cAaU+KFnC
-         3lLQ==
+        bh=SRDNF4XRsMILyeqd8pnV5EZ+1ao3z9JQnVe7XDtSGA4=;
+        b=JODvaTMn8TtbkSaHQ8oXNhena2H0/y0DT7nUklBbRl9DUENsKeE4QrXAz+HKM80EpZ
+         EBdilWaqc28Yp1T4t1V61M1bNj2Ho7B3pG2jqBEKo/VW1Nmg8yEtOrXh0nhQY3kD2MsR
+         KpznZuACjiAme0BIAzQSar/uIG7UZ/UopXx6FaiSuRdt1vAFdNGNMY0z4C32c6n+nap/
+         4n8kRcN5k8HjgHo8+5oSjIyhL/5D5mUDdIbsVM4x1205kuS68s8d+ni30P7xRGpUMKMe
+         8e3/9+U+Ke5aVPJlpGcPdpr29zZFaqbr5JlawbqOqBnTTFd3R+soXlFf4uDuMymu2R2S
+         lxZg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780601309; x=1781206109;
+        d=1e100.net; s=20251104; t=1780602001; x=1781206801;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=KCjs80ykOUdYOov1ibREWQaylg8Gs47dTBWxVYP5wQU=;
-        b=aZ9KsKiMAEyE864+Qff5vNftwXGygAAB+Mgqmge4LVCH1X/QBPGFvNSpF7nEfaUGke
-         R+HBFSHDTihs0clm9/a/hBMWuf+WN1Aa/shVeghdXyU5tUpJdO/AHvf84O/Laff4XZbW
-         smGaiMJu8Ip0eWGelUnYpBqe0+5r6Vzpgtf8zO33aXS82AQuC9r2OT8IfOsDOjD8UV1U
-         B10pVW32XO9xCE462yINsy1/WTGqvzt7XBd9Q2GDE8p8egSFhGQhoSTcVpiGq3yLN0X2
-         lc1s3ui/j/Ca4aZh0KT34qvHaIf/Qg87z5U2PWFeydvA31V6fNlCK5c+vD2KZA+3qdln
-         VhYg==
-X-Forwarded-Encrypted: i=1; AFNElJ+SZcBmkfVPx2UWsUr6YTRKZOrs2JMuTk9aIWx8DwfQ1GkiD5MyphjGK2Q6RJAviba9HrCeyeYQlo0s@vger.kernel.org
-X-Gm-Message-State: AOJu0YzDGTmHzoOaPJA2zjqmKmuJ2X4LQ+S/H05WlECnH592s48BMg02
-	q6wpPVqHjku0Lux7hm9e8SXeQz5JJ9zcIdqczpeEzLXJNaPYZ5C5DceHSHyZKGfPeFvtwk1/nI1
-	4CNAicrc=
-X-Gm-Gg: Acq92OGEx9pte+o9vMzcWRoNeUoptXqsXE8I90XvWWMGFcNnoYnIwUk9H2zqcU7WABw
-	PFdTPCNm0CTV9jfIIOH0Qnht8bUxl0PFI08VKhL67Giy+nzmc6FTK0/vkV6WWcGxCGPIMUKHG9a
-	f2mRML/8VJWzoC2Qe7cG276Ycdh4Qkm2nh10oLB/caU2UhEEijyrdYhZ0+51THVa+w2N7IVl1Ze
-	J5KfqY01xeaAxtX3xf81DDC2PbZmROfxR0PyEFKQw2qBW/LSFaas3rb/EujgSAEwj8IlUFseNMM
-	RYoGalFaeY3/c1HSmk6PU5mXcvASs0X0RO8qfD/3Yx/aeCrXyA+igCwwDUuqTElU17BNwu3hK1x
-	R68iiTgSRvzhUSdgZfz8spQZvGaG3bJlaQs25STr0DaFL4JeLMqMeHRsDe44o4ydnfhU9yZT61o
-	15y6S1IQmHf/oY8ywf7XIdjObKnj4dKzYfmKTNeKET8bVAT4I7513cg7ih3mFqKHhiVTCBcYked
-	v/g4NFHVfvlsOEeT71npvaLwnvmp9dus1DSOnkhs4/3VM+aNwXjR9vtyHEpQYS5J7z3+hQ=
-X-Received: by 2002:a05:690c:4b81:b0:79a:6249:a046 with SMTP id 00721157ae682-7ed0a4f27b3mr3429587b3.9.1780601309252;
-        Thu, 04 Jun 2026 12:28:29 -0700 (PDT)
+        bh=SRDNF4XRsMILyeqd8pnV5EZ+1ao3z9JQnVe7XDtSGA4=;
+        b=Ma5kAOdoGN6bgpmZDiVw1ZXf4XTzWqwZhPXRpilCSwjwBsShDKYRYcYFGUQneFXNud
+         Now34CsulsrVXJ6V/P4TxrhXHpxT+GqpM4vpKn/hjjZG0zJB6UsrCdeoin4j0v9XZn0i
+         0MDYxP8eGbxuzOnTejIdBVmsJpVLvrBGxcelL1f9wN41gkyehwF1NuWcK0wDhAMUd02+
+         U4w7m2jKfhgvglvuWwTGQMIvODiX0dv3iSxKLoYCjwGkBp73NtHnX0bVnAB07302836k
+         xdUa6Ti6doozSTxm0S+m54EVQG1q3eibew7uFevwwLFdFmko66acMNVEBkhmtGOnp5tX
+         AsIA==
+X-Forwarded-Encrypted: i=1; AFNElJ9OhWUXUwSAF57urZQQ9eEwh2tzbhdPQr9t6baaADqbfogTlxGWBnhm7KvmPafPz+achQh+z8RAr5WG@vger.kernel.org
+X-Gm-Message-State: AOJu0YwhiQAuRlOZeRp6C/VC1/qxyHHul4Es4noT+heJT/av74hZh3wL
+	PSyEqOw3cH4RVarvWenXl6YBhKUOmXXQIr+NFKPiXSN+2kaQ0b1vSQQLyueQaP0IweE=
+X-Gm-Gg: Acq92OGXCvACo10/Jxy/5wTyQ3UBkHcMR+w6c/LOEY/OiMl2gG/waFoDWYm2DkD4V8s
+	SXfEZuJq0pF7H2HQ+U+7Qj1KcQZUNNE87eeSan9AAMmaU1coLvolzTLIxiLYb7L3HostOhY2WhD
+	u9Om8q+VX/QHo72WTAecQam6HxO3g24ScCizOybiX5oBQ8j/uYSiaL8VZByQzTnzQkTH/JLJiLL
+	xTtvBdDg1zOp7eoSeUU0w9ODxM/OXq5LkFJN7/1fJcPRpUc5RRBPtvmv1Rztiby8hcH9+QftV8G
+	iZNX1MpZtRENJFa0ixzdWPy6KL51rtzxItcjVJegOKnRDbhLsqYXcqVLEEUT1IGH0PTZPqUmWvq
+	KMJfZlrknF9YGqVoyGX+5ulvdr9ZcQIfdSn+TwpLKXniXAC9d8/birVNJTKjOYsg0iV1GKURRTm
+	d+k/dykhbvHBGHnckKHeP8dbgMdpgj9oJ4AhzgZ0GLxg9pBBokZxNnt4AiVSb6sdUlorqlTMK22
+	+9PmCDYgV1vUYEQgZ/8kNyJIrm3tkGnei4ThXBiIU/sTaFU15thdacbsdkBCwsgCIU8tjc=
+X-Received: by 2002:a05:690c:6a8a:b0:7bd:7e01:8d53 with SMTP id 00721157ae682-7ed0d7b44acmr3408487b3.19.1780602001421;
+        Thu, 04 Jun 2026 12:40:01 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:ae19:b6b2:5990:ed2a? ([2600:1700:6476:1430:ae19:b6b2:5990:ed2a])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea20ea819esm39323027b3.10.2026.06.04.12.28.28
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea2409db52sm38739517b3.44.2026.06.04.12.40.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jun 2026 12:28:28 -0700 (PDT)
-Message-ID: <85dea67ad1983eab5b9ca7735d385f6a1e681e85.camel@dubeyko.com>
-Subject: Re: [PATCH v2] libceph: tolerate addrvecs with multiple entries of
- the same type
+        Thu, 04 Jun 2026 12:40:00 -0700 (PDT)
+Message-ID: <d00df2ed85205662ba17a3f9a37b273277db8528.camel@dubeyko.com>
+Subject: Re: [PATCH v4 1/2] libceph: reject zero bucket types in crush_decode
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Kefu Chai <k.chai@proxmox.com>, ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	linux-kernel@vger.kernel.org
-Date: Thu, 04 Jun 2026 12:28:27 -0700
-In-Reply-To: <20260604140231.2759025-1-k.chai@proxmox.com>
-References: <20260423100904.2336750-1-k.chai@proxmox.com>
-	 <20260604140231.2759025-1-k.chai@proxmox.com>
+To: Ren Wei <n05ec@lzu.edu.cn>, Viacheslav Dubeyko <vdubeyko@redhat.com>, 
+	ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net, 
+	Slava.Dubeyko@ibm.com, yuantan098@gmail.com, zcliangcn@gmail.com,
+ bird@lzu.edu.cn, 	ldy3087146292@gmail.com
+Date: Thu, 04 Jun 2026 12:39:59 -0700
+In-Reply-To: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
+References: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -125,107 +124,121 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Thu, 2026-06-04 at 22:02 +0800, Kefu Chai wrote:
-> ceph_decode_entity_addrvec() rejects any addrvec containing more than
-> one entry that matches the requested msgr type (LEGACY or MSGR2),
-> logging "another match of type N in addrvec" and returning -EINVAL.
+On Thu, 2026-06-04 at 11:18 +0800, Ren Wei wrote:
+> From: Douya Le <ldy3087146292@gmail.com>
 >=20
-> Some admin tooling (e.g. pveceph mon create from Proxmox VE)
-> generates
-> addrvecs with multiple same-type entries when public_network lists
-> more
-> than one CIDR: it picks one local IP per subnet and emits both a v2
-> and
-> a v1 entry for each IP.=C2=A0 Monmaps shaped this way cause:
+> CRUSH bucket type 0 is reserved for devices.=C2=A0 The mapper relies on
+> that invariant and uses type 0 to identify leaf devices.
 >=20
-> =C2=A0 libceph: mon0 (1)10.10.10.15:6789 session established
-> =C2=A0 libceph: another match of type 1 in addrvec
-> =C2=A0 libceph: problem decoding monmap, -22
+> If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
+> can make the mapper treat a negative bucket ID as a device and pass
+> it
+> to is_out(), causing an out-of-bounds access when indexing the OSD
+> weight array with a negative value.
 >=20
-> No Ceph code uses the extra entries: since Nautilus, the userspace
-> messenger (AsyncMessenger) unconditionally picks the first address of
-> the requested type and ignores any subsequent matches.
+> Reject zero bucket types while decoding the CRUSH map so the invalid
+> state never reaches the mapper.
 >=20
-> Match that behavior: use the first matching entry and silently skip
-> any
-> subsequent ones.=C2=A0 This is a compatibility fix for existing
-> deployments
-> and does not enable dual-stack or multi-subnet address selection.
+> Define the reserved device type as a standalone named constant
+> instead
+> of mixing it into the bucket algorithm enum.
 >=20
-> Link: https://bugzilla.proxmox.com/show_bug.cgi?id=3D7518
-> Signed-off-by: Kefu Chai <k.chai@proxmox.com>
+> Fixes: f24e9980eb86 ("ceph: OSD client")
+> Cc: stable@vger.kernel.org
+> Reported-by: Yuan Tan <yuantan098@gmail.com>
+> Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
+> Reported-by: Xin Liu <bird@lzu.edu.cn>
+> Assisted-by: Codex:GPT-5.4
+> Signed-off-by: Douya Le <ldy3087146292@gmail.com>
+> Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+>=20
 > ---
-> Changes since v1:
-> - Rewrite commit message to frame as compatibility fix; drop dual-
-> stack/
-> =C2=A0 multi-subnet framing and the two ceph tracker links
-> - Simplify comment in ceph_decode_entity_addrvec()
+> Changes in v4:
+> - define CRUSH_ITEM_TYPE_DEVICE as a standalone constant instead of
+> =C2=A0 putting it in the bucket algorithm enum
+> - move the remaining type-0-to-constant cleanups into a separate
+> patch
+> - v3 Link:
+> https://lore.kernel.org/all/d21e2f97dfe6f250.1780369814.git.ldy3087146292=
+@gmail.com/
 >=20
-> Tested by reproducing the Proxmox BZ 7518 scenario against a vstart
-> cluster whose mon addrvec was edited to contain two v1 + two v2
-> entries:
+> Changes in v3:
+> - use CRUSH_BUCKET_DEVICE instead of CRUSH_ITEM_TYPE_DEVICE
+> - v2 Link:
+> https://lore.kernel.org/all/3200151429f33554f06ced8a.1780197742.git.ldy30=
+87146292@gmail.com/
 >=20
-> =C2=A0=C2=A0=C2=A0 ceph mon set-addrs a \
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 '[v2:$ip1:$p2/0,v1:$ip1:$p1/0,=
-v2:$ip2:$p2/0,v1:$ip2:$p1/0]'
+> Changes in v2:
+> - use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
+> - v1 Link:
+> https://lore.kernel.org/all/4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.1779=
+949116.git.ldy3087146292@gmail.com/
 >=20
-> A Debian VM booted with the patched kernel via 'qemu -kernel' then
-> ran 'mount -t ceph ...:$p1:/ /mnt -o name=3Dadmin'.=C2=A0 Pre-patch kerne=
-ls
-> fail at monmap decode with "another match of type 1 in addrvec"
-> (-EINVAL).=C2=A0 Post-patch, decode succeeds and the mount proceeds to
-> the auth / MDS-discovery stages.
+> ---
+> =C2=A0include/linux/crush/crush.h | 4 +++-
+> =C2=A0net/ceph/osdmap.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 | 2 ++
+> =C2=A02 files changed, 5 insertions(+), 1 deletion(-)
 >=20
-> Also verified the decoder logic on the monmap.bin attached to BZ 7518
-> using a userspace port of ceph_decode_entity_addrvec(): the pre-patch
-> form returns -EINVAL on both msgr1 and msgr2 lookups; the post-patch
-> form returns 0 and picks the first matching entry.
->=20
-> =C2=A0net/ceph/decode.c | 13 ++++---------
-> =C2=A01 file changed, 4 insertions(+), 9 deletions(-)
->=20
-> diff --git a/net/ceph/decode.c b/net/ceph/decode.c
-> index bc109a1a4616..18f0a7c71950 100644
-> --- a/net/ceph/decode.c
-> +++ b/net/ceph/decode.c
-> @@ -87,8 +87,9 @@ ceph_decode_entity_addr(void **p, void *end, struct
-> ceph_entity_addr *addr)
-> =C2=A0EXPORT_SYMBOL(ceph_decode_entity_addr);
-> =C2=A0
-> =C2=A0/*
-> - * Return addr of desired type (MSGR2 or LEGACY) or error.
-> - * Make sure there is only one match.
-> + * Return addr of desired type (MSGR2 or LEGACY) or error.=C2=A0 If
-> multiple
-> + * entries of the desired type are present, use the first one for
-> + * compatibility with existing deployments.
-> =C2=A0 *
-> =C2=A0 * Assume encoding with MSG_ADDR2.
+> diff --git a/include/linux/crush/crush.h
+> b/include/linux/crush/crush.h
+> index
+> 30dba392b7302de3e14861f8b769242cd8cbac9e..76bd1fa036538df86d548b1c668
+> 163035c30ade6 100644
+> --- a/include/linux/crush/crush.h
+> +++ b/include/linux/crush/crush.h
+> @@ -110,6 +110,8 @@ struct crush_rule {
+> =C2=A0 *=C2=A0 straw=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0 O(n)=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 better=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0 better
+> =C2=A0 *=C2=A0 straw2=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0 O(n)=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 optimal=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0 optimal
 > =C2=A0 */
-> @@ -120,13 +121,7 @@ int ceph_decode_entity_addrvec(void **p, void
-> *end, bool msgr2,
-> =C2=A0			return ret;
-> =C2=A0
-> =C2=A0		dout("%s i %d addr %s\n", __func__, i,
-> ceph_pr_addr(&tmp_addr));
-> -		if (tmp_addr.type =3D=3D my_type) {
-> -			if (found) {
-> -				pr_err("another match of type %d in
-> addrvec\n",
-> -				=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 le32_to_cpu(my_type));
+> +#define CRUSH_ITEM_TYPE_DEVICE 0
 
-Maybe, we still need to have some debugging output here? What's about
-dout()?
+If I understood correctly, the b->type field encodes the CRUSH topology
+type (host, rack, row, datacenter, etc.). So, I think to have enum will
+be much better here.
 
 Thanks,
 Slava.
 
-> -				return -EINVAL;
-> -			}
-> -
-> +		if (tmp_addr.type =3D=3D my_type && !found) {
-> =C2=A0			memcpy(addr, &tmp_addr, sizeof(*addr));
-> =C2=A0			found =3D true;
-> =C2=A0		}
-> --
-> 2.47.3
+> +
+> =C2=A0enum {
+> =C2=A0	CRUSH_BUCKET_UNIFORM =3D 1,
+> =C2=A0	CRUSH_BUCKET_LIST =3D 2,
+> @@ -130,7 +132,7 @@ extern const char *crush_bucket_alg_name(int
+> alg);
+> =C2=A0
+> =C2=A0struct crush_bucket {
+> =C2=A0	__s32 id;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* this'll be =
+negative */
+> -	__u16 type;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* non-zero; type=3D0 is rese=
+rved for devices
+> */
+> +	__u16 type;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* non-zero; CRUSH_ITEM_TYPE_=
+DEVICE is
+> reserved */
+> =C2=A0	__u8 alg;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* one of CRUS=
+H_BUCKET_* */
+> =C2=A0	__u8 hash;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* which hash funct=
+ion to use, CRUSH_HASH_*
+> */
+> =C2=A0	__u32 weight;=C2=A0=C2=A0=C2=A0 /* 16-bit fixed point */
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index
+> 8b5b0587a0cfa2c437b76c8c87251199efe20291..21cdd33f2945e0c1f45277ac05f
+> da373bf217586 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void
+> *pbyval, void *end)
+> =C2=A0		ceph_decode_need(p, end, 4*sizeof(u32), bad);
+> =C2=A0		b->id =3D ceph_decode_32(p);
+> =C2=A0		b->type =3D ceph_decode_16(p);
+> +		if (b->type =3D=3D CRUSH_ITEM_TYPE_DEVICE)
+> +			goto bad;
+> =C2=A0		b->alg =3D ceph_decode_8(p);
+> =C2=A0		if (b->alg !=3D alg) {
+> =C2=A0			b->alg =3D 0;
