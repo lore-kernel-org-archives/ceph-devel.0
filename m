@@ -1,95 +1,226 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99E9C405C28
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 14:27:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B080630C62D
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 16:03:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780583236; cv=none; b=Rd+abqGFhvUyWH2U0g4TKow2MNN+Yiw9hnlSyhFWvgmsXRgUVAIcEkGP7ypP02Qbm7d0DSodHvTB26bFxdI9SO2dJZB/D/ox5JechfqUFDRrv9jyIk9iQ93adzWjYUooU8yd5RP04d5EMx1SrHHwKh6V5OiDuH6dieaHa71Pvvg=
+	t=1780589010; cv=none; b=nU+1IJ0UviGOqXqXJbT1FXYApMMLQfxEUfds3F/MsBuNoprxaSb7aUKTx07T5VojxCDdEZPvmWU8pAsgel+0k43LLwFxK8NRDNn559nHJGgXtTx3D/SHpJbDng9Mk1RIvfPSIzbH/cufEstgF10cIVJD/fgYo/Eu6pgXpsEKqik=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780583236; c=relaxed/simple;
-	bh=9QTOFDsJ3yOCe4Q053NkQEMQbsYSBManmQn/Nq59ARg=;
-	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
-	 Content-Type:Date:Message-ID; b=qDgMt4PQ93UdG4bgNrYXXpYMQoeuRYDaGFmzHkRAtIe+nMhhv6sBw/TBqXLnpVyBVRVb4d8SKeeStZChQzE29mDbWZ538/vI8W3JPB1W/f8thwEQecKF2YnACuHOLuS0XU+qWKRvLhDwWkjlSDv0jPkBO8jfzoqoJZg9CD9Q4kA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=D7n4L3J2; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1780589010; c=relaxed/simple;
+	bh=K/zMQHFhNL6ODwHmJsXggivkNao1W+gcQaQfD19anPo=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=OIm0t15rJHrsoBetE6T91Pwwl7Y3VGj2LFSEw37OjHykBh8AB4jPZaSnYQ28d4jPiRWTQcIMh6ccxYBjMqSZQe0tLnirbcB1MAWJ3NUqUf/aIm1k/0pAGaAgyA1V2SAxdLZfrszFIX1ifoqnLkdtwKbnqIyxlJWeU/UrHLi0a9w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=QeNWkMjR; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="D7n4L3J2"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1780583234;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=+OfjBfn5py7b5HQjhhTkuXyu2HLnt9jaf0NDydzON4I=;
-	b=D7n4L3J26KENO/vcoQolgg/bPPWfJMM+mZPg3MTMIS3xbddWQIaihy3MAZEV2OcCOSKPfH
-	Cn/Y9YBMpjPgIxQvPwP2HQSDoOQU+P49YARX8C2BcOlLJe925s4Xq1DQchPVbgittAsr7D
-	jFGtOWGWwSBkzJAA9hv6AIPB0f3usYw=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-493-PwOfHFj9OsiIKGl_Ou9BIA-1; Thu,
- 04 Jun 2026 10:27:11 -0400
-X-MC-Unique: PwOfHFj9OsiIKGl_Ou9BIA-1
-X-Mimecast-MFC-AGG-ID: PwOfHFj9OsiIKGl_Ou9BIA_1780583228
-Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 5D7CE1956050;
-	Thu,  4 Jun 2026 14:27:07 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.44.50.14])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 22BEF1955BC0;
-	Thu,  4 Jun 2026 14:26:59 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-	Kingdom.
-	Registered in England and Wales under Company Registration No. 3798903
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <ahPon44OlN0SqzU6@infradead.org>
-References: <ahPon44OlN0SqzU6@infradead.org> <20260518222959.488126-1-dhowells@redhat.com> <20260518222959.488126-7-dhowells@redhat.com>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: dhowells@redhat.com, Christian Brauner <christian@brauner.io>,
-    Matthew Wilcox <willy@infradead.org>,
-    Paulo Alcantara <pc@manguebit.org>, Jens Axboe <axboe@kernel.dk>,
-    Leon Romanovsky <leon@kernel.org>, Steve French <sfrench@samba.org>,
-    ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
-    Marc Dionne <marc.dionne@auristor.com>,
-    Eric Van Hensbergen <ericvh@kernel.org>,
-    Dominique Martinet <asmadeus@codewreck.org>,
-    Ilya Dryomov <idryomov@gmail.com>,
-    Trond Myklebust <trondmy@kernel.org>, netfs@lists.linux.dev,
-    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
-    linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-    v9fs@lists.linux.dev, linux-erofs@lists.ozlabs.org,
-    linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
-    linux-block@vger.kernel.org
-Subject: Re: [PATCH v2 06/21] iov_iter: Make iov_iter_get_pages*() wrap iov_iter_extract_pages()
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="QeNWkMjR"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1780588999; h=message-id
+ : date : mime-version : subject : to : cc : references : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=K/zMQHFhNL6ODwHmJsXggivkNao1W+gcQaQfD19anPo=;
+ b=QeNWkMjR+KIjyOxsShJv4gS04JtV3pFYIqKZ9W+o+u6TS5OPVhqVsbdCIsyQKSrYVVlcQ
+ b3MnG4KUL8xTXWGBfc4fL9AIb4mnzjOrlC19U4CNf7iUacujzp1NeAFRpg/L8NpPKmryCBR
+ bwB2LdnWrEbGiTnoJQqMYOkrxV7Ds+c7PGbIiP0zLs7DS7IsvFK6WVs2m22T1JUS178dIU1
+ PmpejjLpedrnGbogQyzyTLIqaY4vuA+vbhTyDzfuX2ndLJBftX9y4SB5f55CoQb+WRBb1UX
+ R+VfBF/0jRYxyqGYzDiUnjpWIUiKQ6/SVTrtHH+LWbZ04wCGmgabEAGGSAYw==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 0F5EB5FD56;
+	Thu,  4 Jun 2026 18:03:18 +0200 (CEST)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id A95FE5FB6E;
+	Thu,  4 Jun 2026 18:03:18 +0200 (CEST)
+Message-ID: <a2022028-8290-45ee-b7a3-312fc56010ee@tu-ilmenau.de>
+Date: Thu, 4 Jun 2026 18:03:18 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <127171.1780583218.1@warthog.procyon.org.uk>
-Date: Thu, 04 Jun 2026 15:26:58 +0100
-Message-ID: <127172.1780583218@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4] libceph: Fix out-of-bounds writes with oversized
+ monitor reply messages
+To: Viacheslav Dubeyko <slava@dubeyko.com>, Ilya Dryomov
+ <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+References: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
+ <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
+ <9dbe4363-85cc-47da-bc16-abe6dd8d7d07@tu-ilmenau.de>
+ <7973116eb155a81f8e886028318904c3ce5b7524.camel@dubeyko.com>
+Content-Language: en-US
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
+ 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
+In-Reply-To: <7973116eb155a81f8e886028318904c3ce5b7524.camel@dubeyko.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Christoph Hellwig <hch@infradead.org> wrote:
-
-> On Mon, May 18, 2026 at 11:29:38PM +0100, David Howells wrote:
-> > Make iov_iter_get_pages*() wrap iov_iter_extract_pages() for kernel
-> > iterator types (e.g. ITER_BVEC, ITER_FOLIOQ, ITER_XARRAY).  The pages
-> > obtained have their refcounts incremented afterwards if they're not slab
-> > pages.  ITER_KVEC is left returning -EFAULT.
+On 03.06.26 7:16 PM, Viacheslav Dubeyko wrote:
+> On Wed, 2026-06-03 at 10:57 +0200, Raphael Zimmer wrote:
+>> On 02.06.26 7:15 PM, Viacheslav Dubeyko wrote:
+>>> On Tue, 2026-06-02 at 17:10 +0200, Raphael Zimmer wrote:
+>>>> When processing an incoming reply message of type
+>>>> CEPH_MSG_STATFS_REPLY,
+>>>> CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY on
+>>>> the
+>>>> monitor connection, an already allocated reply message for the
+>>>> given
+>>>> transaction ID is used (if existing). Such a message has a
+>>>> preallocated
+>>>> front segment with a fixed length of 64, 512, or 32 bytes,
+>>>> depending
+>>>> on
+>>>> the message type it was allocated for. The actual length to
+>>>> receive
+>>>> into
+>>>> this buffer is read from the message. If this value exceeds the
+>>>> allocation size, data received from the network is written beyond
+>>>> the
+>>>> end of the allocated buffer.
+>>>>
+>>>> This patch fixes the issue by adding a check that compares the
+>>>> needed
+>>>> front segment length to the previously allocated length when
+>>>> retrieving
+>>>> the message buffer. If the needed length exceeds the allocation,
+>>>> a
+>>>> new
+>>>> message buffer with the needed size is allocated to replace the
+>>>> previous
+>>>> one.
+>>>>
+>>>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+>>>
+>>> What's about Fixes here?
+>>>
+>>>> ---
+>>>>  net/ceph/mon_client.c | 24 ++++++++++++++++++++++--
+>>>>  1 file changed, 22 insertions(+), 2 deletions(-)
+>>>>
+>>>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>>>> index 66c0d6d6b33d..b33ae17546f8 100644
+>>>> --- a/net/ceph/mon_client.c
+>>>> +++ b/net/ceph/mon_client.c
+>>>> @@ -712,6 +712,8 @@ static struct ceph_msg
+>>>> *get_generic_reply(struct
+>>>> ceph_connection *con,
+>>>>  	struct ceph_mon_client *monc = con->private;
+>>>>  	struct ceph_mon_generic_request *req;
+>>>>  	u64 tid = le64_to_cpu(hdr->tid);
+>>>> +	int type = le16_to_cpu(hdr->type);
+>>>> +	int front_len = le32_to_cpu(hdr->front_len);
+>>>>  	u32 data_len = le32_to_cpu(hdr->data_len);
+>>>>  	struct ceph_msg *m;
+>>>>  
+>>>> @@ -721,14 +723,30 @@ static struct ceph_msg
+>>>> *get_generic_reply(struct ceph_connection *con,
+>>>>  		dout("get_generic_reply %lld dne\n", tid);
+>>>>  		*skip = 1;
+>>>>  		m = NULL;
+>>>> -	} else if (data_len > req->reply->data_length) {
+>>>> +		goto out;
+>>>> +	}
+>>>> +
+>>>> +	if (data_len > req->reply->data_length) {
+>>>>  		pr_warn_ratelimited("mon generic reply tid %llu
+>>>> data
+>>>> %u > preallocated %zu, skipping\n",
+>>>>  				    tid, data_len, req->reply-
+>>>>> data_length);
+>>>>  		*skip = 1;
+>>>>  		m = NULL;
+>>>> +		goto out;
+>>>> +	}
+>>>> +
+>>>> +	*skip = 0;
+>>>> +	if (front_len > req->reply->front_alloc_len) {
+>>>> +		pr_warn_ratelimited("tid %llu front %d >
+>>>> prealloc
+>>>> %d\n",
+>>>> +				    tid, front_len,
+>>>> +				    req->reply-
+>>>>> front_alloc_len);
+>>>> +		m = ceph_msg_new(type, front_len, GFP_NOFS,
+>>>> false);
+>>>
+>>> Does false is correct here? If we provide can_fail == false, then
+>>> allocation failure results it:
+>>>
+>>> 	if (!can_fail) {
+>>> 		pr_err("msg_new can't create type %d front %d\n",
+>>> type,
+>>> 		       front_len);
+>>> 		WARN_ON(1);
+>>> 	} else {
+>>> 		dout("msg_new can't create type %d front %d\n",
+>>> type,
+>>> 		     front_len);
+>>> 	}
+>>> 	return NULL;
+>>>
+>>> The can_fail = true would suppress the WARN, matching the intent of
+>>> a
+>>> graceful degradation path.
+>>>
+>>
+>> I chose this to be consistent with the handling of reply messages on
+>> OSD
+>> connections [1] as well as the handling of other messages in
+>> mon_alloc_msg() [2]. I'm not sure about the graceful degradation
+>> path.
+>> If this allocation fails, it's an unexpected out-of-memory error.
+>> However, it's no functional difference and only affects the
+>> logging/WARN_ON(). So both options would be fine with me. If you
+>> think
+>> it's not a problem to not be completely consistent with other similar
+>> code paths, I can change it to can_fail == true.
 > 
-> Just kill off iov_iter_get_pages*, please.  Or at least stop using it
-> where these types matter.
+> I already lost myself in all possible combinations of various
+> arguments. :) You set *skip = 0 and if it means that we would like not
+> see BUG_ON(), then we need to set can_fail = true. Otherwise, can_fail
+> can have false value.
+> 
+> Thanks,
+> Slava.
 
-Much as I would like to, this isn't the place to do it.  It will require an
-overhaul of the network socket buffering.
+I'm sorry, but I don't really understand what you mean by "we would like
+not see BUG_ON()". I don't see that setting *skip = 0 in this specific
+case is related to a BUG_ON(). Can you please explain once more what
+exactly you mean by this?
 
-David
+Best regards,
+Raphael
 
