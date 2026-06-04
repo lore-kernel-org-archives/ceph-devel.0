@@ -1,77 +1,78 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yx1-f45.google.com (mail-yx1-f45.google.com [74.125.224.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6EF937CD2B
-	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:43:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4A9C39BFE0
+	for <ceph-devel@vger.kernel.org>; Thu,  4 Jun 2026 19:46:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780602208; cv=none; b=EYLwsm1BpJx23C3Yj6RChtsRQ63rZ4h5VP1iXYC+NqY3fNYTegxHo0NpS8m2IrmUw3Hxjq8TPpjcduhT4/DBMF/47F+eUvZfcvg/6tGHN1UDbOeTcy8W+Kk7zJnp5M+KCGWKFSF5irtAD4p10OVq8Llo6wHx5OKzp3tIy9HYAKQ=
+	t=1780602378; cv=none; b=EClFJPi7rlbsjTf4ECIQsn/JsGQSi0NJfpGo2S4+sRsW/eXufIF36r8g4MCnPhRzqAbJI4hGZgS8Jyykjew+EobSK9POFDZ99SPyxqMAJLuQYxGEJfTUDVRZuOX9NzBif49yUeL0il8CZeHQ+L52ztflMUg8UJYjQcApJxJaCR8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780602208; c=relaxed/simple;
-	bh=Sx9tVgP16+DYfMS/9DzDegCfBu4NHf8XfbDUDkdOCBU=;
+	s=arc-20240116; t=1780602378; c=relaxed/simple;
+	bh=Dazbk/dpGlZhfaT8JiAxekZFVNxl5a78e2S6P7cJ4S4=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=HikbQVoEPQ3WlFaQ5YJ60H34JBx26jBN4XQifi2aHws9iNLxy5NQbLRFt8gARprKeIS59KwO+TgbYTqVfzf00sQ69Qaw7zCwcsDk9unMhJMEkj0IFE+31lylq0H+Z1smNMlAKhv+iu2s6aKEUcUT5fw7NDA0KQT2B3NpO171rgs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=W3m48sEt; arc=none smtp.client-ip=209.85.128.176
+	 Content-Type:MIME-Version; b=C+t1ae53v+6NfckFznGw9yIYS5zhhkbJJOe6q7WLyAqqLX4BSKukJqxPIz4tFkrCDFExKQU7dkLHg3jcYPqjAanFkPu/eS8mB28yP5bazrQAYQVmXACrhCu4kJZAls3NogNqowZfrmDPPiJNYCMT2Hx9f37i9PFGW39Wjp83a7k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=NTrIWbjp; arc=none smtp.client-ip=74.125.224.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="W3m48sEt"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-7e86d46b02dso12795017b3.3
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:43:26 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="NTrIWbjp"
+Received: by mail-yx1-f45.google.com with SMTP id 956f58d0204a3-6608c1a4215so1525708d50.0
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Jun 2026 12:46:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780602206; x=1781207006; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1780602375; x=1781207175; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=1aoZKPb94EwhP9d/m//IZ4XA84AB3htmBZebjWtsLJ8=;
-        b=W3m48sEt4bV1Bg/fPvz/w4erCvFZDxzt1i5OujlXC2Ronh9ZIhLeDk5o/rTakyJABr
-         ES3y424CdMYG3ItXz78M+Kzbk9p2RqqD3Czdm6d3AFF/vkRl1UfdL+BOHeCfacz3hXD3
-         UeUSt97Xu0IUK0IlXq5Fnk6fNLE+zduy9kELKBXuIfeq6kfAeUzN7vGFpRW225p83345
-         Nh9Pv+ygDLZ/+Eeiip8tfl+xttagkjTeRL5YKEOUMkEHplOoUSMPkdyRqln7/dy/QfCa
-         Z36ULVEl20T5fFn0eeN53aVDtg2CR6YV2bgVd1faLW7YwlHgBGQXRRgvvhHZZd8qoSJj
-         +QLg==
+        bh=eOC0RAwW0a1sAHbzoBXkbWqyQuwiZjtVEvE9tr60Wls=;
+        b=NTrIWbjphZsN771qdnvALq+kj8ZozUJtJkraMp8nIUuszh+THSW+NFswWsKbPwaeFC
+         0IxoMMdfcwp9EmoYTJ+bJfmWL6isvr6EAL84UB48Fxw8Kb31E7JC3UxfaSLrnJmT4z6r
+         v/SkU2m3PrF6jIuRIoU2NBQuiy4RXjwkFV8Ac1Lf3veRN4k8w3/HEOgtRCnK5tNS9Bxd
+         IRqwugLHmy4lPUbTfp71zcVkPf8xGE7/7FcYK3kjL1hN/EIxmPVd0+GsWaQiQyoySxIZ
+         wpNx2eyTyKvyJhObHZmM8jdZtTHxH29e1vsLqmhkPfc78cDFdRIzwCNon7VJFAXABSOu
+         Klyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780602206; x=1781207006;
+        d=1e100.net; s=20251104; t=1780602375; x=1781207175;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=1aoZKPb94EwhP9d/m//IZ4XA84AB3htmBZebjWtsLJ8=;
-        b=LKp0ZGK4wdzGBr/UckAEnol53eqQKrHcRyqlDFxDh3HmE2MXmjtw0EWNHkyQ3bSWOb
-         oz2kwO5n25Z5A1V74Z4c6iVMUbSPIMRCNjszEktmzQAtomyB9naXM2+GXlEPFZp4c5un
-         dPu7m1NAtk0fvqutOE+iJp2hjKjsBXCCA68okLHf3/WkG4LhZFF81WL5W4PtAN8TSM1A
-         ACgXIBCRIdVGb5G8PQsZatvkaaynr8INhAB/WPSIH6KFEHv/TNsSyTsDj1Q78mYXK7RZ
-         DgV/dU0wdhyiNOuY/K3L/ENYZImlJT7wCcQKSl8sl//fjb2fPqK8756VEmrgeoU5Dc7O
-         7OWg==
-X-Forwarded-Encrypted: i=1; AFNElJ/QG+Mw8Snstnd8gcuNhpeKO29h1v0Zqi2oVGwrfRZxgdJCnHRhi/gpgHcZxght8k4aZ8Aw3tzKODYJ@vger.kernel.org
-X-Gm-Message-State: AOJu0YzDhpoIWqZ/SpmgY5qr5YlV6vK3lVd1G+s8sfhFeN6mhVB2BDaf
-	LkZdp0WlY8X/a2LrowWkJNc+XY3/XNChW/SqEn/AUFccL2y/LjWhHPKvc1tAMxILUNk=
-X-Gm-Gg: Acq92OExkKHy3qGtJrhMQlUYJI62aWsDboSyUMDR3DooZnctQVvaooVXWHBRZFPAs5m
-	g2knqYtbaetpudIRBKlbn06LoFetnkV/iak8n/z1iTmC4Ai9rjP83ZvFOOTt16hFJkwYpljmOwH
-	Pg+iGdkse8F31jJiMg4RGfLgjPM/RxjsgThipCZvgjBzlCqO+sQKhe30ezp9ju6NA2ty/OjEfRR
-	BdzeItsWUUeKdSHs8Rq7QBF3ZcKEqdwevTHoa1Lpjj8PAO+5MHcO1IFU++sBeGn2mTfnG1n9e++
-	u3qZF4q6nbqZw8B7coDZVM5aCKMycpoYYjxzhnaPAemrK1u8N1XRsTKUDNQGKLRTyJpWWmqAVvg
-	9oVqcvJQVcRSdpU4jFWcrut8H1owv9o9n1MMRtLjfcQd7ay0Tlfoe3HxgfJg2CWdaABcI/elGk9
-	W6jWDXNGrtVLhw35QX87f1Qs2HCnNlMM1IwooAtN1p7JGudLf4L9ccN+lnYG8KzNK4AeTLO79u1
-	+G+6PEDWdAFXhxwlhMhXYpMQYmCi+0X79rBl1b2J4JscLezNK2OhWOrnlHNMSvt4sM8+4w=
-X-Received: by 2002:a05:690c:63c6:b0:7d0:1583:4cb3 with SMTP id 00721157ae682-7ed0fd13d79mr3430127b3.45.1780602205879;
-        Thu, 04 Jun 2026 12:43:25 -0700 (PDT)
+        bh=eOC0RAwW0a1sAHbzoBXkbWqyQuwiZjtVEvE9tr60Wls=;
+        b=WdYn5YFcsFrXtnz7pDep/lxj+SFsd8/1AMY/toTJxGRWB7TDMBK+Q2s7GPvvmCzhaI
+         JON5LURiSw31SS2Lr9GhHUo7ctcFrohzH8OQLb9DcA1lUbFbAbLldVuUTdWe7+r24UIF
+         jAx/99274It6Ybz2549XvKoVXGf/gWGZQHxWuftdcSeyjAdTTD0oTzPDANu5S737qD7o
+         62Q7IuwOzEqnlkw9iExlrdoI8RVqvYwy2vgMtGQu4k4krxpJaIlseRPpWPAXLjmGISv7
+         bPGdtl3oVSNFzl1nFeYyu+6C3z5skhPOybjDCwynpqmxGYWuF+Rtb7bI6mU6urED6vvZ
+         KpmQ==
+X-Gm-Message-State: AOJu0YywaTN/791VcVIZ2jccR26Z7AlMIUgK98s6K97hlOawmJw3vzgC
+	NwJJYRbcvB4I7s5ZJ8hSokf7wj4B0Z1UQ3sF16sqhjaIgWoVeDc83CTjHOyVubzCQdY=
+X-Gm-Gg: Acq92OHFvg+AXIN9dewihJN79w5tsDvsIxUPw9LRZSuWaP78irK7OC9Q8Xl8XEm7mux
+	I7f2xZFeg9TTkkJFXo8yJnkUnYAsDwAc6IYwTk5J6jGS/NjVIyBLJMQdzOjGjAlsOfHqCXQjBHd
+	jyvX4CZ6j+6sic5DjrIM3ZGK6ilpglKm3gBj/93RJSwA/DJOZ39dVADNMQYRVD2TwxeOt66EF3g
+	3EGyBgYAwi+4y6mtB2XCLqrco4TZ/xZYIg/Q8ncxME27TC8BUQLEDBHPfglA4cphpBM0DgZ7tye
+	rojPTZILZzgDuJcemHfDg8PMXRONiKs0TS18C8uEaghVqBsQRtC0JAQ6XBkHFgjuVs1WTIUeDVq
+	Ny7zkxwPLgyA2UMIuFmeRhc/vuqTmee11PmAePIgA8+Hkb/r1IfYBmzlKI2i4mQGv25K+6ytJd9
+	grb6xwb543hOXLAUsFr0TxXPO1zVWJY2SyzvMvacN2rDAgDAdUG3Gn7zy0jC2YoO7TLdX5KgguS
+	HplUx3fxLM2bfXxQeUOH2KK7wLMrnyJU4iSk56kUe9cryFlEEpO6xTswUjWKGyZuT7SJZJEggqN
+	cKv8YA==
+X-Received: by 2002:a05:690e:1447:b0:660:867c:bef3 with SMTP id 956f58d0204a3-660f122a4c6mr3782614d50.36.1780602375550;
+        Thu, 04 Jun 2026 12:46:15 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:ae19:b6b2:5990:ed2a? ([2600:1700:6476:1430:ae19:b6b2:5990:ed2a])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-7ea23a99b72sm38606887b3.38.2026.06.04.12.43.24
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-660d644a68fsm4417120d50.14.2026.06.04.12.46.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jun 2026 12:43:25 -0700 (PDT)
-Message-ID: <db9f3f42af6a0a1d9a65eb90b605f4f9c971f46d.camel@dubeyko.com>
-Subject: Re: [PATCH v4 2/2] libceph: crush: use CRUSH_ITEM_TYPE_DEVICE for
- leaf device checks
+        Thu, 04 Jun 2026 12:46:14 -0700 (PDT)
+Message-ID: <03a15ae6cdeba53b1a27000d71415fc7fd949576.camel@dubeyko.com>
+Subject: Re: [PATCH v4] libceph: Fix out-of-bounds writes with oversized
+ monitor reply messages
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Ren Wei <n05ec@lzu.edu.cn>, Viacheslav Dubeyko <vdubeyko@redhat.com>, 
-	ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net, 
-	Slava.Dubeyko@ibm.com, yuantan098@gmail.com, zcliangcn@gmail.com,
- bird@lzu.edu.cn, 	ldy3087146292@gmail.com
-Date: Thu, 04 Jun 2026 12:43:23 -0700
-In-Reply-To: <062971a5852907a5.1780473721.git.ldy3087146292@gmail.com>
-References: <8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com>
-	 <062971a5852907a5.1780473721.git.ldy3087146292@gmail.com>
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
+	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Date: Thu, 04 Jun 2026 12:46:13 -0700
+In-Reply-To: <a2022028-8290-45ee-b7a3-312fc56010ee@tu-ilmenau.de>
+References: <20260602151025.4145216-1-raphael.zimmer@tu-ilmenau.de>
+	 <0d6480e8c6c64dd13d45781bccdb097d8025438f.camel@dubeyko.com>
+	 <9dbe4363-85cc-47da-bc16-abe6dd8d7d07@tu-ilmenau.de>
+	 <7973116eb155a81f8e886028318904c3ce5b7524.camel@dubeyko.com>
+	 <a2022028-8290-45ee-b7a3-312fc56010ee@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -126,86 +127,162 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Thu, 2026-06-04 at 11:18 +0800, Ren Wei wrote:
-> From: Douya Le <ldy3087146292@gmail.com>
+On Thu, 2026-06-04 at 18:03 +0200, Raphael Zimmer wrote:
+> On 03.06.26 7:16 PM, Viacheslav Dubeyko wrote:
+> > On Wed, 2026-06-03 at 10:57 +0200, Raphael Zimmer wrote:
+> > > On 02.06.26 7:15 PM, Viacheslav Dubeyko wrote:
+> > > > On Tue, 2026-06-02 at 17:10 +0200, Raphael Zimmer wrote:
+> > > > > When processing an incoming reply message of type
+> > > > > CEPH_MSG_STATFS_REPLY,
+> > > > > CEPH_MSG_MON_COMMAND_ACK, or CEPH_MSG_MON_GET_VERSION_REPLY
+> > > > > on
+> > > > > the
+> > > > > monitor connection, an already allocated reply message for
+> > > > > the
+> > > > > given
+> > > > > transaction ID is used (if existing). Such a message has a
+> > > > > preallocated
+> > > > > front segment with a fixed length of 64, 512, or 32 bytes,
+> > > > > depending
+> > > > > on
+> > > > > the message type it was allocated for. The actual length to
+> > > > > receive
+> > > > > into
+> > > > > this buffer is read from the message. If this value exceeds
+> > > > > the
+> > > > > allocation size, data received from the network is written
+> > > > > beyond
+> > > > > the
+> > > > > end of the allocated buffer.
+> > > > >=20
+> > > > > This patch fixes the issue by adding a check that compares
+> > > > > the
+> > > > > needed
+> > > > > front segment length to the previously allocated length when
+> > > > > retrieving
+> > > > > the message buffer. If the needed length exceeds the
+> > > > > allocation,
+> > > > > a
+> > > > > new
+> > > > > message buffer with the needed size is allocated to replace
+> > > > > the
+> > > > > previous
+> > > > > one.
+> > > > >=20
+> > > > > Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> > > >=20
+> > > > What's about Fixes here?
+> > > >=20
+> > > > > ---
+> > > > > =C2=A0net/ceph/mon_client.c | 24 ++++++++++++++++++++++--
+> > > > > =C2=A01 file changed, 22 insertions(+), 2 deletions(-)
+> > > > >=20
+> > > > > diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> > > > > index 66c0d6d6b33d..b33ae17546f8 100644
+> > > > > --- a/net/ceph/mon_client.c
+> > > > > +++ b/net/ceph/mon_client.c
+> > > > > @@ -712,6 +712,8 @@ static struct ceph_msg
+> > > > > *get_generic_reply(struct
+> > > > > ceph_connection *con,
+> > > > > =C2=A0	struct ceph_mon_client *monc =3D con->private;
+> > > > > =C2=A0	struct ceph_mon_generic_request *req;
+> > > > > =C2=A0	u64 tid =3D le64_to_cpu(hdr->tid);
+> > > > > +	int type =3D le16_to_cpu(hdr->type);
+> > > > > +	int front_len =3D le32_to_cpu(hdr->front_len);
+> > > > > =C2=A0	u32 data_len =3D le32_to_cpu(hdr->data_len);
+> > > > > =C2=A0	struct ceph_msg *m;
+> > > > > =C2=A0
+> > > > > @@ -721,14 +723,30 @@ static struct ceph_msg
+> > > > > *get_generic_reply(struct ceph_connection *con,
+> > > > > =C2=A0		dout("get_generic_reply %lld dne\n", tid);
+> > > > > =C2=A0		*skip =3D 1;
+> > > > > =C2=A0		m =3D NULL;
+> > > > > -	} else if (data_len > req->reply->data_length) {
+> > > > > +		goto out;
+> > > > > +	}
+> > > > > +
+> > > > > +	if (data_len > req->reply->data_length) {
+> > > > > =C2=A0		pr_warn_ratelimited("mon generic reply tid
+> > > > > %llu
+> > > > > data
+> > > > > %u > preallocated %zu, skipping\n",
+> > > > > =C2=A0				=C2=A0=C2=A0=C2=A0 tid, data_len, req-
+> > > > > >reply-
+> > > > > > data_length);
+> > > > > =C2=A0		*skip =3D 1;
+> > > > > =C2=A0		m =3D NULL;
+> > > > > +		goto out;
+> > > > > +	}
+> > > > > +
+> > > > > +	*skip =3D 0;
+> > > > > +	if (front_len > req->reply->front_alloc_len) {
+> > > > > +		pr_warn_ratelimited("tid %llu front %d >
+> > > > > prealloc
+> > > > > %d\n",
+> > > > > +				=C2=A0=C2=A0=C2=A0 tid, front_len,
+> > > > > +				=C2=A0=C2=A0=C2=A0 req->reply-
+> > > > > > front_alloc_len);
+> > > > > +		m =3D ceph_msg_new(type, front_len, GFP_NOFS,
+> > > > > false);
+> > > >=20
+> > > > Does false is correct here? If we provide can_fail =3D=3D false,
+> > > > then
+> > > > allocation failure results it:
+> > > >=20
+> > > > 	if (!can_fail) {
+> > > > 		pr_err("msg_new can't create type %d front
+> > > > %d\n",
+> > > > type,
+> > > > 		=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 front_len);
+> > > > 		WARN_ON(1);
+> > > > 	} else {
+> > > > 		dout("msg_new can't create type %d front
+> > > > %d\n",
+> > > > type,
+> > > > 		=C2=A0=C2=A0=C2=A0=C2=A0 front_len);
+> > > > 	}
+> > > > 	return NULL;
+> > > >=20
+> > > > The can_fail =3D true would suppress the WARN, matching the
+> > > > intent of
+> > > > a
+> > > > graceful degradation path.
+> > > >=20
+> > >=20
+> > > I chose this to be consistent with the handling of reply messages
+> > > on
+> > > OSD
+> > > connections [1] as well as the handling of other messages in
+> > > mon_alloc_msg() [2]. I'm not sure about the graceful degradation
+> > > path.
+> > > If this allocation fails, it's an unexpected out-of-memory error.
+> > > However, it's no functional difference and only affects the
+> > > logging/WARN_ON(). So both options would be fine with me. If you
+> > > think
+> > > it's not a problem to not be completely consistent with other
+> > > similar
+> > > code paths, I can change it to can_fail =3D=3D true.
+> >=20
+> > I already lost myself in all possible combinations of various
+> > arguments. :) You set *skip =3D 0 and if it means that we would like
+> > not
+> > see BUG_ON(), then we need to set can_fail =3D true. Otherwise,
+> > can_fail
+> > can have false value.
+> >=20
+> > Thanks,
+> > Slava.
 >=20
-> The CRUSH mapper uses type 0 to identify leaf devices in several
-> paths.
+> I'm sorry, but I don't really understand what you mean by "we would
+> like
+> not see BUG_ON()". I don't see that setting *skip =3D 0 in this
+> specific
+> case is related to a BUG_ON(). Can you please explain once more what
+> exactly you mean by this?
 >=20
-> Replace those hardcoded checks with CRUSH_ITEM_TYPE_DEVICE so the
-> code
-> uses the named device-type constant consistently.
 
-Usually, patchset requires a cover letter. The patch itself looks good.
-
-Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+My point was simple. If *skip =3D=3D 0 means that we could have the
+BUG_ON() triggered, then can_fail =3D=3D false is OK.
 
 Thanks,
 Slava.
-
->=20
-> Signed-off-by: Douya Le <ldy3087146292@gmail.com>
-> Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
->=20
-> ---
-> =C2=A0net/ceph/crush/mapper.c | 8 ++++----
-> =C2=A01 file changed, 4 insertions(+), 4 deletions(-)
->=20
-> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-> index
-> 17b041779fb9da2deb8cdbf58439392d7fa2e8ef..00e139efd54eae36f75ed7cebd7
-> 9ac9b0dc27262 100644
-> --- a/net/ceph/crush/mapper.c
-> +++ b/net/ceph/crush/mapper.c
-> @@ -530,7 +530,7 @@ static int crush_choose_firstn(const struct
-> crush_map *map,
-> =C2=A0				if (item < 0)
-> =C2=A0					itemtype =3D map->buckets[-1-
-> item]->type;
-> =C2=A0				else
-> -					itemtype =3D 0;
-> +					itemtype =3D
-> CRUSH_ITEM_TYPE_DEVICE;
-> =C2=A0				dprintk("=C2=A0 item %d type %d\n", item,
-> itemtype);
-> =C2=A0
-> =C2=A0				/* keep going? */
-> @@ -588,7 +588,7 @@ static int crush_choose_firstn(const struct
-> crush_map *map,
-> =C2=A0
-> =C2=A0				if (!reject && !collide) {
-> =C2=A0					/* out? */
-> -					if (itemtype =3D=3D 0)
-> +					if (itemtype =3D=3D
-> CRUSH_ITEM_TYPE_DEVICE)
-> =C2=A0						reject =3D is_out(map,
-> weight,
-> =C2=A0								weig
-> ht_max,
-> =C2=A0								item
-> , x);
-> @@ -743,7 +743,7 @@ static void crush_choose_indep(const struct
-> crush_map *map,
-> =C2=A0				if (item < 0)
-> =C2=A0					itemtype =3D map->buckets[-1-
-> item]->type;
-> =C2=A0				else
-> -					itemtype =3D 0;
-> +					itemtype =3D
-> CRUSH_ITEM_TYPE_DEVICE;
-> =C2=A0				dprintk("=C2=A0 item %d type %d\n", item,
-> itemtype);
-> =C2=A0
-> =C2=A0				/* keep going? */
-> @@ -796,7 +796,7 @@ static void crush_choose_indep(const struct
-> crush_map *map,
-> =C2=A0				}
-> =C2=A0
-> =C2=A0				/* out? */
-> -				if (itemtype =3D=3D 0 &&
-> +				if (itemtype =3D=3D
-> CRUSH_ITEM_TYPE_DEVICE &&
-> =C2=A0				=C2=A0=C2=A0=C2=A0 is_out(map, weight, weight_max,
-> item, x))
-> =C2=A0					break;
-> =C2=A0
