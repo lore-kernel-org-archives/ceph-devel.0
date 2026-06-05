@@ -1,20 +1,20 @@
-Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [13.75.44.102])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id C4DEF3DA5D1
+Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [52.229.168.213])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id C68CF3DA7F6
 	for <ceph-devel@vger.kernel.org>; Fri,  5 Jun 2026 08:43:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.75.44.102
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=52.229.168.213
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780648997; cv=none; b=W7zsvZWFBwVRva2CmDr9no0XWG56t03A7xM+Yg2D/VtjEOxFP6DU4gM+wQkKDXnaBMTmvepYJIkfxvQG/nQqSQbdNBOK2IcdXIbaFt/zQjQToRXwObInm3E8eWHnga+o0qt7xyW6G6MAEVOWbFWzRx6KnbQPI4YzqZWWMg78d8c=
+	t=1780648997; cv=none; b=HFeu+LQvElmqPNujIJcJAbbWDj8aJfiA1Dss69wGkH0e3VxcwFpLSsnpSYNpq6VK8uhuSdbn9DLjDMYg2qC31pKhZJlBKYXjtaCKlyi7zKHUfnW0K1R7CM1lT3p+b0X5x6Jd8KfpuOsW/P7ivWOkWsyZ+kydCV17+2VTDgY0Bw0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1780648997; c=relaxed/simple;
-	bh=x4v07FVHXg/TS5f37IB6lErq2zM4arVYZJ1yh6jRbhc=;
+	bh=p5sW33wuB/X4gnRW65hkq13W4VHt/MMmG4ThUbPqpWA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=h2qyeyjcC0KYQWtSWcPzpNOOg2LtqOQFMuk1YRejsYRJC9gquRDUDoK+qU0j2+I530MwFrk6FqIdwby5ETTFsfhqqolC7wzuIOYq1t6ISKm6kOGKpnumRCK0YgZWrQTuCkAMcfvckwqporr25vWLak8V1H2lpzfyHoKwoJCmE+Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=13.75.44.102
+	 MIME-Version; b=GBJIVq42xpugEe8q+qvjffFF0WAt4rRHyoOYsvsSI12Td0QUYdCCjvjuS9TxiaYxybUg4vXXP6gh6Oz6eZLjZfKQk+TTdXIqC5X97+sGbdi2SBVyEZJLmn85jjW0SV4HiOmTG1PMwgIWtPiypZs4ngMgrbdTA7m86XOSSso3QIM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=52.229.168.213
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lzu.edu.cn
 Received: from enjou-Legion-Y7000P-2019 (unknown [172.23.56.36])
-	by app1 (Coremail) with SMTP id ygmowAC31L4ajCJqUxtfAA--.31502S3;
-	Fri, 05 Jun 2026 16:43:07 +0800 (CST)
+	by app1 (Coremail) with SMTP id ygmowAC31L4ajCJqUxtfAA--.31502S4;
+	Fri, 05 Jun 2026 16:43:09 +0800 (CST)
 From: Ren Wei <n05ec@lzu.edu.cn>
 To: Viacheslav Dubeyko <vdubeyko@redhat.com>,
 	ceph-devel@vger.kernel.org
@@ -28,9 +28,9 @@ Cc: idryomov@gmail.com,
 	bird@lzu.edu.cn,
 	ldy3087146292@gmail.com,
 	n05ec@lzu.edu.cn
-Subject: [PATCH v5 1/2] libceph: reject zero bucket types in crush_decode
-Date: Fri,  5 Jun 2026 16:43:04 +0800
-Message-ID: <b2e69ef787190350.1780640154.git.ldy3087146292@gmail.com>
+Subject: [PATCH v5 2/2] libceph: crush: use CRUSH_ITEM_TYPE_DEVICE for leaf device checks
+Date: Fri,  5 Jun 2026 16:43:05 +0800
+Message-ID: <202a922ea6673113.1780640154.git.ldy3087146292@gmail.com>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <cover.1780640154.git.ldy3087146292@gmail.com>
 References: <cover.1780640154.git.ldy3087146292@gmail.com>
@@ -41,10 +41,10 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:ygmowAC31L4ajCJqUxtfAA--.31502S3
-X-Coremail-Antispam: 1UD129KBjvJXoWxGrykur1ktr4rtw15tw1xGrg_yoW5tFy3p3
-	9rZrWDWr97ury8tFsYka17ur4UJanxGry7Wr98G34jv3yqgrn5Ww1IkFZ09rnruayrKr42
-	qF9rWryq9wn0vFDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+X-CM-TRANSID:ygmowAC31L4ajCJqUxtfAA--.31502S4
+X-Coremail-Antispam: 1UD129KBjvJXoW7CrWrCw4ktFyrCr4UuFWruFg_yoW8ZF15pr
+	42gwsFqFs7Zr1ftFs3ta4I9r17GrZ8CryUurn8WwnFk3srGr95Gr4fKFZxtry7CF4rGF92
+	vF1UAryvgwnrJ37anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
 	9KBjDU0xBIdaVrnRJUUUB01xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
 	w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
 	IY67AKxVW7JVWDJwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVWxJVW8Jr1l84ACjcxK6I8E
@@ -58,95 +58,70 @@ X-Coremail-Antispam: 1UD129KBjvJXoWxGrykur1ktr4rtw15tw1xGrg_yoW5tFy3p3
 	x0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK
 	8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I
 	0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfUonmRUUUUU
-X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQAJCWoihtAA6AAAs3
+X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQEJCWoihtAA6gAAs0
 
 From: Douya Le <ldy3087146292@gmail.com>
 
-CRUSH bucket type 0 is reserved for devices.  The mapper relies on
-that invariant and uses type 0 to identify leaf devices.
+The CRUSH mapper uses CRUSH_ITEM_TYPE_DEVICE to identify leaf devices in
+several paths.
 
-If crush_decode() accepts a bucket with type 0, a malformed CRUSH map
-can make the mapper treat a negative bucket ID as a device and pass it
-to is_out(), causing an out-of-bounds access when indexing the OSD
-weight array with a negative value.
+Replace those hardcoded checks with CRUSH_ITEM_TYPE_DEVICE so the code
+uses the named device-type constant consistently.
 
-Reject zero bucket types while decoding the CRUSH map so the invalid
-state never reaches the mapper.
-
-Define the reserved device type in a separate enum instead of mixing it
-into the bucket algorithm enum.
-
-Fixes: f24e9980eb86 ("ceph: OSD client")
-Cc: stable@vger.kernel.org
-Reported-by: Yuan Tan <yuantan098@gmail.com>
-Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-Reported-by: Xin Liu <bird@lzu.edu.cn>
-Assisted-by: Codex:GPT-5.4
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 Signed-off-by: Douya Le <ldy3087146292@gmail.com>
 Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
 
 ---
 Changes in v5:
+- add Reviewed-by from Viacheslav Dubeyko
 - add a cover letter for the two-patch series
-- define CRUSH_ITEM_TYPE_DEVICE in a separate enum as suggested
-- v4 Link: https://lore.kernel.org/all/8fbe4d61ba313a26.1780473720.git.ldy3087146292@gmail.com/
-
-Changes in v4:
-- define CRUSH_ITEM_TYPE_DEVICE as a standalone constant instead of
-  putting it in the bucket algorithm enum
-- move the remaining type-0-to-constant cleanups into a separate patch
-- v3 Link: https://lore.kernel.org/all/d21e2f97dfe6f250.1780369814.git.ldy3087146292@gmail.com/
-
-Changes in v3:
-- use CRUSH_BUCKET_DEVICE instead of CRUSH_ITEM_TYPE_DEVICE
-- v2 Link: https://lore.kernel.org/all/3200151429f33554f06ced8a.1780197742.git.ldy3087146292@gmail.com/
-
-Changes in v2:
-- use CRUSH_ITEM_TYPE_DEVICE instead of hardcoded 0
-- v1 Link: https://lore.kernel.org/all/4ad15b49fbbae00d86dfe12348bf94d45aa60ac2.1779949116.git.ldy3087146292@gmail.com/
+- v4 Link: https://lore.kernel.org/all/062971a5852907a5.1780473721.git.ldy3087146292@gmail.com/
 
 ---
- include/linux/crush/crush.h | 6 +++++-
- net/ceph/osdmap.c           | 2 ++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ net/ceph/crush/mapper.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 30dba392b7302de3e14861f8b769242cd8cbac9e..770b172903f3ab268226296043a909861582bcb1 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -110,6 +110,10 @@ struct crush_rule {
-  *  straw           O(n)       better       better
-  *  straw2          O(n)       optimal      optimal
-  */
-+enum {
-+	CRUSH_ITEM_TYPE_DEVICE = 0,
-+};
-+
- enum {
- 	CRUSH_BUCKET_UNIFORM = 1,
- 	CRUSH_BUCKET_LIST = 2,
-@@ -130,7 +134,7 @@ extern const char *crush_bucket_alg_name(int alg);
+diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
+index 17b041779fb9da2deb8cdbf58439392d7fa2e8ef..00e139efd54eae36f75ed7cebd79ac9b0dc27262 100644
+--- a/net/ceph/crush/mapper.c
++++ b/net/ceph/crush/mapper.c
+@@ -530,7 +530,7 @@ static int crush_choose_firstn(const struct crush_map *map,
+ 				if (item < 0)
+ 					itemtype = map->buckets[-1-item]->type;
+ 				else
+-					itemtype = 0;
++					itemtype = CRUSH_ITEM_TYPE_DEVICE;
+ 				dprintk("  item %d type %d\n", item, itemtype);
  
- struct crush_bucket {
- 	__s32 id;        /* this'll be negative */
--	__u16 type;      /* non-zero; type=0 is reserved for devices */
-+	__u16 type;      /* non-zero; CRUSH_ITEM_TYPE_DEVICE is reserved */
- 	__u8 alg;        /* one of CRUSH_BUCKET_* */
- 	__u8 hash;       /* which hash function to use, CRUSH_HASH_* */
- 	__u32 weight;    /* 16-bit fixed point */
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 8b5b0587a0cfa2c437b76c8c87251199efe20291..21cdd33f2945e0c1f45277ac05fda373bf217586 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -518,6 +518,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 		ceph_decode_need(p, end, 4*sizeof(u32), bad);
- 		b->id = ceph_decode_32(p);
- 		b->type = ceph_decode_16(p);
-+		if (b->type == CRUSH_ITEM_TYPE_DEVICE)
-+			goto bad;
- 		b->alg = ceph_decode_8(p);
- 		if (b->alg != alg) {
- 			b->alg = 0;
+ 				/* keep going? */
+@@ -588,7 +588,7 @@ static int crush_choose_firstn(const struct crush_map *map,
+ 
+ 				if (!reject && !collide) {
+ 					/* out? */
+-					if (itemtype == 0)
++					if (itemtype == CRUSH_ITEM_TYPE_DEVICE)
+ 						reject = is_out(map, weight,
+ 								weight_max,
+ 								item, x);
+@@ -743,7 +743,7 @@ static void crush_choose_indep(const struct crush_map *map,
+ 				if (item < 0)
+ 					itemtype = map->buckets[-1-item]->type;
+ 				else
+-					itemtype = 0;
++					itemtype = CRUSH_ITEM_TYPE_DEVICE;
+ 				dprintk("  item %d type %d\n", item, itemtype);
+ 
+ 				/* keep going? */
+@@ -796,7 +796,7 @@ static void crush_choose_indep(const struct crush_map *map,
+ 				}
+ 
+ 				/* out? */
+-				if (itemtype == 0 &&
++				if (itemtype == CRUSH_ITEM_TYPE_DEVICE &&
+ 				    is_out(map, weight, weight_max, item, x))
+ 					break;
+ 
 -- 
 2.47.3
 
