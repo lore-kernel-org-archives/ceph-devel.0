@@ -1,154 +1,122 @@
-Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
+Received: from mail-qt1-f169.google.com (mail-qt1-f169.google.com [209.85.160.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E2E637BE6D
-	for <ceph-devel@vger.kernel.org>; Sat,  6 Jun 2026 15:51:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9412E2690EC
+	for <ceph-devel@vger.kernel.org>; Sat,  6 Jun 2026 19:00:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780761109; cv=none; b=gIVNRd4s1kCz/sQ/hkOLbVs3Vn0hnhWJmRC0HIqF2bs5I+8ZFPphRfdGg+P9N7+lDmlN+iyxeJwabskSAOYK2q14zHvlD7fjYVSZtIAcxlvsGm02a+L2rMLNIkDSpuvKqFZHVeCE4zp6x1ImGBu4pseRkg0yblLHGVt0iWXoox4=
+	t=1780772446; cv=none; b=Yl8Ry5J9O44YA2o6hSSbiD5nNb/ZONKAxvRAyKYaNrA0YqHWYyIUd3NxU2RghMlZqZPqELxPrMDMYO4RzBBkldnfKukFBPjAtHnm6+xTo5EoGba+893VvXXSouvIAOL2rMcmXtb0AT0ptnM5AAvW+NOMvZ0cZHNEwY3rcrKFVtY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780761109; c=relaxed/simple;
-	bh=b+biXWp6ckglrWOQeqnOK7JSiOFVopsxQurLx5ts2vE=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=rURxov4PFpuSgwYayJn3PDRpBHEgTBd7zHbWdrjulJZh/3LpejzhI3g6ostpPy4e+WV2Ix4Yo0HnmffvB7N025d853yByveBhMcPm+Eo8YjvVOQyzKkfnKxxxv84wzhxp9uF7r4hFK5ZrEO63Fd+aBk0PJow1G2+I6uDqmCD2mE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gfCpWJxf; arc=none smtp.client-ip=209.85.214.182
+	s=arc-20240116; t=1780772446; c=relaxed/simple;
+	bh=SB7Q4h1MSqAh0UeyNq9Vk1SWGT1nQgzgNaQF44rZQy0=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=f29z1aob/6b2WJsFJHIWVM2DSLhh5TnsnxiEKU0dpi31CJ3wElYruI7oO9+eLxJK/FRuneGLv72ANbEMH3R8PeYFfxllQXtjuKDkvpEu0KWO+a/6nyKCXT98j4rT1ZY6VNoY7tQpdMoBzvbPi10zQia6XIfaBS5yGQ59gP1J3Vc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aA7OGTVL; arc=none smtp.client-ip=209.85.160.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gfCpWJxf"
-Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-2c0c2d792c8so19846325ad.1
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2026 08:51:48 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aA7OGTVL"
+Received: by mail-qt1-f169.google.com with SMTP id d75a77b69052e-51778077b28so34479471cf.1
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2026 12:00:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780761108; x=1781365908; darn=vger.kernel.org;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=kM8smwKK+VUgZJJLi4LC3kYF3TgGBfotkui6o3ZnmhQ=;
-        b=gfCpWJxfnHah+mUGU2E9Qcv+GaaWTf1botMREYpWq/lsHoH6n33epVkWEIWLLOOZ5E
-         ggf0C0yBPMyGsj2tjU8NTp+4WGFnyqLZRyxbVdlNJ816mwvNrfk8Ap64kzU0UViuUJGW
-         L9OeUA4CFd7JxkGQNQpuHBkVUmSo3q2RK3xVSelTWc+1NjYqsY43d5hl2G91NolD4Muh
-         q2Kr9l8Dzi3aIUtaucZnMZ21t5pFcMcMhj6ySPRkTaeYuPdsnGu4xZQ73Xbh4J/RVJEU
-         /xXfULmLqi5PpzZY3vwkv4w1jbxDM8LZ7kandvnAYb63h8n/SEbJQyAN/TDdibx72a2P
-         33jQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780761108; x=1781365908;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1780772444; x=1781377244; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kM8smwKK+VUgZJJLi4LC3kYF3TgGBfotkui6o3ZnmhQ=;
-        b=o+SqhOZO0ulJvtxcGe4RL7GVg6jT+qYiPIZllm7ruDE6E5RFN4i8asF88gLsIjSkeG
-         JPyUVn80mLWE5O1brUvPGYPdJVSQL7qRhx8zfd+3ng8emwbfbb1o+bfTX4Mr+KEZUaqJ
-         Icg+rXlKFC/km43ZqM1UBGXEYKmkjlSPNz9QCaS1JlS1a2zqytAiW6LFHtf2i5QGwv2V
-         2U44bQFNfgG73hYVtLmvvV9zaXPGa8n3eotG/qvgLE0ZclsCyRDwQ5CLKH9B2dZlo2Cj
-         8MGwcoxb7xWUm3Wjxlo4LUbGFIMw9B+Mg0YXJNgnXdPSRg/PLcCg89ZlVLgpiUWhfgeG
-         PR7Q==
-X-Gm-Message-State: AOJu0YylxDd9ILvJFg6JMt4gZPIGUGnIApn+XaLsFMc6QI7YxIRca1Ko
-	CQMId4WViSs+ymAnKNs/8gdrCh8l6Nnnzw5qIHvcMGNbWZhfPUh9ToydXStl9+uz8M1Jxw==
-X-Gm-Gg: Acq92OEltYxIsPltF94KCUvIf3yuZEFeDmdMqu5Dku5aXF/ZP7KZrohZpXKg8sf0o32
-	ehME6NlyBfEmyfwk/YUUQxXHXs7YP60nI1E9diMm0LJtvi4GQIW1icxPjjbXUkBn/gObytF6LYv
-	GIvCCW67aRMDaP0ZW+mUB/ltATaugdEGecLHrayapxLCs/G3MxXgawiHOL817jN4NBGdgjTKTn+
-	eTgsxpyWsQE1L7JYnxKWDqzGtAnIwPtAft4D8CwrmCF2mwoqNmVv1InFvoQWnx/UjYI0Ci2M8xN
-	PsnmtER85CWAyPVsjv7oZxuvojN4ZLym4xiZHajWHh5Ap2ZtApc4zd5srgsoGVj1WXOFduCtqrU
-	fEP8wWsjOj8NTRwFXx4qDf6AvkkJmvM0Yf7PjroKULWxpIywtwfEU6AqFu8yC3cD1BGRAncv2/5
-	SeFBpZh6MmjISSYAvmFIeEvW2rVIxkb32S3JsHyYGgtbkPN/t/jWfjgxCW/0o=
-X-Received: by 2002:a17:903:244d:b0:2bf:800:19f8 with SMTP id d9443c01a7336-2c1e7e500eamr88158175ad.17.1780761107573;
-        Sat, 06 Jun 2026 08:51:47 -0700 (PDT)
-Received: from LAPTOP-N3B6U5LC.localdomain ([36.21.2.173])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2c164f6e86dsm128908575ad.8.2026.06.06.08.51.44
+        bh=mql0QQ+9J26Gk5KyJRUIzwd78adrG9s2r831auI4Ui8=;
+        b=aA7OGTVLrMjR2Crnk2XybjO9444dGr/pDZ33mkjZNVcQLpGtroxPZO1KPQSSAVtXvn
+         MTHkt+DZFZ3KFHC1h07TLgogQeUURDX9JaBacX7140e3JL+liO0RC7qT6WqSfIvvJSgE
+         aZ57EcU/Jb8c699zIfJ2FbYWDYd8q2EWgFb6L3PAkwgS7dbPc3CIuR7/IkxIvuvxlPJd
+         jOD7GYu5FGZbgyxeN4Z4gKFzvEsa8BlVHVdXxNZw10bwJ6GvfKdrvU2G5zPnR0QmHMzN
+         66Oxww1awOREj2RmcMT+1ly91FgXOmWlXrmC0xLr2tijGRNuiPMkdQu6mrx1TvWUBmRr
+         ZAKA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780772444; x=1781377244;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=mql0QQ+9J26Gk5KyJRUIzwd78adrG9s2r831auI4Ui8=;
+        b=EvakAPj+44LhMhrmLKRGcKo5nAJerWtx4ygC9T7C04JNmVj+cTLjBzovMkK5cymTM5
+         DOkBryiZ0za/6zfVRQDNwnyxQ7N7zfFIVD+RBvr0czfTL8OLBRSKf5YUT1AbsuiOY4FR
+         jLScPd5kjPG++B6cmToSJpZpzuUY3d1fwO1KLZ+6uV0GBHVPKHN536V70AolWchV815d
+         WasdaAESpeCKA3pra8T/P/nojm6Kw0Fd+X0v2W8jc4pirXc2jUjntu3Cx8iexO8eIFkD
+         c6C6hpx/PxdmH83FyfC7HZV+DyYQdC0aT2u8N38kru728qFHKBjfk9aXcA1eijg4q3h2
+         K+1g==
+X-Gm-Message-State: AOJu0Yw9Z1aY26KkyMKKTIglBVk+GMGJkIJSqhqfZAmGD3FUMHQzAjwF
+	4QEaX2O12SoiiIBKlAZ2PSlQnTwecUvbMegJND8pICwM43pV689+4FTz
+X-Gm-Gg: Acq92OHEvQtthFfh+w9lIq2NbXG9bn3xIOJGyzzWrQkACvIzBqD6Rb/vRsv7ujs3Yzn
+	fHnXJdf7o7mUBzgFTLoBMxchxgcl/olt9nTSB9vgzkyyOYlAbYn6LcwrZ8kwY5lmyOidU9FgYyB
+	AySHVaLpvsAXPdSHiB8izGHfryZa9YUtp77X8daH23h6nqgIn1TGkuG9JyhchWtKqUYsiYgQa4m
+	5wEqUURQs6kAuVdGbTIkJHTGnMNpDObz5/0/QXOdi/j/5/oiKvBN+nEr7pDaQ1jVbLgyIhi1gwh
+	pwVGGnrFy+PjxtIJimU2D1V+7EexPAqL0m22m65Ev5YKY4ljm7OcOHXghGQm17CeQ/QUDi9hfGX
+	krNSS30v9iX9I1zGKJOhbMv3x7g0BSeBGsW2zASgW5knwFqdnRoTX1yFCfxz3e5pExLr7EPi/y/
+	8I5UfDdPXVAk8uHe7KDpueMUosOtIebvcJTAUssAuMxtLkKGjpoC/y1z00qOXUuaEhTSsuC7uv/
+	2YKztpzMfQfmKj08d518T3qxaraFLY=
+X-Received: by 2002:a05:622a:4d09:b0:516:e290:991a with SMTP id d75a77b69052e-51795be8192mr142753111cf.40.1780772444140;
+        Sat, 06 Jun 2026 12:00:44 -0700 (PDT)
+Received: from server0 (c-68-48-65-54.hsd1.mi.comcast.net. [68.48.65.54])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-5179dd9d908sm40084581cf.15.2026.06.06.12.00.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 06 Jun 2026 08:51:47 -0700 (PDT)
-From: Zhenhao Wan <whi4ed0g@gmail.com>
-Date: Sat, 06 Jun 2026 23:51:34 +0800
-Subject: [PATCH] libceph: fix potential out-of-bounds read in
- decode_new_up_state_weight()
+        Sat, 06 Jun 2026 12:00:43 -0700 (PDT)
+From: Michael Bommarito <michael.bommarito@gmail.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 0/4] ceph: bound untrusted MDS and monitor reply decoders
+Date: Sat,  6 Jun 2026 15:00:21 -0400
+Message-ID: <cover.1780766417.git.michael.bommarito@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <cover.1780596023.git.michael.bommarito@gmail.com>
+References: <cover.1780596023.git.michael.bommarito@gmail.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260606-ceph-fix-final-v1-1-e19325c14dd6@gmail.com>
-X-B4-Tracking: v=1; b=H4sIAAVCJGoC/yWM0QpAQBREf0X32ZYVHvyKPKw1y5WWdpGSf3fRN
- A+nac5FEYERqU4uCjg48uIFdJqQHY0foLgXpjzLq0yiLNZROT6l3sxKV66A7l1pSpCc1gAZP2H
- T/hz3boLdXgvd9wNfEajbcgAAAA==
-X-Change-ID: 20260606-ceph-fix-final-16f4e1df5a5e
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>, Josh Durgin <jdurgin@redhat.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Yuhao Jiang <danisjiang@gmail.com>, stable@vger.kernel.org, 
- Zhenhao Wan <whi4ed0g@gmail.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1780761103; l=2511;
- i=whi4ed0g@gmail.com; h=from:subject:message-id;
- bh=b+biXWp6ckglrWOQeqnOK7JSiOFVopsxQurLx5ts2vE=;
- b=D6HKyc9ODBxIoz84HHcuIwMxLHaeULK5B6fOBbngVHayK1814WdWkbp+qg2zcvZeVJc4ERdHi
- j3xkyExnQs8BoPAz3CIinckImErnd6IPL8Y3IfeSgaJnEtrsw7tuxNS
-X-Developer-Key: i=whi4ed0g@gmail.com; a=ed25519;
- pk=zRTKlstE0LmilshGwJsFYEVjiT6RiXMBXK8Og6VmuVQ=
 
-The new_state section of an incremental OSD map is validated and skipped
-using a byte count computed as
+This is v2 of the CephFS decoder-bound series. The first two patches are
+unchanged code-wise and now carry Slava's Reviewed-by. Patches 3 and 4
+address the review feedback on overflow-safe sizing and aggregate delegated
+inode bounds.
 
-	len *= sizeof(u32) + (struct_v >= 5 ? sizeof(u32) : sizeof(u8));
+The four bugs are still independent:
 
-The multiplication is evaluated in size_t, but the result is stored back
-into the u32 "len", truncating it.  A malicious or corrupted incremental
-map can supply a new_state element count >= 0x20000000 (struct_v >= 5) so
-that len * 8 wraps modulo 2^32 to a small value.  The following
-ceph_decode_need() then validates far fewer bytes than the section
-actually occupies.
+  1/4 rejects a final xattr value length that runs past the xattr blob.
+  2/4 bounds MDSCapAuth path and fs_name copies in handle_session().
+  3/4 bounds the mdsmap export_targets array for info_v 2/3.
+  4/4 bounds delegated-inode parsing by session population and by one
+      reply's aggregate interval length.
 
-new_state is then reprocessed with the unchecked ceph_decode_32() and
-ceph_decode_8() helpers, which have no per-iteration bounds check and
-rely entirely on that truncated up-front validation.  This can lead to
-a kernel out-of-bounds read past "end".
+Changes in v2:
 
-Compute the byte count in u64 and bounds-check it against the remaining
-buffer before skipping, mirroring the size_t-typed length checks used
-elsewhere in this file (e.g. decode_crush_names(), decode_pg_mapping()).
-The osd index used for the osd_state[] write is already bounds-checked
-against map->max_osd, so this is an out-of-bounds read, not a write.
+  - Add Reviewed-by: Viacheslav Dubeyko to patches 1 and 2.
+  - Patch 3 computes the export-targets byte count with size_mul() and
+    reuses the checked length for the cursor advance.
+  - Patch 4 replaces the per-interval cap with a per-session population
+    counter and a per-reply interval budget, so repeated replies and
+    duplicate ranges are bounded too. The cap stays a fixed client-side
+    constant because the kernel client never sees the userspace
+    mds_client_prealloc_inos option; it is sized as a generous multiple of
+    that option's documented default of 1000.
 
-Fixes: 930c53286977 ("libceph: apply new_state before new_up_client on incrementals")
-Reported-by: Yuhao Jiang <danisjiang@gmail.com>
-Cc: stable@vger.kernel.org
-Signed-off-by: Zhenhao Wan <whi4ed0g@gmail.com>
----
- net/ceph/osdmap.c | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
+Michael Bommarito (4):
+  ceph: bound xattr value length in __build_xattrs()
+  ceph: bound MDSCapAuth path and fs_name decode in handle_session()
+  ceph: bound num_export_targets array for mds info v2/v3
+  ceph: cap delegated inode count in ceph_parse_deleg_inos()
 
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 8b5b0587a0cf..dd3023fe821e 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -1842,6 +1842,7 @@ static int decode_new_up_state_weight(void **p, void *end, u8 struct_v,
- 	void *new_up_client;
- 	void *new_state;
- 	void *new_weight_end;
-+	u64 skip_len;
- 	u32 len;
- 	int ret;
- 	int i;
-@@ -1862,9 +1863,10 @@ static int decode_new_up_state_weight(void **p, void *end, u8 struct_v,
- 
- 	new_state = *p;
- 	ceph_decode_32_safe(p, end, len, e_inval);
--	len *= sizeof(u32) + (struct_v >= 5 ? sizeof(u32) : sizeof(u8));
--	ceph_decode_need(p, end, len, e_inval);
--	*p += len;
-+	skip_len = (u64)len * (sizeof(u32) + (struct_v >= 5 ? sizeof(u32) : sizeof(u8)));
-+	if (skip_len > end - *p)
-+		goto e_inval;
-+	*p += skip_len;
- 
- 	/* new_weight */
- 	ceph_decode_32_safe(p, end, len, e_inval);
+ fs/ceph/mds_client.c | 59 ++++++++++++++++++++++++++++++++++++++------
+ fs/ceph/mds_client.h |  1 +
+ fs/ceph/mdsmap.c     |  7 +++++-
+ fs/ceph/super.h      |  9 +++++++
+ fs/ceph/xattr.c      |  1 +
+ 5 files changed, 68 insertions(+), 9 deletions(-)
 
----
-base-commit: dbe8d05c9750b107b10c15361aad40fbb350bedb
-change-id: 20260606-ceph-fix-final-16f4e1df5a5e
 
-Best regards,
---  
-Zhenhao Wan <whi4ed0g@gmail.com>
-
+base-commit: f72c95f3a516d87483e225ae081a402a09fd0127
+-- 
+2.53.0
