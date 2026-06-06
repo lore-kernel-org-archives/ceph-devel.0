@@ -1,75 +1,75 @@
-Received: from mail-qt1-f169.google.com (mail-qt1-f169.google.com [209.85.160.169])
+Received: from mail-qt1-f175.google.com (mail-qt1-f175.google.com [209.85.160.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9412E2690EC
-	for <ceph-devel@vger.kernel.org>; Sat,  6 Jun 2026 19:00:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 288092F8E82
+	for <ceph-devel@vger.kernel.org>; Sat,  6 Jun 2026 19:00:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780772446; cv=none; b=Yl8Ry5J9O44YA2o6hSSbiD5nNb/ZONKAxvRAyKYaNrA0YqHWYyIUd3NxU2RghMlZqZPqELxPrMDMYO4RzBBkldnfKukFBPjAtHnm6+xTo5EoGba+893VvXXSouvIAOL2rMcmXtb0AT0ptnM5AAvW+NOMvZ0cZHNEwY3rcrKFVtY=
+	t=1780772452; cv=none; b=E47d/JlmQp7qzlLfbvMQ+ypi1Dv+dUL4hkXwOxxJYSlfwo3s+tBHmHtnLmVT9EqaSR86cQjezAudepCGwWdpRRN5q6Xg9VCQpNRyWN0xr19XLBBUBDrHyQ4K4R/G4KnAa8NyTI/ygCtep9kl8TW9F13JxHQ/2sLYLOtf0P1AZG0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780772446; c=relaxed/simple;
-	bh=SB7Q4h1MSqAh0UeyNq9Vk1SWGT1nQgzgNaQF44rZQy0=;
+	s=arc-20240116; t=1780772452; c=relaxed/simple;
+	bh=p04gKZewWGHGeiIshvk8TxG729gV4NtSvKoh07Wi73I=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=f29z1aob/6b2WJsFJHIWVM2DSLhh5TnsnxiEKU0dpi31CJ3wElYruI7oO9+eLxJK/FRuneGLv72ANbEMH3R8PeYFfxllQXtjuKDkvpEu0KWO+a/6nyKCXT98j4rT1ZY6VNoY7tQpdMoBzvbPi10zQia6XIfaBS5yGQ59gP1J3Vc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aA7OGTVL; arc=none smtp.client-ip=209.85.160.169
+	 MIME-Version; b=D7njpIltI0UgMOz51DduPs95w5JxBGGYrXX5bN8O5ZdeQ7oI125gmNZvm2aOLiDJ/rwpKw0ZKgJs1+Zk34c1jzc5OqUobF+e8nj4RdoFHN048bBX0DrUrXuNRTUdAhePy/VzEjymdoLqua0znJTe+p92viyirq9p0cVsAWUKx9Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fYYr7jVx; arc=none smtp.client-ip=209.85.160.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aA7OGTVL"
-Received: by mail-qt1-f169.google.com with SMTP id d75a77b69052e-51778077b28so34479471cf.1
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2026 12:00:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fYYr7jVx"
+Received: by mail-qt1-f175.google.com with SMTP id d75a77b69052e-51761d27612so34919731cf.3
+        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2026 12:00:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780772444; x=1781377244; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1780772450; x=1781377250; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=mql0QQ+9J26Gk5KyJRUIzwd78adrG9s2r831auI4Ui8=;
-        b=aA7OGTVLrMjR2Crnk2XybjO9444dGr/pDZ33mkjZNVcQLpGtroxPZO1KPQSSAVtXvn
-         MTHkt+DZFZ3KFHC1h07TLgogQeUURDX9JaBacX7140e3JL+liO0RC7qT6WqSfIvvJSgE
-         aZ57EcU/Jb8c699zIfJ2FbYWDYd8q2EWgFb6L3PAkwgS7dbPc3CIuR7/IkxIvuvxlPJd
-         jOD7GYu5FGZbgyxeN4Z4gKFzvEsa8BlVHVdXxNZw10bwJ6GvfKdrvU2G5zPnR0QmHMzN
-         66Oxww1awOREj2RmcMT+1ly91FgXOmWlXrmC0xLr2tijGRNuiPMkdQu6mrx1TvWUBmRr
-         ZAKA==
+        bh=bXuQS8LAd9fbsQ2k1v5BJHiia9ttbolctoKgd5+Hdl4=;
+        b=fYYr7jVxzJY3p9j7iP8baThsLkX9WC5zc4Dh4fel1GSAUD3dc5rvDj5X88xKPAG+T1
+         ERpNWuO6p7cXTnNd3Sero1TZvYf0EDW4vrZ9Z/5ur7U0dh40c2YRPU5xfkYzyOPKJDli
+         nRhb1VjreEY835iTmjwjH6Ab/A7GpoS1FYW/jJpo7aOyybCZ+3liVNO60hEXI5s58sCb
+         EHKa8cFQgZlJ+HmszKOmUlCd4Iks5AqShJTCNQwIr+QK7XrDkhSutjthZJirK8Vhw14w
+         lzO3wHe72/6/aJm0Wy/5IeWkteZph6oLbyOrBzksO7L4D56KIw/vxopQ9z6+587fW/T7
+         0evw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780772444; x=1781377244;
+        d=1e100.net; s=20251104; t=1780772450; x=1781377250;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=mql0QQ+9J26Gk5KyJRUIzwd78adrG9s2r831auI4Ui8=;
-        b=EvakAPj+44LhMhrmLKRGcKo5nAJerWtx4ygC9T7C04JNmVj+cTLjBzovMkK5cymTM5
-         DOkBryiZ0za/6zfVRQDNwnyxQ7N7zfFIVD+RBvr0czfTL8OLBRSKf5YUT1AbsuiOY4FR
-         jLScPd5kjPG++B6cmToSJpZpzuUY3d1fwO1KLZ+6uV0GBHVPKHN536V70AolWchV815d
-         WasdaAESpeCKA3pra8T/P/nojm6Kw0Fd+X0v2W8jc4pirXc2jUjntu3Cx8iexO8eIFkD
-         c6C6hpx/PxdmH83FyfC7HZV+DyYQdC0aT2u8N38kru728qFHKBjfk9aXcA1eijg4q3h2
-         K+1g==
-X-Gm-Message-State: AOJu0Yw9Z1aY26KkyMKKTIglBVk+GMGJkIJSqhqfZAmGD3FUMHQzAjwF
-	4QEaX2O12SoiiIBKlAZ2PSlQnTwecUvbMegJND8pICwM43pV689+4FTz
-X-Gm-Gg: Acq92OHEvQtthFfh+w9lIq2NbXG9bn3xIOJGyzzWrQkACvIzBqD6Rb/vRsv7ujs3Yzn
-	fHnXJdf7o7mUBzgFTLoBMxchxgcl/olt9nTSB9vgzkyyOYlAbYn6LcwrZ8kwY5lmyOidU9FgYyB
-	AySHVaLpvsAXPdSHiB8izGHfryZa9YUtp77X8daH23h6nqgIn1TGkuG9JyhchWtKqUYsiYgQa4m
-	5wEqUURQs6kAuVdGbTIkJHTGnMNpDObz5/0/QXOdi/j/5/oiKvBN+nEr7pDaQ1jVbLgyIhi1gwh
-	pwVGGnrFy+PjxtIJimU2D1V+7EexPAqL0m22m65Ev5YKY4ljm7OcOHXghGQm17CeQ/QUDi9hfGX
-	krNSS30v9iX9I1zGKJOhbMv3x7g0BSeBGsW2zASgW5knwFqdnRoTX1yFCfxz3e5pExLr7EPi/y/
-	8I5UfDdPXVAk8uHe7KDpueMUosOtIebvcJTAUssAuMxtLkKGjpoC/y1z00qOXUuaEhTSsuC7uv/
-	2YKztpzMfQfmKj08d518T3qxaraFLY=
-X-Received: by 2002:a05:622a:4d09:b0:516:e290:991a with SMTP id d75a77b69052e-51795be8192mr142753111cf.40.1780772444140;
-        Sat, 06 Jun 2026 12:00:44 -0700 (PDT)
+        bh=bXuQS8LAd9fbsQ2k1v5BJHiia9ttbolctoKgd5+Hdl4=;
+        b=EnTTqrVbWrhw/3ta9lARVCRWIQCMLdp+Q4M7HXGm9sBOcxHAmMtn8Fp8LrKsX0Osea
+         nBWInkIqKDaN36fL+PfHMD29Zu9USP5mnXOssy122xLD6TQmapVJriZoMZ+Q7/T7mFAl
+         ej6QdfN5uw2I57tU9FK+5Jdxfcd73QHJgcLwlRl8Y/EWKzmIlJg30nQeycANG1sJnmic
+         +9hpE1REW3X7Gug0/0VJOWCBMDyb/smOY2Qt2mswiQYnEG3J11RFTL+euuUoPVbQjZ3s
+         XCjSrWz3ErL49oNiFnTlpaUj+G2lnBaFt5yrcGZXjzzhuQrLVsCXzjY58hY6W0zcJ9Vg
+         +smA==
+X-Gm-Message-State: AOJu0YyFjgqHa8eNtB1FEUC2D39ot3dt9Ez++l00YNk+NIvJxLhTnaHg
+	kKzhE+5OpeOD7E6vd0/UJ/ogBw5ET2fG1ETGjOwSryqYSZi9pJQd1+Bw
+X-Gm-Gg: Acq92OFoxe3UXjBISzRTO3kEqxbOuFlEnG9kTo99v9tjnRGYpXTwWdlOELDm34PQSCy
+	q+o2EsLSOeK+Vn6dgWKeBHsW/reh2VG77vSvj0sOreSTcuiisJu4jMYmjFIUkLgOT7eDbB/Ahu2
+	584yV7MWbMk4aSi3IdVMomNDZ70CccTIRbJ0lQtwOcwkfNblYmm0Mnrx93wnnLDQ/aLcT5XdDdI
+	ogGEj0+eNVmzF4KsL4P44mWfsMnFqrGocqnqIFUzr+GwtVlCkqSKYeag7GdRwy5MPvpOL3w++78
+	Zi55OzXoWZYr8zwVhITCqVqMV7bf9UBXdN25RMevNYih4Tu2xLgxiuy7GxaTo6EGbOpWc+43/OR
+	x+JLf9OCUZsS6QswSkEaFHUQ9WtCoz2BkNqQ1UsnX3z8Suhw40lE19CgaQ3kFwkAIPr0+WOEdH4
+	wAvMO/mFMC8YJxpxj6juNZFDYGAMqfcc11LgcMtRgtTCuy0jE4TTYrcqtI+fzsye4LPlyXygZEP
+	/7zdEkm9Nzrdio13J6OY3vUavziQ34=
+X-Received: by 2002:a05:622a:1451:b0:516:e031:933f with SMTP id d75a77b69052e-51795b0e76cmr128614291cf.6.1780772446093;
+        Sat, 06 Jun 2026 12:00:46 -0700 (PDT)
 Received: from server0 (c-68-48-65-54.hsd1.mi.comcast.net. [68.48.65.54])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-5179dd9d908sm40084581cf.15.2026.06.06.12.00.42
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-5179dd9d908sm40084581cf.15.2026.06.06.12.00.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 06 Jun 2026 12:00:43 -0700 (PDT)
+        Sat, 06 Jun 2026 12:00:44 -0700 (PDT)
 From: Michael Bommarito <michael.bommarito@gmail.com>
 To: Ilya Dryomov <idryomov@gmail.com>,
 	Alex Markuze <amarkuze@redhat.com>,
 	Viacheslav Dubeyko <slava@dubeyko.com>
 Cc: ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 0/4] ceph: bound untrusted MDS and monitor reply decoders
-Date: Sat,  6 Jun 2026 15:00:21 -0400
-Message-ID: <cover.1780766417.git.michael.bommarito@gmail.com>
+Subject: [PATCH v2 1/4] ceph: bound xattr value length in __build_xattrs()
+Date: Sat,  6 Jun 2026 15:00:22 -0400
+Message-ID: <b95f479f4cc52c879ace02ee224894b8feae942e.1780766417.git.michael.bommarito@gmail.com>
 X-Mailer: git-send-email 2.53.0
-In-Reply-To: <cover.1780596023.git.michael.bommarito@gmail.com>
-References: <cover.1780596023.git.michael.bommarito@gmail.com>
+In-Reply-To: <cover.1780766417.git.michael.bommarito@gmail.com>
+References: <cover.1780596023.git.michael.bommarito@gmail.com> <cover.1780766417.git.michael.bommarito@gmail.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -78,45 +78,56 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-This is v2 of the CephFS decoder-bound series. The first two patches are
-unchanged code-wise and now carry Slava's Reviewed-by. Patches 3 and 4
-address the review feedback on overflow-safe sizing and aggregate delegated
-inode bounds.
+__build_xattrs() decodes the MDS-supplied xattr blob one attribute at a
+time. For each attribute it reads a 32-bit name length, advances past the
+name bytes, reads a 32-bit value length, records the value pointer, and
+advances past the value bytes. The two length fields are read with
+ceph_decode_32_safe(), but the value bytes themselves are advanced over
+with a bare "p += len" and no ceph_decode_need() check that "len" bytes
+remain in the blob.
 
-The four bugs are still independent:
+For every attribute except the last, the next iteration's
+ceph_decode_32_safe() on the following name length implicitly verifies
+that the previous value did not run past the blob end. The final
+attribute has no successor, so its decoded value length is never checked
+against the blob bounds. A malicious or compromised metadata server can
+set the last attribute's value length larger than the bytes actually
+present in the blob.
 
-  1/4 rejects a final xattr value length that runs past the xattr blob.
-  2/4 bounds MDSCapAuth path and fs_name copies in handle_session().
-  3/4 bounds the mdsmap export_targets array for info_v 2/3.
-  4/4 bounds delegated-inode parsing by session population and by one
-      reply's aggregate interval length.
+The blob is a dedicated kvmalloc() allocation sized to the wire length
+(ceph_buffer_new() in ceph_fill_inode()). __set_xattr() records the
+oversized length in xattr->val_len verbatim, and a later getxattr(2) runs
+memcpy(value, xattr->val, xattr->val_len) into a user-supplied buffer,
+copying bytes past the end of the allocation back to user space.
 
-Changes in v2:
+Impact: a malicious metadata server discloses adjacent kernel heap bytes
+to a local user via getxattr(2) on a CephFS file. Add the missing
+ceph_decode_need() so an out-of-bounds value length on the final
+attribute fails the decode and returns -EIO instead of being stored.
 
-  - Add Reviewed-by: Viacheslav Dubeyko to patches 1 and 2.
-  - Patch 3 computes the export-targets byte count with size_mul() and
-    reuses the checked length for the cursor advance.
-  - Patch 4 replaces the per-interval cap with a per-session population
-    counter and a per-reply interval budget, so repeated replies and
-    duplicate ranges are bounded too. The cap stays a fixed client-side
-    constant because the kernel client never sees the userspace
-    mds_client_prealloc_inos option; it is sized as a generous multiple of
-    that option's documented default of 1000.
+Fixes: 355da1eb7a1f ("ceph: inode operations")
+Cc: stable@vger.kernel.org
+Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
+Assisted-by: Claude:claude-opus-4-8
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+---
+v2:
+- Add Reviewed-by from Viacheslav Dubeyko.
 
-Michael Bommarito (4):
-  ceph: bound xattr value length in __build_xattrs()
-  ceph: bound MDSCapAuth path and fs_name decode in handle_session()
-  ceph: bound num_export_targets array for mds info v2/v3
-  ceph: cap delegated inode count in ceph_parse_deleg_inos()
+ fs/ceph/xattr.c | 1 +
+ 1 file changed, 1 insertion(+)
 
- fs/ceph/mds_client.c | 59 ++++++++++++++++++++++++++++++++++++++------
- fs/ceph/mds_client.h |  1 +
- fs/ceph/mdsmap.c     |  7 +++++-
- fs/ceph/super.h      |  9 +++++++
- fs/ceph/xattr.c      |  1 +
- 5 files changed, 68 insertions(+), 9 deletions(-)
-
-
-base-commit: f72c95f3a516d87483e225ae081a402a09fd0127
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index e773be07f7674..d488bb8fc00ba 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -848,6 +848,7 @@ static int __build_xattrs(struct inode *inode)
+ 			name = p;
+ 			p += len;
+ 			ceph_decode_32_safe(&p, end, len, bad);
++			ceph_decode_need(&p, end, len, bad);
+ 			val = p;
+ 			p += len;
+ 
 -- 
 2.53.0
