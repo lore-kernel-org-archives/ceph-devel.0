@@ -1,137 +1,102 @@
-Received: from mail-oi1-f171.google.com (mail-oi1-f171.google.com [209.85.167.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0C691D9A5F
-	for <ceph-devel@vger.kernel.org>; Sat,  6 Jun 2026 23:55:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.171
+Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [13.76.78.106])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 017FC287510
+	for <ceph-devel@vger.kernel.org>; Sun,  7 Jun 2026 09:36:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.76.78.106
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780790114; cv=none; b=qLuqaQ8wA7Not1DRC+isSfkhI9cRCNqYBsr79Dm30aTRNOifkix8qWRoNLLfSRXgczcyGjxBu1NIbCTfPhrQxUQ2qeCgMRDAksYKPR2b9cK6ba6hnmKYwMjq1zBqzlAkv3iGAJdjJ+6dVOH/sgt/nHGkcuxspOtbN3gHbRigO5M=
+	t=1780824973; cv=none; b=Pm98fMCwGho5dk+6wVQHMPIT0PUVNWnstZT9ouq7lbUA0ZKb5+W9D2y2N0Ft6NZDimPiJy5E+vzWAhnP0sTBSH1QWAsmnYdAxlumYfNue4IjK7dom5xETjCq2ainUxjq1e4XL2EcuahpzSCRrey4RhBfc6Eljfz/dxRHahRkNDI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780790114; c=relaxed/simple;
-	bh=K8OYtNJC3IIZRMBqEi51lk43u3HkOmDMFO6SNuAuxjE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=X8BWyvngjHbockD7OmnLUpN7FE6ixPl0pqYUp5uHBnub6d5+TKphE3TnWhJB41Gv4rZ+qOWrYIUeiYnvJlhOrgNyXF2Y54ywDqC9TSwkZsYtO3v2YDkU1bhzYW5wg/9vOKuVUnqNmYiH9rBJdatnkZ81GBGHRFj5FrjfQDW80dg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ieee.org; spf=pass smtp.mailfrom=ieee.org; dkim=pass (1024-bit key) header.d=ieee.org header.i=@ieee.org header.b=CjTBQgqW; arc=none smtp.client-ip=209.85.167.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ieee.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ieee.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ieee.org header.i=@ieee.org header.b="CjTBQgqW"
-Received: by mail-oi1-f171.google.com with SMTP id 5614622812f47-4865e953031so3687371b6e.0
-        for <ceph-devel@vger.kernel.org>; Sat, 06 Jun 2026 16:55:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ieee.org; s=google; t=1780790111; x=1781394911; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=wVY/Nc3kfIfRXZcic+3QshizwzyK0GaTXzlxRWeoy2E=;
-        b=CjTBQgqWJ1AoG9moWTWz/rQBt2XUZTccRHRslxYYs8rDeuZpPFCHGbg9VlYWySgi/M
-         v+skadR8BA+TmVHyxiH8MN2S9tpcYgaodi+e8NJUN4oT/9dw24a69wRaPWJqVTzFs5El
-         /EI3L5s9ZNmjOQ3JMpDrqny+DSq7+oQcGwt20=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780790111; x=1781394911;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=wVY/Nc3kfIfRXZcic+3QshizwzyK0GaTXzlxRWeoy2E=;
-        b=m97vbhHEwJkjeNF/HXEu+cYE25NNPILB2OWyF3IzC918y3xo/dsVCloQPBg7XcmRAl
-         cwiXNqSTLPV6d5afFQlLya/nM18rU3chuaV5b3CYdGQvz/pJLTj8FvPsqa5D5B7MKU6K
-         VQ3JoZgtwyZFCxdqFtCaI55QWMTg+us3gpWi3u01L1nHY+ILUblw2/Gg3R6II/ohstjN
-         TGkLlDBI5oqfYlYRSkpMtTY/J439ltR+Vps+Ry1/3hrxAC15460u0+AWkkP/H2TI54DT
-         aaPAipbg0Y3NRKH+dDPKL6GJICqzYQP21wNsGMrDUBbn++XcFFe09cBorD5z+rsyWuQG
-         M4Ow==
-X-Forwarded-Encrypted: i=1; AFNElJ8crbWFPWYHb5pf8X5y/45EyruG7J33nAJxUrZngwptFfnrcrFRMEVlApB0XQxSn259jTHT3hThQhDv@vger.kernel.org
-X-Gm-Message-State: AOJu0YyRr7K6CqXr+NMrbfJod6J9UkI6TM/yvHD3EvFri9gMMQ5mrO19
-	8uEBpyqhvGX4VCtCzwqd/RcHhdK8CC0HC5UikqgSER375/HQL11DNIgkX1HHQyosJw==
-X-Gm-Gg: Acq92OGujL8sH0fcZRb+R1SR0tpKLyL3o/ewLDfR708moWrvzZjarlbN49uyRFkbr20
-	35gltSPvR8kuL0sr5r+kTRPpCA1oi8AWcTDKTGK8pHoqk3ZJrD5/9w/svgJ4ZENOswi4d2Q02PB
-	hqWbBRg3Rict2k2YXGC8oBMHC+kUy2iTcFkHmg1A+nvvo5MB0yKo4SdtVhIIpWLlewOJ97niXbs
-	5E1CsY5X19u00JU9unnUXjlyJY8KM/Y0QrtWpZDqSwWBt0eV648oGkCjoufVKiyQyc75QmHyiS3
-	aoltSuDquo8tcuXbIgNdpGf+4bAUBzPqPx6idb7cHKiPJRIwEQcXXNCh9j4P0j1E6FZ4PVdO9jV
-	tYYuzDWZ5tO8ygBVIIDoo1eE/Ado36N/G5FQKg63qY6Zi7xPQvPQsuWYydnP8RfY53qqbsvo11v
-	I03pJO4K/SM3G/XNqLkFE+mpQNwMZr4vXlCf2h4GPPZ5sv8EVgcEti
-X-Received: by 2002:a05:6808:15a5:b0:479:d674:dcca with SMTP id 5614622812f47-48692c881fbmr3789772b6e.4.1780790111555;
-        Sat, 06 Jun 2026 16:55:11 -0700 (PDT)
-Received: from [10.211.55.5] ([73.62.185.64])
-        by smtp.googlemail.com with ESMTPSA id 5614622812f47-4865b5a53bcsm10302924b6e.3.2026.06.06.16.55.10
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 06 Jun 2026 16:55:10 -0700 (PDT)
-Message-ID: <dcb49836-cebf-40b0-81b7-c06cf84b81a0@ieee.org>
-Date: Sat, 6 Jun 2026 18:55:09 -0500
+	s=arc-20240116; t=1780824973; c=relaxed/simple;
+	bh=E/puqhYzj2q9xMnDxa1nl3t9b26sMMJzF+Kbhj4ayYc=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=nZI7CWF/XjZ8uQg6E+N8r2d0BdQ4TRB8SGWQYy794hSay1QLmWI3xFNWm4wNXS8f8nngSxsQS276RrKl/CC0rXWbIpmBxDjNuGBVHMeOPXz54hWEqIKPybYAgTa55khgWXTd9u7A+942nihExkbqDNAopL2OvgOAEPneYpW7ABk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=13.76.78.106
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lzu.edu.cn
+Received: from enjou-Legion-Y7000P-2019 (unknown [172.23.56.36])
+	by app1 (Coremail) with SMTP id ygmowADnB8J8OyVq1_hmAA--.10314S3;
+	Sun, 07 Jun 2026 17:35:58 +0800 (CST)
+From: Ren Wei <n05ec@lzu.edu.cn>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	amarkuze@redhat.com,
+	slava@dubeyko.com,
+	sage@inktank.com,
+	yuantan098@gmail.com,
+	zcliangcn@gmail.com,
+	bird@lzu.edu.cn,
+	ldy3087146292@gmail.com,
+	n05ec@lzu.edu.cn
+Subject: [PATCH 1/1] libceph: mon_client: bound get_version reply decode to front len
+Date: Sun,  7 Jun 2026 17:35:49 +0800
+Message-ID: <51227a76810cc04846bff23bb891bb216fc55a57.1780374480.git.ldy3087146292@gmail.com>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <cover.1780374480.git.ldy3087146292@gmail.com>
+References: <cover.1780374480.git.ldy3087146292@gmail.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH next] drivers/block/rbd: Use strscpy() to copy strings
- into arrays
-To: david.laight.linux@gmail.com, Kees Cook <kees@kernel.org>,
- linux-hardening@vger.kernel.org, Arnd Bergmann <arnd@kernel.org>,
- ceph-devel@vger.kernel.org, linux-block@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>, Jens Axboe <axboe@kernel.dk>
-References: <20260606202744.5113-5-david.laight.linux@gmail.com>
-Content-Language: en-US
-From: Alex Elder <elder@ieee.org>
-In-Reply-To: <20260606202744.5113-5-david.laight.linux@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:ygmowADnB8J8OyVq1_hmAA--.10314S3
+X-Coremail-Antispam: 1UD129KBjvJXoW7uw15JFW3tr4kAry5CF48JFb_yoW8WF15pr
+	47CryrKrZ7AF129Fs2kFyqqF4Fy397WFZrWa90kF17u3WDJF4SqFyFg390qFsxZr4fCF4q
+	kr9FqFZ2kw1DAFDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUB01xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
+	w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
+	IY67AKxVW5JVW7JwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVWxJVW8Jr1l84ACjcxK6I8E
+	87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_GcCE3s1le2I262IYc4CY6c
+	8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jr0_
+	Jr4lYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwI
+	xGrwACjI8F5VA0II8E6IAqYI8I648v4I1lFIxGxcIEc7CjxVA2Y2ka0xkIwI1lc7CjxVAa
+	w2AFwI0_Jw0_GFylc2xSY4AK6svPMxAIw28IcxkI7VAKI48JMxAIw28IcVCjz48v1sIEY2
+	0_Gr4l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8G
+	jcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2I
+	x0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK
+	8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I
+	0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfUonmRUUUUU
+X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQELCWolKdAAuAAAsM
 
-On 6/6/26 3:27 PM, david.laight.linux@gmail.com wrote:
-> From: David Laight <david.laight.linux@gmail.com>
-> 
-> Replacing strcpy() with strscpy() ensures than overflow of the target
-> buffer cannot happen.
-> 
-> Signed-off-by: David Laight <david.laight.linux@gmail.com>
-> ---
-> This is one of a group of patches that remove potentially unbounded
-> strcpy() calls.
-> 
-> They are mostly replaced by strscpy() or, when strlen() has just been
-> called, with memcpy() (usually including the '\0').
-> 
-> Calls with copy string literals into arrays are left unchanged.
-> They are safe and easily detected as such.
-> 
-> The changes were made by getting the compiler to detect the calls and
-> then fixing the code by hand.
-> 
-> Note that all the changes are only compile tested.
-> 
-> Some Makefiles were changed to allow files to contain strcpy().
-> As well as 'difficult to fix' files, this included 'show' functions
-> as they really need to use sysfs_emit() or seq_printf().
-> 
-> All the patches are being sent individually to avoid very long cc lists.
-> Apologies for the terse commit messages and likely unexpected tags.
-> (There are about 100 patches in total.)
-> 
->   drivers/block/rbd.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 4065336ebd1f..632fa2d56ea0 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -3672,7 +3672,7 @@ static void __rbd_lock(struct rbd_device *rbd_dev, const char *cookie)
->   	struct rbd_client_id cid = rbd_get_cid(rbd_dev);
->   
->   	rbd_dev->lock_state = RBD_LOCK_STATE_LOCKED;
-> -	strcpy(rbd_dev->lock_cookie, cookie);
-> +	strscpy(rbd_dev->lock_cookie, cookie);
+From: Douya Le <ldy3087146292@gmail.com>
 
-This looks good.  The rbd_device->lock_cookie is a 32 byte
-array.
+handle_get_version_reply() uses msg->front_alloc_len as the decode
+boundary for MON_GET_VERSION_REPLY.  That is the size of the reused
+reply buffer, not the number of bytes actually received.
 
-Cookies passed in are always a 32 byte array (despite the
-function only requiring a string pointer).
+A truncated reply can therefore pass ceph_decode_need() and decode the
+second u64 from stale tail bytes left in the buffer by an earlier
+message, causing an uninitialized memory read.
 
-Reviewed-by: Alex Elder <elder@riscstar.com>
+Use msg->front.iov_len as the receive-side decode boundary, matching
+other libceph reply handlers and limiting decoding to the bytes that
+were actually read from the wire.
 
->   	rbd_set_owner_cid(rbd_dev, &cid);
->   	queue_work(rbd_dev->task_wq, &rbd_dev->acquired_lock_work);
->   }
+Fixes: 513a8243d67f ("libceph: mon_get_version request infrastructure")
+Cc: stable@vger.kernel.org
+Reported-by: Yuan Tan <yuantan098@gmail.com>
+Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
+Reported-by: Xin Liu <bird@lzu.edu.cn>
+Assisted-by: Codex:GPT-5.4
+Signed-off-by: Douya Le <ldy3087146292@gmail.com>
+Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
+---
+ net/ceph/mon_client.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index d2cdc8ee3155..fd3ebebe5f4c 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -821,7 +821,7 @@ static void handle_get_version_reply(struct ceph_mon_client *monc,
+ 	struct ceph_mon_generic_request *req;
+ 	u64 tid = le64_to_cpu(msg->hdr.tid);
+ 	void *p = msg->front.iov_base;
+-	void *end = p + msg->front_alloc_len;
++	void *const end = p + msg->front.iov_len;
+ 	u64 handle;
+ 
+ 	dout("%s msg %p tid %llu\n", __func__, msg, tid);
+-- 
+2.47.3
 
