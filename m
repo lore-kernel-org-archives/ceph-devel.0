@@ -1,161 +1,233 @@
-Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
+Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93AD63603DB
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Jun 2026 04:41:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.214.180
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780980065; cv=pass; b=iWuJ3g9LTEdDRebFMEJmBzG+/c2Uc/Lad6MahcjxjrX6iyJfU9Oz0wfnuKst88AYHnhrAR5RBG3n5rw13loJV9HkODCobWv6enOXq7e+yO5elLbBpxyCUXWYbf+3rlJoTEp8UZz/QdCIuWVvrJnXG14VW4SxVN2hg4bftQFxcXM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780980065; c=relaxed/simple;
-	bh=ttnorqN9WSWmxNwXsZXmXgVZoMduSwjRmLf+TPQP02o=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=M9LkhIlViQcEOAhAVPCHOU9AvS9gSlArt3wuefXjHpOd16jIk4MObbbFYCt33Stmkc13Wnxlzr0xI3X16XFf5+YtsneN4GsGXCZMo3byUHiqh3ya6tPQeWAi0BlJEshEiDvZZpGq+R2uo67WxlyIvSuaeIaUIoTXKWTM2PvPWlc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=asu.edu; spf=pass smtp.mailfrom=asu.edu; dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b=tmBcpcz1; arc=pass smtp.client-ip=209.85.214.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=asu.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=asu.edu
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3438A1DF25C
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Jun 2026 05:02:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.43
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1780981355; cv=none; b=YQ6aIxNbJ2i+KJCHSaNrziacSfD9hrsZzaMo3vdgjpnf0zXC3tvZOfsqa2tGEXwZlO1Nz4KVllCAIqVnuylmBUHknOr0RxPhSSf4rZM2E7KnaSc3DB//qPNu6KDz22FGy+wQMxOGnZlSwrXcLxMfpsWkM+k8lve/8eCEu4nByLA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1780981355; c=relaxed/simple;
+	bh=g20Pz9Ly9u4RxRdhYvhI6l0nb301p6HBXJV1FQw44bo=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=hRPwIJJaxhV2WlGaaepU7/YiACKnVUbAFoadSXxx/cfMwC1XbIBWreXVgxFPOFf+Shn0AuoomwQEOcNu6cH2BqgFZw7AlTlclpiuHrMJNpo6KwuQRKIhOzy0u4ACxZrNZ/hvgHe6pTBjckbFq8GWq9D9m9C7kVbRdiOC8MFA9VM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eFApFAn+; arc=none smtp.client-ip=209.85.216.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b="tmBcpcz1"
-Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-2c0c32f6ce1so34047295ad.2
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Jun 2026 21:41:03 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1780980063; cv=none;
-        d=google.com; s=arc-20240605;
-        b=LIMUJ84UxA7ks0JgZ/HdNCLGHofuWx2vKew6kYMSEBHVTYmRru1vfHhiRjH4XPuMRu
-         rUuKdaZExDwJNgnzGpIf4NCVKiothIXK+nSZVZHoJ0YIL1o+S8+9ypwALpKUwaRjyYhs
-         YvFbRUx4KP3vpX3CK4/c290XbcxQcj+vt82J7iN4shncaNk4JnzVCPx1q+HayHQth7wI
-         DPRMbhrNi2c+MhObbWMFo7rijDAZxRBZOV70siI9r2a3HK7AfJ44qb18L916Ko+2CtXb
-         7fZ87Sw+WYrBYle7pV75n3i5xUJhOm1AL5ERlDc21G/JHGEfuQVPIjL8moV9hBkzKMZD
-         fHTQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=WSw/JWf2ge+x9AIZ6gfiFjtnYCoN7G42xrkHKi6H/tQ=;
-        fh=SW7Tk6kbHgkalzCxZMf+xqkudZfdp+MoVMsCFY67JYI=;
-        b=Me5kuOgRwyOFQj7kTq2C+Hd/qnfTDLRNFCwORZgujyEQKkIAgeQQo6g5RrJL2mndIy
-         +U4vlKMqS0XGqh+Xly9B0eu7J/pB1oTeNtFQUn7xtpyQMaVINvyYHQhJMSQScjrT1Ndm
-         96QO5WQI8MIwHfuRjU3ZZxAGc1XMFa9iyNXGjrxYhERMSAeD9WBCDZ0B+ZRDAo4ZTzDX
-         JF/lTLL3S/qFY6ENCYxKq1zyujJryn04qIk3+Q9v4wBs9UD71y7BZ3vtnmUwq3aamD8R
-         OQ2La0ugPxPYACgFvLNCF2J8UwGbppg2aooW9wAXe3ShNQjholVagblHQ3nHfTOQZvLE
-         3Y/w==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eFApFAn+"
+Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-36bb6d54a56so589513a91.2
+        for <ceph-devel@vger.kernel.org>; Mon, 08 Jun 2026 22:02:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=asu.edu; s=google; t=1780980063; x=1781584863; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1780981353; x=1781586153; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=WSw/JWf2ge+x9AIZ6gfiFjtnYCoN7G42xrkHKi6H/tQ=;
-        b=tmBcpcz1At18Qh2oy9koWazMXJk7Bve3FO8VUS8ValbSp3iiKXWNSXUCWLUOOYGtfp
-         WHjcaVAE04ppCesOtBDyJ5hDHBjsB2DINV9U5MrmoN6NZemEciroEgVtaHSuM83K2oHB
-         tkAhF9v/WtVRJ4pH8+nhkkixEAsS/bH0+G6DagCkZ8XYZi0zXxAL0AaCg5KUltAAcwfv
-         eXzKE+tn8cY0xTEa/Lw8ozZygjpfVuk8cbGl7Ly+uoawHhjWY+kgD70k9sdLnu/nPptb
-         tesl9Hms9Ky7yitj/6GHJkwAUs4IkoNtDAeAfi2q2Yf1MY6DO5UDI3NSVPP6wIAkySjo
-         a4Hw==
+        bh=KJQXimql7JJ+vTY6nyvO+rL2KwVBakav3Mk11pUE2pM=;
+        b=eFApFAn+vBfUjrYD3hTMaCjphtmu8iLiuaqHjZjBAXzu4sBj/bpToCVGrP91aMsDDf
+         Au71ciCpdaUCNLd7xQ9SIDQ7hJ0ma/28i/DahL2CyA3p1HaQq6rhxekCO0i/rT8eudmP
+         fuKan19OZppbzKFxEByrKd8hy31SfKhzhdoTCCQLxkRdeDY6MLoIcrW4mSnDSPKbw/z/
+         KwKh4BHAkEYLKZTr5LRYvXaZr922uhrICMrUh64seeVTgG04mlrRMb0ZmecQPqyHnhvt
+         WjL14qsl8ZY1d7qtUHx1iP8sJhB3m26vmPfQiGMJMEP5j2zyD+YZHCuz2qtF6NE3CQLY
+         oCJQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780980063; x=1781584863;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20251104; t=1780981353; x=1781586153;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=WSw/JWf2ge+x9AIZ6gfiFjtnYCoN7G42xrkHKi6H/tQ=;
-        b=oGC3yhF4WAVbrm7kYi1SCtwAcmg0Ofzm5O2V0ZMnDFOZ9jd8CjrVfwNwpp9etUljng
-         3Y3ceB4F9sZ7JBdQWwXRCONO6vmWZM3+eNHO0VraEv5ce12M6EAqfEicbDs7PgizkGGL
-         91W9cCa8TJH2ciG7ENWrOPppDNQgqoUjgtCT5398V4oMwoa4s+fHONhwBEuX7sJnhLhN
-         CR9qg/1XSSe9VCk92hhE8EEt1h+Zksu29lQQseFxpcD1vcx+NVQ9CN3n+v0+p4KCAbsc
-         U/c9fU3IgkdjtrrxO/0ukZXNfrzcCxAe0EVcQsrBPsUMYJlodFNXzwqkpkWS6VHg3nGL
-         9tiw==
-X-Gm-Message-State: AOJu0YyrsmRbJJ12wGyWq9bwPY6zZuFUODNvv2OL8xjI/8BeE0/SuQCj
-	mBOaH9kDtZWagZCdbRvqY6SfOERdSK1OW1enclMFTW86gdAgVl17EDsgJdqmBQNI8WiTMGN9HPZ
-	CqAaDZIKJR5aJzR+Zw54eXctzMf6rZSg3sg1+c96Dyl3lDEqQOSeougGMBzk=
-X-Gm-Gg: Acq92OG4knPOgtqedAFnbXFnusF5I8y7eS3QsjED+VbrKXHzFdrkfcD+V72al6DjaP6
-	Y6PexvB1+quCJDFEQUdJ82YUbXOJD0LwMiT3QHyRHSv1C2OOUEXein+7q48dUr5QVryjjc2dH+L
-	tZIzvIUHPFfFAv+QWcS9TfiZAaV94PVEa3RCLpDEKKqRIRYEws9x3ngzoCTkrNABbgwwmZkZLXg
-	S5Z/fcFkEEYKIAKsvXyF9it6MQ0rM/NsG03wiJq02gSin21fSLDmTq1xUdmqSPcONhJ1M+eqTZt
-	DrpYDixMF6427GhmUA==
-X-Received: by 2002:a17:902:c949:b0:2c0:cb90:1e08 with SMTP id
- d9443c01a7336-2c1e77754d7mr218644325ad.0.1780980062937; Mon, 08 Jun 2026
- 21:41:02 -0700 (PDT)
+        bh=KJQXimql7JJ+vTY6nyvO+rL2KwVBakav3Mk11pUE2pM=;
+        b=pg+cybSe29YrSv8zbgGVgTi9fJtm4UjDXWSfJOorkTGV66u5cFtL6cGqsSsmFO4fZg
+         EaPBr1j6m1yM/m0KyOFJ1QllLlEAXqqVeEKrhgcF3gvuJMRf+B7wjSgLqa/pi8fp8Akz
+         mAFlMkEOyTjCWHVdW/hVcDcXqDl3ZEldVk17/A7DPABpRtCXtdAZL9ZKikqlMBoN9HU0
+         UmhvxTictYXRD/d2vdG09Wc1VOeK7S4DjAfRCKTWvbuNFztswrCmN4+VmUEdBN5fnMOD
+         IBuXxLUG96MZU5DhmdQ8CjJoUrMcFFZXvkf7JTT/Yh3Icr5zWBR8sY9ZOedrIz+UrmsB
+         TFeQ==
+X-Forwarded-Encrypted: i=1; AFNElJ9cmFBJD0sL1wspyk6t8iNAr6jlQePELWsYccFlh/W9g0bBate29/v5bHd720aHr/uGA6Stz6sn5ulf@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz3PE0gJruoSKcZQpaq91UViFvurKQcjNfIFWHe8aC4zxWipavb
+	7BJgHFS6P3DxEKSFFzCdq2frF/ySui/+0k4Stp8ZK+DFfyRVx6Ftx9io
+X-Gm-Gg: Acq92OHu8nw4pwk+8JsZANVwR74gHlylhxtnvcM/M2eqAq2erGPzh7oVmJ7RHrpwDYS
+	snBfxkAr3nUyjxpHrvf1QETAXmJAbK1VOY8N7GipaFI3LwUUtj9XTgbu4c2WCJbsv/xMV87Ah+i
+	Z9aWEuRPpY9406YuaAKQyAVWYS9iUgZQtfE/hGh8WXiL4GBWyHr4zxPs3XB4CPZLuUkvMpNXkLF
+	DT87NLIy/wNxINoGIdoygFvUKL4E/YiB0o2sVk7WLXoI2p32HYtQJWofTHCRFfdHWzyYUtNDCNJ
+	zBUn8fplh+UJBXtWIdQJPRvRPf78ZR3lf1O1Cgw6b3KqBnWPVDKYtfV6eES9NlCz+QKeBtUq5ib
+	VpGl+OkGnc/KPSH80vQCy7i87kJ7cdYFOF7rHzMAv0w1X6cHbBLt5FAPMWNNmg9GDlHMYgjc84b
+	6y8TskNFiI2Kc5LL7H3As2RTYbMPM=
+X-Received: by 2002:a17:90b:4a08:b0:364:b4e7:6706 with SMTP id 98e67ed59e1d1-370ee351f7amr11371329a91.1.1780981353459;
+        Mon, 08 Jun 2026 22:02:33 -0700 (PDT)
+Received: from kali ([2402:e280:3d7c:a2:536a:b505:93f5:9d5d])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-842828e21c8sm23330365b3a.49.2026.06.08.22.02.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 08 Jun 2026 22:02:33 -0700 (PDT)
+From: Pavitra Jha <jhapavitra98@gmail.com>
+To: idryomov@gmail.com
+Cc: Slava.Dubeyko@ibm.com,
+	amarkuze@redhat.com,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Pavitra Jha <jhapavitra98@gmail.com>,
+	stable@vger.kernel.org
+Subject: [PATCH v3] ceph: fix OOB read in ceph_osdc_list_watchers via uncapped outdata_len
+Date: Tue,  9 Jun 2026 01:00:41 -0400
+Message-ID: <20260609050042.1436568-1-jhapavitra98@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <27e15cffb5d346a19a45efc88a722a3d6abd5c7a.camel@dubeyko.com>
+References: <27e15cffb5d346a19a45efc88a722a3d6abd5c7a.camel@dubeyko.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260609044009.2564543-1-xmei5@asu.edu>
-In-Reply-To: <20260609044009.2564543-1-xmei5@asu.edu>
-From: Xiang Mei <xmei5@asu.edu>
-Date: Mon, 8 Jun 2026 21:40:52 -0700
-X-Gm-Features: AVVi8Cc5lG6jDIO0QGclfdNvU3XaBXv_eU4X8xkZpz3sGoWSEeY6oRTXKBZx1gM
-Message-ID: <CAPpSM+RMkjsg2OXQdumPdxrF01L1wxNLSx=HyVw9BiBdpB_7KQ@mail.gmail.com>
-Subject: Re: [PATCH net] libceph: bound pg_temp/pg_upmap osd list length to CEPH_PG_MAX_SIZE
-To: ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Viacheslav Dubeyko <slava@dubeyko.com>, Weiming Shi <bestswngs@gmail.com>, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-Thanks for your attention to this bug. We have a PoC that can trigger
-the KASAN crash. Please DM if you need it to reproduce the issue.
+The OSD reply header field op->payload_len is wire-controlled and is
+copied directly into m->outdata_len[i] without any bounds check:
 
-Xiang
+  m->outdata_len[i] = le32_to_cpu(op->payload_len);
 
-On Mon, Jun 8, 2026 at 9:40=E2=80=AFPM Xiang Mei <xmei5@asu.edu> wrote:
->
-> __decode_pg_temp() decodes an user-controlled length but only rejects
-> values large enough to overflow the allocation; it does not bound it to
-> CEPH_PG_MAX_SIZE. The helper backs both pg_temp and pg_upmap decoding, an=
-d
-> apply_upmap()/get_temp_osds() later copy the decoded list into the fixed-=
-size
-> on-stack array struct ceph_osds.osds[CEPH_PG_MAX_SIZE]. A monitor that se=
-nds
-> an OSDMap with a pg_temp/pg_upmap entry longer than 32 thus causes a stac=
-k
-> out-of-bounds write.
->
-> An OSD set for a single PG can never exceed CEPH_PG_MAX_SIZE, so reject l=
-onger
-> entries at decode time. The bound is well below the old overflow threshol=
-d, so
-> it also covers the allocation-size overflow the previous check guarded ag=
-ainst.
->
->   BUG: KASAN: stack-out-of-bounds in ceph_pg_to_up_acting_osds
->   Write of size 4 ... by task exploit
->    kasan_report (mm/kasan/report.c:595)
->    ceph_pg_to_up_acting_osds (net/ceph/osdmap.c:2617 net/ceph/osdmap.c:28=
-33)
->    calc_target (net/ceph/osd_client.c:1638)
->    __submit_request (net/ceph/osd_client.c:2394)
->    ceph_osdc_start_request (net/ceph/osd_client.c:2490)
->    ceph_osdc_call (net/ceph/osd_client.c:5164)
->    rbd_dev_image_probe (drivers/block/rbd.c:6899)
->    do_rbd_add (drivers/block/rbd.c:7138)
->    ...
->   kernel BUG at net/ceph/osdmap.c:2670!
->
-> Fixes: a303bb0e5834 ("libceph: introduce and switch to decode_pg_mapping(=
-)")
-> Reported-by: Weiming Shi <bestswngs@gmail.com>
-> Assisted-by: Claude:claude-opus-4-8
-> Signed-off-by: Xiang Mei <xmei5@asu.edu>
-> ---
->  net/ceph/osdmap.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index 8b5b0587a0cf..e35d8abe1773 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -1436,7 +1436,7 @@ static struct ceph_pg_mapping *__decode_pg_temp(voi=
-d **p, void *end,
->         ceph_decode_32_safe(p, end, len, e_inval);
->         if (len =3D=3D 0 && incremental)
->                 return NULL;    /* new_pg_temp: [] to remove */
-> -       if ((size_t)len > (SIZE_MAX - sizeof(*pg)) / sizeof(u32))
-> +       if (len > CEPH_PG_MAX_SIZE)
->                 return ERR_PTR(-EINVAL);
->
->         ceph_decode_need(p, end, len * sizeof(u32), e_inval);
-> --
-> 2.43.0
->
+This value propagates unchecked to req->r_ops[0].outdata_len and is
+then used to set the decode boundary in ceph_osdc_list_watchers():
+
+  void *const end = p + req->r_ops[0].outdata_len;
+
+The actual data allocation is always exactly one page:
+  ceph_alloc_page_vector(1, GFP_NOIO)
+  ceph_osd_data_pages_init(..., PAGE_SIZE, ...)
+
+The messenger caps the copy to PAGE_SIZE bytes, but the decode window
+end is set from the uncapped wire value. A malicious OSD can send
+outdata_len=0x10000, causing _safe decoder boundary checks to pass
+while the physical reads cross the slab allocation boundary.
+
+KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
+
+  ==================================================================
+  BUG: KASAN: slab-out-of-bounds in ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
+  Read of size 4 at addr ffff88800a229f9e by task insmod/57
+
+  CPU: 0 UID: 0 PID: 57 Comm: insmod Tainted: G           O        7.0.0-rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
+  Tainted: [O]=OOT_MODULE
+  Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-debian-1.17.0-1 04/01/2014
+  Call Trace:
+   <TASK>
+   dump_stack_lvl+0x4d/0x70
+   print_report+0x170/0x4f3
+   ? __pfx__raw_spin_lock_irqsave+0x10/0x10
+   kasan_report+0xda/0x110
+   ? ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
+   ? ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
+   ? __pfx_ceph_oob2_init+0x10/0x10 [ceph_oob2_poc]
+   ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
+   do_one_initcall+0x9a/0x3a0
+   ? __pfx_do_one_initcall+0x10/0x10
+   ? kasan_unpoison+0x44/0x70
+   do_init_module+0x27c/0x790
+   ? __pfx_do_init_module+0x10/0x10
+   ? __kasan_slab_free+0x47/0x70
+   ? kfree+0x15f/0x3b0
+   load_module+0x4a9a/0x6350
+   ? __pfx_load_module+0x10/0x10
+   ? security_file_permission+0x24/0x50
+   ? kernel_read_file+0x2ed/0x770
+   ? init_module_from_file+0x15c/0x180
+   init_module_from_file+0x15c/0x180
+   ? __pfx_init_module_from_file+0x10/0x10
+   ? tick_nohz_handler+0x2a3/0x640
+   ? _raw_spin_lock+0x7e/0xd0
+   idempotent_init_module+0x21f/0x750
+   ? __pfx_idempotent_init_module+0x10/0x10
+   ? fdget+0x4e/0x4a0
+   ? fdget+0x4e/0x4a0
+   __x64_sys_finit_module+0xba/0x120
+   do_syscall_64+0xe2/0x570
+   ? exc_page_fault+0x66/0xb0
+   entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+  Allocated by task 57:
+   kasan_save_stack+0x30/0x50
+   kasan_save_track+0x14/0x30
+   __kasan_kmalloc+0x7f/0x90
+   ceph_oob2_init+0x44/0xff0 [ceph_oob2_poc]
+   do_one_initcall+0x9a/0x3a0
+   do_init_module+0x27c/0x790
+   load_module+0x4a9a/0x6350
+   init_module_from_file+0x15c/0x180
+   idempotent_init_module+0x21f/0x750
+   __x64_sys_finit_module+0xba/0x120
+   do_syscall_64+0xe2/0x570
+   entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+  The buggy address belongs to the object at ffff88800a229000
+   which belongs to the cache kmalloc-4k of size 4096
+  The buggy address is located 3998 bytes inside of
+   allocated 4000-byte region [ffff88800a229000, ffff88800a229fa0)
+
+  Memory state around the buggy address:
+   ffff88800a229e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   ffff88800a229f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  >ffff88800a229f80: 00 00 00 00 fc fc fc fc fc fc fc fc fc fc fc fc
+                                 ^
+   ffff88800a22a000: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+   ffff88800a22a080: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+  ==================================================================
+
+  val=0xccccaaaa (OOB garbage from KASAN redzone)
+
+Fix by introducing buf_len to hold the allocation size, using it in
+both ceph_osd_data_pages_init() and the min_t() decode boundary cap,
+so the two are guaranteed to stay in sync if the buffer size changes.
+buf_len is declared as u32 to match the type of outdata_len used in
+the min_t() expression.
+
+Attacker model: a malicious or compromised OSD in a multi-tenant
+Ceph deployment can trigger this against any client issuing
+CEPH_OSD_OP_LIST_WATCHERS without further privileges beyond OSD
+session establishment.
+
+Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
+Cc: stable@vger.kernel.org
+Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
+---
+v3: Change buf_len type from size_t to u32 to match outdata_len type
+    in min_t(), per Viacheslav Dubeyko's review.
+v2: Introduce buf_len variable instead of hardcoding PAGE_SIZE
+    independently in ceph_osd_data_pages_init() and the min_t() cap,
+    per Viacheslav Dubeyko's review.
+---
+ net/ceph/osd_client.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index a67093cf4..5ad47d932 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -5063,6 +5063,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 	struct ceph_osd_request *req;
+ 	struct page **pages;
+ 	int ret;
++	const u32 buf_len = PAGE_SIZE;
+ 
+ 	req = ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_NOIO);
+ 	if (!req)
+@@ -5081,7 +5082,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 	osd_req_op_init(req, 0, CEPH_OSD_OP_LIST_WATCHERS, 0);
+ 	ceph_osd_data_pages_init(osd_req_op_data(req, 0, list_watchers,
+ 						 response_data),
+-				 pages, PAGE_SIZE, 0, false, true);
++				 pages, buf_len, 0, false, true);
+ 
+ 	ret = ceph_osdc_alloc_messages(req, GFP_NOIO);
+ 	if (ret)
+@@ -5091,7 +5092,8 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 	ret = ceph_osdc_wait_request(osdc, req);
+ 	if (ret >= 0) {
+ 		void *p = page_address(pages[0]);
+-		void *const end = p + min_t(u32, req->r_ops[0].outdata_len, PAGE_SIZE);
++		void *const end = p +
++			min_t(u32, req->r_ops[0].outdata_len, buf_len);
+ 
+ 		ret = decode_watchers(&p, end, watchers, num_watchers);
+ 	}
+-- 
+2.53.0
+
