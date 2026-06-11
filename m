@@ -1,125 +1,116 @@
-Received: from mail-qt1-f178.google.com (mail-qt1-f178.google.com [209.85.160.178])
+Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 302D11E492D
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Jun 2026 23:04:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2039933B6D6
+	for <ceph-devel@vger.kernel.org>; Thu, 11 Jun 2026 03:53:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781046250; cv=none; b=PnpSvs+F/9f7vQDiaaUB9hV/13nYwX65xOUp0EfIkWe1rHdwwqVgo0OnvmFXpURmoQUPBGWGuhFrytphbASO7i1pPxr/ujHiVZ50hNMEYjGVtGcj7A4BZs+eWLPjww66Nav2QucvqxgJQzfAaR0sWJqq2ZEVJm1XuM7CIbNDMZ0=
+	t=1781150002; cv=none; b=cEJlD/6AWb69K1LJPum4C9yrrlggUnxNlAiv4Vk+k1+5Frg9G+dgqQfL46Pk9twMmWPrBOWBgLugTffKfns7W25jLu1CkVY/0VoH5LmE7BqaHk7uBQYZXJxUKERR0MEMzZE3rdME9mv+rUUyzalp3VwHQJN2lht2PNwhDkjrJW8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781046250; c=relaxed/simple;
-	bh=frk8YsbVVZ59W+pOrN0FPvPVFDQF2wGDYJf3km/zZBs=;
-	h=References:In-Reply-To:From:To:Subject:Message-ID:Date:
-	 MIME-Version:Content-Type; b=KvorHPc/QB8jsm0va1BHxcsmjPSDthu16kDjEkbb/iLCb+l+jU/P7R1YqNDZHeAVUu/IEAhxNYWgK5YZBqy+MzMtVV433Xq2fwTqS7xaVF2l+LzEBoaz9KmHENwM/0wZ0CbzxkQG8/ao5i4wRnQiqRSsjXc0K13/QLXXRlpDf/w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=weblinkconsultant.com; spf=pass smtp.mailfrom=weblinkconsultant.com; dkim=pass (2048-bit key) header.d=weblinkconsultant-com.20251104.gappssmtp.com header.i=@weblinkconsultant-com.20251104.gappssmtp.com header.b=w0TWxSxX; arc=none smtp.client-ip=209.85.160.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=weblinkconsultant.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=weblinkconsultant.com
+	s=arc-20240116; t=1781150002; c=relaxed/simple;
+	bh=1cxrHD9W9r3yzWHMFyoEXkIaC57zZvqlyAqy7ySJskk=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=ew891iIsLGnjFSs7YlYaBMYEnBSgtOBxISTP+B3Bqghb4zG60a9xFhy6FgMPi0KkwjHcOgIZS3phEiDctYDlveDM5xr/7DIpuUbLz03LidhtLF0Np9FgUMicdgecBzG3D4u7sVfFEGQ/tXhPtrLcALWo5dCXqG6zCmxd1v3A/FM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=P6rADXNi; arc=none smtp.client-ip=209.85.167.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=weblinkconsultant-com.20251104.gappssmtp.com header.i=@weblinkconsultant-com.20251104.gappssmtp.com header.b="w0TWxSxX"
-Received: by mail-qt1-f178.google.com with SMTP id d75a77b69052e-51758478240so30440191cf.2
-        for <ceph-devel@vger.kernel.org>; Tue, 09 Jun 2026 16:04:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="P6rADXNi"
+Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-5aa612bf6efso7533900e87.3
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2026 20:53:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=weblinkconsultant-com.20251104.gappssmtp.com; s=20251104; t=1781046248; x=1781651048; darn=vger.kernel.org;
-        h=mime-version:date:content-transfer-encoding:message-id:subject:to
-         :from:in-reply-to:references:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=frk8YsbVVZ59W+pOrN0FPvPVFDQF2wGDYJf3km/zZBs=;
-        b=w0TWxSxXlS1t/M0l7ym4Y0TPn7ZiYdgVUJGJvO/EjPlnuLBw5aOFEOcgZu5MEHCusf
-         b8sALPI/bmbMM+aYWggCDxt0LhgTbvfooPMP28biOMIOL0/pQSq61U2W7nSoQt54t7RN
-         m/Ozf8RNWa9rNPVGeap5T1qn41LEiAxnJTslJitHgkCQQtW613JPlgehM5z6i1KL64xa
-         z/S+R7Y2IH078V9TMpMcpmD2HSNSRx4oUefC0CdSdO2sw3/xfKCeFXbfDvirchMV6d1q
-         PbAebfnpsHZYdpn79YdtKdDiTWNP6U+Cdj5jjI6Wl7P9adoe8QdrxDeQZ0kgVsMvuKF5
-         i1eg==
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1781149999; x=1781754799; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=1cxrHD9W9r3yzWHMFyoEXkIaC57zZvqlyAqy7ySJskk=;
+        b=P6rADXNiHELOJ8BRuEY+3+49LLLPiDZDMdw0DK3dOQfp9ylFPv+1EI+/v5c+9yY0iv
+         kzr8fZYEFo0+yvEUzbm/pRtYX2AOot4DE9Oo2czeu8gZ8bXenGUNIBXejDB1Kz5j3Pdn
+         BpfRRSlXL9TH+nD2B9Jem8vjaJ0ZYFfSuRNWsleGrjr5Wy9/MB+4u+QtmL582qvFFTLw
+         mNBzRVTieEG0NatJCRhLAGYi/WiEaXBi5hGDR5rMj0b72Rvik35APhLqdLalSqF7Clvt
+         rXUt/wP7ZJOTez3hC1UXM7kLWqHhltMlQKh79I3VCXRJz1ithpExj0CYLSWbUSTubEFQ
+         MHQQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781046248; x=1781651048;
-        h=mime-version:date:content-transfer-encoding:message-id:subject:to
-         :from:in-reply-to:references:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=frk8YsbVVZ59W+pOrN0FPvPVFDQF2wGDYJf3km/zZBs=;
-        b=Uj2H65eQdKiMNXbqwv45/r501rwSRciU6Nu5v1se6JqwVo1+HREVpPUFneDsDflVp9
-         LEdUdBUfy3bdsj+hpB6VVH1kp76TZ7bn1jVzzLD9dX/iyKSZvRsbL/o5WB0praWtN+99
-         dsWGUbncZr0sFmXe+0JgPYK2qj8SunCCiQpUTBxGst5MTORbucflLTRQCfZ29Xg3QMtE
-         LkGOnjsBtIBn3Jh9t+4b7EZZQ6bfyD1WBtzregS1QE9ucw5FsUQ4nwetlxvPMN7ug4xb
-         ja/nP5b9n7d6SynwROWfv2KEoUX/6qu/EdrQXbQmJMVr8+c9zPhCY0fAfO6lVdG7Q9u4
-         i6dQ==
-X-Gm-Message-State: AOJu0Yz9B6bxYnyuMKZ1T/X8ORbqLVMtnILmOdBUVgps0BSWrf9PBwO7
-	qt72NHorKs7QgauQH1N0VphfUl0UobPC+JA0M+9hMzOC5O5HOBijR2BPXQ/XU70e3+d3mDbT3tW
-	RrydHnuE=
-X-Gm-Gg: Acq92OGuOHbuHvN3cpb/0JtHeHKouGGL1eCL6s438XcxSiYMRTSk/CNH1df1fG851bC
-	Sz3SG6SPwpXDaE3W6V0JOO2fnEIfIct4A8qGWNpsyTh/SVph8kn7vOBb9DCBhCcZQNx9Z7N8LrB
-	T0GSbjTWNbSsZGLNZJpZM2g6qnTb/Fwrr2ic91ZaNHL/BEKRwZicFuwj5OL4a0Xo3l3ArIwifMq
-	VW7qLcy3yMQDdQl1AFdx2VykGcb4/LYrV/43YAGk542srSkYv+uD3doeqrJsSVy1P971WYisG0K
-	966o3lsBmmlzDubR1zmYNpe4F0Iv9CtEiYZuhGG9Q2PKz0iyCbrzW/fnjFWnMr1LUN1X2wyYDhE
-	ZsB1ehZjQKVTnh1Bz8wsINSGN4YWoWHB1nzu7QqOd04dcOk4t+K/aGQk/3INltNhsu4kyGxQeAp
-	5Kk0k0jfjVBhkpz6zZ7sVoRj5P1Wv8HNyE4cBMckM/x6dM8BT3qjcKxCpry7bJPo2eRnMNSBYBN
-	r+moDY7IEzdFw==
-X-Received: by 2002:a05:622a:164d:b0:517:9afa:8f93 with SMTP id d75a77b69052e-5179afa953amr317456651cf.46.1781046248161;
-        Tue, 09 Jun 2026 16:04:08 -0700 (PDT)
-Received: from [127.0.0.1] (ec2-32-199-165-46.compute-1.amazonaws.com. [32.199.165.46])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8cecd2682f8sm216308946d6.43.2026.06.09.16.04.05
-        for <ceph-devel@vger.kernel.org>
+        d=1e100.net; s=20251104; t=1781149999; x=1781754799;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=1cxrHD9W9r3yzWHMFyoEXkIaC57zZvqlyAqy7ySJskk=;
+        b=CwBeZDfTbHeOtxr+ok1gKbH2S2UXp7lVGRbzZ0TYP1FX5pZOuUmWOn8ZoWB8bg9RNO
+         rTzjy6cmeIaoRcG5IGs0t4uct4O5zN6Q2NfIWgvlqwglU/+AR1qRiBgs6XtB5cLLqHHn
+         8UgPJrDcVT7T9rVqOxfWfUCUQTSrRY7iaWM7fxh4rJyzkFdUY8QE+YtxKaCNdUzoHpxP
+         GQNeAdyxiH4QF2IDOHkYBHOTGS356td9nekZzpgi3zR8bATPViPbYxs8C6plxi2OnDQP
+         hpAfeN9Cq0dg9klQP8OGeUPe26bvbQQ++a0NP7FIFRsXSs5saPXVJYx5/mu9g1duGhLQ
+         nPlA==
+X-Gm-Message-State: AOJu0YzS/sRHQ0KfP3mCrG8f8hEWE3DTUOsIiDNIXDDTlNr92iSjl7X4
+	AEEoyP8GlExA0/fOfL6+f1sIKVCtrmYGd3kMoJ3aV60Rkpj8/EN5R1GX/KMhFqszMeM=
+X-Gm-Gg: Acq92OFtDo5qFqYAIxCwQ6P+FWCKjQ2MS5A1ULCHxXpnSEohhCfLe1mBDwb/N7Vju3I
+	9WLBWs8LtvdZgIgx8Vx6rK1Gm/K+YWGVFr9qTDyXLfzGaf9u6glpaYCsRC2Ekua674PeiVxr9p+
+	Ax8y1oQzZpsn07zi0alZFxVJMeW8SbWvsxva83OqcWCBh6F+buVk08qutOPS/x4uJSuxHSZ+sZp
+	4HQ7mOm4at6PeJzFACPDnUE8KY0WazmraeZsb1GVbP7m6nJHiyhY1P0WEkpDIiGzk8aUcSet9qm
+	kFNsDH9qit47BZV6394vR/OvvDQyC4d6Q5YJMuSoxYuo7QfXXgekjJCfaKjJfyxdEsHYCKh1/xm
+	tZcKS7M6Sz5ayLf5EJMPndr7xPlYryYuqNuHmdGxKjCqGCYiqJvvY1F6y8iXd5B1dHpUhtkrPUt
+	3nEx57CBiNiQp2KCXuclZANPwTm+kVATT6ZDqvBLCRWgTnnuXBd0nwEHaX6tdOkg8FzMLz+JE/q
+	mqbb6mFJ5VdEPrz2nJmVPJDYYF3cMyUjNwt9G13ocBcn27y8azXEb8KZANPOASSR2Fooe4Qsqyj
+	Aw==
+X-Received: by 2002:a05:6512:1243:b0:5aa:7653:49b3 with SMTP id 2adb3069b0e04-5ad27fb3734mr307807e87.32.1781149999229;
+        Wed, 10 Jun 2026 20:53:19 -0700 (PDT)
+Received: from [192.168.1.246] (broadband-95-84-186-252.ip.moscow.rt.ru. [95.84.186.252])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5aa7b98f0e1sm5943049e87.61.2026.06.10.20.53.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 09 Jun 2026 16:04:06 -0700 (PDT)
-References: <6584ea0f-269e-95d4-7839-139b36c3f67c@weblinkconsultant.com>
- <29e8a9b7-84a3-0bca-c4fa-381bc02469d3@weblinkconsultant.com>
-In-Reply-To: <29e8a9b7-84a3-0bca-c4fa-381bc02469d3@weblinkconsultant.com>
-From: Ruth J <ruth@weblinkconsultant.com>
-To: ceph-devel@vger.kernel.org
-Subject: Partnership Inquiry - Link Insertion & Guest Post Rates for
- ceph.io
-Message-ID: <f48f89b1-4d44-7907-6c0e-1a9dd54092d1@weblinkconsultant.com>
+        Wed, 10 Jun 2026 20:53:18 -0700 (PDT)
+Message-ID: <74dcfda9008fa571eed181d83238000759bf049f.camel@dubeyko.com>
+Subject: Re: [bug report] libceph: BUG() assertion in ceph_can_shift_osds()
+ triggerable
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
+	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Date: Wed, 10 Jun 2026 20:53:16 -0700
+In-Reply-To: <07595980-b8aa-432b-bf1e-e21cb036bfb8@tu-ilmenau.de>
+References: <07595980-b8aa-432b-bf1e-e21cb036bfb8@tu-ilmenau.de>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-Date: Tue, 09 Jun 2026 23:04:05 +0000
+User-Agent: Evolution 3.60.1 (by Flathub.org) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
 
-Hello again,
+CC: ceph-devel@vger.kernel.org
 
-
-This is my final follow-up regarding niche edit and =
-sponsored posts services on ceph.io.
-
-
-We're prepared to move forward with =
-several projects and need to confirm our partner rates.
-
-
-Specifically, could you please share:
-
-
-1. Link insertion: $?
-2. Guest post: $?
-3. Link validity: Permanent or time-limited?
-4. Link type: Dofollow or nofollow?
-5. Sponsored marking: Yes or no?
-6. Guidelines: Any restrictions?
-7. Grey niches: Yes or no?
-8. TAT: Days to publish?
-
-
-A quick rate sheet would be appreciated.
-
-
-If you're unable to collaborate at the moment, just reply "no thanks" and =
-I'll take you out of our list.
-
-
-Awaiting your reply.
-
-
-Best Regards,
-Ruth J
-
-
-P.S. Need immediate help or have quick questions? Message us =
-directly on Telegram @ArchSeoSG - we respond fast.
-
-
-P.P.S. For every reply&mdash;yes or no&mdash;we donate a pack of dog food =
-to a local shelter. Even a &ldquo;not interested&rdquo; can help a furry =
-friend.
+On Mon, 2026-06-08 at 17:12 +0200, Raphael Zimmer wrote:
+> Hi,
+>=20
+> I encountered a triggerable BUG() assertion in the libceph module in
+> ceph_can_shift_osds() (net/ceph/osdmap.h).
+>=20
+> osdmaps are received over the network from a Ceph monitor or OSD with
+> messages of type CEPH_MSG_OSD_MAP. Such an incoming osdmap typically
+> contains information about existing pools. If pools exist,
+> information
+> about each is decoded in decode_pool(). A pool is either replicated
+> or
+> erasure coded, which is encoded in the type field as an 8-bit value
+> representing these pool types. Currently, any value in this field is
+> treated as valid even though only two values have an actual meaning.
+> If
+> this field contains to a value other than CEPH_POOL_TYPE_REP or
+> CEPH_POOL_TYPE_EC, a BUG() assertion can be triggered subsequently.
+> This
+> happens the next time calc_target() is called for a request in this
+> pool. From calc_target(), ceph_pg_to_up_acting_osds() and eventually
+> ceph_can_shift_osds() is called. The switch statement on pool->type
+> triggers a BUG() assertion if pool->type matches neither
+> CEPH_POOL_TYPE_REP nor CEPH_POOL_TYPE_EC.
+>=20
+> This behavior can be prevented by directly checking the pool type
+> against the supported types when receiving an osdmap and rejecting
+> maps
+> that contain invalid values.
+> I will send a proposed patch in reply to this email.
+>=20
+> Best regards,
+> Raphael
