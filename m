@@ -1,74 +1,75 @@
-Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2039933B6D6
-	for <ceph-devel@vger.kernel.org>; Thu, 11 Jun 2026 03:53:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E59F533031C
+	for <ceph-devel@vger.kernel.org>; Thu, 11 Jun 2026 03:54:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781150002; cv=none; b=cEJlD/6AWb69K1LJPum4C9yrrlggUnxNlAiv4Vk+k1+5Frg9G+dgqQfL46Pk9twMmWPrBOWBgLugTffKfns7W25jLu1CkVY/0VoH5LmE7BqaHk7uBQYZXJxUKERR0MEMzZE3rdME9mv+rUUyzalp3VwHQJN2lht2PNwhDkjrJW8=
+	t=1781150045; cv=none; b=LTGRGj0P19RrbxAnBm2Yxnm6wU80nwLKaqyvUy9SCyuXMG+9kIurwoKiop8w770gpeyu8vLuLLgc7o68rmzretVPbf/5fYe5/JVBQ2XCGrymfmJ8sab+NWP/uC1Mn+SUzv/LkohbZ5K+ob0D+5lG+nOiSwZuD6ZvEkyTYyJYlvQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781150002; c=relaxed/simple;
-	bh=1cxrHD9W9r3yzWHMFyoEXkIaC57zZvqlyAqy7ySJskk=;
+	s=arc-20240116; t=1781150045; c=relaxed/simple;
+	bh=HsYXyr97aMfIGCAg5+F0XlMxux8Zlm88WeIZnjXKiaM=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=ew891iIsLGnjFSs7YlYaBMYEnBSgtOBxISTP+B3Bqghb4zG60a9xFhy6FgMPi0KkwjHcOgIZS3phEiDctYDlveDM5xr/7DIpuUbLz03LidhtLF0Np9FgUMicdgecBzG3D4u7sVfFEGQ/tXhPtrLcALWo5dCXqG6zCmxd1v3A/FM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=P6rADXNi; arc=none smtp.client-ip=209.85.167.50
+	 Content-Type:MIME-Version; b=itJFxjZfV5AJWObIUvjhq6REP0os//WFErM8glXyqVvm0KaKTP9xugXYcAD78Q0/WhFd+JZN+YJIlQlHPNE+TA3VEutoTXiFndZkiXx8k0IUmd1P0bQS4IrmfqUhwOjgyaxmaU8wcm5mz2BUpTA934feYvDaw0ljXMPenOE8A8c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=Ei/Uk/HQ; arc=none smtp.client-ip=209.85.167.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="P6rADXNi"
-Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-5aa612bf6efso7533900e87.3
-        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2026 20:53:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="Ei/Uk/HQ"
+Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-5aa61503fdaso456902e87.0
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Jun 2026 20:54:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1781149999; x=1781754799; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1781150042; x=1781754842; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=1cxrHD9W9r3yzWHMFyoEXkIaC57zZvqlyAqy7ySJskk=;
-        b=P6rADXNiHELOJ8BRuEY+3+49LLLPiDZDMdw0DK3dOQfp9ylFPv+1EI+/v5c+9yY0iv
-         kzr8fZYEFo0+yvEUzbm/pRtYX2AOot4DE9Oo2czeu8gZ8bXenGUNIBXejDB1Kz5j3Pdn
-         BpfRRSlXL9TH+nD2B9Jem8vjaJ0ZYFfSuRNWsleGrjr5Wy9/MB+4u+QtmL582qvFFTLw
-         mNBzRVTieEG0NatJCRhLAGYi/WiEaXBi5hGDR5rMj0b72Rvik35APhLqdLalSqF7Clvt
-         rXUt/wP7ZJOTez3hC1UXM7kLWqHhltMlQKh79I3VCXRJz1ithpExj0CYLSWbUSTubEFQ
-         MHQQ==
+        bh=sr6xKM1BGqM/0jr/zsmBcQeY1xQizRY74CdLHDiuQ00=;
+        b=Ei/Uk/HQBEjc2HOV/ywh5Yh7o0qItX14NXb2qZ7hiv+5BAXOkxKyUzYSS7tA0Op0gK
+         AsQ1nf3WoQPPWaV72/U2ikHIMGYjigSZM/vEdXDe08zV0ByADFmTTSVb51k/Uo0TMnhj
+         QlmYJ8bK0Clu2kIvOJX3sQWAG/qyZyjrSgv1WiJpLEHMaZUam9hwtq59wGvhBMGBMIY2
+         kgnZYPk+ld60QAcMqxsnnsNIVHzJhMxR91O/VUZNwZLJ9WcuxRGPXGttVEU0kbqJFiLq
+         roCijDaaAndZQZuFgCTAm1yJLMYM25uQpgMswgtdt8skdhquYONWTAdo/SWkFtwsmfMH
+         JWRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781149999; x=1781754799;
+        d=1e100.net; s=20251104; t=1781150042; x=1781754842;
         h=mime-version:user-agent:content-transfer-encoding:references
          :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=1cxrHD9W9r3yzWHMFyoEXkIaC57zZvqlyAqy7ySJskk=;
-        b=CwBeZDfTbHeOtxr+ok1gKbH2S2UXp7lVGRbzZ0TYP1FX5pZOuUmWOn8ZoWB8bg9RNO
-         rTzjy6cmeIaoRcG5IGs0t4uct4O5zN6Q2NfIWgvlqwglU/+AR1qRiBgs6XtB5cLLqHHn
-         8UgPJrDcVT7T9rVqOxfWfUCUQTSrRY7iaWM7fxh4rJyzkFdUY8QE+YtxKaCNdUzoHpxP
-         GQNeAdyxiH4QF2IDOHkYBHOTGS356td9nekZzpgi3zR8bATPViPbYxs8C6plxi2OnDQP
-         hpAfeN9Cq0dg9klQP8OGeUPe26bvbQQ++a0NP7FIFRsXSs5saPXVJYx5/mu9g1duGhLQ
-         nPlA==
-X-Gm-Message-State: AOJu0YzS/sRHQ0KfP3mCrG8f8hEWE3DTUOsIiDNIXDDTlNr92iSjl7X4
-	AEEoyP8GlExA0/fOfL6+f1sIKVCtrmYGd3kMoJ3aV60Rkpj8/EN5R1GX/KMhFqszMeM=
-X-Gm-Gg: Acq92OFtDo5qFqYAIxCwQ6P+FWCKjQ2MS5A1ULCHxXpnSEohhCfLe1mBDwb/N7Vju3I
-	9WLBWs8LtvdZgIgx8Vx6rK1Gm/K+YWGVFr9qTDyXLfzGaf9u6glpaYCsRC2Ekua674PeiVxr9p+
-	Ax8y1oQzZpsn07zi0alZFxVJMeW8SbWvsxva83OqcWCBh6F+buVk08qutOPS/x4uJSuxHSZ+sZp
-	4HQ7mOm4at6PeJzFACPDnUE8KY0WazmraeZsb1GVbP7m6nJHiyhY1P0WEkpDIiGzk8aUcSet9qm
-	kFNsDH9qit47BZV6394vR/OvvDQyC4d6Q5YJMuSoxYuo7QfXXgekjJCfaKjJfyxdEsHYCKh1/xm
-	tZcKS7M6Sz5ayLf5EJMPndr7xPlYryYuqNuHmdGxKjCqGCYiqJvvY1F6y8iXd5B1dHpUhtkrPUt
-	3nEx57CBiNiQp2KCXuclZANPwTm+kVATT6ZDqvBLCRWgTnnuXBd0nwEHaX6tdOkg8FzMLz+JE/q
-	mqbb6mFJ5VdEPrz2nJmVPJDYYF3cMyUjNwt9G13ocBcn27y8azXEb8KZANPOASSR2Fooe4Qsqyj
-	Aw==
-X-Received: by 2002:a05:6512:1243:b0:5aa:7653:49b3 with SMTP id 2adb3069b0e04-5ad27fb3734mr307807e87.32.1781149999229;
-        Wed, 10 Jun 2026 20:53:19 -0700 (PDT)
+        bh=sr6xKM1BGqM/0jr/zsmBcQeY1xQizRY74CdLHDiuQ00=;
+        b=WlHdB7ny9JStIWmLKM/9jZgA6lVv1C26vRD2RJy6mcrxgSrR2BimiFAlPCiHEuboeD
+         nQejH6bKC7mRuvAo8QA47a0DzfPo/NMexecHPTv1KE9HsNWvA60JJuX5YIxhLBj7R3II
+         bcWY21kI2yhTC4U6qf1eVJNI++gvusoFx7HaBxQ4YsUOSjB3IVDDjumMM6ocAlT9Maby
+         N1WEfGVEQRABCCx5mTrmVT8le4qp7zKTkjnvGoTccblxjsMfWxvMqgzg5gj7KPKAH+UG
+         Vpr9BAfY5Id5QJ0RX1Vx5b80MpEZUouMbzXQkLF61veHP+WMl8Li1uxf1ScWSTqF0y+Q
+         OpTg==
+X-Gm-Message-State: AOJu0YyjI77v7U00tVtho5K10sfI+vmu5bojeVz5paS4CDfEnE40JKR3
+	ywPVRdzF10JD+a+roRrbtJyHLhobsAJjYQp7trbmg9UJF5KDDjTzDmsLloypKWNQycBwSe1aDOh
+	7lbI1R4pCRQ==
+X-Gm-Gg: Acq92OGOo3TNnDKZTYvQZYhlPQrwFD2QBLB9mVwdPd52MFxG+e68fKzVZmvK3DrMqEL
+	w7yASmLvO5TcC61HpczWjXac3nUo8mH0l9qAjUlucxT1XclPx9HwAH4Uca1YkMdnN6J1ezylRVJ
+	xPpmlbgRRy4ml8tnSoph1WbEx+Nbpe8DoYFJcSaxcULouJk8jjAfq41viMF+D+D5wLVkgthg6WF
+	16wegrINe5WhO0yVeJ6sTm8z2ayfB8lDUIph+6Xcg2ZjbkWeFEJVlZgOtFilHHC+wDk3fzU6t0a
+	4mj+iNKu+YS1g9UfLFZrjb5O0/HaM4fFMezBOlqVdDKJi9z9yQOV6sxyFZRbiqAexGfUWZ/fAeu
+	F069KhQ+Wf66HCXAW2oGdKxsMWa7YsFMUiYLQOLf/ys3G2zfMBcxCW79ZAQijG33FUwuX6KHEEL
+	jDJTojv6msSTLVxIe5coP9KKhHM9zRGk4l6k7DpRTtPz85A0cH+pdCFSiwRdRHnSyJw95NVSnGV
+	eZOFfjuHTUxmQ9QCrjqWYCAcAolzAyPThnRKR5ovlCUomUpdfZG5NLqk/PWFjBL95E=
+X-Received: by 2002:a05:6512:1108:b0:5aa:6a11:3a29 with SMTP id 2adb3069b0e04-5ad28509a4bmr235210e87.3.1781150042135;
+        Wed, 10 Jun 2026 20:54:02 -0700 (PDT)
 Received: from [192.168.1.246] (broadband-95-84-186-252.ip.moscow.rt.ru. [95.84.186.252])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5aa7b98f0e1sm5943049e87.61.2026.06.10.20.53.17
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5aa7b97b9c4sm5963291e87.48.2026.06.10.20.54.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 10 Jun 2026 20:53:18 -0700 (PDT)
-Message-ID: <74dcfda9008fa571eed181d83238000759bf049f.camel@dubeyko.com>
-Subject: Re: [bug report] libceph: BUG() assertion in ceph_can_shift_osds()
- triggerable
+        Wed, 10 Jun 2026 20:54:01 -0700 (PDT)
+Message-ID: <a4b07ea74167dfb681c481bc21243b5e7e652472.camel@dubeyko.com>
+Subject: Re: [PATCH] libceph: Reject osdmaps advertising pools of
+ unsupported types
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
 Cc: ceph-devel@vger.kernel.org
-Date: Wed, 10 Jun 2026 20:53:16 -0700
-In-Reply-To: <07595980-b8aa-432b-bf1e-e21cb036bfb8@tu-ilmenau.de>
+Date: Wed, 10 Jun 2026 20:53:57 -0700
+In-Reply-To: <20260608151310.1061874-1-raphael.zimmer@tu-ilmenau.de>
 References: <07595980-b8aa-432b-bf1e-e21cb036bfb8@tu-ilmenau.de>
+	 <20260608151310.1061874-1-raphael.zimmer@tu-ilmenau.de>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.60.1 (by Flathub.org) 
@@ -81,36 +82,64 @@ MIME-Version: 1.0
 
 CC: ceph-devel@vger.kernel.org
 
-On Mon, 2026-06-08 at 17:12 +0200, Raphael Zimmer wrote:
-> Hi,
->=20
-> I encountered a triggerable BUG() assertion in the libceph module in
-> ceph_can_shift_osds() (net/ceph/osdmap.h).
->=20
-> osdmaps are received over the network from a Ceph monitor or OSD with
-> messages of type CEPH_MSG_OSD_MAP. Such an incoming osdmap typically
-> contains information about existing pools. If pools exist,
+On Mon, 2026-06-08 at 17:13 +0200, Raphael Zimmer wrote:
+> osdmaps are received over the network and typically contain
 > information
-> about each is decoded in decode_pool(). A pool is either replicated
-> or
-> erasure coded, which is encoded in the type field as an 8-bit value
-> representing these pool types. Currently, any value in this field is
-> treated as valid even though only two values have an actual meaning.
-> If
-> this field contains to a value other than CEPH_POOL_TYPE_REP or
-> CEPH_POOL_TYPE_EC, a BUG() assertion can be triggered subsequently.
-> This
-> happens the next time calc_target() is called for a request in this
-> pool. From calc_target(), ceph_pg_to_up_acting_osds() and eventually
-> ceph_can_shift_osds() is called. The switch statement on pool->type
-> triggers a BUG() assertion if pool->type matches neither
-> CEPH_POOL_TYPE_REP nor CEPH_POOL_TYPE_EC.
+> about existing pools. Information about each pool is decoded in
+> decode_pool(). A pool is either replicated or erasure coded, which is
+> encoded in the type field as an 8-bit value. Currently, any value in
+> this field is treated as valid even though only two values have an
+> actual meaning. If this field contains a value other than
+> CEPH_POOL_TYPE_REP or CEPH_POOL_TYPE_EC, a BUG() assertion in
+> ceph_can_shift_osds() can be triggered subsequently. This happens the
+> next time calc_target() is called for a request in this pool.
 >=20
-> This behavior can be prevented by directly checking the pool type
-> against the supported types when receiving an osdmap and rejecting
-> maps
-> that contain invalid values.
-> I will send a proposed patch in reply to this email.
+> This patch fixes the issue by adding a check that verifies the pool
+> type
+> directly during decoding and rejecting osdmaps that contain invalid
+> values.
 >=20
-> Best regards,
-> Raphael
+> Fixes: 4f6a7e5ee139 ("ceph: update support for PGID64, PGPOOL3,
+> OSDENC protocol features")
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+> =C2=A0include/linux/ceph/rados.h | 5 +++++
+> =C2=A0net/ceph/osdmap.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0 | 4 ++++
+> =C2=A02 files changed, 9 insertions(+)
+>=20
+> diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+> index 73c3efbec36c..5b5c33845301 100644
+> --- a/include/linux/ceph/rados.h
+> +++ b/include/linux/ceph/rados.h
+> @@ -86,6 +86,11 @@ struct ceph_pg_v1 {
+> =C2=A0#define CEPH_POOL_TYPE_RAID4=C2=A0=C2=A0 2 /* never implemented */
+> =C2=A0#define CEPH_POOL_TYPE_EC=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 3
+> =C2=A0
+> +static inline bool ceph_pool_type_is_supported(__u8 type)
+> +{
+> +	return type =3D=3D CEPH_POOL_TYPE_REP || type =3D=3D
+> CEPH_POOL_TYPE_EC;
+> +}
+> +
+> =C2=A0/*
+> =C2=A0 * stable_mod func is used to control number of placement groups.
+> =C2=A0 * similar to straight-up modulo, but produces a stable mapping as =
+b
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index f8d5621bc767..e440f6019d58 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -818,6 +818,10 @@ static int decode_pool(void **p, void *end,
+> struct ceph_pg_pool_info *pi)
+> =C2=A0
+> =C2=A0	ceph_decode_need(p, end, 4 + 4 + 4, bad);
+> =C2=A0	pi->type =3D ceph_decode_8(p);
+> +	if (!ceph_pool_type_is_supported(pi->type)) {
+> +		pr_warn_ratelimited("got unsupported pool type %u",
+> pi->type);
+> +		return -EINVAL;
+> +	}
+> =C2=A0	pi->size =3D ceph_decode_8(p);
+> =C2=A0	pi->crush_ruleset =3D ceph_decode_8(p);
+> =C2=A0	pi->object_hash =3D ceph_decode_8(p);
