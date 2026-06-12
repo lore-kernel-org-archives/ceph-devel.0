@@ -1,33 +1,72 @@
-Received: from cstnet.cn (smtp25.cstnet.cn [159.226.251.25])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6272E40D567;
-	Thu, 11 Jun 2026 14:40:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.25
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCC0438737E
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 16:52:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781188817; cv=none; b=Im0EoN/DGoiQzip7PoPVPDLWTzdbq5TZNn7gwRK3f6l/vs/tkFc9zdLQq7znGsRGG0u2f7kzw26OX0mXtm19M4EtPyTzgJMbZQE7TpbT7q4fPc61t0zQAIbpKE/bQTpjD5UsKtKkSqI4CgbaKxQgMWWp5S8aK6EkKkWF5+9zwac=
+	t=1781283140; cv=none; b=HTAxdZzawN7TGAYn+vNCRYdUz02oGpPcuX/cCMHT05LXLcRFnyhqjtBuxuwBLw1ZOp7bpz+ihyd7RYBjxiDIfO0fEEyLVPwDcCYr3AzJFbuurtPUty6jeOWpy9P00F3MungnFsji1HVk5RmnaAw7Ug0bbhbaZZQMeQlRITiCleg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781188817; c=relaxed/simple;
-	bh=VxlQ8Q/mIPv2p36F1IgHfA/69SnhoWRW8i9Ij8pUEX4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Wc301FQAm022UKzdpbuFyfvIWGmIENFN9CO54gUNpHKrOnpPvLy4nN0FJWlezjUhnMsfoSBryfLw50kOewwuqVxJWpnTHIEHjwx5GTVVS/tttmW0JJ5BDHxnl6k1TTVEzmQHnBY4ZjnXUJoPYjMJruFwKQM+xnewATIM5EkGRso=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
-Received: from localhost.localdomain (unknown [117.182.75.76])
-	by APP-05 (Coremail) with SMTP id zQCowAAXXcDJyCpq2KwXEw--.1062S2;
-	Thu, 11 Jun 2026 22:40:12 +0800 (CST)
-From: WenTao Liang <vulab@iscas.ac.cn>
+	s=arc-20240116; t=1781283140; c=relaxed/simple;
+	bh=02e03u5CyNTHWcBqjOHwWkUIMHRE177XW4wR3QCeJZk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LhabvlbGbd4KfKx82BB8BAuk1EITRKPuDRRHBpJuKgQE2/ZSWnCkC1/Y2eKC30YwTzZjGoDjzzupIM40PEQAEl8BgU4O//1+WipLkUJXnK0G1i8Oxs7g+d10qYS0fm7Mhv76cGmny68zv86vTNRgW1QwVUC4ZbTtQUgMlFzVURk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=JAFMtuWR; arc=none smtp.client-ip=209.85.221.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="JAFMtuWR"
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-46015dc517aso934815f8f.2
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 09:52:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ionos.com; s=google; t=1781283137; x=1781887937; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=r8GEd2ral1iLxfzHi1TZa71zVgX/umE9oT8nFWBZvHY=;
+        b=JAFMtuWRgDXhgOmiG8VrV7kuzVvK1UdokMzBhVUaDPfu2SCMs7azaXK9whmpUv9eAW
+         vNJW/lUbebzgoeljwrRR6XxqG0h1MFc7LTY3jx5h1YBXWuFX4SzXArgkVXPl+e5Ex93P
+         4n5COYSt3FJbTJiLOmH9A0j8zOOwdoYDyyhRvRFQN8QnamQ4KpaT5GDaFIn0zcxO5HwA
+         xfexETc+UsoBPNv5sg36yQ7KRjrHujiTajzcp8BuGHYWZ3Fu61DUdEilXHAc3cWTEwL5
+         6Qbpk98xDb/lBFhN9PSpJ7WAblFmSTWGRqSVyXNb+9eLALQmfoLILT8Z0aMWqKWbvPXY
+         JZzA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1781283137; x=1781887937;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=r8GEd2ral1iLxfzHi1TZa71zVgX/umE9oT8nFWBZvHY=;
+        b=iBoiF/264clVrJrwP3t4rAHIpG1lWHb5ZBrrVPVyYnBkMlSkp4sw5lQdNADDe3jAUm
+         W2hCzbUYZxtY2pn5ihm7hvc3DL/ZT8BVBdm8BLUMhBo8m1ziqD+gUUGJeXvLeHdqHoB5
+         u4iDMgvZjNsqp4Bn7Z4Tq50Z/W1O5kG8pEtLuWNlrPQr9W/3rHyooLaLajiroo+ZqGEW
+         7eHoi2Iyim8PYsvFdqsDuSdea0/AEoO9cyqskGpNiVnWiZFILMuUrLJfw/cJsG+sLsON
+         t9uMDt2+9YuKwJETKxYTqZam25+ZxDJqwq5fgmx3VFssN3wH6Iu10qhKK1zEgeBxE0Nq
+         04wQ==
+X-Forwarded-Encrypted: i=1; AFNElJ9yrxjLxf17jVzRjEIVGEYtQq580BNkK8xjwQKiWnE7vUwzGcMPBEmLbUw3Yxo93rFAeMdJPqQrWQs7@vger.kernel.org
+X-Gm-Message-State: AOJu0YyabMWdfBEUMEvhS2RyGVR/+zo0+1in2uu6yi4MKCfeWTpHz3G3
+	/2jfXFoSnZIWKdVCcIT5rbPe57PRxA39U0tfbqEGX5Jvm9FucKYjhV61sqL1b6ZAxi4=
+X-Gm-Gg: Acq92OEAQ6Rmm6nJ+YmP3XUkjh4hbCkFMeQToHXmRztkbC1jl/yVwxCa34eYTR5Muln
+	ZPD5/aGH1DtMz0gK42uoeghmXkoOduhJypzlZCR3sDw5E2BsxakdTtI4Pgac8gT+asT8+gODJDr
+	QD5KfnK1X0xfyYFCJ+K4EQdjUZ+UZ8G9rSk6qsJvkP7mN0sXsiyDygkj5Z0HzUzdRJEe3tKuCZb
+	8/ZFT3GvgdaWEH+p7NbsLIpoPXV4YTNaTMTJrRsOVGvSCQFzKUhHOPZBhDFoG7/rnfDSRuDaCZ4
+	1/IKz3RI8E/ZjWRLXz9rL+DGMnX0r8q0r5RBoVvUtup0+835fVvt4HFS1yRWGPmMVwXYjlhLk+l
+	uj2CyVzvNcvKXfsMmqZe83JG2me1iXf1A9zOrKrlWO/0H1VTW3l7bJqvo/0gN/uhTJBN8cIBVJp
+	gkSyre4O4I7C29aSDxtnBEtLNAV1wktAqLYIordulEslfGkJFbiqjA27RuYJEHhOVf4V1idqXV2
+	66e58rLbIi42PFPRvfF+Q4JOBs=
+X-Received: by 2002:a5d:5c81:0:b0:45e:ed7e:f900 with SMTP id ffacd0b85a97d-4606da57ca1mr5226250f8f.6.1781283137105;
+        Fri, 12 Jun 2026 09:52:17 -0700 (PDT)
+Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4606f26f1cdsm7807377f8f.11.2026.06.12.09.52.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 Jun 2026 09:52:16 -0700 (PDT)
+From: Max Kellermann <max.kellermann@ionos.com>
 To: idryomov@gmail.com,
 	amarkuze@redhat.com,
-	slava@dubeyko.com
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	WenTao Liang <vulab@iscas.ac.cn>,
-	stable@vger.kernel.org
-Subject: [PATCH] ceph: fix refcount leak in ceph_readdir()
-Date: Thu, 11 Jun 2026 22:40:07 +0800
-Message-ID: <20260611144007.88851-1-vulab@iscas.ac.cn>
-X-Mailer: git-send-email 2.50.1
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Max Kellermann <max.kellermann@ionos.com>
+Subject: [PATCH 00/12] fs/ceph: optimize struct layouts
+Date: Fri, 12 Jun 2026 18:51:52 +0200
+Message-ID: <20260612165204.86137-1-max.kellermann@ionos.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -35,65 +74,59 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:zQCowAAXXcDJyCpq2KwXEw--.1062S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7KrW7JFy3Cry3WFyDXF1UZFb_yoW8Xw4fpF
-	4kKas0yrW5J343CF92vFnYvrWF9ay3CF1rCrWxAw129a15Gwsrt3sFyF90gF17Cr4rGrsI
-	qF4kGFW7ZF1UGF7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUkG14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-	1l84ACjcxK6xIIjxv20xvE14v26r4j6ryUM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
-	6F4UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s
-	0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xII
-	jxv20xvE14v26r106r15McIj6I8E87Iv67AKxVW8JVWxJwAm72CE4IkC6x0Yz7v_Jr0_Gr
-	1lF7xvr2IYc2Ij64vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7MxkF7I0En4kS14v26r12
-	6r1DMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI
-	0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUAVWUtwCIc40Y
-	0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxV
-	W8JVWxJwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Gr0_Cr1l
-	IxAIcVC2z280aVCY1x0267AKxVW8Jr0_Cr1UYxBIdaVFxhVjvjDU0xZFpf9x0JUvXd8UUU
-	UU=
-X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiBgoPA2oqhg7QRwAAsf
 
-The ceph_readdir() function allocates a ceph_mds_request via
-ceph_mdsc_create_request() and stores it in dfi->last_readdir. In
-the directory entry processing loop, if the entry's offset is less
-than ctx->pos or if the inode pointer is unexpectedly NULL, the
-function returns -EIO without releasing the reference held by
-dfi->last_readdir, causing a refcount leak.
+This patch set aims to reduce the memory usage of the Ceph filesystems
+by optimizing the layout of structs, most importantly struct
+ceph_inode_info:
 
-Fix this by adding ceph_mdsc_put_request(dfi->last_readdir) before
-returning on these error paths. Also set dfi->last_readdir to NULL
-for safety, matching the cleanup done at the normal exit.
+- use `bool` instead of `int` for booelans
+- use `u32` instead of `u64` where possible
+- reorder fields to eliminate padding holes
+- eliminate redundant fields
 
-Cc: stable@vger.kernel.org
-Fixes: af9ffa6df7e3 ("ceph: add support to readdir for encrypted names")
-Signed-off-by: WenTao Liang <vulab@iscas.ac.cn>
----
- fs/ceph/dir.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+Without this patch set, ceph_inode_info looks like this with pahole:
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 27ce9e55e947..ef9e92e362d3 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -546,11 +546,16 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
- 			pr_warn_client(cl,
- 				"%p %llx.%llx rde->offset 0x%llx ctx->pos 0x%llx\n",
- 				inode, ceph_vinop(inode), rde->offset, ctx->pos);
-+			ceph_mdsc_put_request(dfi->last_readdir);
-+			dfi->last_readdir = NULL;
- 			return -EIO;
- 		}
- 
--		if (WARN_ON_ONCE(!rde->inode.in))
-+		if (WARN_ON_ONCE(!rde->inode.in)) {
-+			ceph_mdsc_put_request(dfi->last_readdir);
-+			dfi->last_readdir = NULL;
- 			return -EIO;
-+		}
- 
- 		ctx->pos = rde->offset;
- 		doutc(cl, "%p %llx.%llx (%d/%d) -> %llx '%.*s' %p\n", inode,
+  /* size: 1456, cachelines: 23, members: 78 */
+  /* sum members: 1424, holes: 8, sum holes: 32 */
+  /* member types with holes: 4, total: 4 */
+
+With this patch set, struct ceph_inode_info got smaller by 96 bytes:
+
+  /* size: 1360, cachelines: 22, members: 75 */
+  /* member types with holes: 2, total: 2 */
+
+Max Kellermann (12):
+  fs/ceph/super: remove unused field `i_cap_migration_resv`
+  fs/ceph/super: make field `i_truncate_pagecache_size` optional
+  include/ceph/ceph_fs.h: convert `pool_id` to u32
+  fs/ceph/super.h: convert ceph_inode_xattr fields to `bool`
+  fs/ceph/super.h: convert ceph_cap_snap.writing fields to `bool`
+  fs/ceph: consistently use `u32` for `time_warp_seq`
+  fs/ceph/super: reorder fields to eliminate padding holes
+  fs/ceph: remove i_truncate_mutex, use i_fragtree_mutex for both
+  fs/ceph/super.h: add `const` to helpers
+  fs/ceph/super.h: add helper ceph_in_snap()
+  fs/ceph: use ceph_vino() etc. instead of accessing i_vino directly
+  fs/ceph: remove redundant inode number from ceph_inode_info
+
+ fs/ceph/acl.c                |   2 +-
+ fs/ceph/addr.c               |  23 ++++----
+ fs/ceph/cache.c              |   4 +-
+ fs/ceph/caps.c               |   8 +--
+ fs/ceph/dir.c                |  20 +++----
+ fs/ceph/export.c             |   8 +--
+ fs/ceph/file.c               |  28 +++++-----
+ fs/ceph/inode.c              |  38 ++++++++-----
+ fs/ceph/mds_client.c         |  12 ++---
+ fs/ceph/mds_client.h         |   2 +-
+ fs/ceph/quota.c              |   6 +--
+ fs/ceph/snap.c               |   8 +--
+ fs/ceph/super.h              | 102 +++++++++++++++++++++++++----------
+ fs/ceph/util.c               |   8 +--
+ fs/ceph/xattr.c              |  18 +++----
+ include/linux/ceph/ceph_fs.h |   2 +-
+ 16 files changed, 171 insertions(+), 118 deletions(-)
+
 -- 
-2.50.1 (Apple Git-155)
+2.47.3
 
