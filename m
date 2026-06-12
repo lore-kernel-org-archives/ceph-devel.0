@@ -1,72 +1,76 @@
-Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E10D374E66
-	for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 17:05:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F20E403AEF
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 17:05:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781283945; cv=none; b=f69n9q0l9N/gRqVvysr8U2YMLpJx/SVAQJ0kG6aGo/PTVELiZxdzSlwV96bupKvCu9MXQODBPkU/c/PkVM2vg3gRiITauNFzoFM43dtxzH69y9puAcUnfZzgG4R5jtH13CNJGaQb/dMG+fX3q3t11k9feTR5wk1qsFTL1Cf7KXc=
+	t=1781283946; cv=none; b=t8ycpuEGCA5JK8gklUEyVMb3rcYCAVn4VI6PDSqt7sKOSsLkgnz+AewPGrGce+bKtPAgizZZcJRWa35Lno8va9cQ7Bm84Bg47dZIlqn+STm88dUBs6ntTWWvp+kEDtXIPOcXHkQkhNVTbp57WD+SwTJ7toFg7muKJFUa6tzp8vk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781283945; c=relaxed/simple;
-	bh=YPDuhKVfPAEljKsfayv1OltZXRXezi5hzreSz8ms5Hc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=QpFsup9OL+QW0QxZzsyeJ3KCKPdpeKaG5duQtw3QSDypMnm+eWArNuXYi0199RYoh+2zCbm7V23mj1KYtAi62i62sME7jAEPTeWwhNqx0n+7L1LVHns9M4S3lswRBgkKZ4nbv243K9ctcpzf8fP8pUaH1SDhY/mmfROE0dtAj78=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=NTXQxE/Q; arc=none smtp.client-ip=209.85.128.51
+	s=arc-20240116; t=1781283946; c=relaxed/simple;
+	bh=RSjXrwHkkddP1fCj1wS/0usfZqiCm1jPSSO2MCNNLLQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=GC0btW9Nh+A388vLXa9gdCg3d9PSuvSKsnOg3LoyUVtlpKTQ791LuLEKJKMlPjFeJuNxO4nZDwLhtf6r3qMwWxNHVPwdrI9P0G6zu9lNMcWhHHRqdjPB2q8W93rZzjX6JkfdO3IWkL7WjDc2pa7l55pmYpl9SVglwlfPo06sZHs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=OslkJQtB; arc=none smtp.client-ip=209.85.221.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="NTXQxE/Q"
-Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-490c1915793so10569935e9.2
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 10:05:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="OslkJQtB"
+Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-45eecb8bf67so937195f8f.2
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 10:05:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=ionos.com; s=google; t=1781283942; x=1781888742; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=bo9G/t/0K/ePZvazpUVc0zWoS9ZiJSn1baVydLIWARo=;
-        b=NTXQxE/QH6QxWL+Evos/MJ6Q8ksHCUvf+MOF+Dok9XyOPQo6NjJEOYNmC7c/b22sCB
-         R2dUaI2hKV0Nr9Ihnoc8+v72nXcRAcd3p9Uuofrdh7jSZZ20zfJqIztWyaoenMfEAUJr
-         05DMqzJbjDjmG9XRThKE36fG3Gm2tAof4+qbtWNQvp7a+xJw7ucVIQDXE9sjAN2IkiVr
-         2x09mhQESV/WyjUOn9pwGaKhQM+xtftQAuy20M5czs+fFovs6LC57enUaapepko82lhI
-         T00xJBtBhAxoDM4y7PkJMRBuY4DqmW493EHY9yxakxnmq4REBB+xX3NqlA6e7aFN/XKk
-         iCog==
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Yub7XSzjDB1jxci1f7s3cBnkY99ODuxhkCNRd+nmsY4=;
+        b=OslkJQtBIPKZPKeErmt6v3gY12aH8Z+IRz7gzzwC+xX75/2p/dCj+Lt3I0ewnpKdEG
+         Tix1u3RIWtDsrSGQ0VVs1W6lbVW8hdhQDrn6AK/50MAJKM4eNto3uJh/tGteYCVMtCWz
+         SBmFwkkIPr9ONdIvEww4hEDIKKJi8i+U34VK9M8ff+3jW07NNBtUvX/IH00bMuf60weH
+         GtpAC7yP6JlecnwHvOWqo/mha+iDaoRbZg3OPIK6k9LhD2mdQtQvsU+tv+uHMbJVm68H
+         iTisgmaSfJI/Wk1mkEeO92dyHsshZgFtSZ1IrjL534i3JAASTfXGK2357uu0H7pqXiqg
+         yAWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20251104; t=1781283942; x=1781888742;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=bo9G/t/0K/ePZvazpUVc0zWoS9ZiJSn1baVydLIWARo=;
-        b=Wg5CTv+qIOku7vamNi3oudItHCIamr/rimYuafNB6mI5+/uBeUFEVpkGh+hQsavWI/
-         XMd7aN5QDWuyh9MDR/1ReUg2tcHJKGXzra9ApvFzzZTqF2qcxh3inKFLb3pOCPMYB/d4
-         Ttr+JJ/1h7xcfLrV2vR21IIw5EM2y4wK+v+9Vv+VsbbYP8Ry1Cn0BnTImQqJkLr1KGIj
-         XaEVeGaPdRnNpQwjwljlC9U8dmIPG/2gfo7O6l4p9TbC234axFf9wmKhGVS914MSMLHL
-         RF7vJChL39L+FCgMvAFRgf+LXhs54scCk2UTkGbimzKAQq19wFtKjK0g6lvsZx9qlAmX
-         weAQ==
-X-Forwarded-Encrypted: i=1; AFNElJ/4lvuHMT8Bl1WfTNil4EKUZInp+xjqBFyKtPpR2ACpQRUmHJhqYHh8dYOL9WAQueKuVb3/XMDRVFA3@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxg/Q1qlXSkGcsVgYxdcxReLkjU3+nMAOe4ZZS5xXmYlIlCGhRb
-	WYSVnvU9pI62qYGvfMWJd5fEJ6GXkL/8a4ZWv+J79oM5vr9CetcWHH4hg505u19uxpk=
-X-Gm-Gg: Acq92OGnvJCMw229Fy9LCHGlDK11uHWpY5db0vCNXlkST8mhPebs98SA3355CxgK3fw
-	ukO0XOmwoZMsURtL5pW0uxa5BsENMQx/ImeWDKrfOt2k+x6fRGPQEA9PUcUoW2wYChvshmB0fzK
-	79LfVQs40SFaIPHNWJItpcypxQdTuEGVuLBbeS3awFRA9ZrKxeYFB4FGBBeyO/O8jsEuzzX2q8x
-	kbowXCsm0L/Hqik5iPvDlYobpl5p0tQwjfjK3tnBTaP6b77mPolpwj5UwkY4/pJKa5CGG6xlxQn
-	CCpBu+V5di+UAb+zwIMdclOZJNP/XQpMEuoArcvUhJhRy/4BZMp2EIMYI3iCpJZqBO+P/motUcN
-	+6COyPW1EIDaaUjX3bX3+zOl1La/2fmz2Jn0J/xo8jQtpZGEHxF+m5kWhottut88IqVVFZP5FZp
-	Q3AUGTfNsQsJMcyictljcxBM8npCunq8UZgST6WP7TMTsd7oLq1VZgWFTNzk+Vz4+xtk0oYXGQv
-	gBbA03xrCL4uLXF8UHCEHltFNPr5L17aJHjeA==
-X-Received: by 2002:a05:600c:a310:b0:490:e1cd:ea25 with SMTP id 5b1f17b1804b1-490ec504b34mr33830975e9.23.1781283941704;
-        Fri, 12 Jun 2026 10:05:41 -0700 (PDT)
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=Yub7XSzjDB1jxci1f7s3cBnkY99ODuxhkCNRd+nmsY4=;
+        b=YN0zT4kLvJiJW0EmJgOPcQpRjp5F6YfOrFobgYom2JQVH5As3yrArgkp+8BlMvMKPY
+         mRwBEkoDE2uGjsZ4O+lbKxYsz0J3/UJDIdSo0rSEv7NoBvjF4WKCvRdX5rslWqCoOu1J
+         DJy9+I4Rq8LkC4vJl+2LxfALTGfD+1h5N8ROWtWxMuW0ZQd3aEpcWkW4n/rixUcRxDp7
+         gNRZZfEtiG5I+6ewaDG66H12CLX8x137BPKmpYGHJSJUl+KSAEiVryROOXPAAIfFSJeQ
+         SffRMBlu7+gxhYZFpyZ33AVaagTFFHMr3oCh2E5wv8395RF1A0IED4xApmKbYadzPnp6
+         KmbQ==
+X-Forwarded-Encrypted: i=1; AFNElJ+QbJ2AUgqlulSLyjkf6O79Bm5CELXeZPQeUsfTCJP3k8SFydfZzm6nWqxI9r/ATlkIS7pJtr43rtmE@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy+K/vvqvE6+khlCsPJbE0DeeW1niwmzr6LXL9F8Sj7kCVlBOAZ
+	IdCBFdaehMo9J7h9WALhrID+ch+kG26bmlq4ggNwyfGbm/W4zh2qLbAEFkmv5cxuiec=
+X-Gm-Gg: Acq92OGHC8+KWcLJbLmcVbXhSHuaZRaQ8CyAdU6Cp8HiYKss6t1m5bd2XxFZVhNdAgj
+	Gt9V2SI7tw7SyN7+1OMHgZDur/rnNsJpMJGXJrMEmvOdG8jP66EQpX8OzqWq8Vzxj4UNtnfxZGv
+	n3kLcmo9BnU+LAsA8lNDLkgdiz7blLBLt85bdvFIV8LmyDn27ZKv1/rqJgFZg4E/TNu1QjOU04e
+	jCT09X1HbkTEK4Bvm/UUo4HBXfORf059/G7NIM4yPWM9KJ2SZQYquXubR0jj8SrhdYZn+HcSeBQ
+	HNePBUJ+rhkicNBXDJ+/Oud6HEendfMlPvckwcSNj2abZVloE3m+W3y2j06Xkign53YOWUp2ypA
+	Uxuq2AiVIDC8//d6g7Ki1bN8q9ye/UQSkcNj1xIqAxXpuFOfvfMyfldDsc/jCTf1uDqfimgghuq
+	dZJ5ihFmIA3+7ORy9LUlgm2XpI7v9l/JwqruQ60MnsDLeRscnj/jgZc8+hxg/d8n7xYPKPB1GMd
+	mRebmqhdur1Gdpj+QfDCD9ijGU=
+X-Received: by 2002:a05:6000:4818:b0:446:96b1:f53 with SMTP id ffacd0b85a97d-4606dbad462mr5107122f8f.26.1781283942351;
+        Fri, 12 Jun 2026 10:05:42 -0700 (PDT)
 Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
         by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4606f2b0c10sm7541814f8f.21.2026.06.12.10.05.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Jun 2026 10:05:41 -0700 (PDT)
+        Fri, 12 Jun 2026 10:05:42 -0700 (PDT)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: idryomov@gmail.com,
 	amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH 1/3] fs/ceph/caps: make __ceph_remove_cap() static
-Date: Fri, 12 Jun 2026 19:05:35 +0200
-Message-ID: <20260612170537.92970-1-max.kellermann@ionos.com>
+Subject: [PATCH 2/3] fs/ceph/caps: mark cap remove with RB_CLEAR_NODE() instead of ci=NULL
+Date: Fri, 12 Jun 2026 19:05:36 +0200
+Message-ID: <20260612170537.92970-2-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.47.3
+In-Reply-To: <20260612170537.92970-1-max.kellermann@ionos.com>
+References: <20260612170537.92970-1-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -75,39 +79,72 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-It's only used from within caps.c.
+__ceph_remove_cap() erases the ceph_cap object from the RB tree, thus
+it seems natural to use RB_CLEAR_NODE() / RB_EMPTY_NODE() for the
+removal check.
 
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/caps.c  | 2 +-
- fs/ceph/super.h | 1 -
- 2 files changed, 1 insertion(+), 2 deletions(-)
+ fs/ceph/caps.c       | 11 +++++------
+ fs/ceph/mds_client.c |  2 +-
+ 2 files changed, 6 insertions(+), 7 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d51454e995a8..efa6a15c470b 100644
+index efa6a15c470b..9e7c76a66624 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -1119,7 +1119,7 @@ int ceph_is_any_caps(struct inode *inode)
-  * caller should hold i_ceph_lock.
-  * caller will not hold session s_mutex if called from destroy_inode.
-  */
--void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
-+static void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
- {
- 	struct ceph_mds_session *session = cap->session;
- 	struct ceph_client *cl = session->s_mdsc->fsc->client;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index afc89ce91804..76b946116613 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -1261,7 +1261,6 @@ extern void ceph_add_cap(struct inode *inode,
- 			 unsigned issued, unsigned wanted,
- 			 unsigned cap, unsigned seq, u64 realmino, int flags,
- 			 struct ceph_cap **new_cap);
--extern void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release);
- extern void ceph_remove_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
- 			    bool queue_release);
- extern void __ceph_remove_caps(struct ceph_inode_info *ci);
+@@ -1128,8 +1128,8 @@ static void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 	struct ceph_mds_client *mdsc;
+ 	int removed = 0;
+ 
+-	/* 'ci' being NULL means the remove have already occurred */
+-	if (!ci) {
++	if (RB_EMPTY_NODE(&cap->ci_node)) {
++		/* this means the remove has already occurred */
+ 		doutc(cl, "inode is NULL\n");
+ 		return;
+ 	}
+@@ -1142,6 +1142,7 @@ static void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 
+ 	/* remove from inode's cap rbtree, and clear auth cap */
+ 	rb_erase(&cap->ci_node, &ci->i_caps);
++	RB_CLEAR_NODE(&cap->ci_node);
+ 	if (ci->i_auth_cap == cap)
+ 		ci->i_auth_cap = NULL;
+ 
+@@ -1158,8 +1159,6 @@ static void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 		cap->session = NULL;
+ 		removed = 1;
+ 	}
+-	/* protect backpointer with s_cap_lock: see iterate_session_caps */
+-	cap->ci = NULL;
+ 
+ 	/*
+ 	 * s_cap_reconnect is protected by s_cap_lock. no one changes
+@@ -1201,8 +1200,8 @@ void ceph_remove_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+ 	struct ceph_inode_info *ci = cap->ci;
+ 	struct ceph_fs_client *fsc;
+ 
+-	/* 'ci' being NULL means the remove have already occurred */
+-	if (!ci) {
++	if (RB_EMPTY_NODE(&cap->ci_node)) {
++		/* this means the remove has already occurred */
+ 		doutc(mdsc->fsc->client, "inode is NULL\n");
+ 		return;
+ 	}
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index ed17e0023705..f092960953a8 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1900,7 +1900,7 @@ int ceph_iterate_session_caps(struct ceph_mds_session *session,
+ 
+ 		spin_lock(&session->s_cap_lock);
+ 		p = p->next;
+-		if (!cap->ci) {
++		if (RB_EMPTY_NODE(&cap->ci_node)) {
+ 			doutc(cl, "finishing cap %p removal\n", cap);
+ 			BUG_ON(cap->session != session);
+ 			cap->session = NULL;
 -- 
 2.47.3
 
