@@ -1,73 +1,73 @@
-Received: from mail-wr1-f43.google.com (mail-wr1-f43.google.com [209.85.221.43])
+Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 863434028E5
-	for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 16:52:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D02AC403EA2
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 16:52:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781283143; cv=none; b=eh88I1YviB+4eyOPtaYAQB4yHOlc9n+Z6MHQmc063/k/5l2w2bZBhY/itJSQIyOrTkCaIUkbvWka+WuXEi6Mbp5G2sLLofwW6hJL/sdHiZrbZ03qpUgs8sR//abgydoP3ldADeIwLPnGkv42aD0pmQxJBr+Vo82SoSK5/jYTG6U=
+	t=1781283143; cv=none; b=Wry2kaBpKO27UKYGzVZsQs3XDyR8g0ozaTM+/fv9nF6cW4Rt+ZSblm3pqc3cOH94rVstxQamTZ8d6roWUOUNThaqoZnEolp6o2rqkqkuMKfzk+sRrLR9Dm+QkIwxvg1Tpwpva1Bz1KzlP+mZeTfEHJfqYcRH2cvvCdY0qb37f/Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1781283143; c=relaxed/simple;
-	bh=/SjGO8GfNS/670m9UVV23LT6t08OYkSKEDbinH4DXnI=;
+	bh=v95EqBmqD8bvtDCHu4p8+OxsxIA/K2yD5DT5v/avur4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=UJTc3hMgvDRSS1gi0hVZJMqtnfwME7WCnKSfcyfeq9KuMPFEWJbZbup9ilnPHf91180WAXzbtlOr7K9BS6aqVTkSlYakPoX/ETSLFk7xXwKw0aUvwepHQpUaJME13rEIhTiBi/slqhcgUr1BuW1xKgP2RIwbOO08b4gcZsqp7K4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=chypN7BP; arc=none smtp.client-ip=209.85.221.43
+	 MIME-Version; b=RN7+I/Ebi8HFoJ51wt6gBChEPqSQ4Ax5TNiJE4NO0DN02nAPqQ0LB+0GtqDpYM89p9652C6pWzaV8s7J0++8sQ+o6hkrqIfDhKOGe+itiSeVqfVjubjbtlqpK32lHxaBBdRpFR1eOnMr/wh8CdTuEn1WwBmOTWqdFSvlflYseGM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=LU9kPvwt; arc=none smtp.client-ip=209.85.221.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="chypN7BP"
-Received: by mail-wr1-f43.google.com with SMTP id ffacd0b85a97d-45eea68dd6fso719525f8f.2
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 09:52:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="LU9kPvwt"
+Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-45eee266c6cso1077353f8f.1
+        for <ceph-devel@vger.kernel.org>; Fri, 12 Jun 2026 09:52:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1781283139; x=1781887939; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1781283140; x=1781887940; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=NIgUAPbaBabd2HrM0wuWtfsAmbH9hZzIN1NzDEgYVGQ=;
-        b=chypN7BPn80omgsu6qYyQ2sXMmpZgg+EMf9pjm5FbsiYqoXAMw/9HRPXO2i/Mm9vs2
-         Msbw/BtSVx+hNTP1z/YSFOuQquyfUWy7OzqQly5CYsWmxJqcYw/PcFFl0XMdMZXvHSRE
-         2m2icCUVeeYFHmOOL0Wsh1pgTRETtbLB5zVTA+2xnbmiUasrfDdiq2ikcmNXTIA0zAD0
-         KDarsY0FEAT5JyhiiZAkc5hQ6qFSGpWyB/k/XgMTixvsfnUDyEqQJFGXfv59QYFyvVax
-         I2FzFRc9jOIXgcriVzJCP5k+lDSFwXF0t1doVTbgRJvub9Psnz18V2aHPcjjN4HJPeFC
-         1kNw==
+        bh=3JAFXf3xlSlpOVQjGUTrsX75pZadXaUwrTgQU6I93r0=;
+        b=LU9kPvwtFnMmxVLoKxsOesT0KUaG4IefWw+oUJIyX+2SUPCPkoovtXEG0I9bxkN4/t
+         9fdmzRTxoSnnBtdq7hSsWKMw4FRdK+2tqSpcAXD2fv4+hpLQzRqS3Z/ia7JhG3/G0YfF
+         ABwZyszx2YrSkHq97UccY13anqsviaIUxDFa/0ggRqjNNxHd9iaDUQ4zdRg5TkK7bpYD
+         AD4U/ECkT4SIGAlk31Ea1rIT32IHnm2cOZDO7hjCtOuZ3TVjqynubuJ/NbxAYJqrBvQK
+         GuGlt39VNMZLRevNjF4UcCSI406cZxDD8ENDLnz0izvnCp9Ds/XYcZje3jaWkit59dfy
+         E52w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781283139; x=1781887939;
+        d=1e100.net; s=20251104; t=1781283140; x=1781887940;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=NIgUAPbaBabd2HrM0wuWtfsAmbH9hZzIN1NzDEgYVGQ=;
-        b=UZXmc4gtBr5ceTocpfZn7MqbPOo2s/9bWxwBn0t7gKQ+5YPbd4QDqLqcF/YPrRtehI
-         TNUKcGOMAJL/Do9y3NilN8bpTIXWfWnw2+y5nZD6zMHZ8eih+JpUWiqCM2jb1rI41miC
-         VLFfJ5cESW8N3kOTEEf4NACMNZSdg5qWtcxTicCXEa+1Rm+nu/TP/2d8vjjkhAbPAtXV
-         iDsYvmb6VooBWthTZ3SapG9QOrqGcSEnTA9zxv2g6LR7+j1OJc7Wa5EQIUWR8bmu88/k
-         ZCl/mbgnQ6DGysWwVqobjS7rl6bWl/MfFWirsF7E6SGkxHVJnA4Kt8wHUFo1ISufEkHE
-         QBog==
-X-Forwarded-Encrypted: i=1; AFNElJ+A805GKHVmLEO2IC7Mo1RVOM5pnMoGrlY9AuwkJvADBd8Mdha/UtOq642D4Q7epIiW/1wszUDT0qR4@vger.kernel.org
-X-Gm-Message-State: AOJu0YxuQ4LJmYkt2tAYx3NRz42JCdpqZ4G3CAbp7pzPWoWh+21QzYEE
-	bTLntseCqb4gNwGMh799/FV/1n7VZHGUzFPvQrd5Rd9gCOMohWAaYXbq/xI9HPHIoPE=
-X-Gm-Gg: Acq92OGbLda/CWR1ipoABf4sm3OslnDmDLKAsCr/m9FxTF4Uz4I0Rk22THaPQ/haMx/
-	HO0kGXb/eUSksewjMM3OITYGPeadoue2vtP6euM5MQa4cd+aRUihGwD1yFdVVRfgljKZ0/WJG9K
-	ZcwQAc6ze7P9nNJsa4f9PZwxw9oMxfBvAz9mifYPzgEO1kadYeLq3ijElpHRc5Joc2jKRwz/Zhl
-	tCEtgeIcJ0hZrHi+ouLRioyQnq/FSXjgENQYo+TB5TShuljrtIUgStrjX7txqItuoMKR+jVpUtn
-	FLf5BO0mBX89MhKs5lsOYCUVmrtBqMIr7pvX+Myu+LVGp3nNEnNROu6MzeGXsYYgngVzWuda/sC
-	zKkY1GfeKxvspdkPIRuk+xRa79e18N5l3t8CjOso+wk6Mmo/xUo9ojWj3lhrHAGc0PU7hIRDFYJ
-	4Ap7eWIJApglHrp++mzjtiRQutHyhXUkHlcWV50MrL4tFYWan9SvOoMe7gjwzXgrCUvUy3SQUJm
-	23iTQ7EaWbq9WAoKCymTgOrU44UwrgKOiPgJA==
-X-Received: by 2002:a5d:5d13:0:b0:460:138d:c9b0 with SMTP id ffacd0b85a97d-4606da5a580mr5504565f8f.2.1781283138932;
-        Fri, 12 Jun 2026 09:52:18 -0700 (PDT)
+        bh=3JAFXf3xlSlpOVQjGUTrsX75pZadXaUwrTgQU6I93r0=;
+        b=dFqsIXiwJmUqxWGxMYpDtMcL4hoVlJMlzoco+xWHcN/AYEt/krKpVE7sWuR7arb/nd
+         XV9sLG27lAf97xF2mD/Lc8j8lTTPAibmbQ6g1DI0/a1mugiAFZr3iqJahFtZAgZg0W8h
+         fFzmLMGLrE94vlSQkIAU8eaZSEWC4JajBJTk3DEu0SF0wKtD8pZUVK3WyEKaj+eN1MsX
+         +vekMc19uJ6zpWcRDo7Sxktw+z9T/4HDul7q9H7eMYPUG8nqvVRoLaPgCzWUa5ALKzdm
+         4W1uNLMapnnfgGIg3spFqVFziW5l3B4vATMB7UuJpfWb3z255pDuvRvWXwAJRJv+aIv9
+         TxSA==
+X-Forwarded-Encrypted: i=1; AFNElJ88VgIE7YP7f3syZvYpNgreun2OyxLHlDW6crBCwUnFq5cO9UXiGcUstvn941rvqBqSERkHbfKkDqbj@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw2hRWyqLTKo5CBBmCQB+WPbMWZtxy4pevAYXvYzCzCBHrp9yHT
+	oHKeRbeuYFVt2SYV9rK3rJmQ6yynKuomKJzaG0waaezGDESTY9WSRPeFkfQBKp6TNlU=
+X-Gm-Gg: Acq92OG9e7BOWRiK/42hEGyIz7gIG2Drw6q+iACHqskoIqGKhI81am6xvx7g3lVFuqS
+	fhpJpFzoo3YTw77U3xxr0uHPP5TL6H55P2FVt4MHodfLGgr4QQ69kXir4NOiABDiEEWLDIUL3Uo
+	aMEZenOYWmKtwIiC1VFK1IUcz4A0tF/y147YzLfzz1jpc1oB+KBFtXmytY7lX1TLXgwrGZnaB5p
+	MwM4SFUQHZek7VZzk43Teh5D1j357uaWXgxjIkR5stofdn2muHew8E2RwdSHW5DsQ7a4oAM/jv+
+	K1RiFzU9kOPtnAU3X4avuyL3UL1AZcGAWP7qnOzIutAfJtp63tW0vInwFJmQZgIQowKsHioynO1
+	NZPPRTsaz6RtXyZhyDCkz0rKUIOSEK9g1kWgou9NgGLKRNhmW96PMJrp2WJ4GvUxcK/LIN4u0BJ
+	6XXgjwwq6AgD9qwDzAkuiHzqXKmE8beZ6FNMs6cUXHr3sH61A2haqHGF7r5uEYibyxvCDzEIVoG
+	YI0eSesaO3uLN3qWGlrPMUyr5g=
+X-Received: by 2002:a05:6000:1847:b0:45e:ec18:f207 with SMTP id ffacd0b85a97d-4606db9a69bmr6011120f8f.25.1781283140080;
+        Fri, 12 Jun 2026 09:52:20 -0700 (PDT)
 Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4606f26f1cdsm7807377f8f.11.2026.06.12.09.52.18
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4606f26f1cdsm7807377f8f.11.2026.06.12.09.52.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Jun 2026 09:52:18 -0700 (PDT)
+        Fri, 12 Jun 2026 09:52:19 -0700 (PDT)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: idryomov@gmail.com,
 	amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH 03/12] include/ceph/ceph_fs.h: convert `pool_id` to u32
-Date: Fri, 12 Jun 2026 18:51:55 +0200
-Message-ID: <20260612165204.86137-4-max.kellermann@ionos.com>
+Subject: [PATCH 05/12] fs/ceph/super.h: convert ceph_cap_snap.writing fields to `bool`
+Date: Fri, 12 Jun 2026 18:51:57 +0200
+Message-ID: <20260612165204.86137-6-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260612165204.86137-1-max.kellermann@ionos.com>
 References: <20260612165204.86137-1-max.kellermann@ionos.com>
@@ -79,220 +79,63 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-While the Ceph OSD protocol transmits OSD pool ids as 64 bit integers,
-the MDS protocol is limited to 32 bits.  This is a protocol limitation
-we cannot fix, but it gives us the chance to reduce the struct sizes
-by only using the integer size we really need.
-
-There is one caveat: previously, -1 was used to indicate "invalid pool
-id".  This patch changes this magic value to 0 (i.e. removes the
-special-case code from ceph_file_layout_{from,to}_legacy()).  This is
-fine because on the wire, this magic value is 0, too.
-
-This reduces the size of `struct ceph_inode_info` by 16 bytes (because
-it contains `struct ceph_file_layout` twice, and that struct shrinks
-by 8 bytes; the small pool_id now fits in the existing padding hole).
+This will allow better struct packing.
 
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/addr.c               | 16 ++++++++--------
- fs/ceph/caps.c               |  2 +-
- fs/ceph/inode.c              |  2 +-
- fs/ceph/mds_client.h         |  2 +-
- fs/ceph/util.c               |  8 +-------
- fs/ceph/xattr.c              | 10 +++++-----
- include/linux/ceph/ceph_fs.h |  2 +-
- 7 files changed, 18 insertions(+), 24 deletions(-)
+ fs/ceph/caps.c  | 2 +-
+ fs/ceph/snap.c  | 4 ++--
+ fs/ceph/super.h | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 0a86f672cc09..a11b5c633358 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -2381,7 +2381,7 @@ enum {
- };
- 
- static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
--				s64 pool, struct ceph_string *pool_ns)
-+				u32 pool, struct ceph_string *pool_ns)
- {
- 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(&ci->netfs.inode);
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
-@@ -2420,10 +2420,10 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 		goto out;
- 
- 	if (pool_ns)
--		doutc(cl, "pool %lld ns %.*s no perm cached\n", pool,
-+		doutc(cl, "pool %u ns %.*s no perm cached\n", pool,
- 		      (int)pool_ns->len, pool_ns->str);
- 	else
--		doutc(cl, "pool %lld no perm cached\n", pool);
-+		doutc(cl, "pool %u no perm cached\n", pool);
- 
- 	down_write(&mdsc->pool_perm_rwsem);
- 	p = &mdsc->pool_perm_tree.rb_node;
-@@ -2548,10 +2548,10 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 	if (!err)
- 		err = have;
- 	if (pool_ns)
--		doutc(cl, "pool %lld ns %.*s result = %d\n", pool,
-+		doutc(cl, "pool %u ns %.*s result = %d\n", pool,
- 		      (int)pool_ns->len, pool_ns->str, err);
- 	else
--		doutc(cl, "pool %lld result = %d\n", pool, err);
-+		doutc(cl, "pool %u result = %d\n", pool, err);
- 	return err;
- }
- 
-@@ -2560,7 +2560,7 @@ int ceph_pool_perm_check(struct inode *inode, int need)
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_string *pool_ns;
--	s64 pool;
-+	u32 pool;
- 	int ret, flags;
- 
- 	/* Only need to do this for regular files */
-@@ -2587,11 +2587,11 @@ int ceph_pool_perm_check(struct inode *inode, int need)
- check:
- 	if (flags & CEPH_I_POOL_PERM) {
- 		if ((need & CEPH_CAP_FILE_RD) && !(flags & CEPH_I_POOL_RD)) {
--			doutc(cl, "pool %lld no read perm\n", pool);
-+			doutc(cl, "pool %u no read perm\n", pool);
- 			return -EPERM;
- 		}
- 		if ((need & CEPH_CAP_FILE_WR) && !(flags & CEPH_I_POOL_WR)) {
--			doutc(cl, "pool %lld no write perm\n", pool);
-+			doutc(cl, "pool %u no write perm\n", pool);
- 			return -EPERM;
- 		}
- 		return 0;
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d51454e995a8..cf9916608dc2 100644
+index cf9916608dc2..e50bcb393c8f 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -3638,7 +3638,7 @@ static void handle_cap_grant(struct inode *inode,
+@@ -3288,7 +3288,7 @@ static void __ceph_put_cap_refs(struct ceph_inode_info *ci, int had,
+ 					struct ceph_cap_snap,
+ 					ci_item);
  
- 	if (newcaps & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR)) {
- 		/* file layout may have changed */
--		s64 old_pool = ci->i_layout.pool_id;
-+		u32 old_pool = ci->i_layout.pool_id;
- 		struct ceph_string *old_ns;
- 
- 		ceph_file_layout_from_legacy(&ci->i_layout, &grant->layout);
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 1504b889622c..c26217ed2034 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1175,7 +1175,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 	if (new_version ||
- 	    (new_issued & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))) {
- 		u64 size = le64_to_cpu(info->size);
--		s64 old_pool = ci->i_layout.pool_id;
-+		u32 old_pool = ci->i_layout.pool_id;
- 		struct ceph_string *old_ns;
- 
- 		ceph_file_layout_from_legacy(&ci->i_layout, &info->layout);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 4e6c87f8414c..7b848fdd6f70 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -396,7 +396,7 @@ struct ceph_mds_request {
- struct ceph_pool_perm {
- 	struct rb_node node;
- 	int perm;
--	s64 pool;
-+	u32 pool;
- 	size_t pool_ns_len;
- 	char pool_ns[];
- };
-diff --git a/fs/ceph/util.c b/fs/ceph/util.c
-index 2c34875675bf..5bb40af08b1c 100644
---- a/fs/ceph/util.c
-+++ b/fs/ceph/util.c
-@@ -35,9 +35,6 @@ void ceph_file_layout_from_legacy(struct ceph_file_layout *fl,
- 	fl->stripe_count = le32_to_cpu(legacy->fl_stripe_count);
- 	fl->object_size = le32_to_cpu(legacy->fl_object_size);
- 	fl->pool_id = le32_to_cpu(legacy->fl_pg_pool);
--	if (fl->pool_id == 0 && fl->stripe_unit == 0 &&
--	    fl->stripe_count == 0 && fl->object_size == 0)
--		fl->pool_id = -1;
- }
- 
- void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
-@@ -46,10 +43,7 @@ void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
- 	legacy->fl_stripe_unit = cpu_to_le32(fl->stripe_unit);
- 	legacy->fl_stripe_count = cpu_to_le32(fl->stripe_count);
- 	legacy->fl_object_size = cpu_to_le32(fl->object_size);
--	if (fl->pool_id >= 0)
--		legacy->fl_pg_pool = cpu_to_le32(fl->pool_id);
--	else
--		legacy->fl_pg_pool = 0;
-+	legacy->fl_pg_pool = cpu_to_le32(fl->pool_id);
- }
- 
- int ceph_flags_to_mode(int flags)
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index e773be07f767..9808eb10625d 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -50,7 +50,7 @@ static bool ceph_vxattrcb_layout_exists(struct ceph_inode_info *ci)
- {
- 	struct ceph_file_layout *fl = &ci->i_layout;
- 	return (fl->stripe_unit > 0 || fl->stripe_count > 0 ||
--		fl->object_size > 0 || fl->pool_id >= 0 ||
-+		fl->object_size > 0 || fl->pool_id > 0 ||
- 		rcu_dereference_raw(fl->pool_ns) != NULL);
- }
- 
-@@ -61,7 +61,7 @@ static ssize_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
- 	struct ceph_client *cl = fsc->client;
- 	struct ceph_osd_client *osdc = &fsc->client->osdc;
- 	struct ceph_string *pool_ns;
--	s64 pool = ci->i_layout.pool_id;
-+	u32 pool = ci->i_layout.pool_id;
- 	const char *pool_name;
- 	const char *ns_field = " pool_namespace=";
- 	char buf[128];
-@@ -81,7 +81,7 @@ static ssize_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
- 		total_len = len + strlen(pool_name);
+-		capsnap->writing = 0;
++		capsnap->writing = false;
+ 		if (ceph_try_drop_cap_snap(ci, capsnap))
+ 			/* put the ref held by ceph_queue_cap_snap() */
+ 			put++;
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 52b4c2684f92..6dbc7859ff49 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -521,7 +521,7 @@ static bool has_new_snaps(struct ceph_snap_context *o,
+  * However, if a (sync) write is currently in-progress when we apply
+  * the snapshot, we have to wait until the write succeeds or fails
+  * (and a final size/mtime is known).  In this case the
+- * cap_snap->writing = 1, and is said to be "pending."  When the write
++ * cap_snap->writing = true, and is said to be "pending."  When the write
+  * finishes, we __ceph_finish_cap_snap().
+  *
+  * Caller must hold snap_rwsem for read (i.e., the realm topology won't
+@@ -627,7 +627,7 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
+ 		doutc(cl, "%p %llx.%llx cap_snap %p snapc %p seq %llu used WR,"
+ 		      " now pending\n", inode, ceph_vinop(inode), capsnap,
+ 		      old_snapc, old_snapc->seq);
+-		capsnap->writing = 1;
++		capsnap->writing = true;
  	} else {
- 		len = snprintf(buf, sizeof(buf),
--		"stripe_unit=%u stripe_count=%u object_size=%u pool=%lld",
-+		"stripe_unit=%u stripe_count=%u object_size=%u pool=%u",
- 		ci->i_layout.stripe_unit, ci->i_layout.stripe_count,
- 		ci->i_layout.object_size, pool);
- 		total_len = len;
-@@ -164,7 +164,7 @@ static ssize_t ceph_vxattrcb_layout_pool(struct ceph_inode_info *ci,
- 	ssize_t ret;
- 	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(ci->netfs.inode.i_sb);
- 	struct ceph_osd_client *osdc = &fsc->client->osdc;
--	s64 pool = ci->i_layout.pool_id;
-+	u32 pool = ci->i_layout.pool_id;
- 	const char *pool_name;
- 
- 	down_read(&osdc->lock);
-@@ -174,7 +174,7 @@ static ssize_t ceph_vxattrcb_layout_pool(struct ceph_inode_info *ci,
- 		if (ret <= size)
- 			memcpy(val, pool_name, ret);
- 	} else {
--		ret = ceph_fmt_xattr(val, size, "%lld", pool);
-+		ret = ceph_fmt_xattr(val, size, "%u", pool);
- 	}
- 	up_read(&osdc->lock);
- 	return ret;
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index 69ac3e55a3fe..7faa18493a07 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -69,7 +69,7 @@ struct ceph_file_layout {
- 	u32 stripe_unit;   /* stripe unit, in bytes */
- 	u32 stripe_count;  /* over this many objects */
- 	u32 object_size;   /* until objects are this big */
--	s64 pool_id;        /* rados pool id */
-+	u32 pool_id;        /* rados pool id */
- 	struct ceph_string __rcu *pool_ns; /* rados pool namespace */
- };
- 
+ 		/* note mtime, size NOW. */
+ 		__ceph_finish_cap_snap(ci, capsnap);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 18960a9e735a..505a1552f355 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -269,7 +269,7 @@ struct ceph_cap_snap {
+ 	u64 time_warp_seq;
+ 	u64 truncate_size;
+ 	u32 truncate_seq;
+-	int writing;   /* a sync write is still in progress */
++	bool writing;   /* a sync write is still in progress */
+ 	int dirty_pages;     /* dirty pages awaiting writeback */
+ 	bool inline_data;
+ 	bool need_flush;
 -- 
 2.47.3
 
