@@ -1,86 +1,138 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A8D4369D6F
-	for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2026 12:51:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781614303; cv=none; b=Zq+m1AoEFNguy0UX6cRwHh5TZNAtDPplGewwz2OIzh2KE0IBRJ7lHpW2kMrCOOsgqiWAyx40HXilPlp7P/bjVIXUmvS1xslyuFemBMH6Snx5eGyVx2T0V9jFWfh2eKKpVplnHWLW0imw1cVYRiRvUYRXl7Dff7H0qe86nZ/j2kk=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781614303; c=relaxed/simple;
-	bh=X+SL3SCxfXjKReLDO6t/cz2Tg9ckhBXQW3tanUcnTZg=;
-	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
-	 Content-Type:Date:Message-ID; b=TSfYtd8W0JLs0g/fQ8DmBxX+ey509vjlAb8CR8zOJJ+6Z+Q/fcrG3FDmluj/OM9yMk1TTKL0exqEXo2Tqbh6UEEQJU+0Yh+aDdbPSnotN5TxEUmEqhGlRYJ90Gg++KpY0ZTAMsiRbKIhxUm+EdsVOOIWE6GZWEhR/kBWTjbr+ds=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PN8LTupw; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1831B4508F2
+	for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2026 16:03:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.46
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1781625800; cv=pass; b=TMLecxwyvKBylquG9MGhxDxAxxmcQjplV1UBWdDfKgKiKI6BLpT6qoWlSSYdj+gUIBmLx+aw+82By8mMayoGsvcmqY26gssYIijzLZ+B55eg118wHkdyyvIPajbSg4cUA+gzMS8KCTGSeD90DSVAstFuZB12yOQiypjCL2aeizM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1781625800; c=relaxed/simple;
+	bh=t+swykvqyJO2HMKRiFLDV2DeakAze+aOMxdg22CLth0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Content-Type; b=SXcSWhk9nt+1+7UUnNPs/0uidmJmuMLQW0/ppnxZl9sZBORAzi8wwuTr8qz9FfmXqgPG40Jw9fw2a7OCk13rY6L6xdPGZ8pqGN/i/93MxI+IcTWiq15vLMlqAhccKFkPj4pYRZWYXmFgexv5YGBSYLsZyHUCz6D5OY/F4jjk5Nc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=QWuqesbZ; arc=pass smtp.client-ip=209.85.218.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PN8LTupw"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1781614301;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=2f4COWRiqc1S5CKA80N1C8fgQscr8BG6DIsFW1ivm9s=;
-	b=PN8LTupwfVMIVWCFIgGMpPhzq+b8GU4nr53YR/FoY0o3skfHlgw9u5J+gKtkaX1VHGBuRM
-	vmzNfgcRLzDXQ+HN0YFvIjcX49GlipfZzpemGkoPotlJw6BBRFPbbeR/nzK+z8BEzwnPjS
-	3eC/cGy7LXFKNt3iiiLvZq00Fkouvl4=
-Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-681-Whce7UpKPGSqU5IuIZNo8g-1; Tue,
- 16 Jun 2026 08:51:36 -0400
-X-MC-Unique: Whce7UpKPGSqU5IuIZNo8g-1
-X-Mimecast-MFC-AGG-ID: Whce7UpKPGSqU5IuIZNo8g_1781614293
-Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3E88D19560B3;
-	Tue, 16 Jun 2026 12:51:32 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.44.50.44])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 8D8853008B3E;
-	Tue, 16 Jun 2026 12:51:24 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-	Kingdom.
-	Registered in England and Wales under Company Registration No. 3798903
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <b6b19c84-7734-42ea-b2ec-9ace1f36ad08@chenxiaosong.com>
-References: <b6b19c84-7734-42ea-b2ec-9ace1f36ad08@chenxiaosong.com> <20260616100821.2062304-1-dhowells@redhat.com> <20260616100821.2062304-31-dhowells@redhat.com>
-To: ChenXiaoSong <chenxiaosong@chenxiaosong.com>
-Cc: dhowells@redhat.com, Christian Brauner <christian@brauner.io>,
-    Matthew Wilcox <willy@infradead.org>,
-    Christoph Hellwig <hch@infradead.org>,
-    Paulo Alcantara <pc@manguebit.org>, Jens Axboe <axboe@kernel.dk>,
-    Leon Romanovsky <leon@kernel.org>, Steve French <sfrench@samba.org>,
-    Marc Dionne <marc.dionne@auristor.com>,
-    Eric Van Hensbergen <ericvh@kernel.org>,
-    Dominique Martinet <asmadeus@codewreck.org>,
-    Ilya Dryomov <idryomov@gmail.com>, netfs@lists.linux.dev,
-    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
-    linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-    v9fs@lists.linux.dev, linux-erofs@lists.ozlabs.org,
-    linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4 30/30] CHANGES
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="QWuqesbZ"
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-bec450b950dso681647766b.2
+        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2026 09:03:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1781625797; cv=none;
+        d=google.com; s=arc-20240605;
+        b=k8kGlFXBSRGJy+8iPt9wqj2HFY2XGRMI6Js5W+WBkG4S0w3ygF+D9gP1wqt9Qddj8r
+         IHs9o9kcfS+mygUOYhVsYDKm/pF+BUUbkYsIQ/YuCUjYyM+UIVW1u+DMXeO8rgd5wJFA
+         d37ROiERmuUQq7kI3K28+m6XKEEIrHJyV8RhEqqiiRIJXJ3b/uzuEbK23r4z5xeconzK
+         HmJ/3V0LcjoH5KsAEJyY3nozAY4alaXl6FZQjlOQ7IisTlr47F7Oa2bR+mUN41nMiS5j
+         rWLgG5ZhNDTYLtRaG0wHfkSb2LLPEQFjsZorYN0lS8WT6FDU4+Qqr166NbyaCO7RMEgr
+         wKdw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=nwNbyalYY6VvhSHOu7o9n4a2zJN291WlrYb6S1B22XY=;
+        fh=nOLRziuLvw+Ny7g2CXRgc8UlZN3Yw88OPku+zppOR9Q=;
+        b=h1gW4WUCIny5BUgMv1B1MeMyW+OIjGI1sa+V0bByy2x7w9i1qy7aTlUAKfJNf9JKrF
+         HiIvR3rd23+DQfZYuoY1jVyEzSwxFeAuHGSJBIuebPgKFJ/TMrDp+3xQPv1X6D0BG8/Z
+         x8CyfQemzkTsQcTvIKlLWFH3J/PRUYFpkmyA6Jy0nEgLz2fp2FtgihBkRxdHcMGB3VzH
+         JHqvFX90wCiud3UgQ9GjUXtEP6/d6PsPZ8C6U6Rq2vrxMLsBPKKjOaP2Q+2SeCqGRw4x
+         aAqK4ekAp5RWBfqZz9DXEyNleHDGPD6MP0ZmqxwGtNEkJFX/Va59gAk4qjILqrybL/qw
+         wd0Q==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ionos.com; s=google; t=1781625797; x=1782230597; darn=vger.kernel.org;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=nwNbyalYY6VvhSHOu7o9n4a2zJN291WlrYb6S1B22XY=;
+        b=QWuqesbZ+QWNBvvU0h2shzn2Mmoh4W/+bEmhVTsZKifL+4QyiExmVYhKSZ/UsnDAQw
+         1dmGg5tJz1dnyMgWXyvEVs6NbeldjjA/8sPpKWc6D07fwSinE0tnVafOLaU8fkhk5rnH
+         zEdbLINcs0Zbo+yo31ytKBxH8IbixiKkpvLcxHOKgOw61IrgFpyjbGAtVCv3EEpL63pF
+         YTCzjWNJ+WrjQA9L6RLi2KTSPX16CTV8LYvUk+UI51Gv0Uxo+A6NXQTWxOWPXNPNtXju
+         DaD/FU9ywWVyYyEZdpOBxyVPBzfH1elL0nTNyh+GBkwMf4mCtWzmFjdGC8eIvlMexSux
+         7gDg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1781625797; x=1782230597;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=nwNbyalYY6VvhSHOu7o9n4a2zJN291WlrYb6S1B22XY=;
+        b=Uq5sQHFoFETOEjaxIn1WHvlcCG7TUokWGu/cn3avuRI5IjKEuK3btF+d16V1RzmPCr
+         hMK02sBo4Iytxu0SVSVDWbnLG11hIprn5tF8gTuXaItvecU7EknmyClhZS4Yc0kDN070
+         OYsme1fySiG5pHKT+aErtEJTMkAasLwZpu9j6c+uP5QXhuSZ1QnrF1tWcILCNVV16yIX
+         VOj16fuK5PyRPKmIcX91di3H3ES1lCVgm5sz4sHguQMmjSwcqHb/9U+sAVJfHQjgwoFR
+         GhJADZLJQ9pvyv+q30HzCHPpcSZMPSVrmDdsoS6yQZA9wJ3ywrsd0BiDXXE+HaaMirx9
+         2GPQ==
+X-Forwarded-Encrypted: i=1; AFNElJ8uwFKRCeqBFNasbsBUcUQdsC0SdliTFBW1eEdatHNmLv64I3Nas+vSdCBdIbVkJ6SnsSY5j1AJGbVl@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzq5IH6bh06J9YhvM7dzkSfXXAcR6C3KCRPd0nBmEphQu1DWvqu
+	KIOPYlzg3pe2nkMnVTYS6LnGIMM54K9MI0cq+3z7KE4ZgpNB/s26Hx27RZ18UHF4zx7OdMp0712
+	yR54CGzh2h7YjaDTckjw/hwNmcVzwc0dFTJoB4Xk/kw==
+X-Gm-Gg: Acq92OGCsu7h2CbrKUAk7jPggv9BgPnvz/m6fRIXFimia+ktpLJTfeKk6Ka9iP6LGSZ
+	Sjw1xAQJgO6z4bYJkMMmZTl6ZQuHEK8Dz+DtlilGAMuzWKRHOy5jPI7+gqNS49rxwmA3EaKdCxK
+	BV6FmKt1ddfdC+b7GrOgGewbjs7mpZPvQWM8LZlEIsGcgaWs+Em37LLI4cf3LdDXw8nAQca+iof
+	wQTZebhs1MR3xm9Xs+4IkrdxLxGY6PD1iDXreVWDMdkKEE7lJ2WZgzZv2q1Jevg7IViMyYwy0AU
+	qb4Th9cN/nIOhr8e7ENb4JbpQeQilw/rufHMOvxbs3RdCs8=
+X-Received: by 2002:a17:906:6a22:b0:beb:133d:d2dc with SMTP id
+ a640c23a62f3a-c05a204a013mr25687366b.1.1781625797240; Tue, 16 Jun 2026
+ 09:03:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <2102920.1781614283.1@warthog.procyon.org.uk>
-Date: Tue, 16 Jun 2026 13:51:23 +0100
-Message-ID: <2102921.1781614283@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
+References: <20260612170537.92970-1-max.kellermann@ionos.com> <20260612170537.92970-2-max.kellermann@ionos.com>
+In-Reply-To: <20260612170537.92970-2-max.kellermann@ionos.com>
+From: Max Kellermann <max.kellermann@ionos.com>
+Date: Tue, 16 Jun 2026 18:03:05 +0200
+X-Gm-Features: AVVi8Ce0t9_n3CdSrAob-vHibJ1stEtBwlKpwhK6a_BkgLak9ydvT3pDii69ip4
+Message-ID: <CAKPOu+8q9wsr1Z+eQMv-yBVnFEELZoeqpfqjGOtDR-Jyg4ffsg@mail.gmail.com>
+Subject: Re: [PATCH 2/3] fs/ceph/caps: mark cap remove with RB_CLEAR_NODE()
+ instead of ci=NULL
+To: idryomov@gmail.com, amarkuze@redhat.com, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-ChenXiaoSong <chenxiaosong@chenxiaosong.com> wrote:
+On Fri, Jun 12, 2026 at 7:05=E2=80=AFPM Max Kellermann <max.kellermann@iono=
+s.com> wrote:
+> @@ -1142,6 +1142,7 @@ static void __ceph_remove_cap(struct ceph_cap *cap,=
+ bool queue_release)
+>
+>         /* remove from inode's cap rbtree, and clear auth cap */
+>         rb_erase(&cap->ci_node, &ci->i_caps);
+> +       RB_CLEAR_NODE(&cap->ci_node);
+>         if (ci->i_auth_cap =3D=3D cap)
+>                 ci->i_auth_cap =3D NULL;
+>
+> @@ -1158,8 +1159,6 @@ static void __ceph_remove_cap(struct ceph_cap *cap,=
+ bool queue_release)
+>                 cap->session =3D NULL;
+>                 removed =3D 1;
+>         }
+> -       /* protect backpointer with s_cap_lock: see iterate_session_caps =
+*/
+> -       cap->ci =3D NULL;
 
-> Is this patch missing the subject and commit message?
+Don't merge this patch; while writing follow-up optimizations, I found
+out that this causes a data race because clearing cap->ci_node is no
+longer protected by s_cap_lock.
 
-No.  I got distracted and forgot to finish folding its contents down into
-earlier patches.
+Modifying this "cap removed" marker requires holding BOTH
+ci->i_ceph_lock and session->s_cap_lock. The existing code comment
+(which I ignored & removed, ugh!) is not sufficient.
+(And setting the marker is really only necessary if
+session->s_cap_iterator=3D=3Dcap.)
 
-David
+I will eventually post v2 without this bug. And with more
+documentation on the locking semantics.
 
+--=20
+Max Kellermann
+Principal Architect
+Hosting Technology
+
+cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
+General information about the company can be found here:
+https://www.cm4all.com/impressum
+A member of the IONOS Group
