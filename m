@@ -1,138 +1,243 @@
-Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1831B4508F2
-	for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2026 16:03:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.46
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781625800; cv=pass; b=TMLecxwyvKBylquG9MGhxDxAxxmcQjplV1UBWdDfKgKiKI6BLpT6qoWlSSYdj+gUIBmLx+aw+82By8mMayoGsvcmqY26gssYIijzLZ+B55eg118wHkdyyvIPajbSg4cUA+gzMS8KCTGSeD90DSVAstFuZB12yOQiypjCL2aeizM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781625800; c=relaxed/simple;
-	bh=t+swykvqyJO2HMKRiFLDV2DeakAze+aOMxdg22CLth0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Content-Type; b=SXcSWhk9nt+1+7UUnNPs/0uidmJmuMLQW0/ppnxZl9sZBORAzi8wwuTr8qz9FfmXqgPG40Jw9fw2a7OCk13rY6L6xdPGZ8pqGN/i/93MxI+IcTWiq15vLMlqAhccKFkPj4pYRZWYXmFgexv5YGBSYLsZyHUCz6D5OY/F4jjk5Nc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=QWuqesbZ; arc=pass smtp.client-ip=209.85.218.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A4B91C862F
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Jun 2026 14:59:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1781708397; cv=none; b=QGt82CgCtO100AOQNvJVCAxQhhDfKf+Wi1rByI2RHa4XUiuLssGx6qUkpD46EqeWY7eMoFOle4XuaaZGecN2IolnoaLS1XG6CJzaZLzNFwTHZ9tb0Akp7pIZl3VwUTFDtoZY3MEoYD2ws6JwccS64cu9+K1B453blUaAXaxcoyE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1781708397; c=relaxed/simple;
+	bh=l9AhsV9yqBDjSTP7uRc4DYYWN3E3nRHzJfTk4CTlsNo=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=mQ70j+mq6/V8hpLYn35gCsXIjT+lpaocv5QMqG/ive6UXAQy3hERPCzj+YY1fj1VOlqJCZsfp3nbA0LfNVvMTQ+VH+KF5XMtWe6XAxNYMXB44/PlVyfQbRNhIlvkWvLt9TXNH5ns3sCnj1EFX7pkhc1/isDRhSA1U52VSJwy0ys=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZTer8Tm2; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=OYThnA3G; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="QWuqesbZ"
-Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-bec450b950dso681647766b.2
-        for <ceph-devel@vger.kernel.org>; Tue, 16 Jun 2026 09:03:18 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1781625797; cv=none;
-        d=google.com; s=arc-20240605;
-        b=k8kGlFXBSRGJy+8iPt9wqj2HFY2XGRMI6Js5W+WBkG4S0w3ygF+D9gP1wqt9Qddj8r
-         IHs9o9kcfS+mygUOYhVsYDKm/pF+BUUbkYsIQ/YuCUjYyM+UIVW1u+DMXeO8rgd5wJFA
-         d37ROiERmuUQq7kI3K28+m6XKEEIrHJyV8RhEqqiiRIJXJ3b/uzuEbK23r4z5xeconzK
-         HmJ/3V0LcjoH5KsAEJyY3nozAY4alaXl6FZQjlOQ7IisTlr47F7Oa2bR+mUN41nMiS5j
-         rWLgG5ZhNDTYLtRaG0wHfkSb2LLPEQFjsZorYN0lS8WT6FDU4+Qqr166NbyaCO7RMEgr
-         wKdw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=nwNbyalYY6VvhSHOu7o9n4a2zJN291WlrYb6S1B22XY=;
-        fh=nOLRziuLvw+Ny7g2CXRgc8UlZN3Yw88OPku+zppOR9Q=;
-        b=h1gW4WUCIny5BUgMv1B1MeMyW+OIjGI1sa+V0bByy2x7w9i1qy7aTlUAKfJNf9JKrF
-         HiIvR3rd23+DQfZYuoY1jVyEzSwxFeAuHGSJBIuebPgKFJ/TMrDp+3xQPv1X6D0BG8/Z
-         x8CyfQemzkTsQcTvIKlLWFH3J/PRUYFpkmyA6Jy0nEgLz2fp2FtgihBkRxdHcMGB3VzH
-         JHqvFX90wCiud3UgQ9GjUXtEP6/d6PsPZ8C6U6Rq2vrxMLsBPKKjOaP2Q+2SeCqGRw4x
-         aAqK4ekAp5RWBfqZz9DXEyNleHDGPD6MP0ZmqxwGtNEkJFX/Va59gAk4qjILqrybL/qw
-         wd0Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZTer8Tm2";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="OYThnA3G"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1781708394;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=70vVlKIsy87sxz5mEsRlgPKPwqXbZgi9qwntFNo5UWY=;
+	b=ZTer8Tm2wxhRwgjLsVKl6r9baIVMQbjgl2VB6D9PhZ5cs7CNTgj3fcMuwkJkWsnJY0UoPc
+	Hpq84khMHPshGzhWcvcpgZU//+8eHd9H07Bmj3z0Og9soOgYCTNI3YYI0ZBqrTMURfj1Kq
+	+U4eSEVwOf4d2OLcjRp51NA2TKTWw5U=
+Received: from mail-ot1-f69.google.com (mail-ot1-f69.google.com
+ [209.85.210.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-493-6SyN3mXPN7WrvzOtfsVnaA-1; Wed, 17 Jun 2026 10:59:53 -0400
+X-MC-Unique: 6SyN3mXPN7WrvzOtfsVnaA-1
+X-Mimecast-MFC-AGG-ID: 6SyN3mXPN7WrvzOtfsVnaA_1781708392
+Received: by mail-ot1-f69.google.com with SMTP id 46e09a7af769-7e6c8a160c4so11753496a34.1
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Jun 2026 07:59:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1781625797; x=1782230597; darn=vger.kernel.org;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nwNbyalYY6VvhSHOu7o9n4a2zJN291WlrYb6S1B22XY=;
-        b=QWuqesbZ+QWNBvvU0h2shzn2Mmoh4W/+bEmhVTsZKifL+4QyiExmVYhKSZ/UsnDAQw
-         1dmGg5tJz1dnyMgWXyvEVs6NbeldjjA/8sPpKWc6D07fwSinE0tnVafOLaU8fkhk5rnH
-         zEdbLINcs0Zbo+yo31ytKBxH8IbixiKkpvLcxHOKgOw61IrgFpyjbGAtVCv3EEpL63pF
-         YTCzjWNJ+WrjQA9L6RLi2KTSPX16CTV8LYvUk+UI51Gv0Uxo+A6NXQTWxOWPXNPNtXju
-         DaD/FU9ywWVyYyEZdpOBxyVPBzfH1elL0nTNyh+GBkwMf4mCtWzmFjdGC8eIvlMexSux
-         7gDg==
+        d=redhat.com; s=google; t=1781708392; x=1782313192; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=70vVlKIsy87sxz5mEsRlgPKPwqXbZgi9qwntFNo5UWY=;
+        b=OYThnA3GNWAM66gpJYbi8MgmWFTqUopr+iEh566xb4stMZT+BWq1ZNgRjidgafHnVD
+         RdA608YBZy3IiRO0v9XPsaMraczZwNGUpsOVP5VF5jG2ixd5yIYhAirpk8r60o3iCwyt
+         zzJOGc2cDCRj6g4Dnv4rZZeDmk6V5ZA0RAYVNY0x/qXcZVd12zh6HEeyljy+91ACkQh6
+         YSc5Bmnb4apJtF1EpEIma3XVYehPDVRo3K/mZYoF8uGd4hopbDIgm4w8//xvVxRIvZHj
+         C1jqYZevPqU6dheBoQ18SAe+xA9BMlPPHk8xsRyzuUAdoDI5Pp3WFTN/qobZJUSImACi
+         64UA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781625797; x=1782230597;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=nwNbyalYY6VvhSHOu7o9n4a2zJN291WlrYb6S1B22XY=;
-        b=Uq5sQHFoFETOEjaxIn1WHvlcCG7TUokWGu/cn3avuRI5IjKEuK3btF+d16V1RzmPCr
-         hMK02sBo4Iytxu0SVSVDWbnLG11hIprn5tF8gTuXaItvecU7EknmyClhZS4Yc0kDN070
-         OYsme1fySiG5pHKT+aErtEJTMkAasLwZpu9j6c+uP5QXhuSZ1QnrF1tWcILCNVV16yIX
-         VOj16fuK5PyRPKmIcX91di3H3ES1lCVgm5sz4sHguQMmjSwcqHb/9U+sAVJfHQjgwoFR
-         GhJADZLJQ9pvyv+q30HzCHPpcSZMPSVrmDdsoS6yQZA9wJ3ywrsd0BiDXXE+HaaMirx9
-         2GPQ==
-X-Forwarded-Encrypted: i=1; AFNElJ8uwFKRCeqBFNasbsBUcUQdsC0SdliTFBW1eEdatHNmLv64I3Nas+vSdCBdIbVkJ6SnsSY5j1AJGbVl@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzq5IH6bh06J9YhvM7dzkSfXXAcR6C3KCRPd0nBmEphQu1DWvqu
-	KIOPYlzg3pe2nkMnVTYS6LnGIMM54K9MI0cq+3z7KE4ZgpNB/s26Hx27RZ18UHF4zx7OdMp0712
-	yR54CGzh2h7YjaDTckjw/hwNmcVzwc0dFTJoB4Xk/kw==
-X-Gm-Gg: Acq92OGCsu7h2CbrKUAk7jPggv9BgPnvz/m6fRIXFimia+ktpLJTfeKk6Ka9iP6LGSZ
-	Sjw1xAQJgO6z4bYJkMMmZTl6ZQuHEK8Dz+DtlilGAMuzWKRHOy5jPI7+gqNS49rxwmA3EaKdCxK
-	BV6FmKt1ddfdC+b7GrOgGewbjs7mpZPvQWM8LZlEIsGcgaWs+Em37LLI4cf3LdDXw8nAQca+iof
-	wQTZebhs1MR3xm9Xs+4IkrdxLxGY6PD1iDXreVWDMdkKEE7lJ2WZgzZv2q1Jevg7IViMyYwy0AU
-	qb4Th9cN/nIOhr8e7ENb4JbpQeQilw/rufHMOvxbs3RdCs8=
-X-Received: by 2002:a17:906:6a22:b0:beb:133d:d2dc with SMTP id
- a640c23a62f3a-c05a204a013mr25687366b.1.1781625797240; Tue, 16 Jun 2026
- 09:03:17 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1781708392; x=1782313192;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=70vVlKIsy87sxz5mEsRlgPKPwqXbZgi9qwntFNo5UWY=;
+        b=UGlHg2qBf2oM/Zum8HiiYzFH117EGgox82bq7wRZf6VqF/UrICas5tDVnmxZEDfzLx
+         SIFeI47osX8l2EeZI1tj8bh058BzC9xjEGn8m3Sj7gYSFM/A7Tz4SOPUSMZRXhd5kC5W
+         migsACRwdygVSTvwisgTejw/R48ZnK7VR6i4TJnAX7/wPZbBpp0Mdww5w/wwMjJ4veJ/
+         RJKz/r+MbgyCJK8H/p+sT5ybjTVUtl9P8d7G8fZwP5OLQ+qD7Dji84Zbt+rCnl/ddbNC
+         9VcPas0NsGKRenL6emPLQyGWnYv4DFMDtqjdElgPjaYxSemF568OvWm+IU+Hy2wzzmqo
+         RP3Q==
+X-Gm-Message-State: AOJu0YzlDyvg0zv0lyh7gtspYopuR8T16130IP22Cf1m8d6gqljo0XyP
+	EEiWhQf2yrPiUtxeUrU2bKhM9xXV3jRvPQG7MbTmLhCHHY1pH0Dn5xQ6U0fk+mbT0xW8ZRP9Nsw
+	tNfRFwTLZVK9OsmO1WemnKbdkEUoMaYbfQ6PLP6ZzCOB3ox8G1DC8mf9lOdgprQsdtoyXzcaqqW
+	kME/HYLLyq/oAzozEcGs2J5D9FcygoHjyRxdsQm56LNcO2ahw=
+X-Gm-Gg: Acq92OEG0phnvWm2btx0Vza0CgsWgZEBcqZuJc3xd2jgbjBS9IqmTpFPMw5fasspb+W
+	nQPn8P+kOPpeV0ux4CbwU4R0oET1mGr8P2KIBO6tC+0s0PmGCbE1zaBds46ll/BlI06GienP22h
+	8+dOanXutOhRPr6wGwT17naR+CfxqAqJZ2gsVA2lpkN5Ks7yhF9dx2+XFC+M5LW7OKZOtnLWRRW
+	qZuF4dWPhXi0P1xwpsuR9FQjPqu6P91HihxNMXTLTTrd9AfJkVOTcdzSIiXfDuZh+Xwk1q2043u
+	mKcwJsoTTa8Opy/tMi0FCktdzrnSK25rGHX73bQclLhnRzhJJU3668gOJfD9lNT1i5XWX7Eszxu
+	sW3afuGgw463sb8WHzcTso3lMsO5kdYYImJSjFotyL+X1
+X-Received: by 2002:a05:6830:3886:b0:7e6:e453:25b6 with SMTP id 46e09a7af769-7e90c5bab2amr4040466a34.6.1781708392339;
+        Wed, 17 Jun 2026 07:59:52 -0700 (PDT)
+X-Received: by 2002:a05:6830:3886:b0:7e6:e453:25b6 with SMTP id 46e09a7af769-7e90c5bab2amr4040424a34.6.1781708391744;
+        Wed, 17 Jun 2026 07:59:51 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7e79f5a12e4sm10101847a34.6.2026.06.17.07.59.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 17 Jun 2026 07:59:51 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	slava@dubeyko.com,
+	linux-kernel@vger.kernel.org,
+	Alex Markuze <amarkuze@redhat.com>
+Subject: [PATCH 00/15] ceph: add binary logging (BLOG) for CephFS
+Date: Wed, 17 Jun 2026 14:59:30 +0000
+Message-Id: <20260617145945.1912736-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260612170537.92970-1-max.kellermann@ionos.com> <20260612170537.92970-2-max.kellermann@ionos.com>
-In-Reply-To: <20260612170537.92970-2-max.kellermann@ionos.com>
-From: Max Kellermann <max.kellermann@ionos.com>
-Date: Tue, 16 Jun 2026 18:03:05 +0200
-X-Gm-Features: AVVi8Ce0t9_n3CdSrAob-vHibJ1stEtBwlKpwhK6a_BkgLak9ydvT3pDii69ip4
-Message-ID: <CAKPOu+8q9wsr1Z+eQMv-yBVnFEELZoeqpfqjGOtDR-Jyg4ffsg@mail.gmail.com>
-Subject: Re: [PATCH 2/3] fs/ceph/caps: mark cap remove with RB_CLEAR_NODE()
- instead of ci=NULL
-To: idryomov@gmail.com, amarkuze@redhat.com, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jun 12, 2026 at 7:05=E2=80=AFPM Max Kellermann <max.kellermann@iono=
-s.com> wrote:
-> @@ -1142,6 +1142,7 @@ static void __ceph_remove_cap(struct ceph_cap *cap,=
- bool queue_release)
->
->         /* remove from inode's cap rbtree, and clear auth cap */
->         rb_erase(&cap->ci_node, &ci->i_caps);
-> +       RB_CLEAR_NODE(&cap->ci_node);
->         if (ci->i_auth_cap =3D=3D cap)
->                 ci->i_auth_cap =3D NULL;
->
-> @@ -1158,8 +1159,6 @@ static void __ceph_remove_cap(struct ceph_cap *cap,=
- bool queue_release)
->                 cap->session =3D NULL;
->                 removed =3D 1;
->         }
-> -       /* protect backpointer with s_cap_lock: see iterate_session_caps =
-*/
-> -       cap->ci =3D NULL;
+This series adds a binary logging subsystem for the CephFS kernel
+client.  On hot I/O paths every dout() call formats a printk-style
+string even when nobody is reading the log.  BLOG sidesteps that cost
+by storing compact binary records keyed by a source-ID; the records
+are decoded offline or via debugfs.
 
-Don't merge this patch; while writing follow-up optimizations, I found
-out that this causes a data race because clearing cap->ci_node is no
-longer protected by s_cap_lock.
+All new code lives under fs/ceph/ and include/linux/ceph/.  There
+are no changes outside the Ceph subsystem apart from the kselftests.
 
-Modifying this "cap removed" marker requires holding BOTH
-ci->i_ceph_lock and session->s_cap_lock. The existing code comment
-(which I ignored & removed, ugh!) is not sufficient.
-(And setting the marker is really only necessary if
-session->s_cap_iterator=3D=3Dcap.)
+Design
+------
 
-I will eventually post v2 without this bug. And with more
-documentation on the locking semantics.
+Allocation.  A page-fragment allocator hands out buffer slices without
+taking any global lock.  Freed fragments are recycled through per-CPU
+magazine batches so the common-case log path is allocation-free.
+Filesystem-reachable allocation uses GFP_NOFS to avoid reclaim
+recursion.
 
---=20
-Max Kellermann
-Principal Architect
-Hosting Technology
+Source-ID caching.  Each (file, func, line, fmt) tuple is registered
+once in a per-logger rhashtable and assigned a u32 source-ID.  A
+per-callsite cache with smp_store_release / smp_load_acquire avoids
+the rhashtable lookup after the first hit.  A generation counter on
+the logger prevents stale cache hits across mount/unmount cycles.
 
-cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
-General information about the company can be found here:
-https://www.cm4all.com/impressum
-A member of the IONOS Group
+Per-superblock ownership.  Every mounted CephFS instance (including
+-o noshare mounts) gets its own blog_module_context, so enable/disable
+and debugfs are fully isolated between mounts.
+
+Context propagation.  ceph_blog_enter() stashes the owning
+ceph_fs_client and an optional mds_request pointer in a
+ceph_journal_info that lives in current->journal_info.  Nested VFS
+re-entry inherits the context only when the owning fsc matches,
+preventing cross-mount leaks.  Task pointers used as hash keys are
+not pinned; stale entries are retired lazily via PID-mismatch
+detection on reuse.
+
+debugfs.  Per-superblock files appear under
+  /sys/kernel/debug/ceph/<fsid>/blog/{entries,stats,sources,clients}
+plus a bool "enable" knob and a write-only "clear" trigger.
+
+Logging macros.  bout() and boutc() are drop-in replacements for
+dout() and doutc(), gated on fsc->blog_enabled.  The serializer
+supports all kernel printf specifiers used by Ceph debug logs
+including %o.
+
+Patch breakdown
+---------------
+
+  01-06  BLOG infrastructure, one patch per compilation unit:
+         headers, deserializer, pagefrag allocator, magazine batcher,
+         logger core, per-module context manager.
+
+  07     Ceph BLOG scaffolding -- ceph_blog.h, blog_client.c,
+         super.h / libceph.h additions, Makefile wiring.
+
+  08     bout/boutc macro definitions in ceph_debug.h.
+
+  09     MDS request plumbing -- switch __do_request() to
+         ceph_blog_enter() / ceph_blog_exit().
+
+  10     debugfs interface -- blog_debugfs.c and lifecycle hooks.
+
+  11-14  Callsite conversions -- dout/doutc -> bout/boutc, grouped
+         by subsystem: inodes+dirs, data I/O, caps+snaps, helpers.
+
+  15     Selftests and MAINTAINERS update.
+
+Alex Markuze (15):
+  ceph: add BLOG public headers
+  ceph: add BLOG deserialization support
+  ceph: add BLOG page-fragment allocator
+  ceph: add BLOG magazine batch allocator
+  ceph: add BLOG logger core
+  ceph: add BLOG per-module context management
+  ceph: add Ceph BLOG scaffolding
+  ceph: add bout and boutc wrappers for BLOG
+  ceph: switch MDS request plumbing to struct ceph_journal_info
+  ceph: add BLOG debugfs interface
+  ceph: convert VFS inode and directory paths to bout
+  ceph: convert VFS data I/O paths to bout
+  ceph: convert capability and snapshot paths to bout
+  ceph: convert remaining helper paths to bout
+  selftests: add Ceph BLOG smoke test and collection helpers
+
+ MAINTAINERS                                   |   1 +
+ fs/ceph/Makefile                              |   6 +
+ fs/ceph/addr.c                                | 168 ++---
+ fs/ceph/blog_batch.c                          | 312 ++++++++++
+ fs/ceph/blog_client.c                         | 266 ++++++++
+ fs/ceph/blog_core.c                           | 424 +++++++++++++
+ fs/ceph/blog_debugfs.c                        | 434 +++++++++++++
+ fs/ceph/blog_des.c                            | 342 ++++++++++
+ fs/ceph/blog_module.c                         | 584 ++++++++++++++++++
+ fs/ceph/blog_pagefrag.c                       |  95 +++
+ fs/ceph/caps.c                                | 252 ++++----
+ fs/ceph/crypto.c                              |  14 +-
+ fs/ceph/debugfs.c                             |  23 +-
+ fs/ceph/dir.c                                 | 290 ++++++---
+ fs/ceph/export.c                              |  83 ++-
+ fs/ceph/file.c                                | 274 +++++---
+ fs/ceph/inode.c                               | 233 ++++---
+ fs/ceph/ioctl.c                               |   6 +-
+ fs/ceph/locks.c                               |  66 +-
+ fs/ceph/mds_client.c                          | 293 ++++-----
+ fs/ceph/mdsmap.c                              |   8 +-
+ fs/ceph/quota.c                               |   2 +-
+ fs/ceph/snap.c                                |  66 +-
+ fs/ceph/super.c                               |  58 +-
+ fs/ceph/super.h                               |   5 +
+ fs/ceph/xattr.c                               |  88 ++-
+ include/linux/ceph/blog.h                     |   0
+ include/linux/ceph/blog_batch.h               |   0
+ include/linux/ceph/blog_des.h                 |   0
+ include/linux/ceph/blog_module.h              |   0
+ include/linux/ceph/blog_pagefrag.h            |   0
+ include/linux/ceph/blog_ser.h                 |   0
+ include/linux/ceph/ceph_blog.h                | 284 +++++++++
+ include/linux/ceph/ceph_debug.h               |  44 +-
+ include/linux/ceph/libceph.h                  |   2 +
+ tools/testing/selftests/Makefile              |   1 +
+ tools/testing/selftests/ceph_blog/Makefile    |   7 +
+ .../selftests/ceph_blog/blog_analyze.sh       | 124 ++++
+ .../selftests/ceph_blog/blog_collect.sh       | 116 ++++
+ .../selftests/ceph_blog/blog_smoke_test.sh    | 363 +++++++++++
+ tools/testing/selftests/ceph_blog/config      |   2 +
+ 41 files changed, 4583 insertions(+), 753 deletions(-)
+ create mode 100644 fs/ceph/blog_batch.c
+ create mode 100644 fs/ceph/blog_client.c
+ create mode 100644 fs/ceph/blog_core.c
+ create mode 100644 fs/ceph/blog_debugfs.c
+ create mode 100644 fs/ceph/blog_des.c
+ create mode 100644 fs/ceph/blog_module.c
+ create mode 100644 fs/ceph/blog_pagefrag.c
+ create mode 100644 include/linux/ceph/blog.h
+ create mode 100644 include/linux/ceph/blog_batch.h
+ create mode 100644 include/linux/ceph/blog_des.h
+ create mode 100644 include/linux/ceph/blog_module.h
+ create mode 100644 include/linux/ceph/blog_pagefrag.h
+ create mode 100644 include/linux/ceph/blog_ser.h
+ create mode 100644 include/linux/ceph/ceph_blog.h
+ create mode 100644 tools/testing/selftests/ceph_blog/Makefile
+ create mode 100644 tools/testing/selftests/ceph_blog/blog_analyze.sh
+ create mode 100644 tools/testing/selftests/ceph_blog/blog_collect.sh
+ create mode 100644 tools/testing/selftests/ceph_blog/blog_smoke_test.sh
+ create mode 100644 tools/testing/selftests/ceph_blog/config
+
+-- 
+2.34.1
+
