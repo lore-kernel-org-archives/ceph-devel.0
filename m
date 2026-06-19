@@ -1,45 +1,47 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3F9933121C
-	for <ceph-devel@vger.kernel.org>; Fri, 19 Jun 2026 14:06:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1F3333121C
+	for <ceph-devel@vger.kernel.org>; Fri, 19 Jun 2026 14:07:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781878022; cv=none; b=keqA3yLTc496d220bhy+S8Bn5gymu/AMPsm0IjXSDOM7PgjI9/jxRTNMvlRL6XCI88oltwRe3I4WDhif66/bNl+igC6Zb7auKI1RGCOwA1xdIbCK6sXpOOngh/dQFI43pN2PuNOuzlpIEioVbz5g/iTzszBdFHysF0+kqQAylKU=
+	t=1781878026; cv=none; b=ZY1wykmO5A7WK2NUD+YYO1V3bk37nPc908lua9A7eptDXw5PCOJGiF4c4UqtDcqjw+nnroGgGTyOAwWjPqFyL5zKqnSOnWsV5nLc8rnarPKK6DeYWdpk/ig+ujwwgkekMYUBOKzFgzBFEIxfZa5pBNSnYw7nHLWr4cRZIJ8IFK0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781878022; c=relaxed/simple;
-	bh=90/tqKQLg5Mw54cQk0/epqqZmZVhh6jha/RrCAxKEmI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=b0m3IfnM3zHMEn+obh3ttfhEPdW8PnFt1iCWAui0hhrgYn1QYqD4irvYM2eMd4OVyFFjS9ntrXWHUxrvHd5VlcojJEDIEc5ZMXkegt/DYj5diAISVK9cF+4t5sOmEgHvMdhK6xUP4izKLQylzmwsQqRmdXNum4YBfFn4/XfSEWM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Q5N9CsYN; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1781878026; c=relaxed/simple;
+	bh=zCd/iNdBzMzBN8CIod7ZZV56ICy+rSCXqOJZZvgRkeg=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=ZuSX9jhqAljnxHQ9YFEgdoEApKZKXFbeyB5+xobQ5l4jM+yFh3YoN9FGJvBYcEiQYz3j0e1POfDm3X7jjEZY/p2uZ5l9+mM54cOUY2zSAz/4SbQSYcPmfDxi0o9kCeSwvACxhe2kFIcw644yw+qFO+XCXW1EztRGT213ZJGNn84=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HXGENXNA; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Q5N9CsYN"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HXGENXNA"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1781878019;
+	s=mimecast20190719; t=1781878024;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=Qw58C1XrBetXfQP/iSYx++FDGmKpgIeMlOWrQbDiOFQ=;
-	b=Q5N9CsYNja7N7iu8H/gz/sP9hB7Avky1zpOlm1S0gHKXj4VApyLg6kSdRqnbFj7ptDg0jv
-	XZLNYyQOkNa7k2LDtY3/EOT+LzxCv+5ssZG/v/v9WzxZPTSxMQHcRHg/gssjLXw/XObGyZ
-	GVhXvmdSwIzfBGSVOwJVA7XhxkjPxw8=
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=aRFmJ/J1AuXTPRw4YdoDWjljqrX4pDv27mJgEf6FBEw=;
+	b=HXGENXNA6xaj+Vb9UAkmVsk7nMJ5LDuFe+fEVsjhP05YaaKfYaSHPQ5J30yVhXNkVmrfJD
+	XM0H9CfGEkFKD3UvLcirZpDNzaUw/tZ/g23UdY3OF4lXlpTXp1Rr0Qoi6vltAren+3lT/j
+	x+JAcpoQIpVhcHONTQx4pvN36R9nMRw=
 Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-686-47LyOxksMpSU6sTHtNAPtQ-1; Fri,
- 19 Jun 2026 10:06:55 -0400
-X-MC-Unique: 47LyOxksMpSU6sTHtNAPtQ-1
-X-Mimecast-MFC-AGG-ID: 47LyOxksMpSU6sTHtNAPtQ_1781878014
-Received: from mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.95])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-90-XNnIvtsgNNWaUj3aGHB0sA-1; Fri,
+ 19 Jun 2026 10:07:00 -0400
+X-MC-Unique: XNnIvtsgNNWaUj3aGHB0sA-1
+X-Mimecast-MFC-AGG-ID: XNnIvtsgNNWaUj3aGHB0sA_1781878018
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 858B21955D71;
-	Fri, 19 Jun 2026 14:06:53 +0000 (UTC)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 2FB611955D71;
+	Fri, 19 Jun 2026 14:06:58 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.50.44])
-	by mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 54E531766;
-	Fri, 19 Jun 2026 14:06:49 +0000 (UTC)
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 2B71B195608C;
+	Fri, 19 Jun 2026 14:06:54 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -49,10 +51,13 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-cifs@vger.kernel.org,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH 00/11] netfs: Miscellaneous fixes
-Date: Fri, 19 Jun 2026 15:06:04 +0100
-Message-ID: <20260619140646.2633762-1-dhowells@redhat.com>
+	linux-kernel@vger.kernel.org,
+	Marc Dionne <marc.dionne@auristor.com>
+Subject: [PATCH 01/11] netfs: Fix decision whether to disallow write-streaming due to fscache use
+Date: Fri, 19 Jun 2026 15:06:05 +0100
+Message-ID: <20260619140646.2633762-2-dhowells@redhat.com>
+In-Reply-To: <20260619140646.2633762-1-dhowells@redhat.com>
+References: <20260619140646.2633762-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -60,87 +65,78 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.6 on 10.30.177.95
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-Hi Christian,
+netfs_perform_write() buffers data by writing it into the pagecache for
+later writeback.  If the folio it wants to write to isn't present, it uses
+"write streaming" in which is will store partial data in a non-uptodate,
+but dirty folio.
 
-Here are some miscellaneous fixes for netfslib.  I separated them from my
-netfs-next branch.  Various Sashiko review comments[1][2] are addressed:
+However, when fscache is in use, this is a potential problem as writes to
+the cache have to be aligned to the cache backend's DIO granularity, and so
+netfs_perform_write() attempts to suppress write-streaming in such a case,
+requiring the folio content to be fetched first unless the entire folio is
+going to be overwritten.  This allows the content to be written to the
+cache too.
 
- (1) Fix the decision whether to disallow write-streaming due to fscache
-     use.
+Unfortunately, the test netfs_perform_write() uses isn't correct because it
+doesn't take into account the fact that the object lookup is asynchronous
+and farmed off to a work queue, so there's a short window in which the
+cache is doing a lookup but the test fails because the answer is undefined.
 
- (2) Fix a double fput in cachefiles_create_tmpfile().
+This can be triggered by the generic/464 xfstest, and causes a warning to
+be emitted in cachefiles (in code not yet upstream) because it sees a write
+that doesn't have its bounds rounded out to DIO alignment.
 
- (3) Fix alteration of S_KERNEL_FILE inode flag without holding inode lock.
+Fix this by changing the condition to whether FSCACHE_COOKIE_IS_CACHING is
+set on a cookie rather than whether the cookie is marked enabled.  Note
+that this is really just a hint as to whether we allow write streaming or
+not and no other aspects of the cookie or cache object are accessed.
 
- (4) Fix a potential mathematical underflow in
-     iov_iter_extract_xarray_pages() and make it return 0 and free the
-     array if no pages could be extracted.
+Reported-by: Marc Dionne <marc.dionne@auristor.com>
+cc: David Howells <dhowells@redhat.com>
+cc: Paulo Alcantara <pc@manguebit.org>
+cc: netfs@lists.linux.dev
+cc: linux-fsdevel@vger.kernel.org
+---
+ fs/netfs/buffered_write.c |  2 +-
+ fs/netfs/internal.h       | 12 ++++++++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
 
- (5) Fix a missing alloc failure check in iov_iter_extract_bvec_pages().
-
- (6) Fix iov_iter_extract_user_pages() so that it doesn't leak the pages
-     array if it returns an error or 0 (inasmuch as the leak is really in
-     the callers).
-
- (7) Remove an unused variable in kunit_iov_iter.c.
-
- (8) Fix extract_xarray_to_sg() to calculate folio offset correctly.
-
- (9) Fix a kdoc comment.
-
-(10) Replace the netfs_inode::wb_lock mutex with a bit lock so that the
-     lock can be passed to the collector so that multiple asynchronous
-     writebacks won't interfere with each other.
-
-The patches can also be found here:
-
-	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-fixes
-
-Thanks,
-David
-
-[1] https://sashiko.dev/#/patchset/20260608145432.681865-1-dhowells%40redhat.com
-[2] https://sashiko.dev/#/patchset/20260616100821.2062304-1-dhowells%40redhat.com
-
-Changes
-=======
-ver #1)
-- Added a fix for S_KERNEL_FILE in cachefiles_bury_object().
-- Fixed how iov_iter_extract_*_pages() deals with *pages when returning 0
-  or error.
-- Fixed the replacement of wb_lock with bit lock:
-  - Only release the bit lock for writeback, writethrough and write-single,
-    not for PG_private_2-based I/O, which doesn't take the lock.
-  - In netfs_writeback_single(), need to redirty the inode if can't get the
-    lock.
-
-David Howells (11):
-  netfs: Fix decision whether to disallow write-streaming due to fscache
-    use
-  cachefiles: Fix double fput
-  cachefiles: Fix file burial to take lock when unsetting S_KERNEL_FILE
-  iov_iter: Fix potential underflow in iov_iter_extract_xarray_pages()
-  iov_iter: Fix missing alloc fail check in
-    iov_iter_extract_bvec_pages()
-  iov_iter: Fix a memory leak in iov_iter_extract_user_pages()
-  iov_iter: Remove unused variable in kunit_iov_iter.c
-  scatterlist: Fix offset in folio calc in extract_xarray_to_sg()
-  netfs: Fix kdoc warning
-  netfs: Replace wb_lock with a bit lock for asynchronicity
-  netfs: Fix writethrough to use collection offload
-
- fs/afs/symlink.c           |  4 +-
- fs/cachefiles/namei.c      |  3 +-
- fs/netfs/buffered_write.c  |  2 +-
- fs/netfs/internal.h        | 12 +++++
- fs/netfs/locking.c         | 95 ++++++++++++++++++++++++++++++++++++++
- fs/netfs/write_collect.c   | 10 ++++
- fs/netfs/write_issue.c     | 38 +++++----------
- include/linux/netfs.h      | 13 ++++--
- lib/iov_iter.c             | 20 +++++++-
- lib/scatterlist.c          |  1 +
- lib/tests/kunit_iov_iter.c |  5 +-
- 11 files changed, 164 insertions(+), 39 deletions(-)
+diff --git a/fs/netfs/buffered_write.c b/fs/netfs/buffered_write.c
+index 6bde3320bcec..2cdb68e6b16f 100644
+--- a/fs/netfs/buffered_write.c
++++ b/fs/netfs/buffered_write.c
+@@ -277,7 +277,7 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
+ 		 * caching service temporarily because the backing store got
+ 		 * culled.
+ 		 */
+-		if (netfs_is_cache_enabled(ctx)) {
++		if (netfs_is_cache_maybe_enabled(ctx)) {
+ 			if (finfo) {
+ 				netfs_stat(&netfs_n_wh_wstream_conflict);
+ 				goto flush_content;
+diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
+index 645996ecfc80..d889caa401dc 100644
+--- a/fs/netfs/internal.h
++++ b/fs/netfs/internal.h
+@@ -239,6 +239,18 @@ static inline bool netfs_is_cache_enabled(struct netfs_inode *ctx)
+ #endif
+ }
+ 
++static inline bool netfs_is_cache_maybe_enabled(struct netfs_inode *ctx)
++{
++#if IS_ENABLED(CONFIG_FSCACHE)
++	struct fscache_cookie *cookie = ctx->cache;
++
++	return fscache_cookie_valid(cookie) &&
++		test_bit(FSCACHE_COOKIE_IS_CACHING, &cookie->flags);
++#else
++	return false;
++#endif
++}
++
+ /*
+  * Get a ref on a netfs group attached to a dirty page (e.g. a ceph snap).
+  */
 
