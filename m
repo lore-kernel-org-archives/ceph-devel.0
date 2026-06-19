@@ -1,37 +1,58 @@
-Received: from zg8tmtyylji0my4xnjqumte4.icoremail.net (zg8tmtyylji0my4xnjqumte4.icoremail.net [162.243.164.118])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id ADC81340A6C
-	for <ceph-devel@vger.kernel.org>; Fri, 19 Jun 2026 07:40:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=162.243.164.118
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3F9933121C
+	for <ceph-devel@vger.kernel.org>; Fri, 19 Jun 2026 14:06:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781854825; cv=none; b=Cf+1Hq8gSXJ0UreT6JlcjfhfI+ac3PWa64QEz/K9xNZyaafNg6zHmrXOZrQbJdGT7FR5NncUfQZ4Ax0YjUO4JjsSU12+z33A12E+jd/XgKkwVrOI293VG42PqUkjTPVFbci5ZSmkfrFvvgEOv1qclzF7gl8iIa6Go8pawU4Tz6Y=
+	t=1781878022; cv=none; b=keqA3yLTc496d220bhy+S8Bn5gymu/AMPsm0IjXSDOM7PgjI9/jxRTNMvlRL6XCI88oltwRe3I4WDhif66/bNl+igC6Zb7auKI1RGCOwA1xdIbCK6sXpOOngh/dQFI43pN2PuNOuzlpIEioVbz5g/iTzszBdFHysF0+kqQAylKU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781854825; c=relaxed/simple;
-	bh=RoS5cpHcYYNir2L9D8p6GDJaFAJlKj3ITVBBgWZlTkw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=S6j12CJI2735kH0D55Gr7zcAi8I5b+rnrnftgkOtcLHAAlftAna9MlA/dgGRaLnijHBg2vewVVx4G59aH10tNivcRev67bNbUqQYsH2GahiF6DKyKj6MfE5K2konKKMJZri0ArnEcx529hKwXq0axoTM+JuUIBW7/hOKrP6bv1U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn; spf=pass smtp.mailfrom=lzu.edu.cn; arc=none smtp.client-ip=162.243.164.118
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lzu.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lzu.edu.cn
-Received: from enjou-Legion-Y7000P-2019 (unknown [172.23.56.36])
-	by app3 (Coremail) with SMTP id ywmowAB3tv5Y8jRqOIooAA--.41671S3;
-	Fri, 19 Jun 2026 15:40:12 +0800 (CST)
-From: Ren Wei <n05ec@lzu.edu.cn>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	slava@dubeyko.com,
-	jlayton@kernel.org,
-	yuantan098@gmail.com,
-	zcliangcn@gmail.com,
-	bird@lzu.edu.cn,
-	zzhan461@ucr.edu,
-	n05ec@lzu.edu.cn
-Subject: [PATCH ceph 1/1] libceph: osdmap: guard missing CRUSH type name lookup
-Date: Fri, 19 Jun 2026 15:40:03 +0800
-Message-ID: <c6e4a1cef523893d420ba622078fb03219d78747.1781808861.git.zzhan461@ucr.edu>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <cover.1781808861.git.zzhan461@ucr.edu>
-References: <cover.1781808861.git.zzhan461@ucr.edu>
+	s=arc-20240116; t=1781878022; c=relaxed/simple;
+	bh=90/tqKQLg5Mw54cQk0/epqqZmZVhh6jha/RrCAxKEmI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=b0m3IfnM3zHMEn+obh3ttfhEPdW8PnFt1iCWAui0hhrgYn1QYqD4irvYM2eMd4OVyFFjS9ntrXWHUxrvHd5VlcojJEDIEc5ZMXkegt/DYj5diAISVK9cF+4t5sOmEgHvMdhK6xUP4izKLQylzmwsQqRmdXNum4YBfFn4/XfSEWM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Q5N9CsYN; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Q5N9CsYN"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1781878019;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=Qw58C1XrBetXfQP/iSYx++FDGmKpgIeMlOWrQbDiOFQ=;
+	b=Q5N9CsYNja7N7iu8H/gz/sP9hB7Avky1zpOlm1S0gHKXj4VApyLg6kSdRqnbFj7ptDg0jv
+	XZLNYyQOkNa7k2LDtY3/EOT+LzxCv+5ssZG/v/v9WzxZPTSxMQHcRHg/gssjLXw/XObGyZ
+	GVhXvmdSwIzfBGSVOwJVA7XhxkjPxw8=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-686-47LyOxksMpSU6sTHtNAPtQ-1; Fri,
+ 19 Jun 2026 10:06:55 -0400
+X-MC-Unique: 47LyOxksMpSU6sTHtNAPtQ-1
+X-Mimecast-MFC-AGG-ID: 47LyOxksMpSU6sTHtNAPtQ_1781878014
+Received: from mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.95])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 858B21955D71;
+	Fri, 19 Jun 2026 14:06:53 +0000 (UTC)
+Received: from warthog.procyon.org.com (unknown [10.44.50.44])
+	by mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 54E531766;
+	Fri, 19 Jun 2026 14:06:49 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 00/11] netfs: Miscellaneous fixes
+Date: Fri, 19 Jun 2026 15:06:04 +0100
+Message-ID: <20260619140646.2633762-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -39,65 +60,87 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:ywmowAB3tv5Y8jRqOIooAA--.41671S3
-X-Coremail-Antispam: 1UD129KBjvJXoW7Zr43AF17XF4DArW3XrW7XFb_yoW8XF4kpF
-	W7C3s2yrZrGFW2kF1kJas7XrWYkws3WFy7ZFsYqasYvwn2grnxJr1SqasxZr15Cr45CFW5
-	XFsIv34UJwn8JFDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUBY1xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
-	w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
-	IY67AKxVW5JVW7JwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVW8Jr0_Cr1UM28EF7xvwVC2
-	z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s0DM2AIxVAIcxkEcV
-	Aq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j
-	6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64
-	vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7M4IIrI8v6xkF7I0E8cxan2IY04v7MxkF7I0E
-	n4kS14v26r1q6r43MxkIecxEwVCm-wCF04k20xvY0x0EwIxGrwCF04k20xvE74AGY7Cv6c
-	x26r48MxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCj
-	r7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI42IY6x
-	IIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42IY6xAI
-	w20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z280aVCY1x
-	0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7VUbGQ6JUUUUU==
-X-CM-SenderInfo: zqqvvuo6o23hxhgxhubq/1tbiAQ0DCWozqlMOZQAAsN
+X-Scanned-By: MIMEDefang 3.6 on 10.30.177.95
 
-From: Zhao Zhang <zzhan461@ucr.edu>
+Hi Christian,
 
-Localized read selection can walk a parent bucket whose name exists in
-the CRUSH map while its type has no matching entry in type_names.
-get_immediate_parent() then dereferences a NULL type_cn and passes an
-invalid pointer into strcmp(), causing a null-ptr-deref.
+Here are some miscellaneous fixes for netfslib.  I separated them from my
+netfs-next branch.  Various Sashiko review comments[1][2] are addressed:
 
-Skip such malformed parent buckets unless both the bucket name and type
-name metadata are present. This keeps malformed hierarchy data from
-crashing locality lookup and safely falls back to "not local".
+ (1) Fix the decision whether to disallow write-streaming due to fscache
+     use.
 
-Fixes: 117d96a04f00 ("libceph: support for balanced and localized reads")
-Cc: stable@vger.kernel.org
-Reported-by: Yuan Tan <yuantan098@gmail.com>
-Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
-Reported-by: Xin Liu <bird@lzu.edu.cn>
-Assisted-by: Codex:GPT-5.4
-Signed-off-by: Zhao Zhang <zzhan461@ucr.edu>
-Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
----
- net/ceph/osdmap.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ (2) Fix a double fput in cachefiles_create_tmpfile().
 
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 8b5b0587a0cf..5eb50d9c1361 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -3055,8 +3055,11 @@ static int get_immediate_parent(struct crush_map *c, int id,
- 			if (b->items[j] != id)
- 				continue;
- 
--			*parent_type_id = b->type;
- 			type_cn = lookup_crush_name(&c->type_names, b->type);
-+			if (!type_cn)
-+				continue;
-+
-+			*parent_type_id = b->type;
- 			parent_loc->cl_type_name = type_cn->cn_name;
- 			parent_loc->cl_name = cn->cn_name;
- 			return b->id;
--- 
-2.47.3
+ (3) Fix alteration of S_KERNEL_FILE inode flag without holding inode lock.
+
+ (4) Fix a potential mathematical underflow in
+     iov_iter_extract_xarray_pages() and make it return 0 and free the
+     array if no pages could be extracted.
+
+ (5) Fix a missing alloc failure check in iov_iter_extract_bvec_pages().
+
+ (6) Fix iov_iter_extract_user_pages() so that it doesn't leak the pages
+     array if it returns an error or 0 (inasmuch as the leak is really in
+     the callers).
+
+ (7) Remove an unused variable in kunit_iov_iter.c.
+
+ (8) Fix extract_xarray_to_sg() to calculate folio offset correctly.
+
+ (9) Fix a kdoc comment.
+
+(10) Replace the netfs_inode::wb_lock mutex with a bit lock so that the
+     lock can be passed to the collector so that multiple asynchronous
+     writebacks won't interfere with each other.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-fixes
+
+Thanks,
+David
+
+[1] https://sashiko.dev/#/patchset/20260608145432.681865-1-dhowells%40redhat.com
+[2] https://sashiko.dev/#/patchset/20260616100821.2062304-1-dhowells%40redhat.com
+
+Changes
+=======
+ver #1)
+- Added a fix for S_KERNEL_FILE in cachefiles_bury_object().
+- Fixed how iov_iter_extract_*_pages() deals with *pages when returning 0
+  or error.
+- Fixed the replacement of wb_lock with bit lock:
+  - Only release the bit lock for writeback, writethrough and write-single,
+    not for PG_private_2-based I/O, which doesn't take the lock.
+  - In netfs_writeback_single(), need to redirty the inode if can't get the
+    lock.
+
+David Howells (11):
+  netfs: Fix decision whether to disallow write-streaming due to fscache
+    use
+  cachefiles: Fix double fput
+  cachefiles: Fix file burial to take lock when unsetting S_KERNEL_FILE
+  iov_iter: Fix potential underflow in iov_iter_extract_xarray_pages()
+  iov_iter: Fix missing alloc fail check in
+    iov_iter_extract_bvec_pages()
+  iov_iter: Fix a memory leak in iov_iter_extract_user_pages()
+  iov_iter: Remove unused variable in kunit_iov_iter.c
+  scatterlist: Fix offset in folio calc in extract_xarray_to_sg()
+  netfs: Fix kdoc warning
+  netfs: Replace wb_lock with a bit lock for asynchronicity
+  netfs: Fix writethrough to use collection offload
+
+ fs/afs/symlink.c           |  4 +-
+ fs/cachefiles/namei.c      |  3 +-
+ fs/netfs/buffered_write.c  |  2 +-
+ fs/netfs/internal.h        | 12 +++++
+ fs/netfs/locking.c         | 95 ++++++++++++++++++++++++++++++++++++++
+ fs/netfs/write_collect.c   | 10 ++++
+ fs/netfs/write_issue.c     | 38 +++++----------
+ include/linux/netfs.h      | 13 ++++--
+ lib/iov_iter.c             | 20 +++++++-
+ lib/scatterlist.c          |  1 +
+ lib/tests/kunit_iov_iter.c |  5 +-
+ 11 files changed, 164 insertions(+), 39 deletions(-)
 
