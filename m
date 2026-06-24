@@ -1,47 +1,47 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B7E73A0E93
-	for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2026 11:58:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 298583A16BD
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2026 11:58:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782302334; cv=none; b=UHVPTFZJqm4DlZfrbMOQx0V0Zp5ADDuSS4/WRp3G7UHsZ3ouLqAXs9su1BO5eLCl7ZcbkLFNAU9SL1FOuqdGMfgK0+oNw/SG0SUo4wPlFQyXRD+WSosHCi4gHu9vxvV7iXtcJB7TdLnSRs5OmEdHG9vRYc+nQvSw7TO3vx6QOnY=
+	t=1782302339; cv=none; b=U1JWnRjKbymFceWOplZZZ7Ye2EBtNy3y/mCLi6r2SXMr0FtIjomYnBnEftDUHAbdwXrvz37Q5oLUNkk9U03bdnWzO85DglyvDtQDFyh3Tk9guJk3OaU3G9VymUTcWUFlwabage5pX3Ah3w3kaE2J4Qo+FggvbHjDhJmp3NsTSmQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782302334; c=relaxed/simple;
-	bh=c24Yit3599uQLRElsJbGFusA/7JcG/6iJ0D3gBMzT4k=;
+	s=arc-20240116; t=1782302339; c=relaxed/simple;
+	bh=RwAt3MSlG/ONZGVRygqzttUaCRCyVrGiYvhxyiEUhSI=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HeLocPS8T1ClhnWGf7NQfgmjUINsiQAhmrFzCU7BNloLD4UT1vkAehtaaxU27glIYK8a3eCEHvaJBhUhmmhB6fiTIVjQmcVyWMaHJf8NOO5TmwFZCQOjcKfTrprN1JuARF+MeHt6p5n2sl8HedTLVDxhwo73uobayKfedHIwZsI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SEDcIOqo; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=J84AqHvKKeItEBGh9zU+Qv0C0FkDHQBTYE6FKAGi1IeOepeVuKskawrtPqEs97irTA7NPM0+gmuOgFPcHKyP9ppwly7msN1nvHeuCJMDTxkECeLcEr0vYWvZbMDQtQ1HTJLZYFeW4Upde7H1Oj5PoIsJYHPHjEQ2C9nnImSnEcM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Jy/LB6o7; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SEDcIOqo"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Jy/LB6o7"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1782302332;
+	s=mimecast20190719; t=1782302336;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=+j9T14/yKCuYIYjsdLnru9vHvjv9poR+Pk5ADqQQzV8=;
-	b=SEDcIOqobzd3ViRkBz9cWf/vSPIwpDryzo1HHMih9nyg4xw/fRvPTcPLMo5ONYNTtQrCtB
-	6H9chNIFDKqKiWpOqhCrkuZTNhN3wGcx3bfR/MXwjNcPz3/8eBeBTuUyy162wYUvg9mQA2
-	NkV20vurJxqN5kCg7mahgnjdS4VkqKY=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+	bh=eC9TaEemzBkRAGMHHkG2uG9PLx8V8MWirBLhS6odgqY=;
+	b=Jy/LB6o7w9szHZBdLWg145Ad8gSlME457O0paZ2ddXl+bhXtbf3KoEl295U+5uhC8sW0r2
+	oSHDbXqiTl8nxd0/2xYY5ZIgMZelWBTsmEdP674qDb+d8azo//RofmkwDubjdNCUGzar44
+	/k3bPyg+uj/0hSLydorILXipgHOYiS0=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-79-L0sgAPIIMFiJlli9RKjw3g-1; Wed,
- 24 Jun 2026 07:58:48 -0400
-X-MC-Unique: L0sgAPIIMFiJlli9RKjw3g-1
-X-Mimecast-MFC-AGG-ID: L0sgAPIIMFiJlli9RKjw3g_1782302327
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-481-G89D9wEENYKKA1EPScX3RQ-1; Wed,
+ 24 Jun 2026 07:58:53 -0400
+X-MC-Unique: G89D9wEENYKKA1EPScX3RQ-1
+X-Mimecast-MFC-AGG-ID: G89D9wEENYKKA1EPScX3RQ_1782302331
 Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 4E943195608F;
-	Wed, 24 Jun 2026 11:58:47 +0000 (UTC)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id B4EB81955F7E;
+	Wed, 24 Jun 2026 11:58:51 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.49.152])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 74F42195609E;
-	Wed, 24 Jun 2026 11:58:44 +0000 (UTC)
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id D05FA195609E;
+	Wed, 24 Jun 2026 11:58:48 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -53,9 +53,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Matthew Wilcox <willy@infradead.org>
-Subject: [PATCH v2 12/14] netfs: Fix writeback error handling
-Date: Wed, 24 Jun 2026 12:57:33 +0100
-Message-ID: <20260624115737.2964520-13-dhowells@redhat.com>
+Subject: [PATCH v2 13/14] netfs: Fix folio state after ENOMEM whilst under writeback iteration
+Date: Wed, 24 Jun 2026 12:57:34 +0100
+Message-ID: <20260624115737.2964520-14-dhowells@redhat.com>
 In-Reply-To: <20260624115737.2964520-1-dhowells@redhat.com>
 References: <20260624115737.2964520-1-dhowells@redhat.com>
 Precedence: bulk
@@ -67,12 +67,11 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-Fix the error handling in writeback_iter() loop.  If an error occurs,
-writeback_iter() needs to be called again with *error set to the error so
-that it can clean up iteration state.  Further, the current folio needs
-unlocking and redirtying.
+Fix the state of the current folio when ENOMEM occurs during writeback
+iteration.  The folio needs to be redirtied and unlocked before the
+terminal writeback_iter() is invoked.
 
-Fixes: 288ace2f57c9 ("netfs: New writeback implementation")
+Fixes: 06fa229ceb36 ("netfs: Abstract out a rolling folio buffer implementation")
 Link: https://sashiko.dev/#/patchset/20260619140646.2633762-1-dhowells%40redhat.com
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Paulo Alcantara <pc@manguebit.org>
@@ -80,30 +79,24 @@ cc: Matthew Wilcox <willy@infradead.org>
 cc: netfs@lists.linux.dev
 cc: linux-fsdevel@vger.kernel.org
 ---
- fs/netfs/write_issue.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ fs/netfs/write_issue.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/fs/netfs/write_issue.c b/fs/netfs/write_issue.c
-index e5d4f9ba3d6b..d1f98cca5d0f 100644
+index d1f98cca5d0f..6eb6cff12c17 100644
 --- a/fs/netfs/write_issue.c
 +++ b/fs/netfs/write_issue.c
-@@ -582,8 +582,6 @@ int netfs_writepages(struct address_space *mapping,
- 		}
+@@ -334,8 +334,11 @@ static int netfs_write_folio(struct netfs_io_request *wreq,
  
- 		error = netfs_write_folio(wreq, wbc, folio);
--		if (error < 0)
--			break;
- 	} while ((folio = writeback_iter(mapping, wbc, folio, &error)));
+ 	_enter("");
  
- 	netfs_end_issue_write(wreq);
-@@ -594,6 +592,9 @@ int netfs_writepages(struct address_space *mapping,
- 	return error;
+-	if (rolling_buffer_make_space(&wreq->buffer) < 0)
++	if (rolling_buffer_make_space(&wreq->buffer) < 0) {
++		folio_redirty_for_writepage(wbc, folio);
++		folio_unlock(folio);
+ 		return -ENOMEM;
++	}
  
- couldnt_start:
-+	folio_redirty_for_writepage(wbc, folio);
-+	folio_unlock(folio);
-+	writeback_iter(mapping, wbc, folio, &error);
- 	netfs_kill_dirty_pages(mapping, wbc, folio);
- out:
- 	netfs_wb_end(ictx);
+ 	/* netfs_perform_write() may shift i_size around the page or from out
+ 	 * of the page to beyond it, but cannot move i_size into or through the
 
