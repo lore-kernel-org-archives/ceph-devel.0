@@ -1,345 +1,166 @@
-Received: from proxmox-new.maurer-it.com (proxmox-new.maurer-it.com [94.136.29.106])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B88D63B42C4;
-	Mon, 22 Jun 2026 14:16:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=94.136.29.106
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6800C22CBE6
+	for <ceph-devel@vger.kernel.org>; Wed, 24 Jun 2026 11:57:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782137796; cv=none; b=XohQoxmk5YLclNiwsOtEaOw1DqdqNFz/9H0oMsBxVcIUstuP1lesewnZnFcqa60Q3erZkcKIVjP8NkmGrgFdhKWK9oVUcaoIe4UslAll1KK5ee0r+AlFl3X2HB4Fk8/EJlhiNdEJhGOm53uCn+6pE/Ze1X1q2tSeAKAFIbn4oyg=
+	t=1782302272; cv=none; b=hvCjshxA6Bh5O8ew3fGBLKqTmLDAPZfQ+QBUna46gThIfGK/V/RAdyDSnHn7HiCMQekqwogzxZD+r5N2OVWUfpK0zbbjlRBjxr/b/MqhWnAEEPXg24tm8t0o+eCdBFULm+dzULMEfPwAoq2uGGXun2z4f8Fi6IPitI0Gp3RTva8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782137796; c=relaxed/simple;
-	bh=1C5Qitd0g5twe5hGOTIfTWu9xIrNKFQVvVM8eCsGeRs=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=O3cR/TuJ1WIO0LJTEzruEGu4+7tIgPkub/mFBReFN78PdJbyMIYiCPmsOsKqf1B2A81xBuG8q5sJPdd81ZwYLCneCzrdQMkx4p2hgNejokG73TXp+Sr5YJGyreyZLfsrYCq0r4GTbhMWPkzLUtw4l6aNRFvPzu7fQbR2fjteZ2A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com; spf=pass smtp.mailfrom=proxmox.com; arc=none smtp.client-ip=94.136.29.106
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=proxmox.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=proxmox.com
-Received: from proxmox-new.maurer-it.com (localhost.localdomain [127.0.0.1])
-	by proxmox-new.maurer-it.com (Proxmox) with ESMTP id AD22C46501;
-	Mon, 22 Jun 2026 16:09:23 +0200 (CEST)
-From: Kefu Chai <k.chai@proxmox.com>
-To: XIAO WU <xiaowu.417@qq.com>, ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
- Viacheslav Dubeyko <slava@dubeyko.com>, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3] libceph: tolerate addrvecs with multiple entries of
- the same type
-In-Reply-To: <tencent_3A900D10F5E1841A0950F6CAA67897936D09@qq.com>
-References: <20260604140231.2759025-1-k.chai@proxmox.com>
- <20260611113251.2975975-1-k.chai@proxmox.com>
- <tencent_3A900D10F5E1841A0950F6CAA67897936D09@qq.com>
-Date: Mon, 22 Jun 2026 22:09:17 +0800
-Message-ID: <87echy650y.fsf@proxmox.com>
+	s=arc-20240116; t=1782302272; c=relaxed/simple;
+	bh=sdkjrnk1/aDo1isQHXHBjuOALl3FnBYe1rEFNLG9NR4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Hy2A64ue6FZ/9jj4XAFe0HASvOGrPZo5M7NmahoPnaLgprNUMrwpj4Nf3xn041+cfc2DoXD3VHIr3uG3zVmtsu4aMp/8VEv6bcDXys92kU2FGSzGAyOVowDOt8sVFdhXR3w5p8yM8BKYEnWJKa16i/VJNMvqGLnMMH/Tomz+uf4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PWqn8LZi; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PWqn8LZi"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1782302269;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=4Jn6B1Enc2tDOLXfpCg5+RriHKZeuMcslvrPZlMTtbY=;
+	b=PWqn8LZiMzjk9M/dNPunNaHQLv/zx2Zm7Jiq4WZYXa/c6jd/meZ68/6l5OlPrgY6+zw8I8
+	z5ft3cR91ZilDVWxmb2XnKXtKoytfBLl8EVz8AmUhA9XQQvBtmSdwsoXhf90Y25ZjGO7sb
+	Vw7NjbOMdnNG/ECPLL/9PCX7ChgkyPU=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-217-erOTOxkaNcSszkGUxkaMUQ-1; Wed,
+ 24 Jun 2026 07:57:46 -0400
+X-MC-Unique: erOTOxkaNcSszkGUxkaMUQ-1
+X-Mimecast-MFC-AGG-ID: erOTOxkaNcSszkGUxkaMUQ_1782302264
+Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3AF991955D84;
+	Wed, 24 Jun 2026 11:57:44 +0000 (UTC)
+Received: from warthog.procyon.org.com (unknown [10.44.49.152])
+	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 795DE18004D4;
+	Wed, 24 Jun 2026 11:57:41 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 00/14] netfs: Miscellaneous fixes
+Date: Wed, 24 Jun 2026 12:57:21 +0100
+Message-ID: <20260624115737.2964520-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Bm-Milter-Handled: 55990f41-d878-4baa-be0a-ee34c49e34d2
-X-Bm-Transport-Timestamp: 1782137352426
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
 
-XIAO WU <xiaowu.417@qq.com> writes:
+Hi Christian,
 
-> Hi Kefu,
->
-> I came across a Sashiko AI code review [1] that flagged a pre-existing
-> uninitialized memory issue in `ceph_decode_entity_addrvec()`.=C2=A0 When =
-the
-> addrvec has zero entries (`addr_cnt =3D=3D 0`), the function returns 0
-> without writing to `*addr`, but callers like `ceph_monmap_decode()`
-> pass addresses from `kmalloc_flex()` and proceed to use them.
->
+Here are some miscellaneous fixes for netfslib.  I separated them from my
+netfs-next branch.  Various Sashiko review comments[1][2][3] are addressed:
 
-hi Xiao,
+ (1) Fix the decision whether to disallow write-streaming due to fscache
+     use.
 
-Thanks for the report and the reproducer. I can confirm it. But I'd
-prefer sending the fix separately rather than fold it into v3, as you
-pointed out it's pre-existing and independent of my patch.
+ (2) Fix a double fput in cachefiles_create_tmpfile().
 
-I took a look at the callers of `ceph_decode_entity_addrvec()`.
-Following caller suffers from this issue:
+ (3) Fix alteration of S_KERNEL_FILE inode flag without holding inode lock.
 
-- ceph_monmap_decode()         mon_inst[] from kmalloc_flex() (heap)
-- ceph_mdsmap_decode()         on-stack addr -> m_info[mds].addr
-- decode_new_up_state_weight() on-stack addr -> osd_addr[osd]
-- ProtocolV2 server_ident      on-stack addr, used in memcmp()
+ (4) Fix a potential mathematical underflow in
+     iov_iter_extract_xarray_pages() and make it return 0 and free the
+     array if no pages could be extracted.
 
-osdmap_decode() is the one caller where an empty addrvec is *legitimate*,
-and the slot is pre-zeroed with osdmap_set_max_osd(), so it's safe.
+ (5) Fix a missing alloc failure check in iov_iter_extract_bvec_pages().
 
-> I was able to reproduce this in QEMU by running a fake Ceph monitor that
-> sends a monmap with an empty addrvec.=C2=A0 With `panic_on_warn=3D1`, the
-> kernel hits a WARNING in `ceph_con_v1_try_read()` and panics.
->
+ (6) Fix iov_iter_extract_user_pages() so that it doesn't leak the pages
+     array if it returns an error or 0 (inasmuch as the leak is really in
+     the callers).
 
-For the commit message / changelog, I'd state the threat model: this
-needs a malformed or buggy peer, since legitimate daemons always
-advertise at least one addresss -- I checked the current ceph.git to
-verify this. But I agree that the connect-to-bogus-addr and panic you
-hit does have a concrete impact, as kernel should not panic on malformed
-input. this could happen over an unencrypted, signature-unchecked msgr
-v1 transport.
+ (7) Remove an unused variable in kunit_iov_iter.c.
 
-For the fix, i'd avoid a defenseive memset() of *addr. as this reminds
-me a strncpy which always reset the dest str even if the source str's
-length is zero. So I think the right fix is probably to extend the
-semantic of `-ENOENT` returned by ceph_decode_entity_addrvec().
-Currently, this func returns `-ENOENT` to indicate that "the addrvec has
-entries, but none of them is of the wanted type". We can extend to
-apply to the emtpy addrvec, so it imply that "no addr of the requested
-type". This way, we only need to update osdmap_decode() so it tolerates
--ENOENT.
+ (8) Fix extract_xarray_to_sg() to calculate folio offset correctly.
 
-Ilya, does this direction look right?
+ (9) Fix a kdoc comment.
 
->
-> On Thu, Jun 11, 2026 at 07:32:51PM +0800, Kefu Chai wrote:
->  > ceph_decode_entity_addrvec() currently rejects any addrvec containing
->  > more than one entry that matches the requested msgr type...
->
-> Your patch correctly tolerates duplicate entries, but the function still
-> returns success without touching `*addr` when `addr_cnt =3D=3D 0`:
->
-> ```c
-> // net/ceph/decode.c: ceph_decode_entity_addrvec()
-> if (!addr_cnt)
->  =C2=A0 =C2=A0 return 0;=C2=A0 // *addr is still uninitialized
-> if (addr_cnt =3D=3D 1 && !memchr_inv(&tmp_addr, 0, sizeof(tmp_addr)))
->  =C2=A0 =C2=A0 return 0;=C2=A0 // same
-> ```
->
-> Callers that pass addresses from dynamic allocation hit stale data:
->
-> ```c
-> // net/ceph/mon_client.c: ceph_monmap_decode()
-> mon_inst =3D kmalloc_flex(..., num_mon, sizeof(*mon_inst));
-> // ...
-> ceph_decode_entity_addrvec(p, end, msgr2, &mon_inst[i].addr);
-> // mon_inst[i].addr may be uninitialized if addrvec was empty
-> ```
->
-> [Reproduction]
->
-> I set up a fake Ceph v1 monitor on localhost that sends a monmap
-> containing a monitor entry with an empty addrvec (addr_cnt=3D0). Mounting
-> the Ceph filesystem against it triggers the monmap decode path, causing
-> the client to attempt a connection with the uninitialized address.
->
-> [Crash =E2=80=94 kernel 7.1.0-rc6, panic_on_warn=3D1]
->
->  =C2=A0 con->v1.connect_seq !=3D le32_to_cpu(con->v1.in_reply.connect_seq)
->  =C2=A0 WARNING: net/ceph/messenger_v1.c:901 at=20
-> ceph_con_v1_try_read+0x59f7/0x7020
->
->  =C2=A0 RIP: 0010:ceph_con_v1_try_read+0x59f7/0x7020
->  =C2=A0 Call Trace:
->  =C2=A0 =C2=A0<TASK>
->  =C2=A0 =C2=A0ceph_con_workfn+0xa04/0x13c0
->  =C2=A0 =C2=A0process_one_work+0xa20/0x1c50
->  =C2=A0 =C2=A0worker_thread+0x6df/0xf30
->  =C2=A0 =C2=A0kthread+0x387/0x4a0
->  =C2=A0 =C2=A0ret_from_fork+0xb2c/0xdd0
->  =C2=A0 =C2=A0</TASK>
->
->  =C2=A0 Kernel panic - not syncing: kernel: panic_on_warn set ...
->
-> Full PoC source (poc.c):
-> ---8<----------------------------------------------------------------
-> /*
->  =C2=A0* PoC: Uninitialized memory in ceph_decode_entity_addrvec()
->  =C2=A0* Compile: gcc -static -o poc poc.c
->  =C2=A0* Run: ./poc [port]
->  =C2=A0*/
-> #define _GNU_SOURCE
-> #include <stdio.h>
-> #include <stdlib.h>
-> #include <string.h>
-> #include <unistd.h>
-> #include <sys/socket.h>
-> #include <sys/mount.h>
-> #include <sys/wait.h>
-> #include <sys/stat.h>
-> #include <sys/poll.h>
-> #include <arpa/inet.h>
-> #include <netinet/in.h>
-> #include <stdint.h>
-> #include <errno.h>
-> #include <fcntl.h>
->
-> #define BANNER "ceph v027"
-> #define BNR 9
-> #define ADR 136
-> #define CBNR (BNR+ADR)
-> #define SBNR (BNR+2*ADR)
->
-> #define TAG_RDY 1
-> #define TAG_MSG 7
-> #define MON_MAP 4
-> #define ENT_MON 1
->
-> #define MSZ 16384
->
-> typedef uint8_t u8; typedef uint16_t u16;
-> typedef uint32_t u32; typedef uint64_t u64;
->
-> static u32 ct[256];
-> static int ci;
->
-> static void ic(void)
-> {
->  =C2=A0 =C2=A0 u32 i, j, k;
->  =C2=A0 =C2=A0 if (ci) return;
->  =C2=A0 =C2=A0 for (i =3D 0; i < 256; i++) {
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 k =3D i;
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 for (j =3D 0; j < 8; j++)
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 k =3D (k >> 1) ^ (k & 1 ? 0x82=
-F63B78 : 0);
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 ct[i] =3D k;
->  =C2=A0 =C2=A0 }
->  =C2=A0 =C2=A0 ci =3D 1;
-> }
->
-> static u32 crc(u32 c, const u8 *b, int l)
-> {
->  =C2=A0 =C2=A0 while (l--) c =3D ct[(c ^ *b++) & 0xFF] ^ (c >> 8);
->  =C2=A0 =C2=A0 return c;
-> }
->
-> #define W8(b,v)=C2=A0 ((b)[0] =3D (u8)(v))
-> #define W16(b,v) ((b)[0]=3D(v)&255,(b)[1]=3D((v)>>8)&255)
-> #define W32(b,v)=20
-> ((b)[0]=3D(v)&255,(b)[1]=3D((v)>>8)&255,(b)[2]=3D((v)>>16)&255,(b)[3]=3D(=
-(v)>>24)&255)
-> #define W64(b,v) do { int _i; for (_i=3D0; _i<8; _i++)=20
-> (b)[_i]=3D((u64)(v)>>(_i*8))&255; } while(0)
->
-> #define REQ_FEAT (1ULL << 23)
->
-> static int rcv(int f, u8 *b, int l)
-> {
->  =C2=A0 =C2=A0 while (l > 0) {
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct pollfd p =3D { .fd =3D f, .events =3D=
- POLLIN };
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (poll(&p, 1, 15000) <=3D 0) return -1;
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 int n =3D read(f, b, l);
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (n <=3D 0) return -1;
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 b +=3D n; l -=3D n;
->  =C2=A0 =C2=A0 }
->  =C2=A0 =C2=A0 return 0;
-> }
->
-> static int snd(int f, u8 *b, int l)
-> {
->  =C2=A0 =C2=A0 while (l > 0) { int n =3D write(f, b, l); if (n <=3D 0) re=
-turn -1; b +=3D=20
-> n; l -=3D n; }
->  =C2=A0 =C2=A0 return 0;
-> }
->
-> static int ea(u8 *b) { W8(b, 2); W32(b+1, 0); return 5; }
->
-> static int pay(u8 *b)
-> {
->  =C2=A0 =C2=A0 int o =3D 0, bo, so, po, mo, ms;
->  =C2=A0 =C2=A0 bo =3D o; W32(b+o, 0); o +=3D 4;
->  =C2=A0 =C2=A0 W8(b+o, 6); o++; W8(b+o, 1); o++;
->  =C2=A0 =C2=A0 so =3D o; W32(b+o, 0); o +=3D 4;
->  =C2=A0 =C2=A0 po =3D o;
->  =C2=A0 =C2=A0 W64(b+o, 0x42); o +=3D 8;
->  =C2=A0 =C2=A0 W32(b+o, 1); o +=3D 4;
->  =C2=A0 =C2=A0 W8(b+o, 1); o++; W8(b+o, 1); o++; W32(b+o, 0); o +=3D 4;
->  =C2=A0 =C2=A0 W8(b+o, 1); o++; W8(b+o, 1); o++; W32(b+o, 0); o +=3D 4;
->  =C2=A0 =C2=A0 W32(b+o, 1); o +=3D 4;
->  =C2=A0 =C2=A0 W32(b+o, 2); o +=3D 4; memcpy(b+o, "m0", 2); o +=3D 2;
->  =C2=A0 =C2=A0 W8(b+o, 1); o++; W8(b+o, 1); o++;
->  =C2=A0 =C2=A0 mo =3D o; W32(b+o, 0); o +=3D 4;
->  =C2=A0 =C2=A0 ms =3D o;
->  =C2=A0 =C2=A0 W32(b+o, 2); o +=3D 4; memcpy(b+o, "m0", 2); o +=3D 2;
->  =C2=A0 =C2=A0 o +=3D ea(b+o);
->  =C2=A0 =C2=A0 W32(b+mo, o - ms);
->  =C2=A0 =C2=A0 W32(b+so, o - po);
->  =C2=A0 =C2=A0 W32(b+bo, o - bo);
->  =C2=A0 =C2=A0 return o;
-> }
->
-> #define HS 60
-> #define FS 13
->
-> static int msg(u8 *b, u64 s)
-> {
->  =C2=A0 =C2=A0 int o =3D 0;
->  =C2=A0 =C2=A0 b[o++] =3D TAG_MSG;
->  =C2=A0 =C2=A0 int h =3D o;
->  =C2=A0 =C2=A0 memset(b+o, 0, HS); o +=3D HS;
->  =C2=A0 =C2=A0 int pl =3D pay(b+o); o +=3D pl;
->  =C2=A0 =C2=A0 memset(b+o, 0, FS); o +=3D FS;
->  =C2=A0 =C2=A0 u8 *hh =3D b + h;
->  =C2=A0 =C2=A0 W64(hh+0, s); W16(hh+16, MON_MAP); W16(hh+18, 127);
->  =C2=A0 =C2=A0 W16(hh+20, 1); W32(hh+22, pl); W64(hh+36, ENT_MON);
->  =C2=A0 =C2=A0 W64(hh+44, 0); W32(hh+56, crc(0, hh, 56));
->  =C2=A0 =C2=A0 return o;
-> }
->
-> static int mon(int pt)
-> {
->  =C2=A0 =C2=A0 int s, c; struct sockaddr_in a; u8 b[MSZ];
->  =C2=A0 =C2=A0 ic();
->  =C2=A0 =C2=A0 s =3D socket(AF_INET, SOCK_STREAM, 0);
->  =C2=A0 =C2=A0 int o =3D 1; setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &o, s=
-izeof(o));
->  =C2=A0 =C2=A0 memset(&a, 0, sizeof(a)); a.sin_family =3D AF_INET;
->  =C2=A0 =C2=A0 a.sin_addr.s_addr =3D htonl(INADDR_LOOPBACK); a.sin_port =
-=3D htons(pt);
->  =C2=A0 =C2=A0 bind(s, (void *)&a, sizeof(a)); listen(s, 1);
->  =C2=A0 =C2=A0 struct pollfd p =3D { .fd =3D s, .events =3D POLLIN };
->  =C2=A0 =C2=A0 if (poll(&p, 1, 60000) <=3D 0) goto out;
->  =C2=A0 =C2=A0 c =3D accept(s, 0, 0);
->
->  =C2=A0 =C2=A0 if (rcv(c, b, CBNR) < 0) goto done;
->  =C2=A0 =C2=A0 { u8 *p =3D b; memcpy(p, BANNER, BNR); p +=3D BNR;
->  =C2=A0 =C2=A0 =C2=A0 memset(p, 0, ADR); p +=3D ADR; memset(p, 0, ADR);
->  =C2=A0 =C2=A0 =C2=A0 if (snd(c, b, SBNR) < 0) goto done; }
->  =C2=A0 =C2=A0 { int t =3D 0; while (t < 26) {
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct pollfd p2 =3D { .fd =3D c, .events =
-=3D POLLIN };
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (poll(&p2, 1, 10000) <=3D 0) goto done;
->  =C2=A0 =C2=A0 =C2=A0 =C2=A0 int n =3D read(c, b+t, MSZ-t); if (n <=3D 0)=
- goto done; t +=3D n; } }
->  =C2=A0 =C2=A0 memset(b, 0, 26); W8(b, TAG_RDY); W64(b+1, REQ_FEAT);
->  =C2=A0 =C2=A0 snd(c, b, 26); usleep(300000);
->  =C2=A0 =C2=A0 { int ml =3D msg(b, 1); snd(c, b, ml); }
->  =C2=A0 =C2=A0 usleep(500000);
->  =C2=A0 =C2=A0 { int ml =3D msg(b, 2); snd(c, b, ml); }
-> out:
->  =C2=A0 =C2=A0 close(c); close(s); return 0;
-> done:
->  =C2=A0 =C2=A0 close(c); close(s); return -1;
-> }
->
-> int main(int ac, char **av)
-> {
->  =C2=A0 =C2=A0 int pt =3D 16789; if (ac >=3D 2) pt =3D atoi(av[1]);
->  =C2=A0 =C2=A0 pid_t pid =3D fork();
->  =C2=A0 =C2=A0 if (pid =3D=3D 0) { mon(pt); _exit(0); }
->  =C2=A0 =C2=A0 usleep(200000);
->  =C2=A0 =C2=A0 mkdir("/tmp/mnt", 0700);
->  =C2=A0 =C2=A0 char s[64]; snprintf(s, 64, "127.0.0.1:%d:/", pt);
->  =C2=A0 =C2=A0 mount(s, "/tmp/mnt", "ceph", 0, "name=3Dadmin");
->  =C2=A0 =C2=A0 waitpid(pid, 0, 0);
->  =C2=A0 =C2=A0 umount2("/tmp/mnt", MNT_FORCE); rmdir("/tmp/mnt");
->  =C2=A0 =C2=A0 return 0;
-> }
-> ---8<----------------------------------------------------------------
-> Compile: gcc -static -o poc poc.c
->
-> [1]=20
-> https://sashiko.dev/#/patchset/20260611113251.2975975-1-k.chai%40proxmox.=
-com
->  =C2=A0 =C2=A0 (Sashiko AI code review =E2=80=94 "Uninitialized Memory", =
-Severity: High)
->
-> Thanks,
-> XIAOWU
+(10) Replace the netfs_inode::wb_lock mutex with a bit lock so that the
+     lock can be passed to the collector so that multiple asynchronous
+     writebacks won't interfere with each other.
+
+(11) Fix writeback error handling to go through writeback_iter() so that it
+     can clean up its state.
+
+(12) Fix ENOMEM handling in writeback to clean up the current folio if we
+     can't allocate a rolling buffer segment.
+
+(13) Fix unbuffered/DIO write retry for filesystems that don't have a
+     ->prepare_write() method.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-fixes
+
+Thanks,
+David
+
+[1] https://sashiko.dev/#/patchset/20260608145432.681865-1-dhowells%40redhat.com
+[2] https://sashiko.dev/#/patchset/20260616100821.2062304-1-dhowells%40redhat.com
+[3] https://sashiko.dev/#/patchset/20260619140646.2633762-1-dhowells%40redhat.com
+
+Changes
+=======
+ver #2)
+- Addressed various Sashiko comments[3]:
+  - Changed some kfree() to kvfree().
+  - Added some writeback error handling patches.
+- Fixed DIO write retry.
+
+ver #1)
+- Added a fix for S_KERNEL_FILE in cachefiles_bury_object().
+- Fixed how iov_iter_extract_*_pages() deals with *pages when returning 0
+  or error.
+- Fixed the replacement of wb_lock with bit lock:
+  - Only release the bit lock for writeback, writethrough and write-single,
+    not for PG_private_2-based I/O, which doesn't take the lock.
+  - In netfs_writeback_single(), need to redirty the inode if can't get the
+    lock.
+
+David Howells (14):
+  netfs: Fix decision whether to disallow write-streaming due to fscache
+    use
+  cachefiles: Fix double fput
+  cachefiles: Fix file burial to take lock when unsetting S_KERNEL_FILE
+  iov_iter: Fix potential underflow in iov_iter_extract_xarray_pages()
+  iov_iter: Fix missing alloc fail check in
+    iov_iter_extract_bvec_pages()
+  iov_iter: Fix a memory leak in iov_iter_extract_user_pages()
+  iov_iter: Remove unused variable in kunit_iov_iter.c
+  scatterlist: Fix offset in folio calc in extract_xarray_to_sg()
+  netfs: Fix kdoc warning
+  netfs: Replace wb_lock with a bit lock for asynchronicity
+  netfs: Fix writethrough to use collection offload
+  netfs: Fix writeback error handling
+  netfs: Fix folio state after ENOMEM whilst under writeback iteration
+  netfs: Fix DIO write retry for filesystems without a ->prepare_write()
+
+ fs/afs/symlink.c           |  4 +-
+ fs/cachefiles/namei.c      |  3 +-
+ fs/netfs/buffered_write.c  |  2 +-
+ fs/netfs/direct_write.c    |  6 ---
+ fs/netfs/internal.h        | 12 +++++
+ fs/netfs/locking.c         | 95 ++++++++++++++++++++++++++++++++++++++
+ fs/netfs/write_collect.c   | 10 ++++
+ fs/netfs/write_issue.c     | 48 ++++++++-----------
+ include/linux/netfs.h      | 13 ++++--
+ lib/iov_iter.c             | 20 +++++++-
+ lib/scatterlist.c          |  1 +
+ lib/tests/kunit_iov_iter.c |  5 +-
+ 12 files changed, 171 insertions(+), 48 deletions(-)
 
