@@ -1,47 +1,47 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B57AD35AC32
-	for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2026 14:07:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00A2333A9C1
+	for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2026 14:07:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782396473; cv=none; b=aoo8n/2k5JrBToso9KKmJRqzyhe+6pkOigHQjR2JRUxC+dUD4Tq3rKHQxceM8a1Em/8TyZ4Ug3U49N3eskjdN1bxD/26HAjxHF/qYCxwMv6CVtM4OpNA/FTGG0Ul+eRbcbWYCvY8mK2CRU3TgzvZK2dO8zJO7+iMySebgmSsrwg=
+	t=1782396478; cv=none; b=IJcxecT0UuZv4YcsMu1M6/9cQ+HhyQtbyQIxAwwY/x8xd7SlzY4ijFSt0M0KEDRd51hxVwyfI3H6TVedpKMDVO/MbPUqryE1FVrnz1rL9NmJflnes9BSrc9+3dToa2JwuG4xDyiNxxKNBYSa1cj/9FtZwoGSaLHoAz/2nB9owiw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782396473; c=relaxed/simple;
-	bh=XeKZjskD6VOpKhK4DCHRe6/r4KKjrrJrcuXfBF9rrj4=;
+	s=arc-20240116; t=1782396478; c=relaxed/simple;
+	bh=Yw8I/ZtEAnnW0CdmYQMxWMJdMjN1DXcG2LAXqW6L8Jw=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=aaU2cHeC+CyNLNDc5XalmfCDi9/aZoV/eee95zELW826/AtZmhikH8EDF4zVDBKBY4wzfQ34cRwbwMLv/kRdOsaGEg6fVQe8+QdGiYcjDTJngEV8BB8gg9pveDwdn+HPBVxk9qhChb4Bg9nXWKoSt1Mbo6Wqn5aeTx4K/X7iumE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dqHT75Uo; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=RKTrX/8LaHmDAgDtlWBxITor8S4qtTLgT2IQiiaHaLOrQJOZ4Ljd1ANbFN8W0JR6yH/vUPxfYiCqTng3Dt2DYPFWGnWTca0FPVbdlvpLKs4IjeFQQJF+jpdY+dtU6OD0FUZuZmM2uPQ18UT7WfbDNfFB2ztWOgI1hI6R4/WwSIE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Jyu/VGan; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dqHT75Uo"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Jyu/VGan"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1782396471;
+	s=mimecast20190719; t=1782396476;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=DZAdgt5Q5ecGnX+0eAge9E84oY2tNl0RIvK/bRkloIk=;
-	b=dqHT75UoPw1OjItLqIfNztQuOSOGmDIjsngEkG3f/c6EJfQqYW3akYAFR0LFGv0WTZp1on
-	Q6LTsFmwyVxRNF7BomJxn91GzFWcHzMIDYaOAXc8G5KvvJ6cb4ZLVHal0gSvpfK6srwxSz
-	FzuxlqdTYfdJTN4L6uBGsAYZmSu52DQ=
+	bh=rJeWotLSts92SfZtGdrDgp9DF0vvDCMz9s+A5IDIhUk=;
+	b=Jyu/VGanZkuVhgPbuOIGyTUapbIZKOPJBAG1nCTzlAAKgIcnD8u7lKK8qWDzZubmAmyctv
+	yIHdtlmIFeddiTw5t8BPqWcEaJuP1UqSOXKXy8kZ5rIraqSxIBT+OGM5JFEk3J4KGjOtb9
+	z4p1jSYpMGhi4iibcUiTLn2elB9R0EM=
 Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-127-dhqG_OpHODyzbYpseqLEMQ-1; Thu,
- 25 Jun 2026 10:07:42 -0400
-X-MC-Unique: dhqG_OpHODyzbYpseqLEMQ-1
-X-Mimecast-MFC-AGG-ID: dhqG_OpHODyzbYpseqLEMQ_1782396453
-Received: from mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.95])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-175-grfLy877P4WB6mRXKCs0EA-1; Thu,
+ 25 Jun 2026 10:07:51 -0400
+X-MC-Unique: grfLy877P4WB6mRXKCs0EA-1
+X-Mimecast-MFC-AGG-ID: grfLy877P4WB6mRXKCs0EA_1782396469
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 34B38197730D;
-	Thu, 25 Jun 2026 14:07:33 +0000 (UTC)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id F0E2D1955F61;
+	Thu, 25 Jun 2026 14:07:48 +0000 (UTC)
 Received: from warthog.procyon.org.com (unknown [10.44.49.152])
-	by mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 0D1C33189;
-	Thu, 25 Jun 2026 14:07:28 +0000 (UTC)
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id D67EE180065F;
+	Thu, 25 Jun 2026 14:07:45 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -53,11 +53,10 @@ Cc: David Howells <dhowells@redhat.com>,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	Matthew Wilcox <willy@infradead.org>,
-	Jens Axboe <axboe@kernel.dk>
-Subject: [PATCH v3 07/15] iov_iter: Fix a memory leak in iov_iter_extract_user_pages()
-Date: Thu, 25 Jun 2026 15:06:25 +0100
-Message-ID: <20260625140640.3116900-8-dhowells@redhat.com>
+	Matthew Wilcox <willy@infradead.org>
+Subject: [PATCH v3 10/15] netfs: Fix kdoc warning
+Date: Thu, 25 Jun 2026 15:06:28 +0100
+Message-ID: <20260625140640.3116900-11-dhowells@redhat.com>
 In-Reply-To: <20260625140640.3116900-1-dhowells@redhat.com>
 References: <20260625140640.3116900-1-dhowells@redhat.com>
 Precedence: bulk
@@ -67,60 +66,30 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.6 on 10.30.177.95
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
-There's a potential memory leak in callers of iov_iter_extract_user_pages()
-whereby if a pages array is allocated in function, it isn't freed before
-returning of an error or 0.
+Fix a kdoc warning due to a misnamed parameter in the description.
 
-Now, it's not a leak per se in iov_iter_extract_user_pages() as, if an
-array is allocated, it's returned through *pages, so it's incumbent on the
-caller to free it.  However, not all callers do.
-
-Fix this by freeing the table and clearing *pages before returning an error
-or 0.  Note that iov_iter_extract_pages() and its subfunctions are allowed
-to return 0 without returning an array (for instance if the iterator count
-is 0).
-
-Fixes: 7d58fe731028 ("iov_iter: Add a function to extract a page list from an iterator")
-Closes: https://sashiko.dev/#/patchset/20260616100821.2062304-1-dhowells%40redhat.com
+Reported-by: Matthew Wilcox <willy@infradead.org>
 Signed-off-by: David Howells <dhowells@redhat.com>
 cc: Paulo Alcantara <pc@manguebit.org>
-cc: Matthew Wilcox <willy@infradead.org>
-cc: Christoph Hellwig <hch@infradead.org>
-cc: Jens Axboe <axboe@kernel.dk>
 cc: netfs@lists.linux.dev
 cc: linux-fsdevel@vger.kernel.org
 ---
- lib/iov_iter.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+ include/linux/netfs.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/lib/iov_iter.c b/lib/iov_iter.c
-index 1661c237b643..5a6434709716 100644
---- a/lib/iov_iter.c
-+++ b/lib/iov_iter.c
-@@ -1756,6 +1756,7 @@ static ssize_t iov_iter_extract_user_pages(struct iov_iter *i,
- 	unsigned long addr;
- 	unsigned int gup_flags = 0;
- 	size_t offset;
-+	bool will_alloc = !*pages;
- 	int res;
+diff --git a/include/linux/netfs.h b/include/linux/netfs.h
+index 243c0f737938..bdc270e84b30 100644
+--- a/include/linux/netfs.h
++++ b/include/linux/netfs.h
+@@ -753,7 +753,7 @@ static inline void netfs_inode_init(struct netfs_inode *ctx,
  
- 	if (i->data_source == ITER_DEST)
-@@ -1772,8 +1773,14 @@ static ssize_t iov_iter_extract_user_pages(struct iov_iter *i,
- 	if (!maxpages)
- 		return -ENOMEM;
- 	res = pin_user_pages_fast(addr, maxpages, gup_flags, *pages);
--	if (unlikely(res <= 0))
-+	if (unlikely(res <= 0)) {
-+		if (will_alloc) {
-+			kvfree(*pages);
-+			*pages = NULL;
-+		}
- 		return res;
-+	}
-+
- 	maxsize = min_t(size_t, maxsize, res * PAGE_SIZE - offset);
- 	iov_iter_advance(i, maxsize);
- 	return maxsize;
+ /**
+  * netfs_resize_file - Note that a file got resized
+- * @ctx: The netfs inode being resized
++ * @ictx: The netfs inode being resized
+  * @new_i_size: The new file size
+  * @changed_on_server: The change was applied to the server
+  *
 
