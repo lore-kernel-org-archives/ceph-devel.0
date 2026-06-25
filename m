@@ -1,333 +1,187 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DCCE374E5B;
-	Thu, 25 Jun 2026 10:07:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C575C2E040D
+	for <ceph-devel@vger.kernel.org>; Thu, 25 Jun 2026 14:07:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782382030; cv=none; b=M8jIXtE/ReZXvyUhxU481zVODazT3EB10w51vSM4HF52qKUYk45vpevNUF2SdQrEyEs16dC+9fRIBjwsAReGRDhHrqHIz+IxlDchm3ng/xVMRlSJ98l9tyDPXo4PJfwZe7xCIYOepYde2QoOFGoixy06SkwCyEsorwYHlCng2RQ=
+	t=1782396424; cv=none; b=oku50UY98YuSV2XPJDeCvIJn2lLtaa5XVz1Yjy8BnBUrBkrhvmT0CnEtFEBkNjfvbgvUUre3nL0Okwjowwf+6BVvEQn2LyHDQqvQgFyi0gR1gzwoUhdJtBaGCeAZHbo7NFMfLC9jEW1t+pdd3CgiuLlVglniIgGSGEaeelLHKRk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782382030; c=relaxed/simple;
-	bh=jt6QbqC7/DJwqWscVvN6eh8kCadqRf5Q4gwptpG1Vsw=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=J+R2a/f8xe6V3Y5vwz/oYP7ipZNUw9rhr+UpglktchpZDpFuXdJbjdEEPPvkVyh69UxwbVljNCdsCEIyAbBxK9M+R4Ifn7wc4VmbZJJXyeI9vo8H0Arg9I1lyyJaxhjF5RqvhbmoPFtDmsVocZ8fMOzY+kTB/7XONNGO/rX1cOw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VJnTG2Ve; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1782396424; c=relaxed/simple;
+	bh=7tcZgU8bfqE0wXlxXrCFNaghRQFDKVfr+le4KLDifbU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=k6JVVm5KD4lwp8yATqHbmfrQcJAdD3mKHgxUmY7fMkScXkF1sKHtF+PYS4/tdqnKFnUL09cSA0+6sQg5lHWNtjsvkJZHFI5pZD3cPrDRwIe1+dD8Nym6Hx/SaJx8WUuwIft7Hs0jKVthTmFRL5KIcWa5IILdh5mXYUcfJvajOhQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=BQmGYhN3; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VJnTG2Ve"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id CBF06C2BCB3;
-	Thu, 25 Jun 2026 10:07:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1782382029;
-	bh=jt6QbqC7/DJwqWscVvN6eh8kCadqRf5Q4gwptpG1Vsw=;
-	h=From:Date:Subject:To:Cc:Reply-To:From;
-	b=VJnTG2Vex9U92YweE5rHGluE8PrLVHUoselfPqCTDJoEalTjtjD7DgqnOjuPVlIyw
-	 FxnKgOXQpaL+GZFjKpe04cNNwRyULtVqLgRf5IC8BIrCOmx0Gt+D4/8NyGtSzHWj/8
-	 eslOplcx0WpbVnpjFEdtmRzpnSkZn64nN5T3IkV0iiKwtF6CECRIplasmuKbd+0mfc
-	 dl03pBo0zLTgEl3cXmJoqJvNrHVQ6u8KLi/vsdHMKXc6KHGwOumuksYhyOArbzlzkR
-	 sFWNZJ0DpYQR6cYHKjRkQ0bKy88kkkRIYP1wyCz9oVMIQxFmkU8V4wWEFHE18rIXwB
-	 Cajzvdsrjgdpw==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FC18CDE008;
-	Thu, 25 Jun 2026 10:07:09 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Thu, 25 Jun 2026 18:06:59 +0800
-Subject: [PATCH] ceph: add 'lazyio' mount option to kclient
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BQmGYhN3"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1782396422;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=yPMszipsehEHbDwFN6/VRckHTpEfI2yoQJ9SiHNODMg=;
+	b=BQmGYhN3XsQAYv2GHSy6IN1RnKdsTNG8C5mDmy2bW7i4F02X0TbisDCpVWQHEp3wq2Easi
+	mPplVev685b3VPYdH6QTm5OQILjfITELKEXVN47jQpun0o/fd7UzXpiBuWDBE8uFRyN+Ft
+	I2Ubk6AGyv/SlM9goQWhwJ90CrA3pvE=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-627-x_jyWUqZOdWhoZ6eM57jwA-1; Thu,
+ 25 Jun 2026 10:06:58 -0400
+X-MC-Unique: x_jyWUqZOdWhoZ6eM57jwA-1
+X-Mimecast-MFC-AGG-ID: x_jyWUqZOdWhoZ6eM57jwA_1782396417
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 0FDEB1956067;
+	Thu, 25 Jun 2026 14:06:56 +0000 (UTC)
+Received: from warthog.procyon.org.com (unknown [10.44.49.152])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 291F01956088;
+	Thu, 25 Jun 2026 14:06:51 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	Christoph Hellwig <hch@infradead.org>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v3 00/15] netfs: Miscellaneous fixes
+Date: Thu, 25 Jun 2026 15:06:18 +0100
+Message-ID: <20260625140640.3116900-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Message-Id: <20260625-lazyio-v1-1-db13078789dd@clyso.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
- vPSU3UzU4B8JSMDIzMDMyNT3ZzEqsrMfF0zSwvzNHPjZFNT8zQloOKCotS0zAqwQdGxEH5xaVJ
- WanIJSLdSbS0Arv10pGoAAAA=
-X-Change-ID: 20260625-lazyio-6987f73c557f
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1782382027; l=10168;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=PM08fe1LNt30o34qqJUNodDi+sgsOhN8kdGyuU5/DCE=;
- b=dwfGhD65fy3yAnefPFG+5Lyjv9fYg4h5baopfHJnr4aUNh9YXCmGmPYDLT1f3ZrSdIAHbbpok
- juQ+z2SLO2NBeitrcU1a61PC38E0cJ+xz4NP5PQkJReqaY6w7pIrgi2
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-From: Xiubo Li <xiubo.li@clyso.com>
+Hi Christian,
 
-Add a 'lazyio' mount option to the kernel Ceph client that enables
-LazyIO globally for all regular file opens on a mount. This is the
-kclient equivalent of the 'client_force_lazyio=true' config option
-in the ceph-fuse userspace client.
+Here are some miscellaneous fixes for netfslib.  I separated them from my
+netfs-next branch.  Various Sashiko review comments[1][2][3] are addressed:
 
-When 'lazyio' is specified, CEPH_FILE_MODE_LAZY is automatically
-added to every regular file's fmode at open time in
-ceph_init_file_info(), causing the I/O paths to request
-CEPH_CAP_FILE_LAZYIO from the MDS. This permits buffered I/O via
-the page cache even when multiple clients have the file open for
-write — beneficial for HPC workloads that can tolerate relaxed
-cache coherency.
+ (1) Fix the decision whether to disallow write-streaming due to fscache
+     use.
 
-The mount option is exposed as 'lazyio' / 'nolazyio' via the VFS
-fsparam_flag_no mechanism and supports remount.
+ (2) Fix netfs_create_write_req() to better handle async cache object
+     creation.
 
-Link: https://tracker.ceph.com/issues/77594
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
-Add a 'lazyio' mount option that enables LazyIO globally for all regular
-file opens on a CephFS mount. This is the kclient equivalent of the
-'client_force_lazyio=true' config option in ceph-fuse.
+ (3) Fix a double fput in cachefiles_create_tmpfile().
 
-When 'lazyio' is specified, CEPH_FILE_MODE_LAZY is automatically set on
-every regular file's fmode at open time. The I/O paths then request
-CEPH_CAP_FILE_LAZYIO from the MDS, which permits buffered I/O via the
-page cache even with concurrent writers — beneficial for HPC workloads
-that can tolerate relaxed cache coherency.
+ (4) Fix alteration of S_KERNEL_FILE inode flag without holding inode lock.
 
-The mount option supports 'lazyio' / 'nolazyio' via fsparam_flag_no
-and can be changed at remount.
+ (5) Fix a potential mathematical underflow in
+     iov_iter_extract_xarray_pages() and make it return 0 and free the
+     array if no pages could be extracted.
 
-The following is a test report:
+ (6) Fix a missing alloc failure check in iov_iter_extract_bvec_pages().
 
-=== LazyIO Multi-Client Read Test ===
-(B writes → MDS revokes CACHE from A; lazyio keeps LAZYIO → buffered reads)
+ (7) Fix iov_iter_extract_user_pages() so that it doesn't leak the pages
+     array if it returns an error or 0 (inasmuch as the leak is really in
+     the callers).
 
-  nolazyio: 200 MB in 0.63s -> 319.8 MB/s
-  lazyio  : 200 MB in 0.24s -> 840.3 MB/s
----
- fs/ceph/caps.c  | 75 +++++++++++++++++++++++++++++++++++++++++++++++++--------
- fs/ceph/file.c  |  7 ++++++
- fs/ceph/super.c | 15 ++++++++++++
- fs/ceph/super.h |  1 +
- 4 files changed, 88 insertions(+), 10 deletions(-)
+ (8) Remove an unused variable in kunit_iov_iter.c.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d51454e995a8..a4e1a1aade9d 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -999,6 +999,31 @@ int __ceph_caps_used(struct ceph_inode_info *ci)
- 	return used;
- }
- 
-+/*
-+ * Substitute LAZYIO for CACHE/BUFFER when they are not issued.
-+ * If we have LAZYIO but not CACHE/BUFFER, report LAZYIO as used instead
-+ * so the MDS knows we're fine with the weaker consistency guarantee.
-+ */
-+static inline int ceph_adjust_caps_used_for_lazyio(int used, int issued,
-+					int implemented)
-+{
-+	if (!(used & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_BUFFER)))
-+		return used;
-+	if (!(implemented & CEPH_CAP_FILE_LAZYIO))
-+		return used;
-+	if (issued & CEPH_CAP_FILE_LAZYIO) {
-+		if (!(issued & CEPH_CAP_FILE_CACHE)) {
-+			used &= ~CEPH_CAP_FILE_CACHE;
-+			used |= CEPH_CAP_FILE_LAZYIO;
-+		}
-+		if (!(issued & CEPH_CAP_FILE_BUFFER)) {
-+			used &= ~CEPH_CAP_FILE_BUFFER;
-+			used |= CEPH_CAP_FILE_LAZYIO;
-+		}
-+	}
-+	return used;
-+}
-+
- #define FMODE_WAIT_BIAS 1000
- 
- /*
-@@ -2049,6 +2074,10 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
- 	 * usually because they have outstanding references).
- 	 */
- 	issued = __ceph_caps_issued(ci, &implemented);
-+
-+	/* substitute LAZYIO for CACHE/BUFFER when they are not issued */
-+	used = ceph_adjust_caps_used_for_lazyio(used, issued, implemented);
-+
- 	revoking = implemented & ~issued;
- 
- 	want = file_wanted;
-@@ -2905,9 +2934,22 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 				}
- 				snap_rwsem_locked = true;
- 			}
--			if ((have & want) == want)
-+			/*
-+			 * Allow LAZYIO to act as a substitute for CACHE
-+			 * or BUFFER when those caps are not issued.
-+			 */
-+			if ((have & want) == want ||
-+			    ((have & CEPH_CAP_FILE_LAZYIO) &&
-+			     !(exclude & CEPH_CAP_FILE_LAZYIO) &&
-+			     ((have & want) ==
-+			      (want & ~(CEPH_CAP_FILE_CACHE |
-+					CEPH_CAP_FILE_BUFFER))))) {
- 				*got = need | (want & ~exclude);
--			else
-+				if ((*got & CEPH_CAP_FILE_CACHE) &&
-+				    !(have & CEPH_CAP_FILE_CACHE) &&
-+				    (have & CEPH_CAP_FILE_LAZYIO))
-+					*got |= CEPH_CAP_FILE_LAZYIO;
-+			} else
- 				*got = need;
- 			ceph_take_cap_refs(ci, *got, true);
- 			ret = 1;
-@@ -3525,13 +3567,20 @@ static void handle_cap_grant(struct inode *inode,
- 
- 
- 	/*
--	 * If CACHE is being revoked, and we have no dirty buffers,
--	 * try to invalidate (once).  (If there are dirty buffers, we
--	 * will invalidate _after_ writeback.)
-+	 * Check the revocation of *both* CACHE and LAZYIO, because
-+	 * CACHE may have been revoked earlier and cap->issued no
-+	 * longer contains it -- at that point only LAZYIO was
-+	 * covering us.  If LAZYIO is now also being revoked and no
-+	 * cache cap remains, we must invalidate the page cache.
-+	 * Without this, a CACHE-revoked-then-LAZYIO-revoked sequence
-+	 * leaves stale pages in memory until the next periodic
-+	 * check_caps (up to 60s).  Also invalidate when we have no
-+	 * dirty buffers (if dirty, invalidate after writeback).
- 	 */
- 	if (S_ISREG(inode->i_mode) && /* don't invalidate readdir cache */
--	    ((cap->issued & ~newcaps) & CEPH_CAP_FILE_CACHE) &&
--	    (newcaps & CEPH_CAP_FILE_LAZYIO) == 0 &&
-+	    ((cap->issued & ~newcaps) &
-+	     (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) &&
-+	    !(newcaps & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) &&
- 	    !(ci->i_wrbuffer_ref || ci->i_wb_ref)) {
- 		if (try_nonblocking_invalidate(inode)) {
- 			/* there were locked pages.. invalidate later
-@@ -3675,6 +3724,7 @@ static void handle_cap_grant(struct inode *inode,
- 	/* check cap bits */
- 	wanted = __ceph_caps_wanted(ci);
- 	used = __ceph_caps_used(ci);
-+	used = ceph_adjust_caps_used_for_lazyio(used, cap->issued, cap->implemented);
- 	dirty = __ceph_caps_dirty(ci);
- 	doutc(cl, " my wanted = %s, used = %s, dirty %s\n",
- 	      ceph_cap_string(wanted), ceph_cap_string(used),
-@@ -3702,13 +3752,18 @@ static void handle_cap_grant(struct inode *inode,
- 		doutc(cl, "revocation: %s -> %s (revoking %s)\n",
- 		      ceph_cap_string(cap->issued), ceph_cap_string(newcaps),
- 		      ceph_cap_string(revoking));
-+		/*
-+		 * If BUFFER or LAZYIO is being revoked and we have
-+		 * dirty data, trigger writeback before acking.
-+		 */
- 		if (S_ISREG(inode->i_mode) &&
--		    (revoking & used & CEPH_CAP_FILE_BUFFER)) {
-+		    (revoking & used &
-+		     (CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO))) {
- 			writeback = true;  /* initiate writeback; will delay ack */
- 			revoke_wait = true;
- 		} else if (queue_invalidate &&
--			 revoking == CEPH_CAP_FILE_CACHE &&
--			 (newcaps & CEPH_CAP_FILE_LAZYIO) == 0) {
-+			 (revoking & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) &&
-+			 !(newcaps & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO))) {
- 			revoke_wait = true; /* do nothing yet, invalidation will be queued */
- 		} else if (cap == ci->i_auth_cap) {
- 			check_caps = 1; /* check auth cap only */
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index d54d71669176..36888ce7b587 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -251,6 +251,13 @@ static int ceph_init_file_info(struct inode *inode, struct file *file,
- 		file->private_data = fi;
- 	}
- 
-+	/* If lazyio mount option is set, enable lazyio for all regular files */
-+	if (!isdir && (opt->flags & CEPH_MOUNT_OPT_LAZYIO)) {
-+		fmode |= CEPH_FILE_MODE_LAZY;
-+		doutc(cl, "%p %llx.%llx force_lazyio: added LAZY to fmode\n",
-+		      inode, ceph_vinop(inode));
-+	}
-+
- 	ceph_get_fmode(ci, fmode, 1);
- 	fi->fmode = fmode;
- 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c05fbd4237f8..0bbd38933f0e 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -177,6 +177,7 @@ enum {
- 	Opt_wsync,
- 	Opt_pagecache,
- 	Opt_sparseread,
-+	Opt_lazyio,
- };
- 
- enum ceph_recover_session_mode {
-@@ -203,6 +204,7 @@ static const struct fs_parameter_spec ceph_mount_parameters[] = {
- 	fsparam_flag_no	("fsc",				Opt_fscache), // fsc|nofsc
- 	fsparam_string	("fsc",				Opt_fscache), // fsc=...
- 	fsparam_flag_no ("ino32",			Opt_ino32),
-+	fsparam_flag_no	("lazyio",			Opt_lazyio),
- 	fsparam_string	("mds_namespace",		Opt_mds_namespace),
- 	fsparam_string	("mon_addr",			Opt_mon_addr),
- 	fsparam_flag_no ("poolperm",			Opt_poolperm),
-@@ -593,6 +595,12 @@ static int ceph_parse_mount_param(struct fs_context *fc,
- 		else
- 			fsopt->flags |= CEPH_MOUNT_OPT_SPARSEREAD;
- 		break;
-+	case Opt_lazyio:
-+		if (result.negated)
-+			fsopt->flags &= ~CEPH_MOUNT_OPT_LAZYIO;
-+		else
-+			fsopt->flags |= CEPH_MOUNT_OPT_LAZYIO;
-+		break;
- 	case Opt_test_dummy_encryption:
- #ifdef CONFIG_FS_ENCRYPTION
- 		fscrypt_free_dummy_policy(&fsopt->dummy_enc_policy);
-@@ -749,6 +757,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
- 		seq_puts(m, ",nopagecache");
- 	if (fsopt->flags & CEPH_MOUNT_OPT_SPARSEREAD)
- 		seq_puts(m, ",sparseread");
-+	if (fsopt->flags & CEPH_MOUNT_OPT_LAZYIO)
-+		seq_puts(m, ",lazyio");
- 
- 	fscrypt_show_test_dummy_encryption(m, ',', root->d_sb);
- 
-@@ -1410,6 +1420,11 @@ static int ceph_reconfigure_fc(struct fs_context *fc)
- 	else
- 		ceph_clear_mount_opt(fsc, SPARSEREAD);
- 
-+	if (fsopt->flags & CEPH_MOUNT_OPT_LAZYIO)
-+		ceph_set_mount_opt(fsc, LAZYIO);
-+	else
-+		ceph_clear_mount_opt(fsc, LAZYIO);
-+
- 	if (strcmp_null(fsc->mount_options->mon_addr, fsopt->mon_addr)) {
- 		kfree(fsc->mount_options->mon_addr);
- 		fsc->mount_options->mon_addr = fsopt->mon_addr;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index afc89ce91804..aec2eb4d0256 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -45,6 +45,7 @@
- #define CEPH_MOUNT_OPT_ASYNC_DIROPS    (1<<15) /* allow async directory ops */
- #define CEPH_MOUNT_OPT_NOPAGECACHE     (1<<16) /* bypass pagecache altogether */
- #define CEPH_MOUNT_OPT_SPARSEREAD      (1<<17) /* always do sparse reads */
-+#define CEPH_MOUNT_OPT_LAZYIO          (1<<18) /* force lazyio for all file opens */
- 
- #define CEPH_MOUNT_OPT_DEFAULT			\
- 	(CEPH_MOUNT_OPT_DCACHE |		\
+ (9) Fix extract_xarray_to_sg() to calculate folio offset correctly.
 
----
-base-commit: 9fc75b71fdd38465c76c6f6a884cdd4ae3c72d90
-change-id: 20260625-lazyio-6987f73c557f
+(10) Fix a kdoc comment.
 
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
+(11) Replace the netfs_inode::wb_lock mutex with a bit lock so that the
+     lock can be passed to the collector so that multiple asynchronous
+     writebacks won't interfere with each other.
 
+(12) Fix writeback error handling to go through writeback_iter() so that it
+     can clean up its state.
+
+(13) Fix ENOMEM handling in writeback to clean up the current folio if we
+     can't allocate a rolling buffer segment.
+
+(14) Fix unbuffered/DIO write retry for filesystems that don't have a
+     ->prepare_write() method.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-fixes
+
+Thanks,
+David
+
+[1] https://sashiko.dev/#/patchset/20260608145432.681865-1-dhowells%40redhat.com
+[2] https://sashiko.dev/#/patchset/20260616100821.2062304-1-dhowells%40redhat.com
+[3] https://sashiko.dev/#/patchset/20260619140646.2633762-1-dhowells%40redhat.com
+[4] https://sashiko.dev/#/patchset/20260624115737.2964520-1-dhowells%40redhat.com
+
+Changes
+=======
+ver #3)
+- Addressed more Sashiko comments[4]:
+  - Applied the disallow write-streaming fix to netfs_write_begin() also.
+  - Improve the synchronisation with async cache object creation in
+    netfs_create_write_req().
+  - Fix netfs_writepages() so it doesn't both redirty and kill folios (and
+    double unlock) if it can't create the request.
+  - Move the cleanup of the folio on ENOMEM from netfs_write_folio() to
+    netfs_writepages() as writethrough shouldn't do this.
+  - Alter the unbuffered/DIO write retry fix so that it sets the
+    IN_PROGRESS flag.  Also made it clear the MADE_PROGRESS flag and update
+    wreq->transferred.
+
+ver #2)
+- Addressed various Sashiko comments[3]:
+  - Changed some kfree() to kvfree().
+  - Added some writeback error handling patches.
+- Fixed DIO write retry.
+
+ver #1)
+- Added a fix for S_KERNEL_FILE in cachefiles_bury_object().
+- Fixed how iov_iter_extract_*_pages() deals with *pages when returning 0
+  or error.
+- Fixed the replacement of wb_lock with bit lock:
+  - Only release the bit lock for writeback, writethrough and write-single,
+    not for PG_private_2-based I/O, which doesn't take the lock.
+  - In netfs_writeback_single(), need to redirty the inode if can't get the
+    lock.
+
+David Howells (15):
+  netfs: Fix decision whether to disallow write-streaming due to fscache
+    use
+  netfs: Fix netfs_create_write_req() to handle async cache object
+    creation
+  cachefiles: Fix double fput
+  cachefiles: Fix file burial to take lock when unsetting S_KERNEL_FILE
+  iov_iter: Fix potential underflow in iov_iter_extract_xarray_pages()
+  iov_iter: Fix missing alloc fail check in
+    iov_iter_extract_bvec_pages()
+  iov_iter: Fix a memory leak in iov_iter_extract_user_pages()
+  iov_iter: Remove unused variable in kunit_iov_iter.c
+  scatterlist: Fix offset in folio calc in extract_xarray_to_sg()
+  netfs: Fix kdoc warning
+  netfs: Replace wb_lock with a bit lock for asynchronicity
+  netfs: Fix writethrough to use collection offload
+  netfs: Fix writeback error handling
+  netfs: Fix folio state after ENOMEM whilst under writeback iteration
+  netfs: Fix DIO write retry for filesystems without a ->prepare_write()
+
+ fs/afs/symlink.c           |  4 +-
+ fs/cachefiles/namei.c      |  3 +-
+ fs/netfs/buffered_read.c   |  2 +-
+ fs/netfs/buffered_write.c  |  2 +-
+ fs/netfs/direct_write.c    | 18 +++-----
+ fs/netfs/internal.h        | 12 +++++
+ fs/netfs/locking.c         | 95 ++++++++++++++++++++++++++++++++++++++
+ fs/netfs/write_collect.c   | 10 ++++
+ fs/netfs/write_issue.c     | 55 ++++++++++------------
+ include/linux/netfs.h      | 13 ++++--
+ lib/iov_iter.c             | 20 +++++++-
+ lib/scatterlist.c          |  1 +
+ lib/tests/kunit_iov_iter.c |  5 +-
+ 13 files changed, 185 insertions(+), 55 deletions(-)
 
