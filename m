@@ -1,77 +1,76 @@
-Received: from mail-yx1-f41.google.com (mail-yx1-f41.google.com [74.125.224.41])
+Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB25C380FDE
-	for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 18:13:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 174D12FD69E
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 18:17:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782756792; cv=none; b=NUfHsz6b1M1t9xResbcKSxtWJcc24DP37CHrB/gBXBr4TE5u8tneYr/VIKZOtPRQfgbc8e7qicDwtqUkiPeJy4KGMWzZ/g6r8FmMX3N3MTpit8/2pGs/lXyNI9BM8V9H0cDipIk8n2B2CCKUy5oHUKTgxyG/0wIKHxxhpIO2Zrg=
+	t=1782757051; cv=none; b=qrRRBOupi5Y067FL3jiLNZchc+7+pUWMeYdImYZeyiB+bO71W2BDtdssi17bn93Pupq+J4hIpxAmvwjEuADiuVHjuC0Y00JIkjtE1U9UbPI6b+/xh99G75LpDmgvOXdyVv33hCW7vQrCmSihF9UbkPZokhvkyqvILe2s8LD9N+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782756792; c=relaxed/simple;
-	bh=1Urt0KlkkUCNFIXX2SMeq8ob/I+W23dsau/MWlDtRxw=;
+	s=arc-20240116; t=1782757051; c=relaxed/simple;
+	bh=nF3zW/vM7R+yqFt3KraOlAiqir33ozR0sP3l8+5uHLg=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=QrQ9XNQsO+Qu5PQhtP3/MBBBOsWiLV7o2PzT8j+9lQelX2M3PcjlTUeJkFY8gh7a8FbxRPh2fpUx1Qqqg6SY7JKyc8Jdl/i01crRUSalPEw3E9qL3ZoIRTy4bsb39kWGqP5LfFLBYYO0URuMSEHOk/dQxIxSXqiBXaSzIOJbxQU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=wbuS4k1z; arc=none smtp.client-ip=74.125.224.41
+	 Content-Type:MIME-Version; b=Zafb/l5RmVtMJ3jNBJYYiLtQZNbAPdZYbltJuvo85MvWhrIqXiXHPRLMn3H2+6Rqno/gXXjopdJGxHsZ1fTCDuUxkCJW4KBG7yIlolC38rHJoc72/z0d7QLLk0LRlvN02Do3fcX0Pz6KEct1hmuVI9uIYiW5Hs5WIVJPezNvTLc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=XECR0wYx; arc=none smtp.client-ip=209.85.128.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="wbuS4k1z"
-Received: by mail-yx1-f41.google.com with SMTP id 956f58d0204a3-664c1cf7445so2033063d50.2
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 11:13:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="XECR0wYx"
+Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-80a1fb0c683so32395457b3.1
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 11:17:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782756790; x=1783361590; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782757049; x=1783361849; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=9Xk5917eDNawOHNAXep2M4wtk9i47DxkAHjv3jRATa0=;
-        b=wbuS4k1zLQS2UEqx+WWNdR6lGJ+XD0UsJ952LY4K95rc7Q+BSoUWrDoAdSEpOIAMRd
-         3oEFEsCEwBdrI8uL1XX3UEz7pYVL13d3EdAmZvMCLFVExeMDy5TtzRmBdTrSgsPr104U
-         XRFuQpiAoG8bXajfXv8KqcJ1Dt7SInveWiCfKXL45NtmyIQQ0XEoed52wenx0mqZjaY+
-         wi6Q+Nky4HwjK8pKbmE36O4L8GdFVNVgaW/3rngFGajNcMppRRKh0I4kXfkFjeJiJq9l
-         KMo7oBADtnQfFdr69+jzapHG9hkKu8/t4r5hWilHzSi2NlnF7ockEVvV+SsnfBKuzt/D
-         hICA==
+        bh=0ruul2XvYScI/bfthC8srUtcHVFwUQjm2hy407QDBUs=;
+        b=XECR0wYxu0Scvm9lJtViOTdT71q8V9HlJpoym431HH9gzWrNJZzLJv+5ppNMg8teEG
+         SVsa864CJ+Rtm3Q62H0dztJCfJHmcBr1G/V5WxH0VaCOaPQ7IITBZj5DMubM/oiB83Jb
+         bqRmNnCTsFQjVa/KH9YwaFAmOvx8879JCwwU+io9iVwT4jdGoweMASQcT/28Qc0POj5I
+         AdJptRmQ1NqIGNKjOM8/zDR2Die+CY2QpM+uJdGMXBbN/Q+tDxwhEhiyNTdwdJ70QP4A
+         UMhuFZ3g0VhlpUIpNNZbcVhjWUWhVV8+ThtUCsxBOw4DfH566geASIpfM2zIAeQYh18x
+         seeA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782756790; x=1783361590;
+        d=1e100.net; s=20251104; t=1782757049; x=1783361849;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=9Xk5917eDNawOHNAXep2M4wtk9i47DxkAHjv3jRATa0=;
-        b=Ygg91zgfBSEe75eECGxaAswNoSj0TqMr0XGUCjAV+YAaNjVAu7ymkYAU75mIVl7xWO
-         42pr3bTDiKtJdrNP0kGsoJfiJxaRsArDjSwiLZRMIgzcm2weVc/QatSp7GhSUp0hbucd
-         /SDy0GRelkiOH0wJ+knPznrSaLZiWAOk9O8IOvQKO3NNnY5ugkwYMcisocv0yrgK7RnR
-         UhJCyJmfAqe8GUMnfZDOLIX8gI7Jee2DbuMiT85N+DRjTlBvvN+XpUcodM2KbwK82VLe
-         /ArYsjOmDxMDrmTkQXAqUlXp696CwAZY22c6NLrksbxncXmqZWfTkdxdPK4o6uHtnC5B
-         Hv2Q==
-X-Forwarded-Encrypted: i=1; AHgh+RpT4E5T+6aS9nxtZ37JhoazzSrBTuG0z8RDmj7Gwb0YEiQB+bWanqLQsoOSH/cwB/J4zNcAdbSw7tg9@vger.kernel.org
-X-Gm-Message-State: AOJu0YxqgI8SB9nDTpMoZzpujEPG72hA9bbgEntM1whnUXxORiJ8tsaM
-	b1xuDaSMM1c9pZDGlC80LmI5PPghN65F0PeIHyhgc4gny0URcWxHN/zfIxmrtb2yzRk=
-X-Gm-Gg: AfdE7cmAzsRAhI+TtzuLkZe80zUAmVHlCZ4rp4TmewMJdbQVvb6eVJjKqdvCAI9uh4j
-	kKEkiTqtzMqmtk2tXzGYX4g7FoPHWPe4VhxIATXu9pdYSet0MXTwhZgXAXirm71gBk/+d6FQYFp
-	rTg1Pu/aIdeHJcxobixDXjdbddgJbv9dZuf6abOHnNhH1PPS3d1jbMeey66J5OFhmOkBrHFxKzF
-	SZFKejZVLCXbns+g79IcjLAQqx0sJRoEnV2zO9Xcpk5/us8jZCZ3YLm/yxEBVDXC9P7YOtrxU1G
-	eSBV6h93tJtzEFRC2w8idFO1O1VyggKeFr0SPWjbUE6sdbtL5qs+NxVQAghtfKI4k8VspafaRgT
-	oyI84vupqn5l78gxqAo8u0B3MDkOTCWXJxqtmsM1JorpJr6AfGX18Sdc9JmzWteT7KVb7YxRKzn
-	wu2xgqNYqBtVwEkbaBmXgTRdJp47uu8gOb/Ls9pa4CLeDjzk4br2Rbm2QgYgnDUQisptJQKUPx+
-	IsRPAyaNOBNXT6hi25FJ5agvx8i+unso5ktyhSfhfeL/lfDoDZ/cXL8iRVRl3CyeArehkJQCVpu
-	VqzeKKs=
-X-Received: by 2002:a05:690c:c18:b0:80c:f6bb:566f with SMTP id 00721157ae682-810da20e3c9mr5822817b3.51.1782756789450;
-        Mon, 29 Jun 2026 11:13:09 -0700 (PDT)
+        bh=0ruul2XvYScI/bfthC8srUtcHVFwUQjm2hy407QDBUs=;
+        b=Vd3V2SxstdtPdhOfMA+8/Ig7ZJWpfkX4nEaD6gHxeV0kVGQB4naEqw85xVg6gbejF6
+         UeJ6zQvGFxQyUZgBuBPDmSes3S5vIoXnziN/tdofhcpsXB7km8CIJky1NXRQTU0r1EVg
+         I4UriX/NJpF1lqPe/GTOIbhKkcM/9UMKC4PJDU56+XbP9Ag0vwhjaruXoZEP/fW5v4G5
+         uFDTjxR+beOhNhDYCU0Rj3ajPqyBj1jbNesD70aZdxC6xxeqYNhm5WgdDVL9IpcQ79mj
+         sSl+fANzFSBN6R5f8nVx2rYr45ZHyKBkXntKHBOuR/M8TgFtrQ9RvpH0LdX2b4+/aGdg
+         dS6w==
+X-Forwarded-Encrypted: i=1; AHgh+Rpi9PA1mQUlgPKQYEJnssofw7E9s9v4ppyVXpz8MWjQa1NdrMpuZ/HhMjq/4gg4i/ShGXOuN91YDs7s@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw8IBta7j9/z76L6rT1plJOBMoTYJqEdJrbQnUHy7KlU52sgZQY
+	noSbUwM/D/J7um9+huzoUC9ablXE6wKvXMEJDV/QIe5rCOAAvHYQnSQ00WiJBOpLCo8=
+X-Gm-Gg: AfdE7cmOlFOM60jW5Hn6e/qP5AI/FjyA4gNbwABs8VQzOAowWj4Y5hEoF84z39eitxc
+	Xju1UQ6ktKOt8biXHOJlZUCrQ9c0Ti5RH5dCTJ+HA8MOQ7dpZRuYVn4iJILAHEhH5pUaS9QqwuV
+	HtNVPK079T7yMiiHFZQxPqiT8vVb54EvGKFxkyESoduSF5U6KcvaEkC2ZFBNKQBqrpyFrzawqKf
+	X1QarWZO2AzpXZxOfyqwMcr30HRqxlzuHToSVqikNuWh9NA1PwCOHOrU/QC5ZesdqbnNP6OwR2+
+	+mJRg2M9D0eJxwnd9Q09GnKLyxFQqkJJb31hrYmTEUS4nsqr98OPrkWQ1u1qJCmdLA53uOa2TjD
+	ojlWfwxsH+lJWa25Xsbw9dxhSqmeMnw8LvWdgZIphlD2ksAvOQ6vIPzB2WoRfrvj28Y49kSLVex
+	HQ5v0yl6sPMGxCEqqGN0np5K0EDB2fqCF+Kx4jCOiXCpkZREEQk9PFmNdN+GBnMXBWhCRg75qlv
+	eGZxCH1SlaE4miRGrnfJPr9G1JWFra2wzyem+H2AjnkaPSTPyKq0OvFJ6/5o+9Ga05MZ3kGru+V
+	IChtSQQ=
+X-Received: by 2002:a05:690c:490d:b0:7d0:79f:339f with SMTP id 00721157ae682-810d990871cmr7646997b3.34.1782757049137;
+        Mon, 29 Jun 2026 11:17:29 -0700 (PDT)
 Received: from [10.0.0.3] (162-197-212-70.lightspeed.sntcca.sbcglobal.net. [162.197.212.70])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-810e78731a7sm1145127b3.11.2026.06.29.11.13.07
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-810ea25a12bsm1051587b3.38.2026.06.29.11.17.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Jun 2026 11:13:09 -0700 (PDT)
-Message-ID: <a8f035b7902fa05b77686ff4528df62203800af0.camel@dubeyko.com>
-Subject: Re: [PATCH 1/1] libceph: debugfs: remove client files before
- teardown
+        Mon, 29 Jun 2026 11:17:28 -0700 (PDT)
+Message-ID: <786d6b74d9a13b84ea0f241c2e7e5abecf7ff9da.camel@dubeyko.com>
+Subject: Re: [PATCH ceph 1/1] libceph: osdmap: guard missing CRUSH type name
+ lookup
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Ren Wei <n05ec@lzu.edu.cn>, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net, 
-	yuantan098@gmail.com, zcliangcn@gmail.com, bird@lzu.edu.cn, 
-	ldy3087146292@gmail.com
-Date: Mon, 29 Jun 2026 11:13:05 -0700
-In-Reply-To: <e346902d49608e030177ffb00423e776f4a916ee.1781280238.git.ldy3087146292@gmail.com>
-References: <cover.1781280238.git.ldy3087146292@gmail.com>
-	 <e346902d49608e030177ffb00423e776f4a916ee.1781280238.git.ldy3087146292@gmail.com>
+Cc: idryomov@gmail.com, amarkuze@redhat.com, jlayton@kernel.org, 
+	yuantan098@gmail.com, zcliangcn@gmail.com, bird@lzu.edu.cn, zzhan461@ucr.edu
+Date: Mon, 29 Jun 2026 11:17:24 -0700
+In-Reply-To: <c6e4a1cef523893d420ba622078fb03219d78747.1781808861.git.zzhan461@ucr.edu>
+References: <cover.1781808861.git.zzhan461@ucr.edu>
+	 <c6e4a1cef523893d420ba622078fb03219d78747.1781808861.git.zzhan461@ucr.edu>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -126,53 +125,54 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Mon, 2026-06-15 at 14:31 +0800, Ren Wei wrote:
-> From: Douya Le <ldy3087146292@gmail.com>
+On Fri, 2026-06-19 at 15:40 +0800, Ren Wei wrote:
+> From: Zhao Zhang <zzhan461@ucr.edu>
 >=20
-> ceph_destroy_client() tears down the monitor client before removing
-> the per-client debugfs files. A concurrent read of the monmap debugfs
-> file can enter monmap_show() after ceph_monc_stop() has freed
-> monc->monmap, triggering a use-after-free.
+> Localized read selection can walk a parent bucket whose name exists
+> in
+> the CRUSH map while its type has no matching entry in type_names.
+> get_immediate_parent() then dereferences a NULL type_cn and passes an
+> invalid pointer into strcmp(), causing a null-ptr-deref.
 >=20
-> Remove the debugfs files before stopping the OSD and monitor clients.
-> debugfs_remove() drains active handlers and prevents new accesses, so
-> the debugfs callbacks can no longer race the rest of client teardown.
+> Skip such malformed parent buckets unless both the bucket name and
+> type
+> name metadata are present. This keeps malformed hierarchy data from
+> crashing locality lookup and safely falls back to "not local".
 >=20
-> Fixes: 76aa844d5b2f ("ceph: debugfs")
+> Fixes: 117d96a04f00 ("libceph: support for balanced and localized
+> reads")
 > Cc: stable@vger.kernel.org
 > Reported-by: Yuan Tan <yuantan098@gmail.com>
 > Reported-by: Zhengchuan Liang <zcliangcn@gmail.com>
 > Reported-by: Xin Liu <bird@lzu.edu.cn>
-> Assisted-by: Codex:gpt-5.4
-> Signed-off-by: Douya Le <ldy3087146292@gmail.com>
+> Assisted-by: Codex:GPT-5.4
+> Signed-off-by: Zhao Zhang <zzhan461@ucr.edu>
 > Signed-off-by: Ren Wei <n05ec@lzu.edu.cn>
 > ---
-> =C2=A0net/ceph/ceph_common.c | 4 ++--
-> =C2=A01 file changed, 2 insertions(+), 2 deletions(-)
+> =C2=A0net/ceph/osdmap.c | 5 ++++-
+> =C2=A01 file changed, 4 insertions(+), 1 deletion(-)
 >=20
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 952121849..a797c7360 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -762,13 +762,13 @@ void ceph_destroy_client(struct ceph_client
-> *client)
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 8b5b0587a0cf..5eb50d9c1361 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -3055,8 +3055,11 @@ static int get_immediate_parent(struct
+> crush_map *c, int id,
+> =C2=A0			if (b->items[j] !=3D id)
+> =C2=A0				continue;
 > =C2=A0
-> =C2=A0	atomic_set(&client->msgr.stopping, 1);
-> =C2=A0
-> +	ceph_debugfs_client_cleanup(client);
+> -			*parent_type_id =3D b->type;
+> =C2=A0			type_cn =3D lookup_crush_name(&c->type_names,
+> b->type);
+> +			if (!type_cn)
+> +				continue;
 > +
-> =C2=A0	/* unmount */
-> =C2=A0	ceph_osdc_stop(&client->osdc);
-> =C2=A0	ceph_monc_stop(&client->monc);
-> =C2=A0	ceph_messenger_fini(&client->msgr);
-> =C2=A0
-> -	ceph_debugfs_client_cleanup(client);
-> -
-> =C2=A0	ceph_destroy_options(client->options);
-> =C2=A0
-> =C2=A0	kfree(client);
+> +			*parent_type_id =3D b->type;
+> =C2=A0			parent_loc->cl_type_name =3D type_cn->cn_name;
+> =C2=A0			parent_loc->cl_name =3D cn->cn_name;
+> =C2=A0			return b->id;
 
-Makes sense to me.
+Looks good.
 
 Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
 
