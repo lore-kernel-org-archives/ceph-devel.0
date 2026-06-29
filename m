@@ -1,74 +1,75 @@
-Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
+Received: from mail-yx1-f47.google.com (mail-yx1-f47.google.com [74.125.224.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9690243E486
-	for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 16:46:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8C033F0ABB
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 16:46:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782751574; cv=none; b=B7SH/KNz2AKexPBeHnZsss+7GhiYt/6VO6bBo3ijIE1rIkzr/lP+SuDlmEYnqArYuGd1ewVLM6K4Cth6YDTayG9v03infJU02+BJyQ2SxnSREFiqPMvz/qacYU+ytMYmNyr3aCmuB2Jbc6GAbnA4NJfsBYKfqzL6AIy1CVnpthw=
+	t=1782751595; cv=none; b=OhD+8r2jlNXLy8TTij516AdM+pLxypwzSAW9Ms+5gl20VzX+K5GM6NG5saCaRIZH8gRQ+/PHSZRgSaT+pRAchIPp+U3TcJW3O617Y3Lj+GAd9dfI1oInexkOK/KGzBRh2giz5GMkolV0cS7cE38zAH3WklFyeN4OX7oZYjwPkSs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782751574; c=relaxed/simple;
-	bh=FmobGFWHAA5FfbefEKJI1DPPMV98ZJK9He0pAAY1UIs=;
+	s=arc-20240116; t=1782751595; c=relaxed/simple;
+	bh=RRqC+Ph4bBm1aYWQykaNZxgVa8282J6c1ExfFnS54v0=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=CSrkeBpghS9GejrCbccOJnwlOmhGSj3tE866fczIEA/snuewFs7MaO0bP4IMkBwk0OYYVacHfGslHjnSKaRjxhrZYpLaELRhI2oyL2wO6kqhrld0dPg+HbKojY67JQ2x4SwDU7ZmHFfsFowHcvG45Kc4l+5sMqbR0UVacD/b/8o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=efFT6M9M; arc=none smtp.client-ip=209.85.128.169
+	 Content-Type:MIME-Version; b=dcivVJF5ceN8U6KxiXlovrFhr8rHPO93JkDqDI4Lx2RBouREv5uDnl1f4/DfW93dXHdz9CNqhLAFxfMcrYkMal7h5kdf1kgL3G2uYacIC/UPwQPDe9EzZrmcgfz7gFIo1e/IuDJiI38GROHU1zNrBugGxET3BwMpHuP5w7PI1C0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=qkuqUEgD; arc=none smtp.client-ip=74.125.224.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="efFT6M9M"
-Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-80f602d8785so12713887b3.1
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 09:46:13 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="qkuqUEgD"
+Received: by mail-yx1-f47.google.com with SMTP id 956f58d0204a3-664b05d408bso2871197d50.1
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 09:46:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782751573; x=1783356373; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=FmobGFWHAA5FfbefEKJI1DPPMV98ZJK9He0pAAY1UIs=;
-        b=efFT6M9MiuXFZ8ltSyevLBhkSNI/xpOwIR+3r6n4e4UCuAV1G3OeDeOEeE3yduQb+K
-         PsmWoNPiYZmvO7e/jifM5CgxFD8XguVQT1wPdvkV2y8PFW3+s4XYESmnZiEFNCeC0HaP
-         MaUKiexakAH+KOsZIhprLd893rVNyeqO+7AO5rf65vtA1wi2YjiFpqJwPWICn3jl95Ia
-         WOAfQYHa3YR3LeTfRsJB3o/ZCtpFtRljhrDV0xSeZbNGeTGAMNrxcPX2NP1oGK9FqGek
-         ghvCeKCGremZojB5UA/qwfkz+bXKo4XKWwkFEHQOX/Eyfep94BfsSw4mqiJR1VaWghjs
-         eCyw==
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782751594; x=1783356394; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:autocrypt
+         :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=bV+My7RNdZIVHu219fUo5YksonR652Kx9qOtLGckWPs=;
+        b=qkuqUEgDAj4Zour+Tsnf3h4lUaxHDCLUZHGJ91UMUyK3z2E8QFiFZ42wwtdwEdShtW
+         OoV3OUTsGrdebPJcctkWmC4FZoFbX/PDc2kBMMB4AHVQj84STEl1m3qgJNlPJEY8Cxu/
+         IUtEEwkIvProid4NshN9b0GJO7LKMmC0ok5Q4AzLo+jG4AspTlMI3ixvXobKUyYSS+E+
+         36qHatFv8wg8YsAbV6/HD2dls9k2K5jaqb9o49RDqF9w2OrKT5GWoSNruzC7Tw4e8itt
+         bUJpHR7noQll9zwqrtinQTKH8rq3tGvAYrQbElRzM28APi3u8lAzYUYS9I1Md7iTwZV2
+         WUZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782751573; x=1783356373;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=FmobGFWHAA5FfbefEKJI1DPPMV98ZJK9He0pAAY1UIs=;
-        b=a2qJz4rp08ZCWP1OY1uylT4apl4P7nXICovveNTQY2lYsw78DGMIs30IqZaRnznt2o
-         MVN+LMP5xrSTAhIL1O+rcm1dlyok71zaqiYqTBAK0j5GoeRmMWQXNuYBvB9mnrgdHF36
-         y6B6kS4VxQN4azm8CIg56p2sGj1Mp1fBUKYtzgvhRQx86lhoHfm7L9bLqm2I2138o/c1
-         f0O8EcQsq1FycOIallGldTZirG7v7N2LaSZRSk+i0c2m12bJWdBBjnslQRCU8UBaGWOB
-         UvqMnOjlPjhefa91UBZBcp0je0YPe5QmldHTfNg6LhLRAtoszelp19qCzkySe2ugRTTh
-         aPBg==
-X-Gm-Message-State: AOJu0Yw/vPq73K9Vxnob+sqYwe/yQ5o3iUil0SMAumjSbmQQPx3ReQ+v
-	CZR/jLgatyqpE1EgyxfDFVoj7j6T2AGz/bTLRzbmmZW4/tc7lIEyBOLCfYmmH0J6DzM=
-X-Gm-Gg: AfdE7ckbx2X5k5UWCLZEU1wfx5yXbQLZJhisBVc8W7QRPyIe6qQLnosLUfavAek5EEz
-	RKgFD4mMA20QwzlUanJ1FjeO3Xv21PoX3eXF/Gq/P0JStzz41cpJ2QhwawYHJU64yd6lfPBzkul
-	nMp5mo+RAuPfUPiQNwKJfkn2eRgh7TJMYf9BwFeiFiTEcrjLYxUhOv/MMFkkTabqqzVy+5yRqw6
-	ggFH1ZlUxljn2lCYVmkugXwXe+gFYCw5oBpGPiMlnt7Rk9fIITxLizXlY/+CActKaXin5OHcfPN
-	uJRLkaOAuAeX6FDg6fpUzPvc0K0wzhbDNXeUC4/seJ17s4AkDp7vXu9iu4JfI2uKlzotuw0Va3H
-	ubp5B2WSLWU4ClyJBy8o2iqeDeiiEiY6gPZyFPZRRHEQj1bqleILQF5aytjjCDq0vTDJGx6f0/A
-	5ft2e68xBuDDjRwm08RLhhDOffauRDgBnNunN04gJtwRaiQscf4kAIA3P8mcVltvghIor1eFLcu
-	IrV9DCqiaARU+dYoINWTX0A0SXc8213Z8hNAYzwf98W3I2EyHagX7+y/Hg+FTNVcl+04tj3WVMM
-	zzbVp6I=
-X-Received: by 2002:a05:690c:4c06:b0:80c:3848:bde5 with SMTP id 00721157ae682-810d7ebe581mr3552677b3.13.1782751572734;
-        Mon, 29 Jun 2026 09:46:12 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1782751594; x=1783356394;
+        h=mime-version:user-agent:content-transfer-encoding:autocrypt
+         :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=bV+My7RNdZIVHu219fUo5YksonR652Kx9qOtLGckWPs=;
+        b=bOvfNQcTwRKOokclNUnxL3Da3GaizdsNmsvoKCvYee5khxwajj6zU8E/UECmQptjfa
+         SWoEhbqBgaogfXdDUfLAlzKh06BJZHQMH3w6dSVp28HVyFE17+Jp0XCTbpE+Qs5eAgqa
+         aMxLZZMuqFBi3CC1bsRbXXTkEh5ihcX1hxnqU3uK7t26FORXrFCOMHNwrACg+OEQmMiR
+         VVs5161blFQogTtyt7OhHU9/pkEQuFId6WK4c3VTEiYqlapnIHUMmyNIaf1ygrxtQ2kE
+         nNgXDLcDCjQ4/nUXkerrsgPTM3/lJyjbXq042siFjrTvREtwpM7wSSv66ke36stKIPDc
+         sphQ==
+X-Gm-Message-State: AOJu0Yy14IpW+cxSmYAfA5dd1sZpxuwTDZMCMj8BACUsOgauDisTlK8P
+	D4DkNJ66TFmY2EST2KsOwsB1ytDMdmKg5OFIc8iZj0Iu/PjcDQeLCvgRV2V5cw+gQW4=
+X-Gm-Gg: AfdE7cnQYV/XojVcGIdD/vLgIOItgiSoCSXP6Y4OTCmL4cmHid5YsZtdAv5nUOfTOb3
+	EhvqS5o5CJj9mCT6Rnv7MvbLcgQIHSufdL+to1z/co3Abrxctx223aNg/sNkDKU5CU2y2ZDArB+
+	8VZx1DjtNSrjDGP4mH2yG/3BUlayLSW7byEf8hhhgPnUZ5alkHVkCKNGf2Oo1TriHOggceDGylx
+	orNQcYfl0oeBBukyjbi5UJJWVnc1npiwcg/BP5V1CgWx2umA8mmxRt5XLSBYhLRrkxi/s2JWnI2
+	5Eq8aVOz2q4s6pSlvKPhkYSW8UPaJuVxKp7Rwlyr233NB4FWupEjOEfzwtwzTGGY2pM/SS1Lb1A
+	V40zyzMVXiN6cJN7KxBW0gqlNp7hI3q9dkXFMW75XsM1xGvA3FG1SMtORbAYbg7bwZ85RhkXDix
+	eWzCR9BWg/l7C0vYMJ1ym61ry6cRQQLw+DdKhcz5uyGwf69FVm1GUnxBtBxKYlx2AManpAPco+m
+	pYPIecl0F9059fK3r8+N97UAbr8O+qj1sToIHsXHnwBVh+9lJcSM7uYKBkU8XcIMN+096uPq9hZ
+	cET7i/o=
+X-Received: by 2002:a53:c3c7:0:b0:664:df69:9945 with SMTP id 956f58d0204a3-664f9a035f8mr279567d50.55.1782751593593;
+        Mon, 29 Jun 2026 09:46:33 -0700 (PDT)
 Received: from [10.0.0.3] (162-197-212-70.lightspeed.sntcca.sbcglobal.net. [162.197.212.70])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-810ea95252asm101077b3.48.2026.06.29.09.46.10
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-6647f74a3e2sm7320774d50.2.2026.06.29.09.46.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Jun 2026 09:46:11 -0700 (PDT)
-Message-ID: <8d2ff1bbb16555bda9c616ffec722273ccaa4eb8.camel@dubeyko.com>
-Subject: Re: [bug report] out-of-bounds access in ceph_con_open()
+        Mon, 29 Jun 2026 09:46:32 -0700 (PDT)
+Message-ID: <3e59de30e28f37adc0f8db40357134abf2cc8572.camel@dubeyko.com>
+Subject: Re: [PATCH] libceph: Assign requests to homeless osd if calculated
+ osd exceeds max_osd
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
 Cc: ceph-devel@vger.kernel.org
-Date: Mon, 29 Jun 2026 09:46:08 -0700
-In-Reply-To: <2e10a5e1-14cc-4f8f-9ef5-76a7f7c0fa9e@tu-ilmenau.de>
+Date: Mon, 29 Jun 2026 09:46:30 -0700
+In-Reply-To: <20260629084231.2892980-1-raphael.zimmer@tu-ilmenau.de>
 References: <2e10a5e1-14cc-4f8f-9ef5-76a7f7c0fa9e@tu-ilmenau.de>
+	 <20260629084231.2892980-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -125,61 +126,42 @@ MIME-Version: 1.0
 
 CC: ceph-devel@vger.kernel.org
 
-On Mon, 2026-06-29 at 10:40 +0200, Raphael Zimmer wrote:
-> Hi,
-> I discovered an issue in the libceph module. It results in an
-> out-of-bounds access in ceph_con_open(). The behavior can be
-> triggered
-> by messages of type CEPH_MSG_OSD_MAP from a Ceph monitor or OSD.
+On Mon, 2026-06-29 at 10:42 +0200, Raphael Zimmer wrote:
+> A corrupted osdmap received from a Ceph monitor or OSD may contain
+> placement groups with osd indices greater than max_osd. Subsequently,
+> this may lead to calc_target() returning such an index as target osd
+> for
+> a (linger) request. Because the osd_state, osd_weight, and osd_addr
+> arrays only contain max_osd entries, this leads to out-of-bounds
+> accesses when trying to read values from these arrays.
 >=20
-> The problem is as follows:
-> When decoding an osdmap received in a message of type
-> CEPH_MSG_OSD_MAP,
-> the max_osd value is decoded in osdmap_set_max_osd(). Furthermore,
-> the
-> osd_state, osd_weight, and osd_addr arrays are (re)allocated there
-> with
-> a length equal to this max_osd value. Subsequently, decode_pg_temp()
-> and
-> decode_primary_temp() are called to decode pg mappings and primary
-> osds
-> for these. The indices of the osds in these pg mappings are read from
-> the message, and there is no guarantee that they actually exist and
-> are
-> smaller than max_osd. If the message is corrupted, the pg mappings
-> can
-> afterwards contain osds with indices greater than max_osd. This may
-> result in calc_target() calculating a target osd with such an index.
-> If
-> trying to open a connection to such an osd, the osd_addr array is
-> accessed, which only has a length of max_osd, and therefore, an
-> out-of-bounds access occurs. A concrete trigger path for this is
-> immediately during the processing of the same CEPH_MSG_OSD_MAP
-> message.
-> After decoding the osdmap, scan_requests() is called from
-> handle_one_map(). If there are any linger requests, this function
-> calls
-> recalc_linger_target(). From there, calc_target() and, if this call
-> returns CALC_TARGET_NEED_RESEND, lookup_create_osd() are called.
-> lookup_create_osd() may call ceph_con_open() and pass a reference to
-> the
-> osd_addr array element at the index of the target osd, which results
-> in
-> the out-of-bounds access.
+> This patch fixes the issue by adding a check to calc_target()
+> assigning
+> the request to the homeless osd if the target osd index read from the
+> osdmap exceeds the maximum index of an osd.
 >=20
-> Currently, I see at least two ways to handle this problem.
-> 1) Treating an osdmap that contains such osd indices as invalid
-> directly
-> during decoding
-> 2) Treating target osds with an index greater than or equal to
-> max_osd
-> as invalid in calc_target() and, e.g., assigning the request to the
-> homeless osd.
+> Fixes: 63244fa123a7 ("libceph: introduce ceph_osd_request_target,
+> calc_target()")
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+> =C2=A0net/ceph/osd_client.c | 6 ++++++
+> =C2=A01 file changed, 6 insertions(+)
 >=20
-> The first option would likely require multiple changes and come with
-> more overhead. Therefore, I will send a proposed patch that follows
-> the
-> second option in reply to this email.
->=20
-> Best regards,
-> Raphael
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index a4d3cbfd27a3..3ae7c51e2edc 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1707,6 +1707,12 @@ static enum calc_target_result
+> calc_target(struct ceph_osd_client *osdc,
+> =C2=A0		}
+> =C2=A0	}
+> =C2=A0
+> +	if (t->osd >=3D osdc->osdmap->max_osd) {
+> +		t->osd =3D CEPH_HOMELESS_OSD;
+> +		ct_res =3D CALC_TARGET_NO_ACTION;
+> +		goto out;
+> +	}
+> +
+> =C2=A0	if (unpaused || legacy_change || force_resend || split)
+> =C2=A0		ct_res =3D CALC_TARGET_NEED_RESEND;
+> =C2=A0	else
