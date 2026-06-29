@@ -1,75 +1,76 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F282426D1E
-	for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 16:12:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A4A9426D1E
+	for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 16:12:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782749527; cv=none; b=YGm1WAS1ZVlSAd9mBGDuDTq3hpqsGH+F6t8sKyEWKSPzYTO20H9+7bFXV2WhcdnDSkKSr04rrQWjKtwsA0TiiIRpYX6SVVoxl6cJZDGtqaTAfRO5TyHazI2O7k34WTDOQ+pBXpXhm/QcIUtui1aE2B8y262fybO5FpeCsTzPvW4=
+	t=1782749557; cv=none; b=uOwZYiWpYzWR0FH01JWDCcJdswyIz8BipX49f51PDFDoNaDsFjhrNzUVln9r67j6cK9AORdGc6FU7NzMRBrMJrUxehDW3x7bRapIE/qYfgf7EKYrYZqZTSFDMk7oF5pz7b6TmZUfYx9gOEn58oDYu2ZIhmBYPjxNrbs6upbpYoA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782749527; c=relaxed/simple;
-	bh=rA3HPknBKonb2xiP0zBDChSBqI1xuKdsI08Lj5Ywo28=;
+	s=arc-20240116; t=1782749557; c=relaxed/simple;
+	bh=2JQCdq4ZBfE/MsZ5SQd/dztXjeAmi5P19dVBS6GPqdU=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=re02u53kNBz2MX2OqYXAAgWX8oOUBE2Hp5P+CXwvmlviY6W7Gs52i3GTiT0/OGcCQSeD2EfmscfCbzIPERWz1g4lO/AwV3w7vE9+gXsH9n1tByKlJ0UAelA9w/i3JEfW/oA9zBTqwwunh6lKwrSFEr7BzuadfucZSDjh6YAHrfw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=uSFCiPzk; arc=none smtp.client-ip=209.85.128.173
+	 Content-Type:MIME-Version; b=PoqBMF2tDufv54IPNDk4n83B/fB1ZfH3YMSEkk3WaG++aLwXpwZITaNXeRAu66HJP3SX2F5TohPD5NmAHw/x21WVvxI5H/2+P1wBmFjy7w0af6zIhy60ykI4Bur41wEOTbcLMdRPZSFUZ4X2PcFf+TVRoJvQEee3QOo7QVGlI0E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=hGfi4PcQ; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="uSFCiPzk"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-80ac88a3948so11832667b3.1
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 09:12:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="hGfi4PcQ"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-804e46366d7so28988797b3.2
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Jun 2026 09:12:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782749525; x=1783354325; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782749555; x=1783354355; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=rA3HPknBKonb2xiP0zBDChSBqI1xuKdsI08Lj5Ywo28=;
-        b=uSFCiPzkF8m8jk9BA9oPZk3aIb7nhkBc4UzeOxOoeDoBT07yhAYExcUKMeHUJM7v/t
-         fyRpdhz0C2THv/LFU3CKP/YK2wwoDnRV1LkqNukmcca5XtX6caO/JKSpBWfmc/+ACqOd
-         p9oXx6nm/VKFxYFz36XzaYYPhTAntdGCdnkn7T13n/vA+jtAAReOFwVpdGxtlP6GrFm+
-         a1qFcIANx2/er7+v0MqbnV5EwnPuKgPwkCps8qO9ZBefbuVZJKG2CpyvFJ9pxK5I52Fh
-         gWmairswXfw0n0aCYVh0IY/VHRciTw4+JlMaRnyydOPTgQejzbHZCnfuB19Bie0JL9Jh
-         MccA==
+        bh=O7ofpsV4Hpx4PY55vgluzRwAeB9VFCQWXdXErlMDcIY=;
+        b=hGfi4PcQy5vHXpJKT/zUFnq1SEbeLX17M6QrOZeWwRMIoXXQwla+sGSonOgNyq9iC6
+         WBA2JKQHtpcizqJ/ownCQwYWg9RPR+d4xOXEJRiVQWlh6vRsrEkf0/BHtHv3b0Jlb20f
+         5CJyazab3fgKvqTVgFzrIGeHAw/TyhJ7PslXWY8Bq708GnHZVdokLyM3BiGAcdLaTSla
+         FMt6812FtZYRja0OOYfcoVy7WXhYLoeb/NpS0vVHnQgE56IEKKFBMpQIXkx2dHiOgJaK
+         38JNiVZ1aH1eVertJfhg0MJnN29EOeK+C8skfOH/HM7f4ggmKMzU6NYD2pHOJ5sqv1NG
+         F5vA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782749525; x=1783354325;
+        d=1e100.net; s=20251104; t=1782749555; x=1783354355;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=rA3HPknBKonb2xiP0zBDChSBqI1xuKdsI08Lj5Ywo28=;
-        b=r9PlR2sNYSAIzgH1Ldd3R6CJ1yu5483FfMLrQcinqUqbhhMhw5sgDi7/dMvLlP+jgo
-         8Veb9MSFc+zMsGV1mhyNBXr4SrNt+GllOQewxbdzLzNRPjZXyZ2Nf/ZGI+gnCDXcExDY
-         hsCIKHplii+eoYzkMQhoPtzkrOryqRK49Fbk7OptcVPh2wC9S2DjQEbGzm/ZPFkbikE8
-         mhcobzHkm6CEWknOQFVHn5hLcdRp+Dz4nIT/1K1EZ65+2WXH6Ps8riPk5R4yKx0EgS7v
-         xAEIK65RF0PddgSmKZfNJJpJNyxpV8B14gdmp4U5RmJA+Qxs3HE+02VkjlLCQMYrUK0r
-         VfDw==
-X-Gm-Message-State: AOJu0YzmWPHTZlBSuMU/tHZT9w8JXlgbyUncDGHsnQiKoa63rwu+Fw7+
-	ZoGO7RAD6Glpy14hkK1uJfzUG8l3LQNeMcj02Dt+Ugm7WUuwYVaprjhWsYD+I/kHEl1yIscKsny
-	vKaoUZvw=
-X-Gm-Gg: AfdE7clJIwbLx+3rIw6M2RNgQgUyivqdH99fMPabITlv/TcGChgaJXK15AnhEe/hng+
-	uoSiBvva6+ZuRfTaJ8K7Svq56J9ecuF5gtZNiKsKJ8vqTByOxhgC8Jjla1x3reLd8pPxGSYGKnH
-	9ZtzmKloXsgPXxS/1d10xnmxRt8j7vAbS4/8ktEMoHTzTsZpV1WH4T6FbzN/JnTUdNvDPolqchF
-	q2HugcJ7mpwaxIkfHV8ydgwMl6XiaO0Hz3N0RSVvxXL1MqjJxHq8psEC8foACIf31ee2CE0MbaV
-	qseNKvOXij1TKypEXBbnCwLNU3fikK8hLMAgZ7CXqNEEk7p3iOk3ZxLvQxOsNHw+6hKo/VnqHGf
-	yvrcjmyMPfjkJvt2mBkmyBRL+xXzpWYrkJGuV2IanX5FfBZS5XsI0+cpVY6+/BrtXr3Qy8ELt9n
-	loXdDpl942d2aXXSG8Vbso6BCih/qYixiCz9DdPrwSEKP1ux2AnJXoBhDvxz+b1GMKiIf7DjBGr
-	Ozgg/nRUQzLJF8GA4btS/dqswZATYvR+rfccfmmVpzRk/iF8NDYgL3WkLLpbn47sAxXsu+Bnndz
-	O81XYthi8blKcvYyZQ==
-X-Received: by 2002:a05:690c:64c6:b0:80c:629f:d63b with SMTP id 00721157ae682-810d7bac608mr2351277b3.8.1782749525133;
-        Mon, 29 Jun 2026 09:12:05 -0700 (PDT)
+        bh=O7ofpsV4Hpx4PY55vgluzRwAeB9VFCQWXdXErlMDcIY=;
+        b=dvob/eGhN/wnh2zdcg0FBDs0OSUbTxXwB6rZfv9UjAOQ468kCf5DUHWAkjNxx0T6wv
+         izAGsRAEhUw/OKqy+mXyHkNEbHfXo53kj9Rz9lPkeGAjHAt8/wGDTOUylJESBEzb/VIV
+         INDQ0d9lui7JOp1VCd8OWZJln4XDv5KpgBcg/t5gO9drR3b/j4KEuaXNs/3Y3j7DPss8
+         t06raJ1MKBbZQbZxkV0q0zCoRtG3GbOrEmilVQ84pcA+rK/+/FAOBzUVzoVdspy1xyco
+         gNJndp9agFS4w4jkn3A4SZ3cjasmhCuJ8jLnIYzEwq2SzD7OiBWjbpGoYJQvF290WOsi
+         HVKQ==
+X-Gm-Message-State: AOJu0YwftdLiYxviUxa4xAGzaSrIwPo2nifnqXj7p3goo2NgCeywRlHT
+	XIzXKT+ic7NBcGtCsTKqfc6qYeDXPggo37WFVZz/w6lWMP0dUjyGCEWwJBcayn1DNmkr9ITBB4L
+	xWsh4ELg=
+X-Gm-Gg: AfdE7cmkBrhJeVnk6TYqgbSe/jbDP4MUf8FpDLpbTWXFZ+q+PzuK40vj+pRfuQFlEAe
+	kW1xAb8pHIVpGFZP8yhovIX12x6F3cN7UwmiRh2xny91cSv9ldW+cordbucxPx0F9cJsZi3Owpx
+	ovzS/wrJnpzvzZ0kp+hqhJizj88yE+DqSVXEaJcN86ja9v6FlkJiA3rFIHBCpuADjSxAUwZHhx9
+	G5LuQGIen/+Bfvxh0Bd6eiUYhdcXc9rsUiDooPekkEEeThSgVQeujqTDgX0ineZLtBeVHfWjf1H
+	rzirct+ys+P5SkC16Rj55G7HMNeeoFan9J3qvqR5c4oLKy2N0v6on1DaDR2QxRVHspVFZgh2DPN
+	ZBGX+V2a64Cxn9379LwAj1xwKnWDAHqmKDMns7qN7M0AMBQCWAUPca979IfokTjkyflNMMVpadV
+	KT+l4foydElUN1bDcPNO5AKMvG9RNt6YxHfLCY/cqGQHId9jMU0Wur6RPTc2lBCMOBS9TG683Uh
+	fWMiCvy3HkTtFFVZqZYDeiWRWegzFaj4Fadm3X3zAtV1Mm7orxIZK3DVbWZhXgU1SlCBVafrhur
+	yi8+SvY=
+X-Received: by 2002:a05:690c:4c09:b0:80c:39:1d84 with SMTP id 00721157ae682-810d7ca71e8mr2260977b3.1.1782749555589;
+        Mon, 29 Jun 2026 09:12:35 -0700 (PDT)
 Received: from [10.0.0.3] (162-197-212-70.lightspeed.sntcca.sbcglobal.net. [162.197.212.70])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-80f236425b5sm14530137b3.15.2026.06.29.09.12.04
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-8096af28592sm65100167b3.22.2026.06.29.09.12.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Jun 2026 09:12:04 -0700 (PDT)
-Message-ID: <8ba14425aa4e70de2aba657116a84040811be452.camel@dubeyko.com>
-Subject: Re: [bug report] libceph: (linger) requests not removed from
- need_resend/need_resend_linger in error case
+        Mon, 29 Jun 2026 09:12:34 -0700 (PDT)
+Message-ID: <76f6bf19173ad8b5af3c0a86e21ef8014fbac542.camel@dubeyko.com>
+Subject: Re: [PATCH] libceph: Always remove requests from
+ ceph_osdc_handle_map() structures
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>, Ilya Dryomov
 	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
 Cc: ceph-devel@vger.kernel.org
-Date: Mon, 29 Jun 2026 09:12:03 -0700
-In-Reply-To: <34799e8f-a24d-4967-beb6-4b7f51c3efc5@tu-ilmenau.de>
+Date: Mon, 29 Jun 2026 09:12:33 -0700
+In-Reply-To: <20260617131344.2325324-1-raphael.zimmer@tu-ilmenau.de>
 References: <34799e8f-a24d-4967-beb6-4b7f51c3efc5@tu-ilmenau.de>
+	 <20260617131344.2325324-1-raphael.zimmer@tu-ilmenau.de>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -126,59 +127,85 @@ MIME-Version: 1.0
 
 CC: ceph-devel@vger.kernel.org
 
-On Wed, 2026-06-17 at 15:12 +0200, Raphael Zimmer wrote:
-> Hi,
-> I discovered an issue in the libceph module. It may lead to a
-> stack-use-after-return and, therefore, overwriting stack memory, or
-> triggering a BUG_ON() assertion. The behavior can be triggered by
-> messages of type CEPH_MSG_OSD_MAP from a Ceph monitor or OSD.
->=20
-> The problem is as follows:
-> When receiving a message of type CEPH_MSG_OSD_MAP, it is handled in
-> ceph_osdc_handle_map(). This function creates two local stack
-> variables
-> that track (linger) requests that need to be resent. For requests,
-> this
-> is an rb_root variable named need_resend, and for linger requests, a
-> list_head named need_resend_linger. Subsequently, handle_one_map() is
-> called, which calls scan_requests() for each osd. In scan_requests,
-> the
-> new target is calculated for each (linger) request, and, in case of
-> CALC_TARGET_NEED_RESEND, they are inserted into the previously
-> created
-> list/rbtree. All requests in these structures are kicked off to their
-> new target osd after processing all osdmaps. When doing this, they
+On Wed, 2026-06-17 at 15:13 +0200, Raphael Zimmer wrote:
+> ceph_osdc_handle_map() creates two local stack variables that track
+> (linger) requests that need to be resent. For requests, this is an
+> rb_root, and for linger requests, a list_head. Subsequently,
+> handle_one_map() is called, which calls scan_requests() for each osd.
+> In scan_requests, the new target is calculated for each (linger)
+> request, and, in case of CALC_TARGET_NEED_RESEND, they are inserted
+> into
+> the previously created list/rbtree. All requests in these structures
 > are
-> removed again from the list/rbtree. If an error occurs during
-> processing, e.g., because an osdmap is corrupted,
-> ceph_osdc_handle_map()
-> jumps to the bad label and doesn't call kick_requests(). Therefore,
-> the
-> (linger) requests are still inserted in the list/rbtree, which now
-> doesn't have a head/root anymore. This leads to requests having
-> invalid
-> pointers to stack memory. Subsequently, this can have multiple
-> effects.
-> If the (linger) request should be inserted (for resending) the next
-> time
-> a (valid) osdmap arrives, the respective structures still have values
-> that suggest they are inserted. For a linger request, this results in
-> not being able to insert it again, and for requests, a BUG_ON()
-> assertion may be triggered in the rbtree insertion function.
-> Furthermore, if (during processing a subsequent osdmap)
-> recalc_linger_target() returns CALC_TARGET_POOL_DNE to
-> scan_requests()
-> for the linger request still having a pointer to need_resend_linger,
-> list_del_init() is called, resulting in accessing the invalid pointer
-> to
-> stack memory.
+> kicked off to their new target osd after processing all osdmaps. If
+> an
+> error occurs during processing, e.g., because an osdmap is corrupted,
+> ceph_osdc_handle_map() jumps to the bad label and doesn't call
+> kick_requests(). Therefore, the (linger) requests are still inserted
+> in
+> the list/rbtree, which now doesn't have a head/root anymore. This
+> results in requests containing invalid pointers to stack memory.
+> Subsequently, this can have multiple effects, ranging from not being
+> able to insert linger requests again because they still have prev and
+> next pointers or triggering a BUG_ON() assertion when trying to
+> insert a
+> non-empty rb_node again, to overwriting stack memory.
 >=20
-> I suggest fixing this issue by removing all (linger) requests from
-> the
-> list/rbtree after jumping to the bad label if an error occurs,
-> similar
-> to how it is handled in kick_requests.
-> I will send a proposed patch in reply to this email.
+> This patch fixes the issue by making sure all (linger) requests are
+> removed from the list/rbtree in case the osdmap processing returns an
+> error. This is accomplished by adding logic that is executed after a
+> jump to the bad label performing the removal similar to
+> kick_requests.
 >=20
-> Best regards,
-> Raphael
+> Fixes: 5aea3dcd5021 ("libceph: a major OSD client update")
+> Fixes: 922dab613417 ("libceph, rbd: ceph_osd_linger_request,
+> watch/notify v2")
+> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+> ---
+> =C2=A0net/ceph/osd_client.c | 21 +++++++++++++++++++++
+> =C2=A01 file changed, 21 insertions(+)
+>=20
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 5fc79c29aab0..a4d3cbfd27a3 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -4129,6 +4129,26 @@ static void kick_requests(struct
+> ceph_osd_client *osdc,
+> =C2=A0	}
+> =C2=A0}
+> =C2=A0
+> +static void clear_resend_requests(struct ceph_osd_client *osdc,
+> +				=C2=A0 struct rb_root *need_resend,
+> +				=C2=A0 struct list_head
+> *need_resend_linger)
+> +{
+> +	struct ceph_osd_linger_request *lreq, *nlreq;
+> +	struct rb_node *n;
+> +
+> +	for (n =3D rb_first(need_resend); n; ) {
+> +		struct ceph_osd_request *req =3D
+> +		=C2=A0=C2=A0=C2=A0 rb_entry(n, struct ceph_osd_request, r_node);
+> +
+> +		n =3D rb_next(n);
+> +		erase_request(need_resend, req);
+> +	}
+> +
+> +	list_for_each_entry_safe(lreq, nlreq, need_resend_linger,
+> scan_item) {
+> +		list_del_init(&lreq->scan_item);
+> +	}
+> +}
+> +
+> =C2=A0/*
+> =C2=A0 * Process updated osd map.
+> =C2=A0 *
+> @@ -4243,6 +4263,7 @@ void ceph_osdc_handle_map(struct
+> ceph_osd_client *osdc, struct ceph_msg *msg)
+> =C2=A0bad:
+> =C2=A0	pr_err("osdc handle_map corrupt msg\n");
+> =C2=A0	ceph_msg_dump(msg);
+> +	clear_resend_requests(osdc, &need_resend,
+> &need_resend_linger);
+> =C2=A0	up_write(&osdc->lock);
+> =C2=A0}
+> =C2=A0
