@@ -1,77 +1,75 @@
-Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
+Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9CDB636D4F1
-	for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 16:01:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8C1340DFBB
+	for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 16:06:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782835311; cv=none; b=DVIEg23kFi1BeoKf3/49/pLQyub76ieJ33oFj70RdYD5vjN9N7pC6a9reknWfZMQtazk9yLsT2Z0nypyAK0mlBg1W8hmmeeQ6+PTHRS+zcruHhVtCKwMmlx6m5fZcQliXCi1FTiNf6vtn0jlD0m0vD2n/n33FsW2LN2bzgfm9dA=
+	t=1782835564; cv=none; b=hG8dQCbWymtT4de+jDom7ubtNhEyOgmFoz67q9M9zjfO9YxFdVDlzm6EYfkxRCu4SuYtovlKuuPR4lrRdcLaxQRpnwFZfkX/bByZ0BWKJl2cpomJgMpr37ppdfwYDkUdMawdqI4e7C5qBB+estnbVt7SgjCm4hLety1wSn7ZcZ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782835311; c=relaxed/simple;
-	bh=RHaNn3g4w14aDa53UTweRy7LDhA+u+PVBgz2wJvYFng=;
+	s=arc-20240116; t=1782835564; c=relaxed/simple;
+	bh=QGjn0h8NSRZca48XCmcAPPi02MNk6xdPgE9XLeAOl0Y=;
 	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=Gho1C1LsPYCm8LgvxrBIC3MaOV258wUDtrbP+q7Qv1N4JTrCu0aGBaePaVZkY8DNCF+I/XjAyQ5aEdIAeu7f4a7D3GJSGP24SVUNhCNB6e/T33DMCXD0Wkfj/E3JDe7SmoUxHN7vdK2K028x9uhxydLYaLb5T74ng9gP8SqQy4Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=a5Vq7Ze0; arc=none smtp.client-ip=209.85.210.170
+	 Content-Type:MIME-Version; b=r7aL/EeJpGywcfyxU1nRgR9QmITZC2yi7UaYsnHinmrbBbWAeY/ta6g63ItqxpDdAr2VrfdJqqkLlJVmrxMzo9DZadeRhQjntxUzuBmeumk91msglwd4Rpzp+Xq9MvzmPLLKlX5YvHsRhKd2pPJi+eBxqnM+UhDEPLC4y/VKGmI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=lGAAMvHw; arc=none smtp.client-ip=209.85.128.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="a5Vq7Ze0"
-Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-84794e800f4so974522b3a.0
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 09:01:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="lGAAMvHw"
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-804239c418bso46353607b3.0
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 09:06:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782835306; x=1783440106; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782835561; x=1783440361; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:to:from:subject:message-id:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=hIMOZD/PhyReFTACDz34bK2Y4dho8I+GhKGHZivlkuU=;
-        b=a5Vq7Ze0wGe3/cP5OCoMkLYQg7iMmz99iEfULyGYywz9eG7ylULKY3DO7Fbe5mApry
-         mZLeP2/pP4w+NGfIHYPVF52B35+cjxqtlhSRx8HqOty5Xb92XI+hhJH55Wwh55RnnJhw
-         ulJXXh3Pu+M0WjeGkJl6AMMg87oJB+E2S7z05RqmZ3DD4boqeICvlmW9oak4GV4LbqMC
-         rYPRz3i3B257mqceZJYJYKk43Xnr/7eQnG8a1goL5sUhRDu9J7sQf0tqLAxVu+ma09Vi
-         1sttoMYQY/p71kZsgCmAYL6uuBrsUZsdNZl91MolEPHB8H+3Mr5Jgu7zUcwvVURrkRJ6
-         JLBg==
+        bh=sV6OxKDuDsCOOfUhUwx5E9h0wYjJ8BBeRhGIjauKZlw=;
+        b=lGAAMvHwy1mpjccUQM1qAIo311rh3S/9zWtvGZA7NeDdkf5ao82Sl/qZoPJq2Pox1l
+         MWDRZcEmjx8NeCA07ApouYeZ8YGLUpTRN8Zg0WPXyIaeNLo+muHN9hREk/tRbsn/yWRC
+         lAjwkcRkpaQ7aprRefGXsQ+Qp3NWYo1j8XHChhSNOWEb9IcbEbZ49KQsE/mQw28sPt35
+         xPcHgJIAA2Q/dwp7l/cR6eYEAn8mqpQ1e3haxFvMHo6TQQRzfu8DQgq0/ekKszgcypyx
+         0L0pZiAe+491sfYKGqGnciBDqYl+cu6J6FraUj9jZNVRh2lQPnNg0RsLkN9e7pOVrCvd
+         8jNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782835306; x=1783440106;
+        d=1e100.net; s=20251104; t=1782835561; x=1783440361;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=hIMOZD/PhyReFTACDz34bK2Y4dho8I+GhKGHZivlkuU=;
-        b=ddzzT0t+bv0PSxant5PpI0wP8BF8AODrNW2JP9RnMcB6eUnDO/Du5b8Az7CxviQfNz
-         Ge4erpnTANYVXHnsuteL9EkCTmMBHviAD1c9E99HzS7Ffmipjghx2W6YNMEC6eInWomr
-         hoTh8orA0w+XnfrN0qSUfyAUMKPLZcQTu2ENWgSMu276R1BFqi+ZpgBbqyG+eJCQZc34
-         x5ZEo9SP4lgq1Ap3N0hvMrJ7ueLoCB3VFO2O1Ukvm/va1fRKw7LfYemc8do4O5ZyXbxc
-         RIg1Hguh8vLu5see+ATQM7AVe6w4QY2FDiZm/WnMfTu5dPCaNRxaFv8aNP5Zd8EHIWGY
-         GdYg==
-X-Forwarded-Encrypted: i=1; AFNElJ/qQN48g84JWUzBs3+Ii5K51319ymmRJTAKAw4y7RXXoCrlaxmGhEM91SJKoScqg0amKvmW5FVG8y4B@vger.kernel.org
-X-Gm-Message-State: AOJu0YzG7obVtCXU0fm4qTM36znxe4T7MNtSM99/sK1L1pEXBS6NdPLb
-	eyU1sqHceczAecABC4+WDIRwvsNDpXGC6/tGSlQwmKDXCffdywM/38Qcw/LTBIGfwg2m0JtpOyM
-	yRdk/CqOGbA==
-X-Gm-Gg: AfdE7cmxJrK56cONTlMFTcqJDu4mcdFKN8fnj9txj2BIKut+Kp7mNFrStFqIEAjgvCh
-	GIoZEF8C+nEOoft0+eUq8fY9NH3eLhMKlWuUQZs2ZSG1I7HcggbuLCaDDGEgI5cI1ceu+VabckR
-	bfbBtgndE6MfsJsml9wmdsXeRLF4WIDYHMGwct7duf1pWWaPq/yoo3JDGXWL70sExD4i6T7JZ5P
-	80YfFrkYLWcSKdYvuy5BFuHZMjHRojalnIRCKSdU1NP2nwKd2m8GhKYGZwZVt8zAaLGyTM5BLIh
-	Qn7LtkSkNiiMceshAMvuiQyBPu2zBe+r1vcVZTMIih5YIZuK+gFunwtTdTS0GnlZIuoonfsPzqp
-	fc5YqCtYAHlEJlqwxpQ4oeqpTOOIkYH63j2d2Jdlk//92D1UG0BlEI3egoEpQx9o6HeXqE/amFn
-	CoWA6cAkkBm8rMZR1aoMrfpe4uFjvEJuZKISVzBXx33gi3WjAfzNkjs7aTTA8WpK8Duip/eg+rM
-	8R16OmI5zUbdvDMCjNhWOyFcueJqs14nUqe1wHIi77WGqc2d0+btn0x8aYk4btMkZJUoMxTvFKc
-	4+LW9DE=
-X-Received: by 2002:a05:6a00:4517:b0:845:3d82:10fc with SMTP id d2e1a72fcca58-8479ea7ccffmr3710039b3a.0.1782835305534;
-        Tue, 30 Jun 2026 09:01:45 -0700 (PDT)
+        bh=sV6OxKDuDsCOOfUhUwx5E9h0wYjJ8BBeRhGIjauKZlw=;
+        b=k6FHBfndi7zG9Grqx3Tddpds2fizEa43DAlMyeJk6VrX8va0RAzWNW4YnxctwiEcN4
+         6R/3Zqww7+z0x7uPXGkSZLy22MA4/vHmZC4f6hWDoNKSSV0v6gvhKWUJRnE8vgH+ovEn
+         OaQIeq2YsfRWyK6w6QZ/oaBzGVoJyUlXRvKELJtXfPGY9/IhT8tBg2iPWJjr/sCB7mxw
+         MXfbleurakTFuMN4z9OsX60X3j+wfCGfOmzGw4Tu7/X7PhjFWDTE9fb+gln/fOcOShTf
+         cqn/jxkSWfJISNIRq7TE9Ok7VlozJDyfgr87lRSzmYfTZlUPgRBPP1FPxUatCcErYfS/
+         WarA==
+X-Forwarded-Encrypted: i=1; AHgh+RrvrfcZSwcGxUG2qsYXttbmi9VNh8/1K+e9ZVE7rED2wCZXXvbo/MCXU9ilpA39xSvIWGwWTD8m6Hx9@vger.kernel.org
+X-Gm-Message-State: AOJu0YwzAL3U5/mwaVQJzCoOX04BU2fxTy7ELbgbQYH57giUAPaDTwmA
+	bHPy7mBJsWWrA5fOtyExIPiNJSoRKvLHoGL33sLtKmxmIrS5y4GAhpNcYL8kqzYnawM=
+X-Gm-Gg: AfdE7ckEQ+IqOgIRCi2lFwNRvvIwV+JkCc3R9U6qKkolXz1TPZ/JjrY6Dz5tPYGCmPo
+	FqOEWUQ3bliXT+xTCZLRAEAp42wjuRfHYo6KA8ZvTXo/+FzJ6b6/VJx57hyWhCl2HkJGCt5Ob4Y
+	H3dp+gVtta3ox1JrXDUpBntHU4hEKtwCeh652BNSOMoJAbOEA0mgRuZfKdAIQs0uekNmewsspPD
+	yZPC9XyB+q52WrNLdcl3PZ63ynyHok0fNpTRXCGXcR16NzyU08Mc6h/nR9Yokw0Q/2/rBPO4egc
+	G+CxV0jklP+Pl344E22JnguhaBHvY5hz4HZCdZokLQ0NshyfdIi4Um8yRzSI5VWzkFqSl1kPY9j
+	xUYi/6ePh/gwb0Uc4gqZT7GG9mVXcDO/ParPpwQujciN5AYk5OSywBERCvtJQF+uHWcW8js1KLo
+	8GemUm1hDXHRgjlIXGxc8/B/kamvpWIs1W0oDd7NjjuI3nxOLg5s1I+TbHWcMb1u9w1zYIoaliC
+	I6frmL3Ls4yUA7s85Huh5i/a3uIEYAkWztNVCoVujCX5u+tOsNPbmygJ7vtvfSObaSIZaMCQdE5
+	x95KZDY=
+X-Received: by 2002:a05:690c:c4ce:b0:80c:85e5:872c with SMTP id 00721157ae682-81203f4f6damr11490137b3.58.1782835560829;
+        Tue, 30 Jun 2026 09:06:00 -0700 (PDT)
 Received: from [10.0.0.3] (162-197-212-70.lightspeed.sntcca.sbcglobal.net. [162.197.212.70])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-8479ff8c6f8sm2271108b3a.1.2026.06.30.09.01.43
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-810e797364bsm12554747b3.17.2026.06.30.09.05.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Jun 2026 09:01:44 -0700 (PDT)
-Message-ID: <59c115f6df6f3ec1c9660363958f173f722834f6.camel@dubeyko.com>
-Subject: Re: [PATCH 02/12] fs/ceph/super: make field
- `i_truncate_pagecache_size` optional
+        Tue, 30 Jun 2026 09:06:00 -0700 (PDT)
+Message-ID: <4b9e77c1d8a3bc69a2b91fbba248bbe6939f406f.camel@dubeyko.com>
+Subject: Re: [PATCH 03/12] include/ceph/ceph_fs.h: convert `pool_id` to u32
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: Max Kellermann <max.kellermann@ionos.com>, idryomov@gmail.com, 
 	amarkuze@redhat.com, ceph-devel@vger.kernel.org,
  linux-kernel@vger.kernel.org
-Date: Tue, 30 Jun 2026 09:01:42 -0700
-In-Reply-To: <20260612165204.86137-3-max.kellermann@ionos.com>
+Date: Tue, 30 Jun 2026 09:05:57 -0700
+In-Reply-To: <20260612165204.86137-4-max.kellermann@ionos.com>
 References: <20260612165204.86137-1-max.kellermann@ionos.com>
-	 <20260612165204.86137-3-max.kellermann@ionos.com>
+	 <20260612165204.86137-4-max.kellermann@ionos.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,127 +125,271 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Fri, 2026-06-12 at 18:51 +0200, Max Kellermann wrote:
-> This field is only used with CONFIG_FS_ENCRYPTION; without it, it
-> always equals `i_truncate_size`.
->=20
-> This reduces the size of `struct ceph_inode_info` by 8 bytes on
-> kernels that have filesystem encryption disabled.
->=20
-> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
-> ---
-> =C2=A0fs/ceph/inode.c |=C2=A0 8 ++++++--
-> =C2=A0fs/ceph/super.h | 11 +++++++++++
-> =C2=A02 files changed, 17 insertions(+), 2 deletions(-)
->=20
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 22c7da1ea61c..1504b889622c 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -680,7 +680,9 @@ struct inode *ceph_alloc_inode(struct super_block
-> *sb)
-> =C2=A0	ci->i_truncate_seq =3D 0;
-> =C2=A0	ci->i_truncate_size =3D 0;
-> =C2=A0	ci->i_truncate_pending =3D 0;
-> +#ifdef CONFIG_FS_ENCRYPTION
-> =C2=A0	ci->i_truncate_pagecache_size =3D 0;
-> +#endif
-> =C2=A0
-> =C2=A0	ci->i_max_size =3D 0;
-> =C2=A0	ci->i_reported_size =3D 0;
-> @@ -865,6 +867,7 @@ int ceph_fill_file_size(struct inode *inode, int
-> issued,
-> =C2=A0
-> =C2=A0		ci->i_truncate_size =3D truncate_size;
-> =C2=A0
-> +#ifdef CONFIG_FS_ENCRYPTION
-> =C2=A0		if (IS_ENCRYPTED(inode)) {
-> =C2=A0			doutc(cl, "truncate_pagecache_size %lld ->
-> %llu\n",
-> =C2=A0			=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ci->i_truncate_pagecache_size, si=
-ze);
-> @@ -872,6 +875,7 @@ int ceph_fill_file_size(struct inode *inode, int
-> issued,
-> =C2=A0		} else {
-> =C2=A0			ci->i_truncate_pagecache_size =3D
-> truncate_size;
-> =C2=A0		}
-> +#endif
-> =C2=A0	}
-> =C2=A0	return queue_trunc;
-> =C2=A0}
-> @@ -2331,7 +2335,7 @@ void __ceph_do_pending_vmtruncate(struct inode
-> *inode)
-> =C2=A0	/* there should be no reader or writer */
-> =C2=A0	WARN_ON_ONCE(ci->i_rd_ref || ci->i_wr_ref);
-> =C2=A0
-> -	to =3D ci->i_truncate_pagecache_size;
-> +	to =3D ceph_get_truncate_pagecache_size(ci);
-> =C2=A0	wrbuffer_refs =3D ci->i_wrbuffer_ref;
-> =C2=A0	doutc(cl, "%p %llx.%llx (%d) to %lld\n", inode,
-> ceph_vinop(inode),
-> =C2=A0	=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ci->i_truncate_pending, to);
-> @@ -2341,7 +2345,7 @@ void __ceph_do_pending_vmtruncate(struct inode
-> *inode)
-> =C2=A0	truncate_pagecache(inode, to);
-> =C2=A0
-> =C2=A0	spin_lock(&ci->i_ceph_lock);
-> -	if (to =3D=3D ci->i_truncate_pagecache_size) {
-> +	if (to =3D=3D ceph_get_truncate_pagecache_size(ci)) {
-> =C2=A0		ci->i_truncate_pending =3D 0;
-> =C2=A0		finish =3D 1;
-> =C2=A0	}
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 6aec40955387..f0f03aeb5b19 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -461,11 +461,14 @@ struct ceph_inode_info {
-> =C2=A0	u32 i_truncate_seq;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* l=
-ast truncate to smaller size
-> */
-> =C2=A0	u64 i_truncate_size;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /*=C2=A0 =
-and the size we last
-> truncated down to */
-> =C2=A0	int i_truncate_pending;=C2=A0=C2=A0=C2=A0 /*=C2=A0 still need to c=
-all vmtruncate
-> */
-> +
-> +#ifdef CONFIG_FS_ENCRYPTION
-> =C2=A0	/*
-> =C2=A0	 * For none fscrypt case it equals to i_truncate_size or it
-> will
-> =C2=A0	 * equals to fscrypt_file_size
-> =C2=A0	 */
-> =C2=A0	u64 i_truncate_pagecache_size;
-> +#endif
-> =C2=A0
-> =C2=A0	u64 i_max_size;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 /* max file size authorized by
-> mds */
-> =C2=A0	u64 i_reported_size; /* (max_)size reported to or requested
-> of mds */
-> @@ -660,6 +663,14 @@ static inline struct inode
-> *ceph_find_inode(struct super_block *sb,
-> =C2=A0	return ilookup5(sb, (unsigned long)vino.ino,
-> ceph_ino_compare, &vino);
-> =C2=A0}
-> =C2=A0
-> +static inline u64 ceph_get_truncate_pagecache_size(const struct
-> ceph_inode_info *ci)
-> +{
-> +#ifdef CONFIG_CEPH_FS_SNAPSHOTS
+> While the Ceph OSD protocol transmits OSD pool ids as 64 bit
+> integers,
+> the MDS protocol is limited to 32 bits.=C2=A0 This is a protocol
+> limitation
+> we cannot fix, but it gives us the chance to reduce the struct sizes
+> by only using the integer size we really need.
 
-Maybe, I am missing something. But where CONFIG_CEPH_FS_SNAPSHOTS is
-defined? Currently, we don't have it in the fs/ceph/Kconfig and the
-patch has no declaration of this compilation option.
+We have tendency of growing capacity of file system volumes. I would
+prefer to increase this value to u64 instead of decreasing to u32.
+
+>=20
+> There is one caveat: previously, -1 was used to indicate "invalid
+> pool
+> id".=C2=A0 This patch changes this magic value to 0 (i.e. removes the
+> special-case code from ceph_file_layout_{from,to}_legacy()).=C2=A0 This i=
+s
+> fine because on the wire, this magic value is 0, too.
+
+Potentially, we can use U64_MAX as invalid pool id.
 
 Thanks,
 Slava.
 
-> +	return ci->i_truncate_pagecache_size;
-> +#else
-> +	return ci->i_truncate_size;
-> +#endif
-> +}
+>=20
+> This reduces the size of `struct ceph_inode_info` by 16 bytes
+> (because
+> it contains `struct ceph_file_layout` twice, and that struct shrinks
+> by 8 bytes; the small pool_id now fits in the existing padding hole).
+>=20
+> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+> ---
+> =C2=A0fs/ceph/addr.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 | 16 ++++++++--------
+> =C2=A0fs/ceph/caps.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0 2 +-
+> =C2=A0fs/ceph/inode.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0 2 +-
+> =C2=A0fs/ceph/mds_client.h=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0 |=C2=A0 2 +-
+> =C2=A0fs/ceph/util.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0 8 +-------
+> =C2=A0fs/ceph/xattr.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0 | 10 +++++-----
+> =C2=A0include/linux/ceph/ceph_fs.h |=C2=A0 2 +-
+> =C2=A07 files changed, 18 insertions(+), 24 deletions(-)
+>=20
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 0a86f672cc09..a11b5c633358 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -2381,7 +2381,7 @@ enum {
+> =C2=A0};
 > =C2=A0
-> =C2=A0/*
-> =C2=A0 * Ceph inode.
+> =C2=A0static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
+> -				s64 pool, struct ceph_string
+> *pool_ns)
+> +				u32 pool, struct ceph_string
+> *pool_ns)
+> =C2=A0{
+> =C2=A0	struct ceph_fs_client *fsc =3D ceph_inode_to_fs_client(&ci-
+> >netfs.inode);
+> =C2=A0	struct ceph_mds_client *mdsc =3D fsc->mdsc;
+> @@ -2420,10 +2420,10 @@ static int __ceph_pool_perm_get(struct
+> ceph_inode_info *ci,
+> =C2=A0		goto out;
+> =C2=A0
+> =C2=A0	if (pool_ns)
+> -		doutc(cl, "pool %lld ns %.*s no perm cached\n",
+> pool,
+> +		doutc(cl, "pool %u ns %.*s no perm cached\n", pool,
+> =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 (int)pool_ns->len, pool_ns->str);
+> =C2=A0	else
+> -		doutc(cl, "pool %lld no perm cached\n", pool);
+> +		doutc(cl, "pool %u no perm cached\n", pool);
+> =C2=A0
+> =C2=A0	down_write(&mdsc->pool_perm_rwsem);
+> =C2=A0	p =3D &mdsc->pool_perm_tree.rb_node;
+> @@ -2548,10 +2548,10 @@ static int __ceph_pool_perm_get(struct
+> ceph_inode_info *ci,
+> =C2=A0	if (!err)
+> =C2=A0		err =3D have;
+> =C2=A0	if (pool_ns)
+> -		doutc(cl, "pool %lld ns %.*s result =3D %d\n", pool,
+> +		doutc(cl, "pool %u ns %.*s result =3D %d\n", pool,
+> =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 (int)pool_ns->len, pool_ns->str, e=
+rr);
+> =C2=A0	else
+> -		doutc(cl, "pool %lld result =3D %d\n", pool, err);
+> +		doutc(cl, "pool %u result =3D %d\n", pool, err);
+> =C2=A0	return err;
+> =C2=A0}
+> =C2=A0
+> @@ -2560,7 +2560,7 @@ int ceph_pool_perm_check(struct inode *inode,
+> int need)
+> =C2=A0	struct ceph_client *cl =3D ceph_inode_to_client(inode);
+> =C2=A0	struct ceph_inode_info *ci =3D ceph_inode(inode);
+> =C2=A0	struct ceph_string *pool_ns;
+> -	s64 pool;
+> +	u32 pool;
+> =C2=A0	int ret, flags;
+> =C2=A0
+> =C2=A0	/* Only need to do this for regular files */
+> @@ -2587,11 +2587,11 @@ int ceph_pool_perm_check(struct inode *inode,
+> int need)
+> =C2=A0check:
+> =C2=A0	if (flags & CEPH_I_POOL_PERM) {
+> =C2=A0		if ((need & CEPH_CAP_FILE_RD) && !(flags &
+> CEPH_I_POOL_RD)) {
+> -			doutc(cl, "pool %lld no read perm\n", pool);
+> +			doutc(cl, "pool %u no read perm\n", pool);
+> =C2=A0			return -EPERM;
+> =C2=A0		}
+> =C2=A0		if ((need & CEPH_CAP_FILE_WR) && !(flags &
+> CEPH_I_POOL_WR)) {
+> -			doutc(cl, "pool %lld no write perm\n",
+> pool);
+> +			doutc(cl, "pool %u no write perm\n", pool);
+> =C2=A0			return -EPERM;
+> =C2=A0		}
+> =C2=A0		return 0;
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index d51454e995a8..cf9916608dc2 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -3638,7 +3638,7 @@ static void handle_cap_grant(struct inode
+> *inode,
+> =C2=A0
+> =C2=A0	if (newcaps & (CEPH_CAP_ANY_FILE_RD | CEPH_CAP_ANY_FILE_WR))
+> {
+> =C2=A0		/* file layout may have changed */
+> -		s64 old_pool =3D ci->i_layout.pool_id;
+> +		u32 old_pool =3D ci->i_layout.pool_id;
+> =C2=A0		struct ceph_string *old_ns;
+> =C2=A0
+> =C2=A0		ceph_file_layout_from_legacy(&ci->i_layout, &grant-
+> >layout);
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 1504b889622c..c26217ed2034 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -1175,7 +1175,7 @@ int ceph_fill_inode(struct inode *inode, struct
+> page *locked_page,
+> =C2=A0	if (new_version ||
+> =C2=A0	=C2=A0=C2=A0=C2=A0 (new_issued & (CEPH_CAP_ANY_FILE_RD |
+> CEPH_CAP_ANY_FILE_WR))) {
+> =C2=A0		u64 size =3D le64_to_cpu(info->size);
+> -		s64 old_pool =3D ci->i_layout.pool_id;
+> +		u32 old_pool =3D ci->i_layout.pool_id;
+> =C2=A0		struct ceph_string *old_ns;
+> =C2=A0
+> =C2=A0		ceph_file_layout_from_legacy(&ci->i_layout, &info-
+> >layout);
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index 4e6c87f8414c..7b848fdd6f70 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -396,7 +396,7 @@ struct ceph_mds_request {
+> =C2=A0struct ceph_pool_perm {
+> =C2=A0	struct rb_node node;
+> =C2=A0	int perm;
+> -	s64 pool;
+> +	u32 pool;
+> =C2=A0	size_t pool_ns_len;
+> =C2=A0	char pool_ns[];
+> =C2=A0};
+> diff --git a/fs/ceph/util.c b/fs/ceph/util.c
+> index 2c34875675bf..5bb40af08b1c 100644
+> --- a/fs/ceph/util.c
+> +++ b/fs/ceph/util.c
+> @@ -35,9 +35,6 @@ void ceph_file_layout_from_legacy(struct
+> ceph_file_layout *fl,
+> =C2=A0	fl->stripe_count =3D le32_to_cpu(legacy->fl_stripe_count);
+> =C2=A0	fl->object_size =3D le32_to_cpu(legacy->fl_object_size);
+> =C2=A0	fl->pool_id =3D le32_to_cpu(legacy->fl_pg_pool);
+> -	if (fl->pool_id =3D=3D 0 && fl->stripe_unit =3D=3D 0 &&
+> -	=C2=A0=C2=A0=C2=A0 fl->stripe_count =3D=3D 0 && fl->object_size =3D=3D =
+0)
+> -		fl->pool_id =3D -1;
+> =C2=A0}
+> =C2=A0
+> =C2=A0void ceph_file_layout_to_legacy(struct ceph_file_layout *fl,
+> @@ -46,10 +43,7 @@ void ceph_file_layout_to_legacy(struct
+> ceph_file_layout *fl,
+> =C2=A0	legacy->fl_stripe_unit =3D cpu_to_le32(fl->stripe_unit);
+> =C2=A0	legacy->fl_stripe_count =3D cpu_to_le32(fl->stripe_count);
+> =C2=A0	legacy->fl_object_size =3D cpu_to_le32(fl->object_size);
+> -	if (fl->pool_id >=3D 0)
+> -		legacy->fl_pg_pool =3D cpu_to_le32(fl->pool_id);
+> -	else
+> -		legacy->fl_pg_pool =3D 0;
+> +	legacy->fl_pg_pool =3D cpu_to_le32(fl->pool_id);
+> =C2=A0}
+> =C2=A0
+> =C2=A0int ceph_flags_to_mode(int flags)
+> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> index e773be07f767..9808eb10625d 100644
+> --- a/fs/ceph/xattr.c
+> +++ b/fs/ceph/xattr.c
+> @@ -50,7 +50,7 @@ static bool ceph_vxattrcb_layout_exists(struct
+> ceph_inode_info *ci)
+> =C2=A0{
+> =C2=A0	struct ceph_file_layout *fl =3D &ci->i_layout;
+> =C2=A0	return (fl->stripe_unit > 0 || fl->stripe_count > 0 ||
+> -		fl->object_size > 0 || fl->pool_id >=3D 0 ||
+> +		fl->object_size > 0 || fl->pool_id > 0 ||
+> =C2=A0		rcu_dereference_raw(fl->pool_ns) !=3D NULL);
+> =C2=A0}
+> =C2=A0
+> @@ -61,7 +61,7 @@ static ssize_t ceph_vxattrcb_layout(struct
+> ceph_inode_info *ci, char *val,
+> =C2=A0	struct ceph_client *cl =3D fsc->client;
+> =C2=A0	struct ceph_osd_client *osdc =3D &fsc->client->osdc;
+> =C2=A0	struct ceph_string *pool_ns;
+> -	s64 pool =3D ci->i_layout.pool_id;
+> +	u32 pool =3D ci->i_layout.pool_id;
+> =C2=A0	const char *pool_name;
+> =C2=A0	const char *ns_field =3D " pool_namespace=3D";
+> =C2=A0	char buf[128];
+> @@ -81,7 +81,7 @@ static ssize_t ceph_vxattrcb_layout(struct
+> ceph_inode_info *ci, char *val,
+> =C2=A0		total_len =3D len + strlen(pool_name);
+> =C2=A0	} else {
+> =C2=A0		len =3D snprintf(buf, sizeof(buf),
+> -		"stripe_unit=3D%u stripe_count=3D%u object_size=3D%u
+> pool=3D%lld",
+> +		"stripe_unit=3D%u stripe_count=3D%u object_size=3D%u
+> pool=3D%u",
+> =C2=A0		ci->i_layout.stripe_unit, ci->i_layout.stripe_count,
+> =C2=A0		ci->i_layout.object_size, pool);
+> =C2=A0		total_len =3D len;
+> @@ -164,7 +164,7 @@ static ssize_t ceph_vxattrcb_layout_pool(struct
+> ceph_inode_info *ci,
+> =C2=A0	ssize_t ret;
+> =C2=A0	struct ceph_fs_client *fsc =3D ceph_sb_to_fs_client(ci-
+> >netfs.inode.i_sb);
+> =C2=A0	struct ceph_osd_client *osdc =3D &fsc->client->osdc;
+> -	s64 pool =3D ci->i_layout.pool_id;
+> +	u32 pool =3D ci->i_layout.pool_id;
+> =C2=A0	const char *pool_name;
+> =C2=A0
+> =C2=A0	down_read(&osdc->lock);
+> @@ -174,7 +174,7 @@ static ssize_t ceph_vxattrcb_layout_pool(struct
+> ceph_inode_info *ci,
+> =C2=A0		if (ret <=3D size)
+> =C2=A0			memcpy(val, pool_name, ret);
+> =C2=A0	} else {
+> -		ret =3D ceph_fmt_xattr(val, size, "%lld", pool);
+> +		ret =3D ceph_fmt_xattr(val, size, "%u", pool);
+> =C2=A0	}
+> =C2=A0	up_read(&osdc->lock);
+> =C2=A0	return ret;
+> diff --git a/include/linux/ceph/ceph_fs.h
+> b/include/linux/ceph/ceph_fs.h
+> index 69ac3e55a3fe..7faa18493a07 100644
+> --- a/include/linux/ceph/ceph_fs.h
+> +++ b/include/linux/ceph/ceph_fs.h
+> @@ -69,7 +69,7 @@ struct ceph_file_layout {
+> =C2=A0	u32 stripe_unit;=C2=A0=C2=A0 /* stripe unit, in bytes */
+> =C2=A0	u32 stripe_count;=C2=A0 /* over this many objects */
+> =C2=A0	u32 object_size;=C2=A0=C2=A0 /* until objects are this big */
+> -	s64 pool_id;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* rados pool id=
+ */
+> +	u32 pool_id;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* rados pool id=
+ */
+> =C2=A0	struct ceph_string __rcu *pool_ns; /* rados pool namespace
+> */
+> =C2=A0};
+> =C2=A0
