@@ -1,73 +1,73 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4854D370AD7
-	for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 15:24:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 220B0451047
+	for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 15:41:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782833066; cv=none; b=JxwO6w6mwbSfhfWfMPPV+oEufGugBO7S6TjIPn0v448VVUiUwWJZysUlAVXdRF9EyukpW1uE6FLqleO7Xk4qiGhfDpY/+8jKPdnRTwbGgzeK6jsIgxdcqb3qhLClq1h7Im27joe2ECV0F6NE6Mm81ErYGrXH3+kgpDdb05UsDgE=
+	t=1782834108; cv=none; b=bRjq36Fu2uPZXeGcX9DyQ5U8+lHDgkgTdbKbBTGvN2PvznGiE0hqLoQjpR1RWL4uhHicyzfmUWM+QnEYm3tCtRlnUbiJHWgMe2/RU9UYDwereWQMf7kvDCqqiYfDJq1AEFqXOBbsX88SzL+L+beTWI3BlmDvSD0Udbk2mXeSsIE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782833066; c=relaxed/simple;
-	bh=5GtU4WYiYBPgWmy0sALfNvxHO2WBJavQ9v0P15Vx2Pw=;
+	s=arc-20240116; t=1782834108; c=relaxed/simple;
+	bh=Vb1CCUoo8ZAPNZnywEnukJbTq/+nRfz4pbzLxTU577A=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=c8lYtRGcmv03LSdP9qWkYA71K24wg8dhUt52BMcCdLq9baf1W3/gloGcg1RpOeRUJuNFNe30KqMFixrr3qsuwK4JM0ErkAepzfDsfFBHPvXrHwHnwFXIPoh01baX0mdMLGxhLsPnSbgDmmFc/7/e96qePPYEZzCDCQo54ff75NY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=f2EtArx5; arc=none smtp.client-ip=209.85.128.177
+	 Content-Type:MIME-Version; b=boDQIRipaSJfgYL90H+o94mpjOINKsxZaqBCBd+JYsl1MXarX7KOxvas5Y14Gg5glMKENjcx4q0OCPRxZp/msh4YFML3jfQV04q3S/Jt9NHs2bS3KFRhwcHT8I4zpfJGn8IEbffQRZbdtyRTcssPijr4T77adNl4cRGZaPalRF4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=CyvSW2uC; arc=none smtp.client-ip=209.85.128.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="f2EtArx5"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-7fe36f1be74so54099647b3.2
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 08:24:24 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="CyvSW2uC"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-80bb8287d99so46346667b3.1
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Jun 2026 08:41:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782833063; x=1783437863; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1782834105; x=1783438905; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=lVwjFvH8o9VT7zZUNF3zH+2OYgwOPccRECvn9rYDk/I=;
-        b=f2EtArx5rB9u7yT6XQIOLP/QjE7TKehUDSnO9eYDbo4vGu1ZF8wRhEE/9gng4zx/e/
-         IGpZaahO2rz+/ygCQT5zbskL+1fcx+dR2hafTJZiMf7LQBlJ5RDr9mX6vl0cLMELQkwl
-         DxJoJvXJjtj1tWOHIoQhKILlpIloLyxt5q9Yl4ro4shhpYthHrfmyigNECKI0P+3P5PT
-         Bu15gAJlA75IFM+j5LNPcKl+Tqe4WOTUY4bI7BwWHaURwgoDNyTzX01SmsnsU8TSmSn3
-         CCxA29EFv+xNqI3Wv79NIY9WwfmPJNXPHSOwsuTCe0kaq+JCDufq2pDyvRdAws9YvXBz
-         S05g==
+        bh=1nC5ZFgwdx+CyplTR7dZSuu+BpaY20kDn4ud+dMIlNI=;
+        b=CyvSW2uC3CFljgbzp4KozRmDftYSe6u6bfkZ13AadS1XKTEvNSRq1YwcuboBRkH6a2
+         Xm1nF3BKPH53ZVNe/CZZ/FYPJZF0WYuUvUbTAyMbKYyyfVYAm4rMFiAxUUi+VELLK2s8
+         POpR87SF5jbB3aEJkUno/EIlGRG60AEohCgELfgsKN1ZCOI14+Wpd/MJv+A8uscA27Hc
+         rWoJQaIbV7F90O0355jq8roL7mi7mG9Nr/Ph5rQayYWm2YuFVNHLSgJ8GOL8+RDz4bxj
+         JFvsygXg4X5vFlaXru1UfGNc0oIbQQp7Fncdc5RdE6PRmuccfIoAurqEl7ZN3BXL4CSH
+         Lmag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782833063; x=1783437863;
+        d=1e100.net; s=20251104; t=1782834105; x=1783438905;
         h=mime-version:user-agent:content-transfer-encoding:autocrypt
          :references:in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=lVwjFvH8o9VT7zZUNF3zH+2OYgwOPccRECvn9rYDk/I=;
-        b=aCFjp2rxqfTZOsMAjLsjCx9mjZmWVsiXqtVmAUAAyKrY3jWZCxnQYp70edzWkT0vRB
-         702Xlys1wZKoSsIgqFipzDWaxJZ7tJNW8uFN0tsB0br72JQfpSuuTh+zIoet0AQSIFdX
-         zTXnVOAyL2XTdn+wnd5K88ip2pudKkVisBejzLvu8tkuSgjC3+FaO1moMGMHllBHhqud
-         dV9WrWuVu9llmftSNEOMWeymesVHHUXRHswYAJpfKT+EyEa3NFQg5HAWcF+MmZAz5yD6
-         CD1cDDGvt8d5opCXBXrlwyac3LJN+FPisKnQDNVG1BzGUSVJODNx8HnjaHI7vhyV7hQD
-         uB9A==
-X-Gm-Message-State: AOJu0Yzm7vESA1n4bVcbBgOUMqUNOjCbO5F/Z/YRuiH9Vw7iO/3aRiQS
-	e+/Ta3Cv2IxYOlsOxENLrxAL8PGtBLjGmN/IVrOt9/0CwWDpZv1rOx2TWoXaHNoZmcY=
-X-Gm-Gg: AfdE7ck40TgB4WrX2ENQ4ZnGG5B5AcE0RGIWMltM0SiYFZ2ISkYVXbFIvpdTDtsHeNH
-	VQsXNfan9+08jKPwlU65XdnEpAUuk7m5g0yuNafs7Ugf0Qxp7hzZOFnavUbroUWxrutrb34dyG+
-	7V6a5WlGB7FE8P2ZPG5qJxjqs2AlVRQ3C/1oyILcBI4I4xumCjJoIsxN1S2W2fnClybhaOYbhYB
-	zxHg6QlaUlEEfDxmgMnVzU4+RuGXISMos3sCcDw2By6hcL2ijqjiOTmnHSd3vh6mgzCF/nNJT2B
-	InoQfqXYbwxBeVXtfMSJZUe1e2sfuMCGpMLg616lhiSHv8WYiQTb4E8v7RcBRzG2thWYx27ektE
-	E2jhd/KpGtcon/1pXuZ8e4sm2Ibx/Zgr7WCLkFKcw8HZXxtMQW0ax7Jklewb/B4mFogX2o1lT33
-	Jl89SR1IRVQ3sia8KqkD+70e16QE2dx9Dh0DEIyhtfgl2UDrW42W2IuLWMKpjkqalbeQ4l1ot2X
-	PKsIyBKviCNlDIo0u6l88snBJWmWottVbkK8zg1wkYFSSkgkGbhL0zuJl0EFHMpbFDeF3inFK3Y
-	QWRPJ+c=
-X-Received: by 2002:a05:690c:4c09:b0:80d:66b2:850 with SMTP id 00721157ae682-810da60ee08mr42764477b3.42.1782833063270;
-        Tue, 30 Jun 2026 08:24:23 -0700 (PDT)
+        bh=1nC5ZFgwdx+CyplTR7dZSuu+BpaY20kDn4ud+dMIlNI=;
+        b=YDbes5nSdMuxwvhQTjCJrZo/dIVK0fGOmQ/H/7C3O7uaXJW+PrBePd7HPMEboFtveS
+         E9zAqSnSJ6lsnTk4rKQRii64PfZMGfuTVwHrBNntCyOCpLfni3gao56CypyBQ2XZF5md
+         7+mTapDyOuyUwRseWyIIqQNHzbBje3yjOk5UQoD4xcK4ZDMdJ3Pnh8o3nwm3hQVKCug7
+         Cd0h6b51/gyaIGOC56PA18Et9TB2Og4+gaUdJrbj5xD09j/tji3iRwVyLcupKuDrRJmN
+         78erG9Z0wGYBM1QzSVmZpctXCVdOufX1JsDCj+Sa71pB1WX/8V7fwJTY2Ucbs8R3zosN
+         n2ow==
+X-Gm-Message-State: AOJu0YxyGDsC7y6maUC7MEWmiW0OmtmOsyiNWXoMJakUWE9VwJwrhD95
+	1AaEqQVrQfogN6SYkabw3oqEwDuO6mOplIByD956Vu8aVNYcWGjvhHNRjAHh+plBM1A=
+X-Gm-Gg: AfdE7ckuXSoRg3Ftugq2HxlDmlNY8E6wDh9bdrQjRaE8Aop6HSe57KuHJDEbqHEOrNz
+	oUrIzyX5vRMUIDPNHHYZYmQgmwGRASwg1SR3XT/LIjxFiwWYt7fF7ret+8ztEltX/jbAj5CbFY2
+	G9sEr2pGPeInvYSI08tUwL6IURRPPX7PBZWNWamiIQ6Ow3qGLRsxkSfTwVkGKFQTA2Z7V08yxur
+	O1ezwENydzNDzCKarYzr9J9NxVmAimj9k1ppJ82I8er0Di2boJP4AEKFLgVuLGOmymy8+i+s6+k
+	RaPOJ5EYX3vpMmS6qGZ5pHRQ3w+r40RpwzOhbgnu8ljd9ENRjvIbgMC7/XDkuQ8J0S0il08v6Aw
+	xBAOAdxGJs9FgQxslCJKvVjmDUgZSfbs0azVvC0Z1EfSGr9vJ7jBRdDkbFIIJP7xLkj/Q8dPb3S
+	TzkikWLSHSxAJtvCSF94b+UTDFXFFxGYVMPh6noLaMJ6WQHSMIZWRIVL/9u7UueBxqxCw0YdrVS
+	s9VwuUKpR71Hm0RxfDj6rz8A7p65vo6vVcsVEgQPa+BmMrfHK5dI5fc+LMsKSUZF6aHh6pNjmQG
+	+2mnjDI=
+X-Received: by 2002:a05:690c:6c07:b0:80b:fb24:4571 with SMTP id 00721157ae682-810d8ee5661mr46231837b3.28.1782834105323;
+        Tue, 30 Jun 2026 08:41:45 -0700 (PDT)
 Received: from [10.0.0.3] (162-197-212-70.lightspeed.sntcca.sbcglobal.net. [162.197.212.70])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-810e728a009sm12720597b3.5.2026.06.30.08.24.22
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-810e728a009sm12907937b3.5.2026.06.30.08.41.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Jun 2026 08:24:22 -0700 (PDT)
-Message-ID: <231812ddcf4ecf2c3df63880b821173185420b16.camel@dubeyko.com>
-Subject: Re: [PATCH] ceph: fix refcount leak in write_folio_nounlock()
+        Tue, 30 Jun 2026 08:41:44 -0700 (PDT)
+Message-ID: <134825f322b5e1833350ce9a54d7d2e5b450a9df.camel@dubeyko.com>
+Subject: Re: [PATCH] ceph: fix refcount leak in ceph_readdir()
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: WenTao Liang <vulab@iscas.ac.cn>, idryomov@gmail.com, amarkuze@redhat.com
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
 	stable@vger.kernel.org
-Date: Tue, 30 Jun 2026 08:24:21 -0700
-In-Reply-To: <20260611143404.88190-1-vulab@iscas.ac.cn>
-References: <20260611143404.88190-1-vulab@iscas.ac.cn>
+Date: Tue, 30 Jun 2026 08:41:41 -0700
+In-Reply-To: <20260611144007.88851-1-vulab@iscas.ac.cn>
+References: <20260611144007.88851-1-vulab@iscas.ac.cn>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -122,76 +122,56 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Thu, 2026-06-11 at 22:34 +0800, WenTao Liang wrote:
-> write_folio_nounlock() unconditionally increments
-> fsc->writeback_count before allocating an OSD request.=C2=A0 If an
-> early error causes the function to return without queuing an
-> active write, the counter is never decremented, leaking a
-> reference and making the filesystem appear permanently
-> congested.=C2=A0 Three such paths exist:
+On Thu, 2026-06-11 at 22:40 +0800, WenTao Liang wrote:
+> The ceph_readdir() function allocates a ceph_mds_request via
+> ceph_mdsc_create_request() and stores it in dfi->last_readdir. In
+> the directory entry processing loop, if the entry's offset is less
+> than ctx->pos or if the inode pointer is unexpectedly NULL, the
+> function returns -EIO without releasing the reference held by
+> dfi->last_readdir, causing a refcount leak.
 >=20
-> - ceph_osdc_new_request() fails: the folio is redirtied, but
-> =C2=A0 writeback_count remains incremented.
->=20
-> - After the request is allocated, the fscrypt bounce page
-> =C2=A0 allocation fails.=C2=A0 The function ends writeback on the folio
-> =C2=A0 and releases the request, but does not drop the
-> =C2=A0 writeback_count reference.
->=20
-> - The write is interrupted by a signal (e.g. -ERESTARTSYS).
-> =C2=A0 The folio is redirtied and writeback is ended, yet again the
-> =C2=A0 counter is left elevated.
->=20
-> Fix the leaks by adding an atomic_long_dec() in each of these
-> early return paths, balancing the initial inc.
+> Fix this by adding ceph_mdsc_put_request(dfi->last_readdir) before
+> returning on these error paths. Also set dfi->last_readdir to NULL
+> for safety, matching the cleanup done at the normal exit.
 >=20
 > Cc: stable@vger.kernel.org
-> Fixes: 6390987f2f4c ("ceph: fold ceph_sync_writepages into
-> writepage_nounlock")
+> Fixes: af9ffa6df7e3 ("ceph: add support to readdir for encrypted
+> names")
 > Signed-off-by: WenTao Liang <vulab@iscas.ac.cn>
 > ---
-> =C2=A0fs/ceph/addr.c | 3 +++
-> =C2=A01 file changed, 3 insertions(+)
+> =C2=A0fs/ceph/dir.c | 7 ++++++-
+> =C2=A01 file changed, 6 insertions(+), 1 deletion(-)
 >=20
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 0a86f672cc09..dac2b0ae7d37 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -790,6 +790,7 @@ static int write_folio_nounlock(struct folio
-> *folio,
-> =C2=A0				=C2=A0=C2=A0=C2=A0 ceph_wbc.truncate_size, true);
-> =C2=A0	if (IS_ERR(req)) {
-> =C2=A0		folio_redirty_for_writepage(wbc, folio);
-> +		atomic_long_dec(&fsc->writeback_count);
-> =C2=A0		return PTR_ERR(req);
-> =C2=A0	}
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 27ce9e55e947..ef9e92e362d3 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -546,11 +546,16 @@ static int ceph_readdir(struct file *file,
+> struct dir_context *ctx)
+> =C2=A0			pr_warn_client(cl,
+> =C2=A0				"%p %llx.%llx rde->offset 0x%llx
+> ctx->pos 0x%llx\n",
+> =C2=A0				inode, ceph_vinop(inode), rde-
+> >offset, ctx->pos);
+> +			ceph_mdsc_put_request(dfi->last_readdir);
+> +			dfi->last_readdir =3D NULL;
+> =C2=A0			return -EIO;
+> =C2=A0		}
 > =C2=A0
-> @@ -809,6 +810,7 @@ static int write_folio_nounlock(struct folio
-> *folio,
-> =C2=A0			folio_redirty_for_writepage(wbc, folio);
-> =C2=A0			folio_end_writeback(folio);
-> =C2=A0			ceph_osdc_put_request(req);
-> +			atomic_long_dec(&fsc->writeback_count);
-> =C2=A0			return PTR_ERR(bounce_page);
-> =C2=A0		}
-> =C2=A0	}
-> @@ -847,6 +849,7 @@ static int write_folio_nounlock(struct folio
-> *folio,
-> =C2=A0			=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ceph_vinop(inode), folio);
-> =C2=A0			folio_redirty_for_writepage(wbc, folio);
-> =C2=A0			folio_end_writeback(folio);
-> +			atomic_long_dec(&fsc->writeback_count);
-> =C2=A0			return err;
-> =C2=A0		}
-> =C2=A0		if (err =3D=3D -EBLOCKLISTED)
+> -		if (WARN_ON_ONCE(!rde->inode.in))
+> +		if (WARN_ON_ONCE(!rde->inode.in)) {
+> +			ceph_mdsc_put_request(dfi->last_readdir);
+> +			dfi->last_readdir =3D NULL;
+> =C2=A0			return -EIO;
+> +		}
+> =C2=A0
+> =C2=A0		ctx->pos =3D rde->offset;
+> =C2=A0		doutc(cl, "%p %llx.%llx (%d/%d) -> %llx '%.*s'
+> %p\n", inode,
 
-Maybe, I am missing something. But I have the feeling that we already
-received likewise patch and we've discussed this solution. As I
-remember correctly, I recommended to use this pattern:
+Makes sense to me.
 
-	if (atomic_long_dec_return(&fsc->writeback_count) <
-	    CONGESTION_OFF_THRESH(fsc->mount_options->congestion_kb))
-		fsc->write_congested =3D false;
+Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
 
 Thanks,
 Slava.
