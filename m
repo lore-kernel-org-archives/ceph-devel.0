@@ -1,46 +1,93 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B19BC3B775A
-	for <ceph-devel@vger.kernel.org>; Wed,  1 Jul 2026 15:56:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 961B147CC91
+	for <ceph-devel@vger.kernel.org>; Thu,  2 Jul 2026 11:40:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782921401; cv=none; b=c5afCUnM0+7ERYo3okGPGIZd57jGpQ69WINIbHmI60Cjz+ZrRAH6tOJ0YaEpjf/+C81lJ8VCCiP2nUnZ53nnHRb1lPPgRRQv635osbPBBvNoWal7Zu0Bqvoe3F+ekWDIhyvrU1AWNa1h5h/HTHr74BLM9uciN4/gsZIGszU23TQ=
+	t=1782992446; cv=none; b=HurT4is1x5KDE+OxK97OuwKWE06KhIdxWqoVb/gxK+V/EU7kAFdb9SS6EGs7WvhK4pnvZsvmzOhZbh5BjlE7lD0uHUnXf0JpUxyg0TCbmTDWnT1g1GiIYAWmx48kcl1AM3kzT8qIGOIi7b/QJLyudpAGEGMBOMxTK2deDfOdDf8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782921401; c=relaxed/simple;
-	bh=hjHtRsQbXMiP7PRq1kljbMgL2Fbjp8gba+l8eZeYZXM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hzMYb7LSHa/C8Kiy3FrGlHX/JPtrpx6fFIiCjQMVezuoZgOZluQniX+3LUNGtTYdQsKQdAZatb0GJ33UTacgXzRbpNkSbQ4TmnK3gIL4bJ8nRHFFYVyES1sG6tcyhzLw1zRcjzuiTbWrNNEPakRfOrrIHCOFS0erByOJ4emdHb4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=IwphfnOw; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1782992446; c=relaxed/simple;
+	bh=hLVQ1ftq7EVejCnHot1sW/PcbtMmvC6zm8K/x3ZhQa8=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=Ojbwg+fwBN5wKWPS+2k4Gb+3ZVgKxCFEyEpiEu2kVkx3RXzrLoQDf70WiO2NM9I0VyDwBf6W9g4RUmE/8vGENYS4jBNb9t8wbDL9NmtpDSM/nQbqqxJ4jgynxwDtgvgZEiibJ0nUgTE8kUvEPbuUscTAcuOY3N4Qs9l+dtHI0j0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iRqRE0Vp; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=lJGlGiIl; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="IwphfnOw"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1782921397; h=from : to
- : cc : subject : date : message-id : mime-version :
- content-transfer-encoding : from;
- bh=hjHtRsQbXMiP7PRq1kljbMgL2Fbjp8gba+l8eZeYZXM=;
- b=IwphfnOwRZxggec9xXDlF+TLnAbt72oN9yX3gcxjLxJbREps9OnN5q64bHxe3q9jlzq2R
- w8e0OxTx3esZF27LZ/tg0ixO2MxGKNTOaU7webDDzXLAWGvq6q45or442Nxab2B+t0+Y0y9
- SXGh8AmpaZjk1IVBQ5+sbMjUePvCxadJsvwI9U+huS39N/PSfRI++6JFym+qa6H5Pbh40xl
- nBBELzrGc4a8h/MbEKpnIyJl76wXbwaq0tRWxbDKlfpZ/sTCn6TtmlQ7RFvE++MXw1HOuue
- cMfqLu51dfZVq0J+P5RPA5frzF0jAmb2OPWJ1iunHCv/CzchknxEUkyRoWMA==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id E302F5FC43;
-	Wed,  1 Jul 2026 17:56:37 +0200 (CEST)
-Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id C46DB5FA0F;
-	Wed,  1 Jul 2026 17:56:37 +0200 (CEST)
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Subject: [PATCH v2] libceph: Assign requests to homeless osd if calculated osd exceeds max_osd
-Date: Wed,  1 Jul 2026 17:56:10 +0200
-Message-ID: <20260701155610.3133868-1-raphael.zimmer@tu-ilmenau.de>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iRqRE0Vp";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="lJGlGiIl"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1782992444;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
+	b=iRqRE0VpwZUgsO9Z+of6MOsplq3oPJ5LHlum9JNdnsXZtjthmlXnVSGnU4kz3lXK/OFQ9V
+	O4j+TIphmuD0cDI9fRNg1e5/HpdAMCopQ7aCacLspoEKrRJmmNT9oYwDgWxzFMB09Oz/lA
+	rk2hSxtOPUjLMynpJoXnOMabavCt6Cw=
+Received: from mail-ot1-f71.google.com (mail-ot1-f71.google.com
+ [209.85.210.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-176-Y5vVv-DNN2SevM_WMDplGg-1; Thu, 02 Jul 2026 07:40:43 -0400
+X-MC-Unique: Y5vVv-DNN2SevM_WMDplGg-1
+X-Mimecast-MFC-AGG-ID: Y5vVv-DNN2SevM_WMDplGg_1782992443
+Received: by mail-ot1-f71.google.com with SMTP id 46e09a7af769-7e9fc6dc091so1008604a34.2
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jul 2026 04:40:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1782992443; x=1783597243; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
+        b=lJGlGiIltVH1Y92jLnoDm/OKlj3KpeD1NgyNwBWlNC+ZuKWlJJ5k3qLYDLtYxT7E0z
+         XatM5L4vT35aWfNI9FmJRLZYZKKyn6uV851XKibclVY9TAoVt8qS1uEVlco08yZByVe3
+         O/5Z6jgFFbbZi4eER8CA9TGOp0s231W099qnwPry3XXFE1eLOFeWksPL4dTKwsPg0FBA
+         646zbcBmaN3/k4CsYz+wYNibIJFaglVoTJXJijrM9n0UaW0LDU9qH2oDK1LJuLCTvS/A
+         C3avXaGsqBPPKIzpRju8rjn1tMir+9+rzEnswhpTTBHeztluGRjOTiMRqeVhZYB39+aY
+         WKvg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1782992443; x=1783597243;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
+        b=b/ZI7w6MSL1EMEw9NahXsNffBPQD3zikbfWj3ZEroGrOeWLAT9bfUi09m4Prz1cKRL
+         0x81q4k5jK8cDGmSj+otUWXRDeBR0FBoW9MjineBU1Dju7GDozQdY8ohsqQ1uhrus6OJ
+         tfBTiYoq0VqI88IY/8EI5kvlD+YQ8QN839QMkoxefiWpCpslP8TBVIFIjGnrsJF6VfbX
+         RgXTXnP46OxVnTp9BmEZ7oxhniEmBd9xvHSnICsNMVoJ/wGRf9yb9qYktNnPSIfV8DpX
+         IxV5f2ArnfenvDyEcB73RyNgvGPQJ2mUEYnqq1WNETC+iq6UqEZkrokmrzjT93PL2tNg
+         62+Q==
+X-Forwarded-Encrypted: i=1; AFNElJ9B/PA8qgk3iV5YJqKTHI/HpnEIxxjvnD8pm/hxo2jev/3Mmckn2VIFNslzFAx9leWJP7/rh7M0bdEd@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx7bJWf8MYSTRmZ/YK7Ty3LV5s3MgZojZ97HU/LFKdgqmAtuwW1
+	dceC+Cyao0IRTNAk+WZixiRcrwaQpWqN8PDGNuZrQ/Nu1mC7BNTIihcqI4FTBWHrG0SlXZY1nol
+	zOJikvfmG2YibJ1tI3U6dVMJxUQehgTK5LKhRwkTB8FwY0cOIptKIRtjQ4yksGbu/WcRe99WZxQ
+	==
+X-Gm-Gg: AfdE7ckPUMEN7QlP0pwDXnC4CgVIZmpJlOWCXWfLwEf0YwYlnU+5DSkqyC2pSEAdlzs
+	aG92h9GInzNgfnX8HXmm7XIgC2YltVaTgpapPUQpWkV9PT2cChn3whQ0/L0TQchAoUZ21dMoZ53
+	bGKyi3RcjpXnTKwVVAWISRopFgKGhQKe82DhxamXub9i2saTlfhSSZtmGrhAO2Rnio86mSNwwDV
+	G1GizE3B7MQysUwNdwLRRXSa9Eeu3jD+B2yZrBWy0iq1sCSYYz+J1ItMKXD1NGbQPFvRXqOiUHk
+	nhjBfYfmKaZFcsG4ytpmnEMYhYUhyML57hAYCSVHfYmPIIE7neA1owPE1877Q8IUHv22+tpY36J
+	KCV0O
+X-Received: by 2002:a05:6830:2316:b0:7e9:cddb:142a with SMTP id 46e09a7af769-7eb48aaeb77mr3316524a34.7.1782992442716;
+        Thu, 02 Jul 2026 04:40:42 -0700 (PDT)
+X-Received: by 2002:a05:6830:2316:b0:7e9:cddb:142a with SMTP id 46e09a7af769-7eb48aaeb77mr3316508a34.7.1782992442279;
+        Thu, 02 Jul 2026 04:40:42 -0700 (PDT)
+Received: from cluster.. ([13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7eb545515casm2206351a34.27.2026.07.02.04.40.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 02 Jul 2026 04:40:41 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Xiubo Li <xiubo.li@clyso.com>
+Cc: Alex Markuze <amarkuze@redhat.com>,
+	ceph-devel@vger.kernel.org
+Subject: Re: [v2] ceph: add 'lazyio' mount option to kclient
+Date: Thu,  2 Jul 2026 11:40:22 +0000
+Message-Id: <20260702114034.917507-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260701-lazyio-v2-1-9c667864805b@clyso.com>
+References: <20260701-lazyio-v2-1-9c667864805b@clyso.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -49,42 +96,12 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-A corrupted osdmap received from a Ceph monitor or OSD may contain
-placement groups with osd indices that don't exist, i.e., that are
-greater than max_osd or smaller than CEPH_HOMELESS_OSD (-1).
-Subsequently, this may lead to calc_target() returning such an index as
-target osd for a (linger) request. Because the osd_state, osd_weight,
-and osd_addr arrays only contain max_osd entries (with indices 0 to
-max_osd -1), this leads to out-of-bounds accesses when trying to read
-values from these arrays.
+Hi Xiubo,
 
-This patch fixes the issue by adding a check to calc_target() assigning
-the request to the homeless osd if the target osd index read from the
-osdmap falls outside the valid osd index range.
+Thanks for the patch.
 
-Fixes: 63244fa123a7 ("libceph: introduce ceph_osd_request_target, calc_target()")
-Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
----
- net/ceph/osd_client.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+Reviewed-by: Alex Markuze <amarkuze@redhat.com>
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index a4d3cbfd27a3..3d13226a5d1f 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1707,6 +1707,12 @@ static enum calc_target_result calc_target(struct ceph_osd_client *osdc,
- 		}
- 	}
- 
-+	if (t->osd != CEPH_HOMELESS_OSD && (u32)t->osd >= osdc->osdmap->max_osd) {
-+		t->osd = CEPH_HOMELESS_OSD;
-+		ct_res = CALC_TARGET_NEED_RESEND;
-+		goto out;
-+	}
-+
- 	if (unpaused || legacy_change || force_resend || split)
- 		ct_res = CALC_TARGET_NEED_RESEND;
- 	else
 -- 
-2.47.3
+Alex Markuze
 
