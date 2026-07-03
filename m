@@ -1,113 +1,165 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9CE00340A47
-	for <ceph-devel@vger.kernel.org>; Fri,  3 Jul 2026 07:20:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.45
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783063217; cv=pass; b=BvGQveLs+9XuNrS/+0Hn9kd5mn7NDVtsFeg2xn5fbWzdE26NssxJnnGN6YcqJKP6zF3tnMCeGS58zRD0CjUmzzCOIRQ7GtpmQE2gEMeZ5kWb51Ob8HCfn2m1MyMTbdyU2jGt43FGCvtgJSKwPNdaI5eJro8xfcSkzBk6BYRGsWw=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783063217; c=relaxed/simple;
-	bh=l5K7+smxo031yhaanxRMaaO/cbx3ix29IndZQhgvDRg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=oV/4cZUt/nU9DjIf6q6aG2Nt6aeoBqLYHXSI0bp2VUXhX9fYG2sthnuwxpLb2ecJC0EtVf2xtV8J262TF1f5LtcAE4VFIM+6y3Y68z1pz2Ik6jomqhyxZC+2FWl/nPqcJUyu0Gciw9+ciXsuUUw6Vm61ZUmKUQ9qhN0lhyZXLZM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=IKGWW60i; arc=pass smtp.client-ip=209.85.218.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49A8D36EAA6
+	for <ceph-devel@vger.kernel.org>; Fri,  3 Jul 2026 11:33:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.45
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1783078383; cv=none; b=TlC/6up2wdBIqudzja11Zs/GBxhuwAWktAP2RFRL7EbvfNLo3Hxq4wpVvYcUBt+r5qJM2bVB8NbmwS2eG7GtnkFPSMCyNMO7YSWiz8PFjgJMHtS8ttk6GDSWJ1ZJICF3lAiyTS1OqjvcOtby3ArrZ/axryQevcvV88Aw/wbgNN4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1783078383; c=relaxed/simple;
+	bh=UH7BuFXY0mTyNLMmwQGy+2I4KaMbYJ2QrOGX9DLbpiU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=XS82JG0VWFEMvWCu3hDeVi9E7XGnyJdY/mUFmpgFGspF3UV5NN5IiokSp2eZxD9dfdVZ3sdpfj42WVzf+QCR9R8GYSExopoj7sHcsis1jDc1zCOY5VE3f/a5QDnuEmEtKBka5isCKUny8N9ovN0yJtDK9T760VKOfCr4Z0MtmBY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=e/AViQ0G; arc=none smtp.client-ip=209.85.221.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="IKGWW60i"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c1268d56234so24474366b.2
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Jul 2026 00:20:15 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1783063214; cv=none;
-        d=google.com; s=arc-20260327;
-        b=SMc+FgK0kkc9IoHygyVZo/A4Q2f1JbffUV5PR0hyepvzDT+ZFPzTIG55O0pE50Dg4/
-         fVv8FQCf38OgkAzbe2HrCFHvMeFr16lC7zrcuCAOAYoznAt0n+czw+xj0KugLFiVoxCn
-         iixiRb08DwyE94nRzdoX+2X6UjdihJi9PcHDe4A3nChCjB4Bp9qc8ADVdRQppSvU7PC2
-         cdbTD+mV71jGKdy9YQ4nyibrPgmykNMr8uCeNLiGKY/lBbwCiMUVwDCqSW+Q2gNFByjU
-         SBUTGZUj8EkeY714ejERU53IduP5gEi2ygEnpxbjwzJQWCoI9X/jOZATSKkx22YC633V
-         enCA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=kFdj7QiBpWZI/1mqCJvt0ySOjHkHZGWQDb6yOAmSu2k=;
-        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
-        b=JpL0FtwO8/+PusHMH6zRamh3Z9RW7w4wNKmE11OO+ehalDAqIrpX6/B7rA/gilyWVq
-         NBWdNE2VAa35QOqBEAs2sYnoZWb4zOFPLmc65UC8prT354Df/7ZhDw+H9c2WM0SHpvz/
-         f8ZAIUpFx1wC71pYP2WsgB0+9fx1MVjDx/Ca9zgH0SuZQfnvEeT5bu231Fbv0GYaYhD2
-         WwojcE7czVaMqBNFz93ZqNLF2EskYANFtpajC7Fp4Com+XA+2NvqN4a9B/keBvhDppkS
-         cHFV19vdZ5TM4YT9JPFd+kvPIUM69lgkR48z/gD3zeZ2xELL4njJn1bW8cwIdk8x36Zo
-         2EGg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="e/AViQ0G"
+Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-4758bd3731bso359453f8f.0
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Jul 2026 04:33:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1783063214; x=1783668014; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=kFdj7QiBpWZI/1mqCJvt0ySOjHkHZGWQDb6yOAmSu2k=;
-        b=IKGWW60iUWUycJE9CjzzkHScXqjWhtU9DFnI3au/pNaaVDngR2y7Q1AmVSYBXMy8MN
-         zndJ0EECGuvNyivOlrPc8nLoq0m4V86vMTxtQK7ZGl+M95PALtjRxLf1PMMu85ZOFvsy
-         ti9hQQGCl6757VyU2E7nOTzexXKDK8dkFsnTCEc3VK2U2kYSHniVidmKMnMzCnTiQ1F6
-         O+enF+HDDvhrjONmPQlZxJ4x4PczWA2cLs9C2/5FU9gn+2gniOPbQbPt7dZIM/CCfxRP
-         YY83LijuE9ubhwVT31dVn0aHvGWpsdtiz1SDVhzUzfFzDKVo+BkYiPtcr3hbUQj9Yp8w
-         wtzA==
+        d=ionos.com; s=google; t=1783078379; x=1783683179; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=cXlhWG1WKeTg4AmWopqf59lXRVTRhCfpPcccqRSqFt0=;
+        b=e/AViQ0GYKMpYq8H52yDkg3o+tkcr7qkNQXjuGGdqz2EC5cM/ypMDIXHbVnfBMlQWm
+         Y+mk1gAfo4eV1tWZMybLPYdZ30XfjCuJavFxAcqcJgi57T+xEmFZyyRyg9s3odBvFi89
+         7xJfCkI7/wDiCJAKfxNsdQ4lNa3x+Ryu+WmhadWRoFyn/BD2/i0HjGqpUEPAiXQSVE2n
+         uECGQS2H13weiPY/kTI6THiGm74fkFqGHvbQrWGpCf8jdjfcPjIkwwBEq2G+eNGWvrj2
+         5c4rvscUvAwxgRmyxObAqKNVOTTWcUtUfC/3emdkhh9KRMDjLpSEwQy9k8qIK3Ra69c3
+         RU7w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783063214; x=1783668014;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=kFdj7QiBpWZI/1mqCJvt0ySOjHkHZGWQDb6yOAmSu2k=;
-        b=jvqBkt183/QwSDFFYnE4I2c2O0zaTrQC5VlrWcjbPZ0zsFU+XWOoFJCj+1mfLN7dUw
-         fnRDnU9KGww45xNLdXAdUjaJdYcxOey5lEKAu2BugopjLf5vY5naFm0yX6eFGPsBb1wl
-         up/54jeujZvmWB2Siwf+omxeSNEVRWePdoUcL0juEvcjEXb27PyK3vvJDxqYVoLgKU4L
-         VGZLWDjpCxt5AA2d9dM5nZgk4TVzARuc/m5rfMHW5zNo+EGmwAzY4DOsbqQqKQsoj+1I
-         NZxN//USwgnE8RPjQyHRIEmn6JfJFMeTdCdAQX3wacZZ9H8MzifcUkDiIYH0N1+74m86
-         c1uA==
-X-Gm-Message-State: AOJu0Yx56JpmTYuElvJMSYFV+obQcNjUkW2466h+a+9ioD5ADZT20Kwl
-	p+Dshin5I/6QN7o1u8/nS/VxhhKjBZz6kU5DSbzPKdjLhYXOGXm7gQUcKOEe/zVl3kq+bUO1Z/o
-	r1QNUuT6nMdRORIXPCH75XufHuc48P+Fq7RE7oRD3PdhIL39ST+Zhhwk=
-X-Gm-Gg: AfdE7cmYkt+biE5BOHXFXZzOeP7djsPtOHP35tS0zL3pEGQB/1WZ905H9ZHGbzXMsRX
-	/31i4JKsNFlauuCj2/eTTUDtr4uz73vueGv8Rq2od0d7oMIrFDF3QG6p/SEIBxDyv0SjJUHA8S6
-	YJ0haK2QrRXchGecibxWJGslGezJH2w/MhSF/Gtb4h9QuKOBqlaSfVNIy1I0ks6OFRLd/2TLfX1
-	fIdjLCLve/QzesiF+e8fT+f/YV9wRVukErQZt5wqEu0gCLmIzmbWu6oFY5+HfgSLG0ve609zkZ/
-	ZFu9IuSOfpUyAP0kU+hL1fYqFw==
-X-Received: by 2002:a17:907:a06:b0:c12:9ede:d308 with SMTP id
- a640c23a62f3a-c12a9d19558mr427082466b.12.1783063213746; Fri, 03 Jul 2026
- 00:20:13 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1783078379; x=1783683179;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cXlhWG1WKeTg4AmWopqf59lXRVTRhCfpPcccqRSqFt0=;
+        b=Xa7OIE7X1MgUIopzU59J8EEcBlxDVw4574RZ3/gIFD3HGM+xx59kUsSLlPRy5JCxIB
+         3O9+4H0NEB0l2a0S85FcqkN/H9nxp13IehypOg10E+HJ8FJ/FpfweY/hmRRWtdv8puOc
+         gPSpacuwCYYllUH7RjtkP7JDGrLrbgwanu/f8aIpwkn++2qwrV2U723jx/NgaOONd1Bc
+         cf+ffz/iA4Tdr2krLVwPqnAtOkVYpazVN5nmBk/Nk69bk8txvQuCpqRDT90M1NZ550Zr
+         EBB3UipmVs5Su6auMJQgMUrky7qJXkILyIhcQ/wHBnYf4VEvebkANThYTjV/na8u4V14
+         4Gig==
+X-Forwarded-Encrypted: i=1; AHgh+Rrgjyiv3+3E9WMihrDIpF9LbY9MqD2iTeqcEAGUjbxEoeuAHdo5PgHuoxbgxavpdsm10/qf6bDRMGvF@vger.kernel.org
+X-Gm-Message-State: AOJu0YxtedRaHDxym7QXWVBEloISJYkL6EbwMcJFR71L4vEXmTTiT+5H
+	ap8BbOgFGbqEsrwmGGtEUcXlMJc6H4aGeYYxkXlIOXYqutWewF/K7EHuyD7AC3dVr1g=
+X-Gm-Gg: AfdE7cmdk4QcpRo5mRvHbiv1BrKGKmLPm8iitEO1GR1RYnN++1gyRjxmZ5j3cdDzku0
+	PSYtF/VV9K/FPWVmlyAu1DXV3v/TYPp6K5ty5Q91A+9K788fzIeZoNiw9TSZc5+t3XrQamK0l/8
+	7VCwSlSyZWEhhViaDXAaAHPgy8UX2Oid6X1B4huBQRiBPNrsyesqPMyfmu6EdS5cFIf751JgHAE
+	tFcSWC0/WAJInlwECJKxb2FIrrfNXrX2kvcDRrsXX3rFY4zVMNng4uyeZsz++UALJteadu3KHFO
+	xZCVR+4r+ZPn4zIiX8xU44fqfTxtcHq8KtmB0iOkM3/lZCGxvQbLJxfugO64WLlCkSuUZ02+TA3
+	nkx7ZunG1SagMNr9QtUOknPYG/i2g3QTd9VcHHK3ZhOf7GEyx8Cxdk8opqZoKftmdVBGGD2Ik5v
+	xz/10614yUewbXloybULBP6vOLjg+WbHhtT8GTtZ442fMncRaK2ElseYpidzyPGiDA5jWA2gAAo
+	0Wp1gJ5JNu8DgYU
+X-Received: by 2002:adf:f708:0:b0:475:b34a:dc1b with SMTP id ffacd0b85a97d-47936391546mr3807567f8f.21.1783078378602;
+        Fri, 03 Jul 2026 04:32:58 -0700 (PDT)
+Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-477db8a4a09sm17566060f8f.13.2026.07.03.04.32.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Jul 2026 04:32:58 -0700 (PDT)
+From: Max Kellermann <max.kellermann@ionos.com>
+To: idryomov@gmail.com,
+	amarkuze@redhat.com,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Max Kellermann <max.kellermann@ionos.com>
+Subject: [PATCH] fs/ceph/caps: skip __touch_cap() most of the time
+Date: Fri,  3 Jul 2026 13:32:52 +0200
+Message-ID: <20260703113253.3635335-1-max.kellermann@ionos.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260427155813.2561935-1-max.kellermann@ionos.com> <20260702114034.917507-8-amarkuze@redhat.com>
-In-Reply-To: <20260702114034.917507-8-amarkuze@redhat.com>
-From: Max Kellermann <max.kellermann@ionos.com>
-Date: Fri, 3 Jul 2026 09:20:02 +0200
-X-Gm-Features: AVVi8CfbGdVcnY98ki0hcr9n4zE5yINNKDptegrLbmpgfNNgFuvfsMyATOrUQpM
-Message-ID: <CAKPOu+_O-j3KdUmfAPeQrUPhpehAGeAQbnZd6J+OwG+duBJbcQ@mail.gmail.com>
-Subject: Re: ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Thu, Jul 2, 2026 at 1:40=E2=80=AFPM Alex Markuze <amarkuze@redhat.com> w=
-rote:
->   1. [minor] fs/ceph/caps.c:3093: Timeout constant should be a #define
+__touch_cap() moves one capability to the end of the LRU list; this
+list is sorted by access time for just one thing: ceph_trim_caps().
+That function is supposed to discard the least-recently used
+capabilities.
 
-Why?
+__touch_cap() is called extremely often - several times for every
+system call, but ceph_trim_caps() is only called rarely.
 
->   3. [nit] commit message: Missing Fixes: tag
+__touch_cap() causes considerable lock contention on
+`ceph_mds_session.s_cap_lock`; this is a /proc/lock_stat I captured on
+one of our web servers for 5 minutes:
 
-What should it say?
+      class name    con-bounces    contentions   waittime-min   waittime-max waittime-total   waittime-avg    acq-bounces   acquisitions   holdtime-min   holdtime-max holdtime-total   holdtime-avg
 
---=20
-Max Kellermann
-Principal Architect
-Hosting Technology
+  &s->s_cap_lock:     336304046      341686597           0.04        4905.76   418498578.76           1.22      892783632     1957814739           0.04         959.40   355752146.24           0.18
+  --------------
+  &s->s_cap_lock      339379730          [<00000000a2197200>] __ceph_caps_issued_mask+0x1bc/0x240
+  &s->s_cap_lock        1268054          [<00000000c96a24b7>] ceph_add_cap+0x234/0x3e0
+  &s->s_cap_lock        1021360          [<00000000aa76f996>] ceph_add_cap+0x108/0x3e0
+  &s->s_cap_lock          16042          [<0000000099463548>] __ceph_remove_cap+0x1f4/0x270
+  --------------
+  &s->s_cap_lock      338509619          [<00000000a2197200>] __ceph_caps_issued_mask+0x1bc/0x240
+  &s->s_cap_lock        1937864          [<00000000c96a24b7>] ceph_add_cap+0x234/0x3e0
+  &s->s_cap_lock        1203451          [<00000000aa76f996>] ceph_add_cap+0x108/0x3e0
+  &s->s_cap_lock            202          [<00000000888f212a>] __ceph_remove_cap+0x7c/0x270
 
-cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
-General information about the company can be found here:
-https://www.cm4all.com/impressum
-A member of the IONOS Group
+In this /proc/lock_stat output, __touch_cap() is inlined in
+__ceph_caps_issued_mask().  It is responsible for 99% of all
+contentions.
+
+Since __touch_cap() is called so often, it is acceptable to just skip
+most calls.  The most busy capabilities will still gravitate towards
+the end of the linked list, and if not, it doesn't hurt as much as the
+lock contention.  This is still good enough for ceph_trim_caps().
+
+This patch adds a static variable that gets incremented with each
+call, and 255 out of 256 calls will just be skipped.  I didn't bother
+to make the increment atomic or use READ_ONCE because I don't think
+that makes a practical difference for this use case.
+
+Another /proc/lock_stat for 5 minutes with this patch (__touch_cap()
+is no longer inlined probably because it contains a static variable):
+
+      class name    con-bounces    contentions   waittime-min   waittime-max waittime-total   waittime-avg    acq-bounces   acquisitions   holdtime-min   holdtime-max holdtime-total   holdtime-avg
+
+  &s->s_cap_lock:       1043711        1065182           0.04         502.72      737472.88           0.69       10522578       25069948           0.04         796.44    11053669.64           0.44
+  --------------
+  &s->s_cap_lock        1043074          [<00000000f4367d73>] __touch_cap.isra.0+0x50/0xa8
+  &s->s_cap_lock          12147          [<0000000096f45706>] ceph_add_cap+0x234/0x3e0
+  &s->s_cap_lock           9472          [<0000000038a23e0f>] ceph_add_cap+0x108/0x3e0
+  &s->s_cap_lock            471          [<00000000e2eba934>] __ceph_remove_cap+0x1f4/0x270
+  --------------
+  &s->s_cap_lock         978499          [<00000000f4367d73>] __touch_cap.isra.0+0x50/0xa8
+  &s->s_cap_lock          57794          [<0000000038a23e0f>] ceph_add_cap+0x108/0x3e0
+  &s->s_cap_lock          27226          [<0000000096f45706>] ceph_add_cap+0x234/0x3e0
+  &s->s_cap_lock           1581          [<00000000e2eba934>] __ceph_remove_cap+0x1f4/0x270
+
+__touch_cap() is still responsible for 91% of all contentions, but the
+number of contentions has been reduced by a factor of 320 and the
+total wait time by a factor of 567.
+
+Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+---
+ fs/ceph/caps.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 4b37d9ffdf7f..a5e2b00d91a0 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -871,6 +871,14 @@ static void __touch_cap(struct ceph_cap *cap)
+ 	struct inode *inode = &cap->ci->netfs.inode;
+ 	struct ceph_mds_session *s = cap->session;
+ 	struct ceph_client *cl = s->s_mdsc->fsc->client;
++	static uint8_t skip_counter;
++
++	if (++skip_counter)
++		/* skip this call most of the time to reduce lock
++		 * contention; the LRU list is still accurate enough
++		 * for ceph_trim_caps()
++		 */
++		return;
+ 
+ 	spin_lock(&s->s_cap_lock);
+ 	if (!s->s_cap_iterator) {
+-- 
+2.47.3
+
