@@ -1,125 +1,196 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAC44379EE1
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 14:28:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93CF83A963D
+	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 14:38:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783348135; cv=none; b=OnyjY+bzZ09WkUOap0Beo2CNMCah2FsupUXS62Qlpo6R5Tb2N5sIP27WVP6dPSCTzJfuTLS8pwFMKcTOSBzrAfQ2jZ9o2iXxF7ctGWdHdCZZ76IPrqUdNSGJRi7ICVnXFSJPJHkdtwhZ7I1ICDAX+Ea+HOI6TeQdRW/eQJM7rvo=
+	t=1783348731; cv=none; b=fIXZj1mwAboK6SKmlD94huYyrs26mFfGV92ZQfisJq7fDPV1tkcNxYcVx9cYPs274UyVkznm14208JVv52be2FBBiijK+bhV0HY57ojx+ngsJHwso+uYCaMhXnYzx4wF+e4L3nwvASNlqdGxfqjOhsn3os8Q8Vn/H4CakNhx60s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783348135; c=relaxed/simple;
-	bh=5dVa6fVw8YbsW7azWfSPEccp5aCBtaxIes2anWreLEc=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=a9J4fB6s7BONUk7Wti0UhlAWCENBOkM+689Vp8g5esCgTN1adVnfHxoQTLjMaQ5MG8iovLabVbD+iBQ3kDDOepdAAwZQN+bjS5qsmxjRwDfNqZA8/zx95XXOtJxoHYE+zoLnKEQ5d0pPEZeWiFu7oYDbtVDUZ/HV7rbrZhiT3/w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QiiE1acp; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=riAnt031; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1783348731; c=relaxed/simple;
+	bh=VXHCdG/SfipBhU/H1Gd+PlHxRz29AoHtoJOCjqeAXCE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=nGbft9FVFQW1sCfgvL3+8vb9EbIYay7DnqBNYQ3jMKfmkbQzH4PNnP+5dCgb7iQ8lrWHtEr3j50IBlMJKFcs6mKnQiVb5Y3wIfpZix34hHuD78MnHcnOjgmgMgfVCoS3aVQYXI9/71lkiMPjRp6Fmdji5ymQEYKurKiA8KsJ3vE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Dz9phKn1; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=uDigNlbO; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QiiE1acp";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="riAnt031"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Dz9phKn1";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="uDigNlbO"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1783348132;
+	s=mimecast20190719; t=1783348728;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=6bKkAklAVg2K6bI/RZmLYsad8XQOiYwrC6TQVFTUT34=;
-	b=QiiE1acpNLqqy+U9Zm+E7rAoORln+Wgae2Yw07EXdWuLv2RK0h9Xam5yXn/F0CUCzXyth5
-	GN+2r1qS0GCt3QvsnqWD62E/sfH1hABuNkJhP8fPkpQSop+UvAVNg1gfsfWIseLEp63rMV
-	42zVB5IcGOFf5NvKnMjBFojQyva4w0Q=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=jCuQsGfuM94zuuSDRBMZ7xlSsMRAqQde2jYi0A9wYqk=;
+	b=Dz9phKn1XsgXFOJCSKKgTp/6xWMo2FRrgxY65ZqYW4EjZ/CgVJWtiWGMfNdWVFUIIBr4sF
+	Pc7fG9nKygB2gB2e2TTtJ+PGBTLtqD4fpC0FePA90A/55RMU/Ld3p9YrRxG4vswju5DBOK
+	bI6/SF9xSzb4+qvS01kqy69XwjaKoe4=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-613-VEL32cjnNOunIfjUojWJAg-1; Mon, 06 Jul 2026 10:28:51 -0400
-X-MC-Unique: VEL32cjnNOunIfjUojWJAg-1
-X-Mimecast-MFC-AGG-ID: VEL32cjnNOunIfjUojWJAg_1783348130
-Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-c1273e18eebso310321466b.1
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 07:28:51 -0700 (PDT)
+ us-mta-70-fc_gT0DDMEiLOBHRghAdcw-1; Mon, 06 Jul 2026 10:38:47 -0400
+X-MC-Unique: fc_gT0DDMEiLOBHRghAdcw-1
+X-Mimecast-MFC-AGG-ID: fc_gT0DDMEiLOBHRghAdcw_1783348726
+Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-c12dd729b4fso221707966b.3
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 07:38:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1783348130; x=1783952930; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=6bKkAklAVg2K6bI/RZmLYsad8XQOiYwrC6TQVFTUT34=;
-        b=riAnt031GtOR0KaayQ5cO/ZU6uweITmndyingVb1WSCTtXS0el+5dXY9XLfFBylqMg
-         8FhaMpLurv75vN45l0In91rv/Rm+i4z95n3kRI4qr3ckHJWVWvRJSGace6/xUW3/xOeh
-         dfJ/+VkWSzcRsSHZG/UgsaoJRAe0hxMetfQfkxfzOzIo6a2IVhvNsNe71na4UDeeAmcB
-         W6lKNGiE+GCxn1bG6u+NIQnGuswpSx3u7VaDOEs7t4ZD1vqJF9ATg8EGLSg/+TvDp6gh
-         PYwtjfl38797JaNRnIf9ZnzvgQWtCuUhbHLqtRyxtMtJP/pMnlndJcq11vg1DGcswesa
-         I38w==
+        d=redhat.com; s=google; t=1783348726; x=1783953526; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=jCuQsGfuM94zuuSDRBMZ7xlSsMRAqQde2jYi0A9wYqk=;
+        b=uDigNlbOADW9voivl3HSqkSJwxEWKaKEyaafD3QN2bmJItFyWcX6xqjLSgjAzIURlI
+         jGiXzEYM+kwVnoasMc1UCuyo44DO8fUc3XanmdfjUN49qBaocmRCo13IccWbHLwWMnOK
+         5il/TeSy5U+4HP6h0aK5Zso4s9UwMJpdm/DYS7BcdjUmyWFptior8rp52/eFk/svu7jR
+         5i11Hu/lJraFU1RUATPrnB8eEXvQrD3wyuziPIHg+iBL3w9j4iVrCFrsE/lcjqBmnRlU
+         Ou4TH8XIwRzEfyRyuwOCMYY2TxgLPjLcVJmXhZaR6rm5WLYWiVjWLI/bAzmeyuMsaNvM
+         57VA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783348130; x=1783952930;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=6bKkAklAVg2K6bI/RZmLYsad8XQOiYwrC6TQVFTUT34=;
-        b=TFx9CNa4i6qhQMZDa/LIJ2zeMv3wDlV/trxH3k0o7y/lNY7iQwDSf1RmVegjir8VQq
-         Ft4IsTzcMF/D0f8mj6y/qsLSCBi63iF8dXXOxnFu6KNIXS94IwbvW8XxF2lzK8t+djKJ
-         TmkIz93/lZDmlZCjx5r7tnC2NFphsyx1cfQqm15s0SvsU+RYc8lSw8E3JEXD7lojjbU6
-         /TBS2k+LykRk3BzMJdUOFfM5pbwvvdJOwBV/Ud7G+xRcX5dZ/Ondosa/ZvYnUMdlMYgX
-         Oi9wfbI69WXpIjuHOBJf8HH2+KD74Sxeho0S5ruHmFMH9LsGMu2nyqDZmOm3c9zVtpJm
-         kTJg==
-X-Gm-Message-State: AOJu0Yz5JRzdXoV747kwdBPTqW5/iw2sRb7bqGzk/fbelUtiIwrqczSy
-	/gL84fBCa6A1nin3TcO6Srf48VJu0tP7zRMuruA8zc/zH8mMo6W1KAQ0nj+Qyyac2yQurjaBUGt
-	kbm1gX7ikJBcUAKHwH0GESAbI2fs4xxAZ+ak4NE1NuAC0Xwp5cVm8mO9Mj29wi84=
-X-Gm-Gg: AfdE7cmRFe0vxxIj+e7G4/DBv3uDTAES6w7ztkeDwSz50sC0rlnXLGpeTqrHwHN1RUs
-	xgTA3oFKYDzoK0nCa9bPLi1sNIDhT39Jn+JpGH6A0ptoMao3V65vLhw4NhZQjCoaLaDWgLHwq+B
-	BO3VOJIhrJ1R6Y4787eg7q2twbQTvHLkRp8xAC1Ruot3KngjpxUMgFdCTdtwGJBoFEOM/8nPai3
-	sQCNwcBSqVC3YxA+i8dzyFgQWchk4K0gh7hW3+x5WNHc97HgvXJqoO2rIgYAqMZ9P+nBE7FlWbK
-	tMR/cbsRNsmT17ke1xYaukYOM6htz8UQnItD20/HpMX5hMk8Aq7H7gq/nEBw5nd2+5Wz7K8FfgN
-	Z2/yFnf3KTg0g0q49uEtJz8uBxpSI1fgwIuvaxn1kekL9
-X-Received: by 2002:a17:907:a0e:b0:bef:db4:296e with SMTP id a640c23a62f3a-c15a676be9emr52372166b.10.1783348130260;
-        Mon, 06 Jul 2026 07:28:50 -0700 (PDT)
-X-Received: by 2002:a17:907:a0e:b0:bef:db4:296e with SMTP id a640c23a62f3a-c15a676be9emr52369966b.10.1783348129796;
-        Mon, 06 Jul 2026 07:28:49 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1783348726; x=1783953526;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jCuQsGfuM94zuuSDRBMZ7xlSsMRAqQde2jYi0A9wYqk=;
+        b=oS6E9p1aSkb0lpV2ey/G04CeMvrQEMBH2z51fK0DRdyr1LfYXe6SLGX1kFlK/FQuU/
+         iHoNpoC3O1RGpmXSWaSHd7VpwRQZimpQD2V3XwgKVyt1M//VK4yKzYhXRuAJq/IlpNh6
+         wK1yE0EeUyGI5Zvcdf90q/mc81+S1JW3DwXoOutSYa3FQKuJ6bvMFD8qBA+gQLlQ8VFP
+         KS8OhLYa2nsbKgJhxIv4BlzQjhF9cWZa+h/VwBuP2TXe3FvbuNj+VjmKmY9PVDAiEwC0
+         PFZ/pWRCAXVat/JJnQIK4Bkn4y+eet/5A3ewd2R1LIQB8CzMSU2R/EhEAf5w08eAzbdD
+         MXpQ==
+X-Gm-Message-State: AOJu0YyZOX00UyQBqx3p1f5r7if/JQkPG4Iaat2b3UBvoO/6kPu/nr/z
+	MCfZ1YRgEFzL3JQddMi/wfLqGyIV3eakHRoGVo2OFjx2RZ0x+Sc0tMIHOmLiKWlo4aBvf1OLnFT
+	BXg5z655YUWfdH/FJCUuHzYYyb/Cl+/Sk+pnyLfkTYI1yaymKYm11YoysDjg2hxEShVANEncKzD
+	ET7n3baXZU6kcvs+DV9itTT7LKJTfcoqorliZ5NzYfAealQKjmMg==
+X-Gm-Gg: AfdE7cnqsoYXaHxF8lkXd1MHnhukiDWBw6r74GTINvsFjWqRSWnwwl+rbYu49yiyhGc
+	es7VFMz0BYYfdgvkqmQa4fbOItPbae+sPGL53die8OoL9N9j0rLNGtuHoeyEuuAj8CT0cridD+G
+	0WrbO3s2jdTKxp564xeTuedLBaV+VZ5qrkhcAOPXTXwZGFC/kch+OBi+0bCAtdtUz4r5ukqqeAO
+	iz+wH1K39YnA8DIIBLuDFxIyadnZ+M+zPY6JlZSdhxnhzpGlsRFEy4lXVeHzhMNAcoBnlcUw+Hd
+	B1skOAS58U1CyOqOlYmW1P+6oS/5uNMLuGbx+u9/Yx8qw81xmwSjzYCOY5X1783iHZT/94/37dq
+	hKwmBAaCchcZxYcKcW6Y6QeNmE1yclZryOElhzNqYeUmh
+X-Received: by 2002:a17:906:6296:b0:c12:7d53:cc88 with SMTP id a640c23a62f3a-c15a69a0053mr56160066b.58.1783348726026;
+        Mon, 06 Jul 2026 07:38:46 -0700 (PDT)
+X-Received: by 2002:a17:906:6296:b0:c12:7d53:cc88 with SMTP id a640c23a62f3a-c15a69a0053mr56157566b.58.1783348725355;
+        Mon, 06 Jul 2026 07:38:45 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c12b6091785sm788932766b.16.2026.07.06.07.28.49
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c12b6054b99sm777268566b.8.2026.07.06.07.38.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jul 2026 07:28:49 -0700 (PDT)
+        Mon, 06 Jul 2026 07:38:45 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
-To: Max Kellermann <max.kellermann@ionos.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
-Date: Mon,  6 Jul 2026 14:28:48 +0000
-Message-Id: <20260706142848.1978040-1-amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: idryomov@gmail.com,
+	xiubo.li@clyso.com,
+	jlayton@kernel.org,
+	Alex Markuze <amarkuze@redhat.com>
+Subject: [PATCH v2 00/15] ceph: add binary logging (BLOG) for CephFS
+Date: Mon,  6 Jul 2026 14:38:28 +0000
+Message-Id: <20260706143843.1980879-1-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <CAKPOu+_O-j3KdUmfAPeQrUPhpehAGeAQbnZd6J+OwG+duBJbcQ@mail.gmail.com>
-References: <20260427155813.2561935-1-max.kellermann@ionos.com> <CAKPOu+_O-j3KdUmfAPeQrUPhpehAGeAQbnZd6J+OwG+duBJbcQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hi Max,
+Add a lightweight binary logging subsystem for CephFS that replaces the
+existing dout/doutc text-based debug logging with a binary-serialized
+format.  Log entries are stored in per-task 128KB page-fragment buffers
+and exposed through debugfs for offline analysis.
 
-> >   1. [minor] fs/ceph/caps.c:3093: Timeout constant should be a #define
->
-> Why?
+Changes since v1 (based on review from Xiubo Li, thanks):
+  - 01/15: populate public headers with struct definitions and API
+    declarations; v1 shipped them as empty 0-byte files making the
+    series unbuildable at every commit boundary
+  - 02/15: blog_des.c: pr_err → pr_err_ratelimited (debugfs read path
+    is user-triggerable), -EFAULT → -EBADMSG for bad serialized data,
+    fix snprintf truncation off-by-one when ret >= remaining, extract
+    des_advance() helper to deduplicate the snprintf+advance pattern
+  - 07/15: linux/sched.h now included via the populated blog.h header
+    chain, fixing the implicit dependency on `current`
+  - 10/15: remove unnecessary IS_ENABLED(CONFIG_CEPH_FS) guards around
+    ceph_blog_debugfs_init/cleanup in debugfs.c — this is CephFS-only
+    code where CONFIG_CEPH_FS is always true
 
-Because Slava explicitly asked for this in his review. A named constant like
+Alex Markuze (15):
+  ceph: add BLOG public headers
+  ceph: add BLOG deserialization support
+  ceph: add BLOG page-fragment allocator
+  ceph: add BLOG magazine batch allocator
+  ceph: add BLOG logger core
+  ceph: add BLOG per-module context management
+  ceph: add Ceph BLOG scaffolding
+  ceph: add bout and boutc wrappers for BLOG
+  ceph: switch MDS request plumbing to struct ceph_journal_info
+  ceph: add BLOG debugfs interface
+  ceph: convert VFS inode and directory paths to bout
+  ceph: convert VFS data I/O paths to bout
+  ceph: convert capability and snapshot paths to bout
+  ceph: convert remaining helper paths to bout
+  selftests: add Ceph BLOG smoke test and collection helpers
 
-#define CEPH_GET_CAPS_WAIT_TIMEOUT (5 * HZ)
+ MAINTAINERS                                   |   1 +
+ fs/ceph/Makefile                              |   6 +
+ fs/ceph/addr.c                                | 168 ++---
+ fs/ceph/blog_batch.c                          | 312 ++++++++++
+ fs/ceph/blog_client.c                         | 266 ++++++++
+ fs/ceph/blog_core.c                           | 424 +++++++++++++
+ fs/ceph/blog_debugfs.c                        | 434 +++++++++++++
+ fs/ceph/blog_des.c                            | 332 ++++++++++
+ fs/ceph/blog_module.c                         | 584 ++++++++++++++++++
+ fs/ceph/blog_pagefrag.c                       |  95 +++
+ fs/ceph/caps.c                                | 252 ++++----
+ fs/ceph/crypto.c                              |  14 +-
+ fs/ceph/debugfs.c                             |  19 +-
+ fs/ceph/dir.c                                 | 290 ++++++---
+ fs/ceph/export.c                              |  83 ++-
+ fs/ceph/file.c                                | 274 +++++---
+ fs/ceph/inode.c                               | 233 ++++---
+ fs/ceph/ioctl.c                               |   6 +-
+ fs/ceph/locks.c                               |  66 +-
+ fs/ceph/mds_client.c                          | 293 ++++-----
+ fs/ceph/mdsmap.c                              |   8 +-
+ fs/ceph/quota.c                               |   2 +-
+ fs/ceph/snap.c                                |  66 +-
+ fs/ceph/super.c                               |  58 +-
+ fs/ceph/super.h                               |   5 +
+ fs/ceph/xattr.c                               |  88 ++-
+ include/linux/ceph/blog.h                     | 196 ++++++
+ include/linux/ceph/blog_batch.h               |  44 ++
+ include/linux/ceph/blog_des.h                 |  16 +
+ include/linux/ceph/blog_module.h              |  91 +++
+ include/linux/ceph/blog_pagefrag.h            |  32 +
+ include/linux/ceph/blog_ser.h                 | 270 ++++++++
+ include/linux/ceph/ceph_blog.h                | 284 +++++++++
+ include/linux/ceph/ceph_debug.h               |  44 +-
+ include/linux/ceph/libceph.h                  |   2 +
+ tools/testing/selftests/Makefile              |   1 +
+ tools/testing/selftests/ceph_blog/Makefile    |   7 +
+ .../selftests/ceph_blog/blog_analyze.sh       | 124 ++++
+ .../selftests/ceph_blog/blog_collect.sh       | 116 ++++
+ .../selftests/ceph_blog/blog_smoke_test.sh    | 363 +++++++++++
+ tools/testing/selftests/ceph_blog/config      |   2 +
+ 41 files changed, 5218 insertions(+), 753 deletions(-)
+ create mode 100644 fs/ceph/blog_batch.c
+ create mode 100644 fs/ceph/blog_client.c
+ create mode 100644 fs/ceph/blog_core.c
+ create mode 100644 fs/ceph/blog_debugfs.c
+ create mode 100644 fs/ceph/blog_des.c
+ create mode 100644 fs/ceph/blog_module.c
+ create mode 100644 fs/ceph/blog_pagefrag.c
+ create mode 100644 include/linux/ceph/blog.h
+ create mode 100644 include/linux/ceph/blog_batch.h
+ create mode 100644 include/linux/ceph/blog_des.h
+ create mode 100644 include/linux/ceph/blog_module.h
+ create mode 100644 include/linux/ceph/blog_pagefrag.h
+ create mode 100644 include/linux/ceph/blog_ser.h
+ create mode 100644 include/linux/ceph/ceph_blog.h
+ create mode 100644 tools/testing/selftests/ceph_blog/Makefile
+ create mode 100644 tools/testing/selftests/ceph_blog/blog_analyze.sh
+ create mode 100644 tools/testing/selftests/ceph_blog/blog_collect.sh
+ create mode 100644 tools/testing/selftests/ceph_blog/blog_smoke_test.sh
+ create mode 100644 tools/testing/selftests/ceph_blog/config
 
-keeps the arbitrary recovery timeout discoverable and documents the intent at
-the callsite.
-
-> >   3. [nit] commit message: Missing Fixes: tag
->
-> What should it say?
-
-I think the relevant commit is:
-
-Fixes: 0a454bdd501a ("ceph: reorganize __send_cap for less spinlock abuse")
-
-That is where __prep_cap() started updating mds_wanted before the cap message
-is queued.
-
-The split-out request for the CEPH_FILE_MODE_MASK change still stands, but you
-already agreed to separate that in v2.
-
-Thanks,
-Alex
+-- 
+2.34.1
 
