@@ -1,73 +1,72 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD47C2BEC27
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 15:07:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67892395AE9
+	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 15:28:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783350426; cv=none; b=ScHgiXAqQN8aNOnZFN5ZUe6JXKIWSwllwty0FGQf0B0oIPfwr/4aW62Ibhd4EWIy9uuXbaxZj6f/2xEhivT5qCXulQTO5oWJw0bVEu5f7kfupIhkEjJW6RGYRphUd6oxzXwivbtPpNZWV9IOO76tYtmw10b72z9ZTm+FoBzhojA=
+	t=1783351690; cv=none; b=fj2iOEKd70pmS2aMkim+I68o27u0bJC6CP9W2WDYMYXzuwlIS9C6r7vufJ9tKM/kicZ0s5OjVB8C6P5dnRAxtKulvtqSFW0D83ytQz+VgUFzs0otBNhfNLynNlCFgSMLlbIzXSRPZVsyB+RG+zTJnWhK/hKbWteqAqxJK3CxhAQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783350426; c=relaxed/simple;
-	bh=qhMAi5KmiohwSCCqT2HrcIJcCDFqUKinbe4/58G4JwM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aa7njHax6veWHbZNWQsInvKnSHtQ86ke2s71aTpuTZfIvCM2eh1Aiug694Xdv+/Ylcy0sPR1d75aIBUOJzS9ihhfm9jwz5+lrsNOx5CyiNgRDe+2n5XbTnEV5JbQhwmL0a7spSbfGgg/BApqh8OGx3lB+zhqx24bCcV5m0vi1dw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=NVn6zA9/; arc=none smtp.client-ip=209.85.221.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
+	s=arc-20240116; t=1783351690; c=relaxed/simple;
+	bh=YMYMvTJqPQ4Fbs+w7z6WLF+d+XmNDtWZbfC0Bw3opCU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ThYyNaR1ItTtSdCmQK6OtM0Aa1tjILggudwQmnz+LraeSucxMcSevR20u60zLA9kniTl/5/E0yl/OCQhBCagYeg7CvqSiKFAwt1xn1uTnCfUsXcv9vsL0OgDRvCIO8LmQ75TfGh2R8w9RE4a0eR4pocS0wElFXSzes5BCHI1cYs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FmZnxPl5; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="NVn6zA9/"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-4720d22c94aso3106956f8f.1
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 08:07:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1783350422; x=1783955222; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=ZhkuZBeVv8WpMV3dUfcpoEc5Qq3IQLo93rDLEp2ApNU=;
-        b=NVn6zA9/rZXB6MulSnAs+flmWsJ3Wg5j3lhjgZWkxcQ7hYv4ivKpNBJxEFhLGOkKjL
-         z+41z5k9SezQBGNZMIUyzioGjyZNQ8Lf+Q8vQ+SSDP8Lqnfi3omDAbE3H7VySbw+hMJK
-         +RwQRChStBXC49V0Aldez8GBBCjgmCPQSl/l3hUJ6t+EOmSPYPOCdsAEn1+MCYb0R4cz
-         4E0dRhYC8jPMHYnvGWp4/FmsHbyAW50YSxyluTcVqm+VcfCoVHewKAC84wBmahZhmVnc
-         ceJuJr5jk/VFQuTwpHMjksBHJRVDXoa8X4VMGgZ2VHo617hqgxKpPlwjfYL/mBmmeVcp
-         GTGw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783350422; x=1783955222;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=ZhkuZBeVv8WpMV3dUfcpoEc5Qq3IQLo93rDLEp2ApNU=;
-        b=H8wLWU4RAfRiV+YUK3ZhRj4Z9BOs0pdb/tVt14nzIi7s4mb8J2D/FvkWuHwxm3i8Cd
-         m0sLyRUcZvPaVU7bhT4afMnSOPcJHoQl31CxkMzA2umbSePHlcZc29LvZCu06DYZ4lLE
-         //xMWck3nlrspRGivNhDbckB00nI4oHIfJMiseIfQQe0tlN6HAFLlbCKIYks5XCbFFf8
-         0PC1q4sXIvuZZPtNK/FsLnc8QtoCqXuEAIu+8k+92VOJDx8ONcjChXjeW77GdfYvFoPh
-         K6PXgZzlJcRnxcp1CREfFn6Irc7Pmy64jEG/r5Z1nSWXI1gEGpkjaIE27e0suiLlFFy5
-         Bkbg==
-X-Forwarded-Encrypted: i=1; AHgh+RqL9p7LBQ0lbaXtIrYz49jkKlsn7z6gxZd7yF9wDthF3GAlLwifW9AKlkZvgMjcZbI9N/Mm4/8JvlCg@vger.kernel.org
-X-Gm-Message-State: AOJu0YzF3fScS+tC5Kk5EjPc7Hmn6v/hvf6O2LEkpL1frapmWbUCT0hC
-	IGSlKkoFHeL0qynWk/vIrb7oUXWWLclPTXGfY802BWJMGR4adjTIN9vp6QPitL+RtMg=
-X-Gm-Gg: AfdE7cmWbosfXtNDKLc27uLtLUloUUow6LHf4gPtjJXTWPvo48jFjXxedYWwbKeRA5k
-	F++2iSEq12fqiFWnXZ7dw2dgg346wnqBpuXq2vLBCEDcZJlNQ4TWm6kFC5J69/6mzTl5/DF7bq/
-	JqT9t6gQ5SLQX4TP8E1wND7XjY9u40/4rldldMiAje+/riyJgSUGHurtrbLH1uQYe7Y4qGpwg1b
-	2r0wYfEe1aZIeqk4pNAbCoEKgv+3bKMims7ttFwY/tfZFIF/LfFXe24OiyEKrieaziCaUF/7Zbu
-	OOgKueFtFdfaJf5HEHDkQnrhJ0mJvgrj98/SBemItT3hyL5KGLNLEItm50DECJOloMw6neeWfkp
-	zBnmp7Uc0Es1PJxK3ujZ7ugN+eDrOs4iHIiRyv3dw5CiK1UfzaXnjQtY3dJ8LLG9IzHJ+3RxxLY
-	4rzmGuHONm2PK6AkMaeTKeLQviu/cXIQLt+ZlgDN+XdF1rQAyhB2R6rAt2kYSySPK5eNudH37xn
-	jgmQnE9OHJ2oiXh
-X-Received: by 2002:a05:6000:1a87:b0:472:c96c:eeb with SMTP id ffacd0b85a97d-47de6609b1amr911302f8f.0.1783350421874;
-        Mon, 06 Jul 2026 08:07:01 -0700 (PDT)
-Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47aa0f2186bsm24921043f8f.36.2026.07.06.08.07.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jul 2026 08:07:01 -0700 (PDT)
-From: Max Kellermann <max.kellermann@ionos.com>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FmZnxPl5"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1783351687;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=fJgudNbA+jqSC6IQkevTiVxycA2ilRQtfmBrSyeMALc=;
+	b=FmZnxPl5/JupaEkUdqOIwlDbv28D/7XF8Bd/4oeh1V4GmgeGWrn2L6HXk27qxKz0a8h7yQ
+	kzTq2XkNDxspsz/ezNN6oyvs+Q4BzhGSidc8DAsXvAqBJ56um3AQlvLJIajjoQE1wUz5XQ
+	g5fcaN+4nJH4iXvrsmBBjHVT3M4gy5k=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-689-YRAe3HkUOwmkBnBwBxH6Pw-1; Mon,
+ 06 Jul 2026 11:28:01 -0400
+X-MC-Unique: YRAe3HkUOwmkBnBwBxH6Pw-1
+X-Mimecast-MFC-AGG-ID: YRAe3HkUOwmkBnBwBxH6Pw_1783351679
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 0A0A91955DC0;
+	Mon,  6 Jul 2026 15:27:56 +0000 (UTC)
+Received: from warthog.procyon.org.com (unknown [10.44.33.159])
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id CB32D18005B7;
+	Mon,  6 Jul 2026 15:27:46 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>,
+	Matthew Wilcox <willy@infradead.org>,
+	Christoph Hellwig <hch@infradead.org>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	Jens Axboe <axboe@kernel.dk>,
+	Leon Romanovsky <leon@kernel.org>,
+	Steve French <sfrench@samba.org>,
+	ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Stefan Metzmacher <metze@samba.org>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
 	ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-erofs@lists.ozlabs.org,
+	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>,
-	stable@vger.kernel.org
-Subject: [PATCH v2] ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
-Date: Mon,  6 Jul 2026 17:06:59 +0200
-Message-ID: <20260706150659.3993925-1-max.kellermann@ionos.com>
-X-Mailer: git-send-email 2.47.3
+Subject: [PATCH v5 00/21] netfs: Keep track of folios in a segmented bio_vec[] chain
+Date: Mon,  6 Jul 2026 16:27:15 +0100
+Message-ID: <20260706152737.1231312-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -75,160 +74,417 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
-A reader can hang forever in __ceph_get_caps() when the client no
-longer holds `FILE_RD`, but local cap state still says that the
-capability is already wanted (via `mds_wanted`).
+Hi Christian,
 
-One way to trigger this is through MDS cap revocation.  If another
-client performs a conflicting operation, the MDS can revoke `FILE_RD`
-from the reader; the next read then has to reacquire `FILE_RD`.  If
-the cap update that should request `FILE_RD` never reaches the MDS
-after `cap->mds_wanted` was raised, the reader is left holding only
-non-file caps while local `mds_wanted` still includes the file read
-caps.
+Could you add these patches to the VFS tree for next?
 
-In that state, try_get_cap_refs() sees `need <= mds_wanted` and
-returns 0, so __ceph_get_caps() just waits on `i_cap_wq`.  If the cap
-update that was supposed to request `FILE_RD never reaches the MDS
-after `cap->mds_wanted was` raised, no further request is sent and the
-waiter can sleep indefinitely until unrelated cap traffic happens to
-wake it up.
+The patches get rid of folio_queue, rolling_buffer and ITER_FOLIOQ,
+replacing the folio queue construct used to manage buffers in netfslib with
+one based around a segmented chain of bio_vec arrays instead.  There are
+three main aims here:
 
-The ordering issue is that `cap->mds_wanted` is updated in
-__prep_cap() before the `CEPH_MSG_CLIENT_CAPS message` is actually
-queued for send.  That makes one field serve two different meanings at
-once: what this client wants, and what the client believes the MDS
-already knows it wants.
+ (1) The kernel file I/O subsystem seems to be moving towards consolidating
+     on the use of bio_vec arrays, so embrace this by moving netfslib to
+     keep track of its buffers for buffered I/O in bio_vec[] form.
 
-A proper fix would be to split those states and track whether a cap
-update is actually in flight or has been observed by the MDS.
-However, simply moving the `cap->mds_wanted assignment` later would
-not be sufficient: queueing the message in the messenger does not
-guarantee that the MDS processed that specific wanted set, and
-reconnect or message loss can still invalidate that assumption.
-Fixing that properly would require a larger rework of the cap state
-machine.
+ (2) Netfslib already uses a bio_vec[] to handle unbuffered/DIO, so the
+     number of different buffering schemes used can be reduced to just a
+     single one.
 
-To allow simpler backports to stable kernels, this patch implements a
-simpler workaround:
+ (3) Always send an entire filesystem RPC request message to a TCP socket
+     with single kernel_sendmsg() call as this is faster, more efficient
+     and doesn't require the use of corking as it puts the entire
+     transmission loop inside of a single tcp_sendmsg().
 
-- stop waiting forever in __ceph_get_caps(); after a bounded wait,
-  fall back to the renew path
+For the replacement of folio_queue, a segmented chain of bio_vec arrays
+rather than a single monolithic array is provided:
 
-- make ceph_renew_caps() issue a synchronous `OPEN` request whenever
-  the inode still does not actually hold the wanted caps, instead of
-  only calling ceph_check_caps()
+	struct bvecq {
+		struct bvecq		*next;
+		struct bvecq		*prev;
+		unsigned long long	fpos;
+		refcount_t		ref;
+		u32			priv;
+		u16			nr_slots;
+		u16			max_slots;
+		enum bvecq_mem		mem_type:2;
+		bool			inline_bv:1;
+		bool			discontig:1;
+		struct bio_vec		*bv;
+		struct bio_vec		__bv[];
+	};
 
-The extra issued-vs-wanted check in ceph_renew_caps() is necessary
-because the previous test only checked whether the inode still had any
-real caps at all.  That is not enough after revocation: the client can
-still hold something like `pLs` and yet be missing `FILE_RD`
-completely.  In that case, falling back to ceph_check_caps() is not
-sufficient, because it still trusts `cap->mds_wanted` and may resend
-nothing.  By requiring `(issued & wanted) == wanted` before taking the
-asynchronous path, the code only uses ceph_check_caps() when the
-`wanted caps` are already actually issued.  Otherwise, it sends the
-synchronous `OPEN` renew.
+The fields are:
 
-This preserves the existing asynchronous fast path when the wanted
-caps are already issued, avoids changing cap-state semantics, and
-fixes the hang by guaranteeing that a stalled waiter eventually
-retries through a path that does not rely on the stale `mds_wanted`
-state.
+ (1) next, prev - Link segments together in a list.  I want this to be
+     NULL-terminated linear rather than circular to make it possible to
+     arbitrarily glue bits on the front.
 
-Fixes: 0a454bdd501a ("ceph: reorganize __send_cap for less spinlock abuse")
-Cc: stable@vger.kernel.org
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
----
-v1->v2:
-- add "Fixes" tag
-- remove unrelated CEPH_FILE_MODE_MASK hunk
-- convert const variable `wait_timeout` to global macro in libceph.h
----
- fs/ceph/caps.c               | 16 ++++++++++++++--
- fs/ceph/file.c               |  9 +++++----
- include/linux/ceph/libceph.h |  1 +
- 3 files changed, 20 insertions(+), 6 deletions(-)
+ (2) fpos, discontig - Note the current file position of the first byte of
+     the segment and whether this bvecq is discontiguous with the previous.
+     When accessing the pagecache to clear flags/locks, the fpos can be
+     used to look up folios by file position rather than by finding those
+     folios from the info stored in the bio_vecs.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 4b37d9ffdf7f..5907059592d3 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3094,7 +3094,18 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
- 					ret = -ERESTARTSYS;
- 					break;
- 				}
--				wait_woken(&wait, TASK_INTERRUPTIBLE, MAX_SCHEDULE_TIMEOUT);
-+
-+				/*
-+				 * If a cap update is lost after
-+				 * mds_wanted was raised, waiting
-+				 * forever will never make progress.
-+				 * Retry the renew path periodically
-+				 * so we can resend synchronously.
-+				 */
-+				if (!wait_woken(&wait, TASK_INTERRUPTIBLE, CEPH_GET_CAPS_WAIT_TIMEOUT)) {
-+					ret = -EUCLEAN;
-+					break;
-+				}
- 			}
- 
- 			remove_wait_queue(&ci->i_cap_wq, &wait);
-@@ -3128,7 +3139,8 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
- 				continue;
- 			}
- 			if (ret == -EUCLEAN) {
--				/* session was killed, try renew caps */
-+				/* session was killed or a waited cap
-+				 * request needs a retry */
- 				ret = ceph_renew_caps(inode, flags);
- 				if (ret == 0)
- 					continue;
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 71161f2b2151..a4a2a4b6a027 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -314,7 +314,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
- }
- 
- /*
-- * try renew caps after session gets killed.
-+ * Retry cap acquisition after a stale session or a lost cap update.
-  */
- int ceph_renew_caps(struct inode *inode, int fmode)
- {
-@@ -322,14 +322,15 @@ int ceph_renew_caps(struct inode *inode, int fmode)
- 	struct ceph_client *cl = mdsc->fsc->client;
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_mds_request *req;
--	int err, flags, wanted;
-+	int err, flags, wanted, issued;
- 
- 	spin_lock(&ci->i_ceph_lock);
- 	__ceph_touch_fmode(ci, mdsc, fmode);
- 	wanted = __ceph_caps_file_wanted(ci);
-+	issued = __ceph_caps_issued(ci, NULL);
- 	if (__ceph_is_any_real_caps(ci) &&
--	    (!(wanted & CEPH_CAP_ANY_WR) || ci->i_auth_cap)) {
--		int issued = __ceph_caps_issued(ci, NULL);
-+	    (!(wanted & CEPH_CAP_ANY_WR) || ci->i_auth_cap) &&
-+	    (issued & wanted) == wanted) {
- 		spin_unlock(&ci->i_ceph_lock);
- 		doutc(cl, "%p %llx.%llx want %s issued %s updating mds_wanted\n",
- 		      inode, ceph_vinop(inode), ceph_cap_string(wanted),
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 63e0e2aa1ce9..d831a9b97c60 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -72,6 +72,7 @@ struct ceph_options {
- /*
-  * defaults
-  */
-+#define CEPH_GET_CAPS_WAIT_TIMEOUT (5 * HZ)
- #define CEPH_MOUNT_TIMEOUT_DEFAULT	msecs_to_jiffies(60 * 1000)
- #define CEPH_OSD_KEEPALIVE_DEFAULT	msecs_to_jiffies(5 * 1000)
- #define CEPH_OSD_IDLE_TTL_DEFAULT	msecs_to_jiffies(60 * 1000)
--- 
-2.47.3
+     When the file position is relevant, the model I'm working with is that
+     all the segments pointed to by a single bvecq must represent
+     contiguous data, but adjacent bvecqs within a chain need not be
+     contiguous.  This allows a bvecq chain to be used to provide bufferage
+     for a sparse read or write RPC such as can be done with Ceph.
+
+     If a bvecq segment is not contiguous with the previous one,
+     ->discontig should be set (this is technically redundant if one keeps
+     track of the fpos as a bvecq chain is processed).
+
+     Note that the beginning and end file positions in a segment need not
+     be aligned to any filesystem block size.
+
+ (3) ref - Refcount.  Each bvecq keeps a ref on the next.  I'm not sure
+     this is entirely necessary, but it makes sharing slices easier.
+
+ (4) priv - Private data for the owner.  Dispensible; currently only used
+     for storing a debug ID for tracing in a patch not included here.
+
+ (5) max_slots, nr_slots.  The size of bv[] and the number of slots used.
+     I've assumed a maximum of 65535 bio_vecs in the array (which would
+     represent a ~1MiB allocation).
+
+ (6) bv, __bv, inline_bv.  bv points to the bio_vec[] array handled by
+     this segment.  This may begin at __bv and if it does inline_bv should
+     be set (otherwise it's impossible to distinguish a separately
+     allocated bio_vec[] that follows immediately by coincidence).
+
+ (7) mem_type.  Indicates how the memory attached to the bio_vecs should be
+     disposed of when the bvecq is destroyed.  It can be one of:
+
+	BVECQ_MEM_EXTERNAL	- Externally tracked ref; don't put
+	BVECQ_MEM_PAGECACHE	- Pagecache; must be put
+	BVECQ_MEM_GUP		- Pinned by from GUP; needs unpin
+	BVECQ_MEM_ALLOCED	- Plain alloc'd pages; can be mempooled
+
+     [!] I'm not sure that this is a good name for this member or for the
+     	 enum values.
+
+I've also defined an iov_iter iterator type ITER_BVECQ to walk this sort of
+construct so that it can be passed directly to sendmsg() or block-based DIO
+(as cachefiles does).
+
+
+This series makes the following changes to netfslib:
+
+ (1) The folio_queue chain used to hold folios for buffered I/O is replaced
+     with a bvecq chain.  Each bio_vec then holds (a portion of) one folio.
+     Each bvecq holds a contiguous sequence of folios, but adjacent bvecqs
+     in a chain may be discontiguous.
+
+ (2) For unbuffered/DIO, the source iov_iter is extracted into a bvecq
+     chain.
+
+ (3) An abstract position representation ('bvecq_pos') is created that can
+     used to hold a position in a bvecq chain.  For the moment, this takes
+     a ref on the bvecq it points to, but that may be excessive.
+
+ (4) Buffer tracking is managed with three cursors:  The load_cursor, at
+     which new folios are added as we go; the dispatch_cursor, at which new
+     subrequests' buffers start when they're created; and the
+     collect_cursor, the point at which folios are being unlocked.
+
+     Not all cursors are necessarily needed in all situations and during
+     buffered writeback, we need a dispatch cursor per stream (one for the
+     network filesystem and one for the cache).
+
+ (5) ->prepare_read(), buffer setting up and ->issue_read() are merged, as
+     are the write variants, with the filesystem calling back up to
+     netfslib to prepare its buffer.  This simplifies the process of
+     setting up a subrequest.  It may even make sense to have the
+     filesystem allocate the subrequest.
+
+ (6) Retry dispatch tracking is added to netfs_io_request so that the
+     buffer preparation functions can find it.  Retry requires an
+     additional buffer cursor.
+
+ (7) Netfslib dispatches I/O by accumulating enough bufferage to dispatch
+     at least one subrequest, then looping to generate as many as the
+     filesystem wants to (they may be limited by other constraints,
+     e.g. max RDMA segment count or negotiated max size).  This loop could
+     be moved down into the filesystem.  A new method is provided by which
+     netfslib can ask the filesystem to provide an estimate of the data
+     that should be accumulated before dispatch begins.
+
+ (8) Reading from the cache is now managed by querying the cache to provide
+     a list of the next two data extents within the cache.
+
+ (9) AFS directories are switched to using a bvecq rather than a
+     folio_queue to hold their contents.
+
+(10) CIFS is switch to using a bvecq rather than a folio_queue for holding
+     a temporary encryption buffer.
+
+(11) CIFS RDMA is given the ability to extract ITER_BVECQ and support for
+     extracting ITER_FOLIOQ is removed.
+
+(12) All the folio_queue and rolling_buffer code is removed.
+
+Cachefiles is also modified:
+
+ (1) The object type in the cachefiles file xattr is now correctly set to
+     CACHEFILES_CONTENT_{SINGLE,ALL,BACKFS_MAP} rather than just being 0,
+     to indicate whether we have a single monolithic blob, all the data up
+     to cache i_size with no holes or a sparse file with the data mapped by
+     the backing file system (as currently upstream).
+
+ (2) For "ALL" type files, the cache's i_size is used to track how much
+     data is saved in the cache and no longer bears any relation to the
+     netfs i_size.  The actual object size is stored in the xattr.
+
+ (3) For most typical files which are contiguous and written progressively,
+     the object type is now set to "ALL".  For anything else, cachefiles
+     uses SEEK_DATA/HOLE to find extent outlines at before (this is the
+     current behaviour and needs to be fixed, but in a separate set of
+     patches as it's not trivial).
+
+Two further things that I'm working on (but not in this branch) are:
+
+ (1) Make it so that a filesystem can be given a copy of a subchain which
+     it can then tack header and trailer protocol elements upon to form a
+     single message (I have this working for cifs) and even join copies
+     together with intervening protocol elements to form compounds.
+
+ (2) Make it so that a filesystem can 'splice' out the contents of the TCP
+     receive queue into a bvecq chain.  This allows the socket lock to be
+     dropped much more quickly and the copying of data read to the
+     destination buffers to happen without the lock.  I have this working
+     for cifs too.  Kernel recvmsg() doesn't then block kernel sendmsg()
+     for anywhere near as long.
+
+There are also some things I want to consider for the future:
+
+ (1) Create one or more batched iteration functions to 'unlock' all the
+     folios in a bio_vec[], where 'unlock' is the appropriate action for
+     ending a read or a write.  Batching should hopefully also improve the
+     efficiency of wrangling the marks on the xarray.  Very often these
+     marks are going to be represented by contiguous bits, so there may be
+     a way to change them in bulk.
+
+ (2) Rather than walking the bvecq chain to get each individual folio out
+     via bv_page, use the file position stored on the bvecq and the sum of
+     bv_len to iterate over the appropriate range in i_pages.
+
+ (3) Change iov_iter to store the initial starting point and for
+     iov_iter_revert() to reset to that and advance.  This would (a) help
+     prevent over-reversion and (b) dispense with the need for a prev
+     pointer.
+
+ (4) Use bvecq to replace scatterlist.  One problem with replacing
+     scatterlist is that crypto drivers like to glue bits on the front of
+     the scatterlists they're given (something trivial with that API) - and
+     this is one way to achieve it.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-next
+
+Thanks,
+David
+
+Changes
+=======
+ver #5)
+- Rebase on v7.2-rc2 as that has a bunch of outstanding netfs and afs
+  bugfixes included.
+
+ver #4)
+- Fixed a number of bugs reported by Sashiko[3].
+  - Added a patch to fix an underflow in iov_iter_extract_xarray_pages().
+  - Added a patch to fix alloc failure in iov_iter_extract_bvec_pages().
+  - Added a patch to remove an unused var in kunit code.
+  - Added a patch to fix the folio offset in extract_xarray_to_sg().
+  - Added a patch to fix the exclusion over writeback to make it cover
+    collection too.
+  - Fixed double fput() in cachefiles.
+  - Fixed the collection of cache writes to handle cancellation better.
+  - Fixed iterate_bvecq() to skip bvecq structs with nr_slots==0.
+  - Add a comment into iterate_bvecq() that a slot with bv_len>0 must have a
+    valid bv_page.
+  - Fixed iov_iter_bvecq_advance(), iov_iter_bvecq_revert(),
+    iter_count_bvecq_pages(), iov_iter_extract_bvecq_pages() and
+    extract_bvecq_to_sg() to correctly handle empty bvecqs.
+  - Fixed extract_bvecq_to_sg() to be limited by iter->count.
+  - Fixed bvecq_expand_buffer() to take an unsigned size param.
+  - Fixed bvecq_expand_buffer() to not mix memory types in alloc'd bvecqs.
+  - Fixed bvecq_shorten_buffer() occasional retention of zero-length slots.
+  - Fixed slot validity check polarity in bvecq_pos_advance(); also don't use
+    inner loop otherwise break then exits the wrong loop.
+  - Fixed bvecq_zero(), bvecq_slice() and bvecq_extract to use a barrier when
+    checking bq->nr_slots.
+  - Restructured bvecq_zero() to be similar to bvecq_pos_advance().
+  - Fixed an off-by-one error in bvecq_pos_step() and added a missing slot
+    reset.
+  - Fixed a break in netfs_extract_iter() that should have been a goto.
+  - Fixed netfs_extract_iter() to limit number of pages extracted to remnant
+    of max_pages.
+  - Fixed an uninit var in afs_do_read_symlink().
+  - Fixed netfs_read_gaps() to fill a multipart bvecq chain correctly.
+  - Fixed netfs_dispatch_unbuffered_reads() to initialise collect_cursor as
+    netfs_rreq_assess_dio() uses it to flush the data read.
+  - Fixed netfs_extract_iter() to init the slot counter outside the extract
+    loop to avoid overwriting already loaded slots.
+  - Fixed callers of bvecq_delete_spent() to update bvecq_pos::slot before
+    calling.
+  - Fixed netfs_reissue_write() to make sure subreq->content is unset before
+    setting.
+  - Altered netfs_extract_iter() to free any allocated bvecq chain if no pages
+    were extracted and an error occurred  (and to initialise the return
+    pointer to NULL).  Also, made it return an empty bvecq if nothing was
+    extracted, but no error occurred.
+  - Fixed ceph_netfs_issue_read() to just return if
+    ceph_netfs_issue_op_inline() returns anything other than 1 to avoid a
+    double termination.
+  - Fixed ceph_netfs_issue_read() to do the size calculation in the right
+    order to avoid the op expanding to larger than the buffer.
+  - Fixed netfs_issue_read(), in the NETFS_FILL_WITH_ZEROES case, to deduct
+    subreq->len from stream->buffered rather than just setting it to 0.
+  - Fixed netfs_perform_write() to put the folio if netfs_advance_writethrough()
+    fails.
+  - Restored the old ->prepare_write op specifically for
+    fscache_write_to_cache() which is still used by Ceph.
+  - Fixed undefined return in netfs_pgpriv2_issue_stream().
+  - Fixed netfs_collect_write_results() to try to make sure a request isn't
+    left paused if there are no further server-bound subreqs.
+  - Fixed netfs_queue_wb_folio() to redirty the folio before unlocking it if
+    it can't allocate a bvecq.
+  - Fixed netfs_writepages() to cancel the pagecache iteration after ENOMEM.
+  - Fixed netfs_advance/end_writethrough() to advance the dispatch cursor.
+  - Fixed netfs_retry_read_subrequests() to use barriers when walking
+    stream->subrequests as the app may add another subreq before pausing.
+  - Fixed netfs_prepare_write_retry_buffer() to use ->retry_start and
+    ->retry_buffered rather than ->issue_from and ->buffered.
+  - Fixed netfs_retry_write_stream() to use barriers when walking
+    stream->subrequests as the app may add another subreq before pausing.
+  - Fixed netfs_retry_write_stream() to check the correct length when adding
+    additional subreqs.
+  - Fixed nfs_netfs_issue_read() to set -ENOMEM, not 0, on alloc failure.
+  - Fixed nfs_netfs_issue_read() to only terminate the subreq once.
+  - Fixed cifs_issue_read() to release the credits if cifs_reopen_file()
+    fails.
+- Rebased on v7.1.
+
+ver #3)
+- Rebased to -rc7 as the patches wouldn't apply for Christian.
+- Prepended a fix for a warning from generic/464 (the problem also exists
+  upstream, just not the warning).
+- Renamed kmap_local_bvec() to bvec_kmap_partial() as requested by
+  Christoph.
+- Adjusted smbdirect patch descriptions as requested by Stefan Metzmacher.
+
+ver #2)
+- Fixed a number of bugs reported by Sashiko[1].
+- Split a bunch of fixes out and posted them separately[2].
+
+[1] https://sashiko.dev/#/patchset/20260326104544.509518-1-dhowells%40redhat.com
+[2] https://lore.kernel.org/linux-fsdevel/20260512-infozentrum-becher-7f86c47c96c8@brauner/T/#t
+[3] https://sashiko.dev/#/patchset/20260608145432.681865-1-dhowells%40redhat.com
+
+David Howells (21):
+  mm: Make readahead store folio count in readahead_control
+  netfs: Bulk load the readahead-provided folios up front
+  Add a function to kmap one page of a multipage bio_vec
+  iov_iter: Make iov_iter_get_pages*() wrap iov_iter_extract_pages()
+  iov_iter: Add a segmented queue of bio_vec[]
+  netfs: Add some tools for managing bvecq chains
+  netfs: Add a function to extract from an iter into a bvecq
+  afs: Use a bvecq to hold dir content rather than folioq
+  cifs: Use a bvecq for buffering instead of a folioq
+  smbdirect: Support ITER_BVECQ in smbdirect_map_sges_from_iter()
+  cachefiles: Don't rely on backing fs storage map for most use cases
+  netfs: Add the cache object ID to netfs_read/write tracepoints
+  netfs: Switch to using bvecq rather than folio_queue and
+    rolling_buffer
+  smbdirect: Remove support for ITER_FOLIOQ from
+    smbdirect_map_sges_from_iter()
+  netfs: Remove netfs_alloc/free_folioq_buffer()
+  netfs: Remove netfs_extract_user_iter()
+  iov_iter: Remove ITER_FOLIOQ
+  netfs: Remove folio_queue and rolling_buffer
+  netfs: Check for too much data being read
+  netfs: Limit the minimum trigger for progress reporting
+  netfs: Combine prepare and issue ops and grab the buffers on request
+
+ Documentation/core-api/folio_queue.rst      |  209 ----
+ Documentation/core-api/index.rst            |    1 -
+ Documentation/filesystems/netfs_library.rst |    2 +-
+ fs/9p/vfs_addr.c                            |   59 +-
+ fs/afs/dir.c                                |   40 +-
+ fs/afs/dir_edit.c                           |   43 +-
+ fs/afs/dir_search.c                         |   33 +-
+ fs/afs/file.c                               |   28 +-
+ fs/afs/fsclient.c                           |    8 +-
+ fs/afs/inode.c                              |    2 +-
+ fs/afs/internal.h                           |   12 +-
+ fs/afs/symlink.c                            |   35 +-
+ fs/afs/write.c                              |   32 +-
+ fs/afs/yfsclient.c                          |    6 +-
+ fs/cachefiles/interface.c                   |   82 +-
+ fs/cachefiles/internal.h                    |   13 +-
+ fs/cachefiles/io.c                          |  523 +++++++---
+ fs/cachefiles/namei.c                       |   19 +-
+ fs/cachefiles/xattr.c                       |   24 +-
+ fs/ceph/Kconfig                             |    1 +
+ fs/ceph/addr.c                              |  125 ++-
+ fs/netfs/Kconfig                            |    3 +
+ fs/netfs/Makefile                           |    4 +-
+ fs/netfs/buffered_read.c                    |  514 +++++----
+ fs/netfs/buffered_write.c                   |   31 +-
+ fs/netfs/bvecq.c                            |  763 ++++++++++++++
+ fs/netfs/direct_read.c                      |  108 +-
+ fs/netfs/direct_write.c                     |  157 +--
+ fs/netfs/fscache_io.c                       |    4 +-
+ fs/netfs/internal.h                         |  112 +-
+ fs/netfs/iterator.c                         |  391 +++----
+ fs/netfs/misc.c                             |  168 +--
+ fs/netfs/objects.c                          |   22 +-
+ fs/netfs/read_collect.c                     |  160 +--
+ fs/netfs/read_pgpriv2.c                     |  187 ++--
+ fs/netfs/read_retry.c                       |  246 +++--
+ fs/netfs/read_single.c                      |  169 +--
+ fs/netfs/rolling_buffer.c                   |  222 ----
+ fs/netfs/stats.c                            |    6 +-
+ fs/netfs/write_collect.c                    |  240 +++--
+ fs/netfs/write_issue.c                      | 1042 +++++++++++--------
+ fs/netfs/write_retry.c                      |  150 +--
+ fs/nfs/Kconfig                              |    1 +
+ fs/nfs/fscache.c                            |   17 +-
+ fs/smb/client/cifsglob.h                    |    2 +-
+ fs/smb/client/cifssmb.c                     |   13 +-
+ fs/smb/client/file.c                        |  139 +--
+ fs/smb/client/smb2ops.c                     |   82 +-
+ fs/smb/client/smb2pdu.c                     |   28 +-
+ fs/smb/client/transport.c                   |   15 +-
+ fs/smb/smbdirect/connection.c               |  134 ++-
+ include/linux/bvec.h                        |   18 +
+ include/linux/bvecq.h                       |  326 ++++++
+ include/linux/folio_queue.h                 |  282 -----
+ include/linux/fscache.h                     |   17 +
+ include/linux/iov_iter.h                    |   87 +-
+ include/linux/netfs.h                       |  165 +--
+ include/linux/pagemap.h                     |   10 +
+ include/linux/rolling_buffer.h              |   61 --
+ include/linux/uio.h                         |   17 +-
+ include/trace/events/cachefiles.h           |   17 +-
+ include/trace/events/netfs.h                |  155 ++-
+ kernel/bpf/btf.c                            |    2 -
+ lib/iov_iter.c                              |  547 +++++-----
+ lib/scatterlist.c                           |   82 +-
+ lib/tests/kunit_iov_iter.c                  |  135 ++-
+ mm/readahead.c                              |    5 +
+ net/9p/client.c                             |    8 +-
+ 68 files changed, 4764 insertions(+), 3597 deletions(-)
+ delete mode 100644 Documentation/core-api/folio_queue.rst
+ create mode 100644 fs/netfs/bvecq.c
+ delete mode 100644 fs/netfs/rolling_buffer.c
+ create mode 100644 include/linux/bvecq.h
+ delete mode 100644 include/linux/folio_queue.h
+ delete mode 100644 include/linux/rolling_buffer.h
 
