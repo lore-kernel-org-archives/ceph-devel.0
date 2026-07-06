@@ -1,91 +1,91 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 888AF41DEFB
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 286303E3D8B
 	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 14:38:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783348737; cv=none; b=JQO9VMMajUIMeHm9IOYbg+1vwTL5wUxdhaUMbTCirYD1R4NmghSUUPAO+VkwmL2ju9MzDrz5ZlsrmKJD0tNrRSw00IqdGwlui3k2IADCHMoKJCUajdBqfj6z+aiHn0+6AUe1EOO7y8X+ZiRWvdLrVI/5SsUKB1IEh8Yjj4LQbXE=
+	t=1783348738; cv=none; b=aSXScXH7S1sOKkBON7b0/gM32cTc3lsW9DEG+imXBhasBPbAmZUOJ83aqEDoSekbpaDFHc9qS1d5eIORdESUnZi7hm1mg7fklge2txLH+Uw1fU1O+JW7SesziOLHHLtzuJAVCo2vH5l9vIZqT+5PLMMLfECANvT6b6NOyZezInc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783348737; c=relaxed/simple;
-	bh=Ge+xREHUzIFAv2iPytGrM9yk8EOae86kjSKYEnSjBhQ=;
+	s=arc-20240116; t=1783348738; c=relaxed/simple;
+	bh=8lApZJzj3IG3AmWDmjNUsdY9Xk+EudJkVOzzuJlf1SQ=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=hOsAJIftVwxYCdxVOCzIaD3TDvBcAFdRoPnIjejQP6rhK67eT2qVEZl8QMOKWasJ0YxiL5TFWuaogFeBu+A0QDBNUDHsdYnzpPIBQi+17daTe5w3EyF5JBwjNH4U0u1Geuuz+q5dW2GL5n9HSO5PritCvjag1U17ojPl/v+TbOM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KGbvbQeb; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=MYO0j/ue; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=j+nPcbyBigGGqppHBEHnJSXkrlf1/8I2jqajKPlz8ayKVmL0gl4dy5tY370e/gF08VUvf6Lgdb3Bve4ohUnFj+1wlTpLcK2odkFDeNXf8UnTM6XB04/W1WeglRc3IVaNMPe+vCHHlKJDHHNHGvXpuxDx7P7RhLnp1Eek8H0tTBU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ByzBBxhg; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ln6XcLJH; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KGbvbQeb";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="MYO0j/ue"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ByzBBxhg";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ln6XcLJH"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1783348734;
+	s=mimecast20190719; t=1783348735;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=VU6bNGDdp0rI3WsqzTKPr7JfkwiW3hoSy7BhvGfIckI=;
-	b=KGbvbQebofE8uaaXCETrBgp6Lat9soRC6RkVBQaVQT6NLRp2xWnvFXwnxJBHk4DzKzrVUZ
-	ttTqLj6KlOhlkK/9XCNlu2F8qGP7ANgUkWX2d2TUOlt3j1V8If/AMxkN+rsznN/bGL1c+v
-	97JLajOggmINWdZZr4DL6muSsbFSJSE=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=o6Lsm+kdop7ymsBSjZqJY/UExAC2BvISC4p9vxMoMbU=;
+	b=ByzBBxhgaFb85NclKlvWJL79UcUIif6Nk8boNO/xYToPokcTCAdbnvot70ZFw4Ciu1739Q
+	5GVajwgdQ5KjxnPeZeUF7JvuhzKVWbnBSjY98Rr3y0KtmfWYItedmsLdaQx7FCEt5jtV0p
+	tXO7co4pRn5RYx/lNcFgjstd4k5r1vo=
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
+ [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-340-0ZU0XTUtPa2DnzJxyLAg8g-1; Mon, 06 Jul 2026 10:38:51 -0400
-X-MC-Unique: 0ZU0XTUtPa2DnzJxyLAg8g-1
-X-Mimecast-MFC-AGG-ID: 0ZU0XTUtPa2DnzJxyLAg8g_1783348730
-Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-c1263dd9fcaso226620866b.2
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 07:38:51 -0700 (PDT)
+ us-mta-61-MjNxK0YAP9mcc8tjRweiBQ-1; Mon, 06 Jul 2026 10:38:54 -0400
+X-MC-Unique: MjNxK0YAP9mcc8tjRweiBQ-1
+X-Mimecast-MFC-AGG-ID: MjNxK0YAP9mcc8tjRweiBQ_1783348733
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c126bfee5a0so225922866b.3
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 07:38:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1783348730; x=1783953530; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1783348732; x=1783953532; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=VU6bNGDdp0rI3WsqzTKPr7JfkwiW3hoSy7BhvGfIckI=;
-        b=MYO0j/uebLgd/qLTXMvL8rhe+yUSr8p2L3Jd5+8enjPR75MhSFa7ReObvFQ597w2ab
-         a6p8D5qlTpvgi6WHRUiN2w5lPC7U/m9uINO2RwJ19OVbyz0bhTqHnJiosrSu8hKGGOjP
-         yQioEDh0dIqfmOtOf6TbFg9WIwHWKI0l+nv+pJ7g8Q7aqeg6I2LeBIYtIKVRe/Ujy6dV
-         YhzpUYYQuHiysw8FDsNY9lYyYvkcERuWOxw5ok5xF7yA+UL65k9csOXzhiCborESyQfw
-         SL3SVP7TNWaTOwzSI2jLwe9qjCq8N2GAJWCF3oNn810hhduD74FjQQImOr+5w68t4N3e
-         oEzg==
+        bh=o6Lsm+kdop7ymsBSjZqJY/UExAC2BvISC4p9vxMoMbU=;
+        b=ln6XcLJHhMHl6yEP7usHUr4y3mt45RglwTGz2CH3hQPctGQ/8KHpHv/aLWH2uvEglC
+         yHLFJLhOWb+GkKv6Zb/FFSFvsHVguiIoT2cZXD4ke3xn8rcP4+NKbBxItVYGhK66gnVM
+         wvJvhsPxh4Mp4Gm9FUXWMJ2kEteQzbukMkCgktzl0H/NADBjqkNYCTVDLFtHA4JEsZKq
+         GdcZTpPYzCSYruQmLuMyjH256utAGp+5LTBBA/UkWiRmxujoBOtlUXoLLQL86PjmFcnF
+         YzX2AdwrqOchjgBJnSFTvTy2Zj43gLyVdD0SGXpvZDd/THPaWryosS/VFnqE/gLWNvlI
+         ubFQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783348730; x=1783953530;
+        d=1e100.net; s=20251104; t=1783348732; x=1783953532;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=VU6bNGDdp0rI3WsqzTKPr7JfkwiW3hoSy7BhvGfIckI=;
-        b=jWgY517aDI1oMeIY587Lt/cVRzCIIkjKvKnJ7TBmQn4mgP75ugp/yCIaNF6b7j30sw
-         VjiKCO5NSalI6/1Qg0Li75Y9RmNlsrqKbGrysob2+icvwBPI5h7/V/jH4K9GJCAOGgU5
-         Go5Y+p92hXKrc+Cj3AHWDWGp9qE/9wah/D+bxhKwbUwGhEcI/+B9pKkOUIjOgqeR4tIH
-         6GrWM3rssJfpPHmexlPuCSydr9hyEFJY+uAjqqcMe94h7n1beK+RBnb7zalauuefE5wx
-         KeRUQw3pRGuLBu/VXGpjjA9GI5gvi4Y9lbTWrWIcrBS1A9W0Slr65MCdj05WOao8GzTf
-         slKA==
-X-Gm-Message-State: AOJu0YwrGS7YKRSfu5+HA/06F0DSIRbhr2C8/k2p6aeIHrTMJdDY3isl
-	D4VMxsJAafKAJZU3shDezoZzP6mMct+FpUibWmWq7oBQO3oRlou7e3R5XCuZLI1xedzdgtZ/x6x
-	H8YMA4EN/Hp9q2k48Movn0/SWPzlKlzbsF29eBlVc/sXv+sL8BZ3eNTjrZtBJmR1G88h4XMTtxe
-	lz2hg96LmxR8pc/bkBFDlfhaTCsaNrasNzHnVKkKPAcPPhuMEwWA==
-X-Gm-Gg: AfdE7cn3ePqgcXpX/oyQrZVA4yPkZs7nOkuhnzySWyX7ZVaEYPj108iIh2CSRsVNxac
-	FrrOD+5px9eLINS5sJsrOAizT+EUXg3g9AuLbMZWLqgkJbxU8k1QnMomo7dlW2OKEuZFlQXwHIN
-	Z4+hvdBQZwRUpp0tQs7WRoZiFd0MQ8ABvFvNKQrNBLaKfOwrSIWUJyn2BwPnZvvUAZugNAhogVB
-	1D+Kks331/zlcRxisrKZw/i+z7s89W1dZ3zSxw9QeMvZ/ZbXUjd87PuVl1pYMUdGU7e4ZgtD5ok
-	4bjgI5njLerg2muwTNk+ttYA7wWkVZzYAS6f9gQTMEy61a1oF5CH8rgw+Hflp/ss4GThTorqer3
-	qtBkI9vdBT7sBfSKUQ7O6EPrRIjKQ+DbbQw4CyQMkNRng
-X-Received: by 2002:a17:906:c351:b0:c12:64f1:c4f6 with SMTP id a640c23a62f3a-c15a67bc6bbmr39669366b.38.1783348730057;
-        Mon, 06 Jul 2026 07:38:50 -0700 (PDT)
-X-Received: by 2002:a17:906:c351:b0:c12:64f1:c4f6 with SMTP id a640c23a62f3a-c15a67bc6bbmr39667666b.38.1783348729451;
-        Mon, 06 Jul 2026 07:38:49 -0700 (PDT)
+        bh=o6Lsm+kdop7ymsBSjZqJY/UExAC2BvISC4p9vxMoMbU=;
+        b=cM+HUMDmFJCLdTUhaFrcQ1FcWnVOQD0srbgtzUOLUYuqhZxdVfkoaLRLSted6yBB4j
+         /ltIyplz+LQJ0DdO+wPXVwYUoZKMPUZLyrrgxBC6byD4DkTfYY5+xbFxPNvd01tpY+fE
+         TBJ1CZxbZm68fXkNMnzhf34/yb+hrH+QJX4q9tBrEf0oeUp1Gk4ozBjCDKjOqAOKb5Y0
+         0K5xPahZxdlnl90VjPAE/lfkscgBvF26JQ9p/QSWJy3v33b2Nfy6N16ejuqTthqzj4Q9
+         O7PV20ZeS3gqMrU/A3aTJzZTFb+XVNWxri2imypXVWDcR4Csd1bkxPDSH5Q9yHxp3WZ1
+         1sMw==
+X-Gm-Message-State: AOJu0YyIcP1RvY3R/pJ42dIA87cYCGcWJX98HzMPLTeq7XAz04PaKW/L
+	xhKnyd+TFIMHuhhEMY4LJsNavQLqTBhOQeTpj4Wx0w8eGR/yXARLOAPpt9UgmiJLnieGBCt20A8
+	tM925tPPXu9zo7U/TR0wyIsc643YZbGWh5tfYRJqlgGQU9cXT2L/mwaM7pJFlrjQqLDC2ewZsXl
+	80H5VsIpTLG9TsajfvRmIzWy9wdbimh51on51hHstu39VvOno4gQ==
+X-Gm-Gg: AfdE7cmOMNIBFcJclyiVZXC0m8kGiVLlliANXP/6DBSL2hA1eT9JHUDvBSG5ZnqU1J4
+	JXklKbI+TTFbPJNglGZbUFHHYxxa4q1UBIBpQpFJJRaCbajW0o/rNcMeETi2AgfRS9KVpTNYEMR
+	iKDZFxyKUnWAIf6NWViupns0HgZPkSv8AhJhmSkaS6+gdTaD9OZCQwmqOw59LDIIU5/GAZrTqyb
+	0mKKpG59MwCr49Ni7nlq0cjgEd77OYZJabt43FK+kxoN23dtcbHkJyDWmvMXd4BVKBLADWCqduW
+	kbahdWf63+DJNT933+/qS7XXiDlRqKal2rfljvDJaNHRiZYVnwodIRCoo0lX5lJhzNBeseZBwnB
+	y3rS7q2bRSzEio2akkyjzysgz5YVr0cskKwJTFDJG9WpB
+X-Received: by 2002:a17:906:b349:b0:c12:a599:b59e with SMTP id a640c23a62f3a-c15a6840fdamr34045266b.29.1783348732415;
+        Mon, 06 Jul 2026 07:38:52 -0700 (PDT)
+X-Received: by 2002:a17:906:b349:b0:c12:a599:b59e with SMTP id a640c23a62f3a-c15a6840fdamr34043166b.29.1783348731789;
+        Mon, 06 Jul 2026 07:38:51 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c12b6054b99sm777268566b.8.2026.07.06.07.38.48
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c12b6054b99sm777268566b.8.2026.07.06.07.38.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jul 2026 07:38:49 -0700 (PDT)
+        Mon, 06 Jul 2026 07:38:51 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com,
 	xiubo.li@clyso.com,
 	jlayton@kernel.org,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v2 04/15] ceph: add BLOG magazine batch allocator
-Date: Mon,  6 Jul 2026 14:38:32 +0000
-Message-Id: <20260706143843.1980879-5-amarkuze@redhat.com>
+Subject: [PATCH v2 06/15] ceph: add BLOG per-module context management
+Date: Mon,  6 Jul 2026 14:38:34 +0000
+Message-Id: <20260706143843.1980879-7-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260706143843.1980879-1-amarkuze@redhat.com>
 References: <20260706143843.1980879-1-amarkuze@redhat.com>
@@ -97,333 +97,610 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add blog_batch.c: per-CPU magazine batching for TLS context recycling.
-Freed composites go to a local magazine; subsequent acquisitions reclaim
-from the magazine, making the common-case log path allocation-free.
+Add blog_module.c: per-superblock rhashtable mapping tasks to
+blog_task_entry structures, with context acquire/release and safe
+retirement that clears the RETIRED bit on removal failure.
+
+Task pointers are not pinned with get_task_struct(); retirement
+happens lazily on pointer reuse (PID-mismatch detection) and at
+unmount.  Filesystem-reachable allocation paths use GFP_NOFS to
+avoid reclaim recursion.
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- fs/ceph/blog_batch.c | 312 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 312 insertions(+)
- create mode 100644 fs/ceph/blog_batch.c
+ fs/ceph/blog_module.c | 584 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 584 insertions(+)
+ create mode 100644 fs/ceph/blog_module.c
 
-diff --git a/fs/ceph/blog_batch.c b/fs/ceph/blog_batch.c
+diff --git a/fs/ceph/blog_module.c b/fs/ceph/blog_module.c
 new file mode 100644
-index 000000000000..6daf853b8201
+index 000000000000..74bec04b6e92
 --- /dev/null
-+++ b/fs/ceph/blog_batch.c
-@@ -0,0 +1,312 @@
++++ b/fs/ceph/blog_module.c
+@@ -0,0 +1,584 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
-+ * Binary Logging Batch Management
++ * Binary Logging Infrastructure (BLOG) - Per-Module Support
 + *
-+ * Magazine-based batching for efficient object recycling.
++ * Per-task context association via rhashtable keyed by task pointer.
++ * Stale entries (task_struct reuse) are detected by PID comparison.
 + */
 +
-+#include <linux/slab.h>
 +#include <linux/module.h>
-+#include <linux/percpu.h>
-+#include <linux/preempt.h>
++#include <linux/slab.h>
++#include <linux/mm.h>
 +#include <linux/spinlock.h>
 +#include <linux/list.h>
-+#include <linux/ceph/blog_batch.h>
++#include <linux/atomic.h>
++#include <linux/sched.h>
++#include <linux/sched/signal.h>
++#include <linux/rhashtable.h>
 +#include <linux/ceph/blog.h>
++#include <linux/ceph/blog_module.h>
 +
-+static struct blog_magazine *alloc_magazine(struct blog_batch *batch, gfp_t gfp)
++static LIST_HEAD(blog_module_contexts);
++static DEFINE_SPINLOCK(blog_modules_lock);
++static atomic64_t blog_logger_gen = ATOMIC64_INIT(1);
++
++#define BLOG_LOG_BATCH_MAX_FULL 16
++#define BLOG_TASK_ENTRY_RETIRED 0
++
++/* --- rhashtable parameters for task -> context mapping --- */
++
++static const struct rhashtable_params blog_task_ht_params = {
++	.key_offset = offsetof(struct blog_task_entry, task),
++	.key_len = sizeof(struct task_struct *),
++	.head_offset = offsetof(struct blog_task_entry, node),
++	.automatic_shrinking = true,
++};
++
++/* --- helper: recycle a TLS context back to the magazine batches --- */
++
++static void blog_module_rebalance_log_batch(struct blog_logger *logger)
 +{
 +	struct blog_magazine *mag;
 +
-+	/* Allocate magazine structure from cache */
-+	mag = kmem_cache_zalloc(batch->magazine_cache, gfp);
-+	if (!mag)
-+		return NULL;
++	if (!logger || logger->log_batch.nr_full <= BLOG_LOG_BATCH_MAX_FULL)
++		return;
 +
-+	INIT_LIST_HEAD(&mag->list);
-+	mag->count = 0;
-+	return mag;
-+}
-+
-+static void free_magazine(struct blog_batch *batch, struct blog_magazine *mag)
-+{
-+	int i;
-+	struct blog_tls_pagefrag *composite;
-+
-+	/* Free all composites in this magazine before freeing magazine itself */
-+	for (i = 0; i < mag->count; i++) {
-+		composite = mag->elements[i];
-+		if (composite) {
-+			/* Composites are allocated with alloc_pages(), free with __free_pages() */
-+			__free_pages(virt_to_page(composite),
-+				     get_order(BLOG_TLS_PAGEFRAG_ALLOC_SIZE));
-+		}
-+	}
-+
-+	/* Free the magazine structure itself */
-+	kmem_cache_free(batch->magazine_cache, mag);
-+}
-+
-+/**
-+ * blog_batch_init - Initialize the batching system
-+ * @batch: Batch structure to initialize
-+ * @mag_cache: Slab cache for magazine structs, or NULL to create one
-+ * @nr_prealloc: Number of composites to preallocate (0 = none)
-+ * @retain_limit: Max composites to retain on put; excess are freed (0 = unlimited)
-+ *
-+ * Allocates and initializes the per-CPU magazines and global pools.
-+ * Composites are allocated via alloc_pages() in BLOG_MAGAZINE_SIZE
-+ * batches.  Pass nr_prealloc = 0 for batches that start empty
-+ * (e.g. the log_batch).
-+ *
-+ * Return: 0 on success, negative error code on failure
-+ */
-+int blog_batch_init(struct blog_batch *batch, struct kmem_cache *mag_cache,
-+		    unsigned int nr_prealloc, unsigned int retain_limit)
-+{
-+	unsigned int nr_mags, i, j;
-+	int cpu;
-+	struct blog_cpu_magazine *cpu_mag;
-+	struct blog_magazine *mag;
-+	struct blog_tls_pagefrag *composite;
-+	struct page *pages;
-+
-+	/* Initialize counters */
-+	batch->nr_full = 0;
-+	batch->nr_empty = 0;
-+	batch->retain_limit = retain_limit;
-+
-+	/* Use caller-provided cache or create one */
-+	if (mag_cache) {
-+		batch->magazine_cache = mag_cache;
-+		batch->external_cache = true;
-+	} else {
-+		batch->magazine_cache = kmem_cache_create("blog_magazine",
-+						       sizeof(struct blog_magazine),
-+						       0, SLAB_HWCACHE_ALIGN, NULL);
-+		if (!batch->magazine_cache)
-+			return -ENOMEM;
-+		batch->external_cache = false;
-+	}
-+
-+	/* Initialize global magazine lists */
-+	INIT_LIST_HEAD(&batch->full_magazines);
-+	INIT_LIST_HEAD(&batch->empty_magazines);
-+	spin_lock_init(&batch->full_lock);
-+	spin_lock_init(&batch->empty_lock);
-+
-+	/* Allocate per-CPU magazines */
-+	batch->cpu_magazines = alloc_percpu(struct blog_cpu_magazine);
-+	if (!batch->cpu_magazines)
-+		goto cleanup_cache;
-+
-+	/* Initialize per-CPU magazines to NULL (magazines allocated on-demand) */
-+	for_each_possible_cpu(cpu) {
-+		cpu_mag = per_cpu_ptr(batch->cpu_magazines, cpu);
-+		cpu_mag->mag = NULL;
-+	}
-+
-+	/* Pre-populate magazines with composites */
-+	nr_mags = DIV_ROUND_UP(nr_prealloc, BLOG_MAGAZINE_SIZE);
-+	for (i = 0; i < nr_mags; i++) {
-+		mag = alloc_magazine(batch, GFP_KERNEL);
-+		if (!mag)
-+			goto cleanup;
-+
-+		for (j = 0; j < BLOG_MAGAZINE_SIZE; j++) {
-+			pages = alloc_pages(GFP_KERNEL | __GFP_ZERO,
-+					    get_order(BLOG_TLS_PAGEFRAG_ALLOC_SIZE));
-+			if (!pages) {
-+				free_magazine(batch, mag);
-+				goto cleanup;
-+			}
-+			composite = page_address(pages);
-+			mag->elements[j] = composite;
-+			mag->count++;
-+		}
-+
-+		spin_lock(&batch->full_lock);
-+		list_add(&mag->list, &batch->full_magazines);
-+		batch->nr_full++;
-+		spin_unlock(&batch->full_lock);
-+	}
-+
-+	return 0;
-+
-+cleanup:
-+	blog_batch_cleanup(batch);
-+	return -ENOMEM;
-+
-+cleanup_cache:
-+	if (!batch->external_cache && batch->magazine_cache)
-+		kmem_cache_destroy(batch->magazine_cache);
-+	return -ENOMEM;
-+}
-+
-+/**
-+ * blog_batch_cleanup - Clean up the batching system
-+ * @batch: Batch structure to clean up
-+ *
-+ * Frees all magazines and composites, and destroys the magazine cache.
-+ */
-+void blog_batch_cleanup(struct blog_batch *batch)
-+{
-+	int cpu;
-+	struct blog_magazine *mag, *tmp;
-+	struct blog_cpu_magazine *cpu_mag;
-+
-+	/* Free per-CPU magazines */
-+	if (batch->cpu_magazines) {
-+		for_each_possible_cpu(cpu) {
-+			cpu_mag = per_cpu_ptr(batch->cpu_magazines, cpu);
-+			if (cpu_mag->mag)
-+				free_magazine(batch, cpu_mag->mag);
-+		}
-+		free_percpu(batch->cpu_magazines);
-+	}
-+
-+	/* Free magazines in the full pool */
-+	spin_lock(&batch->full_lock);
-+	list_for_each_entry_safe(mag, tmp, &batch->full_magazines, list) {
-+		list_del(&mag->list);
-+		batch->nr_full--;
-+		free_magazine(batch, mag);
-+	}
-+	spin_unlock(&batch->full_lock);
-+
-+	/* Free magazines in the empty pool */
-+	spin_lock(&batch->empty_lock);
-+	list_for_each_entry_safe(mag, tmp, &batch->empty_magazines, list) {
-+		list_del(&mag->list);
-+		batch->nr_empty--;
-+		free_magazine(batch, mag);
-+	}
-+	spin_unlock(&batch->empty_lock);
-+
-+	/* Destroy magazine cache */
-+	if (!batch->external_cache && batch->magazine_cache)
-+		kmem_cache_destroy(batch->magazine_cache);
-+
-+	batch->magazine_cache = NULL;
-+	batch->external_cache = false;
-+}
-+
-+/**
-+ * blog_batch_get - Get an element from the batch
-+ * @batch: Batch to get element from
-+ *
-+ * Return: Element from the magazine, or NULL if none available
-+ */
-+void *blog_batch_get(struct blog_batch *batch)
-+{
-+	struct blog_cpu_magazine *cpu_mag;
-+	struct blog_magazine *old_mag, *new_mag;
-+	void *element = NULL;
-+
-+	preempt_disable();
-+	cpu_mag = this_cpu_ptr(batch->cpu_magazines);
-+
-+	/* If we have a magazine and it has elements, use it */
-+	if (cpu_mag->mag && cpu_mag->mag->count > 0) {
-+		element = cpu_mag->mag->elements[--cpu_mag->mag->count];
-+		goto out;
-+	}
-+
-+	/* Current magazine is empty, try to get a full one */
-+	old_mag = cpu_mag->mag;
-+
-+	/* Return old magazine to empty pool if we have one */
-+	if (old_mag) {
-+		spin_lock(&batch->empty_lock);
-+		list_add(&old_mag->list, &batch->empty_magazines);
-+		batch->nr_empty++;
-+		spin_unlock(&batch->empty_lock);
-+		cpu_mag->mag = NULL;
-+	}
-+
-+	if (READ_ONCE(batch->nr_full) > 0) {
-+		/* Try to get a full magazine */
-+		spin_lock(&batch->full_lock);
-+		if (!list_empty(&batch->full_magazines)) {
-+			new_mag = list_first_entry(&batch->full_magazines,
-+						   struct blog_magazine, list);
-+			list_del(&new_mag->list);
-+			batch->nr_full--;
-+			spin_unlock(&batch->full_lock);
-+
-+			cpu_mag->mag = new_mag;
-+			if (new_mag->count > 0)
-+				element = new_mag->elements[--new_mag->count];
-+		} else {
-+			spin_unlock(&batch->full_lock);
-+		}
-+	}
-+out:
-+	preempt_enable();
-+	return element;
-+}
-+
-+/**
-+ * blog_batch_put - Put an element back into the batch
-+ * @batch: Batch to put element into
-+ * @element: Element to put back
-+ */
-+void blog_batch_put(struct blog_batch *batch, void *element)
-+{
-+	struct blog_cpu_magazine *cpu_mag;
-+	struct blog_magazine *mag;
-+
-+	/* Trim: if over retention limit, free the element instead of storing */
-+	if (batch->retain_limit &&
-+	    READ_ONCE(batch->nr_full) * BLOG_MAGAZINE_SIZE >= batch->retain_limit) {
-+		__free_pages(virt_to_page(element),
-+			     get_order(BLOG_TLS_PAGEFRAG_ALLOC_SIZE));
++	spin_lock(&logger->log_batch.full_lock);
++	if (list_empty(&logger->log_batch.full_magazines)) {
++		spin_unlock(&logger->log_batch.full_lock);
 +		return;
 +	}
++	mag = list_first_entry(&logger->log_batch.full_magazines,
++			       struct blog_magazine, list);
++	list_del(&mag->list);
++	logger->log_batch.nr_full--;
++	spin_unlock(&logger->log_batch.full_lock);
 +
-+	preempt_disable();
-+	cpu_mag = this_cpu_ptr(batch->cpu_magazines);
++	spin_lock(&logger->alloc_batch.full_lock);
++	list_add(&mag->list, &logger->alloc_batch.full_magazines);
++	logger->alloc_batch.nr_full++;
++	spin_unlock(&logger->alloc_batch.full_lock);
++}
 +
-+	/* Optimistically try to add to current magazine */
-+	if (likely(cpu_mag->mag && cpu_mag->mag->count < BLOG_MAGAZINE_SIZE)) {
-+		cpu_mag->mag->elements[cpu_mag->mag->count++] = element;
-+		goto out;
++static void blog_module_queue_to_log_batch(struct blog_logger *logger,
++					   struct blog_tls_ctx *ctx)
++{
++	struct blog_tls_pagefrag *composite;
++
++	if (!logger || !ctx)
++		return;
++	if (logger->owner_ctx)
++		atomic_dec(&logger->owner_ctx->allocated_contexts);
++	composite = blog_ctx_container(ctx);
++	atomic_set(&ctx->refcount, 0);
++	ctx->pending_offset = 0;
++	ctx->pending_size = 0;
++	blog_batch_put(&logger->log_batch, composite);
++	blog_module_rebalance_log_batch(logger);
++}
++
++static void blog_module_clear_task(struct blog_tls_ctx *ctx)
++{
++	if (ctx)
++		WRITE_ONCE(ctx->task, NULL);
++}
++
++static void blog_module_tls_release(void *ptr)
++{
++	struct blog_tls_ctx *ctx = ptr;
++	struct blog_logger *logger;
++
++	if (!ctx)
++		return;
++	logger = ctx->logger;
++	if (!logger) {
++		pr_err("BUG: TLS context id=%llu has no logger\n", ctx->id);
++		return;
++	}
++	blog_module_clear_task(ctx);
++	blog_module_queue_to_log_batch(logger, ctx);
++}
++
++/* --- task-entry lifecycle --- */
++
++static void blog_task_entry_free_rcu(struct rcu_head *rcu)
++{
++	kfree(container_of(rcu, struct blog_task_entry, rcu));
++}
++
++/*
++ * Retire a stale rhashtable entry: remove from hash table, recycle the
++ * TLS context back to the magazine batch, and schedule the entry for
++ * RCU-deferred freeing.
++ */
++static bool blog_retire_entry_locked(struct blog_logger *logger,
++				     struct blog_task_entry *entry,
++				     struct blog_tls_ctx **tls_ctx)
++{
++	if (test_and_set_bit(BLOG_TASK_ENTRY_RETIRED, &entry->flags))
++		return false;
++	if (rhashtable_remove_fast(&logger->task_map, &entry->node,
++				   blog_task_ht_params)) {
++		clear_bit(BLOG_TASK_ENTRY_RETIRED, &entry->flags);
++		return false;
 +	}
 +
-+	/* If current magazine is full, move it to full pool */
-+	if (likely(cpu_mag->mag && cpu_mag->mag->count >= BLOG_MAGAZINE_SIZE)) {
-+		spin_lock(&batch->full_lock);
-+		list_add_tail(&cpu_mag->mag->list, &batch->full_magazines);
-+		batch->nr_full++;
-+		spin_unlock(&batch->full_lock);
-+		cpu_mag->mag = NULL;
++	*tls_ctx = entry->ctx;
++	if (*tls_ctx && !list_empty(&(*tls_ctx)->list))
++		list_del_init(&(*tls_ctx)->list);
++	return true;
++}
++
++static bool blog_retire_stale_task(struct blog_logger *logger,
++				   struct task_struct *task)
++{
++	struct blog_task_entry *entry;
++	struct blog_tls_ctx *tls_ctx = NULL;
++	bool retired = false;
++
++	spin_lock(&logger->lock);
++	rcu_read_lock();
++	entry = rhashtable_lookup_fast(&logger->task_map, &task,
++				       blog_task_ht_params);
++	if (entry && entry->pid != task->pid)
++		retired = blog_retire_entry_locked(logger, entry, &tls_ctx);
++	rcu_read_unlock();
++	spin_unlock(&logger->lock);
++
++	if (tls_ctx) {
++		blog_module_clear_task(tls_ctx);
++		blog_module_queue_to_log_batch(logger, tls_ctx);
++	}
++	if (retired)
++		call_rcu(&entry->rcu, blog_task_entry_free_rcu);
++	return retired;
++}
++
++/*
++ * Allocate a fresh TLS context (composite) from the magazine batch or
++ * the page allocator, initialize it, and link it into the logger.
++ */
++static struct blog_tls_ctx *blog_alloc_tls_ctx(struct blog_logger *logger)
++{
++	struct blog_tls_pagefrag *composite;
++	struct blog_tls_ctx *tls_ctx;
++	struct blog_pagefrag *pf;
++	struct task_struct *task = current;
++
++	composite = blog_batch_get(&logger->alloc_batch);
++	if (!composite) {
++		struct page *pages;
++
++		pages = alloc_pages(GFP_NOFS | __GFP_ZERO,
++				    get_order(BLOG_TLS_PAGEFRAG_ALLOC_SIZE));
++		if (!pages)
++			return NULL;
++		composite = page_address(pages);
 +	}
 +
-+	/* Get new magazine if needed */
-+	if (likely(!cpu_mag->mag)) {
-+		/* Try to get from empty pool first */
-+		spin_lock(&batch->empty_lock);
-+		if (!list_empty(&batch->empty_magazines)) {
-+			mag = list_first_entry(&batch->empty_magazines,
-+					       struct blog_magazine, list);
-+			list_del(&mag->list);
-+			batch->nr_empty--;
-+			spin_unlock(&batch->empty_lock);
-+			cpu_mag->mag = mag;
-+		} else {
-+			spin_unlock(&batch->empty_lock);
-+			cpu_mag->mag = alloc_magazine(batch, GFP_ATOMIC);
-+		}
++	tls_ctx = &composite->ctx;
 +
-+		if (unlikely(!cpu_mag->mag)) {
-+			/* Cannot store element; free it to avoid a leak */
-+			__free_pages(virt_to_page(element),
-+				     get_order(BLOG_TLS_PAGEFRAG_ALLOC_SIZE));
-+			goto out;
-+		}
++	if (tls_ctx->id == 0) {
++		INIT_LIST_HEAD(&tls_ctx->list);
++		spin_lock(&logger->ctx_id_lock);
++		tls_ctx->id = logger->next_ctx_id++;
++		spin_unlock(&logger->ctx_id_lock);
++#if BLOG_DEBUG_POISON
++		tls_ctx->debug_poison = BLOG_CTX_POISON;
++#endif
 +	}
-+	/* Add element to magazine */
-+	cpu_mag->mag->elements[cpu_mag->mag->count++] = element;
-+out:
-+	preempt_enable();
++
++	atomic_set(&tls_ctx->refcount, 1);
++	tls_ctx->task = task;
++	tls_ctx->pid = task->pid;
++	get_task_comm(tls_ctx->comm, task);
++	tls_ctx->base_jiffies = jiffies;
++	tls_ctx->release = blog_module_tls_release;
++	tls_ctx->logger = logger;
++	tls_ctx->flags = 0;
++	tls_ctx->pending_offset = 0;
++	tls_ctx->pending_size = 0;
++
++	pf = &composite->pf;
++	pf->pages = NULL;
++	pf->buffer = composite->buf;
++	pf->capacity = BLOG_TLS_PAGEFRAG_BUFFER_SIZE;
++	spin_lock_init(&pf->lock);
++	pf->head = 0;
++	pf->alloc_count = 0;
++	pf->active_elements = 0;
++	pf->last_entry = NULL;
++
++	spin_lock(&logger->lock);
++	if (list_empty(&tls_ctx->list)) {
++		list_add(&tls_ctx->list, &logger->contexts);
++		logger->total_contexts_allocated++;
++	}
++	spin_unlock(&logger->lock);
++
++	return tls_ctx;
++}
++
++/* --- public module API --- */
++
++struct blog_module_context *blog_module_init(const char *module_name)
++{
++	struct blog_module_context *ctx;
++	struct blog_logger *logger;
++	int ret;
++
++	if (!module_name || !*module_name)
++		return NULL;
++	if (strlen(module_name) >= sizeof(ctx->name))
++		return NULL;
++
++	ctx = kzalloc(sizeof(*ctx), GFP_KERNEL);
++	if (!ctx)
++		return NULL;
++
++	logger = kzalloc(sizeof(*logger), GFP_KERNEL);
++	if (!logger)
++		goto err_ctx;
++
++	logger->magazine_cache = kmem_cache_create("blog_magazine",
++						   sizeof(struct blog_magazine),
++						   0, SLAB_HWCACHE_ALIGN, NULL);
++	if (!logger->magazine_cache)
++		goto err_logger;
++
++	logger->source_map = kvcalloc(BLOG_MAX_SOURCE_IDS,
++				      sizeof(struct blog_source_info),
++				      GFP_KERNEL);
++	if (!logger->source_map)
++		goto err_cache;
++
++	strscpy(ctx->name, module_name, sizeof(ctx->name));
++	ctx->logger = logger;
++	atomic_set(&ctx->refcount, 1);
++	atomic_set(&ctx->allocated_contexts, 0);
++	INIT_LIST_HEAD(&ctx->list);
++
++	INIT_LIST_HEAD(&logger->contexts);
++	spin_lock_init(&logger->lock);
++	spin_lock_init(&logger->source_lock);
++	spin_lock_init(&logger->ctx_id_lock);
++	atomic_set(&logger->next_source_id, 1);
++	logger->next_ctx_id = 1;
++	logger->total_contexts_allocated = 0;
++	logger->owner_ctx = ctx;
++	logger->generation = atomic64_inc_return(&blog_logger_gen);
++
++	ret = rhashtable_init(&logger->task_map, &blog_task_ht_params);
++	if (ret)
++		goto err_source_map;
++
++	ret = blog_batch_init(&logger->alloc_batch, logger->magazine_cache,
++			      num_possible_cpus() * 4 + 32,
++			      num_possible_cpus() + 32);
++	if (ret)
++		goto err_ht;
++
++	ret = blog_batch_init(&logger->log_batch, logger->magazine_cache, 0, 0);
++	if (ret)
++		goto err_batch_alloc;
++
++	spin_lock(&blog_modules_lock);
++	list_add(&ctx->list, &blog_module_contexts);
++	spin_unlock(&blog_modules_lock);
++
++	ctx->initialized = true;
++	pr_debug("BLOG: module '%s' initialized\n", module_name);
++	return ctx;
++
++err_batch_alloc:
++	blog_batch_cleanup(&logger->alloc_batch);
++err_ht:
++	rhashtable_destroy(&logger->task_map);
++err_source_map:
++	kvfree(logger->source_map);
++err_cache:
++	kmem_cache_destroy(logger->magazine_cache);
++err_logger:
++	kfree(logger);
++err_ctx:
++	kfree(ctx);
++	return NULL;
++}
++
++/*
++ * Walk callback for rhashtable_free_and_destroy -- release each
++ * task entry and its associated TLS context.
++ */
++static void blog_task_entry_free_cb(void *ptr, void *arg)
++{
++	struct blog_task_entry *entry = ptr;
++	struct blog_logger *logger = arg;
++
++	if (entry->ctx) {
++		spin_lock(&logger->lock);
++		if (!list_empty(&entry->ctx->list))
++			list_del_init(&entry->ctx->list);
++		spin_unlock(&logger->lock);
++
++		blog_module_clear_task(entry->ctx);
++		blog_module_queue_to_log_batch(logger, entry->ctx);
++	}
++	kfree(entry);
++}
++
++void blog_module_cleanup(struct blog_module_context *ctx)
++{
++	struct blog_logger *logger;
++	struct blog_tls_ctx *tls_ctx, *tmp;
++	LIST_HEAD(pending);
++
++	if (!ctx || !ctx->initialized)
++		return;
++	logger = ctx->logger;
++	if (!logger)
++		return;
++
++	spin_lock(&blog_modules_lock);
++	list_del(&ctx->list);
++	spin_unlock(&blog_modules_lock);
++
++	/* Drain the task hash table */
++	rhashtable_free_and_destroy(&logger->task_map,
++				    blog_task_entry_free_cb, logger);
++
++	/* Detach any remaining contexts from the logger list */
++	spin_lock(&logger->lock);
++	list_for_each_entry_safe(tls_ctx, tmp, &logger->contexts, list)
++		list_move(&tls_ctx->list, &pending);
++	spin_unlock(&logger->lock);
++
++	list_for_each_entry_safe(tls_ctx, tmp, &pending, list) {
++		list_del_init(&tls_ctx->list);
++		blog_module_clear_task(tls_ctx);
++		if (tls_ctx->release)
++			tls_ctx->release(tls_ctx);
++		else
++			blog_module_queue_to_log_batch(logger, tls_ctx);
++	}
++
++	blog_batch_cleanup(&logger->alloc_batch);
++	blog_batch_cleanup(&logger->log_batch);
++
++	if (logger->magazine_cache)
++		kmem_cache_destroy(logger->magazine_cache);
++	kvfree(logger->source_map);
++
++	pr_debug("BLOG: module '%s' cleaned up\n", ctx->name);
++
++	kfree(logger);
++	ctx->logger = NULL;
++	ctx->initialized = false;
++	kfree(ctx);
++}
++
++void blog_module_get(struct blog_module_context *ctx)
++{
++	if (ctx)
++		atomic_inc(&ctx->refcount);
++}
++
++void blog_module_put(struct blog_module_context *ctx)
++{
++	if (ctx && atomic_dec_and_test(&ctx->refcount))
++		blog_module_cleanup(ctx);
++}
++
++/* --- source ID helpers --- */
++
++u32 blog_get_source_id_ctx(struct blog_module_context *ctx, const char *file,
++			   const char *func, unsigned int line, const char *fmt)
++{
++	if (!ctx || !ctx->logger)
++		return 0;
++	return blog_get_source_id(ctx->logger, file, func, line, fmt);
++}
++
++struct blog_source_info *blog_get_source_info_ctx(struct blog_module_context *ctx,
++						  u32 id)
++{
++	if (!ctx || !ctx->logger || id >= BLOG_MAX_SOURCE_IDS)
++		return NULL;
++	return &ctx->logger->source_map[id];
++}
++
++/* --- per-task context acquisition (rhashtable-based) --- */
++
++struct blog_tls_ctx *blog_get_tls_ctx_ctx(struct blog_module_context *ctx)
++{
++	struct blog_logger *logger;
++	struct blog_task_entry *entry;
++	struct blog_tls_ctx *tls_ctx;
++	struct task_struct *task = current;
++	bool stale;
++
++	if (!ctx || !ctx->logger)
++		return NULL;
++	logger = ctx->logger;
++
++retry:
++	rcu_read_lock();
++	entry = rhashtable_lookup_fast(&logger->task_map, &task,
++				       blog_task_ht_params);
++	if (entry && entry->pid == task->pid) {
++		tls_ctx = entry->ctx;
++		rcu_read_unlock();
++		return tls_ctx;
++	}
++	stale = !!entry;
++	rcu_read_unlock();
++
++	if (stale) {
++		if (!blog_retire_stale_task(logger, task))
++			return NULL;
++		goto retry;
++	}
++
++	/* Allocate fresh context */
++	tls_ctx = blog_alloc_tls_ctx(logger);
++	if (!tls_ctx)
++		return NULL;
++
++	entry = kzalloc(sizeof(*entry), GFP_NOFS);
++	if (!entry) {
++		blog_module_queue_to_log_batch(logger, tls_ctx);
++		return NULL;
++	}
++
++	entry->task = task;
++	entry->pid = task->pid;
++	get_task_comm(entry->comm, task);
++	entry->ctx = tls_ctx;
++
++	if (rhashtable_lookup_insert_fast(&logger->task_map, &entry->node,
++					  blog_task_ht_params)) {
++		/*
++		 * Race: another thread inserted for the same task.
++		 * Recycle our context and use theirs.
++		 */
++		kfree(entry);
++		blog_module_clear_task(tls_ctx);
++		blog_module_queue_to_log_batch(logger, tls_ctx);
++
++		rcu_read_lock();
++		entry = rhashtable_lookup_fast(&logger->task_map, &task,
++					       blog_task_ht_params);
++		tls_ctx = entry && entry->pid == task->pid ? entry->ctx : NULL;
++		rcu_read_unlock();
++		if (!tls_ctx)
++			goto retry;
++		return tls_ctx;
++	}
++
++	atomic_inc(&ctx->allocated_contexts);
++	return tls_ctx;
++}
++
++struct blog_tls_ctx *blog_get_ctx_ctx(struct blog_module_context *ctx)
++{
++	return blog_get_tls_ctx_ctx(ctx);
++}
++
++/* --- blog_log_with_ctx / blog_log_commit_with_ctx --- */
++
++/**
++ * blog_log_with_ctx - Reserve buffer for a binary log message (explicit ctx)
++ * @logger: Logger instance
++ * @tls_ctx: TLS context to log into
++ * @source_id: Source ID for this location
++ * @client_id: Client ID for this message
++ * @needed_size: Size needed for the message
++ *
++ * Only one reservation may be outstanding per context at a time.
++ * The caller must call blog_log_commit_with_ctx() before issuing
++ * another reservation on the same context.
++ *
++ * Returns a buffer to write the message into, or NULL on failure
++ */
++void *blog_log_with_ctx(struct blog_logger *logger,
++			struct blog_tls_ctx *tls_ctx,
++			u32 source_id, u8 client_id, size_t needed_size)
++{
++	struct blog_pagefrag *pf;
++	struct blog_log_entry *entry;
++	int alloc;
++	size_t total_size;
++
++	if (!logger || !tls_ctx)
++		return NULL;
++
++	if (needed_size > BLOG_MAX_PAYLOAD)
++		return NULL;
++
++	total_size = round_up(sizeof(*entry) + needed_size, 8);
++	pf = blog_ctx_pf(tls_ctx);
++
++	if (test_and_clear_bit(BLOG_CTX_NEEDS_RESET, &tls_ctx->flags)) {
++		blog_pagefrag_reset(pf);
++		tls_ctx->pending_offset = 0;
++		tls_ctx->pending_size = 0;
++	}
++
++	alloc = blog_pagefrag_reserve(pf, total_size);
++	if (alloc == -ENOMEM) {
++		blog_pagefrag_reset(pf);
++		return NULL;
++	}
++
++	entry = blog_pagefrag_get_ptr(pf, alloc);
++	if (!entry)
++		return NULL;
++
++	if (WARN_ON_ONCE(tls_ctx->pending_size != 0))
++		return NULL;
++	tls_ctx->pending_offset = alloc;
++	tls_ctx->pending_size = total_size;
++
++#if BLOG_DEBUG_POISON
++	entry->debug_poison = BLOG_LOG_ENTRY_POISON;
++#endif
++	entry->ts_delta = jiffies - tls_ctx->base_jiffies;
++	entry->source_id = source_id;
++	entry->len = (u16)needed_size;
++	entry->client_id = client_id;
++	entry->flags = 0;
++
++	return entry->buffer;
++}
++
++int blog_log_commit_with_ctx(struct blog_logger *logger,
++			     struct blog_tls_ctx *tls_ctx,
++			     size_t actual_size)
++{
++	struct blog_pagefrag *pf;
++	struct blog_log_entry *entry;
++	size_t total_size;
++
++	if (!logger || !tls_ctx)
++		return -EINVAL;
++
++	/* Validate that actual_size fits within the reservation */
++	total_size = round_up(sizeof(struct blog_log_entry) + actual_size, 8);
++	if (total_size > tls_ctx->pending_size)
++		return -ENOSPC;
++
++	pf = blog_ctx_pf(tls_ctx);
++
++	entry = blog_pagefrag_get_ptr(pf, tls_ctx->pending_offset);
++	if (!entry) {
++		tls_ctx->pending_offset = 0;
++		tls_ctx->pending_size = 0;
++		return -EFAULT;
++	}
++	entry->len = (u16)actual_size;
++
++	blog_pagefrag_publish(pf, tls_ctx->pending_offset + total_size);
++	tls_ctx->pending_offset = 0;
++	tls_ctx->pending_size = 0;
++
++	return 0;
 +}
 -- 
 2.34.1
