@@ -1,117 +1,139 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FCB83AB286
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 16:05:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD6E13ACA70
+	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 16:18:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783353903; cv=none; b=VuoN6KWiZ6AFpYjTxHMKNM1bWWYdHxi/Sj5DN4/r+wjiqCdQj1sWnXQKxsHqxTxKNlgvcWCW74WnwSADmOn/4a3+I9M1RxxE924zMVH1JI0kRs4OWJSyuhKFkXmtXTL51C1pzBNyJPZmjU+MHENxWJO+cidZhCleVcxfuGX1WgE=
+	t=1783354699; cv=none; b=Gqr+o3eMwcvUs24/+pzIj/zlzrrWh6vrfNXPLlYdoH600CVe3EQoCR6LHjIWzrrxs0LDiANHnJV3zU3P4QYM3wOLEtKmWgSSUAvmfKiAuv0Nmn/zhuGhtX0RYuBbQjVq+EWmJpxPMMi03T0Yxb86OCD7dHZmRLmJLHl1CIo4oSI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783353903; c=relaxed/simple;
-	bh=o3UZD9n+83b8Cku/Gj7UgXynPNJ5nfcVTdTwlKA1WLQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=WpCbg7rBpu2N+K7yhuGdf0IkWbrk+ytEwwbC0xZEBWz2D3ZXIjDL2sKEgdvfqa7UNbxUdXUMHLwlQkiIRZdTCUShCinlSIcy+spx8iWk/lHz2V5SVqT94/NkLzJEfcR356DVfz8pvog3gqy4x0lSAE9FvjWb2EB2v5C6W4bZY/k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=aD+xltdf; arc=none smtp.client-ip=209.85.128.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1783354699; c=relaxed/simple;
+	bh=3Jdx0m/PVKztJ1BjQRf7/ruhFRoVzdvTceFvJBmFXTc=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=cRQsoAd2U8b+MlMuGZZbe+6kR8fUQSbZUiVDm5k+GImilN3hC1OF4UJjN1LrIUpHu7O2FQljhJX9DLBUddPK/eR9eSMDRlb4vy3YsT6fKGOqN1gyolperDgBNREJ2f4lN4ZDjeFEh9vfqxWC6yv04f+W1yX7cmZWO/ngBGFUPCQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XI6rp/5v; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=R6Oe7vUj; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="aD+xltdf"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-493c83474ddso29369275e9.3
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 09:05:01 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XI6rp/5v";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="R6Oe7vUj"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1783354696;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=4UG44r9/VRKV59jwr7aVIzEumeCeyyRuKxMCf/s0BFE=;
+	b=XI6rp/5v+nlJdas++2JxOtte0Nnx5bFalL3B6JBbxIl9XPpkQdEFrDa8quAuXVKnLhhvuj
+	pq9slc23oAgBbtAJx26bNXsKg7PQqNyBPimnGSXAlQc5xrnbK/LfE1uHFJ8QGU8OUl5EGQ
+	zKPETbWMoNyzhaYaUkHpLewsDCqzcfA=
+Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
+ [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-580-Gglp7r_FOz26IWzKsBK1Gg-1; Mon, 06 Jul 2026 12:18:15 -0400
+X-MC-Unique: Gglp7r_FOz26IWzKsBK1Gg-1
+X-Mimecast-MFC-AGG-ID: Gglp7r_FOz26IWzKsBK1Gg_1783354694
+Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-698accdb6beso2629183a12.0
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 09:18:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1783353900; x=1783958700; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=fAtxCizj1p/QiS5BxHbmhEUHAndkrPUWvJDYWge70Ho=;
-        b=aD+xltdfrvHOzZsbizB00kV4WUNpfDlbQIgvVTgW80lqupHbMR16OJDR+nbeONBUmE
-         QdyS4LSVIJq5GS15QGsJzrhmnj9gH0tsonOK6Yh7uJDOWnj2BZPOtr4/ZqOuS85eKa5w
-         wGLzQamgZbPc5n+vT+uih7DrU5kG6FGAzYDvpZ6s97rhb4FLXFWTVSR61Twc5wYoqtwd
-         qZ/+MElj1Qf/SpD0bIGnfKjtlQUk9smbDXMuH+77QlhquZwB8zEqB3WczHm3iDSpvOzw
-         zJt2ZXyKEMp1wjAnv/XJTFTohD121k7IwKn9ccN5mCjjVmqo5CcpksJXcGayHPyDTZZ1
-         OJsA==
+        d=redhat.com; s=google; t=1783354694; x=1783959494; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4UG44r9/VRKV59jwr7aVIzEumeCeyyRuKxMCf/s0BFE=;
+        b=R6Oe7vUj6VjIjeoCRngZSvMjOGuaDNYt9T2rtrx8yNU6JqXvLZS+J3JD88DINq/oom
+         4zGTtqG7R6AxFxaUySgkHFMe4TxuiHuqzkK3Y5J4+ptbBI3XF/y2Tnawb/9bxTmJspPf
+         qyHWiHYkwN5NMgwvMCAmJkNoYn8bpe61zbbDHlcg/kPKWkhl81zjla8KG0J7fFtTPmp8
+         K5qcB9AWboTo20b6KDIWxmOLbT8Cjwgxb5Yl/Q5RGCrSDajrxy9gnpnRG2zniKcoiKkQ
+         Ud5U6ZhE8sBeCHe8XlA98f4TKkx2rcrSfkkOHQwMRQS8Cb9itst5kz5SZeCrEx/Poaix
+         IyzA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783353900; x=1783958700;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=fAtxCizj1p/QiS5BxHbmhEUHAndkrPUWvJDYWge70Ho=;
-        b=FI6ifeyOP31jfzjj02RFpLuWNjYZ+RftfhGhiKUWTMmM/78StPNYoQKtLPhJc6LQBg
-         kB4g6rwKH5gG3Zgscc3Zf7h8m9p082yazNbSFIpDOn7gvqQjIMAyzRD9xYCTxO5ZxEZv
-         AKKODcMPMsxPVV5cMw0RO08N1JsKiDESf0hb6cmODORXMA8Mk99e3oTFwwOQgjLEUJxG
-         6nhLVcB0qcYHjJUw6E/hDslwYW6VZURdFqJeKxLQFJYVEVjvsD5bKtmuXa3xtAlNUsay
-         dxJAgDtd7IIM1MGkkA3AYIEYVlQnkpOCLcSO/s0gXXW9QDH1BTOF9UodkUtQvV3rZgjW
-         lVnw==
-X-Forwarded-Encrypted: i=1; AHgh+RqLzOEZyIct+rgbNfmBf85AgHz274epdfGfq8qYSOc3rHnx5eng+HcCeCJjS9XkT9j5v3rNW0/B5Fjd@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywbi/IeSbGGF9MerwjTN7Du/+HXgfy88ToQ1H6NtBI/gD2GPPxu
-	TyFZ28PsX0LICEY8ZOiVnMlwRpjObtopp0B+hPEQT83+KpSWQCaupWK5cNvqyy3ecNU=
-X-Gm-Gg: AfdE7cmS6nq2K0LuhkD9wJQi81Qkx5YEuC09rgp+ALft2Kc4EvvFjzkIqbFMvay/ybF
-	YCBRQ5c1eiuIgtXCzWOzygGqxO2U3d4ADKwB79zQ/6xD/FxrGEWDi3uWOj2RSDB5f6XOl4xPdwb
-	EUQ6PqssNUAt0SD/VgxL5Gs2ryuWmMuB06TKWPBvtjElDkmWe3ZtXuO/3dczITzYqnGbXy1pDCD
-	j+sDGG16xSR23ixPPGlkrbYW33UL31rud/P+zVmXJ8h6Xk3G5H6iBKujSeOHY9pWL68Tb7nuJLT
-	yookVTfqXSknee+ELHdRtGOlsnETuWry7wAYahiEE+aiP6OiHKpKYfqbm/dVfd7/kBbl7Tl9Iyg
-	fIR+TW5wd23m4RZW4rG/yvxsXqjZ+UH6XwaVz0joCcbupN2ezC8oHETONwCdEC/dsyY5iVQrehG
-	SLi6jz5wiQkyXhIMqnSI0LBZdj/NKuHSYdtmFltvaG+5cVnA==
-X-Received: by 2002:a05:600c:1550:b0:493:bf84:53d8 with SMTP id 5b1f17b1804b1-493df06a55bmr14424035e9.9.1783353899805;
-        Mon, 06 Jul 2026 09:04:59 -0700 (PDT)
-Received: from localhost.localdomain ([2a00:6d43:105:c401:e307:1a37:2e76:ce91])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-493cce12c40sm488808455e9.13.2026.07.06.09.04.58
+        d=1e100.net; s=20251104; t=1783354694; x=1783959494;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=4UG44r9/VRKV59jwr7aVIzEumeCeyyRuKxMCf/s0BFE=;
+        b=bpUgGhcDarJmFcZrv9KJhbmTzngysVEVjl8ajL2ModpOzLMUqzpLxEMUyZTo4ttzgt
+         531aNCVeK6TyZW2M5D7kGKehGp3QZeAsV1svw1FN53EsW1Z0cyqKhFTHDn5fH7SIain0
+         +s88h25sARpcjb/QVNQk9J8hxpZlpkXT4TvehrIGq3EjS65ounlooDwclhTJfYSBIe4q
+         0jdqAWnQksJhAII36qpKfJl/OJ09ARCcuSXw34y39PkgYbZUXLAdxK7NuzeGWCd1OS9D
+         2E5iItoJnULI/RYB62EClJD9Mpq/dnVmMCpt3Zff76//CWgeUPbUcJCCVng7ElrycUfn
+         XUPQ==
+X-Gm-Message-State: AOJu0YxUh06UmZkfeFL4xraQPGplZIXLrQhLPmFrr0eDVkLzr/rhwBtS
+	DmG70P5Fanu2j1ry9sJvC+cehnPDaVNOpZ9IoZTRHmbn9eTlcvXapUND0QvDqOXER2KXgji+dIb
+	kcw4CSfsncNJdmwf7dSRrQn+T3x+eDZIVNZrwL9j5hMrm6GWWIn+zWFvIsV4Uze9i60BScOPDTw
+	==
+X-Gm-Gg: AfdE7cmxnZ27FlBpe5gGgC3uUQARQIuQnHIqqqNwdUsvi4IQOM74AYnJfP1OtwKkOVi
+	/xYmmIMidunNnW4bLn96CJiko8ejst2hOIDmFsEVcgzLo4mRUCW6tigQB3tnRchEEw9W02L0oGW
+	kH/5wAkGZgXJc5OMpyo7mqsVs4RIJGW8DiX++/2KNVj/d0XiPtsXllgUmSUMwuzew2xy9Le5MBS
+	WAafoUD7UwxBm4RmoLL4HeN35MGZgPXmWsis42YZbIbUvIf5PLQBNZi2DVuUu776vxmHGLJb+9z
+	QQ755fyS3/0BaIzkpGICIcKgCB/crr6rrEosUY9CFSKCY4OeL0KLXva+SO+vm2BdUupqvuN+rxD
+	uYTsxVFsYV6Gg+ogwuLaBcL15H0nurAE8OAyGH2khPZ5l
+X-Received: by 2002:a05:6402:430e:b0:698:6620:d988 with SMTP id 4fb4d7f45d1cf-69a85b9b0d2mr662363a12.15.1783354694371;
+        Mon, 06 Jul 2026 09:18:14 -0700 (PDT)
+X-Received: by 2002:a05:6402:430e:b0:698:6620:d988 with SMTP id 4fb4d7f45d1cf-69a85b9b0d2mr662342a12.15.1783354693905;
+        Mon, 06 Jul 2026 09:18:13 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-69a19db05ecsm4225243a12.28.2026.07.06.09.18.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jul 2026 09:04:59 -0700 (PDT)
-From: Marco Crivellari <marco.crivellari@suse.com>
-To: linux-kernel@vger.kernel.org,
-	ceph-devel@vger.kernel.org
-Cc: Tejun Heo <tj@kernel.org>,
-	Lai Jiangshan <jiangshanlai@gmail.com>,
-	Frederic Weisbecker <frederic@kernel.org>,
-	Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
-	Marco Crivellari <marco.crivellari@suse.com>,
-	Michal Hocko <mhocko@suse.com>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Subject: [PATCH] ceph: Change system_unbound_wq with system_dfl_wq
-Date: Mon,  6 Jul 2026 18:04:50 +0200
-Message-ID: <20260706160450.370729-1-marco.crivellari@suse.com>
-X-Mailer: git-send-email 2.54.0
+        Mon, 06 Jul 2026 09:18:13 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: max.kellermann@ionos.com
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: [v2] net/ceph/messenger: support IPv6 Link-Local with scope identifier
+Date: Mon,  6 Jul 2026 16:18:11 +0000
+Message-Id: <20260706161811.1998210-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260706074402.3927113-1-max.kellermann@ionos.com>
+References: <20260706074402.3927113-1-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-system_wq (per-CPU) and system_unbound_wq (unbound) are the older
-workqueue name, replaced by system_{percpu|dfl}_wq.
-The new workqueues have been introduced by:
+Hi Max,
 
-  128ea9f6ccfb ("workqueue: Add system_percpu_wq and system_dfl_wq")
+NACK for now. Thanks for the patch, but I have some concerns
+that need a v2:
 
-Usage of older workqueues will now trigger a pr_warn_once() because they are
-marked as deprecated as per commit:
+  1. [critical] net/ceph/messenger.c:1241: IPv4 addresses with explicit ports no longer parse correctly
+     `ceph_pton()` now sets `*ipend = str + len`, where `len` extends to
+     the list delimiter (comma/end-of-string). For
+     `10.0.0.1:7001,10.0.0.2:7001`, `ipend` lands on the comma, not the
+     colon. The caller `ceph_parse_ips()` (line 1350) checks `*ipend ==
+     ':'` to find the port — it never will. Depending on how
+     `inet_pton_with_scope()` handles the trailing `:7001` in the
+     address string, this either silently defaults every monitor to
+     `CEPH_MON_PORT` or fails the parse entirely. Either way, existing
+     mount strings with explicit ports regress.
+     Suggested fix: Split the address from the port before passing to
+     `inet_pton_with_scope()`, or set `*ipend` to where the address
+     portion actually ends (before the colon) so the caller's
+     port-parsing logic still works.
+  2. [major] net/ceph/messenger.c:1241: init_net instead of caller's network namespace
+     The patch passes `&init_net` to `inet_pton_with_scope()`. The rest
+     of the file uses the caller's namespace: `ceph_messenger_init()`
+     saves `current->nsproxy->net_ns` into `msgr->net` (line 1695),
+     `sock_create_kern()` uses `read_pnet(&con->msgr->net)` (line 448),
+     and `dns_query()` uses `current->nsproxy->net_ns` (line 1271).
+     Resolving `%eth0` scope identifiers against `init_net` will
+     silently break in containers where the interface only exists in the
+     container's namespace — exactly where link-local addresses are most
+     commonly used.
+     Suggested fix: Use `current->nsproxy->net_ns` instead of
+     `&init_net`.
+  3. [nit] net/ceph/messenger.c:1252: Spaces instead of tab indentation
+     Line is indented with spaces instead of tabs. Kernel coding style
+     requires tabs.
+     Suggested fix: Replace the 4 spaces with a tab.
 
-  64d8eae3f895 ("workqueue: Add warnings and fallback if system_{unbound}_wq is used")
+New ipend placement breaks IPv4 port parsing (regression); init_net wrong namespace for container use.
 
-So change the used workqueue with the newer, keeping the same behavior.
 
-Suggested-by: Tejun Heo <tj@kernel.org>
-Signed-off-by: Marco Crivellari <marco.crivellari@suse.com>
----
- fs/ceph/mds_client.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 853bf698b356..f3c3116d8b4c 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -5742,7 +5742,7 @@ int ceph_mdsc_schedule_reset(struct ceph_mds_client *mdsc,
- 	strscpy(st->last_reason, msg, sizeof(st->last_reason));
- 	spin_unlock(&st->lock);
- 
--	if (WARN_ON_ONCE(!queue_work(system_unbound_wq, &mdsc->reset_work))) {
-+	if (WARN_ON_ONCE(!queue_work(system_dfl_wq, &mdsc->reset_work))) {
- 		spin_lock(&st->lock);
- 		st->phase = CEPH_CLIENT_RESET_IDLE;
- 		st->last_errno = -EALREADY;
 -- 
-2.54.0
+Alex Markuze
 
