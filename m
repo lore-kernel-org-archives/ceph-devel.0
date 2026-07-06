@@ -1,91 +1,91 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0155442EEAD
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51A204302EC
 	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 14:39:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783348748; cv=none; b=YpxR7V8zaxLetqKZNAIyFHwv3I3mK33wHRPnKrX8op2mAFThQBjdejwS8nHxOdANfGfv08jeIU3benmdMa7mCmlI5af3sVGnCG4oem8yE0G+63WbrZZSWA9sVkrHNXr8//4CWvdFCfcUND3wu8pnOAa+/1BrHR3zGW33P0NoNJk=
+	t=1783348748; cv=none; b=MXNriaIggnf5hKNeETbUO/SzDLwj9be/LaU3Hvf4NIEAKZqUGfAzqMx6gEvSreZ5epw4hErrfrqxZfVbo2JWi3cGf67FYHnx6GPoUjX0+PBTo0Ypr58UEJsHksLCPuofdu9vd+407sKCS6Ii3sjl3wzDVsRBh2P0DQeBOPhdvYY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1783348748; c=relaxed/simple;
-	bh=x70pi7Rp3h0u/ENLEeZhNPOitEbP8ztc3+w62aiEYGs=;
+	bh=V8a2kowkKIJ7i/7V1Bop7FahJS6nZ7k6xxo52Iiu0fM=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=g3NQ37WUH4lXQvy0x81huxBptEz4nIE8YcKx2mRX7TiCAIh7qKR5i71IuVswuqNPBsadx0yVvJFHCvJMOCxNRSEkXE/FS5l2jTYZ9Sq52EzujeNEeWfMOOFcvOsG2FNNOelDGs1dqgj/3tPEf2XTQKpQPuwysgVvzP/aKErYEuw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YFIkFmo2; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=UPKV65Fl; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=t3ndkC5A1HYyB46irrsVp/Be+09M+deMGXyunnkoKonxOUT8H/jMhZNqmNr36wwBmYQeGV6tR+f+w0ob/DqUDWzCXeV5lNqlXAVRnxnfJZql/d416LdLQr1XP0S1STB/FWTwcglRSncpPt1y2fvwHCllilSsMTrPhqM6WogJ054=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XQ//rqcK; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=crtYxf2n; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YFIkFmo2";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="UPKV65Fl"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XQ//rqcK";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="crtYxf2n"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1783348745;
+	s=mimecast20190719; t=1783348744;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=jxl13maPiKUVbQ3hOyrikNqTKn6BH1VinXqCXHqUd4A=;
-	b=YFIkFmo2EBXUjVpaiWhGdkwohzfo7vqo5lqpsxq2CgxoLq6yD2l9pe0NDqYK+Jfw27lOcf
-	aoAEibNxZMepgdfb2N4AuDEockD0QE/Ss9FB7c9AP3bXp7RzyfRcrEwcwpB5tAub9X9Yoo
-	jtTs67ACrfr2M7o2kmFfY0r7eGfjGHM=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=IkH1WEbdFhNc0rvUZFncNxCcS8wHyjsbeTXh8mKGvKo=;
+	b=XQ//rqcKDRR3fOU8MRYQpVNitjqnY8yUuaC+OB0eT84YCoqnjgMFcWWvStoRph5Xvjgs2e
+	Hho0XPoofriegV94WGe2FPIc5o/on4ln0WZT9IbVD2xa68xvoP+Y87z2Kxsc9Jxak0QYd/
+	Gg9bMmdNF5RpANq1eQMasoNd9exdpmo=
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
+ [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-522-w6r_fs0tPJ2E5xH3X2FjZg-1; Mon, 06 Jul 2026 10:39:03 -0400
-X-MC-Unique: w6r_fs0tPJ2E5xH3X2FjZg-1
-X-Mimecast-MFC-AGG-ID: w6r_fs0tPJ2E5xH3X2FjZg_1783348743
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c12e5e49423so186739166b.0
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 07:39:03 -0700 (PDT)
+ us-mta-654-xghf4jbPMnqG98Kbk85zrA-1; Mon, 06 Jul 2026 10:39:03 -0400
+X-MC-Unique: xghf4jbPMnqG98Kbk85zrA-1
+X-Mimecast-MFC-AGG-ID: xghf4jbPMnqG98Kbk85zrA_1783348742
+Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-c128cc0129cso223848166b.1
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 07:39:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=redhat.com; s=google; t=1783348742; x=1783953542; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=jxl13maPiKUVbQ3hOyrikNqTKn6BH1VinXqCXHqUd4A=;
-        b=UPKV65Flr4xMfdPRDl3gC9mrkaafOmmmlFpNT8lK4H/p0kywl8i2QHO05W8J8oZ2ds
-         AiT/2qTVgqh1gqz8HYBBRC1+UwGi8iI/NN+X+ovRVCeTHmlPTJRL3a73NLZZYB8ljOGz
-         oWDIHmUnB6C5MFB0Ai6ck+0+QzNPhzwoIVhPLlgAGZBO2qu56Q6l8TXXYbON0nFLShMg
-         ehhdCwKMIBB+jKhVjHdksxVcTYNKav+S4Di/YnbTkf/wmObANAvDKou1/DkpFdtCIY/d
-         EgRRR17tMrMoF1B3/YY2ZiNcrI1/rkSNr5IPekvbUfkNcqnwKKe70MEVj0FXTQ7IKLjY
-         IgtQ==
+         :message-id:reply-to;
+        bh=IkH1WEbdFhNc0rvUZFncNxCcS8wHyjsbeTXh8mKGvKo=;
+        b=crtYxf2nRW8MpuhSYmW5SzeP7BlCIYodqzZB9rzXuvruhJxyHOypWQKNfOLRJERVn1
+         y6aIkbigwx1j76IQqrlqiA6gJItfKfddM1nkefobH4g2rHlSFlV6kGXAgt70FGY1XQ1T
+         9yi3/0GWRdceAQDxcFig/FEn8T0l8EDf3ptdzeJNmpgFWESubU2Bsi9YKHArrRUkfvyD
+         zgCnvV1pGgoo6FFlXNY4oUXvvcUVTtM2yQYw8x8j/YjeaqZigYBRUIyzO07BG2PFotxq
+         q2rI/4wXF+OX2FrF+l3qcPzcawmp2VSWLWn3S/kN1Q2M7TWfWZKeLDNLGFxAQBKHzFas
+         hH8g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20251104; t=1783348742; x=1783953542;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=jxl13maPiKUVbQ3hOyrikNqTKn6BH1VinXqCXHqUd4A=;
-        b=Yrs/acm9P08R2C4szjNaMtt5lp6AzqBLrQk4oR+YqmTzSq/o2InVVoJ3clenIlb3iD
-         yBhpBctLFKKV+Tm+y62oEVS1cmKkI9YisaQ/Ls7x1QIAG+GY3BMB33hhys7IECxMnrCZ
-         aDBCj1ka7bBjSVNaRlz22D7TdL7FGUHf11cPMVM9xi5z+VPZ51LvUFEnLm3sp9Xnnwvb
-         evKRkUNvwZ9nZtX4ZbivuCQkBb4rsgosLxJp/V55vg9RuEDBH375GIrkM/UUP/i3GLqs
-         iL3YJde4WG8pIkq5ljk4bdnWDGPaFQZInPo9czf9SAquwvpgwoQZN8gmIelt5zptIwUX
-         u9Wg==
-X-Gm-Message-State: AOJu0Yw2e4WIhT5HltdCL8DvIuBmfUSIbubBSYVQyR2yJHEVcUHNfuhB
-	pt/Gw0nLtWv8zbWY1+xz0Jif4uesUBMxHgqpHSWTDWKbTL1TrLeyoezGBBYBdfj2AyQsuscMLgc
-	p39myo8Og5YLy89sHm1OnbfsL81g/VHitxbqQI71R/FQauYxlk0SN52/rQ7I0ot1QvwYRwTXkU0
-	H9Q2PgQrKLj5dxe4bHOrBncfIgdOUWd+0XnBQ0zX8SQuqKqjGfHg==
-X-Gm-Gg: AfdE7cl8SnRqHG/8+Whc8T2IqidkK+YwXDoG298ZGHdIDLEpXnNWG6wCqplao5Wjo4V
-	+VBADAuk8vKLUUjSj6bugLxXTK2gCKsYSY0fXDdB84ZXt5IYHdl03QoBWWIZC/Bzg5hNHVT6tJp
-	hLTwnEF6lGE+93BPKH4bDwKl+1N96pQTLKZtM4iFbnvfBXYkvS023fsRm1bwi9ICDdJ0CuLDu8V
-	ddPlZZCNHeDjdEomEyfL8uCHQWVMKXOJy8iqCVtCKFnPHSjbVBUUAZv48jzF7kTy5XMELQScf5l
-	22DjWY7OMDxZt7PFBQZZQ9/cjVk3aa2C4ADd88HDiVR5WOejVdvOTTAYDLT25joRl6EBZmkfCSn
-	CQ43LRj3aFsRiZtInBhAbHa434sY6oi787DI5eRNmUclE
-X-Received: by 2002:a17:906:3782:b0:c12:34f0:f7b8 with SMTP id a640c23a62f3a-c15a691d52emr33257766b.55.1783348742139;
-        Mon, 06 Jul 2026 07:39:02 -0700 (PDT)
-X-Received: by 2002:a17:906:3782:b0:c12:34f0:f7b8 with SMTP id a640c23a62f3a-c15a691d52emr33255666b.55.1783348741412;
-        Mon, 06 Jul 2026 07:39:01 -0700 (PDT)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c12b6054b99sm777268566b.8.2026.07.06.07.39.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+         :to:cc:subject:date:message-id:reply-to;
+        bh=IkH1WEbdFhNc0rvUZFncNxCcS8wHyjsbeTXh8mKGvKo=;
+        b=VmNuQmqtUJrUjq9HNZaPzMR1Kc0r2xGwcxnr5RTd/tJkJSj56tGbsp3AUTpQso3Esb
+         4CnJIkzBQHxpRwBxjgTdpmLRpHKrpPhfO2BuUl54EjIR5A8YDCz3i9C8YANq5ESiStL4
+         ZbMCyRnx9GsGDHWI5TKOU1SxLy/ydlyWnvYmEiGHH+DBYofWZhPIbFhxRZjPe10sadpX
+         BPoHik+gznfL5K6VmDDwC1s0z2i+H4bxUtLvLK+ktL7tA1k/MIyhTrq8e8owhO1qbcU+
+         vHcmx6bS7R2i8OkusmsFTf60W7Tc6xTXKHHefP/0jKOK6PcB/ped91wTOfwmr9dvZrlr
+         dRwA==
+X-Gm-Message-State: AOJu0Yz3ws9YyKl5ydTj2ixX5qB9KFr4xWGbnVg8gCIq/qeYekwHxLuT
+	rIPgi5+3rvlQcH+VaxIMi8F00ewZe8lHtgYq5aNaDtVCH8+BTke/ZVSDDbWJnQIO6LS1f26V0TG
+	EOh+oWzwHoQs/5rxUuPz2UExZG0YoSA/nUIqL2Tji5dmDhw/8FQvvxMkfSpbA/SWYz3Wq4pJu2R
+	FQUKTMWSzgDOhdwd0C1oTgTe29XdODoXPj0aQWUoVabrmhZzUzNA==
+X-Gm-Gg: AfdE7cliZzJ6DCANan6ab6xWnkwD7/6OzrjeUedVK3T6wgXNC9BF/MxnlRhpXoWo1NM
+	1HU0RtOAobmMY+QRtS4ZBUnYxbFfwN9+trkN7RclPDBMbwv+pDnGW8UHpR8ZFW0diSn+c7pEQDG
+	j5/eQfq8z6B4SxHoTEshI62f2WKxjBFGgTKF6nI1X1+0I6Vip2hB4k1KP+GckRr9ckeCTc6GMti
+	TJxM1lO61m7jkow9aMwQGAXfYf6AA+fXAjFXxhgkHFLA21RhdtNfLZ4imXGDmkHewR21pwq49tN
+	l9XzRI7fikd+nfCb8XFAp+kQt4BJJKyF9+KkARRA/+e58xJxTe04ytXl0QZHTLQC/Ft0Vxa8R1u
+	cls0kSR0XYiNE3DZvzjUNUmGCfAgeAIUIGC8aXAYM5hz1
+X-Received: by 2002:a17:907:c896:b0:bd8:bc4e:fb8c with SMTP id a640c23a62f3a-c12c9d3de9dmr593601466b.4.1783348740886;
         Mon, 06 Jul 2026 07:39:00 -0700 (PDT)
+X-Received: by 2002:a17:907:c896:b0:bd8:bc4e:fb8c with SMTP id a640c23a62f3a-c12c9d3de9dmr593596066b.4.1783348739356;
+        Mon, 06 Jul 2026 07:38:59 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c12b6054b99sm777268566b.8.2026.07.06.07.38.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Jul 2026 07:38:58 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com,
 	xiubo.li@clyso.com,
 	jlayton@kernel.org,
 	Alex Markuze <amarkuze@redhat.com>
-Subject: [PATCH v2 15/15] selftests: add Ceph BLOG smoke test and collection helpers
-Date: Mon,  6 Jul 2026 14:38:43 +0000
-Message-Id: <20260706143843.1980879-16-amarkuze@redhat.com>
+Subject: [PATCH v2 13/15] ceph: convert capability and snapshot paths to bout
+Date: Mon,  6 Jul 2026 14:38:41 +0000
+Message-Id: <20260706143843.1980879-14-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260706143843.1980879-1-amarkuze@redhat.com>
 References: <20260706143843.1980879-1-amarkuze@redhat.com>
@@ -97,694 +97,1358 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add kselftests: blog_smoke_test.sh (dual-mount isolation, enable/
-disable), blog_collect.sh, blog_analyze.sh, and kselftest wiring.
-
-Add F: pattern for tools/testing/selftests/ceph_blog/ to the CephFS
-MAINTAINERS entry.
+Replace dout()/doutc() with bout()/boutc() in caps.c (cap grant,
+release, flush, revoke) and snap.c (snap handling, cap snap queue).
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- MAINTAINERS                                   |   1 +
- tools/testing/selftests/Makefile              |   1 +
- tools/testing/selftests/ceph_blog/Makefile    |   7 +
- .../selftests/ceph_blog/blog_analyze.sh       | 124 ++++++
- .../selftests/ceph_blog/blog_collect.sh       | 116 ++++++
- .../selftests/ceph_blog/blog_smoke_test.sh    | 363 ++++++++++++++++++
- tools/testing/selftests/ceph_blog/config      |   2 +
- 7 files changed, 614 insertions(+)
- create mode 100644 tools/testing/selftests/ceph_blog/Makefile
- create mode 100644 tools/testing/selftests/ceph_blog/blog_analyze.sh
- create mode 100644 tools/testing/selftests/ceph_blog/blog_collect.sh
- create mode 100644 tools/testing/selftests/ceph_blog/blog_smoke_test.sh
- create mode 100644 tools/testing/selftests/ceph_blog/config
+ fs/ceph/caps.c | 252 ++++++++++++++++++++++++++-----------------------
+ fs/ceph/snap.c |  66 ++++++-------
+ 2 files changed, 165 insertions(+), 153 deletions(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 441b556b9671..9a7265ce7de5 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -5909,6 +5909,7 @@ B:	https://tracker.ceph.com/
- T:	git https://github.com/ceph/ceph-client.git
- F:	Documentation/filesystems/ceph.rst
- F:	fs/ceph/
-+F:	tools/testing/selftests/ceph_blog/
- F:	tools/testing/selftests/filesystems/ceph/
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 4b37d9ffdf7f..a10a9d1ec76e 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -188,7 +188,7 @@ static void __ceph_unreserve_caps(struct ceph_mds_client *mdsc, int nr_caps)
+ 			mdsc->caps_avail_count += nr_caps;
+ 		}
  
- CERTIFICATE HANDLING
-diff --git a/tools/testing/selftests/Makefile b/tools/testing/selftests/Makefile
-index ab254ae793a9..d7e0138fcf3a 100644
---- a/tools/testing/selftests/Makefile
-+++ b/tools/testing/selftests/Makefile
-@@ -7,6 +7,7 @@ TARGETS += bpf
- TARGETS += breakpoints
- TARGETS += cachestat
- TARGETS += capabilities
-+TARGETS += ceph_blog
- TARGETS += cgroup
- TARGETS += clone3
- TARGETS += connector
-diff --git a/tools/testing/selftests/ceph_blog/Makefile b/tools/testing/selftests/ceph_blog/Makefile
-new file mode 100644
-index 000000000000..39f6d0c8990c
---- /dev/null
-+++ b/tools/testing/selftests/ceph_blog/Makefile
-@@ -0,0 +1,7 @@
-+# SPDX-License-Identifier: GPL-2.0
-+
-+TEST_PROGS := blog_smoke_test.sh
-+TEST_PROGS += blog_collect.sh
-+TEST_PROGS += blog_analyze.sh
-+
-+include ../lib.mk
-diff --git a/tools/testing/selftests/ceph_blog/blog_analyze.sh b/tools/testing/selftests/ceph_blog/blog_analyze.sh
-new file mode 100644
-index 000000000000..1f0bf049fbb9
---- /dev/null
-+++ b/tools/testing/selftests/ceph_blog/blog_analyze.sh
-@@ -0,0 +1,124 @@
-+#!/bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# blog_analyze.sh - Analyze BLOG trace snapshots
-+#
-+# Parses the output of blog_collect.sh or blog_smoke_test.sh and
-+# produces a summary: entry counts, source-file breakdown, timeline,
-+# and per-client statistics.
-+#
-+# Usage:
-+#   ./blog_analyze.sh <snapshot_dir>
-+#   ./blog_analyze.sh /tmp/blog_snapshot_20260413_120000
-+#
-+set -euo pipefail
-+
-+DIR="${1:?Usage: $0 <snapshot_dir>}"
-+[[ -d "$DIR" ]] || { echo "Not a directory: $DIR"; exit 1; }
-+
-+ENTRIES="$DIR/entries.txt"
-+SOURCES="$DIR/sources.txt"
-+CLIENTS="$DIR/clients.txt"
-+STATS="$DIR/stats.txt"
-+
-+echo "=========================================="
-+echo " BLOG Trace Analysis"
-+echo " Source: $DIR"
-+echo "=========================================="
-+echo ""
-+
-+# ---------- entry summary ----------
-+if [[ -f "$ENTRIES" ]]; then
-+    TOTAL=$(wc -l < "$ENTRIES")
-+    echo "--- Entries ---"
-+    echo "  Total lines:  $TOTAL"
-+
-+    if (( TOTAL > 0 )); then
-+        FIRST=$(head -1 "$ENTRIES" | awk '{print $1, $2}')
-+        LAST=$(tail -1 "$ENTRIES" | awk '{print $1, $2}')
-+        echo "  First entry:  $FIRST"
-+        echo "  Last entry:   $LAST"
-+
-+        echo ""
-+        echo "  Top 10 source locations:"
-+        # entries format: "YYYY-MM-DD HH:MM:SS.mmm [file:func:line] message"
-+        grep -oE '\[[^]]+\]' "$ENTRIES" 2>/dev/null | sed 's/^\[//;s/\]$//' | \
-+            sort | uniq -c | sort -rn | head -10 | \
-+            while read -r count loc; do
-+                printf "    %6d  %s\n" "$count" "$loc"
-+            done
-+
-+        echo ""
-+        echo "  Top 10 most frequent messages (first 60 chars):"
-+        # strip timestamp and source prefix, take first 60 chars
-+        sed 's/^[0-9-]* [0-9:.]* \[[^]]*\] //' "$ENTRIES" | \
-+            cut -c1-60 | sort | uniq -c | sort -rn | head -10 | \
-+            while read -r count msg; do
-+                printf "    %6d  %s\n" "$count" "$msg"
-+            done
-+
-+        echo ""
-+        echo "  Per-second entry rate:"
-+        # extract HH:MM:SS, count per second
-+        awk '{print $1" "$2}' "$ENTRIES" | \
-+            sed 's/\.[0-9]*//' | sort | uniq -c | \
-+            awk '{sum+=$1; count++} END {
-+                if(count>0) printf "    avg %.1f entries/sec over %d seconds\n", sum/count, count
-+            }'
-+    fi
-+else
-+    echo "  (no entries.txt found)"
-+fi
-+
-+echo ""
-+
-+# ---------- source summary ----------
-+if [[ -f "$SOURCES" ]]; then
-+    echo "--- Registered Sources ---"
-+    SOURCE_COUNT=$(grep -c '^ID ' "$SOURCES" 2>/dev/null || echo 0)
-+    echo "  Total registered: $SOURCE_COUNT"
-+
-+    if (( SOURCE_COUNT > 0 )); then
-+        echo ""
-+        echo "  By file:"
-+        grep '^ID ' "$SOURCES" | \
-+            sed 's/^ID [0-9]*: //' | cut -d: -f1 | \
-+            sort | uniq -c | sort -rn | \
-+            while read -r count file; do
-+                printf "    %4d  %s\n" "$count" "$file"
-+            done
-+    fi
-+else
-+    echo "  (no sources.txt found)"
-+fi
-+
-+echo ""
-+
-+# ---------- client summary ----------
-+if [[ -f "$CLIENTS" ]]; then
-+    echo "--- Registered Clients ---"
-+    CLIENT_COUNT=$(grep -c '^Client ID' "$CLIENTS" 2>/dev/null || echo 0)
-+    echo "  Total registered: $CLIENT_COUNT"
-+
-+    if (( CLIENT_COUNT > 0 )); then
-+        grep -A2 '^Client ID' "$CLIENTS" | \
-+            while IFS= read -r line; do
-+                echo "    $line"
-+            done
-+    fi
-+else
-+    echo "  (no clients.txt found)"
-+fi
-+
-+echo ""
-+
-+# ---------- stats summary ----------
-+if [[ -f "$STATS" ]]; then
-+    echo "--- Logger Statistics ---"
-+    sed 's/^/    /' "$STATS"
-+else
-+    echo "  (no stats.txt found)"
-+fi
-+
-+echo ""
-+echo "=========================================="
-diff --git a/tools/testing/selftests/ceph_blog/blog_collect.sh b/tools/testing/selftests/ceph_blog/blog_collect.sh
-new file mode 100644
-index 000000000000..9401724bf43d
---- /dev/null
-+++ b/tools/testing/selftests/ceph_blog/blog_collect.sh
-@@ -0,0 +1,116 @@
-+#!/bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# blog_collect.sh - Collect BLOG debugfs snapshots from a mounted CephFS
-+#
-+# Finds the Ceph BLOG debugfs directory, snapshots all files, and
-+# optionally tails the entries file for live monitoring.
-+#
-+# Usage:
-+#   ./blog_collect.sh [snapshot|tail|clear|stats|sources|clients] [-d blog_dir] [-o dir]
-+#
-+set -euo pipefail
-+
-+ACTION="${1:-snapshot}"
-+OUTDIR=""
-+TARGET_BLOG_DIR="${BLOG_DIR:-}"
-+
-+shift || true
-+while getopts "d:o:" opt; do
-+    case $opt in
-+        d) TARGET_BLOG_DIR="$OPTARG" ;;
-+        o) OUTDIR="$OPTARG" ;;
-+        *) ;;
-+    esac
-+done
-+
-+DEBUGFS_BASE="/sys/kernel/debug/ceph"
-+shopt -s nullglob
-+
-+find_blog_dir() {
-+    local dirs=("$DEBUGFS_BASE"/*/blog)
-+
-+    if [[ -n "$TARGET_BLOG_DIR" ]]; then
-+        [[ -d "$TARGET_BLOG_DIR" ]] || {
-+            echo "ERROR: BLOG debugfs directory does not exist: $TARGET_BLOG_DIR" >&2
-+            return 1
-+        }
-+        echo "$TARGET_BLOG_DIR"
-+        return 0
-+    fi
-+
-+    if (( ${#dirs[@]} == 0 )); then
-+        echo "ERROR: No BLOG debugfs directory found under $DEBUGFS_BASE" >&2
-+        echo "Ensure CephFS is mounted and CONFIG_CEPH_FS=y|m" >&2
-+        return 1
-+    fi
-+
-+    if (( ${#dirs[@]} > 1 )); then
-+        echo "ERROR: Multiple BLOG debugfs directories found:" >&2
-+        printf '  %s\n' "${dirs[@]}" >&2
-+        echo "Select one with -d <dir> or BLOG_DIR=<dir>." >&2
-+        return 1
-+    fi
-+
-+    echo "${dirs[0]}"
-+}
-+
-+BLOG_DIR=$(find_blog_dir)
-+echo "BLOG debugfs: $BLOG_DIR"
-+
-+case "$ACTION" in
-+    snapshot)
-+        OUTDIR="${OUTDIR:-/tmp/blog_snapshot_$(date +%Y%m%d_%H%M%S)}"
-+        mkdir -p "$OUTDIR"
-+        for f in enabled entries stats sources clients; do
-+            [[ -r "$BLOG_DIR/$f" ]] && cat "$BLOG_DIR/$f" > "$OUTDIR/$f.txt"
-+        done
-+        echo "Snapshot saved to $OUTDIR/"
-+        if [[ -f "$OUTDIR/enabled.txt" ]]; then
-+            echo "  enabled:  $(tr -d '[:space:]' < "$OUTDIR/enabled.txt")"
-+        fi
-+        echo "  entries:  $(wc -l < "$OUTDIR/entries.txt") lines"
-+        echo "  sources:  $(grep -c '^ID ' "$OUTDIR/sources.txt" 2>/dev/null || echo 0)"
-+        echo "  clients:  $(grep -c '^FSID:' "$OUTDIR/clients.txt" 2>/dev/null || echo 0)"
-+        ;;
-+
-+    tail)
-+        echo "--- Live BLOG entries (Ctrl-C to stop) ---"
-+        # Show new entries by polling; entries file is a seq_file so we
-+        # re-read the whole thing each interval and diff.
-+        PREV=$(mktemp)
-+        CURR=""
-+        trap 'rm -f "$PREV" "$CURR"' EXIT INT TERM
-+        cat "$BLOG_DIR/entries" > "$PREV"
-+        while true; do
-+            sleep 1
-+            CURR=$(mktemp)
-+            cat "$BLOG_DIR/entries" > "$CURR"
-+            diff "$PREV" "$CURR" | grep '^>' | sed 's/^> //' || true
-+            mv "$CURR" "$PREV"
-+            CURR=""
-+        done
-+        ;;
-+
-+    clear)
-+        echo "clear" > "$BLOG_DIR/clear"
-+        echo "BLOG entries cleared."
-+        ;;
-+
-+    stats)
-+        cat "$BLOG_DIR/stats"
-+        ;;
-+
-+    sources)
-+        cat "$BLOG_DIR/sources"
-+        ;;
-+
-+    clients)
-+        cat "$BLOG_DIR/clients"
-+        ;;
-+
-+    *)
-+        echo "Usage: $0 [snapshot|tail|clear|stats|sources|clients] [-d blog_dir] [-o dir]"
-+        exit 1
-+        ;;
-+esac
-diff --git a/tools/testing/selftests/ceph_blog/blog_smoke_test.sh b/tools/testing/selftests/ceph_blog/blog_smoke_test.sh
-new file mode 100644
-index 000000000000..1623630261c2
---- /dev/null
-+++ b/tools/testing/selftests/ceph_blog/blog_smoke_test.sh
-@@ -0,0 +1,363 @@
-+#!/bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# blog_smoke_test.sh - Per-superblock smoke test for Ceph BLOG
-+#
-+# Verifies that BLOG stays disabled by default, that enabling BLOG on one
-+# noshare-mounted CephFS instance only affects that instance, and that a second
-+# noshare mount remains quiet until it is enabled separately.
-+#
-+# Usage:
-+#   ./blog_smoke_test.sh -m <mon_addr> [-k <secret>] [-n <client_name>]
-+#                        [-p <mount_a>] [-q <mount_b>] [-o <output_dir>]
-+#
-+# Environment variables:
-+#   CEPH_MON      - monitor address(es)
-+#   CEPH_SECRET   - CephX secret key
-+#   CEPH_CLIENT   - client name, default "admin"
-+#   CEPH_MOUNT    - mount A, default "/mnt/ceph_blog_test_a"
-+#   CEPH_MOUNT_B  - mount B, default "${CEPH_MOUNT}_b"
-+#   BLOG_OUTPUT   - output directory for collected traces
-+#
-+set -euo pipefail
-+shopt -s nullglob
-+
-+MON="${CEPH_MON:-}"
-+SECRET="${CEPH_SECRET:-}"
-+CLIENT="${CEPH_CLIENT:-admin}"
-+MNT_A="${CEPH_MOUNT:-/mnt/ceph_blog_test_a}"
-+MNT_B="${CEPH_MOUNT_B:-}"
-+OUTDIR="${BLOG_OUTPUT:-/tmp/blog_test_$(date +%Y%m%d_%H%M%S)}"
-+
-+TMP_STATE_DIR=""
-+DEBUGFS_A=""
-+DEBUGFS_B=""
-+MOUNTED_A=0
-+MOUNTED_B=0
-+
-+RED='\033[0;31m'
-+GREEN='\033[0;32m'
-+YELLOW='\033[0;33m'
-+NC='\033[0m'
-+
-+pass()  { echo -e "  ${GREEN}PASS${NC}  $*"; }
-+fail()  { echo -e "  ${RED}FAIL${NC}  $*"; }
-+info()  { echo -e "  ${YELLOW}----${NC}  $*"; }
-+die()   { echo -e "${RED}ERROR:${NC} $*" >&2; exit 1; }
-+
-+usage() {
-+	sed -n '/^# Usage:/,/^$/p' "$0" | sed 's/^# //' >&2
-+	exit 1
-+}
-+
-+while getopts "m:k:n:p:q:o:h" opt; do
-+	case $opt in
-+		m) MON="$OPTARG" ;;
-+		k) SECRET="$OPTARG" ;;
-+		n) CLIENT="$OPTARG" ;;
-+		p) MNT_A="$OPTARG" ;;
-+		q) MNT_B="$OPTARG" ;;
-+		o) OUTDIR="$OPTARG" ;;
-+		h) usage ;;
-+		*) usage ;;
-+	esac
-+done
-+
-+[[ -z "$MON" ]] && die "Monitor address required (-m or CEPH_MON)"
-+[[ $(id -u) -ne 0 ]] && die "Must run as root"
-+[[ -z "$MNT_B" ]] && MNT_B="${MNT_A}_b"
-+
-+cleanup() {
-+	info "Cleaning up..."
-+	if (( MOUNTED_B )); then
-+		umount "$MNT_B" 2>/dev/null || true
-+	fi
-+	if (( MOUNTED_A )); then
-+		umount "$MNT_A" 2>/dev/null || true
-+	fi
-+	[[ -n "$TMP_STATE_DIR" && -d "$TMP_STATE_DIR" ]] && rm -rf "$TMP_STATE_DIR"
-+}
-+trap cleanup EXIT
-+
-+assert_eq() {
-+	local got="$1"
-+	local want="$2"
-+	local msg="$3"
-+
-+	if [[ "$got" != "$want" ]]; then
-+		fail "$msg: expected '$want', got '$got'"
-+		exit 1
-+	fi
-+	pass "$msg: $got"
-+}
-+
-+assert_gt_zero() {
-+	local value="$1"
-+	local msg="$2"
-+
-+	if [[ "$value" -le 0 ]]; then
-+		fail "$msg: expected > 0, got '$value'"
-+		exit 1
-+	fi
-+	pass "$msg: $value"
-+}
-+
-+have_kconfig() {
-+	local pattern="$1"
-+
-+	grep -qE "$pattern" /boot/config-"$(uname -r)" 2>/dev/null ||
-+		zgrep -qE "$pattern" /proc/config.gz 2>/dev/null
-+}
-+
-+capture_blog_dirs() {
-+	local dest="$1"
-+	local dirs=(/sys/kernel/debug/ceph/*/blog)
-+
-+	: > "$dest"
-+	if (( ${#dirs[@]} > 0 )); then
-+		printf '%s\n' "${dirs[@]}" | sort -u > "$dest"
-+	fi
-+}
-+
-+find_new_blog_dir() {
-+	local before="$1"
-+	local after="$2"
-+	local label="$3"
-+	local new_dirs=()
-+
-+	mapfile -t new_dirs < <(comm -13 "$before" "$after" | sed '/^$/d')
-+	if (( ${#new_dirs[@]} != 1 )); then
-+		echo "Expected exactly one new BLOG debugfs directory for $label" >&2
-+		echo "Before:" >&2
-+		cat "$before" >&2
-+		echo "After:" >&2
-+		cat "$after" >&2
-+		return 1
-+	fi
-+
-+	echo "${new_dirs[0]}"
-+}
-+
-+mount_ceph() {
-+	local mnt="$1"
-+	local opts="name=$CLIENT,noshare"
-+
-+	mkdir -p "$mnt"
-+	[[ -n "$SECRET" ]] && opts="${opts},secret=$SECRET"
-+	mount -t ceph "$MON":/ "$mnt" -o "$opts"
-+}
-+
-+ensure_blog_dir() {
-+	local dir="$1"
-+
-+	[[ -d "$dir" ]] || die "BLOG debugfs directory missing: $dir"
-+	[[ -r "$dir/entries" ]] || die "BLOG entries file missing: $dir/entries"
-+	[[ -r "$dir/stats" ]] || die "BLOG stats file missing: $dir/stats"
-+	[[ -r "$dir/sources" ]] || die "BLOG sources file missing: $dir/sources"
-+	[[ -r "$dir/clients" ]] || die "BLOG clients file missing: $dir/clients"
-+	[[ -w "$dir/enabled" ]] || die "BLOG enabled file missing: $dir/enabled"
-+}
-+
-+read_enabled() {
-+	tr -d '[:space:]' < "$1/enabled"
-+}
-+
-+set_blog_enabled() {
-+	local dir="$1"
-+	local value="$2"
-+	local actual
-+
-+	echo "$value" > "$dir/enabled"
-+	actual="$(read_enabled "$dir")"
-+	case "$value" in
-+		0)
-+			[[ "$actual" == "N" || "$actual" == "0" ]] ||
-+				die "Failed to disable BLOG in $dir (got '$actual')"
-+			;;
-+		1)
-+			[[ "$actual" == "Y" || "$actual" == "1" ]] ||
-+				die "Failed to enable BLOG in $dir (got '$actual')"
-+			;;
-+		*)
-+			die "Unsupported BLOG enabled value: $value"
-+			;;
-+	esac
-+}
-+
-+clear_blog() {
-+	local dir="$1"
-+
-+	echo "clear" > "$dir/clear"
-+}
-+
-+count_entries() {
-+	local dir="$1"
-+	local count
-+
-+	count="$(grep -Ec '^[0-9]{4}-[0-9]{2}-[0-9]{2} ' "$dir/entries" 2>/dev/null || true)"
-+	echo "${count:-0}"
-+}
-+
-+count_sources() {
-+	local dir="$1"
-+	local count
-+
-+	count="$(grep -c '^ID ' "$dir/sources" 2>/dev/null || true)"
-+	echo "${count:-0}"
-+}
-+
-+count_contexts() {
-+	local dir="$1"
-+	local count
-+
-+	count="$(awk -F': ' '/Total contexts allocated/{print $2; exit}' \
-+		"$dir/stats" 2>/dev/null || true)"
-+	echo "${count:-0}"
-+}
-+
-+count_mount_clients() {
-+	local dir="$1"
-+	local count
-+
-+	count="$(grep -c '^FSID:' "$dir/clients" 2>/dev/null || true)"
-+	echo "${count:-0}"
-+}
-+
-+require_timestamped_entries() {
-+	local dir="$1"
-+	local msg="$2"
-+
-+	if ! grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2} ' "$dir/entries"; then
-+		fail "$msg: no timestamped BLOG entries found"
-+		exit 1
-+	fi
-+	pass "$msg"
-+}
-+
-+snapshot_blog() {
-+	local dir="$1"
-+	local tag="$2"
-+	local dest="$OUTDIR/$tag"
-+
-+	mkdir -p "$dest"
-+	for f in enabled entries stats sources clients; do
-+		cat "$dir/$f" > "$dest/$f.txt"
-+	done
-+}
-+
-+run_mount_io() {
-+	local mnt="$1"
-+	local tag="$2"
-+	local root="$mnt/blog_smoke_$tag"
-+
-+	rm -rf "$root"
-+	mkdir -p "$root/subdir"
-+	printf 'ceph-blog-%s %s\n' "$tag" "$(date +%s%N)" > "$root/file.txt"
-+	cat "$root/file.txt" > /dev/null
-+	stat "$root/file.txt" > /dev/null
-+	mv "$root/file.txt" "$root/subdir/file.txt"
-+	ln -sf "$root/subdir/file.txt" "$root/link.txt"
-+	readlink "$root/link.txt" > /dev/null
-+	ls -l "$root" > /dev/null
-+	rm -f "$root/link.txt" "$root/subdir/file.txt"
-+	rmdir "$root/subdir"
-+	rmdir "$root"
-+}
-+
-+echo "=========================================="
-+echo " Ceph BLOG Per-Superblock Smoke Test"
-+echo "=========================================="
-+echo ""
-+
-+KSFT_SKIP=4
-+info "Checking kernel BLOG support..."
-+if ! have_kconfig 'CONFIG_CEPH_FS=(y|m)'; then
-+	info "SKIP: Cannot confirm CONFIG_CEPH_FS=y|m"
-+	exit "$KSFT_SKIP"
-+fi
-+if ! have_kconfig 'CONFIG_DEBUG_FS=y'; then
-+	info "SKIP: Cannot confirm CONFIG_DEBUG_FS=y"
-+	exit "$KSFT_SKIP"
-+fi
-+if have_kconfig 'CONFIG_CEPH_FS=m'; then
-+	modprobe ceph 2>/dev/null || die "Failed to load ceph module"
-+fi
-+
-+mkdir -p "$OUTDIR" "$MNT_A" "$MNT_B"
-+TMP_STATE_DIR="$(mktemp -d /tmp/ceph_blog_smoke.XXXXXX)"
-+
-+capture_blog_dirs "$TMP_STATE_DIR/before_a"
-+info "Mounting CephFS A with noshare: $MON -> $MNT_A"
-+mount_ceph "$MNT_A" || die "Mount A failed"
-+MOUNTED_A=1
-+capture_blog_dirs "$TMP_STATE_DIR/after_a"
-+DEBUGFS_A="$(find_new_blog_dir "$TMP_STATE_DIR/before_a" \
-+	"$TMP_STATE_DIR/after_a" "mount A")" || die "Failed to identify BLOG dir for mount A"
-+ensure_blog_dir "$DEBUGFS_A"
-+pass "Mount A BLOG debugfs: $DEBUGFS_A"
-+
-+capture_blog_dirs "$TMP_STATE_DIR/before_b"
-+info "Mounting CephFS B with noshare: $MON -> $MNT_B"
-+mount_ceph "$MNT_B" || die "Mount B failed"
-+MOUNTED_B=1
-+capture_blog_dirs "$TMP_STATE_DIR/after_b"
-+DEBUGFS_B="$(find_new_blog_dir "$TMP_STATE_DIR/before_b" \
-+	"$TMP_STATE_DIR/after_b" "mount B")" || die "Failed to identify BLOG dir for mount B"
-+ensure_blog_dir "$DEBUGFS_B"
-+pass "Mount B BLOG debugfs: $DEBUGFS_B"
-+
-+assert_eq "$(count_mount_clients "$DEBUGFS_A")" 1 "mount A clients view is local"
-+assert_eq "$(count_mount_clients "$DEBUGFS_B")" 1 "mount B clients view is local"
-+
-+info "Phase 1: BLOG disabled by default on both mounts"
-+set_blog_enabled "$DEBUGFS_A" 0
-+set_blog_enabled "$DEBUGFS_B" 0
-+run_mount_io "$MNT_A" "disabled_a"
-+assert_eq "$(count_entries "$DEBUGFS_A")" 0 "mount A stays quiet when disabled"
-+assert_eq "$(count_entries "$DEBUGFS_B")" 0 "mount B stays quiet while mount A runs"
-+snapshot_blog "$DEBUGFS_A" "00_disabled_a"
-+snapshot_blog "$DEBUGFS_B" "00_disabled_b"
-+
-+info "Phase 2: Enable BLOG only on mount A"
-+set_blog_enabled "$DEBUGFS_A" 1
-+set_blog_enabled "$DEBUGFS_B" 0
-+clear_blog "$DEBUGFS_A"
-+clear_blog "$DEBUGFS_B"
-+run_mount_io "$MNT_A" "enabled_a"
-+
-+A_ENTRIES="$(count_entries "$DEBUGFS_A")"
-+B_ENTRIES="$(count_entries "$DEBUGFS_B")"
-+assert_gt_zero "$A_ENTRIES" "mount A produces BLOG entries when enabled"
-+assert_eq "$B_ENTRIES" 0 "mount B remains quiet while only mount A is enabled"
-+assert_gt_zero "$(count_sources "$DEBUGFS_A")" "mount A registers BLOG sources"
-+assert_gt_zero "$(count_contexts "$DEBUGFS_A")" "mount A allocates BLOG contexts"
-+require_timestamped_entries "$DEBUGFS_A" "mount A entries deserialize with timestamps"
-+snapshot_blog "$DEBUGFS_A" "01_enabled_a"
-+snapshot_blog "$DEBUGFS_B" "01_enabled_a_other_mount"
-+
-+info "Phase 3: Disable mount A, enable mount B"
-+A_BEFORE_B="$A_ENTRIES"
-+set_blog_enabled "$DEBUGFS_A" 0
-+set_blog_enabled "$DEBUGFS_B" 1
-+clear_blog "$DEBUGFS_B"
-+run_mount_io "$MNT_B" "enabled_b"
-+
-+A_AFTER_B="$(count_entries "$DEBUGFS_A")"
-+B_AFTER_B="$(count_entries "$DEBUGFS_B")"
-+assert_eq "$A_AFTER_B" "$A_BEFORE_B" "mount A entries stay unchanged while mount B runs"
-+assert_gt_zero "$B_AFTER_B" "mount B produces BLOG entries when enabled"
-+assert_gt_zero "$(count_sources "$DEBUGFS_B")" "mount B registers BLOG sources"
-+assert_gt_zero "$(count_contexts "$DEBUGFS_B")" "mount B allocates BLOG contexts"
-+require_timestamped_entries "$DEBUGFS_B" "mount B entries deserialize with timestamps"
-+snapshot_blog "$DEBUGFS_A" "02_enabled_b_other_mount"
-+snapshot_blog "$DEBUGFS_B" "02_enabled_b"
-+
-+echo ""
-+echo "=========================================="
-+echo " Results Summary"
-+echo "=========================================="
-+pass "Default-off behavior verified on both mounts"
-+pass "Enable-on-A only behavior verified"
-+pass "Cross-mount non-interference verified with noshare"
-+pass "Enable-on-B behavior verified"
-+info "Traces saved to: $OUTDIR/"
-diff --git a/tools/testing/selftests/ceph_blog/config b/tools/testing/selftests/ceph_blog/config
-new file mode 100644
-index 000000000000..7c5706ed8be8
---- /dev/null
-+++ b/tools/testing/selftests/ceph_blog/config
-@@ -0,0 +1,2 @@
-+CONFIG_CEPH_FS=m
-+CONFIG_DEBUG_FS=y
+-		doutc(mdsc->fsc->client,
++		boutc(mdsc->fsc->client,
+ 		      "caps %d = %d used + %d resv + %d avail\n",
+ 		      mdsc->caps_total_count, mdsc->caps_use_count,
+ 		      mdsc->caps_reserve_count, mdsc->caps_avail_count);
+@@ -215,7 +215,7 @@ int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+ 	struct ceph_mds_session *s;
+ 	LIST_HEAD(newcaps);
+ 
+-	doutc(cl, "ctx=%p need=%d\n", ctx, need);
++	boutc(cl, "ctx=%p need=%d\n", ctx, need);
+ 
+ 	/* first reserve any caps that are already allocated */
+ 	spin_lock(&mdsc->caps_list_lock);
+@@ -301,7 +301,7 @@ int ceph_reserve_caps(struct ceph_mds_client *mdsc,
+ 
+ 	spin_unlock(&mdsc->caps_list_lock);
+ 
+-	doutc(cl, "ctx=%p %d = %d used + %d resv + %d avail\n", ctx,
++	boutc(cl, "ctx=%p %d = %d used + %d resv + %d avail\n", ctx,
+ 	      mdsc->caps_total_count, mdsc->caps_use_count,
+ 	      mdsc->caps_reserve_count, mdsc->caps_avail_count);
+ 	return err;
+@@ -315,7 +315,7 @@ void ceph_unreserve_caps(struct ceph_mds_client *mdsc,
+ 	if (!ctx->count)
+ 		return;
+ 
+-	doutc(cl, "ctx=%p count=%d\n", ctx, ctx->count);
++	boutc(cl, "ctx=%p count=%d\n", ctx, ctx->count);
+ 	spin_lock(&mdsc->caps_list_lock);
+ 	__ceph_unreserve_caps(mdsc, ctx->count);
+ 	ctx->count = 0;
+@@ -364,7 +364,7 @@ struct ceph_cap *ceph_get_cap(struct ceph_mds_client *mdsc,
+ 	}
+ 
+ 	spin_lock(&mdsc->caps_list_lock);
+-	doutc(cl, "ctx=%p (%d) %d = %d used + %d resv + %d avail\n", ctx,
++	boutc(cl, "ctx=%p (%d) %d = %d used + %d resv + %d avail\n", ctx,
+ 	      ctx->count, mdsc->caps_total_count, mdsc->caps_use_count,
+ 	      mdsc->caps_reserve_count, mdsc->caps_avail_count);
+ 	BUG_ON(!ctx->count);
+@@ -390,7 +390,7 @@ void ceph_put_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap)
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 
+ 	spin_lock(&mdsc->caps_list_lock);
+-	doutc(cl, "%p %d = %d used + %d resv + %d avail\n", cap,
++	boutc(cl, "%p %d = %d used + %d resv + %d avail\n", cap,
+ 	      mdsc->caps_total_count, mdsc->caps_use_count,
+ 	      mdsc->caps_reserve_count, mdsc->caps_avail_count);
+ 	mdsc->caps_use_count--;
+@@ -503,7 +503,7 @@ static void __cap_set_timeouts(struct ceph_mds_client *mdsc,
+ 
+ 	ci->i_hold_caps_max = round_jiffies(jiffies +
+ 					    opt->caps_wanted_delay_max * HZ);
+-	doutc(mdsc->fsc->client, "%p %llx.%llx %lu\n", inode,
++	boutc(mdsc->fsc->client, "%p %llx.%llx %lu\n", inode,
+ 	      ceph_vinop(inode), ci->i_hold_caps_max - jiffies);
+ }
+ 
+@@ -520,7 +520,7 @@ static void __cap_delay_requeue(struct ceph_mds_client *mdsc,
+ {
+ 	struct inode *inode = &ci->netfs.inode;
+ 
+-	doutc(mdsc->fsc->client, "%p %llx.%llx flags 0x%lx at %lu\n",
++	boutc(mdsc->fsc->client, "%p %llx.%llx flags 0x%lx at %lu\n",
+ 	      inode, ceph_vinop(inode), ci->i_ceph_flags,
+ 	      ci->i_hold_caps_max);
+ 	if (!mdsc->stopping) {
+@@ -547,7 +547,7 @@ static void __cap_delay_requeue_front(struct ceph_mds_client *mdsc,
+ {
+ 	struct inode *inode = &ci->netfs.inode;
+ 
+-	doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
++	boutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 	spin_lock(&mdsc->cap_delay_lock);
+ 	set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
+ 	if (!list_empty(&ci->i_cap_delay_list))
+@@ -566,7 +566,7 @@ static void __cap_delay_cancel(struct ceph_mds_client *mdsc,
+ {
+ 	struct inode *inode = &ci->netfs.inode;
+ 
+-	doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
++	boutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 	if (list_empty(&ci->i_cap_delay_list))
+ 		return;
+ 	spin_lock(&mdsc->cap_delay_lock);
+@@ -605,7 +605,7 @@ static void __check_cap_issue(struct ceph_inode_info *ci, struct ceph_cap *cap,
+ 		if (issued & CEPH_CAP_FILE_SHARED)
+ 			atomic_inc(&ci->i_shared_gen);
+ 		if (S_ISDIR(ci->netfs.inode.i_mode)) {
+-			doutc(cl, " marking %p NOT complete\n", inode);
++			boutc(cl, " marking %p NOT complete\n", inode);
+ 			__ceph_dir_clear_complete(ci);
+ 		}
+ 	}
+@@ -664,7 +664,7 @@ void ceph_add_cap(struct inode *inode,
+ 
+ 	lockdep_assert_held(&ci->i_ceph_lock);
+ 
+-	doutc(cl, "%p %llx.%llx mds%d cap %llx %s seq %d\n", inode,
++	boutc(cl, "%p %llx.%llx mds%d cap %llx %s seq %d\n", inode,
+ 	      ceph_vinop(inode), session->s_mds, cap_id,
+ 	      ceph_cap_string(issued), seq);
+ 
+@@ -744,7 +744,7 @@ void ceph_add_cap(struct inode *inode,
+ 	actual_wanted = __ceph_caps_wanted(ci);
+ 	if ((wanted & ~actual_wanted) ||
+ 	    (issued & ~actual_wanted & CEPH_CAP_ANY_WR)) {
+-		doutc(cl, "issued %s, mds wanted %s, actual %s, queueing\n",
++		boutc(cl, "issued %s, mds wanted %s, actual %s, queueing\n",
+ 		      ceph_cap_string(issued), ceph_cap_string(wanted),
+ 		      ceph_cap_string(actual_wanted));
+ 		__cap_delay_requeue(mdsc, ci);
+@@ -763,7 +763,7 @@ void ceph_add_cap(struct inode *inode,
+ 		WARN_ON(ci->i_auth_cap == cap);
+ 	}
+ 
+-	doutc(cl, "inode %p %llx.%llx cap %p %s now %s seq %d mds%d\n",
++	boutc(cl, "inode %p %llx.%llx cap %p %s now %s seq %d mds%d\n",
+ 	      inode, ceph_vinop(inode), cap, ceph_cap_string(issued),
+ 	      ceph_cap_string(issued|cap->issued), seq, mds);
+ 	cap->cap_id = cap_id;
+@@ -796,7 +796,7 @@ static int __cap_is_valid(struct ceph_cap *cap)
+ 	ttl = cap->session->s_cap_ttl;
+ 
+ 	if (cap->cap_gen < gen || time_after_eq(jiffies, ttl)) {
+-		doutc(cl, "%p %llx.%llx cap %p issued %s but STALE (gen %u vs %u)\n",
++		boutc(cl, "%p %llx.%llx cap %p issued %s but STALE (gen %u vs %u)\n",
+ 		      inode, ceph_vinop(inode), cap,
+ 		      ceph_cap_string(cap->issued), cap->cap_gen, gen);
+ 		return 0;
+@@ -824,7 +824,7 @@ int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented)
+ 		cap = rb_entry(p, struct ceph_cap, ci_node);
+ 		if (!__cap_is_valid(cap))
+ 			continue;
+-		doutc(cl, "%p %llx.%llx cap %p issued %s\n", inode,
++		boutc(cl, "%p %llx.%llx cap %p issued %s\n", inode,
+ 		      ceph_vinop(inode), cap, ceph_cap_string(cap->issued));
+ 		have |= cap->issued;
+ 		if (implemented)
+@@ -874,11 +874,11 @@ static void __touch_cap(struct ceph_cap *cap)
+ 
+ 	spin_lock(&s->s_cap_lock);
+ 	if (!s->s_cap_iterator) {
+-		doutc(cl, "%p %llx.%llx cap %p mds%d\n", inode,
++		boutc(cl, "%p %llx.%llx cap %p mds%d\n", inode,
+ 		      ceph_vinop(inode), cap, s->s_mds);
+ 		list_move_tail(&cap->session_caps, &s->s_caps);
+ 	} else {
+-		doutc(cl, "%p %llx.%llx cap %p mds%d NOP, iterating over caps\n",
++		boutc(cl, "%p %llx.%llx cap %p mds%d NOP, iterating over caps\n",
+ 		      inode, ceph_vinop(inode), cap, s->s_mds);
+ 	}
+ 	spin_unlock(&s->s_cap_lock);
+@@ -898,7 +898,7 @@ int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int touch)
+ 	int have = ci->i_snap_caps;
+ 
+ 	if ((have & mask) == mask) {
+-		doutc(cl, "mask %p %llx.%llx snap issued %s (mask %s)\n",
++		boutc(cl, "mask %p %llx.%llx snap issued %s (mask %s)\n",
+ 		      inode, ceph_vinop(inode), ceph_cap_string(have),
+ 		      ceph_cap_string(mask));
+ 		return 1;
+@@ -909,7 +909,7 @@ int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int touch)
+ 		if (!__cap_is_valid(cap))
+ 			continue;
+ 		if ((cap->issued & mask) == mask) {
+-			doutc(cl, "mask %p %llx.%llx cap %p issued %s (mask %s)\n",
++			boutc(cl, "mask %p %llx.%llx cap %p issued %s (mask %s)\n",
+ 			      inode, ceph_vinop(inode), cap,
+ 			      ceph_cap_string(cap->issued),
+ 			      ceph_cap_string(mask));
+@@ -921,7 +921,7 @@ int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int touch)
+ 		/* does a combination of caps satisfy mask? */
+ 		have |= cap->issued;
+ 		if ((have & mask) == mask) {
+-			doutc(cl, "mask %p %llx.%llx combo issued %s (mask %s)\n",
++			boutc(cl, "mask %p %llx.%llx combo issued %s (mask %s)\n",
+ 			      inode, ceph_vinop(inode),
+ 			      ceph_cap_string(cap->issued),
+ 			      ceph_cap_string(mask));
+@@ -1130,13 +1130,13 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 
+ 	/* 'ci' being NULL means the remove have already occurred */
+ 	if (!ci) {
+-		doutc(cl, "inode is NULL\n");
++		boutc(cl, "inode is NULL\n");
+ 		return;
+ 	}
+ 
+ 	lockdep_assert_held(&ci->i_ceph_lock);
+ 
+-	doutc(cl, "%p from %p %llx.%llx\n", cap, inode, ceph_vinop(inode));
++	boutc(cl, "%p from %p %llx.%llx\n", cap, inode, ceph_vinop(inode));
+ 
+ 	mdsc = ceph_inode_to_fs_client(&ci->netfs.inode)->mdsc;
+ 
+@@ -1149,7 +1149,7 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+ 	spin_lock(&session->s_cap_lock);
+ 	if (session->s_cap_iterator == cap) {
+ 		/* not yet, we are iterating over this very cap */
+-		doutc(cl, "delaying %p removal from session %p\n", cap,
++		boutc(cl, "delaying %p removal from session %p\n", cap,
+ 		      cap->session);
+ 	} else {
+ 		list_del_init(&cap->session_caps);
+@@ -1203,7 +1203,7 @@ void ceph_remove_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+ 
+ 	/* 'ci' being NULL means the remove have already occurred */
+ 	if (!ci) {
+-		doutc(mdsc->fsc->client, "inode is NULL\n");
++		boutc(mdsc->fsc->client, "inode is NULL\n");
+ 		return;
+ 	}
+ 
+@@ -1248,7 +1248,7 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
+ 	struct ceph_mds_client *mdsc = arg->session->s_mdsc;
+ 	struct ceph_osd_client *osdc = &mdsc->fsc->client->osdc;
+ 
+-	doutc(mdsc->fsc->client,
++	boutc(mdsc->fsc->client,
+ 	      "%s %llx %llx caps %s wanted %s dirty %s seq %u/%u"
+ 	      " tid %llu/%llu mseq %u follows %lld size %llu/%llu"
+ 	      " xattr_ver %llu xattr_len %d\n",
+@@ -1403,7 +1403,7 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
+ 	revoking = cap->implemented & ~cap->issued;
+ 	retain &= ~revoking;
+ 
+-	doutc(cl, "%p %llx.%llx cap %p session %p %s -> %s (revoking %s)\n",
++	boutc(cl, "%p %llx.%llx cap %p session %p %s -> %s (revoking %s)\n",
+ 	      inode, ceph_vinop(inode), cap, cap->session,
+ 	      ceph_cap_string(held), ceph_cap_string(held & retain),
+ 	      ceph_cap_string(revoking));
+@@ -1626,7 +1626,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
+ 	u64 oldest_flush_tid = 0;
+ 	u64 first_tid = 1, last_tid = 0;
+ 
+-	doutc(cl, "%p %llx.%llx session %p\n", inode, ceph_vinop(inode),
++	boutc(cl, "%p %llx.%llx session %p\n", inode, ceph_vinop(inode),
+ 	      session);
+ 
+ 	list_for_each_entry(capsnap, &ci->i_cap_snaps, ci_item) {
+@@ -1642,7 +1642,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
+ 
+ 		/* only flush each capsnap once */
+ 		if (capsnap->cap_flush.tid > 0) {
+-			doutc(cl, "already flushed %p, skipping\n", capsnap);
++			boutc(cl, "already flushed %p, skipping\n", capsnap);
+ 			continue;
+ 		}
+ 
+@@ -1675,7 +1675,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
+ 		int ret;
+ 
+ 		if (!(cap && cap->session == session)) {
+-			doutc(cl, "%p %llx.%llx auth cap %p not mds%d, stop\n",
++			boutc(cl, "%p %llx.%llx auth cap %p not mds%d, stop\n",
+ 			      inode, ceph_vinop(inode), cap, session->s_mds);
+ 			break;
+ 		}
+@@ -1697,7 +1697,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
+ 		refcount_inc(&capsnap->nref);
+ 		spin_unlock(&ci->i_ceph_lock);
+ 
+-		doutc(cl, "%p %llx.%llx capsnap %p tid %llu %s\n", inode,
++		boutc(cl, "%p %llx.%llx capsnap %p tid %llu %s\n", inode,
+ 		      ceph_vinop(inode), capsnap, cf->tid,
+ 		      ceph_cap_string(capsnap->dirty));
+ 
+@@ -1725,23 +1725,23 @@ void ceph_flush_snaps(struct ceph_inode_info *ci,
+ 	bool need_put = false;
+ 	int mds;
+ 
+-	doutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
++	boutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 	if (psession)
+ 		session = *psession;
+ retry:
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (!(ci->i_ceph_flags & CEPH_I_FLUSH_SNAPS)) {
+-		doutc(cl, " no capsnap needs flush, doing nothing\n");
++		boutc(cl, " no capsnap needs flush, doing nothing\n");
+ 		goto out;
+ 	}
+ 	if (!ci->i_auth_cap) {
+-		doutc(cl, " no auth cap (migrating?), doing nothing\n");
++		boutc(cl, " no auth cap (migrating?), doing nothing\n");
+ 		goto out;
+ 	}
+ 
+ 	mds = ci->i_auth_cap->session->s_mds;
+ 	if (session && session->s_mds != mds) {
+-		doutc(cl, " oops, wrong session %p mutex\n", session);
++		boutc(cl, " oops, wrong session %p mutex\n", session);
+ 		ceph_put_mds_session(session);
+ 		session = NULL;
+ 	}
+@@ -1801,7 +1801,7 @@ int __ceph_mark_dirty_caps(struct ceph_inode_info *ci, int mask,
+ 		return 0;
+ 	}
+ 
+-	doutc(cl, "%p %llx.%llx %s dirty %s -> %s\n", inode,
++	boutc(cl, "%p %llx.%llx %s dirty %s -> %s\n", inode,
+ 	      ceph_vinop(inode), ceph_cap_string(mask),
+ 	      ceph_cap_string(was), ceph_cap_string(was | mask));
+ 	ci->i_dirty_caps |= mask;
+@@ -1816,7 +1816,7 @@ int __ceph_mark_dirty_caps(struct ceph_inode_info *ci, int mask,
+ 			ci->i_head_snapc = ceph_get_snap_context(
+ 				ci->i_snap_realm->cached_context);
+ 		}
+-		doutc(cl, "%p %llx.%llx now dirty snapc %p auth cap %p\n",
++		boutc(cl, "%p %llx.%llx now dirty snapc %p auth cap %p\n",
+ 		      inode, ceph_vinop(inode), ci->i_head_snapc,
+ 		      ci->i_auth_cap);
+ 		BUG_ON(!list_empty(&ci->i_dirty_item));
+@@ -1924,13 +1924,13 @@ static u64 __mark_caps_flushing(struct inode *inode,
+ 	BUG_ON(!ci->i_prealloc_cap_flush);
+ 
+ 	flushing = ci->i_dirty_caps;
+-	doutc(cl, "flushing %s, flushing_caps %s -> %s\n",
++	boutc(cl, "flushing %s, flushing_caps %s -> %s\n",
+ 	      ceph_cap_string(flushing),
+ 	      ceph_cap_string(ci->i_flushing_caps),
+ 	      ceph_cap_string(ci->i_flushing_caps | flushing));
+ 	ci->i_flushing_caps |= flushing;
+ 	ci->i_dirty_caps = 0;
+-	doutc(cl, "%p %llx.%llx now !dirty\n", inode, ceph_vinop(inode));
++	boutc(cl, "%p %llx.%llx now !dirty\n", inode, ceph_vinop(inode));
+ 
+ 	swap(cf, ci->i_prealloc_cap_flush);
+ 	cf->ci = ci;
+@@ -1974,13 +1974,13 @@ static int try_nonblocking_invalidate(struct inode *inode)
+ 	if (inode->i_data.nrpages == 0 &&
+ 	    invalidating_gen == ci->i_rdcache_gen) {
+ 		/* success. */
+-		doutc(cl, "%p %llx.%llx success\n", inode,
++		boutc(cl, "%p %llx.%llx success\n", inode,
+ 		      ceph_vinop(inode));
+ 		/* save any racing async invalidate some trouble */
+ 		ci->i_rdcache_revoking = ci->i_rdcache_gen - 1;
+ 		return 0;
+ 	}
+-	doutc(cl, "%p %llx.%llx failed\n", inode, ceph_vinop(inode));
++	boutc(cl, "%p %llx.%llx failed\n", inode, ceph_vinop(inode));
+ 	return -1;
+ }
+ 
+@@ -2089,7 +2089,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 		}
+ 	}
+ 
+-	doutc(cl, "%p %llx.%llx file_want %s used %s dirty %s "
++	boutc(cl, "%p %llx.%llx file_want %s used %s dirty %s "
+ 	      "flushing %s issued %s revoking %s retain %s %s%s%s%s\n",
+ 	     inode, ceph_vinop(inode), ceph_cap_string(file_wanted),
+ 	     ceph_cap_string(used), ceph_cap_string(ci->i_dirty_caps),
+@@ -2113,10 +2113,10 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 	    (revoking & (CEPH_CAP_FILE_CACHE|
+ 			 CEPH_CAP_FILE_LAZYIO)) && /*  or revoking cache */
+ 	    !tried_invalidate) {
+-		doutc(cl, "trying to invalidate on %p %llx.%llx\n",
++		boutc(cl, "trying to invalidate on %p %llx.%llx\n",
+ 		      inode, ceph_vinop(inode));
+ 		if (try_nonblocking_invalidate(inode) < 0) {
+-			doutc(cl, "queuing invalidate\n");
++			boutc(cl, "queuing invalidate\n");
+ 			queue_invalidate = true;
+ 			ci->i_rdcache_revoking = ci->i_rdcache_gen;
+ 		}
+@@ -2144,7 +2144,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 			cap_used &= ~ci->i_auth_cap->issued;
+ 
+ 		revoking = cap->implemented & ~cap->issued;
+-		doutc(cl, " mds%d cap %p used %s issued %s implemented %s revoking %s\n",
++		boutc(cl, " mds%d cap %p used %s issued %s implemented %s revoking %s\n",
+ 		      cap->mds, cap, ceph_cap_string(cap_used),
+ 		      ceph_cap_string(cap->issued),
+ 		      ceph_cap_string(cap->implemented),
+@@ -2153,7 +2153,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 		/* completed revocation? going down and there are no caps? */
+ 		if (revoking) {
+ 			if ((revoking & cap_used) == 0) {
+-				doutc(cl, "completed revocation of %s\n",
++				boutc(cl, "completed revocation of %s\n",
+ 				      ceph_cap_string(cap->implemented & ~cap->issued));
+ 				goto ack;
+ 			}
+@@ -2175,7 +2175,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 		}
+ 
+ 		if (flags & CHECK_CAPS_FLUSH_FORCE) {
+-			doutc(cl, "force to flush caps\n");
++			boutc(cl, "force to flush caps\n");
+ 			goto ack;
+ 		}
+ 
+@@ -2184,24 +2184,24 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 			/* request larger max_size from MDS? */
+ 			if (ci->i_wanted_max_size > ci->i_max_size &&
+ 			    ci->i_wanted_max_size > ci->i_requested_max_size) {
+-				doutc(cl, "requesting new max_size\n");
++				boutc(cl, "requesting new max_size\n");
+ 				goto ack;
+ 			}
+ 
+ 			/* approaching file_max? */
+ 			if (__ceph_should_report_size(ci)) {
+-				doutc(cl, "i_size approaching max_size\n");
++				boutc(cl, "i_size approaching max_size\n");
+ 				goto ack;
+ 			}
+ 		}
+ 		/* flush anything dirty? */
+ 		if (cap == ci->i_auth_cap) {
+ 			if ((flags & CHECK_CAPS_FLUSH) && ci->i_dirty_caps) {
+-				doutc(cl, "flushing dirty caps\n");
++				boutc(cl, "flushing dirty caps\n");
+ 				goto ack;
+ 			}
+ 			if (ci->i_ceph_flags & CEPH_I_FLUSH_SNAPS) {
+-				doutc(cl, "flushing snap caps\n");
++				boutc(cl, "flushing snap caps\n");
+ 				goto ack;
+ 			}
+ 		}
+@@ -2453,7 +2453,7 @@ static int flush_mdlog_and_wait_inode_unsafe_requests(struct inode *inode)
+ 		kfree(sessions);
+ 	}
+ 
+-	doutc(cl, "%p %llx.%llx wait on tid %llu %llu\n", inode,
++	boutc(cl, "%p %llx.%llx wait on tid %llu %llu\n", inode,
+ 	      ceph_vinop(inode), req1 ? req1->r_tid : 0ULL,
+ 	      req2 ? req2->r_tid : 0ULL);
+ 	if (req1) {
+@@ -2480,13 +2480,17 @@ static int flush_mdlog_and_wait_inode_unsafe_requests(struct inode *inode)
+ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+ {
+ 	struct inode *inode = file->f_mapping->host;
++	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	u64 flush_tid;
+ 	int ret, err;
+ 	int dirty;
++	struct ceph_journal_info __ji;
++
++	ceph_blog_enter(fsc, &__ji);
+ 
+-	doutc(cl, "%p %llx.%llx%s\n", inode, ceph_vinop(inode),
++	boutc(cl, "%p %llx.%llx%s\n", inode, ceph_vinop(inode),
+ 	      datasync ? " datasync" : "");
+ 
+ 	ret = file_write_and_wait_range(file, start, end);
+@@ -2498,7 +2502,7 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+ 		goto out;
+ 
+ 	dirty = try_flush_caps(inode, &flush_tid);
+-	doutc(cl, "dirty caps are %s\n", ceph_cap_string(dirty));
++	boutc(cl, "dirty caps are %s\n", ceph_cap_string(dirty));
+ 
+ 	err = flush_mdlog_and_wait_inode_unsafe_requests(inode);
+ 
+@@ -2519,8 +2523,9 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+ 	if (err < 0)
+ 		ret = err;
+ out:
+-	doutc(cl, "%p %llx.%llx%s result=%d\n", inode, ceph_vinop(inode),
++	boutc(cl, "%p %llx.%llx%s result=%d\n", inode, ceph_vinop(inode),
+ 	      datasync ? " datasync" : "", ret);
++	ceph_blog_exit(&__ji);
+ 	return ret;
+ }
+ 
+@@ -2532,19 +2537,25 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+  */
+ int ceph_write_inode(struct inode *inode, struct writeback_control *wbc)
+ {
++	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	u64 flush_tid;
+ 	int err = 0;
+ 	int dirty;
+ 	int wait = (wbc->sync_mode == WB_SYNC_ALL && !wbc->for_sync);
++	struct ceph_journal_info __ji;
+ 
+-	doutc(cl, "%p %llx.%llx wait=%d\n", inode, ceph_vinop(inode), wait);
++	ceph_blog_enter(fsc, &__ji);
++
++	boutc(cl, "%p %llx.%llx wait=%d\n", inode, ceph_vinop(inode), wait);
+ 	ceph_fscache_unpin_writeback(inode, wbc);
+ 	if (wait) {
+ 		err = ceph_wait_on_async_create(inode);
+-		if (err)
++		if (err) {
++			ceph_blog_exit(&__ji);
+ 			return err;
++		}
+ 		dirty = try_flush_caps(inode, &flush_tid);
+ 		if (dirty)
+ 			err = wait_event_interruptible(ci->i_cap_wq,
+@@ -2558,6 +2569,7 @@ int ceph_write_inode(struct inode *inode, struct writeback_control *wbc)
+ 			__cap_delay_requeue_front(mdsc, ci);
+ 		spin_unlock(&ci->i_ceph_lock);
+ 	}
++	ceph_blog_exit(&__ji);
+ 	return err;
+ }
+ 
+@@ -2605,7 +2617,7 @@ static void __kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 		if (!cf->is_capsnap) {
+ 			struct cap_msg_args arg;
+ 
+-			doutc(cl, "%p %llx.%llx cap %p tid %llu %s\n",
++			boutc(cl, "%p %llx.%llx cap %p tid %llu %s\n",
+ 			      inode, ceph_vinop(inode), cap, cf->tid,
+ 			      ceph_cap_string(cf->caps));
+ 			__prep_cap(&arg, cap, CEPH_CAP_OP_FLUSH,
+@@ -2621,7 +2633,7 @@ static void __kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 			struct ceph_cap_snap *capsnap =
+ 					container_of(cf, struct ceph_cap_snap,
+ 						    cap_flush);
+-			doutc(cl, "%p %llx.%llx capsnap %p tid %llu %s\n",
++			boutc(cl, "%p %llx.%llx capsnap %p tid %llu %s\n",
+ 			      inode, ceph_vinop(inode), capsnap, cf->tid,
+ 			      ceph_cap_string(capsnap->dirty));
+ 
+@@ -2652,7 +2664,7 @@ void ceph_early_kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 	struct ceph_cap *cap;
+ 	u64 oldest_flush_tid;
+ 
+-	doutc(cl, "mds%d\n", session->s_mds);
++	boutc(cl, "mds%d\n", session->s_mds);
+ 
+ 	spin_lock(&mdsc->cap_dirty_lock);
+ 	oldest_flush_tid = __get_oldest_flush_tid(mdsc);
+@@ -2706,7 +2718,7 @@ void ceph_kick_flushing_caps(struct ceph_mds_client *mdsc,
+ 
+ 	lockdep_assert_held(&session->s_mutex);
+ 
+-	doutc(cl, "mds%d\n", session->s_mds);
++	boutc(cl, "mds%d\n", session->s_mds);
+ 
+ 	spin_lock(&mdsc->cap_dirty_lock);
+ 	oldest_flush_tid = __get_oldest_flush_tid(mdsc);
+@@ -2741,7 +2753,7 @@ void ceph_kick_flushing_inode_caps(struct ceph_mds_session *session,
+ 
+ 	lockdep_assert_held(&ci->i_ceph_lock);
+ 
+-	doutc(mdsc->fsc->client, "%p %llx.%llx flushing %s\n",
++	boutc(mdsc->fsc->client, "%p %llx.%llx flushing %s\n",
+ 	      inode, ceph_vinop(inode),
+ 	      ceph_cap_string(ci->i_flushing_caps));
+ 
+@@ -2790,7 +2802,7 @@ void ceph_take_cap_refs(struct ceph_inode_info *ci, int got,
+ 		if (ci->i_wb_ref == 0)
+ 			ihold(inode);
+ 		ci->i_wb_ref++;
+-		doutc(cl, "%p %llx.%llx wb %d -> %d (?)\n", inode,
++		boutc(cl, "%p %llx.%llx wb %d -> %d (?)\n", inode,
+ 		      ceph_vinop(inode), ci->i_wb_ref-1, ci->i_wb_ref);
+ 	}
+ }
+@@ -2824,7 +2836,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 	int have, implemented;
+ 	bool snap_rwsem_locked = false;
+ 
+-	doutc(cl, "%p %llx.%llx need %s want %s\n", inode,
++	boutc(cl, "%p %llx.%llx need %s want %s\n", inode,
+ 	      ceph_vinop(inode), ceph_cap_string(need),
+ 	      ceph_cap_string(want));
+ 
+@@ -2833,7 +2845,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 
+ 	if ((flags & CHECK_FILELOCK) &&
+ 	    test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
+-		doutc(cl, "%p %llx.%llx error filelock\n", inode,
++		boutc(cl, "%p %llx.%llx error filelock\n", inode,
+ 		      ceph_vinop(inode));
+ 		ret = -EIO;
+ 		goto out_unlock;
+@@ -2854,7 +2866,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 
+ 	if (have & need & CEPH_CAP_FILE_WR) {
+ 		if (endoff >= 0 && endoff > (loff_t)ci->i_max_size) {
+-			doutc(cl, "%p %llx.%llx endoff %llu > maxsize %llu\n",
++			boutc(cl, "%p %llx.%llx endoff %llu > maxsize %llu\n",
+ 			      inode, ceph_vinop(inode), endoff, ci->i_max_size);
+ 			if (endoff > ci->i_requested_max_size)
+ 				ret = ci->i_auth_cap ? -EFBIG : -EUCLEAN;
+@@ -2865,7 +2877,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 		 * can get a final snapshot value for size+mtime.
+ 		 */
+ 		if (__ceph_have_pending_cap_snap(ci)) {
+-			doutc(cl, "%p %llx.%llx cap_snap_pending\n", inode,
++			boutc(cl, "%p %llx.%llx cap_snap_pending\n", inode,
+ 			      ceph_vinop(inode));
+ 			goto out_unlock;
+ 		}
+@@ -2884,7 +2896,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 		int not = want & ~(have & need);
+ 		int revoking = implemented & ~have;
+ 		int exclude = revoking & not;
+-		doutc(cl, "%p %llx.%llx have %s but not %s (revoking %s)\n",
++		boutc(cl, "%p %llx.%llx have %s but not %s (revoking %s)\n",
+ 		      inode, ceph_vinop(inode), ceph_cap_string(have),
+ 		      ceph_cap_string(not), ceph_cap_string(revoking));
+ 		if (!exclude || !(exclude & CEPH_CAP_FILE_BUFFER)) {
+@@ -2926,7 +2938,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 			spin_unlock(&s->s_cap_lock);
+ 		}
+ 		if (session_readonly) {
+-			doutc(cl, "%p %llx.%llx need %s but mds%d readonly\n",
++			boutc(cl, "%p %llx.%llx need %s but mds%d readonly\n",
+ 			      inode, ceph_vinop(inode), ceph_cap_string(need),
+ 			      ci->i_auth_cap->mds);
+ 			ret = -EROFS;
+@@ -2934,21 +2946,21 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 		}
+ 
+ 		if (ceph_inode_is_shutdown(inode)) {
+-			doutc(cl, "%p %llx.%llx inode is shutdown\n",
++			boutc(cl, "%p %llx.%llx inode is shutdown\n",
+ 			      inode, ceph_vinop(inode));
+ 			ret = -ESTALE;
+ 			goto out_unlock;
+ 		}
+ 		mds_wanted = __ceph_caps_mds_wanted(ci, false);
+ 		if (need & ~mds_wanted) {
+-			doutc(cl, "%p %llx.%llx need %s > mds_wanted %s\n",
++			boutc(cl, "%p %llx.%llx need %s > mds_wanted %s\n",
+ 			      inode, ceph_vinop(inode), ceph_cap_string(need),
+ 			      ceph_cap_string(mds_wanted));
+ 			ret = -EUCLEAN;
+ 			goto out_unlock;
+ 		}
+ 
+-		doutc(cl, "%p %llx.%llx have %s need %s\n", inode,
++		boutc(cl, "%p %llx.%llx have %s need %s\n", inode,
+ 		      ceph_vinop(inode), ceph_cap_string(have),
+ 		      ceph_cap_string(need));
+ 	}
+@@ -2965,7 +2977,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 	else if (ret == 1)
+ 		ceph_update_cap_hit(&mdsc->metric);
+ 
+-	doutc(cl, "%p %llx.%llx ret %d got %s\n", inode,
++	boutc(cl, "%p %llx.%llx ret %d got %s\n", inode,
+ 	      ceph_vinop(inode), ret, ceph_cap_string(*got));
+ 	return ret;
+ }
+@@ -2984,7 +2996,7 @@ static void check_max_size(struct inode *inode, loff_t endoff)
+ 	/* do we need to explicitly request a larger max_size? */
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (endoff >= ci->i_max_size && endoff > ci->i_wanted_max_size) {
+-		doutc(cl, "write %p %llx.%llx at large endoff %llu, req max_size\n",
++		boutc(cl, "write %p %llx.%llx at large endoff %llu, req max_size\n",
+ 		      inode, ceph_vinop(inode), endoff);
+ 		ci->i_wanted_max_size = endoff;
+ 	}
+@@ -3206,7 +3218,7 @@ static int ceph_try_drop_cap_snap(struct ceph_inode_info *ci,
+ 
+ 	if (!capsnap->need_flush &&
+ 	    !capsnap->writing && !capsnap->dirty_pages) {
+-		doutc(cl, "%p follows %llu\n", capsnap, capsnap->follows);
++		boutc(cl, "%p follows %llu\n", capsnap, capsnap->follows);
+ 		BUG_ON(capsnap->cap_flush.tid > 0);
+ 		ceph_put_snap_context(capsnap->context);
+ 		if (!list_is_last(&capsnap->ci_item, &ci->i_cap_snaps))
+@@ -3260,7 +3272,7 @@ static void __ceph_put_cap_refs(struct ceph_inode_info *ci, int had,
+ 			put++;
+ 			check_flushsnaps = true;
+ 		}
+-		doutc(cl, "%p %llx.%llx wb %d -> %d (?)\n", inode,
++		boutc(cl, "%p %llx.%llx wb %d -> %d (?)\n", inode,
+ 		      ceph_vinop(inode), ci->i_wb_ref+1, ci->i_wb_ref);
+ 	}
+ 	if (had & CEPH_CAP_FILE_WR) {
+@@ -3301,7 +3313,7 @@ static void __ceph_put_cap_refs(struct ceph_inode_info *ci, int had,
+ 	}
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	doutc(cl, "%p %llx.%llx had %s%s%s\n", inode, ceph_vinop(inode),
++	boutc(cl, "%p %llx.%llx had %s%s%s\n", inode, ceph_vinop(inode),
+ 	      ceph_cap_string(had), last ? " last" : "", put ? " put" : "");
+ 
+ 	switch (mode) {
+@@ -3371,7 +3383,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+ 			ceph_put_snap_context(ci->i_head_snapc);
+ 			ci->i_head_snapc = NULL;
+ 		}
+-		doutc(cl, "on %p %llx.%llx head %d/%d -> %d/%d %s\n",
++		boutc(cl, "on %p %llx.%llx head %d/%d -> %d/%d %s\n",
+ 		      inode, ceph_vinop(inode), ci->i_wrbuffer_ref+nr,
+ 		      ci->i_wrbuffer_ref_head+nr, ci->i_wrbuffer_ref,
+ 		      ci->i_wrbuffer_ref_head, last ? " LAST" : "");
+@@ -3404,7 +3416,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
+ 				}
+ 			}
+ 		}
+-		doutc(cl, "%p %llx.%llx cap_snap %p snap %lld %d/%d -> %d/%d %s%s\n",
++		boutc(cl, "%p %llx.%llx cap_snap %p snap %lld %d/%d -> %d/%d %s%s\n",
+ 		      inode, ceph_vinop(inode), capsnap, capsnap->context->seq,
+ 		      ci->i_wrbuffer_ref+nr, capsnap->dirty_pages + nr,
+ 		      ci->i_wrbuffer_ref, capsnap->dirty_pages,
+@@ -3435,7 +3447,7 @@ static void invalidate_aliases(struct inode *inode)
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	struct dentry *dn, *prev = NULL;
+ 
+-	doutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
++	boutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 	d_prune_aliases(inode);
+ 	/*
+ 	 * For non-directory inode, d_find_alias() only returns
+@@ -3520,10 +3532,10 @@ static void handle_cap_grant(struct inode *inode,
+ 	if (IS_ENCRYPTED(inode) && size)
+ 		size = extra_info->fscrypt_file_size;
+ 
+-	doutc(cl, "%p %llx.%llx cap %p mds%d seq %d %s\n", inode,
++	boutc(cl, "%p %llx.%llx cap %p mds%d seq %d %s\n", inode,
+ 	      ceph_vinop(inode), cap, session->s_mds, seq,
+ 	      ceph_cap_string(newcaps));
+-	doutc(cl, " size %llu max_size %llu, i_size %llu\n", size,
++	boutc(cl, " size %llu max_size %llu, i_size %llu\n", size,
+ 	      max_size, i_size_read(inode));
+ 
+ 
+@@ -3584,7 +3596,7 @@ static void handle_cap_grant(struct inode *inode,
+ 		inode->i_uid = make_kuid(&init_user_ns, le32_to_cpu(grant->uid));
+ 		inode->i_gid = make_kgid(&init_user_ns, le32_to_cpu(grant->gid));
+ 		ci->i_btime = extra_info->btime;
+-		doutc(cl, "%p %llx.%llx mode 0%o uid.gid %d.%d\n", inode,
++		boutc(cl, "%p %llx.%llx mode 0%o uid.gid %d.%d\n", inode,
+ 		      ceph_vinop(inode), inode->i_mode,
+ 		      from_kuid(&init_user_ns, inode->i_uid),
+ 		      from_kgid(&init_user_ns, inode->i_gid));
+@@ -3612,7 +3624,7 @@ static void handle_cap_grant(struct inode *inode,
+ 		u64 version = le64_to_cpu(grant->xattr_version);
+ 
+ 		if (version > ci->i_xattrs.version) {
+-			doutc(cl, " got new xattrs v%llu on %p %llx.%llx len %d\n",
++			boutc(cl, " got new xattrs v%llu on %p %llx.%llx len %d\n",
+ 			      version, inode, ceph_vinop(inode), len);
+ 			if (ci->i_xattrs.blob)
+ 				ceph_buffer_put(ci->i_xattrs.blob);
+@@ -3664,7 +3676,7 @@ static void handle_cap_grant(struct inode *inode,
+ 
+ 	if (ci->i_auth_cap == cap && (newcaps & CEPH_CAP_ANY_FILE_WR)) {
+ 		if (max_size != ci->i_max_size) {
+-			doutc(cl, "max_size %lld -> %llu\n", ci->i_max_size,
++			boutc(cl, "max_size %lld -> %llu\n", ci->i_max_size,
+ 			      max_size);
+ 			ci->i_max_size = max_size;
+ 			if (max_size >= ci->i_wanted_max_size) {
+@@ -3679,7 +3691,7 @@ static void handle_cap_grant(struct inode *inode,
+ 	wanted = __ceph_caps_wanted(ci);
+ 	used = __ceph_caps_used(ci);
+ 	dirty = __ceph_caps_dirty(ci);
+-	doutc(cl, " my wanted = %s, used = %s, dirty %s\n",
++	boutc(cl, " my wanted = %s, used = %s, dirty %s\n",
+ 	      ceph_cap_string(wanted), ceph_cap_string(used),
+ 	      ceph_cap_string(dirty));
+ 
+@@ -3702,7 +3714,7 @@ static void handle_cap_grant(struct inode *inode,
+ 	if (cap->issued & ~newcaps) {
+ 		int revoking = cap->issued & ~newcaps;
+ 
+-		doutc(cl, "revocation: %s -> %s (revoking %s)\n",
++		boutc(cl, "revocation: %s -> %s (revoking %s)\n",
+ 		      ceph_cap_string(cap->issued), ceph_cap_string(newcaps),
+ 		      ceph_cap_string(revoking));
+ 		if (S_ISREG(inode->i_mode) &&
+@@ -3724,11 +3736,11 @@ static void handle_cap_grant(struct inode *inode,
+ 		cap->issued = newcaps;
+ 		cap->implemented |= newcaps;
+ 	} else if (cap->issued == newcaps) {
+-		doutc(cl, "caps unchanged: %s -> %s\n",
++		boutc(cl, "caps unchanged: %s -> %s\n",
+ 		      ceph_cap_string(cap->issued),
+ 		      ceph_cap_string(newcaps));
+ 	} else {
+-		doutc(cl, "grant: %s -> %s\n", ceph_cap_string(cap->issued),
++		boutc(cl, "grant: %s -> %s\n", ceph_cap_string(cap->issued),
+ 		      ceph_cap_string(newcaps));
+ 		/* non-auth MDS is revoking the newly grant caps ? */
+ 		if (cap == ci->i_auth_cap &&
+@@ -3863,7 +3875,7 @@ static void handle_cap_flush_ack(struct inode *inode, u64 flush_tid,
+ 		}
+ 	}
+ 
+-	doutc(cl, "%p %llx.%llx mds%d seq %d on %s cleaned %s, flushing %s -> %s\n",
++	boutc(cl, "%p %llx.%llx mds%d seq %d on %s cleaned %s, flushing %s -> %s\n",
+ 	      inode, ceph_vinop(inode), session->s_mds, seq,
+ 	      ceph_cap_string(dirty), ceph_cap_string(cleaned),
+ 	      ceph_cap_string(ci->i_flushing_caps),
+@@ -3887,16 +3899,16 @@ static void handle_cap_flush_ack(struct inode *inode, u64 flush_tid,
+ 					    &list_first_entry(&session->s_cap_flushing,
+ 							      struct ceph_inode_info,
+ 							      i_flushing_item)->netfs.inode;
+-				doutc(cl, " mds%d still flushing cap on %p %llx.%llx\n",
++				boutc(cl, " mds%d still flushing cap on %p %llx.%llx\n",
+ 				      session->s_mds, inode, ceph_vinop(inode));
+ 			}
+ 		}
+ 		mdsc->num_cap_flushing--;
+-		doutc(cl, " %p %llx.%llx now !flushing\n", inode,
++		boutc(cl, " %p %llx.%llx now !flushing\n", inode,
+ 		      ceph_vinop(inode));
+ 
+ 		if (ci->i_dirty_caps == 0) {
+-			doutc(cl, " %p %llx.%llx now clean\n", inode,
++			boutc(cl, " %p %llx.%llx now clean\n", inode,
+ 			      ceph_vinop(inode));
+ 			BUG_ON(!list_empty(&ci->i_dirty_item));
+ 			drop = true;
+@@ -3941,7 +3953,7 @@ void __ceph_remove_capsnap(struct inode *inode, struct ceph_cap_snap *capsnap,
+ 
+ 	lockdep_assert_held(&ci->i_ceph_lock);
+ 
+-	doutc(cl, "removing capsnap %p, %p %llx.%llx ci %p\n", capsnap,
++	boutc(cl, "removing capsnap %p, %p %llx.%llx ci %p\n", capsnap,
+ 	      inode, ceph_vinop(inode), ci);
+ 
+ 	list_del_init(&capsnap->ci_item);
+@@ -3988,14 +4000,14 @@ static void handle_cap_flushsnap_ack(struct inode *inode, u64 flush_tid,
+ 	bool wake_ci = false;
+ 	bool wake_mdsc = false;
+ 
+-	doutc(cl, "%p %llx.%llx ci %p mds%d follows %lld\n", inode,
++	boutc(cl, "%p %llx.%llx ci %p mds%d follows %lld\n", inode,
+ 	      ceph_vinop(inode), ci, session->s_mds, follows);
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+ 	list_for_each_entry(iter, &ci->i_cap_snaps, ci_item) {
+ 		if (iter->follows == follows) {
+ 			if (iter->cap_flush.tid != flush_tid) {
+-				doutc(cl, " cap_snap %p follows %lld "
++				boutc(cl, " cap_snap %p follows %lld "
+ 				      "tid %lld != %lld\n", iter,
+ 				      follows, flush_tid,
+ 				      iter->cap_flush.tid);
+@@ -4004,7 +4016,7 @@ static void handle_cap_flushsnap_ack(struct inode *inode, u64 flush_tid,
+ 			capsnap = iter;
+ 			break;
+ 		} else {
+-			doutc(cl, " skipping cap_snap %p follows %lld\n",
++			boutc(cl, " skipping cap_snap %p follows %lld\n",
+ 			      iter, iter->follows);
+ 		}
+ 	}
+@@ -4057,7 +4069,7 @@ static bool handle_cap_trunc(struct inode *inode,
+ 	if (IS_ENCRYPTED(inode) && size)
+ 		size = extra_info->fscrypt_file_size;
+ 
+-	doutc(cl, "%p %llx.%llx mds%d seq %d to %lld truncate seq %d\n",
++	boutc(cl, "%p %llx.%llx mds%d seq %d to %lld truncate seq %d\n",
+ 	      inode, ceph_vinop(inode), mds, seq, truncate_size, truncate_seq);
+ 	queue_trunc = ceph_fill_file_size(inode, issued,
+ 					  truncate_seq, truncate_size, size);
+@@ -4096,7 +4108,7 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+ 		target = -1;
+ 	}
+ 
+-	doutc(cl, " cap %llx.%llx export to peer %d piseq %u pmseq %u\n",
++	boutc(cl, " cap %llx.%llx export to peer %d piseq %u pmseq %u\n",
+ 	      ceph_vinop(inode), target, t_issue_seq, t_mseq);
+ retry:
+ 	down_read(&mdsc->snap_rwsem);
+@@ -4131,7 +4143,7 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+ 		/* already have caps from the target */
+ 		if (tcap->cap_id == t_cap_id &&
+ 		    ceph_seq_cmp(tcap->seq, t_issue_seq) < 0) {
+-			doutc(cl, " updating import cap %p mds%d\n", tcap,
++			boutc(cl, " updating import cap %p mds%d\n", tcap,
+ 			      target);
+ 			tcap->cap_id = t_cap_id;
+ 			tcap->seq = t_issue_seq - 1;
+@@ -4238,7 +4250,7 @@ static void handle_cap_import(struct ceph_mds_client *mdsc,
+ 		peer = -1;
+ 	}
+ 
+-	doutc(cl, " cap %llx.%llx import from peer %d piseq %u pmseq %u\n",
++	boutc(cl, " cap %llx.%llx import from peer %d piseq %u pmseq %u\n",
+ 	      ceph_vinop(inode), peer, piseq, pmseq);
+ retry:
+ 	cap = __get_cap_for_mds(ci, mds);
+@@ -4265,7 +4277,7 @@ static void handle_cap_import(struct ceph_mds_client *mdsc,
+ 
+ 	ocap = peer >= 0 ? __get_cap_for_mds(ci, peer) : NULL;
+ 	if (ocap && ocap->cap_id == p_cap_id) {
+-		doutc(cl, " remove export cap %p mds%d flags %d\n",
++		boutc(cl, " remove export cap %p mds%d flags %d\n",
+ 		      ocap, peer, ph->flags);
+ 		if ((ph->flags & CEPH_CAP_FLAG_AUTH) &&
+ 		    (ocap->seq != piseq ||
+@@ -4524,7 +4536,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 	spin_lock(&ci->i_ceph_lock);
+ 	cap = __get_cap_for_mds(ceph_inode(inode), session->s_mds);
+ 	if (!cap) {
+-		doutc(cl, " no cap on %p ino %llx.%llx from mds%d\n",
++		boutc(cl, " no cap on %p ino %llx.%llx from mds%d\n",
+ 		      inode, ceph_ino(inode), ceph_snap(inode),
+ 		      session->s_mds);
+ 		spin_unlock(&ci->i_ceph_lock);
+@@ -4628,14 +4640,14 @@ unsigned long ceph_check_delayed_caps(struct ceph_mds_client *mdsc)
+ 	unsigned long loop_start = jiffies;
+ 	unsigned long delay = 0;
+ 
+-	doutc(cl, "begin\n");
++	boutc(cl, "begin\n");
+ 	spin_lock(&mdsc->cap_delay_lock);
+ 	while (!list_empty(&mdsc->cap_delay_list)) {
+ 		ci = list_first_entry(&mdsc->cap_delay_list,
+ 				      struct ceph_inode_info,
+ 				      i_cap_delay_list);
+ 		if (time_before(loop_start, ci->i_hold_caps_max - delay_max)) {
+-			doutc(cl, "caps added recently.  Exiting loop");
++			boutc(cl, "caps added recently.  Exiting loop");
+ 			delay = ci->i_hold_caps_max;
+ 			break;
+ 		}
+@@ -4647,7 +4659,7 @@ unsigned long ceph_check_delayed_caps(struct ceph_mds_client *mdsc)
+ 		inode = igrab(&ci->netfs.inode);
+ 		if (inode) {
+ 			spin_unlock(&mdsc->cap_delay_lock);
+-			doutc(cl, "on %p %llx.%llx\n", inode,
++			boutc(cl, "on %p %llx.%llx\n", inode,
+ 			      ceph_vinop(inode));
+ 			ceph_check_caps(ci, 0);
+ 			iput(inode);
+@@ -4663,7 +4675,7 @@ unsigned long ceph_check_delayed_caps(struct ceph_mds_client *mdsc)
+ 			break;
+ 	}
+ 	spin_unlock(&mdsc->cap_delay_lock);
+-	doutc(cl, "done\n");
++	boutc(cl, "done\n");
+ 
+ 	return delay;
+ }
+@@ -4678,14 +4690,14 @@ static void flush_dirty_session_caps(struct ceph_mds_session *s)
+ 	struct ceph_inode_info *ci;
+ 	struct inode *inode;
+ 
+-	doutc(cl, "begin\n");
++	boutc(cl, "begin\n");
+ 	spin_lock(&mdsc->cap_dirty_lock);
+ 	while (!list_empty(&s->s_cap_dirty)) {
+ 		ci = list_first_entry(&s->s_cap_dirty, struct ceph_inode_info,
+ 				      i_dirty_item);
+ 		inode = &ci->netfs.inode;
+ 		ihold(inode);
+-		doutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
++		boutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 		spin_unlock(&mdsc->cap_dirty_lock);
+ 		ceph_wait_on_async_create(inode);
+ 		ceph_check_caps(ci, CHECK_CAPS_FLUSH);
+@@ -4693,7 +4705,7 @@ static void flush_dirty_session_caps(struct ceph_mds_session *s)
+ 		spin_lock(&mdsc->cap_dirty_lock);
+ 	}
+ 	spin_unlock(&mdsc->cap_dirty_lock);
+-	doutc(cl, "done\n");
++	boutc(cl, "done\n");
+ }
+ 
+ void ceph_flush_dirty_caps(struct ceph_mds_client *mdsc)
+@@ -4709,12 +4721,12 @@ static void flush_cap_releases(struct ceph_mds_session *s)
+ 	struct ceph_mds_client *mdsc = s->s_mdsc;
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 
+-	doutc(cl, "begin\n");
++	boutc(cl, "begin\n");
+ 	spin_lock(&s->s_cap_lock);
+ 	if (s->s_num_cap_releases)
+ 		ceph_flush_session_cap_releases(mdsc, s);
+ 	spin_unlock(&s->s_cap_lock);
+-	doutc(cl, "done\n");
++	boutc(cl, "done\n");
+ 
+ }
+ 
+@@ -4822,7 +4834,7 @@ int ceph_drop_caps_for_unlink(struct inode *inode)
+ 			struct ceph_mds_client *mdsc =
+ 				ceph_inode_to_fs_client(inode)->mdsc;
+ 
+-			doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode,
++			boutc(mdsc->fsc->client, "%p %llx.%llx\n", inode,
+ 			      ceph_vinop(inode));
+ 			spin_lock(&mdsc->cap_delay_lock);
+ 			set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
+@@ -4865,7 +4877,7 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
+ 	used = __ceph_caps_used(ci);
+ 	dirty = __ceph_caps_dirty(ci);
+ 
+-	doutc(cl, "%p %llx.%llx mds%d used|dirty %s drop %s unless %s\n",
++	boutc(cl, "%p %llx.%llx mds%d used|dirty %s drop %s unless %s\n",
+ 	      inode, ceph_vinop(inode), mds, ceph_cap_string(used|dirty),
+ 	      ceph_cap_string(drop), ceph_cap_string(unless));
+ 
+@@ -4889,7 +4901,7 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
+ 		if (force || (cap->issued & drop)) {
+ 			if (cap->issued & drop) {
+ 				int wanted = __ceph_caps_wanted(ci);
+-				doutc(cl, "%p %llx.%llx cap %p %s -> %s, "
++				boutc(cl, "%p %llx.%llx cap %p %s -> %s, "
+ 				      "wanted %s -> %s\n", inode,
+ 				      ceph_vinop(inode), cap,
+ 				      ceph_cap_string(cap->issued),
+@@ -4904,7 +4916,7 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
+ 				    !(wanted & CEPH_CAP_ANY_FILE_WR))
+ 					ci->i_requested_max_size = 0;
+ 			} else {
+-				doutc(cl, "%p %llx.%llx cap %p %s (force)\n",
++				boutc(cl, "%p %llx.%llx cap %p %s (force)\n",
+ 				      inode, ceph_vinop(inode), cap,
+ 				      ceph_cap_string(cap->issued));
+ 			}
+@@ -4921,7 +4933,7 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
+ 			*p += sizeof(*rel);
+ 			ret = 1;
+ 		} else {
+-			doutc(cl, "%p %llx.%llx cap %p %s (noop)\n",
++			boutc(cl, "%p %llx.%llx cap %p %s (noop)\n",
+ 			      inode, ceph_vinop(inode), cap,
+ 			      ceph_cap_string(cap->issued));
+ 		}
+@@ -4972,7 +4984,7 @@ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 	spin_lock(&dentry->d_lock);
+ 	if (ret && di->lease_session && di->lease_session->s_mds == mds) {
+ 		int len = dentry->d_name.len;
+-		doutc(cl, "%p mds%d seq %d\n",  dentry, mds,
++		boutc(cl, "%p mds%d seq %d\n",  dentry, mds,
+ 		      (int)di->lease_seq);
+ 		rel->dname_seq = cpu_to_le32(di->lease_seq);
+ 		__ceph_mdsc_drop_dentry_lease(dentry);
+@@ -5000,7 +5012,7 @@ static int remove_capsnaps(struct ceph_mds_client *mdsc, struct inode *inode)
+ 
+ 	lockdep_assert_held(&ci->i_ceph_lock);
+ 
+-	doutc(cl, "removing capsnaps, ci is %p, %p %llx.%llx\n",
++	boutc(cl, "removing capsnaps, ci is %p, %p %llx.%llx\n",
+ 	      ci, inode, ceph_vinop(inode));
+ 
+ 	while (!list_empty(&ci->i_cap_snaps)) {
+@@ -5028,7 +5040,7 @@ int ceph_purge_inode_cap(struct inode *inode, struct ceph_cap *cap, bool *invali
+ 
+ 	lockdep_assert_held(&ci->i_ceph_lock);
+ 
+-	doutc(cl, "removing cap %p, ci is %p, %p %llx.%llx\n",
++	boutc(cl, "removing cap %p, ci is %p, %p %llx.%llx\n",
+ 	      cap, ci, inode, ceph_vinop(inode));
+ 
+ 	is_auth = (cap == ci->i_auth_cap);
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 9b79a5eaca93..8e86e4df22bd 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -138,7 +138,7 @@ static struct ceph_snap_realm *ceph_create_snap_realm(
+ 	__insert_snap_realm(&mdsc->snap_realms, realm);
+ 	mdsc->num_snap_realms++;
+ 
+-	doutc(mdsc->fsc->client, "%llx %p\n", realm->ino, realm);
++	boutc(mdsc->fsc->client, "%llx %p\n", realm->ino, realm);
+ 	return realm;
+ }
+ 
+@@ -163,7 +163,7 @@ static struct ceph_snap_realm *__lookup_snap_realm(struct ceph_mds_client *mdsc,
+ 		else if (ino > r->ino)
+ 			n = n->rb_right;
+ 		else {
+-			doutc(cl, "%llx %p\n", r->ino, r);
++			boutc(cl, "%llx %p\n", r->ino, r);
+ 			return r;
+ 		}
+ 	}
+@@ -192,7 +192,7 @@ static void __destroy_snap_realm(struct ceph_mds_client *mdsc,
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	lockdep_assert_held_write(&mdsc->snap_rwsem);
+ 
+-	doutc(cl, "%p %llx\n", realm, realm->ino);
++	boutc(cl, "%p %llx\n", realm, realm->ino);
+ 
+ 	rb_erase(&realm->node, &mdsc->snap_realms);
+ 	mdsc->num_snap_realms--;
+@@ -306,7 +306,7 @@ static int adjust_snap_realm_parent(struct ceph_mds_client *mdsc,
+ 		if (IS_ERR(parent))
+ 			return PTR_ERR(parent);
+ 	}
+-	doutc(cl, "%llx %p: %llx %p -> %llx %p\n", realm->ino, realm,
++	boutc(cl, "%llx %p: %llx %p -> %llx %p\n", realm->ino, realm,
+ 	      realm->parent_ino, realm->parent, parentino, parent);
+ 	if (realm->parent) {
+ 		list_del_init(&realm->child_item);
+@@ -365,7 +365,7 @@ static int build_snap_context(struct ceph_mds_client *mdsc,
+ 	    realm->cached_context->seq == realm->seq &&
+ 	    (!parent ||
+ 	     realm->cached_context->seq >= parent->cached_context->seq)) {
+-		doutc(cl, "%llx %p: %p seq %lld (%u snaps) (unchanged)\n",
++		boutc(cl, "%llx %p: %p seq %lld (%u snaps) (unchanged)\n",
+ 		      realm->ino, realm, realm->cached_context,
+ 		      realm->cached_context->seq,
+ 		      (unsigned int)realm->cached_context->num_snaps);
+@@ -405,7 +405,7 @@ static int build_snap_context(struct ceph_mds_client *mdsc,
+ 
+ 	sort(snapc->snaps, num, sizeof(u64), cmpu64_rev, NULL);
+ 	snapc->num_snaps = num;
+-	doutc(cl, "%llx %p: %p seq %lld (%u snaps)\n", realm->ino, realm,
++	boutc(cl, "%llx %p: %p seq %lld (%u snaps)\n", realm->ino, realm,
+ 	      snapc, snapc->seq, (unsigned int) snapc->num_snaps);
+ 
+ 	ceph_put_snap_context(realm->cached_context);
+@@ -460,7 +460,7 @@ static void rebuild_snap_realms(struct ceph_mds_client *mdsc,
+ 
+ 		last = build_snap_context(mdsc, _realm, &realm_queue,
+ 					  dirty_realms);
+-		doutc(cl, "%llx %p, %s\n", realm->ino, realm,
++		boutc(cl, "%llx %p, %s\n", realm->ino, realm,
+ 		      last > 0 ? "is deferred" : !last ? "succeeded" : "failed");
+ 
+ 		/* is any child in the list ? */
+@@ -557,13 +557,13 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
+ 		   as no new writes are allowed to start when pending, so any
+ 		   writes in progress now were started before the previous
+ 		   cap_snap.  lucky us. */
+-		doutc(cl, "%p %llx.%llx already pending\n", inode,
++		boutc(cl, "%p %llx.%llx already pending\n", inode,
+ 		      ceph_vinop(inode));
+ 		goto update_snapc;
+ 	}
+ 	if (ci->i_wrbuffer_ref_head == 0 &&
+ 	    !(dirty & (CEPH_CAP_ANY_EXCL|CEPH_CAP_FILE_WR))) {
+-		doutc(cl, "%p %llx.%llx nothing dirty|writing\n", inode,
++		boutc(cl, "%p %llx.%llx nothing dirty|writing\n", inode,
+ 		      ceph_vinop(inode));
+ 		goto update_snapc;
+ 	}
+@@ -584,13 +584,13 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
+ 	} else {
+ 		if (!(used & CEPH_CAP_FILE_WR) &&
+ 		    ci->i_wrbuffer_ref_head == 0) {
+-			doutc(cl, "%p %llx.%llx no new_snap|dirty_page|writing\n",
++			boutc(cl, "%p %llx.%llx no new_snap|dirty_page|writing\n",
+ 			      inode, ceph_vinop(inode));
+ 			goto update_snapc;
+ 		}
+ 	}
+ 
+-	doutc(cl, "%p %llx.%llx cap_snap %p queuing under %p %s %s\n",
++	boutc(cl, "%p %llx.%llx cap_snap %p queuing under %p %s %s\n",
+ 	      inode, ceph_vinop(inode), capsnap, old_snapc,
+ 	      ceph_cap_string(dirty), capsnap->need_flush ? "" : "no_flush");
+ 	ihold(inode);
+@@ -624,7 +624,7 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
+ 	list_add_tail(&capsnap->ci_item, &ci->i_cap_snaps);
+ 
+ 	if (used & CEPH_CAP_FILE_WR) {
+-		doutc(cl, "%p %llx.%llx cap_snap %p snapc %p seq %llu used WR,"
++		boutc(cl, "%p %llx.%llx cap_snap %p snapc %p seq %llu used WR,"
+ 		      " now pending\n", inode, ceph_vinop(inode), capsnap,
+ 		      old_snapc, old_snapc->seq);
+ 		capsnap->writing = 1;
+@@ -643,7 +643,7 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
+ 		ci->i_head_snapc = NULL;
+ 	} else {
+ 		ci->i_head_snapc = ceph_get_snap_context(new_snapc);
+-		doutc(cl, " new snapc is %p\n", new_snapc);
++		boutc(cl, " new snapc is %p\n", new_snapc);
+ 	}
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+@@ -677,7 +677,7 @@ int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
+ 	capsnap->truncate_size = ci->i_truncate_size;
+ 	capsnap->truncate_seq = ci->i_truncate_seq;
+ 	if (capsnap->dirty_pages) {
+-		doutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s "
++		boutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s "
+ 		      "s=%llu still has %d dirty pages\n", inode,
+ 		      ceph_vinop(inode), capsnap, capsnap->context,
+ 		      capsnap->context->seq,
+@@ -691,7 +691,7 @@ int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
+ 	 * And trigger to flush the buffer immediately.
+ 	 */
+ 	if (ci->i_wrbuffer_ref) {
+-		doutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s "
++		boutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s "
+ 		      "s=%llu used WRBUFFER, delaying\n", inode,
+ 		      ceph_vinop(inode), capsnap, capsnap->context,
+ 		      capsnap->context->seq, ceph_cap_string(capsnap->dirty),
+@@ -701,7 +701,7 @@ int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
+ 	}
+ 
+ 	set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
+-	doutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s s=%llu\n",
++	boutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s s=%llu\n",
+ 	      inode, ceph_vinop(inode), capsnap, capsnap->context,
+ 	      capsnap->context->seq, ceph_cap_string(capsnap->dirty),
+ 	      capsnap->size);
+@@ -727,7 +727,7 @@ static void queue_realm_cap_snaps(struct ceph_mds_client *mdsc,
+ 	struct inode *lastinode = NULL;
+ 	struct ceph_cap_snap *capsnap = NULL;
+ 
+-	doutc(cl, "%p %llx inode\n", realm, realm->ino);
++	boutc(cl, "%p %llx inode\n", realm, realm->ino);
+ 
+ 	spin_lock(&realm->inodes_with_caps_lock);
+ 	list_for_each_entry(ci, &realm->inodes_with_caps, i_snap_realm_item) {
+@@ -766,7 +766,7 @@ static void queue_realm_cap_snaps(struct ceph_mds_client *mdsc,
+ 
+ 	if (capsnap)
+ 		kmem_cache_free(ceph_cap_snap_cachep, capsnap);
+-	doutc(cl, "%p %llx done\n", realm, realm->ino);
++	boutc(cl, "%p %llx done\n", realm, realm->ino);
+ }
+ 
+ /*
+@@ -795,7 +795,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 
+ 	lockdep_assert_held_write(&mdsc->snap_rwsem);
+ 
+-	doutc(cl, "deletion=%d\n", deletion);
++	boutc(cl, "deletion=%d\n", deletion);
+ more:
+ 	realm = NULL;
+ 	rebuild_snapcs = 0;
+@@ -825,7 +825,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 	rebuild_snapcs += err;
+ 
+ 	if (le64_to_cpu(ri->seq) > realm->seq) {
+-		doutc(cl, "updating %llx %p %lld -> %lld\n", realm->ino,
++		boutc(cl, "updating %llx %p %lld -> %lld\n", realm->ino,
+ 		      realm, realm->seq, le64_to_cpu(ri->seq));
+ 		/* update realm parameters, snap lists */
+ 		realm->seq = le64_to_cpu(ri->seq);
+@@ -849,15 +849,15 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 
+ 		rebuild_snapcs = 1;
+ 	} else if (!realm->cached_context) {
+-		doutc(cl, "%llx %p seq %lld new\n", realm->ino, realm,
++		boutc(cl, "%llx %p seq %lld new\n", realm->ino, realm,
+ 		      realm->seq);
+ 		rebuild_snapcs = 1;
+ 	} else {
+-		doutc(cl, "%llx %p seq %lld unchanged\n", realm->ino, realm,
++		boutc(cl, "%llx %p seq %lld unchanged\n", realm->ino, realm,
+ 		      realm->seq);
+ 	}
+ 
+-	doutc(cl, "done with %llx %p, rebuild_snapcs=%d, %p %p\n", realm->ino,
++	boutc(cl, "done with %llx %p, rebuild_snapcs=%d, %p %p\n", realm->ino,
+ 	      realm, rebuild_snapcs, p, e);
+ 
+ 	/*
+@@ -946,7 +946,7 @@ static void flush_snaps(struct ceph_mds_client *mdsc)
+ 	struct inode *inode;
+ 	struct ceph_mds_session *session = NULL;
+ 
+-	doutc(cl, "begin\n");
++	boutc(cl, "begin\n");
+ 	spin_lock(&mdsc->snap_flush_lock);
+ 	while (!list_empty(&mdsc->snap_flush_list)) {
+ 		ci = list_first_entry(&mdsc->snap_flush_list,
+@@ -961,7 +961,7 @@ static void flush_snaps(struct ceph_mds_client *mdsc)
+ 	spin_unlock(&mdsc->snap_flush_lock);
+ 
+ 	ceph_put_mds_session(session);
+-	doutc(cl, "done\n");
++	boutc(cl, "done\n");
+ }
+ 
+ /**
+@@ -1048,7 +1048,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 	trace_len = le32_to_cpu(h->trace_len);
+ 	p += sizeof(*h);
+ 
+-	doutc(cl, "from mds%d op %s split %llx tracelen %d\n", mds,
++	boutc(cl, "from mds%d op %s split %llx tracelen %d\n", mds,
+ 	      ceph_snap_op_name(op), split, trace_len);
+ 
+ 	down_write(&mdsc->snap_rwsem);
+@@ -1080,7 +1080,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 				goto out;
+ 		}
+ 
+-		doutc(cl, "splitting snap_realm %llx %p\n", realm->ino, realm);
++		boutc(cl, "splitting snap_realm %llx %p\n", realm->ino, realm);
+ 		for (i = 0; i < num_split_inos; i++) {
+ 			struct ceph_vino vino = {
+ 				.ino = le64_to_cpu(split_inos[i]),
+@@ -1105,12 +1105,12 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 			 */
+ 			if (ci->i_snap_realm->created >
+ 			    le64_to_cpu(ri->created)) {
+-				doutc(cl, " leaving %p %llx.%llx in newer realm %llx %p\n",
++				boutc(cl, " leaving %p %llx.%llx in newer realm %llx %p\n",
+ 				      inode, ceph_vinop(inode), ci->i_snap_realm->ino,
+ 				      ci->i_snap_realm);
+ 				goto skip_inode;
+ 			}
+-			doutc(cl, " will move %p %llx.%llx to split realm %llx %p\n",
++			boutc(cl, " will move %p %llx.%llx to split realm %llx %p\n",
+ 			      inode, ceph_vinop(inode), realm->ino, realm);
+ 
+ 			ceph_get_snap_realm(mdsc, realm);
+@@ -1211,7 +1211,7 @@ struct ceph_snapid_map* ceph_get_snapid_map(struct ceph_mds_client *mdsc,
+ 	}
+ 	spin_unlock(&mdsc->snapid_map_lock);
+ 	if (exist) {
+-		doutc(cl, "found snapid map %llx -> %x\n", exist->snap,
++		boutc(cl, "found snapid map %llx -> %x\n", exist->snap,
+ 		      exist->dev);
+ 		return exist;
+ 	}
+@@ -1256,12 +1256,12 @@ struct ceph_snapid_map* ceph_get_snapid_map(struct ceph_mds_client *mdsc,
+ 	if (exist) {
+ 		free_anon_bdev(sm->dev);
+ 		kfree(sm);
+-		doutc(cl, "found snapid map %llx -> %x\n", exist->snap,
++		boutc(cl, "found snapid map %llx -> %x\n", exist->snap,
+ 		      exist->dev);
+ 		return exist;
+ 	}
+ 
+-	doutc(cl, "create snapid map %llx -> %x\n", sm->snap, sm->dev);
++	boutc(cl, "create snapid map %llx -> %x\n", sm->snap, sm->dev);
+ 	return sm;
+ }
+ 
+@@ -1308,7 +1308,7 @@ void ceph_trim_snapid_map(struct ceph_mds_client *mdsc)
+ 	while (!list_empty(&to_free)) {
+ 		sm = list_first_entry(&to_free, struct ceph_snapid_map, lru);
+ 		list_del(&sm->lru);
+-		doutc(cl, "trim snapid map %llx -> %x\n", sm->snap, sm->dev);
++		boutc(cl, "trim snapid map %llx -> %x\n", sm->snap, sm->dev);
+ 		free_anon_bdev(sm->dev);
+ 		kfree(sm);
+ 	}
 -- 
 2.34.1
 
