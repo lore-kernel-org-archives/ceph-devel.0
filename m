@@ -1,71 +1,72 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F30B642377F
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 14:59:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD47C2BEC27
+	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 15:07:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783349972; cv=none; b=UmRA6l4SCjlNT8qtRPjb0A/awH9FYj1Y+KJzlbfRRfc27P/qKxC4dCP+YdsY8DV2uEJxwBlx4viCj/j5gRr5JuiLhTg/83y0KX280MX0kH4INACzj7LlorSsIEOerDCOSgqLxPNVIGPHveNkAAA3hDYxyOBSBOCF6DFuN0N7Qt8=
+	t=1783350426; cv=none; b=ScHgiXAqQN8aNOnZFN5ZUe6JXKIWSwllwty0FGQf0B0oIPfwr/4aW62Ibhd4EWIy9uuXbaxZj6f/2xEhivT5qCXulQTO5oWJw0bVEu5f7kfupIhkEjJW6RGYRphUd6oxzXwivbtPpNZWV9IOO76tYtmw10b72z9ZTm+FoBzhojA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783349972; c=relaxed/simple;
-	bh=mSF8IHEnaLUQN+8ULeKs1g8+1rEm//DN2j8bXKSazyo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=RYHfFe0rgvf/OIWcsmOvhpcqR58gCdHBN3j20w1hHuEBvB6fqJnEVjqOw5GJnvhMzwXNBmrZuk4RnMywE3GxECJIuNX0W2jwhahLnVTNL/AoWhdp8ydrkoE7XJJnDkrt9bvSnOhfk9KxEXnPuA4mCR+9fs0xsiDLlsRTFZrH9bc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=ABj3wIvA; arc=none smtp.client-ip=209.85.128.49
+	s=arc-20240116; t=1783350426; c=relaxed/simple;
+	bh=qhMAi5KmiohwSCCqT2HrcIJcCDFqUKinbe4/58G4JwM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aa7njHax6veWHbZNWQsInvKnSHtQ86ke2s71aTpuTZfIvCM2eh1Aiug694Xdv+/Ylcy0sPR1d75aIBUOJzS9ihhfm9jwz5+lrsNOx5CyiNgRDe+2n5XbTnEV5JbQhwmL0a7spSbfGgg/BApqh8OGx3lB+zhqx24bCcV5m0vi1dw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=NVn6zA9/; arc=none smtp.client-ip=209.85.221.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="ABj3wIvA"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-493c5220cb7so24121425e9.3
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 07:59:29 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="NVn6zA9/"
+Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-4720d22c94aso3106956f8f.1
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 08:07:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1783349968; x=1783954768; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1783350422; x=1783955222; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=QeStcLSdfwxcN44D9Oy9a8bVFzM7p1YOmb/gfi7ptzo=;
-        b=ABj3wIvAn0cwY5b7ji6L/g9kAD5f9N535pxF04CES+PQkmuglOq91FjgRQRqHSzQFM
-         A0fCv5ustBKtmIiH/CqgJBbWJ2phe97zM7iNl03CuCePw8nCLcSIE9tIQhJfFl1rAHwd
-         o34D+Q0ETigImwcf4CHdRAsqYGubtZPjbYYd9bXSGFbRB3upRegy6Avr4MTAApYBzWg+
-         ZYswMFet0yXyxoTp3FsF1fxfKjukqGuDC+XiptEug2bSQUC7UqG7J35F95+VgfeVfv0K
-         BSLRAxdafIRQBlPUmvCykzuwErV6mvvHHn1IAmoa8vK/PSkw6YnqOxlz6FQlRu433rGr
-         MD5A==
+        bh=ZhkuZBeVv8WpMV3dUfcpoEc5Qq3IQLo93rDLEp2ApNU=;
+        b=NVn6zA9/rZXB6MulSnAs+flmWsJ3Wg5j3lhjgZWkxcQ7hYv4ivKpNBJxEFhLGOkKjL
+         z+41z5k9SezQBGNZMIUyzioGjyZNQ8Lf+Q8vQ+SSDP8Lqnfi3omDAbE3H7VySbw+hMJK
+         +RwQRChStBXC49V0Aldez8GBBCjgmCPQSl/l3hUJ6t+EOmSPYPOCdsAEn1+MCYb0R4cz
+         4E0dRhYC8jPMHYnvGWp4/FmsHbyAW50YSxyluTcVqm+VcfCoVHewKAC84wBmahZhmVnc
+         ceJuJr5jk/VFQuTwpHMjksBHJRVDXoa8X4VMGgZ2VHo617hqgxKpPlwjfYL/mBmmeVcp
+         GTGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783349968; x=1783954768;
+        d=1e100.net; s=20251104; t=1783350422; x=1783955222;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=QeStcLSdfwxcN44D9Oy9a8bVFzM7p1YOmb/gfi7ptzo=;
-        b=me4TKX5AHrwVvlwO86hwdXKjNbsifpWiRSpvH24BUAg3tDoDDsSUUNB0yCYSdDRIhX
-         44arukKTtVat4Jmupgr9cI3mw2dGr/JCxcp5LEyBlfaTdIvWUdcq5g32Xbt5ZvJAWCtG
-         NVYHJ6fycapPjut6UnKi0XpulTW0+dYlnW2FN7uF8lNPkPrQH0dR1jSLKeWupbvwBhWg
-         2Ryhq3z7CnHWWHaIKH4ZvY6hdGb6zkOsWugSIY1CGPnD34cszqbI4KUVrzeMV6gotfeu
-         YnQrBmOw2iVVuLui7aZZMAGLsd//Oe2e6sJDiAA9zxbvPQVFd+p2ut6APDytFD/lxoaP
-         6UDg==
-X-Forwarded-Encrypted: i=1; AHgh+RqyzyFQTUE8fO0orOo7vPsO4bofuu95QYRvoXAV6/Qa+eZJfEAjo6s0H06258Z3+k45tmiOT1IOCm/v@vger.kernel.org
-X-Gm-Message-State: AOJu0YxjyPVo/9xVzpJo8nXvjRfWX56vFvWsqr3qG0/m0t8ijjUXGjMF
-	z2sTsdz6qHO4xi6CIMJBEOyPH9O4qhcDmeagmVGchsBRAPmzUNcgpWsL7IIe3GIRB/A=
-X-Gm-Gg: AfdE7cn0monuaBUyChaj+fiTOH6MpzRnr0LV+opFwmWZb3ez6Zf/weWkZSbqJYoVJhQ
-	q6uvKmrIkQ3d079DaYjGfh/UAiB4tfD1AldVfp78nouVuLdMh42yyNAceOBi8rjumZqHRHl4znx
-	zd38EA5HXWAhuIf6fQxw0dhbVUsUIXZr5BS3hXFiZs+u5olSL3aMkLTSN96LlPL0snSe96pyzTj
-	WghWVy9adZmAU9uqSuUQEU5RcGznCRmvuF82Ha4aFGinHXYiqOaogPJONql4vAF5aMwoLb8uFxI
-	EIEQVoKOH6SJjovdB/p3GS6XVmjxr8zuMKb6cJyyjSI17to6ZdZc6WAU9Hni+7hqHzhDUpWxYZY
-	d2+oultnx5DwbKuRHqJH2UL68ihpQnRvhmKQaMzmJ66rLqYTrf4fTudKENkk+TQaDxymrmTlZHm
-	QprtcwzzSsJfP5TbKfLKkJsyQqoS0Je0v4nxofT4PtIB2abu+QdYimbGa1LPqgvJqLFggZt5Qb0
-	4KdO21+64mtYOyU
-X-Received: by 2002:a05:600c:6992:b0:493:b2c1:b2f8 with SMTP id 5b1f17b1804b1-493df0386efmr9498955e9.4.1783349968265;
-        Mon, 06 Jul 2026 07:59:28 -0700 (PDT)
+        bh=ZhkuZBeVv8WpMV3dUfcpoEc5Qq3IQLo93rDLEp2ApNU=;
+        b=H8wLWU4RAfRiV+YUK3ZhRj4Z9BOs0pdb/tVt14nzIi7s4mb8J2D/FvkWuHwxm3i8Cd
+         m0sLyRUcZvPaVU7bhT4afMnSOPcJHoQl31CxkMzA2umbSePHlcZc29LvZCu06DYZ4lLE
+         //xMWck3nlrspRGivNhDbckB00nI4oHIfJMiseIfQQe0tlN6HAFLlbCKIYks5XCbFFf8
+         0PC1q4sXIvuZZPtNK/FsLnc8QtoCqXuEAIu+8k+92VOJDx8ONcjChXjeW77GdfYvFoPh
+         K6PXgZzlJcRnxcp1CREfFn6Irc7Pmy64jEG/r5Z1nSWXI1gEGpkjaIE27e0suiLlFFy5
+         Bkbg==
+X-Forwarded-Encrypted: i=1; AHgh+RqL9p7LBQ0lbaXtIrYz49jkKlsn7z6gxZd7yF9wDthF3GAlLwifW9AKlkZvgMjcZbI9N/Mm4/8JvlCg@vger.kernel.org
+X-Gm-Message-State: AOJu0YzF3fScS+tC5Kk5EjPc7Hmn6v/hvf6O2LEkpL1frapmWbUCT0hC
+	IGSlKkoFHeL0qynWk/vIrb7oUXWWLclPTXGfY802BWJMGR4adjTIN9vp6QPitL+RtMg=
+X-Gm-Gg: AfdE7cmWbosfXtNDKLc27uLtLUloUUow6LHf4gPtjJXTWPvo48jFjXxedYWwbKeRA5k
+	F++2iSEq12fqiFWnXZ7dw2dgg346wnqBpuXq2vLBCEDcZJlNQ4TWm6kFC5J69/6mzTl5/DF7bq/
+	JqT9t6gQ5SLQX4TP8E1wND7XjY9u40/4rldldMiAje+/riyJgSUGHurtrbLH1uQYe7Y4qGpwg1b
+	2r0wYfEe1aZIeqk4pNAbCoEKgv+3bKMims7ttFwY/tfZFIF/LfFXe24OiyEKrieaziCaUF/7Zbu
+	OOgKueFtFdfaJf5HEHDkQnrhJ0mJvgrj98/SBemItT3hyL5KGLNLEItm50DECJOloMw6neeWfkp
+	zBnmp7Uc0Es1PJxK3ujZ7ugN+eDrOs4iHIiRyv3dw5CiK1UfzaXnjQtY3dJ8LLG9IzHJ+3RxxLY
+	4rzmGuHONm2PK6AkMaeTKeLQviu/cXIQLt+ZlgDN+XdF1rQAyhB2R6rAt2kYSySPK5eNudH37xn
+	jgmQnE9OHJ2oiXh
+X-Received: by 2002:a05:6000:1a87:b0:472:c96c:eeb with SMTP id ffacd0b85a97d-47de6609b1amr911302f8f.0.1783350421874;
+        Mon, 06 Jul 2026 08:07:01 -0700 (PDT)
 Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47a9e3e2702sm25592916f8f.9.2026.07.06.07.59.27
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47aa0f2186bsm24921043f8f.36.2026.07.06.08.07.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jul 2026 07:59:27 -0700 (PDT)
+        Mon, 06 Jul 2026 08:07:01 -0700 (PDT)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: idryomov@gmail.com,
 	amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH v2] fs/ceph/caps: skip __touch_cap() most of the time
-Date: Mon,  6 Jul 2026 16:59:25 +0200
-Message-ID: <20260706145925.3989710-1-max.kellermann@ionos.com>
+Cc: Max Kellermann <max.kellermann@ionos.com>,
+	stable@vger.kernel.org
+Subject: [PATCH v2] ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
+Date: Mon,  6 Jul 2026 17:06:59 +0200
+Message-ID: <20260706150659.3993925-1-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -75,97 +76,159 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-__touch_cap() moves one capability to the end of the LRU list; this
-list is sorted by access time for just one thing: ceph_trim_caps().
-That function is supposed to discard the least-recently used
-capabilities.
+A reader can hang forever in __ceph_get_caps() when the client no
+longer holds `FILE_RD`, but local cap state still says that the
+capability is already wanted (via `mds_wanted`).
 
-__touch_cap() is called extremely often - several times for every
-system call, but ceph_trim_caps() is only called rarely.
+One way to trigger this is through MDS cap revocation.  If another
+client performs a conflicting operation, the MDS can revoke `FILE_RD`
+from the reader; the next read then has to reacquire `FILE_RD`.  If
+the cap update that should request `FILE_RD` never reaches the MDS
+after `cap->mds_wanted` was raised, the reader is left holding only
+non-file caps while local `mds_wanted` still includes the file read
+caps.
 
-__touch_cap() causes considerable lock contention on
-`ceph_mds_session.s_cap_lock`; this is a /proc/lock_stat I captured on
-one of our web servers for 5 minutes:
+In that state, try_get_cap_refs() sees `need <= mds_wanted` and
+returns 0, so __ceph_get_caps() just waits on `i_cap_wq`.  If the cap
+update that was supposed to request `FILE_RD never reaches the MDS
+after `cap->mds_wanted was` raised, no further request is sent and the
+waiter can sleep indefinitely until unrelated cap traffic happens to
+wake it up.
 
-      class name    con-bounces    contentions   waittime-min   waittime-max waittime-total   waittime-avg    acq-bounces   acquisitions   holdtime-min   holdtime-max holdtime-total   holdtime-avg
+The ordering issue is that `cap->mds_wanted` is updated in
+__prep_cap() before the `CEPH_MSG_CLIENT_CAPS message` is actually
+queued for send.  That makes one field serve two different meanings at
+once: what this client wants, and what the client believes the MDS
+already knows it wants.
 
-  &s->s_cap_lock:     336304046      341686597           0.04        4905.76   418498578.76           1.22      892783632     1957814739           0.04         959.40   355752146.24           0.18
-  --------------
-  &s->s_cap_lock      339379730          [<00000000a2197200>] __ceph_caps_issued_mask+0x1bc/0x240
-  &s->s_cap_lock        1268054          [<00000000c96a24b7>] ceph_add_cap+0x234/0x3e0
-  &s->s_cap_lock        1021360          [<00000000aa76f996>] ceph_add_cap+0x108/0x3e0
-  &s->s_cap_lock          16042          [<0000000099463548>] __ceph_remove_cap+0x1f4/0x270
-  --------------
-  &s->s_cap_lock      338509619          [<00000000a2197200>] __ceph_caps_issued_mask+0x1bc/0x240
-  &s->s_cap_lock        1937864          [<00000000c96a24b7>] ceph_add_cap+0x234/0x3e0
-  &s->s_cap_lock        1203451          [<00000000aa76f996>] ceph_add_cap+0x108/0x3e0
-  &s->s_cap_lock            202          [<00000000888f212a>] __ceph_remove_cap+0x7c/0x270
+A proper fix would be to split those states and track whether a cap
+update is actually in flight or has been observed by the MDS.
+However, simply moving the `cap->mds_wanted assignment` later would
+not be sufficient: queueing the message in the messenger does not
+guarantee that the MDS processed that specific wanted set, and
+reconnect or message loss can still invalidate that assumption.
+Fixing that properly would require a larger rework of the cap state
+machine.
 
-In this /proc/lock_stat output, __touch_cap() is inlined in
-__ceph_caps_issued_mask().  It is responsible for 99% of all
-contentions.
+To allow simpler backports to stable kernels, this patch implements a
+simpler workaround:
 
-Since __touch_cap() is called so often, it is acceptable to just skip
-most calls.  The most busy capabilities will still gravitate towards
-the end of the linked list, and if not, it doesn't hurt as much as the
-lock contention.  This is still good enough for ceph_trim_caps().
+- stop waiting forever in __ceph_get_caps(); after a bounded wait,
+  fall back to the renew path
 
-This patch adds a static variable that gets incremented with each
-call, and 255 out of 256 calls will just be skipped.  I didn't bother
-to make the increment atomic or use READ_ONCE because I don't think
-that makes a practical difference for this use case.
+- make ceph_renew_caps() issue a synchronous `OPEN` request whenever
+  the inode still does not actually hold the wanted caps, instead of
+  only calling ceph_check_caps()
 
-Another /proc/lock_stat for 5 minutes with this patch (__touch_cap()
-is no longer inlined probably because it contains a static variable):
+The extra issued-vs-wanted check in ceph_renew_caps() is necessary
+because the previous test only checked whether the inode still had any
+real caps at all.  That is not enough after revocation: the client can
+still hold something like `pLs` and yet be missing `FILE_RD`
+completely.  In that case, falling back to ceph_check_caps() is not
+sufficient, because it still trusts `cap->mds_wanted` and may resend
+nothing.  By requiring `(issued & wanted) == wanted` before taking the
+asynchronous path, the code only uses ceph_check_caps() when the
+`wanted caps` are already actually issued.  Otherwise, it sends the
+synchronous `OPEN` renew.
 
-      class name    con-bounces    contentions   waittime-min   waittime-max waittime-total   waittime-avg    acq-bounces   acquisitions   holdtime-min   holdtime-max holdtime-total   holdtime-avg
+This preserves the existing asynchronous fast path when the wanted
+caps are already issued, avoids changing cap-state semantics, and
+fixes the hang by guaranteeing that a stalled waiter eventually
+retries through a path that does not rely on the stale `mds_wanted`
+state.
 
-  &s->s_cap_lock:       1043711        1065182           0.04         502.72      737472.88           0.69       10522578       25069948           0.04         796.44    11053669.64           0.44
-  --------------
-  &s->s_cap_lock        1043074          [<00000000f4367d73>] __touch_cap.isra.0+0x50/0xa8
-  &s->s_cap_lock          12147          [<0000000096f45706>] ceph_add_cap+0x234/0x3e0
-  &s->s_cap_lock           9472          [<0000000038a23e0f>] ceph_add_cap+0x108/0x3e0
-  &s->s_cap_lock            471          [<00000000e2eba934>] __ceph_remove_cap+0x1f4/0x270
-  --------------
-  &s->s_cap_lock         978499          [<00000000f4367d73>] __touch_cap.isra.0+0x50/0xa8
-  &s->s_cap_lock          57794          [<0000000038a23e0f>] ceph_add_cap+0x108/0x3e0
-  &s->s_cap_lock          27226          [<0000000096f45706>] ceph_add_cap+0x234/0x3e0
-  &s->s_cap_lock           1581          [<00000000e2eba934>] __ceph_remove_cap+0x1f4/0x270
-
-__touch_cap() is still responsible for 91% of all contentions, but the
-number of contentions has been reduced by a factor of 320 and the
-total wait time by a factor of 567.
-
+Fixes: 0a454bdd501a ("ceph: reorganize __send_cap for less spinlock abuse")
+Cc: stable@vger.kernel.org
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
 v1->v2:
-- add data_race() annotation
-- use the proprietary "u8" typedef instead of the standard "uint8_t" type
-
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+- add "Fixes" tag
+- remove unrelated CEPH_FILE_MODE_MASK hunk
+- convert const variable `wait_timeout` to global macro in libceph.h
 ---
- fs/ceph/caps.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ fs/ceph/caps.c               | 16 ++++++++++++++--
+ fs/ceph/file.c               |  9 +++++----
+ include/linux/ceph/libceph.h |  1 +
+ 3 files changed, 20 insertions(+), 6 deletions(-)
 
 diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 4b37d9ffdf7f..876201075623 100644
+index 4b37d9ffdf7f..5907059592d3 100644
 --- a/fs/ceph/caps.c
 +++ b/fs/ceph/caps.c
-@@ -871,6 +871,14 @@ static void __touch_cap(struct ceph_cap *cap)
- 	struct inode *inode = &cap->ci->netfs.inode;
- 	struct ceph_mds_session *s = cap->session;
- 	struct ceph_client *cl = s->s_mdsc->fsc->client;
-+	static u8 skip_counter;
+@@ -3094,7 +3094,18 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
+ 					ret = -ERESTARTSYS;
+ 					break;
+ 				}
+-				wait_woken(&wait, TASK_INTERRUPTIBLE, MAX_SCHEDULE_TIMEOUT);
 +
-+	if (data_race(++skip_counter))
-+		/* skip this call most of the time to reduce lock
-+		 * contention; the LRU list is still accurate enough
-+		 * for ceph_trim_caps()
-+		 */
-+		return;
++				/*
++				 * If a cap update is lost after
++				 * mds_wanted was raised, waiting
++				 * forever will never make progress.
++				 * Retry the renew path periodically
++				 * so we can resend synchronously.
++				 */
++				if (!wait_woken(&wait, TASK_INTERRUPTIBLE, CEPH_GET_CAPS_WAIT_TIMEOUT)) {
++					ret = -EUCLEAN;
++					break;
++				}
+ 			}
  
- 	spin_lock(&s->s_cap_lock);
- 	if (!s->s_cap_iterator) {
+ 			remove_wait_queue(&ci->i_cap_wq, &wait);
+@@ -3128,7 +3139,8 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
+ 				continue;
+ 			}
+ 			if (ret == -EUCLEAN) {
+-				/* session was killed, try renew caps */
++				/* session was killed or a waited cap
++				 * request needs a retry */
+ 				ret = ceph_renew_caps(inode, flags);
+ 				if (ret == 0)
+ 					continue;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 71161f2b2151..a4a2a4b6a027 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -314,7 +314,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
+ }
+ 
+ /*
+- * try renew caps after session gets killed.
++ * Retry cap acquisition after a stale session or a lost cap update.
+  */
+ int ceph_renew_caps(struct inode *inode, int fmode)
+ {
+@@ -322,14 +322,15 @@ int ceph_renew_caps(struct inode *inode, int fmode)
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_mds_request *req;
+-	int err, flags, wanted;
++	int err, flags, wanted, issued;
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+ 	__ceph_touch_fmode(ci, mdsc, fmode);
+ 	wanted = __ceph_caps_file_wanted(ci);
++	issued = __ceph_caps_issued(ci, NULL);
+ 	if (__ceph_is_any_real_caps(ci) &&
+-	    (!(wanted & CEPH_CAP_ANY_WR) || ci->i_auth_cap)) {
+-		int issued = __ceph_caps_issued(ci, NULL);
++	    (!(wanted & CEPH_CAP_ANY_WR) || ci->i_auth_cap) &&
++	    (issued & wanted) == wanted) {
+ 		spin_unlock(&ci->i_ceph_lock);
+ 		doutc(cl, "%p %llx.%llx want %s issued %s updating mds_wanted\n",
+ 		      inode, ceph_vinop(inode), ceph_cap_string(wanted),
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 63e0e2aa1ce9..d831a9b97c60 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -72,6 +72,7 @@ struct ceph_options {
+ /*
+  * defaults
+  */
++#define CEPH_GET_CAPS_WAIT_TIMEOUT (5 * HZ)
+ #define CEPH_MOUNT_TIMEOUT_DEFAULT	msecs_to_jiffies(60 * 1000)
+ #define CEPH_OSD_KEEPALIVE_DEFAULT	msecs_to_jiffies(5 * 1000)
+ #define CEPH_OSD_IDLE_TTL_DEFAULT	msecs_to_jiffies(60 * 1000)
 -- 
 2.47.3
 
