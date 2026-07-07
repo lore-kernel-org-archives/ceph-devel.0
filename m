@@ -1,175 +1,295 @@
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47DD1389111
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Jul 2026 21:32:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2304374A01
+	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 02:44:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783373578; cv=none; b=Wb04s2aH5m4i/AJerU1fskVSv3ulXhS3qUb9BdzwPJ57hGLjzBOqMi7uRG5ncNZHR8QmlsCxtA8SdNDaLDLFVX6uJmBE/fSvYBj4fGK6I8TT1pMeFd/ZDBfX0t5odWGufHf1xw0AV9E2rvhytylX6bthrBqTN4rcFug4kHsc7rQ=
+	t=1783392265; cv=none; b=eoFExzRFjV505uEwKMPoE3Pvz1czfzeDz6/KKZYrts3Xf9ZAfhA4GlPukLX5wkh2QUz1MZ0Vv3XPp+3i1ebHohUh2hJahlUqeV8aSudJpV9cssIAv8bkJiB4jZsP/EcE03rjuVzdsoD5/SviFwf9EKSc0l7uLijcOb/g3mqOdCs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783373578; c=relaxed/simple;
-	bh=16AGre52KACjglOSOHDbwZevBxBcMvBm/jrl3Aup3LU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=JjAACN1TvvNo/3+iXB3p9AZWCfB4yHfGSIh8w0CUB/fcm6sVXrwar1ZT93XXUZinyrkNh1aBsg+Ll0OG6RPkWpA5yMwzepN/vbT3wE5nfXj78oxqGjIq3yoXlXCZgDTFvM0b6U2Wpu/xxu7rSWiY5LqctbjQChv8hHckXCvUZcI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=rzLAl/Sz; arc=none smtp.client-ip=209.85.128.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
+	s=arc-20240116; t=1783392265; c=relaxed/simple;
+	bh=1PLq6WY4CnR0zi7/8JoPBsNi9U2U+pDCnLrimvlEcck=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Y4sVIJFNvNopfOb1P+UxHatjoRD8Jp5n90SGaZtwTDHN+4S0YRNb190BCteIcUTCZhSqC3Ho3Y7yGmwwpMTw3FYTXcxQ3mBXOGavWqP/arpSmKYhS/QTO4DilyCb2/wJhTQAF4AzhlYPW/b8iuNRhP4ktuIyEz1EMi1HiC3MpuU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bUfo2489; arc=none smtp.client-ip=209.85.210.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="rzLAl/Sz"
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-806449d108aso51430877b3.2
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 14:32:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bUfo2489"
+Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-84830c774a0so101077b3a.1
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jul 2026 19:44:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1783373576; x=1783978376; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:mime-version:message-id:date
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=H1HHG2kvBFgZpT+6uTuenonFTOapf3Lmxw4GWhzyxu0=;
-        b=rzLAl/SzdcHt8rNwgDqeh1oP+ah1Hhv77sGRAyS3lGibTXwP+4ROpa93K1NuLOel/z
-         XoKyiVB32zoTQRMwDL4N6OYVUjFn6K0TB3V2HABV4vjVMyZ6KiZaQe7aTqM32qmoBsOy
-         wf9fWIMCRjXfraEjXTX1pPNzVmtVA/Q/vxKlT8WecRw+C2PQ9b0hOMWUSMAOOaEw+dpc
-         LWa3nMR+AsPYornpRTf1zWn9MyLFxSFHRJ4rCmUfvp6MBkjfncgvfdQY5booQoIqtJ27
-         zLNVO9+1LeHyYasMMDkhYGwzgMG69Z/shhNhcQ8NQWLnXGS4adYE6/koA98s+Apdb6bA
-         nmjw==
+        d=gmail.com; s=20251104; t=1783392263; x=1783997063; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=ChMw8OaemqtHhUVBRsG61U3VgzcJsabcXu4l5Ex7ygA=;
+        b=bUfo2489xVPCAgT8PXtCZoGQxS92Uy23d20Eh8atETkpOLg6UegY8sMzPtNVABLX3m
+         jsj6B8cKkuNEOO4phubu9gVR2pM1wQEey5Z8KXNCZmOJXQrfy3rlDf+2tb4zoQ0kQMQF
+         XgMvUhc9/ELbQdmRV2IIRPHcnH9uS1FY5xDfBJ/DWOB+VN6wKQpWnGDhWtbRfofChA8i
+         e5TqzkEOhTylHCn6fbUIgnz1cwtNe5r22YtSnvDD9EaIB2QRdHpa0iKrxzJoPwA2OYcp
+         5XJrWTniG4E5nDvTj1Dv4lJrcz5rUyfQVIb+IeEd2uTQFOvXpcBFV/DI72VH185d++cT
+         h02g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783373576; x=1783978376;
-        h=content-transfer-encoding:content-type:mime-version:message-id:date
-         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=H1HHG2kvBFgZpT+6uTuenonFTOapf3Lmxw4GWhzyxu0=;
-        b=ibwCWLQ+GxHXX2qBm/5y989WKY8GrbeQ0rQaRBiIxK/vA06sYic+GwmY3O+qWOudzz
-         9swnbPVphewg8OvRIIfEvvjivIdRJdhD7wztC1QxbKgpWP3pCExgXlwU6fLFaTDJ1DrU
-         IHdiytnN6rLnMhyifgG2+LdNEaWUn8zAZELfA/l6G9z1MsvWGROBKRWgljhc2BYOY34i
-         vVNiyXjJ0NYMZYJPP5cMUpGd9m/JvXuLxJfT7R//UX+ZYeqos7CB48SynyEaeYHsjEsg
-         HwtKlcsAMsn3sSV0c3/d2v9WR71XuEwomxrer9oGuWltC3ZxG4DhJ1OTrv/tphjkRUqa
-         mrhQ==
-X-Gm-Message-State: AOJu0Yyq9xTHm7TCjGcskyOceMB5OhKOQOLmndbHxHNqa64P3m959Do0
-	lbk5pkU3NqztrCab9gwOm4/T8231HN7aw7+BsQRk9nIPip6EbhtpkkrJigLvg8btcfd8a8q6Vfq
-	Ju+Zuh9c=
-X-Gm-Gg: AfdE7cnXZN6IWofaevXQbr+26mU46fr+0rAEATow0yRRcxvedUo2qc9PPNeaSu0o+Jb
-	hxXcucRKoBW15oqTOVURprKDx8msADImfE/T8Y5lChvZldXlHVwVzw6yefcjjc6hSYdwfhp6dgP
-	kGk4WZ52f2U1H+3tnZD6S3lRcq1qp1RcYYYe2bu5AM1VgoakdiZoHbJOlRaT4T0qvZ25wZ4AFDv
-	cH/17FP/oY2tQ7SWOeKyBfZ3UnwQ2G5pzpO/B6E4jPqEFUwIFQMcbe7AOAWOVc9Ngw6KW2gFXYZ
-	v7DZDofRSHKKSI/fQAcJZB6BeF/v5Z+UBtQxACcqXpFfbfr9Urmy32OE2qq5A607dRT/YwfQnXP
-	xvgPdblc6jgLK6L/3PJjKR1EffMztvTRzeJ3NY5ysilLwaujqWW3vyytGIiWqj9L6uGy1TDqr3m
-	2OZqODEhjBNZ/NY5HNybEI/yQYR5KptUb5k3jTX64fUY2KLdpCa6uaP36OMORJ1SqG5UjlF05V0
-	1NCpg+ZggkAejuao32ofBBZ5b2wGR0Hr/g3j0+uLs7ZWcO9sPYr
-X-Received: by 2002:a05:690c:6103:b0:806:5a1c:d892 with SMTP id 00721157ae682-81be2a74bd5mr18588587b3.47.1783373576120;
-        Mon, 06 Jul 2026 14:32:56 -0700 (PDT)
-Received: from system76-pc.attlocal.net ([2600:1700:6476:1430:fc23:ea94:e881:d8a4])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81448dd0217sm62647927b3.22.2026.07.06.14.32.54
+        d=1e100.net; s=20251104; t=1783392263; x=1783997063;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=ChMw8OaemqtHhUVBRsG61U3VgzcJsabcXu4l5Ex7ygA=;
+        b=K5ZYlqFaJnf0c6oZg8Qyzje2UuXKndE696yhWu/hS+d0rc0V0xebExnk08ALb/sban
+         gFq66G6cjPDpEKJzjmiKoP8HZloHSbtoC/c9hJ9Xa/npUrOY+SCwoZ31uwI6zigNsk23
+         tc/Yj9cs+11q2KKiyEJ4cvp9eFpKgqTPWIxvCDYrVTgRvOhHmJ51s2QkAPbcFyKn93XR
+         X6aKZX9Ui1l0+oTapDrmsjAUuzAqNZ1+BkZ1JiFEqBvVSPbAZMDOZ93WJlHjBTQaXHgh
+         HBehKI9nfJHqL0bquQW4Zrwy4MMEWhi8JcqWSZtHZGpKF/y26TK9FnDSUJbmSWBXR0wC
+         nTlA==
+X-Gm-Message-State: AOJu0Yz1NjpgWpteG6j5QWw5GJLfWdoD7NccPa29P19LFqL8Qf9U7m+B
+	uj8m2k2Cr68IvHgIwXbXKA11DyLnia1Pys7gh7U6SKiP/eHtQyHaMkdx8qxRZmmtros=
+X-Gm-Gg: AfdE7cnVoKZvp+P6DjdpU5IHc9vzvCxKLatsvuUK2P1A6VgG1sc5BJcHxVaPITNrA6u
+	SPy7Cq+HPeVoYYdRCq+Ef8qp1DErbTgI/rGRRotG95gMDLPEIGKGH4tIGcmGPbpZ5+Dwepves+S
+	XpxeIXGnT68EvzsoJJ6po/KGdPCfTrXPKmy+q3Tv+6nMK6j+/Wpj9hc5p4olEGYkxb+K7pvEf8m
+	N/vUzGhmu7KeL03GFiPQ7mYhX7P8bp+6/kuYVmWAdajkmRXly3BYwfh6UZ1wPM1I9XzHiG5re7C
+	pRZjyAn7+sHHJiNOBafQM/KGh5PzLoKZ0WjG6ae0SVbkgjdDKFmL2afENaUTNr76DURKaXCOwLu
+	Y2DyM4uFiH6iKpOdMO+ktKWHzZq8GErNwzlxOtbT0uNL8qcxsG95sYkumm+oWwRvrA/uFJV6dFM
+	WtLZv0bFqbtqgA79PD/HP29DXa/1dnXg4=
+X-Received: by 2002:a05:6a00:a0d:b0:82c:e9cc:f61d with SMTP id d2e1a72fcca58-84826be1dfbmr2963495b3a.9.1783392262951;
+        Mon, 06 Jul 2026 19:44:22 -0700 (PDT)
+Received: from enjou-Legion-Y7000P-2019 ([123.114.53.210])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-847f6b64819sm4811900b3a.12.2026.07.06.19.44.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jul 2026 14:32:55 -0700 (PDT)
-From: Viacheslav Dubeyko <slava@dubeyko.com>
+        Mon, 06 Jul 2026 19:44:22 -0700 (PDT)
+From: Ren Wei <enjou1224z@gmail.com>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com,
-	pdonnell@redhat.com,
 	amarkuze@redhat.com,
-	Slava.Dubeyko@ibm.com,
 	slava@dubeyko.com,
-	vdubeyko@redhat.com,
-	sagemct@ibm.com
-Subject: [PATCH v2] ceph: fix denial of service issue in ceph_update_snap_trace()
-Date: Mon,  6 Jul 2026 14:32:41 -0700
-Message-ID: <20260706213240.139919-2-slava@dubeyko.com>
-X-Mailer: git-send-email 2.43.0
+	sage@newdream.net,
+	yuantan098@gmail.com,
+	dstsmallbird@foxmail.com,
+	edragain@163.com,
+	enjou1224z@gmail.com
+Subject: [PATCH 1/1] libceph: use RCU to protect monmap in ceph_compare_options()
+Date: Tue,  7 Jul 2026 10:44:04 +0800
+Message-ID: <8f8d2b03575328c52405f3d660b5d31e0c741ae9.1783342642.git.edragain@163.com>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <cover.1783342642.git.edragain@163.com>
+References: <cover.1783342642.git.edragain@163.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+From: Yong Wang <edragain@163.com>
 
-A WARN_ON() fires inside ceph_update_snap_trace() when the client
-receives a malformed snap trace from the MDS. The kernel additionally
-logs:
+ceph_compare_options() checks whether a new mount shares any monitor
+address with an existing client by walking client->monc.monmap via
+ceph_monmap_contains().  That comparison can run under sb_lock or
+rbd_client_list_lock, so it cannot take monc->mutex.
 
-ceph_update_snap_trace do remount to continue after corrupted snaptrace is fixed
+Meanwhile, monmap update handling replaces monc->monmap under
+monc->mutex and frees the old map immediately.  A concurrent shared-
+mount comparison can therefore dereference a freed monmap and walk
+stale mon_inst[] entries, triggering a use-after-free.
 
-indicating the client cannot recover the snap state and forces
-the operator to remount the filesystem. Triggered with the call chain
-reaching the warn from ceph_con_process_message() -> mds_dispatch()
--> ceph_update_snap_trace(). Impact: denial of service of the affected
-mount until remount; the client refuses further snap-related operations
-after the warn, so any open file in a snap-realm becomes unusable.
+Protect the compare path with RCU and publish/free monitor maps with
+rcu_assign_pointer() and kfree_rcu().  Annotate monc->monmap as an
+RCU pointer and use rcu_dereference_protected() in mutex-protected
+paths to keep the accesses consistent with the new pointer contract.
 
-[  230.026879] WARNING: fs/ceph/snap.c:926 at ceph_update_snap_trace+0x308/0x3300, CPU#1: kworker/1:1/58
-[  230.028125] Modules linked in:
-[  230.028427] CPU: 1 UID: 0 PID: 58 Comm: kworker/1:1 Not tainted 6.19.0-g44331bd6a610-dirty #9 PREEMPT(lazy)
-[  230.029089] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.14.0-0-g155821a1990b-prebuilt.qemu.org 04/01/2014
-[  230.029815] Workqueue: ceph-msgr ceph_con_workfn
-[  230.030177] RIP: 0010:ceph_update_snap_trace+0x31c/0x3300
-[  230.030550] Code: fa 48 c1 ea 03 80 3c 02 00 0f 85 23 26 00 00 48 8d 3d 28 d2 3a 05 48 8b 73 28 49 89 e9 4d 89 e8 4c 89 f1 48 c7 c2 40 40 8e 9e <67> 48 0f b9 3a e8 3a 7c db fe 48 b8 00 00 00 00 00 fc ff df 4d 8d
-[  230.031708] RSP: 0018:ffffc900003f7728 EFLAGS: 00010246
-[  230.032084] RAX: dffffc0000000000 RBX: ffff88812282d000 RCX: ffffffff9e8e3b40
-[  230.032533] RDX: ffffffff9e8e4040 RSI: 0000000000016f97 RDI: ffffffffa087e7d0
-[  230.033008] RBP: ffffffff9e8e3c00 R08: ffffffff9e8e3b40 R09: ffffffff9e8e3c00
-[  230.033460] R10: 00000000fffffffb R11: ffff888102928040 R12: ffff88811031a3e0
-[  230.033937] R13: ffffffff9e8e3b40 R14: ffffffff9e8e3b40 R15: 1ffff9200007eefd
-[  230.034401] FS:  0000000000000000(0000) GS:ffff888254a05000(0000) knlGS:0000000000000000
-[  230.034941] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[  230.035315] CR2: 00007f7efa7be740 CR3: 000000012435c000 CR4: 0000000000750ef0
-[  230.035803] PKRU: 55555554
-[  230.036001] Call Trace:
-[  230.036175]  <TASK>
-[  230.036342]  ? mds_dispatch+0x1ceb/0x6f60
-[  230.036645]  ? __pfx___might_resched+0x10/0x10
-[  230.037010]  ? iget5_locked+0x44/0xb0
-[  230.037316]  ? __pfx_ceph_update_snap_trace+0x10/0x10
-[  230.037670]  ? __pfx_down_write+0x10/0x10
-[  230.038005]  mds_dispatch+0x1dd1/0x6f60
-[  230.038306]  ? ceph_con_process_message+0x1ab/0x270
-[  230.039024]  ? lock_release+0xc7/0x270
-[  230.039321]  ? __pfx_mds_dispatch+0x10/0x10
-[  230.039622]  ? __local_bh_enable_ip+0xa1/0x110
-[  230.039992]  ceph_con_process_message+0x1f4/0x270
---
-[  321.986495] libceph: failed to decode MOSDOpReply for tid 9: -22
-[  330.121991] ------------[ cut here ]------------
+This keeps the existing non-blocking comparison semantics while
+ensuring that replaced monmaps remain alive until readers are done.
 
-The error path in ceph_update_snap_trace() is reached whenever snap trace
-decoding fails. The two entry points are:
-(1) bad — a ceph_decode_need() macro fails when the encoded snap trace does not
-contain enough bytes for the declared number of snaps or prior-parent snaps.
-(2) fail — reached directly from -ENOMEM returns (ceph_create_snap_realm(),
-dup_array(), adjust_snap_realm_parent()).
-
-This patch fixes the issue by changing WARN(1, ...) on
-pr_warn_ratelimited_client().
-
-Fixes: a68e564adcaa ("ceph: blocklist the kclient when receiving corrupted snap trace")
-Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-cc: Alex Markuze <amarkuze@redhat.com>
-cc: Ilya Dryomov <idryomov@gmail.com>
-cc: Patrick Donnelly <pdonnell@redhat.com>
-cc: Ceph Development <ceph-devel@vger.kernel.org>
+Fixes: 4e7a5dcd1bba ("ceph: negotiate authentication protocol; implement AUTH_NONE protocol")
+Cc: stable@vger.kernel.org
+Reported-by: Yuan Tan <yuantan098@gmail.com>
+Reported-by: Xin Liu <dstsmallbird@foxmail.com>
+Assisted-by: Codex:gpt-5.4
+Signed-off-by: Yong Wang <edragain@163.com>
+Reviewed-by: Ren Wei <enjou1224z@gmail.com>
 ---
- fs/ceph/snap.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ include/linux/ceph/mon_client.h |  4 +++-
+ net/ceph/ceph_common.c          | 16 ++++++++++++----
+ net/ceph/mon_client.c           | 34 ++++++++++++++++++++++-----------
+ 3 files changed, 38 insertions(+), 16 deletions(-)
 
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 9b79a5eaca93..e5d8d59ffc17 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -923,11 +923,11 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
- 		pr_err_client(cl, "failed to blocklist %s: %d\n",
- 			      ceph_pr_addr(&client->msgr.inst.addr), ret);
+diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+index 7a9a40163c0f..98a745f6d9ab 100644
+--- a/include/linux/ceph/mon_client.h
++++ b/include/linux/ceph/mon_client.h
+@@ -4,6 +4,7 @@
  
--	WARN(1, "[client.%lld] %s %s%sdo remount to continue%s",
--	     client->monc.auth->global_id, __func__,
--	     ret ? "" : ceph_pr_addr(&client->msgr.inst.addr),
--	     ret ? "" : " was blocklisted, ",
--	     err == -EIO ? " after corrupted snaptrace is fixed" : "");
-+	pr_warn_ratelimited_client(cl, "%s %s%sdo remount to continue%s",
-+			    __func__,
-+			    ret ? "" : ceph_pr_addr(&client->msgr.inst.addr),
-+			    ret ? "" : " was blocklisted, ",
-+			    err == -EIO ? " after corrupted snaptrace is fixed" : "");
+ #include <linux/completion.h>
+ #include <linux/kref.h>
++#include <linux/rcupdate.h>
+ #include <linux/rbtree.h>
  
- 	return err;
+ #include <linux/ceph/messenger.h>
+@@ -19,6 +20,7 @@ struct ceph_monmap {
+ 	struct ceph_fsid fsid;
+ 	u32 epoch;
+ 	u32 num_mon;
++	struct rcu_head rcu;
+ 	struct ceph_entity_inst mon_inst[] __counted_by(num_mon);
+ };
+ 
+@@ -69,7 +71,7 @@ struct ceph_mon_generic_request {
+ 
+ struct ceph_mon_client {
+ 	struct ceph_client *client;
+-	struct ceph_monmap *monmap;
++	struct ceph_monmap __rcu *monmap;
+ 
+ 	struct mutex mutex;
+ 	struct delayed_work delayed_work;
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 952121849180..705800e07591 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -133,6 +133,7 @@ int ceph_compare_options(struct ceph_options *new_opt,
+ {
+ 	struct ceph_options *opt1 = new_opt;
+ 	struct ceph_options *opt2 = client->options;
++	struct ceph_monmap *monmap;
+ 	int ofs = offsetof(struct ceph_options, mon_addr);
+ 	int i;
+ 	int ret;
+@@ -180,13 +181,20 @@ int ceph_compare_options(struct ceph_options *new_opt,
+ 	if (ret)
+ 		return ret;
+ 
++	rcu_read_lock();
++	monmap = rcu_dereference(client->monc.monmap);
++	ret = -1;
++
+ 	/* any matching mon ip implies a match */
+ 	for (i = 0; i < opt1->num_mon; i++) {
+-		if (ceph_monmap_contains(client->monc.monmap,
+-				 &opt1->mon_addr[i]))
+-			return 0;
++		if (ceph_monmap_contains(monmap, &opt1->mon_addr[i])) {
++			ret = 0;
++			break;
++		}
+ 	}
+-	return -1;
++
++	rcu_read_unlock();
++	return ret;
  }
+ EXPORT_SYMBOL(ceph_compare_options);
+ 
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index d2cdc8ee3155..1c7f1affa37c 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -206,19 +206,22 @@ static void __close_session(struct ceph_mon_client *monc)
+  */
+ static void pick_new_mon(struct ceph_mon_client *monc)
+ {
++	struct ceph_monmap *monmap =
++		rcu_dereference_protected(monc->monmap,
++					  lockdep_is_held(&monc->mutex));
+ 	int old_mon = monc->cur_mon;
+ 
+-	BUG_ON(monc->monmap->num_mon < 1);
++	BUG_ON(monmap->num_mon < 1);
+ 
+-	if (monc->monmap->num_mon == 1) {
++	if (monmap->num_mon == 1) {
+ 		monc->cur_mon = 0;
+ 	} else {
+-		int max = monc->monmap->num_mon;
++		int max = monmap->num_mon;
+ 		int o = -1;
+ 		int n;
+ 
+ 		if (monc->cur_mon >= 0) {
+-			if (monc->cur_mon < monc->monmap->num_mon)
++			if (monc->cur_mon < monmap->num_mon)
+ 				o = monc->cur_mon;
+ 			if (o >= 0)
+ 				max--;
+@@ -232,7 +235,7 @@ static void pick_new_mon(struct ceph_mon_client *monc)
+ 	}
+ 
+ 	dout("%s mon%d -> mon%d out of %d mons\n", __func__, old_mon,
+-	     monc->cur_mon, monc->monmap->num_mon);
++	     monc->cur_mon, monmap->num_mon);
+ }
+ 
+ /*
+@@ -240,6 +243,9 @@ static void pick_new_mon(struct ceph_mon_client *monc)
+  */
+ static void __open_session(struct ceph_mon_client *monc)
+ {
++	struct ceph_monmap *monmap =
++		rcu_dereference_protected(monc->monmap,
++					  lockdep_is_held(&monc->mutex));
+ 	int ret;
+ 
+ 	pick_new_mon(monc);
+@@ -256,7 +262,7 @@ static void __open_session(struct ceph_mon_client *monc)
+ 
+ 	dout("%s opening mon%d\n", __func__, monc->cur_mon);
+ 	ceph_con_open(&monc->con, CEPH_ENTITY_TYPE_MON, monc->cur_mon,
+-		      &monc->monmap->mon_inst[monc->cur_mon].addr);
++		      &monmap->mon_inst[monc->cur_mon].addr);
+ 
+ 	/*
+ 	 * Queue a keepalive to ensure that in case of an early fault
+@@ -542,6 +548,7 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
+ 				 struct ceph_msg *msg)
+ {
+ 	struct ceph_client *client = monc->client;
++	struct ceph_monmap *old_monmap;
+ 	struct ceph_monmap *monmap;
+ 	void *p, *end;
+ 
+@@ -564,10 +571,12 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
+ 		goto out;
+ 	}
+ 
+-	kfree(monc->monmap);
+-	monc->monmap = monmap;
++	old_monmap = rcu_dereference_protected(monc->monmap,
++					       lockdep_is_held(&monc->mutex));
++	rcu_assign_pointer(monc->monmap, monmap);
++	kfree_rcu(old_monmap, rcu);
+ 
+-	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monc->monmap->epoch);
++	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monmap->epoch);
+ 	client->have_fsid = true;
+ 
+ out:
+@@ -775,6 +784,7 @@ static void handle_statfs_reply(struct ceph_mon_client *monc,
+ int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
+ 			struct ceph_statfs *buf)
+ {
++	struct ceph_monmap *monmap;
+ 	struct ceph_mon_generic_request *req;
+ 	struct ceph_mon_statfs *h;
+ 	int ret = -ENOMEM;
+@@ -802,7 +812,9 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
+ 	h->monhdr.have_version = 0;
+ 	h->monhdr.session_mon = cpu_to_le16(-1);
+ 	h->monhdr.session_mon_tid = 0;
+-	h->fsid = monc->monmap->fsid;
++	monmap = rcu_dereference_protected(monc->monmap,
++					   lockdep_is_held(&monc->mutex));
++	h->fsid = monmap->fsid;
+ 	h->contains_data_pool = (data_pool != CEPH_NOPOOL);
+ 	h->data_pool = cpu_to_le64(data_pool);
+ 	send_generic_request(monc, req);
+@@ -1267,7 +1279,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
+ 	ceph_msg_put(monc->m_subscribe);
+ 	ceph_msg_put(monc->m_subscribe_ack);
+ 
+-	kfree(monc->monmap);
++	kfree_rcu(monc->monmap, rcu);
+ }
+ EXPORT_SYMBOL(ceph_monc_stop);
+ 
 -- 
-2.54.0
-
+2.53.0
