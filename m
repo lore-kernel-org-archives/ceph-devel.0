@@ -1,283 +1,335 @@
-Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com [209.85.222.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7FB443F4D1
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 18:06:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.169
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783447578; cv=none; b=AGHrTccU9ELzXBf0Tgo/b1ueOSuSOiJWDmrLQXdl9vDZm0g2CsGj5TR4LPho+GnwxnSa21982MeJefBuXg/wdv8ZWzwkoQeAY3WTZ8BMr+PU95U2Mp4rN2e0NKbBJf0UDIpJsfZhbkAQzSLZF6tYl5E4kMD1kEawiIYr5SPllc8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783447578; c=relaxed/simple;
-	bh=jMf54vz5lLWWAyBOm8SwuZY6wrGMxLirEhBITV9rcow=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=KUJCTq0x9q908yLLk6PSX8hanOLOnR2KdjhYx43T5xSgKX+Cr9fuv7W5ulMMlfEqpOa7FJauGwZYY2S/EnHlHvky2GbYd2pzxymwIousbN3LXa96Jmd2Wv9ZS1jRXSUTYfviWc3KuZB+6Ks0ZspHs2ILaYr2dc+GwOMky573H+0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DOfEuvuZ; arc=none smtp.client-ip=209.85.222.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F28E534B1A3;
+	Tue,  7 Jul 2026 18:30:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.156.1
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1783449058; cv=fail; b=QAVBFZ5ZLYmAy9qu7AzXSNXJM8Pqp0lPUdBixjH6BjoxCYck8l0juwzKlCedV7B6VIHhXYqYHe6CrfCkFbNNC75qam+cNXNhsBE4RSpo/ZmxcljSNf1YlhQx4HI71LKxJJE76xjpUep7Sz0JCr0l3cqi2SQ5PiX/rkIBlW76WxQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1783449058; c=relaxed/simple;
+	bh=+4fhHIM/Y0sRZMyTH/tci6k2/a6my4fa0W2l4mBk9Dw=;
+	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
+	 MIME-Version:Subject; b=dZRceXix1B/pbPpxYdSM6W39Pyh2tMqup0P4UNAffB2P5QjrB1rcpjPyJe3yBI3KjpvOrcy8Rj0Mai59qs8wlGwUvT030PoYTwre1LG6dEPEou0Y2gFcirFHu3mee3vEwkYlpVVtcylWQcPPZbaimIe4WVElFP7F7+6Aug6mqhM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Rr2fJ065; arc=fail smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DOfEuvuZ"
-Received: by mail-qk1-f169.google.com with SMTP id af79cd13be357-92e602d2c0fso60619685a.0
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 11:06:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1783447576; x=1784052376; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=xh8uKkwCGFjIS79lWu05IfbpURewrsfn5K6ej1XEKUg=;
-        b=DOfEuvuZABQZDtyfBGaM1DxDOCZx2ycChImrcP+lKgLxjfH6oJmBREY53souBYLgRU
-         JuU9Y+qyh3F7D76pUw+YpIEUiZKuQKmY7KvYlNPIkhcHkC1oXQ/l9bVA96hfdNU9/uN7
-         peQ2eUvgwzOQeYBKX4WT/SE2JJcrUtV7rG47xcyFzjUlqITpcy4GHM47zkchhm3Bn60S
-         lBnPX18zOcQkzg3iI5zguoRFmsrHOqiKz3X5fOZb9AUEfE/ChT2yPuwSOw70qRlcab4A
-         T3HII71tVeUG85j8AV/DJCqWIudbuXKlzdapvVggGKT7FzB4u3IgYAyaw9vAcNXSczWa
-         aG/A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783447576; x=1784052376;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=xh8uKkwCGFjIS79lWu05IfbpURewrsfn5K6ej1XEKUg=;
-        b=cydhxPX7oasH+yNh+yI+D0Lmv9mup8GWZMnE+OP5ABHDDrax8hbjq2UKZv/zaE8inS
-         doX527G516BeYmlBm4YXi51uCno7YK8R3gvsbp+YeLvVeMaclmZ3KjQxxIif33Fu4cxB
-         hgAWu/8N7Z0IxOws7mMGNTGil4VILoBWV7CWJK/0w4yFnRy0QMPSHyGQlDT6TIWXs7a5
-         hsvI0auKREhl6sqQFJYejMLYhL8z0xsnYhUmo1unM7c/9yqWSAeozCzKiIfRtx+rNQYd
-         Y9zeXUG/EanTxCcpd69eJXkh/IUF1ZzsLt9nGKr+Kx2ZQWJOpM/Q2SR5N2Vm+efUzIBN
-         l1Hw==
-X-Gm-Message-State: AOJu0YwuhVI8kvIZan/xgb6HIyktKa7c5oTvcM5/k9Cbus9bLfCmjjjI
-	r6oSIEVf+HZDtxr5qt4ygsvvWpfT6qtvAmqoUDqDb9tP6VKnYkXbrR+z
-X-Gm-Gg: AfdE7clX0fRJKjTtShxIrj7l+oh9F2XieZvH9J45sUa+L3GZ9rfXWtITUsUudkZPHYt
-	ijMBXhBSaG/IjUI13nF84tza+tI2XfcYKjJdT89s2RRI2rDrWA1kBEATCQu2iL/BaUZR/pJBVsb
-	1hU6Ed0fXCPZIpzA8vtFZUl/xXIzg9gqpOV5aBPbWVuB040vQ3mqvUC+KMv4uszoIW6+G1qUgRv
-	INToJbNCwwxXz8drJbUnEJ0kSEBzE/zPmwcd+Bxr/65PoJdK07xM3tb0jsawG4mLUOQV9nhNfu6
-	iBKExHjECJIMZxZEuNjY3Yadz7EbEJ9S5+1i2Xz6vCkarZu7/9uyeWCAD6eWGAmINEXHYd+EGjB
-	z61ghi73QZZGVId19R2XGxt1sL0PEqX40x5Sl9VhNd40j1k+ohmc9Z+tsw7vIZsuuc2/Ldje078
-	uv2Pz18/lniaiEv5XtZ5ZMcV9Qzd3aU6j1nh04fBNyQ3WFkq65vpS5IKNuFTgy/miwyYtq0tBY2
-	x9Y063RITGzb2oYknaSferLN0/tTsSS
-X-Received: by 2002:a05:6214:508d:b0:8f0:796:1346 with SMTP id 6a1803df08f44-8fd7305a956mr33325936d6.18.1783447575387;
-        Tue, 07 Jul 2026 11:06:15 -0700 (PDT)
-Received: from server0.tail6e7dd.ts.net (c-68-48-65-54.hsd1.mi.comcast.net. [68.48.65.54])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8f471de87e3sm166404376d6.35.2026.07.07.11.06.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Jul 2026 11:06:14 -0700 (PDT)
-From: Michael Bommarito <michael.bommarito@gmail.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v3 4/4] ceph: cap delegated inode count in ceph_parse_deleg_inos()
-Date: Tue,  7 Jul 2026 14:06:00 -0400
-Message-ID: <6a37b446fa15089850b123d47484c3663036b6cf.1783447231.git.michael.bommarito@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <cover.1783447231.git.michael.bommarito@gmail.com>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Rr2fJ065"
+Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 667FmMFU310140;
+	Tue, 7 Jul 2026 18:30:54 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-id:content-transfer-encoding:content-type:date:from
+	:in-reply-to:message-id:mime-version:references:subject:to; s=
+	pp1; bh=+4fhHIM/Y0sRZMyTH/tci6k2/a6my4fa0W2l4mBk9Dw=; b=Rr2fJ065
+	9+lNmBEY55E5fXUvJHESUpd5bSec7rCboWuHvP/78mwnODRKWeMKFIZxpNiKdmlV
+	8jldddRlSMdPZvKbEKLCwNWRIfxqHn0zKdN7OLcSSBzCUGKNNAUsHPeJ+0BGrnsD
+	ttL8ZBAinRlGfs/wJCzcug2+JzL96B/NW5qZpB/jHmezAm62VnVpmixdgPvwi1wU
+	KwNJ0xcSBYu2KwagcpANRbp3wF0RWTOEH9Y/9Y8WbjL76gICOcdRXSABMFPu1pF1
+	DaOmE7HmbpUAWmvRCFbjR2BlEYwEXcCMRuH7A9o1bbrf9R3q+6sfwJGSGSpNbdOw
+	+URtCtONZ6vsMA==
+Received: from bl0pr03cu003.outbound.protection.outlook.com (mail-eastusazon11012016.outbound.protection.outlook.com [52.101.53.16])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4f6suqrfb9-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Tue, 07 Jul 2026 18:30:53 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=ROY3wZzwN3xIfwh9MTrsWjeGgJXBCO0UKX1nOylu9EJDi9RFwUjwInv5XmTknrY2IyLQsd2KsGp4v4h0W7KLV2qmXXnxlbwasNQjw5tQ9eUyJyAjyAYO2I8M/QIEjagobr7QGgF9nNXHxVJxk6JdfFvw9fkbb7iNKZznnXyNSwLFptGfmNgEEEqbm96Uh+39XMpKMi8tfpys9vjCkgwcjgvtkqau4bXauMChkgFRe2HJG/SM9uv4COBd6btw2oYH2rVtCLofbgbaFdvDPqBUFr9fnoHBTo0u0hGhwBKCatPPFJPIMOQh54c/T2Pnj/CrTEZhkW4j8cLV916wZkG76A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=+4fhHIM/Y0sRZMyTH/tci6k2/a6my4fa0W2l4mBk9Dw=;
+ b=NqOCzM0MBVwlGoG75jcLsegY+d5Po0E6Ec2LJ3Akn+ZcpD8cfzETjM5QDoHHf+f0mzEdc2JcYJ2s/ptDuCXkFanXi07tGV9tNXRu3hRp7JzumS1lvarUp4M4kHNQpYLubkIOvFk8lwd8jg9qmFT17NzgJ7/hl0ZvEj1CSWOMiXQvPg4I5YClSB+DWDviOzOAPSEJk0+QDfDRK9aYrHnVHeEP7KRzxLbPJYSY4dI/7hCyd0GndtjPlviX3JtUtkokdN6WmeBhGcU3h+m2Ygwf3f4aNdxXqsDtn0n+bGNMrUU9dD/ITaSQiUVBmPU3RagiM6BgizjWB6Smmll1cwvOfA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
+ header.d=ibm.com; arc=none
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
+ by SAVPR15MB7119.namprd15.prod.outlook.com (2603:10b6:806:4e8::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.9; Tue, 7 Jul 2026
+ 18:30:51 +0000
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539%6]) with mapi id 15.21.0181.009; Tue, 7 Jul 2026
+ 18:30:50 +0000
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+To: "idryomov@gmail.com" <idryomov@gmail.com>,
+        Alex Markuze
+	<amarkuze@redhat.com>,
+        "michael.bommarito@gmail.com"
+	<michael.bommarito@gmail.com>,
+        "slava@dubeyko.com" <slava@dubeyko.com>
+CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Thread-Topic: [EXTERNAL] [PATCH v3 4/4] ceph: cap delegated inode count in
+ ceph_parse_deleg_inos()
+Thread-Index: AQHdDjtqFKG6hMp4bEambccnCnXRSLZiYP8A
+Date: Tue, 7 Jul 2026 18:30:50 +0000
+Message-ID: <47199f35e992c25f4c85fe2b6e5b194197856fba.camel@ibm.com>
 References: <cover.1783447231.git.michael.bommarito@gmail.com>
+	 <6a37b446fa15089850b123d47484c3663036b6cf.1783447231.git.michael.bommarito@gmail.com>
+In-Reply-To:
+ <6a37b446fa15089850b123d47484c3663036b6cf.1783447231.git.michael.bommarito@gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|SAVPR15MB7119:EE_
+x-ms-office365-filtering-correlation-id: f3f6cea7-5f9d-4ab9-a0b8-08dedc55df32
+x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|376014|1800799024|10070799003|23010399003|366016|18002099003|22082099003|38070700021|56012099006|4143699003|6133799003|11063799006;
+x-microsoft-antispam-message-info:
+ 9VFW7y/UlnWBmqNTM5X+XF7XHc8EvZ3+OY9mpkpbT+f0bRPDjbM7MhzbqOpMdkpuMq+ncHXVY8BXVB1G3uSLoqyyigl58caULTPLh2p5o0VyNbzdD2ZeSZWKQpmt+Inndl9U8zZHE98GBTp8KaQlX37m53qqXiyt2f3VZMWrTNldasMzQtipIggfFlSSdo2u03nM7A+b2vb6NQUsW3JPRRv4/b+Gh66CUAuOBO4IxEfKr/nJznzw1uxAH9n3jApxbOF0ry2p+bjvUxIArkE3/NqtI0eIQHeF3RPPwWCCskUjwlHWm7GdCCQ/VJXF75lXiFLITyEoOcp9FzIlnL0PbKEvFEJemZrHNenk6A/SsCqwCM7ir8+Dibffos4Rv8xnQ3gq7FkK76L7SmnBZUqKQ8cxHT2wXdhlBZhFNvP+GkqFRWZs30IIjvynM/PxoI5b8AyXGZUOQkXlWuuy6VnoA3UzuHMYuzkkdsCD62VHLbcOpDxspXRROsghx5zAy4sG++sHxah8w9QlW11ottJ9NsGXAs5trb99jy65RyT8pA2Pw7rK4E+3QrJWD/DU7xucT68VWe/7bBPQlIuSflYIS7HAuHllArkWJ5Kb80CnZqiUZ69xRgh5Gndkl+cRw985NxLP80laL+HopMsteg8HwGl8MDOm78ZhCIqTJzymjfWz/b3D5geZgRy6iibUzXH9SkjKzuYTNtNveNLirGB/sSwQIplHlOE5ZtGXvKuGeIk=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(10070799003)(23010399003)(366016)(18002099003)(22082099003)(38070700021)(56012099006)(4143699003)(6133799003)(11063799006);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?eE02QTN4QzJMWWxjdVZYcHhIdnV5UTg5Q2U5WnpldjF4R09sTEw1ZUxKZ2dL?=
+ =?utf-8?B?NWowQnFXUE1MZTZncXVWbjZ1WCtqRi9zNlZQYzVWUkFIT2dlV3N4MU5tKzRr?=
+ =?utf-8?B?bjRULzJ5d041eTQwaTBIa3ZVd1VmeTVsb3JGZEw4emJsRWx0L2FHOTdVZDk1?=
+ =?utf-8?B?WnhzY0tRT2VScGVSajNPc1QwemhKeDlYUUd0VjNvdVQ5K0dkV0hpR3FrVldx?=
+ =?utf-8?B?clVZODVzOGloK251QkxCSmY1S0QvSTZzeklUVWtra2NJSHNJVkc1Y2JwYThO?=
+ =?utf-8?B?QzJPRDVYLzdNNzF4WCswVjVMS2J1NHk1RmVCMnM5RUFEOG5ZNGFZbnNwNzhn?=
+ =?utf-8?B?TzhCcUFoTWpLQzdxWE1XZ0tBRTF2aTNVWVRQdU9sUUNCRmQwMDJPZ1lyeG9V?=
+ =?utf-8?B?OUlxeEF3SjNhNnltWXZSNzJ6bE0yUTBlRlMra0hOTEZ2ck9vT2ZZRk9zNnVX?=
+ =?utf-8?B?OVpHUDBBQzRSQTFJeVpCSUw0SGJDZ0drVzdxNk9SbFRVUkFQU3hVUHRrUFUy?=
+ =?utf-8?B?bEVMZXI4Y2ZqdHJ1SVU0WTFyWjUrdE1tcDZUQ1R0b0pnUktXeHVBZGptQlZJ?=
+ =?utf-8?B?ak40VWQ0dUNuZTIvRDloNk1kRk9XTXlyRDVyWXhmalhQbEVsVEJidDhONXNu?=
+ =?utf-8?B?UHRlRnArU0N4bEtCSTVFTU9QaWRTdUIySkFvZzZGR0VnY3I1Y2x1VDQ2L1Q2?=
+ =?utf-8?B?WG1zdGlPWW0va3M5dXdlc2JGYVl4dEpzcjFsYUZRTjlVcXM5OUI2WEZKamt3?=
+ =?utf-8?B?ODdZbjN3RDEyaHNkWFpENk9tS0xhQmF6Skl0ZHgyWlU4QWFYKzB2NTdDRWxK?=
+ =?utf-8?B?TmwzQmFZMEM1ZFp6NE84cDFYT0s3OXB6M2ZVOVdvUFJMT2d1RjRteVJsZlEr?=
+ =?utf-8?B?OUxURWN6Zi9GNE5QT2VnaUxRVUNISEQxQko0MEowN0xCeVl0cFFaMnY0eStq?=
+ =?utf-8?B?cTd4em03UEFLZTlBWWRQUnpvYkFRaGZDUE4xSUlxUXZPMGlnZmQvTXExZWQz?=
+ =?utf-8?B?V25pV2o5ZklRYXhVL3Zaek5RMlUzK1J2TnEyVklTeUNTRExPQmdkQlZpdmtK?=
+ =?utf-8?B?L1pHRGVFWVZqaHZrMndTU1NkV0hFZ2txVkVUY2NGMURoNVZ4UnhVV05vOTRU?=
+ =?utf-8?B?dHhKTzZHQlBhbWRXZVBkazdZSmlscHVLUysxWW5uTGtOQ0JGaTNvUm1lZTV2?=
+ =?utf-8?B?UzZiQXdraVRNU3NieHdFeUxZa1VXcUd5NmIwdWlPMVFyQk9aOHZLaFhVNlpF?=
+ =?utf-8?B?SzhtQzBBOENCcVorMVhaYU9QYU1xTE4rWkllTHQyOG9qeUtCRFBVVnpndDM0?=
+ =?utf-8?B?Q0wzOXdyVE1NeHZsWXpkUmgxMG5INnlnWjZFd2t4OVlDQ2hmS1F5MUxVYUxX?=
+ =?utf-8?B?VWZua1pOZEZ1YUJBem1NSEordTl3TEdsMk1NSG5FWDJXKzF4QnFicTNOTVkv?=
+ =?utf-8?B?MWRlUHlmR3BkN3l4dXJUeGdycUZJY0l5ZXpOT2ZCVmtxRDRDOGZGM0V2bEc5?=
+ =?utf-8?B?SmM5YW9UMWtZTEwybmFUT1l2QTNCUXVjaGtqVHpHOEdKTzNpTXpGV09tUkVk?=
+ =?utf-8?B?UitUTkRpOFRlb0VZUWhxSlZmdUU5ZUNTWExIZ1h5M0JyR2FlYjZZaWxuVURP?=
+ =?utf-8?B?dUJNSnRhb2p2ZldFWUc5UzVhbXhJd29XS1lpdlhRZXMrY2xUUzVVU1BCSW0v?=
+ =?utf-8?B?eVBQMzUySytsNjB0VStGRnRyT3luMFVqTDJIV3J3eU9kczR3WHk0ZDVmdmwv?=
+ =?utf-8?B?UUZJcHpDQjZtRVRUN20vdnhaVzFIbWxMZ2s5SS9LdWRpSWRHdmljME9XdTZC?=
+ =?utf-8?B?ODYxRVl1bXVIOEU3cHpJemtqRWFiVlYyeGhLRkVOV0wyVVBFbTlDTEljZnEz?=
+ =?utf-8?B?YktkNE8ycUJaRzdDNFdqYThxZnBJOGxXTXpSRlZBNDIwdlZ6eHZDelpZZHpj?=
+ =?utf-8?B?cityWXB6SXQ4YWk1MzF4TXZwbDVvQzdmVDBRUjJpRER0OHdlOWhhYjNHbmpC?=
+ =?utf-8?B?YlVZQXVUTU9NU3lzekV6MWNEVzFLeWxMWmpkNnNTYWRHQ3crazFkTzlhbHpF?=
+ =?utf-8?B?TFZiWU9UeUJjOFlCT1k3SUZqTGlpQ09LdUY3UXo1Ly8yaSs1VEYwZ3lMV3R5?=
+ =?utf-8?B?UVZOYThJN1lSYjlRUEgrRDJRSVZLeG5NdXZzWXZ3cmZDbXpYZjNDclVPTWUr?=
+ =?utf-8?B?M1NCZk02V0czcklmMXNCOWRTYVpjek5mdzd5dG1ZaktYSnBNSlAwWU5WMHR2?=
+ =?utf-8?B?N0NjTnJtZHhZMmczaWplWVNlTHFjM2dGMVVzZ2E1QlJ4blJ5a3V0U09WREdV?=
+ =?utf-8?B?QWlWZGZ0Sk9vME5lcHJIOWcvN2pQaExPd2dwbEphTFIxd0ZjamM1VUY5aVV1?=
+ =?utf-8?Q?AaScRa8/FmjhrExAgK32B0h4mdfdCfTEAqPzw?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <83E6D82AE1F4F74FBD29AF54D2ACCFEE@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+X-Exchange-RoutingPolicyChecked:
+	JMgZ+YwijIa3NNA4nTFGZQCe5HUCQvuSzHIPbkXp082jXxSJnbrGEiLpyfchaFRT4274WDUVhmWrjiWLbEWVaDQ1DxK7WYqqzEkV6oU/Jj7wq+8XCCnLcFxWO0LoOAtaaZ1zDhacGB9wKWC5G5SNUxIfbp46OT6HqbTdc54EcOTBM77xnYy4c6Lzz6rpzTCyopctYwLsWzNzrRjHg/ZuErNPJDrCVmqeW0bSviujhhKH9yENypVzFIQ3u7o7RQdVPg0VBFP6S7RwMG6hxwO66/1G4jzAO9G6weeiZ3vjhT7taWEicpoe09ldO0KsPbc4JF0ausnRHNgetFJZsRkCDQ==
+X-OriginatorOrg: ibm.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: f3f6cea7-5f9d-4ab9-a0b8-08dedc55df32
+X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Jul 2026 18:30:50.8119
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: xrCZK4O2xeTyjNUXAFxO8ZphARHOEk647tj4R+kOvC40Y6Vi9GqjgVXKh9h/XuT3Qq2ebD8bRtlMGTx0lfaECQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SAVPR15MB7119
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA3MDE4MCBTYWx0ZWRfX82SRU8lZ32PZ
+ xkN6u24Gpd/LeE7mus+NYSRhq7Bg+LD3UNHka3RMcO0mLOTmoocy0SL9FsE87xMAjOq8OQqK0v3
+ /0R/mikBTcJLjZx0rUQRj+SP+hGHG8o=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA3MDE4MCBTYWx0ZWRfX6IL7VVtPj1zr
+ GaKzlMAQWD+P+LENEc21QpoWQIw4tVlCJmYplvxfmBAELqTN7zVGJI+onNC8KL4R8Q+cfbQYiVA
+ z3Zwq2bmRrAJplrlZnoCjW7Tm2IsiSoUVn/HH7qw5B4bk8vab6wStEWNT3UOgrCpBmfThzf49Er
+ eVivp58c+81AotB3bSBA5df3c8AqT85ARw3BGtaX/6+dw4K1mQmdt7aKoYJ8BJYdT31GB8R6tFx
+ fRZKvox96XgIJUWipAkY3cmNiDyfWUHfT6XtLB8gakPP6JsxUy5gpxi34NiAq0UJjaYn8XB13i2
+ WQ0NkX/78alqEvyqzMxk9SGdQIkt1Z7/v31scuE8UvZoCclNRfSTjqKapG0kAmEdGxZryf9LAy/
+ oZqEohmP5jnYMg9JcJmd+4+BJ3K0LDIWm6ZvWcmqBUH0gc4IfLKnKz0oHU/baRkO4BgUQBzeTJ/
+ pXhAVnzsrKgOtW4+Qbw==
+X-Proofpoint-GUID: uaKjiBAnRD36CdcS3YASN5YM4_XOwQGe
+X-Authority-Analysis: v=2.4 cv=Oot/DS/t c=1 sm=1 tr=0 ts=6a4d45dd cx=c_pps
+ a=jOIfm9F7dEqBEZKe3Ytqiw==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=uAbxVGIbfxUO_5tXvNgY:22 a=VwQbUJbxAAAA:8 a=VnNF1IyMAAAA:8 a=pGLkceISAAAA:8
+ a=qDBYfIvd-FbV1rgR9w8A:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-ORIG-GUID: nKmlFsGuY5ZoCmqQdN7ZYbkgpZeZisDK
+Subject: Re:  [PATCH v3 4/4] ceph: cap delegated inode count in
+ ceph_parse_deleg_inos()
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-07_04,2026-07-06_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 lowpriorityscore=0 clxscore=1015 impostorscore=0 phishscore=0
+ malwarescore=0 suspectscore=0 spamscore=0 adultscore=0 priorityscore=1501
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607070180
 
-ceph_parse_deleg_inos() decodes interval sets of delegated inode numbers
-from an MDS create-with-delegation reply. For each set it reads a 64-bit
-start and a 64-bit len with ceph_decode_64_safe(), which only validates
-that the eight bytes are present in the message, not the value, and then
-loops over len while inserting entries into s_delegated_inos.
-
-len is fully attacker controlled. A malicious or compromised MDS can send
-one huge interval, many intervals in one reply, duplicate intervals, or
-repeated replies that accumulate delegated inodes on the same session.
-The original code bounded none of these and could spin the insert loop or
-grow the xarray without limit.
-
-Bound both dimensions with a single enforcement point. Track the number
-of delegated inodes held by each MDS session in an atomic counter and
-grow it only in ceph_insert_deleg_ino(), which uses atomic_add_unless()
-to refuse to push the count past CEPH_MAX_DELEG_INOS. Because that helper
-is the only place the counter grows, the per-session population can never
-exceed the cap, so no separate per-session pre-check is needed. The
-counter is decremented when async create consumes a delegated inode or
-when an insert fails, incremented when a delegated inode is restored,
-initialized with the session xarray, and reset when reconnect destroys
-the xarray.
-
-A per-session cap alone still lets one reply spin the insert loop on
-duplicate ranges without growing the counter, so also cap the aggregate
-interval length accepted from a single reply. Together these bound both
-the loop trip count per reply and the xarray population across replies.
-
-The cap is a fixed, client-chosen constant rather than a value derived
-from the MDS. mds_client_prealloc_inos is a userspace MDS configuration
-option; it is never sent to the kernel client on the wire, and a
-server-supplied bound could not be trusted for a defensive limit in any
-case. The constant is set well above that option's documented default of
-1000 (a generous multiple), so legitimate refill behavior is unaffected
-while the CPU and xarray memory a malformed delegation stream can consume
-stays bounded.
-
-Impact: a malicious or compromised Ceph MDS can no longer make a client
-spin through an unbounded delegated-inode interval or grow one session's
-delegated-inode xarray without limit.
-
-Fixes: d48464878708 ("ceph: decode interval_sets for delegated inos")
-Cc: stable@vger.kernel.org
-Suggested-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Assisted-by: Claude:claude-opus-4-8
-Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
----
- fs/ceph/mds_client.c | 59 +++++++++++++++++++++++++++++++++++++++-----
- fs/ceph/mds_client.h |  1 +
- fs/ceph/super.h      |  9 +++++++
- 3 files changed, 63 insertions(+), 6 deletions(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 94f76e9fe4ead..7b00b83371f7e 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -618,10 +618,36 @@ static int parse_reply_info_filelock(void **p, void *end,
- 
- #define DELEGATED_INO_AVAILABLE		xa_mk_value(1)
- 
-+static int ceph_insert_deleg_ino(struct ceph_mds_session *s, u64 ino)
-+{
-+	struct ceph_client *cl = s->s_mdsc->fsc->client;
-+	int err;
-+
-+	/*
-+	 * Cap how many delegated inodes a single session may hold. This is
-+	 * the only place that grows the count, so atomic_add_unless() bounds
-+	 * it at exactly CEPH_MAX_DELEG_INOS; s_num_deleg_inos can never exceed
-+	 * that.
-+	 */
-+	if (!atomic_add_unless(&s->s_num_deleg_inos, 1, CEPH_MAX_DELEG_INOS)) {
-+		pr_warn_ratelimited_client(cl,
-+			"MDS session already holds %d delegated inodes\n",
-+			CEPH_MAX_DELEG_INOS);
-+		return -EOVERFLOW;
-+	}
-+
-+	err = xa_insert(&s->s_delegated_inos, ino, DELEGATED_INO_AVAILABLE,
-+			GFP_KERNEL);
-+	if (err)
-+		atomic_dec(&s->s_num_deleg_inos);
-+	return err;
-+}
-+
- static int ceph_parse_deleg_inos(void **p, void *end,
- 				 struct ceph_mds_session *s)
- {
- 	struct ceph_client *cl = s->s_mdsc->fsc->client;
-+	u64 msg_deleg_inos = 0;
- 	u32 sets;
- 
- 	ceph_decode_32_safe(p, end, sets, bad);
-@@ -639,16 +665,34 @@ static int ceph_parse_deleg_inos(void **p, void *end,
- 				start, len);
- 			continue;
- 		}
-+
-+		/*
-+		 * Bound the number of inodes one reply may delegate.
-+		 * ceph_insert_deleg_ino() separately caps the per-session
-+		 * population, so this only has to stop one reply from spinning
-+		 * the insert loop under an attacker-controlled len.
-+		 */
-+		if (len > (u64)CEPH_MAX_DELEG_INOS ||
-+		    msg_deleg_inos > (u64)CEPH_MAX_DELEG_INOS - len) {
-+			pr_warn_ratelimited_client(cl,
-+				"MDS reply delegates too many inodes (have %llu, +%llu, max %d)\n",
-+				msg_deleg_inos, len, CEPH_MAX_DELEG_INOS);
-+			return -EIO;
-+		}
-+		msg_deleg_inos += len;
-+
- 		while (len--) {
--			int err = xa_insert(&s->s_delegated_inos, start++,
--					    DELEGATED_INO_AVAILABLE,
--					    GFP_KERNEL);
-+			int err = ceph_insert_deleg_ino(s, start++);
-+
- 			if (!err) {
- 				doutc(cl, "added delegated inode 0x%llx\n", start - 1);
- 			} else if (err == -EBUSY) {
- 				pr_warn_client(cl,
- 					"MDS delegated inode 0x%llx more than once.\n",
- 					start - 1);
-+			} else if (err == -EOVERFLOW) {
-+				/* ceph_insert_deleg_ino() already warned. */
-+				return -EIO;
- 			} else {
- 				return err;
- 			}
-@@ -666,16 +710,17 @@ u64 ceph_get_deleg_ino(struct ceph_mds_session *s)
- 
- 	xa_for_each(&s->s_delegated_inos, ino, val) {
- 		val = xa_erase(&s->s_delegated_inos, ino);
--		if (val == DELEGATED_INO_AVAILABLE)
-+		if (val == DELEGATED_INO_AVAILABLE) {
-+			atomic_dec(&s->s_num_deleg_inos);
- 			return ino;
-+		}
- 	}
- 	return 0;
- }
- 
- int ceph_restore_deleg_ino(struct ceph_mds_session *s, u64 ino)
- {
--	return xa_insert(&s->s_delegated_inos, ino, DELEGATED_INO_AVAILABLE,
--			 GFP_KERNEL);
-+	return ceph_insert_deleg_ino(s, ino);
- }
- #else /* BITS_PER_LONG == 64 */
- /*
-@@ -1062,6 +1107,7 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
- 	INIT_LIST_HEAD(&s->s_waiting);
- 	INIT_LIST_HEAD(&s->s_unsafe);
- 	xa_init(&s->s_delegated_inos);
-+	atomic_set(&s->s_num_deleg_inos, 0);
- 	INIT_LIST_HEAD(&s->s_cap_releases);
- 	INIT_WORK(&s->s_cap_release_work, ceph_cap_release_work);
- 
-@@ -5103,6 +5149,7 @@ static int send_mds_reconnect(struct ceph_mds_client *mdsc,
- 
- 	/* Serialized by s_mutex against concurrent ceph_get_deleg_ino(). */
- 	xa_destroy(&session->s_delegated_inos);
-+	atomic_set(&session->s_num_deleg_inos, 0);
- 	if (session->s_state == CEPH_MDS_SESSION_CLOSED ||
- 	    session->s_state == CEPH_MDS_SESSION_REJECTED) {
- 		pr_info_client(cl, "mds%d skipping reconnect, session %s\n",
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 731d6ad04956d..d1a10c4bd4d2d 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -299,6 +299,7 @@ struct ceph_mds_session {
- 	struct list_head  s_waiting;  /* waiting requests */
- 	struct list_head  s_unsafe;   /* unsafe requests */
- 	struct xarray	  s_delegated_inos;
-+	atomic_t	  s_num_deleg_inos;
- };
- 
- /*
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 3737ea7ed88b3..fb2b0a4b7bb3e 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -642,6 +642,15 @@ static inline int ceph_ino_compare(struct inode *inode, void *data)
- #define CEPH_MDS_INO_LOG_OFFSET		(2 * CEPH_MAX_MDS)
- #define CEPH_INO_SYSTEM_BASE		((6*CEPH_MAX_MDS) + (CEPH_MAX_MDS * CEPH_NUM_STRAY))
- 
-+/*
-+ * Upper bound on the number of delegated inodes a single MDS session may
-+ * hold. The MDS normally hands out a small preallocation window (the
-+ * userspace mds_client_prealloc_inos option defaults to 1000) and refills
-+ * it as the client consumes entries. This leaves generous headroom while
-+ * bounding the CPU and memory a malformed delegation interval can consume.
-+ */
-+#define CEPH_MAX_DELEG_INOS		8192
-+
- static inline bool ceph_vino_is_reserved(const struct ceph_vino vino)
- {
- 	if (vino.ino >= CEPH_INO_SYSTEM_BASE ||
--- 
-2.53.0
-
+SGkgTWljaGFlbCwNCg0KU29ycnkgZm9yIGRlbGF5IHdpdGggdGhlIHJldmlldy4NCg0KT24gVHVl
+LCAyMDI2LTA3LTA3IGF0IDE0OjA2IC0wNDAwLCBNaWNoYWVsIEJvbW1hcml0byB3cm90ZToNCj4g
+Y2VwaF9wYXJzZV9kZWxlZ19pbm9zKCkgZGVjb2RlcyBpbnRlcnZhbCBzZXRzIG9mIGRlbGVnYXRl
+ZCBpbm9kZSBudW1iZXJzDQo+IGZyb20gYW4gTURTIGNyZWF0ZS13aXRoLWRlbGVnYXRpb24gcmVw
+bHkuIEZvciBlYWNoIHNldCBpdCByZWFkcyBhIDY0LWJpdA0KPiBzdGFydCBhbmQgYSA2NC1iaXQg
+bGVuIHdpdGggY2VwaF9kZWNvZGVfNjRfc2FmZSgpLCB3aGljaCBvbmx5IHZhbGlkYXRlcw0KPiB0
+aGF0IHRoZSBlaWdodCBieXRlcyBhcmUgcHJlc2VudCBpbiB0aGUgbWVzc2FnZSwgbm90IHRoZSB2
+YWx1ZSwgYW5kIHRoZW4NCj4gbG9vcHMgb3ZlciBsZW4gd2hpbGUgaW5zZXJ0aW5nIGVudHJpZXMg
+aW50byBzX2RlbGVnYXRlZF9pbm9zLg0KPiANCj4gbGVuIGlzIGZ1bGx5IGF0dGFja2VyIGNvbnRy
+b2xsZWQuIEEgbWFsaWNpb3VzIG9yIGNvbXByb21pc2VkIE1EUyBjYW4gc2VuZA0KPiBvbmUgaHVn
+ZSBpbnRlcnZhbCwgbWFueSBpbnRlcnZhbHMgaW4gb25lIHJlcGx5LCBkdXBsaWNhdGUgaW50ZXJ2
+YWxzLCBvcg0KPiByZXBlYXRlZCByZXBsaWVzIHRoYXQgYWNjdW11bGF0ZSBkZWxlZ2F0ZWQgaW5v
+ZGVzIG9uIHRoZSBzYW1lIHNlc3Npb24uDQo+IFRoZSBvcmlnaW5hbCBjb2RlIGJvdW5kZWQgbm9u
+ZSBvZiB0aGVzZSBhbmQgY291bGQgc3BpbiB0aGUgaW5zZXJ0IGxvb3Agb3INCj4gZ3JvdyB0aGUg
+eGFycmF5IHdpdGhvdXQgbGltaXQuDQo+IA0KPiBCb3VuZCBib3RoIGRpbWVuc2lvbnMgd2l0aCBh
+IHNpbmdsZSBlbmZvcmNlbWVudCBwb2ludC4gVHJhY2sgdGhlIG51bWJlcg0KPiBvZiBkZWxlZ2F0
+ZWQgaW5vZGVzIGhlbGQgYnkgZWFjaCBNRFMgc2Vzc2lvbiBpbiBhbiBhdG9taWMgY291bnRlciBh
+bmQNCj4gZ3JvdyBpdCBvbmx5IGluIGNlcGhfaW5zZXJ0X2RlbGVnX2lubygpLCB3aGljaCB1c2Vz
+IGF0b21pY19hZGRfdW5sZXNzKCkNCj4gdG8gcmVmdXNlIHRvIHB1c2ggdGhlIGNvdW50IHBhc3Qg
+Q0VQSF9NQVhfREVMRUdfSU5PUy4gQmVjYXVzZSB0aGF0IGhlbHBlcg0KPiBpcyB0aGUgb25seSBw
+bGFjZSB0aGUgY291bnRlciBncm93cywgdGhlIHBlci1zZXNzaW9uIHBvcHVsYXRpb24gY2FuIG5l
+dmVyDQo+IGV4Y2VlZCB0aGUgY2FwLCBzbyBubyBzZXBhcmF0ZSBwZXItc2Vzc2lvbiBwcmUtY2hl
+Y2sgaXMgbmVlZGVkLiBUaGUNCj4gY291bnRlciBpcyBkZWNyZW1lbnRlZCB3aGVuIGFzeW5jIGNy
+ZWF0ZSBjb25zdW1lcyBhIGRlbGVnYXRlZCBpbm9kZSBvcg0KPiB3aGVuIGFuIGluc2VydCBmYWls
+cywgaW5jcmVtZW50ZWQgd2hlbiBhIGRlbGVnYXRlZCBpbm9kZSBpcyByZXN0b3JlZCwNCj4gaW5p
+dGlhbGl6ZWQgd2l0aCB0aGUgc2Vzc2lvbiB4YXJyYXksIGFuZCByZXNldCB3aGVuIHJlY29ubmVj
+dCBkZXN0cm95cw0KPiB0aGUgeGFycmF5Lg0KPiANCj4gQSBwZXItc2Vzc2lvbiBjYXAgYWxvbmUg
+c3RpbGwgbGV0cyBvbmUgcmVwbHkgc3BpbiB0aGUgaW5zZXJ0IGxvb3Agb24NCj4gZHVwbGljYXRl
+IHJhbmdlcyB3aXRob3V0IGdyb3dpbmcgdGhlIGNvdW50ZXIsIHNvIGFsc28gY2FwIHRoZSBhZ2dy
+ZWdhdGUNCj4gaW50ZXJ2YWwgbGVuZ3RoIGFjY2VwdGVkIGZyb20gYSBzaW5nbGUgcmVwbHkuIFRv
+Z2V0aGVyIHRoZXNlIGJvdW5kIGJvdGgNCj4gdGhlIGxvb3AgdHJpcCBjb3VudCBwZXIgcmVwbHkg
+YW5kIHRoZSB4YXJyYXkgcG9wdWxhdGlvbiBhY3Jvc3MgcmVwbGllcy4NCj4gDQo+IFRoZSBjYXAg
+aXMgYSBmaXhlZCwgY2xpZW50LWNob3NlbiBjb25zdGFudCByYXRoZXIgdGhhbiBhIHZhbHVlIGRl
+cml2ZWQNCj4gZnJvbSB0aGUgTURTLiBtZHNfY2xpZW50X3ByZWFsbG9jX2lub3MgaXMgYSB1c2Vy
+c3BhY2UgTURTIGNvbmZpZ3VyYXRpb24NCj4gb3B0aW9uOyBpdCBpcyBuZXZlciBzZW50IHRvIHRo
+ZSBrZXJuZWwgY2xpZW50IG9uIHRoZSB3aXJlLCBhbmQgYQ0KPiBzZXJ2ZXItc3VwcGxpZWQgYm91
+bmQgY291bGQgbm90IGJlIHRydXN0ZWQgZm9yIGEgZGVmZW5zaXZlIGxpbWl0IGluIGFueQ0KPiBj
+YXNlLiBUaGUgY29uc3RhbnQgaXMgc2V0IHdlbGwgYWJvdmUgdGhhdCBvcHRpb24ncyBkb2N1bWVu
+dGVkIGRlZmF1bHQgb2YNCj4gMTAwMCAoYSBnZW5lcm91cyBtdWx0aXBsZSksIHNvIGxlZ2l0aW1h
+dGUgcmVmaWxsIGJlaGF2aW9yIGlzIHVuYWZmZWN0ZWQNCj4gd2hpbGUgdGhlIENQVSBhbmQgeGFy
+cmF5IG1lbW9yeSBhIG1hbGZvcm1lZCBkZWxlZ2F0aW9uIHN0cmVhbSBjYW4gY29uc3VtZQ0KPiBz
+dGF5cyBib3VuZGVkLg0KPiANCj4gSW1wYWN0OiBhIG1hbGljaW91cyBvciBjb21wcm9taXNlZCBD
+ZXBoIE1EUyBjYW4gbm8gbG9uZ2VyIG1ha2UgYSBjbGllbnQNCj4gc3BpbiB0aHJvdWdoIGFuIHVu
+Ym91bmRlZCBkZWxlZ2F0ZWQtaW5vZGUgaW50ZXJ2YWwgb3IgZ3JvdyBvbmUgc2Vzc2lvbidzDQo+
+IGRlbGVnYXRlZC1pbm9kZSB4YXJyYXkgd2l0aG91dCBsaW1pdC4NCj4gDQo+IEZpeGVzOiBkNDg0
+NjQ4Nzg3MDggKCJjZXBoOiBkZWNvZGUgaW50ZXJ2YWxfc2V0cyBmb3IgZGVsZWdhdGVkIGlub3Mi
+KQ0KPiBDYzogc3RhYmxlQHZnZXIua2VybmVsLm9yZw0KPiBTdWdnZXN0ZWQtYnk6IFZpYWNoZXNs
+YXYgRHViZXlrbyA8U2xhdmEuRHViZXlrb0BpYm0uY29tPg0KPiBBc3Npc3RlZC1ieTogQ2xhdWRl
+OmNsYXVkZS1vcHVzLTQtOA0KPiBTaWduZWQtb2ZmLWJ5OiBNaWNoYWVsIEJvbW1hcml0byA8bWlj
+aGFlbC5ib21tYXJpdG9AZ21haWwuY29tPg0KPiAtLS0NCj4gIGZzL2NlcGgvbWRzX2NsaWVudC5j
+IHwgNTkgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0NCj4gIGZz
+L2NlcGgvbWRzX2NsaWVudC5oIHwgIDEgKw0KPiAgZnMvY2VwaC9zdXBlci5oICAgICAgfCAgOSAr
+KysrKysrDQo+ICAzIGZpbGVzIGNoYW5nZWQsIDYzIGluc2VydGlvbnMoKyksIDYgZGVsZXRpb25z
+KC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9tZHNfY2xpZW50LmMgYi9mcy9jZXBoL21k
+c19jbGllbnQuYw0KPiBpbmRleCA5NGY3NmU5ZmU0ZWFkLi43YjAwYjgzMzcxZjdlIDEwMDY0NA0K
+PiAtLS0gYS9mcy9jZXBoL21kc19jbGllbnQuYw0KPiArKysgYi9mcy9jZXBoL21kc19jbGllbnQu
+Yw0KPiBAQCAtNjE4LDEwICs2MTgsMzYgQEAgc3RhdGljIGludCBwYXJzZV9yZXBseV9pbmZvX2Zp
+bGVsb2NrKHZvaWQgKipwLCB2b2lkICplbmQsDQo+ICANCj4gICNkZWZpbmUgREVMRUdBVEVEX0lO
+T19BVkFJTEFCTEUJCXhhX21rX3ZhbHVlKDEpDQo+ICANCj4gK3N0YXRpYyBpbnQgY2VwaF9pbnNl
+cnRfZGVsZWdfaW5vKHN0cnVjdCBjZXBoX21kc19zZXNzaW9uICpzLCB1NjQgaW5vKQ0KPiArew0K
+PiArCXN0cnVjdCBjZXBoX2NsaWVudCAqY2wgPSBzLT5zX21kc2MtPmZzYy0+Y2xpZW50Ow0KPiAr
+CWludCBlcnI7DQo+ICsNCj4gKwkvKg0KPiArCSAqIENhcCBob3cgbWFueSBkZWxlZ2F0ZWQgaW5v
+ZGVzIGEgc2luZ2xlIHNlc3Npb24gbWF5IGhvbGQuIFRoaXMgaXMNCj4gKwkgKiB0aGUgb25seSBw
+bGFjZSB0aGF0IGdyb3dzIHRoZSBjb3VudCwgc28gYXRvbWljX2FkZF91bmxlc3MoKSBib3VuZHMN
+Cj4gKwkgKiBpdCBhdCBleGFjdGx5IENFUEhfTUFYX0RFTEVHX0lOT1M7IHNfbnVtX2RlbGVnX2lu
+b3MgY2FuIG5ldmVyIGV4Y2VlZA0KPiArCSAqIHRoYXQuDQo+ICsJICovDQo+ICsJaWYgKCFhdG9t
+aWNfYWRkX3VubGVzcygmcy0+c19udW1fZGVsZWdfaW5vcywgMSwgQ0VQSF9NQVhfREVMRUdfSU5P
+UykpIHsNCj4gKwkJcHJfd2Fybl9yYXRlbGltaXRlZF9jbGllbnQoY2wsDQo+ICsJCQkiTURTIHNl
+c3Npb24gYWxyZWFkeSBob2xkcyAlZCBkZWxlZ2F0ZWQgaW5vZGVzXG4iLA0KPiArCQkJQ0VQSF9N
+QVhfREVMRUdfSU5PUyk7DQo+ICsJCXJldHVybiAtRU9WRVJGTE9XOw0KPiArCX0NCj4gKw0KPiAr
+CWVyciA9IHhhX2luc2VydCgmcy0+c19kZWxlZ2F0ZWRfaW5vcywgaW5vLCBERUxFR0FURURfSU5P
+X0FWQUlMQUJMRSwNCj4gKwkJCUdGUF9LRVJORUwpOw0KPiArCWlmIChlcnIpDQo+ICsJCWF0b21p
+Y19kZWMoJnMtPnNfbnVtX2RlbGVnX2lub3MpOw0KPiArCXJldHVybiBlcnI7DQo+ICt9DQo+ICsN
+Cj4gIHN0YXRpYyBpbnQgY2VwaF9wYXJzZV9kZWxlZ19pbm9zKHZvaWQgKipwLCB2b2lkICplbmQs
+DQo+ICAJCQkJIHN0cnVjdCBjZXBoX21kc19zZXNzaW9uICpzKQ0KPiAgew0KPiAgCXN0cnVjdCBj
+ZXBoX2NsaWVudCAqY2wgPSBzLT5zX21kc2MtPmZzYy0+Y2xpZW50Ow0KPiArCXU2NCBtc2dfZGVs
+ZWdfaW5vcyA9IDA7DQo+ICAJdTMyIHNldHM7DQo+ICANCj4gIAljZXBoX2RlY29kZV8zMl9zYWZl
+KHAsIGVuZCwgc2V0cywgYmFkKTsNCj4gQEAgLTYzOSwxNiArNjY1LDM0IEBAIHN0YXRpYyBpbnQg
+Y2VwaF9wYXJzZV9kZWxlZ19pbm9zKHZvaWQgKipwLCB2b2lkICplbmQsDQo+ICAJCQkJc3RhcnQs
+IGxlbik7DQo+ICAJCQljb250aW51ZTsNCj4gIAkJfQ0KPiArDQo+ICsJCS8qDQo+ICsJCSAqIEJv
+dW5kIHRoZSBudW1iZXIgb2YgaW5vZGVzIG9uZSByZXBseSBtYXkgZGVsZWdhdGUuDQo+ICsJCSAq
+IGNlcGhfaW5zZXJ0X2RlbGVnX2lubygpIHNlcGFyYXRlbHkgY2FwcyB0aGUgcGVyLXNlc3Npb24N
+Cj4gKwkJICogcG9wdWxhdGlvbiwgc28gdGhpcyBvbmx5IGhhcyB0byBzdG9wIG9uZSByZXBseSBm
+cm9tIHNwaW5uaW5nDQo+ICsJCSAqIHRoZSBpbnNlcnQgbG9vcCB1bmRlciBhbiBhdHRhY2tlci1j
+b250cm9sbGVkIGxlbi4NCj4gKwkJICovDQo+ICsJCWlmIChsZW4gPiAodTY0KUNFUEhfTUFYX0RF
+TEVHX0lOT1MgfHwNCj4gKwkJICAgIG1zZ19kZWxlZ19pbm9zID4gKHU2NClDRVBIX01BWF9ERUxF
+R19JTk9TIC0gbGVuKSB7DQo+ICsJCQlwcl93YXJuX3JhdGVsaW1pdGVkX2NsaWVudChjbCwNCj4g
+KwkJCQkiTURTIHJlcGx5IGRlbGVnYXRlcyB0b28gbWFueSBpbm9kZXMgKGhhdmUgJWxsdSwgKyVs
+bHUsIG1heCAlZClcbiIsDQo+ICsJCQkJbXNnX2RlbGVnX2lub3MsIGxlbiwgQ0VQSF9NQVhfREVM
+RUdfSU5PUyk7DQo+ICsJCQlyZXR1cm4gLUVJTzsNCj4gKwkJfQ0KPiArCQltc2dfZGVsZWdfaW5v
+cyArPSBsZW47DQo+ICsNCj4gIAkJd2hpbGUgKGxlbi0tKSB7DQo+IC0JCQlpbnQgZXJyID0geGFf
+aW5zZXJ0KCZzLT5zX2RlbGVnYXRlZF9pbm9zLCBzdGFydCsrLA0KPiAtCQkJCQkgICAgREVMRUdB
+VEVEX0lOT19BVkFJTEFCTEUsDQo+IC0JCQkJCSAgICBHRlBfS0VSTkVMKTsNCj4gKwkJCWludCBl
+cnIgPSBjZXBoX2luc2VydF9kZWxlZ19pbm8ocywgc3RhcnQrKyk7DQo+ICsNCj4gIAkJCWlmICgh
+ZXJyKSB7DQo+ICAJCQkJZG91dGMoY2wsICJhZGRlZCBkZWxlZ2F0ZWQgaW5vZGUgMHglbGx4XG4i
+LCBzdGFydCAtIDEpOw0KPiAgCQkJfSBlbHNlIGlmIChlcnIgPT0gLUVCVVNZKSB7DQo+ICAJCQkJ
+cHJfd2Fybl9jbGllbnQoY2wsDQo+ICAJCQkJCSJNRFMgZGVsZWdhdGVkIGlub2RlIDB4JWxseCBt
+b3JlIHRoYW4gb25jZS5cbiIsDQo+ICAJCQkJCXN0YXJ0IC0gMSk7DQo+ICsJCQl9IGVsc2UgaWYg
+KGVyciA9PSAtRU9WRVJGTE9XKSB7DQo+ICsJCQkJLyogY2VwaF9pbnNlcnRfZGVsZWdfaW5vKCkg
+YWxyZWFkeSB3YXJuZWQuICovDQo+ICsJCQkJcmV0dXJuIC1FSU87DQo+ICAJCQl9IGVsc2Ugew0K
+PiAgCQkJCXJldHVybiBlcnI7DQo+ICAJCQl9DQo+IEBAIC02NjYsMTYgKzcxMCwxNyBAQCB1NjQg
+Y2VwaF9nZXRfZGVsZWdfaW5vKHN0cnVjdCBjZXBoX21kc19zZXNzaW9uICpzKQ0KPiAgDQo+ICAJ
+eGFfZm9yX2VhY2goJnMtPnNfZGVsZWdhdGVkX2lub3MsIGlubywgdmFsKSB7DQo+ICAJCXZhbCA9
+IHhhX2VyYXNlKCZzLT5zX2RlbGVnYXRlZF9pbm9zLCBpbm8pOw0KPiAtCQlpZiAodmFsID09IERF
+TEVHQVRFRF9JTk9fQVZBSUxBQkxFKQ0KPiArCQlpZiAodmFsID09IERFTEVHQVRFRF9JTk9fQVZB
+SUxBQkxFKSB7DQo+ICsJCQlhdG9taWNfZGVjKCZzLT5zX251bV9kZWxlZ19pbm9zKTsNCj4gIAkJ
+CXJldHVybiBpbm87DQo+ICsJCX0NCj4gIAl9DQo+ICAJcmV0dXJuIDA7DQo+ICB9DQo+ICANCj4g
+IGludCBjZXBoX3Jlc3RvcmVfZGVsZWdfaW5vKHN0cnVjdCBjZXBoX21kc19zZXNzaW9uICpzLCB1
+NjQgaW5vKQ0KPiAgew0KPiAtCXJldHVybiB4YV9pbnNlcnQoJnMtPnNfZGVsZWdhdGVkX2lub3Ms
+IGlubywgREVMRUdBVEVEX0lOT19BVkFJTEFCTEUsDQo+IC0JCQkgR0ZQX0tFUk5FTCk7DQo+ICsJ
+cmV0dXJuIGNlcGhfaW5zZXJ0X2RlbGVnX2lubyhzLCBpbm8pOw0KPiAgfQ0KPiAgI2Vsc2UgLyog
+QklUU19QRVJfTE9ORyA9PSA2NCAqLw0KPiAgLyoNCj4gQEAgLTEwNjIsNiArMTEwNyw3IEBAIHN0
+YXRpYyBzdHJ1Y3QgY2VwaF9tZHNfc2Vzc2lvbiAqcmVnaXN0ZXJfc2Vzc2lvbihzdHJ1Y3QgY2Vw
+aF9tZHNfY2xpZW50ICptZHNjLA0KPiAgCUlOSVRfTElTVF9IRUFEKCZzLT5zX3dhaXRpbmcpOw0K
+PiAgCUlOSVRfTElTVF9IRUFEKCZzLT5zX3Vuc2FmZSk7DQo+ICAJeGFfaW5pdCgmcy0+c19kZWxl
+Z2F0ZWRfaW5vcyk7DQo+ICsJYXRvbWljX3NldCgmcy0+c19udW1fZGVsZWdfaW5vcywgMCk7DQo+
+ICAJSU5JVF9MSVNUX0hFQUQoJnMtPnNfY2FwX3JlbGVhc2VzKTsNCj4gIAlJTklUX1dPUksoJnMt
+PnNfY2FwX3JlbGVhc2Vfd29yaywgY2VwaF9jYXBfcmVsZWFzZV93b3JrKTsNCj4gIA0KPiBAQCAt
+NTEwMyw2ICs1MTQ5LDcgQEAgc3RhdGljIGludCBzZW5kX21kc19yZWNvbm5lY3Qoc3RydWN0IGNl
+cGhfbWRzX2NsaWVudCAqbWRzYywNCj4gIA0KPiAgCS8qIFNlcmlhbGl6ZWQgYnkgc19tdXRleCBh
+Z2FpbnN0IGNvbmN1cnJlbnQgY2VwaF9nZXRfZGVsZWdfaW5vKCkuICovDQo+ICAJeGFfZGVzdHJv
+eSgmc2Vzc2lvbi0+c19kZWxlZ2F0ZWRfaW5vcyk7DQo+ICsJYXRvbWljX3NldCgmc2Vzc2lvbi0+
+c19udW1fZGVsZWdfaW5vcywgMCk7DQo+ICAJaWYgKHNlc3Npb24tPnNfc3RhdGUgPT0gQ0VQSF9N
+RFNfU0VTU0lPTl9DTE9TRUQgfHwNCj4gIAkgICAgc2Vzc2lvbi0+c19zdGF0ZSA9PSBDRVBIX01E
+U19TRVNTSU9OX1JFSkVDVEVEKSB7DQo+ICAJCXByX2luZm9fY2xpZW50KGNsLCAibWRzJWQgc2tp
+cHBpbmcgcmVjb25uZWN0LCBzZXNzaW9uICVzXG4iLA0KPiBkaWZmIC0tZ2l0IGEvZnMvY2VwaC9t
+ZHNfY2xpZW50LmggYi9mcy9jZXBoL21kc19jbGllbnQuaA0KPiBpbmRleCA3MzFkNmFkMDQ5NTZk
+Li5kMWExMGM0YmQ0ZDJkIDEwMDY0NA0KPiAtLS0gYS9mcy9jZXBoL21kc19jbGllbnQuaA0KPiAr
+KysgYi9mcy9jZXBoL21kc19jbGllbnQuaA0KPiBAQCAtMjk5LDYgKzI5OSw3IEBAIHN0cnVjdCBj
+ZXBoX21kc19zZXNzaW9uIHsNCj4gIAlzdHJ1Y3QgbGlzdF9oZWFkICBzX3dhaXRpbmc7ICAvKiB3
+YWl0aW5nIHJlcXVlc3RzICovDQo+ICAJc3RydWN0IGxpc3RfaGVhZCAgc191bnNhZmU7ICAgLyog
+dW5zYWZlIHJlcXVlc3RzICovDQo+ICAJc3RydWN0IHhhcnJheQkgIHNfZGVsZWdhdGVkX2lub3M7
+DQo+ICsJYXRvbWljX3QJICBzX251bV9kZWxlZ19pbm9zOw0KPiAgfTsNCj4gIA0KPiAgLyoNCj4g
+ZGlmZiAtLWdpdCBhL2ZzL2NlcGgvc3VwZXIuaCBiL2ZzL2NlcGgvc3VwZXIuaA0KPiBpbmRleCAz
+NzM3ZWE3ZWQ4OGIzLi5mYjJiMGE0YjdiYjNlIDEwMDY0NA0KPiAtLS0gYS9mcy9jZXBoL3N1cGVy
+LmgNCj4gKysrIGIvZnMvY2VwaC9zdXBlci5oDQo+IEBAIC02NDIsNiArNjQyLDE1IEBAIHN0YXRp
+YyBpbmxpbmUgaW50IGNlcGhfaW5vX2NvbXBhcmUoc3RydWN0IGlub2RlICppbm9kZSwgdm9pZCAq
+ZGF0YSkNCj4gICNkZWZpbmUgQ0VQSF9NRFNfSU5PX0xPR19PRkZTRVQJCSgyICogQ0VQSF9NQVhf
+TURTKQ0KPiAgI2RlZmluZSBDRVBIX0lOT19TWVNURU1fQkFTRQkJKCg2KkNFUEhfTUFYX01EUykg
+KyAoQ0VQSF9NQVhfTURTICogQ0VQSF9OVU1fU1RSQVkpKQ0KPiAgDQo+ICsvKg0KPiArICogVXBw
+ZXIgYm91bmQgb24gdGhlIG51bWJlciBvZiBkZWxlZ2F0ZWQgaW5vZGVzIGEgc2luZ2xlIE1EUyBz
+ZXNzaW9uIG1heQ0KPiArICogaG9sZC4gVGhlIE1EUyBub3JtYWxseSBoYW5kcyBvdXQgYSBzbWFs
+bCBwcmVhbGxvY2F0aW9uIHdpbmRvdyAodGhlDQo+ICsgKiB1c2Vyc3BhY2UgbWRzX2NsaWVudF9w
+cmVhbGxvY19pbm9zIG9wdGlvbiBkZWZhdWx0cyB0byAxMDAwKSBhbmQgcmVmaWxscw0KPiArICog
+aXQgYXMgdGhlIGNsaWVudCBjb25zdW1lcyBlbnRyaWVzLiBUaGlzIGxlYXZlcyBnZW5lcm91cyBo
+ZWFkcm9vbSB3aGlsZQ0KPiArICogYm91bmRpbmcgdGhlIENQVSBhbmQgbWVtb3J5IGEgbWFsZm9y
+bWVkIGRlbGVnYXRpb24gaW50ZXJ2YWwgY2FuIGNvbnN1bWUuDQo+ICsgKi8NCj4gKyNkZWZpbmUg
+Q0VQSF9NQVhfREVMRUdfSU5PUwkJODE5Mg0KPiArDQo+ICBzdGF0aWMgaW5saW5lIGJvb2wgY2Vw
+aF92aW5vX2lzX3Jlc2VydmVkKGNvbnN0IHN0cnVjdCBjZXBoX3Zpbm8gdmlubykNCj4gIHsNCj4g
+IAlpZiAodmluby5pbm8gPj0gQ0VQSF9JTk9fU1lTVEVNX0JBU0UgfHwNCg0KTG9va3MgZ29vZC4N
+Cg0KUmV2aWV3ZWQtYnk6IFZpYWNoZXNsYXYgRHViZXlrbyA8U2xhdmEuRHViZXlrb0BpYm0uY29t
+Pg0KDQpUaGFua3MsDQpTbGF2YS4NCg==
