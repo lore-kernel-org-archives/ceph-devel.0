@@ -1,215 +1,120 @@
-Received: from mail-pg1-f182.google.com (mail-pg1-f182.google.com [209.85.215.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 424493F4849
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 10:58:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBADF2E03E4
+	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 13:42:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783421897; cv=none; b=H7Z1EC3agd0QDDQCp2QDsD+yIZlEkyjb+PIeXLbvnfoh9qfibZ6LWnXSZ4GCVpvP/ETUg2KBsRQHrDEHPDnEM5fBPtR9cRJQY13sAqqgZ3wdjGNvsCOg7Z4RXHNS83tPD8qzn9fyb15QRDIGuCYmVCR0/8f9Mn5+K2jSh5W/hRs=
+	t=1783431764; cv=none; b=pxsgKTZ9/YJuiEx44UVl/5BeOLqVHiu/HnL9CO8yMugHA3KMI5mT58sIPo04FKYeekf0Cphmf8tuggdr2IINN0lfBxdwtNSnnkaiqRUBXF+3Ux1xWZEl2sZfsUikG1mR7bJzUFsi3GMvuO2rfnshs3ieDtvYHEnak0qIcAHV5xY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783421897; c=relaxed/simple;
-	bh=P8gIYO8Be5GyRIeaQoKDFNwhdYjhH8ur+OsFkbOFxi4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=BVDtOk5oS4OwOQNHAL9+lH8IAkTuCxp3o5FSgxy9P8SKDArWLd9cveNIgxsWjFG6Be3/NY8p/+Dk19S2MTLHI9iRhuSFEGLnfbJxbUu/H0MIYhRFkwDJeZG6LcfzpL/PATMcNOn7s283S2QtfxYLcWa0+LraOG4R/JZHJUTId6o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fAugUfq+; arc=none smtp.client-ip=209.85.215.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1783431764; c=relaxed/simple;
+	bh=2iSqJrhybkl2X9Qzkw6+JnhCIcDlGA613iANe6q7Qb8=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=OmFlGTGbQENO7PPsQWZtWf7XiCDJ4ZV28/Rysi8jKBY09UwXrcdAnFQieFCq+O+6go+Tc0dhj0V5kMqWFaux0MweDNIY2EN5DT41CzEg5HUkSI+TKx6WdVgtlqPznUqAHoT5TIlv1v6wP0K+e0qtxwz/1XGY+EcF4Ki6O3rbC30=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Nu4ZH4TS; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ozUrglX5; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fAugUfq+"
-Received: by mail-pg1-f182.google.com with SMTP id 41be03b00d2f7-c88aab7c1d5so230162a12.2
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 03:58:15 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Nu4ZH4TS";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ozUrglX5"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1783431761;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=th9p+kXXIbFIPhMusnRxzwc8SwStagvVDkw1qMpNP9E=;
+	b=Nu4ZH4TScpTtaT3cyJ7q/k3jOU2JVmHgqm9g+I6J9VRZY4H7woyx5d6pLeRlu1sGQOaCGH
+	RPEv6G+i+smim9PAfZtDrP2++KTRIKiDZgC6WGT07liGQSGP3MRVKDZCe8lFXar1mwAlkv
+	o4JAQ2Da/QWd6HeeFqwGZnHCwI3+6xI=
+Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
+ [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-549-keyvCz60Mbiat6VmDjB79A-1; Tue, 07 Jul 2026 09:42:40 -0400
+X-MC-Unique: keyvCz60Mbiat6VmDjB79A-1
+X-Mimecast-MFC-AGG-ID: keyvCz60Mbiat6VmDjB79A_1783431759
+Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-6983880a958so3515136a12.2
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 06:42:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1783421895; x=1784026695; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=vTAOErkodfEqDL8pLtelOUXnkS/56cD3vo3IuTVepFA=;
-        b=fAugUfq+oDcjbVek5xqlh4DG+f1Lx9bPjkVepzCce5NFTaXKQAinfzq49SGz1NGZJR
-         027Zr6P1EfwXLfJEm4R5UcgrPeUfAWhU3pf98D/5vmGEfiU/b9vPuCIBt6PmCOnDKL5n
-         M9vQxuAwfpmIMBbLodvAiKcNQwBjRZ4z4tWzJ6lkzfF60N4WGZt7FsLK//YcTeRCCWP8
-         KkqsqqbXqCQEC+UGm41SQCn2l4Iuvn8h8TX1M4fgC7TVzBSFOCRH6FlsV2mZ8v0yMHST
-         a1zbU7K/Y2nXRZIGmvyfvZ4UQfQT1w7W9IECuPuvet0Z0jBhGmLm8UiwRj2yUy9Te6Gp
-         Ybzw==
+        d=redhat.com; s=google; t=1783431759; x=1784036559; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=th9p+kXXIbFIPhMusnRxzwc8SwStagvVDkw1qMpNP9E=;
+        b=ozUrglX5Gjfc0ejW6GIdAPov+DVSDslTts6xAbeXljcrfeytRc59WPq4U1xwH9Gh6J
+         O8S7mJgYSOZy2RJInO+c5QFvuDVjgK+757QfSOtdsio3HJXbw5dRCK4t3EW/k8FBvbkf
+         yqnI5uL64T2+j3q3tAqIaW6ZiggJXMA/0ZozolT5Ma9X23QubxnvjxGtdsD9FonoH4oe
+         shAjGaA9kQrw90j6vJbZAa6VsNotoNR5aHLutShvaNvOU0IMUuivbBdL/YL+OvOtJYol
+         r7OF/epWPZr1ggSAfnRNWgGe+ty6nLhIoXZyPF/Vqf3Mg4CnXbTAU45B15Xl2oSp5Lw4
+         JhOw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783421895; x=1784026695;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=vTAOErkodfEqDL8pLtelOUXnkS/56cD3vo3IuTVepFA=;
-        b=pa6t6N/KUvbjLlGj16e/qm+jIbAkaSbIK1fCer/hIFivXWagz0lzFRwPeXHblGJLqV
-         TniZJuLDAJiI25MT8Nwq3GW1Sy+eT5TZMbMFs8qAVQaYyRVyklegZTqof2gCnZx4UomL
-         pAPmygGsy1NyyxB9HOazb5ECpjZHxxefADI6Mg/vHnzWeQPcknyeomcKO1MvoU70wvxF
-         VpEMiirfn/qOGj2987jUK2I9gqDHewZg+7EbPQL9K0/cz5R9G/1ZDZjFvKHzfv1fyrQk
-         bnsTX+T/P9PaAPcYjcZdmwe2mhWT0KDcHS2L4trFZO8e5RHIU9IuC4IPu+Yag67fAlf2
-         UV6Q==
-X-Gm-Message-State: AOJu0Ywk254GdPBTimavYn4zhsdHjwj/d5qKXJlWFwQj9snERJ+1tOz/
-	1J/V7TuhqQSWHMiEXYx+mD4MANd80GvqmCTAYUTcU9Kc1/F3u0wD2RXV
-X-Gm-Gg: AfdE7clUOsrCh4Oky8Y1zlr7xGuMuQLMu6/3y6n+rVyZCykRcOlv+CiMWLHMvnVAIq1
-	Q2Jqu6qQ0+T8b74b67DQhCsuvINNfv4a1XW9lRS9Df3DTV7G8wx/3SHVKxAvK9eUMMWElD2dCmV
-	zz1+G2nAF0dlPF8ZHdrFvq8CxyOMZjhcdhEGKz1An7l89AMusdmP73psytj9NQzZ5T9/8MI35XX
-	wIYIxxZeti6R8b97lM5jmfus3Tick83cm6Js1JzzRl/dW8w+0TfmuZi2spZAa6dk/hHL+j2Ugsd
-	/MVvqUwHajDZvTMSNlZZvhh9Ks8K1xn4uTUFBEpcE2WQORrxkaTbOEMevpuHp+mh57KtEuFYE9D
-	rUm3iTNgPSW2EQs/rAkZpAn3nLbUmzAMSBCAysArI3ZlIoqT6BAuv84RbGw6o/a/GbkrZJXJ/d8
-	vMofwQihE=
-X-Received: by 2002:a05:6a20:6f91:b0:3bf:bdb9:f611 with SMTP id adf61e73a8af0-3c03c661a00mr9815737637.5.1783421894592;
-        Tue, 07 Jul 2026 03:58:14 -0700 (PDT)
-Received: from kali ([122.162.146.188])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-13b658a99afsm7862340c88.0.2026.07.07.03.58.11
+        d=1e100.net; s=20251104; t=1783431759; x=1784036559;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=th9p+kXXIbFIPhMusnRxzwc8SwStagvVDkw1qMpNP9E=;
+        b=MqOvmom3zE+TNWF+J5xFoLLm3T5OtMrdguDAJAZ3mIcXl2wwEpYxT9+ikFocRvvDVB
+         3reQrJ/hQvhvrHqBTU8VattiSpPBDTB3F83WK5NhvqPwzGJSlJdMIsVBpVenrGZjhFJd
+         rdu6vFpbTo/XQPZkw4fXGcG7xd7urZiVPp6Z9ZX2ctJmnXt+4QPX3DHdKIKpjVnZxJ/K
+         JwxN23wFnwVzV01xAtg+4vWmpqRtReIMMZuxvubrgh3DG8ictLRqNd4P3gBkgQXLis6g
+         G0C4gyC1u5hKQZ63kC9GoWHE+aAE6KNhtrS3VyFoGk9/guJJJe3kYVSBdkGXIS3R+6i5
+         NUsQ==
+X-Gm-Message-State: AOJu0YxTfVIREG4GXc1yVULHygHw4CqEaZxYlLQcyv73hTjPFnXvHvDA
+	dYu4U4qQkOkZkrgc9VzdnOS1dMtrR8g3f91EUp4l3tA7DOhptVibKlmUR2tsnrcKEPdLzgZTQfD
+	VbjmEeAouovOTYwKtdZwsQgdQ1in9V100lWU/Y0vNx4lPLawADcaqqUAIDeq4q3xG6C32y7hnkw
+	==
+X-Gm-Gg: AfdE7cmPN0Tkxw0nQhJaKQLecqVg1onvxPP33EOJmMwt40KB42K+OWuqkv+Bso+8X6g
+	W6kzlz8rrtascei+HD0iujCTsTaretF/PQctTL1mOVuKsva8kyqFWfSwn6CS9x4I6EDmUo1U6+Q
+	zaukhZq1IrGowuPOkTDdwRRVUqQuRqqrRO468Mp7z6LV52l4tH2aOlAbqBUhcvZ16xjd+5IbJ2r
+	wz/9Gpra73H9LUwSERk2JPHmhcBI4iYbb5bI0u2QCG3cTcWg7OBCcrqL41Zr4Ob/x7wBXwbX3N5
+	Xo9rJkG4uUor8gejH0UK7bvI+TbwdraDQzcHsJGA0Tj0AIeQMqHFAdhY19LvL3ElUi11rtoOsHD
+	R7TLI8/krpuFIRWx5vr7ernxyGxNd518rutPBf4iEvL4n
+X-Received: by 2002:a05:6402:11cc:b0:698:c0d8:e40a with SMTP id 4fb4d7f45d1cf-69a85c3f126mr2764090a12.38.1783431758163;
+        Tue, 07 Jul 2026 06:42:38 -0700 (PDT)
+X-Received: by 2002:a05:6402:11cc:b0:698:c0d8:e40a with SMTP id 4fb4d7f45d1cf-69a85c3f126mr2764070a12.38.1783431757756;
+        Tue, 07 Jul 2026 06:42:37 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-69a19db05ecsm5722143a12.28.2026.07.07.06.42.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Jul 2026 03:58:14 -0700 (PDT)
-From: Pavitra Jha <jhapavitra98@gmail.com>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	slava@dubeyko.com
+        Tue, 07 Jul 2026 06:42:37 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: slava@dubeyko.com
 Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org,
-	Pavitra Jha <jhapavitra98@gmail.com>
-Subject: [PATCH v4] ceph: fix OOB read in ceph_osdc_list_watchers via uncapped outdata_len
-Date: Tue,  7 Jul 2026 06:57:27 -0400
-Message-ID: <20260707105727.43352-1-jhapavitra98@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260702114034.917507-13-amarkuze@redhat.com>
-References: <20260702114034.917507-13-amarkuze@redhat.com>
+	idryomov@gmail.com,
+	xiubo.li@clyso.com
+Subject: Re: [PATCH v2 00/15] ceph: add binary logging (BLOG) for CephFS
+Date: Tue,  7 Jul 2026 13:42:35 +0000
+Message-Id: <20260707134235.2235224-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260706143843.1980879-1-amarkuze@redhat.com>
+References: <20260706143843.1980879-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-The OSD reply header field op->payload_len is wire-controlled and is
-copied directly into m->outdata_len[i] without any bounds check:
+Hi Slava,
 
-  m->outdata_len[i] = le32_to_cpu(op->payload_len);
+The series is based on ceph-client/testing, not mainline. Patch 9/15
+touches mds_client.c which has several patches in testing that haven't
+gone upstream yet, so it won't apply to 7.2-rc2.
 
-This value propagates unchecked to req->r_ops[0].outdata_len and is
-then used to set the decode boundary in ceph_osdc_list_watchers():
+To apply:
 
-  void *const end = p + req->r_ops[0].outdata_len;
+  git clone https://github.com/ceph/ceph-client.git -b testing
+  b4 shazam <msgid>
 
-The actual data allocation is always exactly one page:
-  ceph_alloc_page_vector(1, GFP_NOIO)
-  ceph_osd_data_pages_init(..., PAGE_SIZE, ...)
+or just pull ceph-client/testing directly — the series applies clean
+there.
 
-The messenger caps the copy to PAGE_SIZE bytes, but the decode window
-end is set from the uncapped wire value. A malicious OSD can send
-outdata_len=0x10000, causing _safe decoder boundary checks to pass
-while the physical reads cross the slab allocation boundary.
-KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
+Thanks,
+Alex
 
-  ==================================================================
-  BUG: KASAN: slab-out-of-bounds in ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
-  Read of size 4 at addr ffff88800a229f9e by task insmod/57
-
-  CPU: 0 UID: 0 PID: 57 Comm: insmod Tainted: G           O        7.0.0-rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
-  Tainted: [O]=OOT_MODULE
-  Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-debian-1.17.0-1 04/01/2014
-  Call Trace:
-   <TASK>
-   dump_stack_lvl+0x4d/0x70
-   print_report+0x170/0x4f3
-   kasan_report+0xda/0x110
-   ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
-   do_one_initcall+0x9a/0x3a0
-   do_init_module+0x27c/0x790
-   load_module+0x4a9a/0x6350
-   init_module_from_file+0x15c/0x180
-   idempotent_init_module+0x21f/0x750
-   __x64_sys_finit_module+0xba/0x120
-   do_syscall_64+0xe2/0x570
-   entry_SYSCALL_64_after_hwframe+0x77/0x7f
-
-  Allocated by task 57:
-   kasan_save_stack+0x30/0x50
-   kasan_save_track+0x14/0x30
-   __kasan_kmalloc+0x7f/0x90
-   ceph_oob2_init+0x44/0xff0 [ceph_oob2_poc]
-   do_one_initcall+0x9a/0x3a0
-   do_init_module+0x27c/0x790
-   load_module+0x4a9a/0x6350
-   init_module_from_file+0x15c/0x180
-   idempotent_init_module+0x21f/0x750
-   __x64_sys_finit_module+0xba/0x120
-   do_syscall_64+0xe2/0x570
-   entry_SYSCALL_64_after_hwframe+0x77/0x7f
-
-  The buggy address belongs to the object at ffff88800a229000
-   which belongs to the cache kmalloc-4k of size 4096
-  The buggy address is located 3998 bytes inside of
-   allocated 4000-byte region [ffff88800a229000, ffff88800a229fa0)
-
-  Memory state around the buggy address:
-   ffff88800a229e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-   ffff88800a229f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  >ffff88800a229f80: 00 00 00 00 fc fc fc fc fc fc fc fc fc fc fc fc
-                                 ^
-   ffff88800a22a000: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
-   ffff88800a22a080: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
-  ==================================================================
-
-  val=0xccccaaaa (OOB garbage from KASAN redzone)
-
-Fix by introducing buf_len to hold the allocation size, using it in
-both ceph_osd_data_pages_init() and the min_t() decode boundary cap,
-so the two are guaranteed to stay in sync if the buffer size changes.
-buf_len is declared as u32 to match the type of outdata_len used in
-the min_t() expression.
-
-Attacker model: a malicious or compromised OSD in a multi-tenant
-Ceph deployment can trigger this against any client issuing
-CEPH_OSD_OP_LIST_WATCHERS without further privileges beyond OSD
-session establishment.
-
-Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
-Cc: stable@vger.kernel.org
-Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
-Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
----
-v4: Rebase against current linux/master and ceph-testing/testing,
-    confirmed clean git am -3 apply against both. No functional
-    changes from Slava's reviewed v3.
-v3: Change buf_len type from size_t to u32 to match outdata_len type
-    in min_t(), per Viacheslav Dubeyko's review.
-v2: Introduce buf_len variable instead of hardcoding PAGE_SIZE
-    independently in ceph_osd_data_pages_init() and the min_t() cap,
-    per Viacheslav Dubeyko's review.
----
- net/ceph/osd_client.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 2ff00070c..62bec6ad8 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -5060,6 +5060,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
- 	struct ceph_osd_request *req;
- 	struct page **pages;
- 	int ret;
-+	const u32 buf_len = PAGE_SIZE;
- 
- 	req = ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_NOIO);
- 	if (!req)
-@@ -5078,7 +5079,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
- 	osd_req_op_init(req, 0, CEPH_OSD_OP_LIST_WATCHERS, 0);
- 	ceph_osd_data_pages_init(osd_req_op_data(req, 0, list_watchers,
- 						 response_data),
--				 pages, PAGE_SIZE, 0, false, true);
-+				 pages, buf_len, 0, false, true);
- 
- 	ret = ceph_osdc_alloc_messages(req, GFP_NOIO);
- 	if (ret)
-@@ -5088,7 +5089,8 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
- 	ret = ceph_osdc_wait_request(osdc, req);
- 	if (ret >= 0) {
- 		void *p = page_address(pages[0]);
--		void *const end = p + req->r_ops[0].outdata_len;
-+		void *const end = p +
-+			min_t(u32, req->r_ops[0].outdata_len, buf_len);
- 
- 		ret = decode_watchers(&p, end, watchers, num_watchers);
- 	}
--- 
-2.53.0
+--
+Alex Markuze
 
