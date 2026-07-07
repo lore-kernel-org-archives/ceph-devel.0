@@ -1,46 +1,76 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f182.google.com (mail-pg1-f182.google.com [209.85.215.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA1CB221FD4
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 10:31:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 424493F4849
+	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 10:58:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783420288; cv=none; b=mk7RfhGhpYxV88CSRs4+mwhIj2klxzsAe6QeXOuZ7bo/EgwqSVVS+ueATJT5WCToVFxiiXDJ8hs2mvRF60rGtNaZyrD487UJxXJtwP/9GBJkprO9GNwRbjvzPlriNIx2BGBeykVEQStu8y1S7Y1+4AYDLgtzdmie6Dkmcgf3Ml4=
+	t=1783421897; cv=none; b=H7Z1EC3agd0QDDQCp2QDsD+yIZlEkyjb+PIeXLbvnfoh9qfibZ6LWnXSZ4GCVpvP/ETUg2KBsRQHrDEHPDnEM5fBPtR9cRJQY13sAqqgZ3wdjGNvsCOg7Z4RXHNS83tPD8qzn9fyb15QRDIGuCYmVCR0/8f9Mn5+K2jSh5W/hRs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783420288; c=relaxed/simple;
-	bh=Juojjzbn1dejT4fCnt2BXq46Kzp2k9vxL9rr92cH3yk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ACjGhm5KAt+aozk9DxzX/DIJ0u+rrqHVkhicDNcnQDOTE46SYTJxMLrbdUtpOf4fRswl0NHUk4/yCF5zcqQkKROkA41UxfwdydKMZOPUEjqRiB6zzkW1zima6yMrEySuVk/2eGE2ZATWlbhSzs/TiewvHVnLBewBK7okTvtZZsk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=PeIkycZq; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1783421897; c=relaxed/simple;
+	bh=P8gIYO8Be5GyRIeaQoKDFNwhdYjhH8ur+OsFkbOFxi4=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=BVDtOk5oS4OwOQNHAL9+lH8IAkTuCxp3o5FSgxy9P8SKDArWLd9cveNIgxsWjFG6Be3/NY8p/+Dk19S2MTLHI9iRhuSFEGLnfbJxbUu/H0MIYhRFkwDJeZG6LcfzpL/PATMcNOn7s283S2QtfxYLcWa0+LraOG4R/JZHJUTId6o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fAugUfq+; arc=none smtp.client-ip=209.85.215.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="PeIkycZq"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1783420283; h=from : to
- : cc : subject : date : message-id : mime-version :
- content-transfer-encoding : from;
- bh=Juojjzbn1dejT4fCnt2BXq46Kzp2k9vxL9rr92cH3yk=;
- b=PeIkycZqhd7tNCZ9v6LBqY2sNn6sPWSeNW+KrwB+i6GgHpst6K0PF3LNmt6CXcIVraMyl
- JiA0GJYbbAtq2H/CqYG6o8yf9YYtIAjwtuwXJYTyzFmLzH2QTRHZkqnakSrTs0XpQokodBc
- llKzvMutlihTAwEC4MTux1s9Sx+Tp92lMsF21iGahkLXyogGW/FMsDVWefUqGnGiUlFl74a
- b6BLFAoF0jiaDIdntF4XETSKDvlDWDukEgu7MZb+ObfLkGA13cOaw5Am+rnQ214lRBIK+xF
- YiBAW5ip9tjJSry8tEtuAvZEGjpRfq3dZwIz1RdZ26334SOTStJ5mpoNiCgQ==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id AB2CA5FCA1;
-	Tue,  7 Jul 2026 12:31:23 +0200 (CEST)
-Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 734655FAE7;
-	Tue,  7 Jul 2026 12:31:23 +0200 (CEST)
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fAugUfq+"
+Received: by mail-pg1-f182.google.com with SMTP id 41be03b00d2f7-c88aab7c1d5so230162a12.2
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 03:58:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1783421895; x=1784026695; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=vTAOErkodfEqDL8pLtelOUXnkS/56cD3vo3IuTVepFA=;
+        b=fAugUfq+oDcjbVek5xqlh4DG+f1Lx9bPjkVepzCce5NFTaXKQAinfzq49SGz1NGZJR
+         027Zr6P1EfwXLfJEm4R5UcgrPeUfAWhU3pf98D/5vmGEfiU/b9vPuCIBt6PmCOnDKL5n
+         M9vQxuAwfpmIMBbLodvAiKcNQwBjRZ4z4tWzJ6lkzfF60N4WGZt7FsLK//YcTeRCCWP8
+         KkqsqqbXqCQEC+UGm41SQCn2l4Iuvn8h8TX1M4fgC7TVzBSFOCRH6FlsV2mZ8v0yMHST
+         a1zbU7K/Y2nXRZIGmvyfvZ4UQfQT1w7W9IECuPuvet0Z0jBhGmLm8UiwRj2yUy9Te6Gp
+         Ybzw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1783421895; x=1784026695;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=vTAOErkodfEqDL8pLtelOUXnkS/56cD3vo3IuTVepFA=;
+        b=pa6t6N/KUvbjLlGj16e/qm+jIbAkaSbIK1fCer/hIFivXWagz0lzFRwPeXHblGJLqV
+         TniZJuLDAJiI25MT8Nwq3GW1Sy+eT5TZMbMFs8qAVQaYyRVyklegZTqof2gCnZx4UomL
+         pAPmygGsy1NyyxB9HOazb5ECpjZHxxefADI6Mg/vHnzWeQPcknyeomcKO1MvoU70wvxF
+         VpEMiirfn/qOGj2987jUK2I9gqDHewZg+7EbPQL9K0/cz5R9G/1ZDZjFvKHzfv1fyrQk
+         bnsTX+T/P9PaAPcYjcZdmwe2mhWT0KDcHS2L4trFZO8e5RHIU9IuC4IPu+Yag67fAlf2
+         UV6Q==
+X-Gm-Message-State: AOJu0Ywk254GdPBTimavYn4zhsdHjwj/d5qKXJlWFwQj9snERJ+1tOz/
+	1J/V7TuhqQSWHMiEXYx+mD4MANd80GvqmCTAYUTcU9Kc1/F3u0wD2RXV
+X-Gm-Gg: AfdE7clUOsrCh4Oky8Y1zlr7xGuMuQLMu6/3y6n+rVyZCykRcOlv+CiMWLHMvnVAIq1
+	Q2Jqu6qQ0+T8b74b67DQhCsuvINNfv4a1XW9lRS9Df3DTV7G8wx/3SHVKxAvK9eUMMWElD2dCmV
+	zz1+G2nAF0dlPF8ZHdrFvq8CxyOMZjhcdhEGKz1An7l89AMusdmP73psytj9NQzZ5T9/8MI35XX
+	wIYIxxZeti6R8b97lM5jmfus3Tick83cm6Js1JzzRl/dW8w+0TfmuZi2spZAa6dk/hHL+j2Ugsd
+	/MVvqUwHajDZvTMSNlZZvhh9Ks8K1xn4uTUFBEpcE2WQORrxkaTbOEMevpuHp+mh57KtEuFYE9D
+	rUm3iTNgPSW2EQs/rAkZpAn3nLbUmzAMSBCAysArI3ZlIoqT6BAuv84RbGw6o/a/GbkrZJXJ/d8
+	vMofwQihE=
+X-Received: by 2002:a05:6a20:6f91:b0:3bf:bdb9:f611 with SMTP id adf61e73a8af0-3c03c661a00mr9815737637.5.1783421894592;
+        Tue, 07 Jul 2026 03:58:14 -0700 (PDT)
+Received: from kali ([122.162.146.188])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-13b658a99afsm7862340c88.0.2026.07.07.03.58.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Jul 2026 03:58:14 -0700 (PDT)
+From: Pavitra Jha <jhapavitra98@gmail.com>
+To: idryomov@gmail.com,
+	amarkuze@redhat.com,
+	slava@dubeyko.com
 Cc: ceph-devel@vger.kernel.org,
-	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Subject: [PATCH v3] libceph: Reject osdmaps advertising pools of unsupported types
-Date: Tue,  7 Jul 2026 12:31:19 +0200
-Message-ID: <20260707103119.3909051-1-raphael.zimmer@tu-ilmenau.de>
-X-Mailer: git-send-email 2.47.3
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org,
+	Pavitra Jha <jhapavitra98@gmail.com>
+Subject: [PATCH v4] ceph: fix OOB read in ceph_osdc_list_watchers via uncapped outdata_len
+Date: Tue,  7 Jul 2026 06:57:27 -0400
+Message-ID: <20260707105727.43352-1-jhapavitra98@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260702114034.917507-13-amarkuze@redhat.com>
+References: <20260702114034.917507-13-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -49,71 +79,137 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-osdmaps are received over the network and typically contain information
-about existing pools. Information about each pool is decoded in
-decode_pool(). A pool is either replicated or erasure coded, which is
-encoded in the type field as an 8-bit value. Currently, any value in
-this field is treated as valid even though only two values have an
-actual meaning. If this field contains a value other than
-CEPH_POOL_TYPE_REP or CEPH_POOL_TYPE_EC, a BUG() assertion in
-ceph_can_shift_osds() can be triggered subsequently. This happens the
-next time calc_target() is called for a request in this pool.
+The OSD reply header field op->payload_len is wire-controlled and is
+copied directly into m->outdata_len[i] without any bounds check:
 
-This patch fixes the issue by adding a check that verifies the pool type
-directly during decoding and rejecting osdmaps that contain invalid
-values. To also account for incremental maps that are updated in-place,
-the corrupted pool is removed from the osdmap if its decoding fails.
+  m->outdata_len[i] = le32_to_cpu(op->payload_len);
 
-Fixes: 4f6a7e5ee139 ("ceph: update support for PGID64, PGPOOL3, OSDENC protocol features")
-Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+This value propagates unchecked to req->r_ops[0].outdata_len and is
+then used to set the decode boundary in ceph_osdc_list_watchers():
+
+  void *const end = p + req->r_ops[0].outdata_len;
+
+The actual data allocation is always exactly one page:
+  ceph_alloc_page_vector(1, GFP_NOIO)
+  ceph_osd_data_pages_init(..., PAGE_SIZE, ...)
+
+The messenger caps the copy to PAGE_SIZE bytes, but the decode window
+end is set from the uncapped wire value. A malicious OSD can send
+outdata_len=0x10000, causing _safe decoder boundary checks to pass
+while the physical reads cross the slab allocation boundary.
+KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
+
+  ==================================================================
+  BUG: KASAN: slab-out-of-bounds in ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
+  Read of size 4 at addr ffff88800a229f9e by task insmod/57
+
+  CPU: 0 UID: 0 PID: 57 Comm: insmod Tainted: G           O        7.0.0-rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
+  Tainted: [O]=OOT_MODULE
+  Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-debian-1.17.0-1 04/01/2014
+  Call Trace:
+   <TASK>
+   dump_stack_lvl+0x4d/0x70
+   print_report+0x170/0x4f3
+   kasan_report+0xda/0x110
+   ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
+   do_one_initcall+0x9a/0x3a0
+   do_init_module+0x27c/0x790
+   load_module+0x4a9a/0x6350
+   init_module_from_file+0x15c/0x180
+   idempotent_init_module+0x21f/0x750
+   __x64_sys_finit_module+0xba/0x120
+   do_syscall_64+0xe2/0x570
+   entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+  Allocated by task 57:
+   kasan_save_stack+0x30/0x50
+   kasan_save_track+0x14/0x30
+   __kasan_kmalloc+0x7f/0x90
+   ceph_oob2_init+0x44/0xff0 [ceph_oob2_poc]
+   do_one_initcall+0x9a/0x3a0
+   do_init_module+0x27c/0x790
+   load_module+0x4a9a/0x6350
+   init_module_from_file+0x15c/0x180
+   idempotent_init_module+0x21f/0x750
+   __x64_sys_finit_module+0xba/0x120
+   do_syscall_64+0xe2/0x570
+   entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+  The buggy address belongs to the object at ffff88800a229000
+   which belongs to the cache kmalloc-4k of size 4096
+  The buggy address is located 3998 bytes inside of
+   allocated 4000-byte region [ffff88800a229000, ffff88800a229fa0)
+
+  Memory state around the buggy address:
+   ffff88800a229e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   ffff88800a229f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  >ffff88800a229f80: 00 00 00 00 fc fc fc fc fc fc fc fc fc fc fc fc
+                                 ^
+   ffff88800a22a000: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+   ffff88800a22a080: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+  ==================================================================
+
+  val=0xccccaaaa (OOB garbage from KASAN redzone)
+
+Fix by introducing buf_len to hold the allocation size, using it in
+both ceph_osd_data_pages_init() and the min_t() decode boundary cap,
+so the two are guaranteed to stay in sync if the buffer size changes.
+buf_len is declared as u32 to match the type of outdata_len used in
+the min_t() expression.
+
+Attacker model: a malicious or compromised OSD in a multi-tenant
+Ceph deployment can trigger this against any client issuing
+CEPH_OSD_OP_LIST_WATCHERS without further privileges beyond OSD
+session establishment.
+
+Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
+Cc: stable@vger.kernel.org
+Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
+Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
 ---
- include/linux/ceph/rados.h | 5 +++++
- net/ceph/osdmap.c          | 8 +++++++-
- 2 files changed, 12 insertions(+), 1 deletion(-)
+v4: Rebase against current linux/master and ceph-testing/testing,
+    confirmed clean git am -3 apply against both. No functional
+    changes from Slava's reviewed v3.
+v3: Change buf_len type from size_t to u32 to match outdata_len type
+    in min_t(), per Viacheslav Dubeyko's review.
+v2: Introduce buf_len variable instead of hardcoding PAGE_SIZE
+    independently in ceph_osd_data_pages_init() and the min_t() cap,
+    per Viacheslav Dubeyko's review.
+---
+ net/ceph/osd_client.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-index 73c3efbec36c..5b5c33845301 100644
---- a/include/linux/ceph/rados.h
-+++ b/include/linux/ceph/rados.h
-@@ -86,6 +86,11 @@ struct ceph_pg_v1 {
- #define CEPH_POOL_TYPE_RAID4   2 /* never implemented */
- #define CEPH_POOL_TYPE_EC      3
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 2ff00070c..62bec6ad8 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -5060,6 +5060,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 	struct ceph_osd_request *req;
+ 	struct page **pages;
+ 	int ret;
++	const u32 buf_len = PAGE_SIZE;
  
-+static inline bool ceph_pool_type_is_supported(__u8 type)
-+{
-+	return type == CEPH_POOL_TYPE_REP || type == CEPH_POOL_TYPE_EC;
-+}
-+
- /*
-  * stable_mod func is used to control number of placement groups.
-  * similar to straight-up modulo, but produces a stable mapping as b
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index f8d5621bc767..0ad2e4801294 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -818,6 +818,10 @@ static int decode_pool(void **p, void *end, struct ceph_pg_pool_info *pi)
+ 	req = ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_NOIO);
+ 	if (!req)
+@@ -5078,7 +5079,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 	osd_req_op_init(req, 0, CEPH_OSD_OP_LIST_WATCHERS, 0);
+ 	ceph_osd_data_pages_init(osd_req_op_data(req, 0, list_watchers,
+ 						 response_data),
+-				 pages, PAGE_SIZE, 0, false, true);
++				 pages, buf_len, 0, false, true);
  
- 	ceph_decode_need(p, end, 4 + 4 + 4, bad);
- 	pi->type = ceph_decode_8(p);
-+	if (!ceph_pool_type_is_supported(pi->type)) {
-+		pr_warn_ratelimited("got unsupported pool type %u\n", pi->type);
-+		return -EINVAL;
-+	}
- 	pi->size = ceph_decode_8(p);
- 	pi->crush_ruleset = ceph_decode_8(p);
- 	pi->object_hash = ceph_decode_8(p);
-@@ -1363,8 +1367,10 @@ static int __decode_pools(void **p, void *end, struct ceph_osdmap *map,
- 		}
+ 	ret = ceph_osdc_alloc_messages(req, GFP_NOIO);
+ 	if (ret)
+@@ -5088,7 +5089,8 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
+ 	ret = ceph_osdc_wait_request(osdc, req);
+ 	if (ret >= 0) {
+ 		void *p = page_address(pages[0]);
+-		void *const end = p + req->r_ops[0].outdata_len;
++		void *const end = p +
++			min_t(u32, req->r_ops[0].outdata_len, buf_len);
  
- 		ret = decode_pool(p, end, pi);
--		if (ret)
-+		if (ret) {
-+			__remove_pg_pool(&map->pg_pools, pi);
- 			return ret;
-+		}
+ 		ret = decode_watchers(&p, end, watchers, num_watchers);
  	}
- 
- 	return 0;
 -- 
-2.47.3
+2.53.0
 
