@@ -1,46 +1,91 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC27A13A86C
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 08:22:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D8F239934B
+	for <ceph-devel@vger.kernel.org>; Tue,  7 Jul 2026 09:22:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783412526; cv=none; b=VAti20/SUFCqPkTb5IwHswMAK27A5S37jx3nm3uu/BwwfRkPgin+d71HzV08cXDEDueWcE3ferLJ3tish9VrcP6H/B/qHE2YpTKFHzAExnzfS8/vKyPaVvYRSjl4uWjDOyiAf8sCGxzvQlJzh0rwAvRQr7sKKzNwaN90LijqfAU=
+	t=1783416137; cv=none; b=nyZaFN/PVsLwSrYAp24tz128Px/ZImPoR1NkNvkwSJ5NqvaLNs2//wER0rpLFNW4gNxMaf1m44rXV6Bt5D8uCPj6+ovGro54pbtYHzfwiARNEbRL640jlagrpYf5+aYAvrb5942e07Xj9v5JxBSXOjGcgUFq0LO8wbWcGsjFj5o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783412526; c=relaxed/simple;
-	bh=nM1R/NS4DxlJccV1b2vBzN6xsm+J0g6K3GfI0Vk33R4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JLE63I58MIKpZmsiOKCFJn0FjEvD18bYhTfk0pefhCZzkJxrjyj/XBJII6mi3bxxtXSqGyeQxoD6AFEL7p5EFXfohHF3rhIV9RlJ8QL0Z7l4rFyL5aIPByBszRblrEb3OGVQZWDWoolTiSrlWnBN+UsaGjkRXq8BrifRcJzFYOs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=cOOC92KR; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1783416137; c=relaxed/simple;
+	bh=WxjhaKCyJdrrSmi5smW9eF9czZHPoSjIFvfDoycEZUM=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=BL7nVn+qlEpLAgEafhRRrExF0qpX/8DOnWlE+r50ocBf7LyVJc9D016fOw2mszmKO5MkBvqqWJIAkNY0O/MAIRVa7zc8Qy1AfApPR1NHWspdqlBJ1VkCj9PwsFfaBCKguB6YfzTXmJdxdqeNpbQR55Jv/8oxL+x9Gnr6DsgJlvk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MJjEgpm3; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=H+NDGlVC; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="cOOC92KR"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1783412523; h=from : to
- : cc : subject : date : message-id : mime-version :
- content-transfer-encoding : from;
- bh=nM1R/NS4DxlJccV1b2vBzN6xsm+J0g6K3GfI0Vk33R4=;
- b=cOOC92KRk9LRqIg6qhZCbHNvlbEOx2lzR7xHbaYEeWyRBLsEnbgmjB/omcPan5vUWZ6DI
- wQ4bdRnMINH6KNVmlW9a/OQzCnuvO0dJ7c9mhQ/mTYWhKnq9VJwkp6KQkZmVfS9kXuxWd2K
- 8fHJh59HBsKV2jfcE8ZCQMXIjbXl/I/JcwHAMjeY8hcUVY+0C0nCTb79eZI6g7RBbAFsrvj
- uFDtn+N8uVl8w7OPq7tnfqz2E8gJubMLpQwWX1rVgtLdhc5mSOcD4aLc1EnhnDlzG9qO0pe
- EPh2vBsWzaDFO1Gbn4/ek6J718XOtvpoSckzFslP9R/8Ly0/PPWdJy56CWNg==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id F073E5FB4F;
-	Tue,  7 Jul 2026 10:22:02 +0200 (CEST)
-Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id D116E5FAD6;
-	Tue,  7 Jul 2026 10:22:02 +0200 (CEST)
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Subject: [PATCH v2] libceph: Reject osdmaps advertising pools of unsupported types
-Date: Tue,  7 Jul 2026 10:21:35 +0200
-Message-ID: <20260707082135.3901920-1-raphael.zimmer@tu-ilmenau.de>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MJjEgpm3";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="H+NDGlVC"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1783416134;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=6IVcySQL23eGG2rMYOmit5ll0hDEav5B7Wjz5J6CN6c=;
+	b=MJjEgpm3uU5eO9rMUtdmZgPQ1n6KCSdw0C3sJId0i54PIKhSiK+wL0msceUHuZ0Cl7S3Ei
+	BwcRgdfLvkCpEn1S0vgBAMK5m7RY3Wn+YdvSBF24XycAayYYGyTMpjcTmIGBP7sUcZ7Pr+
+	jGYjTV2ezPuLzL9LPp4mfhbFRjo/Vjo=
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
+ [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-617-PXH_2xhUPyekMQpbG7HkbQ-1; Tue, 07 Jul 2026 05:22:12 -0400
+X-MC-Unique: PXH_2xhUPyekMQpbG7HkbQ-1
+X-Mimecast-MFC-AGG-ID: PXH_2xhUPyekMQpbG7HkbQ_1783416132
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-c12c2d67af1so246233366b.3
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 02:22:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1783416132; x=1784020932; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=6IVcySQL23eGG2rMYOmit5ll0hDEav5B7Wjz5J6CN6c=;
+        b=H+NDGlVCh05OspcxfCiaTjbWOwbER2hcn0D+hjTStlM9ExYZ5UwLCafx3z6QYQpKro
+         YKlwD/tgCLEnqd1SJz0hEyiVBEsHAuAEhZzOIUgU/QwK+ipq0HDVZRWDy6gGS3t8xKNx
+         sILcCItdJgQzqy2w2DfTUJwrmJQathIi6yEfRowO7S39nvuUfdaNYvGByKLYM9O6zC6z
+         0qztSBiMYHGF+XHAcUuQ2WsM3O4fz6nR5JBeE0If4nWsv39z1U3s7qU+ho7hPtpU3oGh
+         UbrMDuYSWFDcPrW0fOAL7icfeAdUTj9uOg3Wy7tpwynvasj/7IliNxAluoDSsNQ1Bw94
+         GLoA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1783416132; x=1784020932;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=6IVcySQL23eGG2rMYOmit5ll0hDEav5B7Wjz5J6CN6c=;
+        b=l6xk/zTeUSCeHuH3J/7nawwvPAalblpGEgqSbPrJLQ2bLmEx8KE3KtmOsYby6idg2d
+         qRa4h3rI6bpzJSLAp0G1CabR/NEro5YHVCXjnDwRUq/TkwOJIhYZDMCznHmboM/qaZle
+         OB6WucJ2OLItCpYi0eUntQ44fIHJOWT9mPY+HrbW8GZU5qFYYjAuF8gK5cqa5mJNNTNF
+         LwSVYdbIyqg4DFLARc64Vp+o8Lj9u6wLXuRIUra3su2+I4OnmoNI7XPKmk3AtXSFY89W
+         VfL7KtarhonEUwHoRSBjRFxcMoky9K8tNyvZwEYw/CvDSqSL3Qa3465fsk4qSbVRhy9F
+         TevA==
+X-Gm-Message-State: AOJu0Yxbm0kRaeBp23noCdmSO5t8MjscadbdE9Q7FCyzQvDTtwa30/AG
+	S0D8lakLkaHsKhPZjewNuILOwLwUbozyBVvq065pqtGt3J1a9aPm59LcKr2tm1nM2+KahtlGp0E
+	Ck2ME0mB3pJBKjNc3moEPdDuUpb/4zP0x7mHemRzp5qfNZLr+tbNwgZfDLQTQrfHPSFy4odfL9g
+	==
+X-Gm-Gg: AfdE7cnpN0OGCT4tglmVXc2EsfSfczyj2zFV17HgkF/PkRQUDKtv7Mm+SekYa3cEJpd
+	Eo4JPGQ3mg5OaKffc9QkNvDbbh5rWl9p9q2Pk5rxdA9MJz6M8Fief4CzvMaauHmNZkSVMRPQisi
+	yt0pTLVJfKwa+S76JRORQlJJeSzlcHNMU6YMSa6nnytmBnNwx/9T1mLDoU6vaF4j6QH6fUcqSXK
+	JD26zUNp1hSLlCu0VFYz9ljYBjs9gZwfshWXA8PpJ4n54BqQMZYZ9wPQqAwOuAIO9xRGB1sa7mh
+	7Gjx85Kd/8JrSiRanvcaV372FFRpam+PqVje8aO71ni9ZZ2b131IJf3Fo287VM4+6wdCMWGcuBn
+	d6enn90UWcdDaZg0Daj+IgA/KCPIg/h7IcaPgxNJ7+W0q
+X-Received: by 2002:a17:907:d301:b0:c12:c936:86f6 with SMTP id a640c23a62f3a-c15a676c68amr249381666b.12.1783416131720;
+        Tue, 07 Jul 2026 02:22:11 -0700 (PDT)
+X-Received: by 2002:a17:907:d301:b0:c12:c936:86f6 with SMTP id a640c23a62f3a-c15a676c68amr249379466b.12.1783416131209;
+        Tue, 07 Jul 2026 02:22:11 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c15ad9bca46sm91755466b.40.2026.07.07.02.22.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Jul 2026 02:22:10 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: marco.crivellari@suse.com
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: ceph: Change system_unbound_wq with system_dfl_wq
+Date: Tue,  7 Jul 2026 09:22:09 +0000
+Message-Id: <20260707092209.2184748-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260706160450.370729-1-marco.crivellari@suse.com>
+References: <20260706160450.370729-1-marco.crivellari@suse.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -49,71 +94,12 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-osdmaps are received over the network and typically contain information
-about existing pools. Information about each pool is decoded in
-decode_pool(). A pool is either replicated or erasure coded, which is
-encoded in the type field as an 8-bit value. Currently, any value in
-this field is treated as valid even though only two values have an
-actual meaning. If this field contains a value other than
-CEPH_POOL_TYPE_REP or CEPH_POOL_TYPE_EC, a BUG() assertion in
-ceph_can_shift_osds() can be triggered subsequently. This happens the
-next time calc_target() is called for a request in this pool.
+Hi Marco,
 
-This patch fixes the issue by adding a check that verifies the pool type
-directly during decoding and rejecting osdmaps that contain invalid
-values. To also account for incremental maps that are updated in-place,
-the corrupted pool is removed from the osdmap if its decoding fails.
+Thanks for the patch.
 
-Fixes: 4f6a7e5ee139 ("ceph: update support for PGID64, PGPOOL3, OSDENC protocol features")
-Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
----
- include/linux/ceph/rados.h | 5 +++++
- net/ceph/osdmap.c          | 8 +++++++-
- 2 files changed, 12 insertions(+), 1 deletion(-)
+Reviewed-by: Alex Markuze <amarkuze@redhat.com>
 
-diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
-index 73c3efbec36c..5b5c33845301 100644
---- a/include/linux/ceph/rados.h
-+++ b/include/linux/ceph/rados.h
-@@ -86,6 +86,11 @@ struct ceph_pg_v1 {
- #define CEPH_POOL_TYPE_RAID4   2 /* never implemented */
- #define CEPH_POOL_TYPE_EC      3
- 
-+static inline bool ceph_pool_type_is_supported(__u8 type)
-+{
-+	return type == CEPH_POOL_TYPE_REP || type == CEPH_POOL_TYPE_EC;
-+}
-+
- /*
-  * stable_mod func is used to control number of placement groups.
-  * similar to straight-up modulo, but produces a stable mapping as b
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index f8d5621bc767..b243cafe171f 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -818,6 +818,10 @@ static int decode_pool(void **p, void *end, struct ceph_pg_pool_info *pi)
- 
- 	ceph_decode_need(p, end, 4 + 4 + 4, bad);
- 	pi->type = ceph_decode_8(p);
-+	if (!ceph_pool_type_is_supported(pi->type)) {
-+		pr_warn_ratelimited("got unsupported pool type %u", pi->type);
-+		return -EINVAL;
-+	}
- 	pi->size = ceph_decode_8(p);
- 	pi->crush_ruleset = ceph_decode_8(p);
- 	pi->object_hash = ceph_decode_8(p);
-@@ -1363,8 +1367,10 @@ static int __decode_pools(void **p, void *end, struct ceph_osdmap *map,
- 		}
- 
- 		ret = decode_pool(p, end, pi);
--		if (ret)
-+		if (ret) {
-+			erase_pg_pool(&map->pg_pools, pi);
- 			return ret;
-+		}
- 	}
- 
- 	return 0;
 -- 
-2.47.3
+Alex Markuze
 
