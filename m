@@ -1,78 +1,77 @@
-Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
+Received: from mail-pj1-f44.google.com (mail-pj1-f44.google.com [209.85.216.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A818726ADC
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 03:04:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DABE2C15A0
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 05:40:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783479842; cv=none; b=VRG0WwWChchEy7TEFKi+9BT8mdycEy6vDSrUPVAeEN9zX+w+G9Y19Tj2mBHGI4aWZo4GYUjadxhRGeu+8CEHH27B/Tr6bXCe1WiEywcQjKUODvIVaP1+oC2733TXUa3yZ2uAxoI5zldgv4ICXhGGnhkHm5Er24Kpt8s9SalKa7Y=
+	t=1783489224; cv=none; b=ueDk7ogXPCsl2TW4Z6oIk6fLi/aAM3tEvquzDxkacEY4eEScctHfpPnFz+DcjAwO+revpAqmaWNLxQK5mpwGZ9EM53sXLY6dzujDE8Ift/tejJ8xDY/jGyPX+FO3265K+ZV4Fg26aaQjf+4roo1uSKs3JdN9Gn2hzKIxlqMHFiM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783479842; c=relaxed/simple;
-	bh=qmyy1BwSfWnAZ4LljYmC4wDZq2scKHqYZb0nEdhJOdE=;
+	s=arc-20240116; t=1783489224; c=relaxed/simple;
+	bh=gIr0SaX2K90EVt0U62Oqc43cEgL46YyDy/5w6EFjS58=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=b3bJHA2UfRrknPdXSLEWigXPDZnDnuySO0R5GZ2700ajFCEokRj+02fdY2bLAi/BDMdIgD7r/Pd/lZi75VOt3+ZK3AhniSiV4RLXCAH+c6FL5nX9quPOfpQSWVZIOaD97nakNfcmm6TrSWIjTd31fk6hRRNxHHig9MQ4DQeH44A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=StSn50zu; arc=none smtp.client-ip=209.85.210.174
+	 MIME-Version; b=uOxfrPeEXXnCyTdYw02aR8Tejttxo2pgFDx4lZpocmwKzQHwvRAAevl1YVLSUyb6RaHinBi2GVSXm9ESzlVCz+3ctklhZBnzJLB76l26Ru8akz6AxqlDnBRiue05UqGvrw/uXpvh4ksckipcxqAXzxpDQsJICfHbXP8rfdCMbe4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YQz1643k; arc=none smtp.client-ip=209.85.216.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="StSn50zu"
-Received: by mail-pf1-f174.google.com with SMTP id d2e1a72fcca58-847a69ba83dso158633b3a.2
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 20:04:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YQz1643k"
+Received: by mail-pj1-f44.google.com with SMTP id 98e67ed59e1d1-385b78b4f9bso28543a91.2
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 22:40:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1783479840; x=1784084640; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1783489221; x=1784094021; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dvlhzeJPauWp4CMwFWRivJ96GmY7MOSFiH7l8oDt9XU=;
-        b=StSn50zuKVtbOK6P3aFyyWxI9Mj8JnXFypUJ7kWFD4xH9ebLNwZlkOQ1PNA4eKwkOT
-         gf2GR9ElDWBdY0k2w8L7tscwOxImVpf8excmft8x/YOm6NZ1chiJ6yeu0x5UbpEeRY0w
-         /lmhs+nYAGhAn23bGhet5SCI2QQ/G1e2XNpgbbnYZ8s9Y6SV4CUsiJkAfVAx5zCBlNCn
-         Z2Y3onp0AX3KAW66/AxUJsd5nVWQ+9Fi2UsTJg/tdwcLrvzW7PxOw0KE1+EbYi2OHT58
-         laHRl8Dk9egTGg5Dog4BV8+12sdr/xRiZcmoX75nkhSeDiyoZ1U3+xmCPIoFCDEjz/P+
-         ruqQ==
+         :message-id:reply-to:content-type;
+        bh=afD53h7FGemsl3jdOrrWX1SceigfQwiiF8iZ9/aRxdw=;
+        b=YQz1643kFZ0HRyHi6hSPszRqBMvhb8lVP0dhZRQBOGdFeze/enBTPuzO2pBHXaA+Vr
+         gdkE7sMOZgaGVClnfQgkKTlCXl6o6FrxRmLR4H+FrjxqjvEPvLRWx/65mi0l1PXhqp+D
+         E2dS6fQvIl3bAwKNV3gJLzIFgYxGaPVl+sq72kVV3qWeNxcPJEkhDLL3U2Ur6exBau/+
+         dTZm7Jk8ZgbLeEDyh9SwCqFVJU70y+Daf2QKzMfPTjdwHOugmLFZW4WQ1jKDQFL/Tv6d
+         H+AukQkdszPLxym1qVQxNOyxbc3juld0Lz7EDn6iQT3VFL5QS7Ruif0shQnoskJwHpYK
+         GHJw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783479840; x=1784084640;
+        d=1e100.net; s=20251104; t=1783489221; x=1784094021;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=dvlhzeJPauWp4CMwFWRivJ96GmY7MOSFiH7l8oDt9XU=;
-        b=ez/Iy/Uso+IVgrpb0J2XKVQRTRqOj8Mdgb67mnleJ+pGDEwSVfHUhGGpkWErsd9K2h
-         y67877W0dcXpmtMPu/DrIjOCPnWrzliVWzY6cxOfNr4TqiQVqn2qPt6mIj5sXid43ugO
-         KYd6uHFr5TBFTD7fvMu3BEctXYf+Hym7YDArQ2oHVCEfCVCJnLtziSDjHjuRNxa1oaD1
-         BC79SxpMrUx6qYwn4n9X2AKzTelU25ANtl77FiVOiDdMPma/Soh6tElvSzfYFo9Z7m4b
-         0tbLCOXiykxtsUYyZrL5P5hdaIMYcBu20hhDJ1uJHd5w/tEiMnQTkRn0rPKaIB3z8o6N
-         NOug==
-X-Gm-Message-State: AOJu0YwTqX0vER/Gn9w9WKor8+NZd+oylzqnG0y7w1NKYtRceth6Evmj
-	84BEp1DZR7puLpiAhtnACHGnCd/7CNio8mY58iKaDRJ7oq3VKWNrmxeh1R+YOJOB
-X-Gm-Gg: AfdE7cnztHlPKwt6JcwIgzM+39IqI6OV6y1nu9bFtTvfD76QSIvI6S/Jij7HmnqKxXL
-	lw1ZMIeNC8kvTUepOvHVzZIASFZXEvidDWdWKvycXGs6mznMEyPjU6CRp22LsBBNheO3jkn6LF8
-	+FN1C57YuOyCM8fxTf8bHCYIoTKBrPUCjN50quopT/PmXjpdtxA6JdKsvttv3UiAzHoGX5cPOrt
-	S2su0JtQNoSNKdV/mhsJtjJ47RCUxeUCGamfwdWjINegDlDJRuVRuaGrUPF1dV9BZyyyXcZWmTp
-	G6LjbktV3m1uMqzJLz2msNcUyk+QQyPFjG/vCEdWaLVeCT20n+PhToJzWJgpIvCfIKgsp+OurK6
-	r252fPXLFq/mHgZTIchR2YFAKPOfbsPOZqS077UcOZCXwL2GUfLXWxPOshgzRThK2A6C056NtHf
-	8an3rgo+VNsax7uYYIo+j5w4nL9Ky1rOrIDip2XfqLcw==
-X-Received: by 2002:a05:6a00:8c4:b0:848:2f6e:e52f with SMTP id d2e1a72fcca58-84843031caamr799151b3a.67.1783479839835;
-        Tue, 07 Jul 2026 20:03:59 -0700 (PDT)
-Received: from enjou-Legion-Y7000P-2019 ([123.114.53.210])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-847f6b609acsm6175745b3a.1.2026.07.07.20.03.57
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=afD53h7FGemsl3jdOrrWX1SceigfQwiiF8iZ9/aRxdw=;
+        b=evrUfWZEksSHrZrOaiw2TBTxn8TBBAcA5WD+IUbcRD7Ne0Yd5mjqTzThKqjgRbXy3H
+         a2wwdrxEbWsTkf7ucmsDbKoV6/W/S3oA8f4KGP8BuTgIWwbSO3bhQJE2JkKhTaRiy3Mz
+         mCcCrNKtJ1L+g1tHW45pKgIQI+eG6MH6QLyCZS+xUGQjBa4qdOBHM+cpXtY2U2JixDy4
+         ULb9bqBZ76juP88PvbpDayfiMpgJTDWWLb82IFiiqjIe0fsEN1ZYyaFJIXRwMKGTjHEo
+         jv+ciGqbyt0goCKUUTZfrEJyusbaDtw/qWGBDUljZdV0Qfreuc7+/sj8UqiFgMUQib6a
+         uuCQ==
+X-Gm-Message-State: AOJu0YxDugA3O1fG1HGll1DLTRpTTtGHf3WMi6K2EFUUzcEP3HWsB1O7
+	/bnH8zB6/JzFWvLAqMC/BTGESR3ipazjNsL4zR/mEubmCW4HNOQN8Dnw
+X-Gm-Gg: AfdE7cnC/fNTfvyITkrJn78xlUMMwylinShhbQWCTcx297L5JkQFrrI4cQc8w64pI/4
+	A6NzeM1zA6NSp44BFYgjOqTAaWhSqqAIEvbXOvGgbCtFLb+Y+rhYkkCbOyPSyf4kiHql6AAjnQ3
+	i8nivg303lnQBcDdOTi3Raf8xkPBOWCUAbr4Mm2Wj1vGmZw/5P/QDvCO3bzj3wEr9b/7SCzwzPY
+	zw/OfDpk/B+Iqh+eBwRmkCAaAkrkF09vrNJVuW49tleLRFv/j+RoH8hT0emEea1DPnmoxU0OM7r
+	2fpuZ8iA3C+CNmc5FYX+aFmH8Lj2ryH3tWxPiH3hPmtr/ivhgBLFDvL7r64Tf0/cISqyh9GGiJw
+	1IvKIB4vqH6ebSrczb9srBCvdZUgNmeuUNfTsKBam/q3fJOM/VQxX6BEgn4YZYqfO8KmWBjlk0d
+	uWy139rcdqOKaZ7+jI7g==
+X-Received: by 2002:a17:90a:c106:b0:37f:f00b:bda6 with SMTP id 98e67ed59e1d1-3893d81c80emr1043876a91.0.1783489220587;
+        Tue, 07 Jul 2026 22:40:20 -0700 (PDT)
+Received: from kali ([122.162.146.188])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3118ee6080dsm3245416eec.17.2026.07.07.22.40.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Jul 2026 20:03:59 -0700 (PDT)
-From: Ren Wei <enjou1224z@gmail.com>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
+        Tue, 07 Jul 2026 22:40:19 -0700 (PDT)
+From: Pavitra Jha <jhapavitra98@gmail.com>
+To: idryomov@gmail.com,
 	amarkuze@redhat.com,
-	slava@dubeyko.com,
-	sage@newdream.net,
-	yuantan098@gmail.com,
-	dstsmallbird@foxmail.com,
-	edragain@163.com,
-	enjou1224z@gmail.com
-Subject: [PATCH 1/1] libceph: use RCU to protect monmap in ceph_compare_options()
-Date: Wed,  8 Jul 2026 11:03:41 +0800
-Message-ID: <f9b8b94904378d14111606a3cfee801c60492681.1783423648.git.edragain@163.com>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <cover.1783423648.git.edragain@163.com>
-References: <cover.1783423648.git.edragain@163.com>
+	slava@dubeyko.com
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org,
+	Pavitra Jha <jhapavitra98@gmail.com>,
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Subject: [PATCH v4] ceph: fix OOB read in decode_watchers() via missing bounds check
+Date: Wed,  8 Jul 2026 01:39:41 -0400
+Message-ID: <20260708053941.90316-1-jhapavitra98@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260702114034.917507-12-amarkuze@redhat.com>
+References: <20260702114034.917507-12-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -81,348 +80,106 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Yong Wang <edragain@163.com>
+ceph_start_decoding() validates that struct_len bytes remain in the
+buffer after the encoding header, but accepts struct_len=0 as valid:
+ceph_decode_need(p, end, 0, bad) always passes. When a malicious or
+compromised OSD sends an obj_list_watch_response_t reply with
+struct_len=0, ceph_start_decoding() returns success with p == end,
+leaving zero bytes guaranteed for subsequent reads.
 
-ceph_compare_options() checks whether a new mount shares any monitor
-address with an existing client by walking client->monc.monmap via
-ceph_monmap_contains().  That comparison can run under sb_lock or
-rbd_client_list_lock, so it cannot take monc->mutex.
+The immediately following ceph_decode_32(p) in decode_watchers() has
+no preceding bounds check. With p == end this is a 4-byte read past
+the validated buffer boundary. The garbage value is then passed
+directly to kzalloc_objs() as the watcher count.
 
-Meanwhile, monmap update handling replaces monc->monmap under
-monc->mutex and frees the old map immediately.  A concurrent shared-
-mount comparison can therefore dereference a freed monmap and walk
-stale mon_inst[] entries, triggering a use-after-free.
+The sibling function decode_watcher() already uses the safe variants
+(ceph_decode_copy_safe, ceph_decode_64_safe, ceph_decode_skip_32)
+after its own ceph_start_decoding() call. decode_watchers() is the
+only site that uses the bare variant, confirming an oversight.
 
-Protect the compare path with RCU and publish/free monitor maps with
-rcu_assign_pointer() and kfree_rcu().  Annotate monc->monmap as an
-RCU pointer and use rcu_dereference_protected() in mutex-protected
-paths to keep the accesses consistent with the new pointer contract.
+Fix by replacing ceph_decode_32(p) with ceph_decode_32_safe(p, end,
+*num_watchers, bad), consistent with the established pattern.
 
-This keeps the existing non-blocking comparison semantics while
-ensuring that replaced monmaps remain alive until readers are done.
+KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
 
-Fixes: 4e7a5dcd1bbab ("ceph: negotiate authentication protocol; implement AUTH_NONE protocol")
+  [   72.047085] ceph_oob_poc: buf=ffff8880085936c8 end=ffff8880085936ce
+  [   72.048685] ceph_oob_poc: ceph_start_decoding OK: struct_v=1
+  struct_len=0 p==end: 1
+  [   72.049477] ceph_oob_poc: triggering OOB read past slab boundary...
+  [   72.050699] ==================================================
+  [   72.051427] BUG: KASAN: slab-out-of-bounds in
+  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
+  [   72.051427] Read of size 4 at addr ffff8880085936ce by task insmod/61
+  [   72.051427] CPU: 0 UID: 0 PID: 61 Comm: insmod Tainted: G O
+  [   72.051427]  7.0.0-rc7-g9c2abf69da83-dirty #14 PREEMPT(lazy)
+  [   72.051427] Call Trace:
+  [   72.051427]  dump_stack_lvl+0x4d/0x70
+  [   72.051427]  print_report+0x170/0x4f3
+  [   72.051427]  kasan_report+0xda/0x110
+  [   72.051427]  kasan_check_range+0x125/0x200
+  [   72.051427]  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
+  [   72.051427]  do_one_initcall+0x9a/0x310
+  [   72.051427]  do_init_module+0x186/0x410
+  [   72.051427]  load_module+0x2ba7/0x2e50
+  [   72.051427]  init_module_from_file+0x15c/0x180
+  [   72.051427]  idempotent_init_module+0x19f/0x430
+  [   72.051427]  __x64_sys_finit_module+0x78/0xc0
+  [   72.051427]  do_syscall_64+0xe2/0x570
+  [   72.051427]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
+  [   72.051427] The buggy address belongs to the object at ffff8880085936c8
+  [   72.051427]  which belongs to the cache kmalloc-8 of size 8
+  [   72.051427] The buggy address is located 0 bytes to the right of
+  [   72.051427]  allocated 6-byte region [ffff8880085936c8, ffff8880085936ce)
+  [   72.051427] Memory state around the buggy address:
+  [   72.051427] >ffff888008593680: fc fc fc fc fc fc fc fc fc 06 fc fc fc fc fc fc
+  [   72.051427]                                               ^
+  [   72.051427] ==================================================
+  [   72.129720] ceph_oob_poc: num_watchers=3435973836 (OOB garbage)
+
+0xCCCCCCCC (3435973836) is KASAN redzone poison, confirming the read
+landed in the slab redzone immediately past the 6-byte allocation.
+
+Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
+deployment (e.g. cloud) can trigger this against any kernel client
+that calls CEPH_OSD_OP_LIST_WATCHERS, without any further privileges
+beyond OSD session establishment.
+
+Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
 Cc: stable@vger.kernel.org
-Cc: ceph-devel@vger.kernel.org
-Reported-by: Yuan Tan <yuantan098@gmail.com>
-Reported-by: Xin Liu <dstsmallbird@foxmail.com>
-Assisted-by: Codex:gpt-5.4
-Signed-off-by: Yong Wang <edragain@163.com>
-Reviewed-by: Ren Wei <enjou1224z@gmail.com>
+Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
 ---
- fs/ceph/super.c                 |  7 +++--
- include/linux/ceph/mon_client.h |  4 ++-
- net/ceph/ceph_common.c          | 21 ++++++++++----
- net/ceph/debugfs.c              | 11 ++++---
- net/ceph/mon_client.c           | 51 ++++++++++++++++++++++-----------
- 5 files changed, 65 insertions(+), 29 deletions(-)
+v4: Rebase against current linux/master and ceph-testing/testing.
+    No functional changes from Slava's reviewed v3.
+v3: Rename error label e_inval -> bad per Slava Dubeyko's review.
+v2: Correct commit message; retracted overstated impact claims,
+    verified with follow-up KASAN harness.
+---
+ net/ceph/osd_client.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c05fbd4237f8..4145594ba710 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -60,6 +60,7 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
- {
- 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(d_inode(dentry));
- 	struct ceph_mon_client *monc = &fsc->client->monc;
-+	struct ceph_monmap *monmap;
- 	struct ceph_statfs st;
- 	int i, err;
- 	u64 data_pool;
-@@ -111,8 +112,10 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
- 	/* Must convert the fsid, for consistent values across arches */
- 	buf->f_fsid.val[0] = 0;
- 	mutex_lock(&monc->mutex);
--	for (i = 0 ; i < sizeof(monc->monmap->fsid) / sizeof(__le32) ; ++i)
--		buf->f_fsid.val[0] ^= le32_to_cpu(((__le32 *)&monc->monmap->fsid)[i]);
-+	monmap = rcu_dereference_protected(monc->monmap,
-+					   lockdep_is_held(&monc->mutex));
-+	for (i = 0 ; i < sizeof(monmap->fsid) / sizeof(__le32) ; ++i)
-+		buf->f_fsid.val[0] ^= le32_to_cpu(((__le32 *)&monmap->fsid)[i]);
- 	mutex_unlock(&monc->mutex);
- 
- 	/* fold the fs_cluster_id into the upper bits */
-diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
-index 7a9a40163c0f..98a745f6d9ab 100644
---- a/include/linux/ceph/mon_client.h
-+++ b/include/linux/ceph/mon_client.h
-@@ -4,6 +4,7 @@
- 
- #include <linux/completion.h>
- #include <linux/kref.h>
-+#include <linux/rcupdate.h>
- #include <linux/rbtree.h>
- 
- #include <linux/ceph/messenger.h>
-@@ -19,6 +20,7 @@ struct ceph_monmap {
- 	struct ceph_fsid fsid;
- 	u32 epoch;
- 	u32 num_mon;
-+	struct rcu_head rcu;
- 	struct ceph_entity_inst mon_inst[] __counted_by(num_mon);
- };
- 
-@@ -69,7 +71,7 @@ struct ceph_mon_generic_request {
- 
- struct ceph_mon_client {
- 	struct ceph_client *client;
--	struct ceph_monmap *monmap;
-+	struct ceph_monmap __rcu *monmap;
- 
- 	struct mutex mutex;
- 	struct delayed_work delayed_work;
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 952121849180..929df54cf3bb 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -133,6 +133,7 @@ int ceph_compare_options(struct ceph_options *new_opt,
- {
- 	struct ceph_options *opt1 = new_opt;
- 	struct ceph_options *opt2 = client->options;
-+	struct ceph_monmap *monmap;
- 	int ofs = offsetof(struct ceph_options, mon_addr);
- 	int i;
- 	int ret;
-@@ -180,13 +181,20 @@ int ceph_compare_options(struct ceph_options *new_opt,
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 2ff00070c..2cdac81a6 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -5030,7 +5030,7 @@ static int decode_watchers(void **p, void *end,
  	if (ret)
  		return ret;
  
-+	rcu_read_lock();
-+	monmap = rcu_dereference(client->monc.monmap);
-+	ret = -1;
-+
- 	/* any matching mon ip implies a match */
- 	for (i = 0; i < opt1->num_mon; i++) {
--		if (ceph_monmap_contains(client->monc.monmap,
--				 &opt1->mon_addr[i]))
--			return 0;
-+		if (ceph_monmap_contains(monmap, &opt1->mon_addr[i])) {
-+			ret = 0;
-+			break;
-+		}
- 	}
--	return -1;
-+
-+	rcu_read_unlock();
-+	return ret;
- }
- EXPORT_SYMBOL(ceph_compare_options);
- 
-@@ -791,6 +799,7 @@ int __ceph_open_session(struct ceph_client *client)
- {
- 	DEFINE_WAIT_FUNC(wait, woken_wake_function);
- 	long timeout = ceph_timeout_jiffies(client->options->mount_timeout);
-+	struct ceph_monmap *monmap;
- 	bool have_monmap, have_osdmap;
- 	int err;
- 
-@@ -803,7 +812,9 @@ int __ceph_open_session(struct ceph_client *client)
- 	for (;;) {
- 		mutex_lock(&client->monc.mutex);
- 		err = client->auth_err;
--		have_monmap = client->monc.monmap && client->monc.monmap->epoch;
-+		monmap = rcu_dereference_protected(client->monc.monmap,
-+						   lockdep_is_held(&client->monc.mutex));
-+		have_monmap = monmap && monmap->epoch;
- 		mutex_unlock(&client->monc.mutex);
- 
- 		down_read(&client->osdc.lock);
-diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-index 83c270bce63c..f0aa4631cf6e 100644
---- a/net/ceph/debugfs.c
-+++ b/net/ceph/debugfs.c
-@@ -35,15 +35,18 @@ static int monmap_show(struct seq_file *s, void *p)
- {
- 	int i;
- 	struct ceph_client *client = s->private;
-+	struct ceph_monmap *monmap;
- 
- 	mutex_lock(&client->monc.mutex);
--	if (client->monc.monmap == NULL)
-+	monmap = rcu_dereference_protected(client->monc.monmap,
-+					   lockdep_is_held(&client->monc.mutex));
-+	if (!monmap)
- 		goto out_unlock;
- 
--	seq_printf(s, "epoch %d\n", client->monc.monmap->epoch);
--	for (i = 0; i < client->monc.monmap->num_mon; i++) {
-+	seq_printf(s, "epoch %d\n", monmap->epoch);
-+	for (i = 0; i < monmap->num_mon; i++) {
- 		struct ceph_entity_inst *inst =
--			&client->monc.monmap->mon_inst[i];
-+			&monmap->mon_inst[i];
- 
- 		seq_printf(s, "\t%s%lld\t%s\n",
- 			   ENTITY_NAME(inst->name),
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index d2cdc8ee3155..d7e600a74ca5 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -206,19 +206,22 @@ static void __close_session(struct ceph_mon_client *monc)
-  */
- static void pick_new_mon(struct ceph_mon_client *monc)
- {
-+	struct ceph_monmap *monmap =
-+		rcu_dereference_protected(monc->monmap,
-+					  lockdep_is_held(&monc->mutex));
- 	int old_mon = monc->cur_mon;
- 
--	BUG_ON(monc->monmap->num_mon < 1);
-+	BUG_ON(monmap->num_mon < 1);
- 
--	if (monc->monmap->num_mon == 1) {
-+	if (monmap->num_mon == 1) {
- 		monc->cur_mon = 0;
- 	} else {
--		int max = monc->monmap->num_mon;
-+		int max = monmap->num_mon;
- 		int o = -1;
- 		int n;
- 
- 		if (monc->cur_mon >= 0) {
--			if (monc->cur_mon < monc->monmap->num_mon)
-+			if (monc->cur_mon < monmap->num_mon)
- 				o = monc->cur_mon;
- 			if (o >= 0)
- 				max--;
-@@ -232,7 +235,7 @@ static void pick_new_mon(struct ceph_mon_client *monc)
+-	*num_watchers = ceph_decode_32(p);
++	ceph_decode_32_safe(p, end, *num_watchers, bad);
+ 	*watchers = kzalloc_objs(**watchers, *num_watchers, GFP_NOIO);
+ 	if (!*watchers)
+ 		return -ENOMEM;
+@@ -5044,6 +5044,8 @@ static int decode_watchers(void **p, void *end,
  	}
  
- 	dout("%s mon%d -> mon%d out of %d mons\n", __func__, old_mon,
--	     monc->cur_mon, monc->monmap->num_mon);
-+	     monc->cur_mon, monmap->num_mon);
+ 	return 0;
++bad:
++	return -EINVAL;
  }
  
  /*
-@@ -240,6 +243,9 @@ static void pick_new_mon(struct ceph_mon_client *monc)
-  */
- static void __open_session(struct ceph_mon_client *monc)
- {
-+	struct ceph_monmap *monmap =
-+		rcu_dereference_protected(monc->monmap,
-+					  lockdep_is_held(&monc->mutex));
- 	int ret;
- 
- 	pick_new_mon(monc);
-@@ -256,7 +262,7 @@ static void __open_session(struct ceph_mon_client *monc)
- 
- 	dout("%s opening mon%d\n", __func__, monc->cur_mon);
- 	ceph_con_open(&monc->con, CEPH_ENTITY_TYPE_MON, monc->cur_mon,
--		      &monc->monmap->mon_inst[monc->cur_mon].addr);
-+		      &monmap->mon_inst[monc->cur_mon].addr);
- 
- 	/*
- 	 * Queue a keepalive to ensure that in case of an early fault
-@@ -542,6 +548,7 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
- 				 struct ceph_msg *msg)
- {
- 	struct ceph_client *client = monc->client;
-+	struct ceph_monmap *old_monmap;
- 	struct ceph_monmap *monmap;
- 	void *p, *end;
- 
-@@ -564,10 +571,12 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
- 		goto out;
- 	}
- 
--	kfree(monc->monmap);
--	monc->monmap = monmap;
-+	old_monmap = rcu_dereference_protected(monc->monmap,
-+					       lockdep_is_held(&monc->mutex));
-+	rcu_assign_pointer(monc->monmap, monmap);
-+	kfree_rcu(old_monmap, rcu);
- 
--	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monc->monmap->epoch);
-+	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monmap->epoch);
- 	client->have_fsid = true;
- 
- out:
-@@ -775,6 +784,7 @@ static void handle_statfs_reply(struct ceph_mon_client *monc,
- int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
- 			struct ceph_statfs *buf)
- {
-+	struct ceph_monmap *monmap;
- 	struct ceph_mon_generic_request *req;
- 	struct ceph_mon_statfs *h;
- 	int ret = -ENOMEM;
-@@ -802,7 +812,9 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
- 	h->monhdr.have_version = 0;
- 	h->monhdr.session_mon = cpu_to_le16(-1);
- 	h->monhdr.session_mon_tid = 0;
--	h->fsid = monc->monmap->fsid;
-+	monmap = rcu_dereference_protected(monc->monmap,
-+					   lockdep_is_held(&monc->mutex));
-+	h->fsid = monmap->fsid;
- 	h->contains_data_pool = (data_pool != CEPH_NOPOOL);
- 	h->data_pool = cpu_to_le64(data_pool);
- 	send_generic_request(monc, req);
-@@ -975,6 +987,7 @@ static __printf(2, 0)
- int do_mon_command_vargs(struct ceph_mon_client *monc, const char *fmt,
- 			 va_list ap)
- {
-+	struct ceph_monmap *monmap;
- 	struct ceph_mon_generic_request *req;
- 	struct ceph_mon_command *h;
- 	int ret = -ENOMEM;
-@@ -999,7 +1012,9 @@ int do_mon_command_vargs(struct ceph_mon_client *monc, const char *fmt,
- 	h->monhdr.have_version = 0;
- 	h->monhdr.session_mon = cpu_to_le16(-1);
- 	h->monhdr.session_mon_tid = 0;
--	h->fsid = monc->monmap->fsid;
-+	monmap = rcu_dereference_protected(monc->monmap,
-+					   lockdep_is_held(&monc->mutex));
-+	h->fsid = monmap->fsid;
- 	h->num_strs = cpu_to_le32(1);
- 	len = vsprintf(h->str, fmt, ap);
- 	h->str_len = cpu_to_le32(len);
-@@ -1138,17 +1153,18 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
- 	__le32 my_type = ceph_msgr2(monc->client) ?
- 		CEPH_ENTITY_ADDR_TYPE_MSGR2 : CEPH_ENTITY_ADDR_TYPE_LEGACY;
- 	struct ceph_options *opt = monc->client->options;
-+	struct ceph_monmap *monmap;
- 	int num_mon = opt->num_mon;
- 	int i;
- 
- 	/* build initial monmap */
--	monc->monmap = kzalloc_flex(*monc->monmap, mon_inst, num_mon);
--	if (!monc->monmap)
-+	monmap = kzalloc_flex(*monmap, mon_inst, num_mon);
-+	if (!monmap)
- 		return -ENOMEM;
--	monc->monmap->num_mon = num_mon;
-+	monmap->num_mon = num_mon;
- 
- 	for (i = 0; i < num_mon; i++) {
--		struct ceph_entity_inst *inst = &monc->monmap->mon_inst[i];
-+		struct ceph_entity_inst *inst = &monmap->mon_inst[i];
- 
- 		memcpy(&inst->addr.in_addr, &opt->mon_addr[i].in_addr,
- 		       sizeof(inst->addr.in_addr));
-@@ -1157,6 +1173,7 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
- 		inst->name.type = CEPH_ENTITY_TYPE_MON;
- 		inst->name.num = cpu_to_le64(i);
- 	}
-+	RCU_INIT_POINTER(monc->monmap, monmap);
- 	return 0;
- }
- 
-@@ -1232,7 +1249,7 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
- out_auth:
- 	ceph_auth_destroy(monc->auth);
- out_monmap:
--	kfree(monc->monmap);
-+	kfree(rcu_access_pointer(monc->monmap));
- out:
- 	return err;
- }
-@@ -1267,7 +1284,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
- 	ceph_msg_put(monc->m_subscribe);
- 	ceph_msg_put(monc->m_subscribe_ack);
- 
--	kfree(monc->monmap);
-+	kfree_rcu(rcu_access_pointer(monc->monmap), rcu);
- }
- EXPORT_SYMBOL(ceph_monc_stop);
- 
 -- 
 2.53.0
+
