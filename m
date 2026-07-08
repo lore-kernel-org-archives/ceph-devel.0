@@ -1,255 +1,331 @@
-Received: from mail-oi1-f179.google.com (mail-oi1-f179.google.com [209.85.167.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CCB630D41D
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 22:17:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.179
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783549068; cv=none; b=lkx+RESDp7jdMeJkplrCSxzflTppZAWNnXNs/ai5GNATuQ3MLNKcNEPK8kRWjizNDLPAJuM7NtiPpAqXME0Tar203mdSGuBTrs/OSDM5b+yvgrEufd7f5naqJKqeWu2zP8CnE61IOLTaNtbkH6uOuJInFREYhRtOwRxllhJGcQo=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783549068; c=relaxed/simple;
-	bh=sP5TaXE6OCX4DtncDP5hN1KCYLKaTlPVM3ZLgKb4cho=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=i4AFCHdoF+DYX5kfFU+2GL77u4M9kwTbv5r4+Qdbfl35CwxQ8f1DbyNQDoo68MJ0wFK5zBevavMOhF8ZoACAJkrlPEE31xfMjW06gZFTd01mVHJMA/lws/J/TuHw01Bp6aUnGSVFEphaP1UkXI3pgpVEHdQxlVn2Mgw0xVwqbwA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com; spf=pass smtp.mailfrom=cloudflare.com; dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b=ZJTJrmiP; arc=none smtp.client-ip=209.85.167.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloudflare.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57F9F3EF673;
+	Wed,  8 Jul 2026 22:25:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.156.1
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1783549518; cv=fail; b=MhP5WHAoOBRTCANFCnW4aePnNxdTRKI2x8JE0MAlrHVu20ItrzWLw9cawGztalQGkRYBnJPSecsy5WpkMB8nBTadOX1vn5humt1MpNeBSEoVoLaVTjWBr0sRJF/K6W2t/AKSHnOSAUk42yKrd6IqcKJkFiIAPuFxU7MmpdGMs4g=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1783549518; c=relaxed/simple;
+	bh=Zrs/GXtYFi0RFkmxTMzAuLc1LPrRcnNz2mycBAUAqec=;
+	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
+	 MIME-Version:Subject; b=neXoEJhqCk2d1hMXSCeKXWgVTYKk5YLh/9WLD3DrOlUxExQBrX6kVAxSXp9gzBYehE9xtaczNBONPSUri+Bxjni+Y/gozuSniUBr5LObRIdJDs0MQ/rhuekmLR6BMeu8kmaVJuSncK1XU5/hvxje1O1vEv+nB22yFbCO8UkM8Xc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=GQ0X3P8m; arc=fail smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b="ZJTJrmiP"
-Received: by mail-oi1-f179.google.com with SMTP id 5614622812f47-495b250b01cso977157b6e.0
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Jul 2026 15:17:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=cloudflare.com; s=google09082023; t=1783549065; x=1784153865; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=24y69AJneapRjn/79LSS7d+cxbOO03kpFqP/nxLFpxA=;
-        b=ZJTJrmiPn5BYr/HxTDJW2uIJ9qPj00q8rlmnSQrE9Yhyz61Ycwj0kgt7JGpCJ2YSev
-         7BsIHUE+O1XeN8vQh1egFILGyaXrjrxaD+ZrRam/g5tNSSlozqZtwAqigC22ExD/BIeA
-         rhGgzQPyAptBOe9tYnxaDHaCK5lpOvfehL77Td7rIY1FLvuNrjsQQN5+KhZYG37mE6GS
-         HrW3iQwWELQpqUI8QL+yPpSYwXcfSZijls9+bL1o/EbXmIr4oXGKHtI7L6pm+fn6Ehjj
-         lRhWYS1R3ILGPLT5bARl28i3QVS/1QxtxkirKVwdyTc69ULG+1qQwunX9UH332YZ/ryr
-         cYGg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783549065; x=1784153865;
-        h=in-reply-to:content-disposition:content-type:mime-version
-         :references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=24y69AJneapRjn/79LSS7d+cxbOO03kpFqP/nxLFpxA=;
-        b=qrQXlqYRFGpEWr/LlWzNJOvK7gSak4jTtSFMnM/h7klzy47ntNcMr9DR3YIffM8JfM
-         a2daotvCAaiBlCgf0L4P/Cl2yzOQHGFvKiDG4U97mBgS0+OkZTptFYGPlfJWxid+j5j6
-         ApuUy5KgBi69GNPBYPFCQLBV7ZPUG/RNwFWw/POLcCOPQfYhhfaQPJ9P/mLnZhD7NjcU
-         OiOlE+5SWB2XI5QoKIxTb2WF56wzO7V+LxYc7m763PMx+a/xOtdQgg0FagQBGnFkU6PB
-         +WtZYqAATUdSQQugukPiiAkhyK9FTah3Coo1pip461RhVdjLaIH5+jnzamwGDFLwTfJx
-         eLSg==
-X-Forwarded-Encrypted: i=1; AFNElJ/bki3aampTlkku8WIXrKnfUt7uG7DWJMkuzvHUZ8cW7tCZn5TY0LvtK1rzryPiQIYv+WLIu5E7uIlM@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyl++cKAFpEjp25eMGTNgJ2loCDgwW7K0BGwhfvsvmideupMOmr
-	0+e5ysQCUypptXQ2kJqbkMUG8qJlg8zz83KTT71F6BsYBzPumNxmEq7grFGbQwEXjtY=
-X-Gm-Gg: AfdE7ck0wCPK2i1Y1lRW/lDdN6k2qjBA3YRiskzUNPQSExaHmb4n7ENRnxOdHvLzDFT
-	fl8hVhys5DS+cTozbv40IQAVQ3UQUmM2acT9hO8WwytK/Y9DbLkiub6+umsIGEtJIz2xLgbTJjL
-	kScpSH1Qar2SzI6m+tK9dNBL8JWCX2g+Nwlv2Js8+gDnMfHNtxHbQ0LarKcZXvldYmtvWV5tzAT
-	+a1NWRjlmTUREf/Kda1izhZuI5bGo20Dhqyr4nNvHXSt+5HiAn8/j7Mi0K2milQHg8uoobJdfD7
-	LPEIfj2xF7V0LcX9WNBoEUO1QbeIRi78hapO0wAbtf9JY/6OKkPvb3tmF0wbR/ReQnlhCyLLDJ5
-	Lrrr7vnUvNANP/B7ozEL2DiNMHAxayVRgaaGIVKwX3yzwOEb1bDZtNtWsXRJ/Ko2HNVcEaq8=
-X-Received: by 2002:a05:6808:1808:b0:49b:1b6d:c95 with SMTP id 5614622812f47-4a20200e0eemr3409823b6e.11.1783549065242;
-        Wed, 08 Jul 2026 15:17:45 -0700 (PDT)
-Received: from 20HS2G4 ([2a09:bac6:bf21:2632::3ce:9])
-        by smtp.gmail.com with ESMTPSA id 5614622812f47-4a1adca6bedsm2645440b6e.8.2026.07.08.15.17.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Jul 2026 15:17:43 -0700 (PDT)
-Date: Wed, 8 Jul 2026 17:17:40 -0500
-From: Chris Arges <carges@cloudflare.com>
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: "idryomov@gmail.com" <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	"slava@dubeyko.com" <slava@dubeyko.com>,
-	"zyan@redhat.com" <zyan@redhat.com>,
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-	"ademaria@cloudflare.com" <ademaria@cloudflare.com>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"kernel-team@cloudflare.com" <kernel-team@cloudflare.com>
-Subject: Re: [PATCH] libceph: reset OSD session when keepalive2 acks stop
- arriving
-Message-ID: <ak7MhOYrTMip9IpF@20HS2G4>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="GQ0X3P8m"
+Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 668KILDE645901;
+	Wed, 8 Jul 2026 22:25:08 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-id:content-transfer-encoding:content-type:date:from
+	:in-reply-to:message-id:mime-version:references:subject:to; s=
+	pp1; bh=Zrs/GXtYFi0RFkmxTMzAuLc1LPrRcnNz2mycBAUAqec=; b=GQ0X3P8m
+	XglSvicAr4KpGptCXte+q3EQH2ENMskIZ8026A2TCAhFuuIKIg7xxvfW0pFs9BEF
+	YO5N9MRTzvA76b53Hbm+WqEudOzfA5P7xsI2VZpnWSZJy7XPoOc47T2KX/xRszLA
+	3+EOjFaTvM0qR/bmyGclKqRqM05EiHxNxdbep6U9kMJ+DrHZaL28ReBXI9LtZlY1
+	ljSi6EOR4VMyl2O4h2GCulxXJzs3fBgi9cwEY3EZ1E6z7Bd/1o/kx2BTWqs+Rkto
+	CWhtI6//wCE2BXA/DUcSe46sxY3STUFll6oNc2fwcbE1I8PrFvXphYUScxTjmXkk
+	8JuEysKgL7BZaQ==
+Received: from ph7pr06cu001.outbound.protection.outlook.com (mail-westus3azon11010008.outbound.protection.outlook.com [52.101.201.8])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4f6suqxefd-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Wed, 08 Jul 2026 22:25:07 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Gf1RIE3fi4M1sDB9epzGDCYb/AB4GvPTPwTxxyu0gow1v8STLbwG+vgwSBm5XbQahmA3cVYJLFrdnMrvbrAPP0sgCPG1aYAVBFj7IF2RnkotkTfemj/3Da576M1uXaQUua6zE1COaPODwnKkFUU+Qx0sN8MIw0YgDG1mlie/z0o4vXf/X/IUkSEJDU6c47Ab9y8gu0d//V4YPoIBb4g3v30rzNA9avMsiRnvBt9kqWFZMz5ROxuY8Po+0Fbla+UBVnow9azVQBDxWUtXV7fcoyZzlqla5PvfUbvypHpESHp2BpooE2JeczjEaKsZSliXp9NReZAlktshagKEjMRO4Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Zrs/GXtYFi0RFkmxTMzAuLc1LPrRcnNz2mycBAUAqec=;
+ b=gWd6kS5JmmNPhicO57X4vlXdiFjYxhJ7cyxB21rnvx0qN9aLUl+w3NIelCjcKkMeMlX9FEnahv9TOzATalUGpaToYz4sEc35fEiIipjXPREOEIk8Tx4VXMkwVRQjokX5rvP/+iZJOhEFxD5Fn9kjLessfiwew4b4KyYuO0RQEZ0H9b7Fbg2Ek7H1af5ZJHtB3SI4kRAT3eZq1PTIWKY4MKUeam3NXhB76LLd7XXZeAYwd3xqf8UuOmnn0FZUCQFEHOK0m27A4Fd9sAYeyCVZXGeERaq2lhe3IXmaow1SmGDGz23XryzG5V55hBLQjuPMDsJcTWHScbJAfyB2Iu5pZg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
+ header.d=ibm.com; arc=none
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
+ by DS0PR15MB6277.namprd15.prod.outlook.com (2603:10b6:8:156::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.10; Wed, 8 Jul
+ 2026 22:25:02 +0000
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539%6]) with mapi id 15.21.0181.009; Wed, 8 Jul 2026
+ 22:25:02 +0000
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+To: "carges@cloudflare.com" <carges@cloudflare.com>
+CC: "slava@dubeyko.com" <slava@dubeyko.com>,
+        "ceph-devel@vger.kernel.org"
+	<ceph-devel@vger.kernel.org>,
+        "ademaria@cloudflare.com"
+	<ademaria@cloudflare.com>,
+        "kernel-team@cloudflare.com"
+	<kernel-team@cloudflare.com>,
+        Alex Markuze <amarkuze@redhat.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "idryomov@gmail.com" <idryomov@gmail.com>,
+        "zyan@redhat.com"
+	<zyan@redhat.com>
+Thread-Topic: [EXTERNAL] Re: [PATCH] libceph: reset OSD session when
+ keepalive2 acks stop arriving
+Thread-Index: AQHdDyeefqOq3aM36ESpgbom4zv0GrZkMumA
+Date: Wed, 8 Jul 2026 22:25:02 +0000
+Message-ID: <8bd0d49a1a9c58c2d720a80f15524a48b54910c2.camel@ibm.com>
 References: <20260707-fix-rbd-keepalives-v1-1-be888d525d6a@cloudflare.com>
- <c97c245feafde9295dea3039fc3d2c01d1e1d741.camel@ibm.com>
+	 <c97c245feafde9295dea3039fc3d2c01d1e1d741.camel@ibm.com>
+	 <ak7MhOYrTMip9IpF@20HS2G4>
+In-Reply-To: <ak7MhOYrTMip9IpF@20HS2G4>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|DS0PR15MB6277:EE_
+x-ms-office365-filtering-correlation-id: 2fa9d18d-ec7f-4558-3480-08dedd3fc0ec
+x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|376014|23010399003|1800799024|10070799003|366016|38070700021|13003099007|22082099003|56012099006|11063799006|4143699003|18002099003|4133799003;
+x-microsoft-antispam-message-info:
+ hItToVfycHPQ21OgY3IK+bdXFYK4ZKnjDOH/wFEL1YmlRihgHRdJzwN/vmVzoQ6RxIJgiGFBgbMcGPNd7Vu8syj04Z0IraLk8v3mDPqwGbtsxq2PmdLpTw1HqZ4jdYnvTnGM+FBaagMdYHOz4MHLeGL92DXnbikQAXJuh+6foGfQCmLjaazhI62nX3RdQpbAe/HpRRqm870Rej1U1JFMfxhBhVPcmF7Hj9S5627jb403DQm1nY1Rq48XZQ9TrWL/smXKrL9LnB5qiqb1MTl0FZCsZixeceh38ROGBsJH8FpKoeeYMH5n7Boz2j3tIIqIS5e0OhOD/NDYQVba51+xlwz7IYjKVH4exH1A/6E4SN3sv39zK7d/O4mQC7hDWK6g8cW686Fa0z2+RQQbPS4XfAq8j/FDvXgwgSRYPLcKt9rlMRUzm1C9UXaO/NN+lG7qu8gC62tIhvBRQwYcxpJYV6tUG4WfbMA08rAgKqyH0TlM21sbRTf2TWuSRDBRhe45+Imms500TUmo+cWIM2c5X5YkXFGH0yreap16EZF1vspgXlFrWDMF7lWw06JAR7k1ouDzttRVj0QzSUUI/WmtJOo2/bu8/UTBugh+ZwrNSvVkY0OjwGBeYyCfeJI75gS/edFahiAp7QInHRVrvNRvMFM4K6Xh7GdDGUovIedw5YrYxFkjnX3LIaBKdGJbox78
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(23010399003)(1800799024)(10070799003)(366016)(38070700021)(13003099007)(22082099003)(56012099006)(11063799006)(4143699003)(18002099003)(4133799003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?dk1MR2tRNVJ2RFJwVTl3MTBueEZMWHRKVFpFN01wNnNnNHhkZkR6OWhaTVdQ?=
+ =?utf-8?B?UzVQbnVZdG54UW5xOFVXR1V6NEd3MnJzd2ZjVW1MR3FuQkx3YjQyRW5Vams0?=
+ =?utf-8?B?RTZhWWJvZThrTk41VTFkOUQ0V1F3NWxsbVR0Vm1sZ01FNkJPZXpPRGpvSnFB?=
+ =?utf-8?B?cFRjdmJvWFBQdU02bEI3VStGdm90bENmUVl3cGFZd2FzTTcvSmFBMGV1TnJi?=
+ =?utf-8?B?Wk44SGo1NFdkZVYrOEtTVm9pRGpQMzIzQ0RDWi9xQWJtWTBzQkcwMHo3TVZO?=
+ =?utf-8?B?eE1OeHZvU2FwMWVvR1Rpb0ZmODZBSDhJNDJNOGlTR0Y0TEdoazNNY0V4RWJF?=
+ =?utf-8?B?ZFNYWE5maHpOekU1clpNb1FLcW1ZRXNteEVNR0lNa1BGdjdBTDhYRlBMdkZq?=
+ =?utf-8?B?eDNzVFUxMjg0aEN0aWNNajdsQUMxWFFkZDRoZmhKRVFGdWczQXBKL1V6d3l3?=
+ =?utf-8?B?UlZvR0haSXFBTGFLSVkxa29vckVYcGFPNjNwTlNVTlZKS3o1MUlIcERlWlc5?=
+ =?utf-8?B?TWxCTFJpN1RBTWRnSlAvd01KYzk2YUJleFJIbis3MytMMkZkeDBCQVFiSFR0?=
+ =?utf-8?B?YUVLdkFocjZaZEhTcVN2ZVlDTTVkLzhrY3NScVZXTk9ib0JKYWp1WXJWSFgy?=
+ =?utf-8?B?RXRMUmF4MGxrT3NXdEpIQitldEhDZDdpcUpEbEFFWkxtY2xwbGRtSlBsVWtG?=
+ =?utf-8?B?MXpjQ29FOThLQ0VwKy9qZU5sL0prQk82TmUzT2hTQVNBbnNmTUtsdmJ0dzd5?=
+ =?utf-8?B?ZkhoVGtpNDVFTm8yTVhJbFhWL0xuRkN1K21pUnpPZ0QwOXFPaDJnWkdveUwx?=
+ =?utf-8?B?aUVtTHhRS1cyb2VUK0ZpeEFBazQwaHRkOHMvdjBPYjJZZkJnVTFJbUtWREtD?=
+ =?utf-8?B?bWhQUjRUSmRBU2lDdVVodmdhWTN5L0hMOEMyMHNIZGFsQjY4d0ErMEM0VHZB?=
+ =?utf-8?B?dVRhM0ZKRnNrcFZ3NTgra2pjZDkvdFBkSytUTFhyeEU4dUtQRzNmTGtIWFkz?=
+ =?utf-8?B?NzY5eVdsYjZkS3dyeGpoUWQ5NENIdGpnQURGNVBySEVKVDBXV2dWSzhUeTRS?=
+ =?utf-8?B?K3gzQ1MrZkEwL1V5TmRZT0JDak41eVJXMXJnazdsZGxrbVBxVmRHYXFsQ29S?=
+ =?utf-8?B?SWlOcmpOMW4wR0psMDRydFEvSzJKL1BsSldBTkJUdTlGTk5YOHRtZnVNdU9G?=
+ =?utf-8?B?TjZVTElvV24vcXJHaE0vdlg4ZDdXeExiWW1pVDY3T0ZhV3Q3WXNEV2hnSnBj?=
+ =?utf-8?B?TkJIV0c3V0FjcEZ5a2dlOGNwS1Y5R0VLZ0pJM0RVTGhndkl4eEdCemNLRnpz?=
+ =?utf-8?B?dDZVeHhCV0laYkh3OGl1L3FGcXptS1VRWlV5UTZ4d1lEMmUwbjFmNVRFVjlJ?=
+ =?utf-8?B?cWlYcDVPbjFLMTZBYmRyTFlUT2VZdGJqZEhlcTkzYmlvU0NraWhwVnpFcllo?=
+ =?utf-8?B?QWc1WDBGNnBBZG9jTVdiTlBRa1d4VlNEVUdQR0lSVXBqOTRhSFNiOHBrZWFI?=
+ =?utf-8?B?WHl4S280Z2xlck54M1FyU0NRcWF2cWxCQ0RzNVlFaGMvR2ZyZnY1ckZuWFl2?=
+ =?utf-8?B?VVo4cmJTTmpvdjRPQTNzNVUrbUxyZFV3OTk5UDVWSXZ1WkgzY0JPREM1K1dS?=
+ =?utf-8?B?eHgvR2NFQVd2U0JWUnNtMTJ3eHUvS2hYYXcvUm92UC9BNXUzZ0xhZTlsSG82?=
+ =?utf-8?B?NjAzNUZKbitZanlWYjBicURRUm14ckV2b0NSQjJSZVZ1THhtVGtWNWhZZTdh?=
+ =?utf-8?B?L3R4UGlXWDFXMXZsN1hvZlFnSGFXempnU05NZmozcnozTXU0cGxxU0RuSGpj?=
+ =?utf-8?B?YmN3WklzODI4Z3pXN3JiZzJON3Q3d2c0Q2pwVHpFczZXQm0rRXNoSk1JMDdv?=
+ =?utf-8?B?K1J2SGY4L1owVU4rMzlRNDJxYkYzcWV3TGZOQW9TcnZXVGF2M1hjYUM0OERN?=
+ =?utf-8?B?d2JsTmZuWkNHM0FtZGlhTzVPdU9XaFR4TXA1L01QVExham1nS0RIQ0s4blcw?=
+ =?utf-8?B?cGkxbytMbDlMYVY2MEs5OWdMbnJ1ZkE0bDJ3NWxkVnRMMzk1ejh2WVJxWUFM?=
+ =?utf-8?B?aDlRdnJrb2I1QVBieUxKUDVBYnZwTkh1L1RxV3ZwVktaWk5ac0ZDcE9QMGx0?=
+ =?utf-8?B?WXk1Sk9FVzJCZGt2My9tL1hrOTc0d2tjTWllQ2NvM2M0bElENWs4dlAyangr?=
+ =?utf-8?B?bVVKNXVhRkNZYUc5OXY5Q1hnT2Q5VDVRQkdNQjY3UURCZHdBNjZWUVlXVUx6?=
+ =?utf-8?B?MUZFYTc0Nm1ZaHBSZFBDM3k5bDY1NWNZMnFMdkZJaE1rbkFUM2NFZ3hNcGRk?=
+ =?utf-8?B?TGpnYkJaTXphUUlEak44Z2xHazdPYW1wL1Y3N1ZuK0Q0RCsyVVhLRVRQOC9M?=
+ =?utf-8?Q?+yjIPZGIjXeJAS55uQip+mwhNdGGcyib8sDAx?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <3089F137559E0C43A5FFB6C698B87DC5@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c97c245feafde9295dea3039fc3d2c01d1e1d741.camel@ibm.com>
+X-Exchange-RoutingPolicyChecked:
+	RjgJP5TQB0G2EELsqqaBD4pIsY6eB+OH5vdAWbA9pNaZ27iGzuYi25AM3ZUqT3kSoLNu2NgGwXLvqpoj1RimmlwTxk6Eobp2zak3dDxRa62vlS5lxdzchVZF4davf8OyOwB+vP/Pkr5IYyDgRGbTCQtzsYywJyy8TTnkainMhCrfK1oB8OahHCVL+UCeOQE5SoQPFNcSKZTg+MNHgGyUmACUDBGGqVSXgKJYOTr7lWey6X1ArKy1/mjd5HS4OL7fPtU98A2gfiuIclRbby8oG8t+egI7/IXsJE0Qr1Smh3yfv+WzerZBjLMrDM/S3X8QT9HMlfjU9MrJ1jMYxCrtuw==
+X-OriginatorOrg: ibm.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2fa9d18d-ec7f-4558-3480-08dedd3fc0ec
+X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Jul 2026 22:25:02.2023
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: WEVYlAUW/MwVcObcryLNYPtZw4JRYCmZVUbxmDw3w0NijtkvEwPO9O6mBGYfFbTl1ScNL4qTc1oCZHWWrQZqsw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR15MB6277
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA4MDIxOSBTYWx0ZWRfX6GNQaxMi6l2Y
+ PR8fkN9uPl591yOFd2zRe0J+0dvlRh+WO6mn4S0watxCjNhDUISUyRXnzYVrDLxi/DzZ7uMIYVi
+ r4Saek4HaB6zrrUV+mUm4xT7MRcKO+c=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA4MDIxOSBTYWx0ZWRfX8wyHUG9VhG5O
+ 7gXjihpF/AqvNW1dZucJjsH3u+OHuZghNDadyoo4UqcsH9Uf1v+2nFiyqN9PqAeXV5EHPm5YXo/
+ QITwxIrjEAP/Ea3wxvo3Ykfgsy2uspRuSyjCw+CF4py4slucO+7OBnHvxx7kAuzNN6U8sFbHhfZ
+ gJcixrOh69yys5fLMDznEvi1S9SLq4BawdBld6p0tRCkGQuUCPtUykNT7tShdA6yqlcXHkihtPO
+ nmpJKrHp0ypWqTDkA5wu5R+Kl9KTYJ+kFFgJ4hy4mrCl1Ok2LRZ/kO+rtJirYzrdAWRraYirqzT
+ +isUbV52GrUBOIlvIAdzuBewjEy7ao5SP2DtW3dEhDQoFVXFwqIv0bJsky5O+70WN/Gxg1fQmMX
+ UVOG5EyfhNKg3A4xozXRjdwUu88GzU/MXAqRQlJajbl79KFrbf9xQoMcGRHyfMEeT2+0JT4v6PX
+ fdcEEtFt1YVmM99wdig==
+X-Proofpoint-GUID: IJornvUdXS4fERbBpN3muKXx7ZkyXngJ
+X-Authority-Analysis: v=2.4 cv=Oot/DS/t c=1 sm=1 tr=0 ts=6a4ece44 cx=c_pps
+ a=5av3elwsUCsOTZAZyay1PA==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=uAbxVGIbfxUO_5tXvNgY:22 a=4u6H09k7AAAA:8 a=EG7W4yiQAAAA:8
+ a=FB5wZ7d_HugNLhkEmfoA:9 a=QEXdDO2ut3YA:10 a=5yerskEF2kbSkDMynNst:22
+X-Proofpoint-ORIG-GUID: -bKoRv8EpNClQldSKOfRFCd2nMItm22i
+Subject: RE: [PATCH] libceph: reset OSD session when keepalive2 acks stop
+ arriving
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-08_04,2026-07-08_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 lowpriorityscore=0 clxscore=1015 impostorscore=0 phishscore=0
+ malwarescore=0 suspectscore=0 spamscore=0 adultscore=0 priorityscore=1501
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607080219
 
-On 2026-07-08 21:07:53, Viacheslav Dubeyko wrote:
-> On Tue, 2026-07-07 at 19:46 -0500, Chris J Arges wrote:
-> > handle_timeout() in osd_client.c sends CEPH_MSGR2_TAG_KEEPALIVE2 frames
-> > to OSDs with stalled requests, but libceph never verifies if the ACKs
-> > actually return.
-> > 
-> > Consequently, if an OSD messenger queue wedges while the underlying
-> > TCP socket remains ESTABLISHED, the client will block indefinitely in
-> > ceph_osdc_wait_request(), causing tasks to hang in D state.
-> > 
-> > Fix this by introducing a watchdog in handle_timeout() that checks
-> > ceph_con_keepalive_expired() against a new CEPH_OSD_PING_TIMEOUT (60s).
-> > On expiry, reset the sparse-read state, call reopen_osd(), and kick
-> > outstanding requests when the session is reopened.
-> > 
-> > Because OSD keepalives are only sent to OSDs with stalled requests,
-> > last_keepalive_ack can be stale on an otherwise healthy connection that
-> > has simply been idle. Track the start of each slow/probing episode per
-> > OSD and require the episode to last CEPH_OSD_PING_TIMEOUT before checking
-> > for an expired keepalive ack, so the watchdog only fires after we have
-> > been actively pinging.
-> > 
-> > Additionally, seed last_keepalive_ack to the current time in
-> > ceph_con_open() to prevent the watchdog from firing spuriously on fresh
-> > connections for both OSD and monitor clients.
-> > 
-> > Fixes: 8b9558aab853 ("libceph: use keepalive2 to verify the mon session is alive")
-> > Link: https://urldefense.proofpoint.com/v2/url?u=https-3A__tracker.ceph.com_issues_76202&d=DwICaQ&c=BSDicqBQBDjDI9RkVyTcHQ&r=q5bIm4AXMzc8NJu1_RGmnQ2fMWKq4Y4RAkElvUgSs00&m=8udRqH37aQXbOFlaT2eCFf9V5N2umZEpRHyjRWqPY9nOaaxnBb5-_kuP0k6YrT4O&s=4IAHOQNcSzsOsmpIm3nIsgqXGHCx-bxmgd1yDJ3m-VU&e= 
-> > Co-developed-by: Andrew DeMaria <ademaria@cloudflare.com>
-> > Signed-off-by: Andrew DeMaria <ademaria@cloudflare.com>
-> > Signed-off-by: Chris J Arges <carges@cloudflare.com>
-> > ---
-> > This patch fixes an issue where the kernel rbd client and an OSD have an
-> > ESTABLISHED TCP connection, but keepalive2 ACKs stop returning from the
-> > OSD. When that happens, outstanding OSD requests can remain held by the
-> > client and callers can hang in D state. We were able to mitgiate this
-> > issue by using ss -K to kill the affected OSD TCP connection which
-> > reopened the OSD session.
-> > 
-> > We were able to reproduce this issue in production a few times, and
-> > synthetically by dropping OSD to rbd application frames while allowing
-> > TCP ACKs through.
-> > 
-> > https://urldefense.proofpoint.com/v2/url?u=https-3A__tracker.ceph.com_issues_76202&d=DwICaQ&c=BSDicqBQBDjDI9RkVyTcHQ&r=q5bIm4AXMzc8NJu1_RGmnQ2fMWKq4Y4RAkElvUgSs00&m=8udRqH37aQXbOFlaT2eCFf9V5N2umZEpRHyjRWqPY9nOaaxnBb5-_kuP0k6YrT4O&s=4IAHOQNcSzsOsmpIm3nIsgqXGHCx-bxmgd1yDJ3m-VU&e=  describes the same situation.
-> > 
-> > The following patch addresses this by creating a watchdog that resets the
-> > OSD session if this situation is detected.
-> > ---
-> >  include/linux/ceph/libceph.h    |  1 +
-> >  include/linux/ceph/osd_client.h |  1 +
-> >  net/ceph/messenger.c            |  3 +++
-> >  net/ceph/osd_client.c           | 23 ++++++++++++++++++++++-
-> >  4 files changed, 27 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> > index 63e0e2aa1ce9..1a117c5f1964 100644
-> > --- a/include/linux/ceph/libceph.h
-> > +++ b/include/linux/ceph/libceph.h
-> > @@ -74,6 +74,7 @@ struct ceph_options {
-> >   */
-> >  #define CEPH_MOUNT_TIMEOUT_DEFAULT	msecs_to_jiffies(60 * 1000)
-> >  #define CEPH_OSD_KEEPALIVE_DEFAULT	msecs_to_jiffies(5 * 1000)
-> > +#define CEPH_OSD_PING_TIMEOUT		msecs_to_jiffies(60 * 1000)
-> 
-> Could we reuse the user-configurable osd_keepalive_timeout (default 5s)? Why
-> exactly 60s has been selected?
-> 
-> Thanks,
-> Slava.
-> 
-
-I think CEPH_OSD_KEEPALIVE_TIMEOUT should be distinct from
-CEPH_OSD_PING_TIMEOUT. This way keepalive_timeout fires more frequently, and
-can still catch a TCP session going bad. The ping_timeout should be longer so
-we can try a few application-layer ACKs and if the TCP session is still good
-then it shows a session reset may be warranted.
-
-We chose 60s specifically because other timeouts had that value and it worked
-in test.
-
---chris
-
-> >  #define CEPH_OSD_IDLE_TTL_DEFAULT	msecs_to_jiffies(60 * 1000)
-> >  #define CEPH_OSD_REQUEST_TIMEOUT_DEFAULT 0  /* no timeout */
-> >  #define CEPH_READ_FROM_REPLICA_DEFAULT	0  /* read from primary */
-> > diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> > index 50b14a5661c7..52eb76e9d62a 100644
-> > --- a/include/linux/ceph/osd_client.h
-> > +++ b/include/linux/ceph/osd_client.h
-> > @@ -94,6 +94,7 @@ struct ceph_osd {
-> >  	struct ceph_auth_handshake o_auth;
-> >  	unsigned long lru_ttl;
-> >  	struct list_head o_keepalive_item;
-> > +	unsigned long o_keepalive_stamp;
-> >  	struct mutex lock;
-> >  	struct ceph_sparse_read	o_sparse_read;
-> >  };
-> > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> > index 34b3097b4c7b..f7776d83d506 100644
-> > --- a/net/ceph/messenger.c
-> > +++ b/net/ceph/messenger.c
-> > @@ -610,6 +610,9 @@ void ceph_con_open(struct ceph_connection *con,
-> >  
-> >  	memcpy(&con->peer_addr, addr, sizeof(*addr));
-> >  	con->delay = 0;      /* reset backoff memory */
-> > +
-> > +	ktime_get_real_ts64(&con->last_keepalive_ack);
-> > +
-> >  	mutex_unlock(&con->mutex);
-> >  	queue_con(con);
-> >  }
-> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> > index 2ff00070c181..6d9530beb2e3 100644
-> > --- a/net/ceph/osd_client.c
-> > +++ b/net/ceph/osd_client.c
-> > @@ -53,6 +53,7 @@ static void link_linger(struct ceph_osd *osd,
-> >  static void unlink_linger(struct ceph_osd *osd,
-> >  			  struct ceph_osd_linger_request *lreq);
-> >  static void clear_backoffs(struct ceph_osd *osd);
-> > +static void kick_osd_requests(struct ceph_osd *osd);
-> >  
-> >  #if 1
-> >  static inline bool rwsem_is_wrlocked(struct rw_semaphore *sem)
-> > @@ -3480,8 +3481,11 @@ static void handle_timeout(struct work_struct *work)
-> >  			mutex_unlock(&lreq->lock);
-> >  		}
-> >  
-> > -		if (found)
-> > +		if (found) {
-> >  			list_move_tail(&osd->o_keepalive_item, &slow_osds);
-> > +		} else {
-> > +			osd->o_keepalive_stamp = 0;
-> > +		}
-> >  	}
-> >  
-> >  	if (opts->osd_request_timeout) {
-> > @@ -3507,6 +3511,23 @@ static void handle_timeout(struct work_struct *work)
-> >  							struct ceph_osd,
-> >  							o_keepalive_item);
-> >  		list_del_init(&osd->o_keepalive_item);
-> > +
-> > +		/* Record start of ping timeout from the first slow tick. */
-> > +		if (!osd->o_keepalive_stamp) {
-> > +			osd->o_keepalive_stamp = jiffies;
-> > +		} else if (time_after_eq(jiffies,
-> > +				  osd->o_keepalive_stamp + CEPH_OSD_PING_TIMEOUT) &&
-> > +		    ceph_con_keepalive_expired(&osd->o_con,
-> > +					       CEPH_OSD_PING_TIMEOUT)) {
-> > +			pr_warn_ratelimited("osd%d not responding to keepalives, resetting session\n",
-> > +					    osd->o_osd);
-> > +			osd->o_sparse_op_idx = -1;
-> > +			ceph_init_sparse_read(&osd->o_sparse_read);
-> > +			if (!reopen_osd(osd))
-> > +				kick_osd_requests(osd);
-> > +			continue;
-> > +		}
-> > +
-> >  		ceph_con_keepalive(&osd->o_con);
-> >  	}
-> >  
-> > 
-> > ---
-> > base-commit: 0e35b9b6ec0ffcc5e23cbdec09f5c622ad532b53
-> > change-id: 20260707-fix-rbd-keepalives-664fe9266c35
-> > 
-> > Best regards,
-> > --  
-> > Chris J Arges <carges@cloudflare.com>
-> > 
+T24gV2VkLCAyMDI2LTA3LTA4IGF0IDE3OjE3IC0wNTAwLCBDaHJpcyBBcmdlcyB3cm90ZToNCj4g
+T24gMjAyNi0wNy0wOCAyMTowNzo1MywgVmlhY2hlc2xhdiBEdWJleWtvIHdyb3RlOg0KPiA+IE9u
+IFR1ZSwgMjAyNi0wNy0wNyBhdCAxOTo0NiAtMDUwMCwgQ2hyaXMgSiBBcmdlcyB3cm90ZToNCj4g
+PiA+IGhhbmRsZV90aW1lb3V0KCkgaW4gb3NkX2NsaWVudC5jIHNlbmRzIENFUEhfTVNHUjJfVEFH
+X0tFRVBBTElWRTIgZnJhbWVzDQo+ID4gPiB0byBPU0RzIHdpdGggc3RhbGxlZCByZXF1ZXN0cywg
+YnV0IGxpYmNlcGggbmV2ZXIgdmVyaWZpZXMgaWYgdGhlIEFDS3MNCj4gPiA+IGFjdHVhbGx5IHJl
+dHVybi4NCj4gPiA+IA0KPiA+ID4gQ29uc2VxdWVudGx5LCBpZiBhbiBPU0QgbWVzc2VuZ2VyIHF1
+ZXVlIHdlZGdlcyB3aGlsZSB0aGUgdW5kZXJseWluZw0KPiA+ID4gVENQIHNvY2tldCByZW1haW5z
+IEVTVEFCTElTSEVELCB0aGUgY2xpZW50IHdpbGwgYmxvY2sgaW5kZWZpbml0ZWx5IGluDQo+ID4g
+PiBjZXBoX29zZGNfd2FpdF9yZXF1ZXN0KCksIGNhdXNpbmcgdGFza3MgdG8gaGFuZyBpbiBEIHN0
+YXRlLg0KPiA+ID4gDQo+ID4gPiBGaXggdGhpcyBieSBpbnRyb2R1Y2luZyBhIHdhdGNoZG9nIGlu
+IGhhbmRsZV90aW1lb3V0KCkgdGhhdCBjaGVja3MNCj4gPiA+IGNlcGhfY29uX2tlZXBhbGl2ZV9l
+eHBpcmVkKCkgYWdhaW5zdCBhIG5ldyBDRVBIX09TRF9QSU5HX1RJTUVPVVQgKDYwcykuDQo+ID4g
+PiBPbiBleHBpcnksIHJlc2V0IHRoZSBzcGFyc2UtcmVhZCBzdGF0ZSwgY2FsbCByZW9wZW5fb3Nk
+KCksIGFuZCBraWNrDQo+ID4gPiBvdXRzdGFuZGluZyByZXF1ZXN0cyB3aGVuIHRoZSBzZXNzaW9u
+IGlzIHJlb3BlbmVkLg0KPiA+ID4gDQo+ID4gPiBCZWNhdXNlIE9TRCBrZWVwYWxpdmVzIGFyZSBv
+bmx5IHNlbnQgdG8gT1NEcyB3aXRoIHN0YWxsZWQgcmVxdWVzdHMsDQo+ID4gPiBsYXN0X2tlZXBh
+bGl2ZV9hY2sgY2FuIGJlIHN0YWxlIG9uIGFuIG90aGVyd2lzZSBoZWFsdGh5IGNvbm5lY3Rpb24g
+dGhhdA0KPiA+ID4gaGFzIHNpbXBseSBiZWVuIGlkbGUuIFRyYWNrIHRoZSBzdGFydCBvZiBlYWNo
+IHNsb3cvcHJvYmluZyBlcGlzb2RlIHBlcg0KPiA+ID4gT1NEIGFuZCByZXF1aXJlIHRoZSBlcGlz
+b2RlIHRvIGxhc3QgQ0VQSF9PU0RfUElOR19USU1FT1VUIGJlZm9yZSBjaGVja2luZw0KPiA+ID4g
+Zm9yIGFuIGV4cGlyZWQga2VlcGFsaXZlIGFjaywgc28gdGhlIHdhdGNoZG9nIG9ubHkgZmlyZXMg
+YWZ0ZXIgd2UgaGF2ZQ0KPiA+ID4gYmVlbiBhY3RpdmVseSBwaW5naW5nLg0KPiA+ID4gDQo+ID4g
+PiBBZGRpdGlvbmFsbHksIHNlZWQgbGFzdF9rZWVwYWxpdmVfYWNrIHRvIHRoZSBjdXJyZW50IHRp
+bWUgaW4NCj4gPiA+IGNlcGhfY29uX29wZW4oKSB0byBwcmV2ZW50IHRoZSB3YXRjaGRvZyBmcm9t
+IGZpcmluZyBzcHVyaW91c2x5IG9uIGZyZXNoDQo+ID4gPiBjb25uZWN0aW9ucyBmb3IgYm90aCBP
+U0QgYW5kIG1vbml0b3IgY2xpZW50cy4NCj4gPiA+IA0KPiA+ID4gRml4ZXM6IDhiOTU1OGFhYjg1
+MyAoImxpYmNlcGg6IHVzZSBrZWVwYWxpdmUyIHRvIHZlcmlmeSB0aGUgbW9uIHNlc3Npb24gaXMg
+YWxpdmUiKQ0KPiA+ID4gTGluazogaHR0cHM6Ly91cmxkZWZlbnNlLnByb29mcG9pbnQuY29tL3Yy
+L3VybD91PWh0dHBzLTNBX190cmFja2VyLmNlcGguY29tX2lzc3Vlc183NjIwMiZkPUR3SUNhUSZj
+PUJTRGljcUJRQkRqREk5UmtWeVRjSFEmcj1xNWJJbTRBWE16YzhOSnUxX1JHbW5RMmZNV0txNFk0
+UkFrRWx2VWdTczAwJm09OHVkUnFIMzdhUVhiT0ZsYVQyZUNGZjlWNU4ydW1aRXBSSHlqUldxUFk5
+bk9hYXhuQmI1LV9rdVAwazZZclQ0TyZzPTRJQUhPUU5jU3pzT3NtcEltM25Jc2dxWEdIQ3gtYnht
+Z2QxeURKM20tVlUmZT0gDQo+ID4gPiBDby1kZXZlbG9wZWQtYnk6IEFuZHJldyBEZU1hcmlhIDxh
+ZGVtYXJpYUBjbG91ZGZsYXJlLmNvbT4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IEFuZHJldyBEZU1h
+cmlhIDxhZGVtYXJpYUBjbG91ZGZsYXJlLmNvbT4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IENocmlz
+IEogQXJnZXMgPGNhcmdlc0BjbG91ZGZsYXJlLmNvbT4NCj4gPiA+IC0tLQ0KPiA+ID4gVGhpcyBw
+YXRjaCBmaXhlcyBhbiBpc3N1ZSB3aGVyZSB0aGUga2VybmVsIHJiZCBjbGllbnQgYW5kIGFuIE9T
+RCBoYXZlIGFuDQo+ID4gPiBFU1RBQkxJU0hFRCBUQ1AgY29ubmVjdGlvbiwgYnV0IGtlZXBhbGl2
+ZTIgQUNLcyBzdG9wIHJldHVybmluZyBmcm9tIHRoZQ0KPiA+ID4gT1NELiBXaGVuIHRoYXQgaGFw
+cGVucywgb3V0c3RhbmRpbmcgT1NEIHJlcXVlc3RzIGNhbiByZW1haW4gaGVsZCBieSB0aGUNCj4g
+PiA+IGNsaWVudCBhbmQgY2FsbGVycyBjYW4gaGFuZyBpbiBEIHN0YXRlLiBXZSB3ZXJlIGFibGUg
+dG8gbWl0Z2lhdGUgdGhpcw0KPiA+ID4gaXNzdWUgYnkgdXNpbmcgc3MgLUsgdG8ga2lsbCB0aGUg
+YWZmZWN0ZWQgT1NEIFRDUCBjb25uZWN0aW9uIHdoaWNoDQo+ID4gPiByZW9wZW5lZCB0aGUgT1NE
+IHNlc3Npb24uDQo+ID4gPiANCj4gPiA+IFdlIHdlcmUgYWJsZSB0byByZXByb2R1Y2UgdGhpcyBp
+c3N1ZSBpbiBwcm9kdWN0aW9uIGEgZmV3IHRpbWVzLCBhbmQNCj4gPiA+IHN5bnRoZXRpY2FsbHkg
+YnkgZHJvcHBpbmcgT1NEIHRvIHJiZCBhcHBsaWNhdGlvbiBmcmFtZXMgd2hpbGUgYWxsb3dpbmcN
+Cj4gPiA+IFRDUCBBQ0tzIHRocm91Z2guDQo+ID4gPiANCj4gPiA+IGh0dHBzOi8vdXJsZGVmZW5z
+ZS5wcm9vZnBvaW50LmNvbS92Mi91cmw/dT1odHRwcy0zQV9fdHJhY2tlci5jZXBoLmNvbV9pc3N1
+ZXNfNzYyMDImZD1Ed0lDYVEmYz1CU0RpY3FCUUJEakRJOVJrVnlUY0hRJnI9cTViSW00QVhNemM4
+Tkp1MV9SR21uUTJmTVdLcTRZNFJBa0VsdlVnU3MwMCZtPTh1ZFJxSDM3YVFYYk9GbGFUMmVDRmY5
+VjVOMnVtWkVwUkh5alJXcVBZOW5PYWF4bkJiNS1fa3VQMGs2WXJUNE8mcz00SUFIT1FOY1N6c09z
+bXBJbTNuSXNncVhHSEN4LWJ4bWdkMXlESjNtLVZVJmU9ICBkZXNjcmliZXMgdGhlIHNhbWUgc2l0
+dWF0aW9uLg0KPiA+ID4gDQo+ID4gPiBUaGUgZm9sbG93aW5nIHBhdGNoIGFkZHJlc3NlcyB0aGlz
+IGJ5IGNyZWF0aW5nIGEgd2F0Y2hkb2cgdGhhdCByZXNldHMgdGhlDQo+ID4gPiBPU0Qgc2Vzc2lv
+biBpZiB0aGlzIHNpdHVhdGlvbiBpcyBkZXRlY3RlZC4NCj4gPiA+IC0tLQ0KPiA+ID4gIGluY2x1
+ZGUvbGludXgvY2VwaC9saWJjZXBoLmggICAgfCAgMSArDQo+ID4gPiAgaW5jbHVkZS9saW51eC9j
+ZXBoL29zZF9jbGllbnQuaCB8ICAxICsNCj4gPiA+ICBuZXQvY2VwaC9tZXNzZW5nZXIuYyAgICAg
+ICAgICAgIHwgIDMgKysrDQo+ID4gPiAgbmV0L2NlcGgvb3NkX2NsaWVudC5jICAgICAgICAgICB8
+IDIzICsrKysrKysrKysrKysrKysrKysrKystDQo+ID4gPiAgNCBmaWxlcyBjaGFuZ2VkLCAyNyBp
+bnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pDQo+ID4gPiANCj4gPiA+IGRpZmYgLS1naXQgYS9p
+bmNsdWRlL2xpbnV4L2NlcGgvbGliY2VwaC5oIGIvaW5jbHVkZS9saW51eC9jZXBoL2xpYmNlcGgu
+aA0KPiA+ID4gaW5kZXggNjNlMGUyYWExY2U5Li4xYTExN2M1ZjE5NjQgMTAwNjQ0DQo+ID4gPiAt
+LS0gYS9pbmNsdWRlL2xpbnV4L2NlcGgvbGliY2VwaC5oDQo+ID4gPiArKysgYi9pbmNsdWRlL2xp
+bnV4L2NlcGgvbGliY2VwaC5oDQo+ID4gPiBAQCAtNzQsNiArNzQsNyBAQCBzdHJ1Y3QgY2VwaF9v
+cHRpb25zIHsNCj4gPiA+ICAgKi8NCj4gPiA+ICAjZGVmaW5lIENFUEhfTU9VTlRfVElNRU9VVF9E
+RUZBVUxUCW1zZWNzX3RvX2ppZmZpZXMoNjAgKiAxMDAwKQ0KPiA+ID4gICNkZWZpbmUgQ0VQSF9P
+U0RfS0VFUEFMSVZFX0RFRkFVTFQJbXNlY3NfdG9famlmZmllcyg1ICogMTAwMCkNCj4gPiA+ICsj
+ZGVmaW5lIENFUEhfT1NEX1BJTkdfVElNRU9VVAkJbXNlY3NfdG9famlmZmllcyg2MCAqIDEwMDAp
+DQo+ID4gDQo+ID4gQ291bGQgd2UgcmV1c2UgdGhlIHVzZXItY29uZmlndXJhYmxlIG9zZF9rZWVw
+YWxpdmVfdGltZW91dCAoZGVmYXVsdCA1cyk/IFdoeQ0KPiA+IGV4YWN0bHkgNjBzIGhhcyBiZWVu
+IHNlbGVjdGVkPw0KPiA+IA0KPiA+IFRoYW5rcywNCj4gPiBTbGF2YS4NCj4gPiANCj4gDQo+IEkg
+dGhpbmsgQ0VQSF9PU0RfS0VFUEFMSVZFX1RJTUVPVVQgc2hvdWxkIGJlIGRpc3RpbmN0IGZyb20N
+Cj4gQ0VQSF9PU0RfUElOR19USU1FT1VULiBUaGlzIHdheSBrZWVwYWxpdmVfdGltZW91dCBmaXJl
+cyBtb3JlIGZyZXF1ZW50bHksIGFuZA0KPiBjYW4gc3RpbGwgY2F0Y2ggYSBUQ1Agc2Vzc2lvbiBn
+b2luZyBiYWQuIFRoZSBwaW5nX3RpbWVvdXQgc2hvdWxkIGJlIGxvbmdlciBzbw0KPiB3ZSBjYW4g
+dHJ5IGEgZmV3IGFwcGxpY2F0aW9uLWxheWVyIEFDS3MgYW5kIGlmIHRoZSBUQ1Agc2Vzc2lvbiBp
+cyBzdGlsbCBnb29kDQo+IHRoZW4gaXQgc2hvd3MgYSBzZXNzaW9uIHJlc2V0IG1heSBiZSB3YXJy
+YW50ZWQuDQo+IA0KPiBXZSBjaG9zZSA2MHMgc3BlY2lmaWNhbGx5IGJlY2F1c2Ugb3RoZXIgdGlt
+ZW91dHMgaGFkIHRoYXQgdmFsdWUgYW5kIGl0IHdvcmtlZA0KPiBpbiB0ZXN0Lg0KPiANCj4gLS1j
+aHJpcw0KPiANCj4gPiA+ICAjZGVmaW5lIENFUEhfT1NEX0lETEVfVFRMX0RFRkFVTFQJbXNlY3Nf
+dG9famlmZmllcyg2MCAqIDEwMDApDQo+ID4gPiAgI2RlZmluZSBDRVBIX09TRF9SRVFVRVNUX1RJ
+TUVPVVRfREVGQVVMVCAwICAvKiBubyB0aW1lb3V0ICovDQo+ID4gPiAgI2RlZmluZSBDRVBIX1JF
+QURfRlJPTV9SRVBMSUNBX0RFRkFVTFQJMCAgLyogcmVhZCBmcm9tIHByaW1hcnkgKi8NCj4gPiA+
+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L2NlcGgvb3NkX2NsaWVudC5oIGIvaW5jbHVkZS9s
+aW51eC9jZXBoL29zZF9jbGllbnQuaA0KPiA+ID4gaW5kZXggNTBiMTRhNTY2MWM3Li41MmViNzZl
+OWQ2MmEgMTAwNjQ0DQo+ID4gPiAtLS0gYS9pbmNsdWRlL2xpbnV4L2NlcGgvb3NkX2NsaWVudC5o
+DQo+ID4gPiArKysgYi9pbmNsdWRlL2xpbnV4L2NlcGgvb3NkX2NsaWVudC5oDQo+ID4gPiBAQCAt
+OTQsNiArOTQsNyBAQCBzdHJ1Y3QgY2VwaF9vc2Qgew0KPiA+ID4gIAlzdHJ1Y3QgY2VwaF9hdXRo
+X2hhbmRzaGFrZSBvX2F1dGg7DQo+ID4gPiAgCXVuc2lnbmVkIGxvbmcgbHJ1X3R0bDsNCj4gPiA+
+ICAJc3RydWN0IGxpc3RfaGVhZCBvX2tlZXBhbGl2ZV9pdGVtOw0KPiA+ID4gKwl1bnNpZ25lZCBs
+b25nIG9fa2VlcGFsaXZlX3N0YW1wOw0KPiA+ID4gIAlzdHJ1Y3QgbXV0ZXggbG9jazsNCj4gPiA+
+ICAJc3RydWN0IGNlcGhfc3BhcnNlX3JlYWQJb19zcGFyc2VfcmVhZDsNCj4gPiA+ICB9Ow0KPiA+
+ID4gZGlmZiAtLWdpdCBhL25ldC9jZXBoL21lc3Nlbmdlci5jIGIvbmV0L2NlcGgvbWVzc2VuZ2Vy
+LmMNCj4gPiA+IGluZGV4IDM0YjMwOTdiNGM3Yi4uZjc3NzZkODNkNTA2IDEwMDY0NA0KPiA+ID4g
+LS0tIGEvbmV0L2NlcGgvbWVzc2VuZ2VyLmMNCj4gPiA+ICsrKyBiL25ldC9jZXBoL21lc3Nlbmdl
+ci5jDQo+ID4gPiBAQCAtNjEwLDYgKzYxMCw5IEBAIHZvaWQgY2VwaF9jb25fb3BlbihzdHJ1Y3Qg
+Y2VwaF9jb25uZWN0aW9uICpjb24sDQo+ID4gPiAgDQo+ID4gPiAgCW1lbWNweSgmY29uLT5wZWVy
+X2FkZHIsIGFkZHIsIHNpemVvZigqYWRkcikpOw0KPiA+ID4gIAljb24tPmRlbGF5ID0gMDsgICAg
+ICAvKiByZXNldCBiYWNrb2ZmIG1lbW9yeSAqLw0KPiA+ID4gKw0KPiA+ID4gKwlrdGltZV9nZXRf
+cmVhbF90czY0KCZjb24tPmxhc3Rfa2VlcGFsaXZlX2Fjayk7DQo+ID4gPiArDQo+ID4gPiAgCW11
+dGV4X3VubG9jaygmY29uLT5tdXRleCk7DQo+ID4gPiAgCXF1ZXVlX2Nvbihjb24pOw0KPiA+ID4g
+IH0NCj4gPiA+IGRpZmYgLS1naXQgYS9uZXQvY2VwaC9vc2RfY2xpZW50LmMgYi9uZXQvY2VwaC9v
+c2RfY2xpZW50LmMNCj4gPiA+IGluZGV4IDJmZjAwMDcwYzE4MS4uNmQ5NTMwYmViMmUzIDEwMDY0
+NA0KPiA+ID4gLS0tIGEvbmV0L2NlcGgvb3NkX2NsaWVudC5jDQo+ID4gPiArKysgYi9uZXQvY2Vw
+aC9vc2RfY2xpZW50LmMNCj4gPiA+IEBAIC01Myw2ICs1Myw3IEBAIHN0YXRpYyB2b2lkIGxpbmtf
+bGluZ2VyKHN0cnVjdCBjZXBoX29zZCAqb3NkLA0KPiA+ID4gIHN0YXRpYyB2b2lkIHVubGlua19s
+aW5nZXIoc3RydWN0IGNlcGhfb3NkICpvc2QsDQo+ID4gPiAgCQkJICBzdHJ1Y3QgY2VwaF9vc2Rf
+bGluZ2VyX3JlcXVlc3QgKmxyZXEpOw0KPiA+ID4gIHN0YXRpYyB2b2lkIGNsZWFyX2JhY2tvZmZz
+KHN0cnVjdCBjZXBoX29zZCAqb3NkKTsNCj4gPiA+ICtzdGF0aWMgdm9pZCBraWNrX29zZF9yZXF1
+ZXN0cyhzdHJ1Y3QgY2VwaF9vc2QgKm9zZCk7DQo+ID4gPiAgDQo+ID4gPiAgI2lmIDENCj4gPiA+
+ICBzdGF0aWMgaW5saW5lIGJvb2wgcndzZW1faXNfd3Jsb2NrZWQoc3RydWN0IHJ3X3NlbWFwaG9y
+ZSAqc2VtKQ0KPiA+ID4gQEAgLTM0ODAsOCArMzQ4MSwxMSBAQCBzdGF0aWMgdm9pZCBoYW5kbGVf
+dGltZW91dChzdHJ1Y3Qgd29ya19zdHJ1Y3QgKndvcmspDQo+ID4gPiAgCQkJbXV0ZXhfdW5sb2Nr
+KCZscmVxLT5sb2NrKTsNCj4gPiA+ICAJCX0NCj4gPiA+ICANCj4gPiA+IC0JCWlmIChmb3VuZCkN
+Cj4gPiA+ICsJCWlmIChmb3VuZCkgew0KPiA+ID4gIAkJCWxpc3RfbW92ZV90YWlsKCZvc2QtPm9f
+a2VlcGFsaXZlX2l0ZW0sICZzbG93X29zZHMpOw0KPiA+ID4gKwkJfSBlbHNlIHsNCj4gPiA+ICsJ
+CQlvc2QtPm9fa2VlcGFsaXZlX3N0YW1wID0gMDsNCj4gPiA+ICsJCX0NCj4gPiA+ICAJfQ0KPiA+
+ID4gIA0KPiA+ID4gIAlpZiAob3B0cy0+b3NkX3JlcXVlc3RfdGltZW91dCkgew0KPiA+ID4gQEAg
+LTM1MDcsNiArMzUxMSwyMyBAQCBzdGF0aWMgdm9pZCBoYW5kbGVfdGltZW91dChzdHJ1Y3Qgd29y
+a19zdHJ1Y3QgKndvcmspDQo+ID4gPiAgCQkJCQkJCXN0cnVjdCBjZXBoX29zZCwNCj4gPiA+ICAJ
+CQkJCQkJb19rZWVwYWxpdmVfaXRlbSk7DQo+ID4gPiAgCQlsaXN0X2RlbF9pbml0KCZvc2QtPm9f
+a2VlcGFsaXZlX2l0ZW0pOw0KPiA+ID4gKw0KPiA+ID4gKwkJLyogUmVjb3JkIHN0YXJ0IG9mIHBp
+bmcgdGltZW91dCBmcm9tIHRoZSBmaXJzdCBzbG93IHRpY2suICovDQo+ID4gPiArCQlpZiAoIW9z
+ZC0+b19rZWVwYWxpdmVfc3RhbXApIHsNCj4gPiA+ICsJCQlvc2QtPm9fa2VlcGFsaXZlX3N0YW1w
+ID0gamlmZmllczsNCj4gPiA+ICsJCX0gZWxzZSBpZiAodGltZV9hZnRlcl9lcShqaWZmaWVzLA0K
+PiA+ID4gKwkJCQkgIG9zZC0+b19rZWVwYWxpdmVfc3RhbXAgKyBDRVBIX09TRF9QSU5HX1RJTUVP
+VVQpICYmDQo+ID4gPiArCQkgICAgY2VwaF9jb25fa2VlcGFsaXZlX2V4cGlyZWQoJm9zZC0+b19j
+b24sDQo+ID4gPiArCQkJCQkgICAgICAgQ0VQSF9PU0RfUElOR19USU1FT1VUKSkgew0KDQpJIGRv
+bid0IHZlcnkgbGlrZSB0aGlzIG11bHRpLWxpbmUgY2hlY2suIDopIENvdWxkIHdlIHJld29yayBp
+dCBzb21laG93PyBXaGF0DQphYm91dCBzdGF0aWMgaW5saW5lIG1ldGhvZD8NCg0KVGhhbmtzLA0K
+U2xhdmEuIA0KDQo+ID4gPiArCQkJcHJfd2Fybl9yYXRlbGltaXRlZCgib3NkJWQgbm90IHJlc3Bv
+bmRpbmcgdG8ga2VlcGFsaXZlcywgcmVzZXR0aW5nIHNlc3Npb25cbiIsDQo+ID4gPiArCQkJCQkg
+ICAgb3NkLT5vX29zZCk7DQo+ID4gPiArCQkJb3NkLT5vX3NwYXJzZV9vcF9pZHggPSAtMTsNCj4g
+PiA+ICsJCQljZXBoX2luaXRfc3BhcnNlX3JlYWQoJm9zZC0+b19zcGFyc2VfcmVhZCk7DQo+ID4g
+PiArCQkJaWYgKCFyZW9wZW5fb3NkKG9zZCkpDQo+ID4gPiArCQkJCWtpY2tfb3NkX3JlcXVlc3Rz
+KG9zZCk7DQo+ID4gPiArCQkJY29udGludWU7DQo+ID4gPiArCQl9DQo+ID4gPiArDQo+ID4gPiAg
+CQljZXBoX2Nvbl9rZWVwYWxpdmUoJm9zZC0+b19jb24pOw0KPiA+ID4gIAl9DQo+ID4gPiAgDQo+
+ID4gPiANCj4gPiA+IC0tLQ0KPiA+ID4gYmFzZS1jb21taXQ6IDBlMzViOWI2ZWMwZmZjYzVlMjNj
+YmRlYzA5ZjVjNjIyYWQ1MzJiNTMNCj4gPiA+IGNoYW5nZS1pZDogMjAyNjA3MDctZml4LXJiZC1r
+ZWVwYWxpdmVzLTY2NGZlOTI2NmMzNQ0KPiA+ID4gDQo+ID4gPiBCZXN0IHJlZ2FyZHMsDQo+ID4g
+PiAtLSAgDQo+ID4gPiBDaHJpcyBKIEFyZ2VzIDxjYXJnZXNAY2xvdWRmbGFyZS5jb20+DQoNCg0K
+PiA+IA0K
