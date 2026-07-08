@@ -1,397 +1,303 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 802DB3E3DB1
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 20:42:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783543333; cv=none; b=QB58JA+3UFeOWx2XfPfH1ePy4RJNjFIXAU2hULW2ynRJUXrdXJTzMkNv/Bvafw1u0kxwkpJGFg4q8hCYhhxGNS7nP1crhkn9DR6jDVcqOCcVAb7HYP1Zfn9ow6IbBcoUbK/+lgLm5ce3wb/JSQQS+EaSaNEbJAJayVKBTu/F4Ac=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783543333; c=relaxed/simple;
-	bh=G8gl+N2X7ZPSk4gcCDrdn5g4yuvBE5M1Z7SnFwJ/jkU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=NqmYVGclxq9a/jroYXQiU3PqwS8tu9Dp6g7Zn5zORi4rJORPThLdDhlnYfwqt3wQBD6KigUd2vj1EZZ8qYYlFGmFeL4GGD+mYJbmuptpXZPtsbphWagBw8bVD4gvWmaSWcZoUysySC1qmN6dCDSQuau2KEtykdNLFzCkxaXpDhU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=X1rCtkxf; arc=none smtp.client-ip=209.85.128.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F33A18C008;
+	Wed,  8 Jul 2026 21:08:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.158.5
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1783544885; cv=fail; b=Z9fySATTb64eYTC47z/DyPinSW4rVvKFVhC66+KzyTbn99xnrpEPSWyWNYUeJ4Kb+Y9IvfJA4AvHw4d1pQdPEI/YFZkxSoP8ULGn16MNX+XP8B1PMf+OfgTWZIE3SNTEQVF6d3bHq6y8vWwC2JBA5Y8nE/afi6eAFEbN3jWBQSU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1783544885; c=relaxed/simple;
+	bh=xrHVrStW/stQR8ItQsOne7RVzkRw6hAyPSFkEvJmtfM=;
+	h=From:To:CC:Date:Message-ID:References:In-Reply-To:Content-Type:
+	 MIME-Version:Subject; b=VqhZeiQmtsl1uizMMcTpMvr462gYS3BQPmFyKBIxBjPXPlKaew+TIASG/B2SLs/W3lgjYML/IYiSNRwjt4Pq3xf97Rf461qBxYvKywqkggliC1krKj8W51FQsUQB74ZylKndIZSZSOESS9bJ/kSyRq1fvyS4yH4lFce0XDKywyc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com; spf=pass smtp.mailfrom=ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=YZzEO5sJ; arc=fail smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="X1rCtkxf"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-4938d5f86f3so1893765e9.1
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Jul 2026 13:42:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1783543328; x=1784148128; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=wHj6NL6CO+zM2abA8DzJxqrh6c3G8Xqm0sNj5b9NoYo=;
-        b=X1rCtkxfl6JPvbPgX2ZE8lUN7ZCfxO7t2A4t75u5JCxCnaUyJ3jAVpAx8r+KlLIAB9
-         WDgNUPmseM/eNIcPlk2e1ycnxPFxgJqO3oRcKgrwDVhqEVcpgVrOYlHz1chSEtgtPMeC
-         XFkDJVcdPfTkAK/RPg48YFF61Iz8EfQeEwvFf/vBEL7UbnpSd0C/fBFSm7EQiDC2Uc/g
-         Q56YPyZ3dO6tVUyRa7Hc3Z7tD5CW3XId1t8vjuW+YxSOffzQzDzRLptlbae0Se1WZms9
-         gIarb4pvV6SFokl7HMOPdLUyVe4JNEhDnwe7Q5qBbzrgzKbIIqeydRdnpggFB3GCInpz
-         d4oQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783543328; x=1784148128;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=wHj6NL6CO+zM2abA8DzJxqrh6c3G8Xqm0sNj5b9NoYo=;
-        b=h5btOOptYUESgZaQ3THMtEknBQmJii5hEEv15j6kiAYHtCdwuDSRXPkoeMyVcQc82D
-         b7hFXeh7/QB7ikeQHaHJcwL9cXJJptkSnKNq/2HhVADD1dc5l1Q+acR85fhublP7y+bR
-         nOT5BH65+wVcohFYVo5v+aU8/+n2QNRw8QPsd6T8fTsuUiMVwd2r1FG8bS0jZvMZr5FO
-         mdPmPG1FiBXQh8GztDnQvnNtLfmsk63IdYlyhJk0BKRFyiKDdEBjVIyJ8oq12llSP/Nh
-         c8Gu1uowkr8/ektCBWjGiTL9tZB6vu9hYE1TPhtiDrD19CqgZjPVbpofvhJWD/v3qgG5
-         BusA==
-X-Forwarded-Encrypted: i=1; AHgh+RpFNkjsFOOgZYhMQbf1/UqcgUSQpBhKr5Mee+BEWNTPJLbtXPUYxbN5RBONSH2EE7FwrzrPB2yFrMH7@vger.kernel.org
-X-Gm-Message-State: AOJu0YzWqVVChzKkH2KjXCQAxygYRarchbU5S4fHrU9ymsnS6+parRkB
-	ZCRzkP5V37hXAEtVpeIFA4SRrDoALQuC6EmJukZORgT+DHYDBumTS2ie8DxKc4gPQrg=
-X-Gm-Gg: AfdE7ckTcK3d2qvJXF24SXQcO81QVl6H0mqc0d/phSIEs+MEgq3GEYCAJKFAfjzZtxK
-	Ym8spMMTeSh9aOAALLCmts2alOGeCloGzdkKO6k69KGbqYMJv09gzm0Nxkl5/LySm7VYwy2pqle
-	CmY3gzJWbuhYw8abeJEHYJS+TN5GUdtvucRVgLACpGPXP6+kVEYfpuIGwtNakcLDxYqLjn2vems
-	RGvJkZb8AdqTKsAJNaASzliG6zpWAFbUMCTK9dm7O1ag+YvsLYDABQQ0CMrBmkilBVfNbGfVBli
-	ZBpJEtx+SzSPH4yZVnmT9k93YZHkof3xFKSx8uFvCqSoEHXTwGljwHEL4rd9F4J6ajlBbizOObW
-	4DKtU0nz+SoLspg1FQEv5p6ht75ugim7V4lt32rfwyXQLJoQ9iFvUtLzejIB0veiZPgpCOpNP9g
-	aoOMU7qn/08AcU+OYSd+MbMLM1FGTsY0uzFF8SX1VUJs/kr5wVdR0nG7HPeI+vGXDj2NdDypdSB
-	K1+ULe6ycXHKOiG9Blr2MwWGB8=
-X-Received: by 2002:a05:600c:34ce:b0:47d:52ef:c572 with SMTP id 5b1f17b1804b1-493e1008fb8mr97443435e9.1.1783543327801;
-        Wed, 08 Jul 2026 13:42:07 -0700 (PDT)
-Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47a9e4d843csm44682306f8f.14.2026.07.08.13.42.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Jul 2026 13:42:07 -0700 (PDT)
-From: Max Kellermann <max.kellermann@ionos.com>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH] fd/ceph/mds_client: add per-request lock for completion
-Date: Wed,  8 Jul 2026 22:42:04 +0200
-Message-ID: <20260708204204.264138-1-max.kellermann@ionos.com>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="YZzEO5sJ"
+Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 668KIKjq3422943;
+	Wed, 8 Jul 2026 21:07:57 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-id:content-transfer-encoding:content-type:date:from
+	:in-reply-to:message-id:mime-version:references:subject:to; s=
+	pp1; bh=xrHVrStW/stQR8ItQsOne7RVzkRw6hAyPSFkEvJmtfM=; b=YZzEO5sJ
+	jDM5dsXrrqpEXKu4McEqIDnw/BPByqq+Hswq6DH6DpT8C9ce/XrkkEizd6NPaCeW
+	7estT4uhPQFYo48j0wJ83tHWXIysqNRX9LnVEh35f3gPQVv4hFpwJcsm2j/CdYj1
+	DOe0MZvtDFJAVVbEfipd5QSEAthsprOU5NZlAlqzapLK9N2hbs2jF4dhcydlGJtf
+	TUeG3vNBXg27Ipy1pBBDe42wihNRe316KJyMj1tRILyvq7gjKcgQmPPhzYG264Re
+	kANR7j3wXk3XYkqc8MCr00gUrk1BTb45G5eeSR5FYvobt7KzalNFG5aPdq/K85kO
+	k9TB9kMyr2AH9g==
+Received: from ph0pr06cu001.outbound.protection.outlook.com (mail-westus3azon11011049.outbound.protection.outlook.com [40.107.208.49])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4f6stsxr9n-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Wed, 08 Jul 2026 21:07:56 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=XdK9FdDvn4ZVZ+s992vjFU3T+33VBnhKzx0UAWn8kalhkt4AHKKdhyEYBYWtzPXhh9GiRvPc+e/rHo8lOTYydQxaZgTo7gpejlyWAHVvJ3BareaxW8LMGxVVEIKkYWZ8jxE8aW2ota4NOiZF8nXfAz3Tbkdl9CvI3MEY2Fl1lSElkOaQJCsSBZ2VcikvF+14eZuK9Xf9CWnZo6/T4VXBqvAoLnLVUtHcqpE4vQz9ST+R1f7oi8cydw7022aLC0CVCU1C8zARsr5gaZNQjGa2L2dpa50k8jbOn7nwo8jfNRQT3qqNHWcUq9dzCcbCKia+k04rhuuVs3BMbflsDbCTcQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=xrHVrStW/stQR8ItQsOne7RVzkRw6hAyPSFkEvJmtfM=;
+ b=zR/CoerSnSCu+/LOW3AVl6JsCBUY36/xS+hlPb/5zzFPEo/UtfX7o5kuu7QGEmknSbp8WZle9aCH5cWTVoxWUErzXHBDfYUtj8Pyi5cyvTm/cvOzJD55jP+PKm/PjewzXUkZpwK6jTJY7J+68WvEZaey1UswwmcjhAxfeSO99WSWOfIYFvYYQ74EOqdA3F3ZlRN3g/wxAwhAumbLEsFaGOdARhrBIvflSsSXdAq4nREI4Ou0bnbyqHjiROY0VlbOrp9l7mv12riRGdhOlQTmHRAa5V1+7CqDkvRqNdQNMAII6Qm4Xgtole1vE6Xc7VExW1MI6qIoye9eygS92mmpXA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=ibm.com; dmarc=pass action=none header.from=ibm.com; dkim=pass
+ header.d=ibm.com; arc=none
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com (2603:10b6:806:338::8)
+ by LV0PR15MB7044.namprd15.prod.outlook.com (2603:10b6:408:32e::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.10; Wed, 8 Jul
+ 2026 21:07:54 +0000
+Received: from SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539]) by SA1PR15MB5819.namprd15.prod.outlook.com
+ ([fe80::920c:d2ba:5432:b539%6]) with mapi id 15.21.0181.009; Wed, 8 Jul 2026
+ 21:07:53 +0000
+From: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+To: "idryomov@gmail.com" <idryomov@gmail.com>,
+        Alex Markuze
+	<amarkuze@redhat.com>,
+        "carges@cloudflare.com" <carges@cloudflare.com>,
+        "slava@dubeyko.com" <slava@dubeyko.com>,
+        "zyan@redhat.com" <zyan@redhat.com>
+CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
+        "ademaria@cloudflare.com" <ademaria@cloudflare.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "kernel-team@cloudflare.com" <kernel-team@cloudflare.com>
+Thread-Topic: [EXTERNAL] [PATCH] libceph: reset OSD session when keepalive2
+ acks stop arriving
+Thread-Index: AQHdDnPkxyUZyMyGTUSX8b+sAwL26LZkHsSA
+Date: Wed, 8 Jul 2026 21:07:53 +0000
+Message-ID: <c97c245feafde9295dea3039fc3d2c01d1e1d741.camel@ibm.com>
+References: <20260707-fix-rbd-keepalives-v1-1-be888d525d6a@cloudflare.com>
+In-Reply-To: <20260707-fix-rbd-keepalives-v1-1-be888d525d6a@cloudflare.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SA1PR15MB5819:EE_|LV0PR15MB7044:EE_
+x-ms-office365-filtering-correlation-id: 3a6b02bd-32c2-4f19-fb95-08dedd34fa32
+x-ld-processed: fcf67057-50c9-4ad4-98f3-ffca64add9e9,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|376014|10070799003|23010399003|366016|11063799006|4133799003|18002099003|56012099006|22082099003|38070700021|13003099007;
+x-microsoft-antispam-message-info:
+ irAicUEHCdxejLnm07ZKXDIzuluVE+Z/AmFgTJ7KFTyGm7+/dz1LVsQ8UtNJVhbn9m6NDo4gSI7SNh24utUd5dqZjCKlFPda3tCD+Q4WtvoKN4F+z7IBlClHMBfyxqDK8ebAYimps3AwJcujYspcULXC0OI0pd32Jxtvp7orEeuKedM7DLUPdFNMvuIhb6R4z6HL0OP3Bq1uvbkQcTgM68+hGWY78z4raK4DlnvWIQetXrN3WrJewjIcjgPEJEYqym9g3nbLmDrErnpzzujoVtPvdnzwkiaG7tQpu4OYBBAchcVr0Kj3iSyqEFbP7tY8Na9P4JCeSFR6JQ83LRwsQ/LXbL+iS9lbaOkaI9xFbR23EGjxg0HYdjwUnCMVjhQCu6/6/01kKokd+WHgFFfHdi30747uk+P3euWPGKdENyQnHiBTYW9TB2rzWIBmmXjioRb/HnWRPUw3j0gR51mDw2g29Z8KGzaQS2IT/efDLwK3Mr9MnfAr4dmF5wicwYgijcfN5cOoi9dDUemNFAjD0uNazRY4jRcnPNCJnfM3UAOCnK0h7zXD1qk1Oivi7AWSpmv9qaB9Ol/eA4uJLdoccUtYodtLX5MPWH/yCCZbaJG9FXRwfvoUaMO9Zr6DgQppD81pEzdyhit8FFAMcI1pgp8D7WqLGROZ178VzQpKjBI=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR15MB5819.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(10070799003)(23010399003)(366016)(11063799006)(4133799003)(18002099003)(56012099006)(22082099003)(38070700021)(13003099007);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?NjdmWVlUSktNZDZXMkkrRERVYWYyQURjOGM2RzU1MUY0RmFTUnoxWU1xWUhU?=
+ =?utf-8?B?b3ZjSk4wZUpLRWNyOUphUWZkR21LdWFSdGc2QTJHUGN5Y1lRemNQQnd1WXVw?=
+ =?utf-8?B?RmNpNVNyL09Lb0hhZk9BcEhuUDhUZkp1NjNtdzBybE1yZXUwY2c2UzZZeWVO?=
+ =?utf-8?B?akRMT28yTWtnNElrd1JuN3liYWlaME1wNGd6MENsUTJOL3E1QlVzc0R3Wnhr?=
+ =?utf-8?B?Z0NBSE4vTXJ2aTdVSU1rUWxtMTFmZnlJR0Y5V05waGdJalNyUkdneHJYb3E5?=
+ =?utf-8?B?Yk9PSEVDcC9lNzVVbUQxd1V6dmYrbmwzNlB1OHhEbFBzTldMb1lCaGdBTmhQ?=
+ =?utf-8?B?OHRiVDBsbGpCK3VGQkVKQnB2dGwzOFVXdUQ1UHgrNU1KWmpMbzhFdmNReGJS?=
+ =?utf-8?B?Rjh5MEFBZ0FxQW1KOFBtYWpldmtiNEMybTdMTzZUblBEai9zNndrUXlqbWdD?=
+ =?utf-8?B?TFdoNGQwTC8relhuUGJtWGZWWFR5Q0JZeEM2MnAyQmNjQkRXRnJZMUNFM3ls?=
+ =?utf-8?B?cTdoMEY1ajBJQ0FzMm1ycUUrdHdEeC82M0JBVGgrZzFwenlaNGxlUVpPUGRB?=
+ =?utf-8?B?OXhPN015U2JJWnBOVXcyNU5ZZ2kzUFhpYVl1K3N3TnpZWXBUTjk1Nk9hSlRr?=
+ =?utf-8?B?TUpDcThPMXZyUmpIRVVNazlwaW1vVkI3ZEUxeTNsZEFEdXdEQ09ZRlVRcWhV?=
+ =?utf-8?B?UkhYcE81ZXZPNEVHbXkraUJSZHlEVG1YMEtOUituLzVTUlJPSit5MFoyaDIz?=
+ =?utf-8?B?SGNINXIwWmVGajdsc0J3c1FEc2F2dC9HQ242c1RYdk1vLzdWVHVZZSthYURP?=
+ =?utf-8?B?c2pnYXVVUFJVZE8zekE4andwcmRsR0JsMlg1TUw4by90aUpCdW1hVUVYaWJu?=
+ =?utf-8?B?anNucFFSaUhUZENUZmVWSU9hTmZCcVVKWUw0dXJRNEFIend5TWQrVEZxNlNT?=
+ =?utf-8?B?QUF2ZEN6TXZjb1hVNStWYTFkc0N5dllqSnpwSC9OUlp6aG5hcDBWZVZta2xv?=
+ =?utf-8?B?Zk12TDZaUExTbVNELzYvZWgvNW5ZTXI4eHlUZDdXQlYvTVVFQ2l3bk4yamE3?=
+ =?utf-8?B?MjN2d3dLWlhMRU9sSWpPNlRsSmpadk5kWkVvUkpNZU9mci9PNStMdFUvenM0?=
+ =?utf-8?B?eTE0MktpeWF2dExqTW5aamw2aE9vSWhqTVkwS1RpY1BMYTJqNjJ1ck00NjYz?=
+ =?utf-8?B?bEpEZEJoZU8xdDZLYVEvSW9WMHpOV0xEYjNtejk2N1Z2ZjBNcjhNRVZiZ0Nw?=
+ =?utf-8?B?NXY2MjRSZDRzMlNiUkRjNXZYei90TlZhRW9FeDJIbGorKzVHcVkvZWVXSVlH?=
+ =?utf-8?B?R0JkNTJZLzlHVXRmOXp4enU0QjEyS2pzUHpNMjVWTkhwb01TWXdLUkJ0QTVR?=
+ =?utf-8?B?SEpBWERPbUtWb2d6MW9qS3VWaDBZbE82TjV4TU80VXlEL0Y3NHBKbWIxRGtw?=
+ =?utf-8?B?WWlqalIyRGp0MFBDYVJ3bDFBbDJsY1FQYTBabUxBNWlxR1gyMGp2MUwxbkpS?=
+ =?utf-8?B?VHNQV1Ewa280bGZzM3ZDeDNRRmJ0Tm1nTjR0S1NoM2VqQk84RVNiYzJYM0Fm?=
+ =?utf-8?B?dEdmVGxEUTduZWN6NEtiVy9DclUyQlNySVF1OUdwaGhGdld6OE82a3dHMkkw?=
+ =?utf-8?B?NW41QnU5ZDVkeU1vSnRGNU9HQ3NXTHJ4UnVQT0hCbVlXVTl1eUJvNnZ3OHJV?=
+ =?utf-8?B?YmE1TTBRZm5SaitNTU1FZFhnaTVDb3pPTEZxeEwzL1RuRk1nQTl0eEdoeVQw?=
+ =?utf-8?B?TTF2MmNOL3NJZjlsVzAwK21pK1RxNmh2czFMMCtORW9XTENpMUp6cHRwcG1F?=
+ =?utf-8?B?WkFaeEs0WHh1TDBnRmJEcFQ4Z2xydVVGT1FNR3BkTU8xd2ZDZ3Z4eVZzYlVx?=
+ =?utf-8?B?MTFyUXZwSE81L2pFNmFTakViN0MwOXk0L0YxOWZ6czlodXMzeTlmVTI2MmI5?=
+ =?utf-8?B?NjJUQVJPTWV5eTNacHVRUlpzUzRiY040TnhCakNxY3dPOTB4U1htaFBrVUYr?=
+ =?utf-8?B?Y25nbS8rMlEvNnh1djFDTURubzFoNVlsdk4vK0NqNGlYOUNMVTdsUXJjcjdH?=
+ =?utf-8?B?L2MzRm01d05ZRzBXOHdiM2RObDhWamtxNzFUZkJlQzJOdFB2aTd3b2RncWoy?=
+ =?utf-8?B?Qk1oYnB5TllNMklMUDlTSlk1YUNYSzRiTnd6YXE4RUo2aW4zZXV4c2JxaGwz?=
+ =?utf-8?B?clFDM09DWmVGelp1bEdUOFZudXFsN0JCZ0VOZFdrOUpBamRsTlVaYm9lbTQz?=
+ =?utf-8?B?WUkwMGl5YjhYSDh3MVdpS09XbXpTdlBwVWxLZXFLbmtjdXdvcVFYbkhzclBk?=
+ =?utf-8?B?R0lkYmlaT3h1bmdvazB6RTBhUjlyZTBOdXJTNmlodWdBdkZaL3FieDBybWpC?=
+ =?utf-8?Q?Mvtm4eqjw4RmPFqoC9ew+iuaL/9tLAioEkVE4?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <91520D9080E9A843BF076485E78429BC@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-Exchange-RoutingPolicyChecked:
+	P8owAhMieRn7e6pL1EZ9b1+Rpu+CkPxibYVzxuSUnH4YFOUmTq5r0EkqEt578RsyExuZt5of+M4aRAE8uMYQn7YPzGHdH57XxxOsv0A+hbDnxgcAeJRN/qyh1XuBqY5V3wDwuLx+ZiVPSq4+COsr4xW/5uF+w+4b6qp/DDFuwOe2MhVYfeL8GxcHvvWkuYrwFSrro0EMD+w4yNrROs9O75mBhHnYrB3LkQJbrIbAcNBuU8r8FZRrFyLoIsMt2tYVAf3d5AugNbfPVMc9P55z3b0cM/Mv330NjYKzA+kYTLUmK5aLRefLFWPXk3+SWXUDuhxSD8+cn74s7ev85acpNw==
+X-OriginatorOrg: ibm.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR15MB5819.namprd15.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3a6b02bd-32c2-4f19-fb95-08dedd34fa32
+X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Jul 2026 21:07:53.8826
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: fcf67057-50c9-4ad4-98f3-ffca64add9e9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: h4snBrwEQH6coSKrf9TDPi+WlpSjZe/A+TU5FgbyfO5xTfx1H2jfawZa5AGATUw/IH1M/dAoL6EOMr0qU/iINg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV0PR15MB7044
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Proofpoint-ORIG-GUID: ClB-Y4G1LLr_y9CoFfyW067fJEY2SwFw
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA4MDIwNCBTYWx0ZWRfX9glYlPKxMUMM
+ OHf4YmSjo9V9ABkjBa8bMV0HAePIsg1JSfYgNN7YhRbT78mjlMA0vZTCWgoLUrN2SzlvTGqewrF
+ /B3CG9hgcdLng6cVYWGo+zWZRAzvZ/A=
+X-Authority-Analysis: v=2.4 cv=DKW/JSNb c=1 sm=1 tr=0 ts=6a4ebc2c cx=c_pps
+ a=9TxNVFKjsEmGPsTOmRxrqw==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=RzCfie-kr_QcCd8fBx8p:22 a=4u6H09k7AAAA:8 a=EG7W4yiQAAAA:8
+ a=Yau1-ZPbEGb5T86JTmYA:9 a=QEXdDO2ut3YA:10 a=5yerskEF2kbSkDMynNst:22
+X-Proofpoint-GUID: cZ-UW1Sa4aVjYaVSctqEtc_0qYax0Csg
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA4MDIwNCBTYWx0ZWRfX9GEarlDVbdo7
+ Z1SLVQc932vH+AS8yanj/jNaOTu69LrxmdLR5lJ1Sr5madgjE8XFtPqXE6q/gOK8J5nW/SihjAh
+ ycTMqM4L4kGKEzTaKDV1kuDqbE/ERDUbbzYVxZDmwqf8CD0OaZ/G0lXyLtg5B2fYowo6mEu2LEq
+ NHhYsXXpCAcnc1u7aAQquOsd1BuUKyZPLtbgQwj6jPtDxojz3YmgmsL5X1fw7/NZgJOw92PAzCM
+ IszZrTRxS6xB4RqawSA877Fm3Y0AuvKvedA6vlieNQLQmU7A7jGneWLq1fnW4xf/e4/8KadrPt+
+ 6x75zFrby/2Yx4vSCLAWw3bhJqvdrCKqNvdYZ1eKzKq4tmaE4vnZ5ASs0lPzgMj+D8SzoRWadqS
+ q7MtipBibA01GopCyX5lp6Dzr0LEtAUWII3fKhT5a/O2eE2cGIR0erPdAG4EZiLqim5A3Uw1ljZ
+ ZszZ1wvKrS0d5uszJ0g==
+Subject: Re:  [PATCH] libceph: reset OSD session when keepalive2 acks stop
+ arriving
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-08_04,2026-07-08_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 bulkscore=0 clxscore=1011 phishscore=0 impostorscore=0
+ priorityscore=1501 adultscore=0 lowpriorityscore=0 suspectscore=0
+ malwarescore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2607080204
 
-ceph_mdsc_wait_request() took `ceph_mds_client.mutex` only to resolve
-a request's terminal state after the wait returned: either a reply had
-arrived and handle_reply() had set `r_reply`/`CEPH_MDS_R_GOT_RESULT`,
-or there was an error and the waiter had to abort the request by
-setting `r_err`/`CEPH_MDS_R_ABORTED` so a late reply is discarded.  It
-never touched any `ceph_mds_client` fields; it used the big mutex
-purely as the serialization point against the matching section at the
-tail of handle_reply(), and (indirectly) against __do_request() and
-handle_forward().
-
-`ceph_mds_client.mutex` is a coarse lock, also covering the request
-tree, tid counters, the session table and the mdsmap.  Making the
-waiter take it means request completion contends with request
-submission (ceph_mdsc_submit_request() holds it across
-__register_request() and __do_request()) even though the two only
-share a handful of per-request fields.
-
-This patch adds a per-request spinlock that guards a request's
-terminal state: `r_err`, `r_reply`, `CEPH_MDS_R_GOT_RESULT` and
-`CEPH_MDS_R_ABORTED`.
-
-Lock ordering is `ceph_mds_client.mutex`, `r_fill_mutex`,
-`r_completion_lock`; the spinlock is always innermost and no sleeping
-lock is taken while it is held.
-
-The two BUG_ON()s in handle_forward()'s resend branch are removed.
-They asserted that a request being resent had neither errored nor
-completed, an invariant that held only because the client mutex
-serialized the resend against the waiter's abort.  Now that the waiter
-aborts under `r_completion_lock` without the client mutex, a forward
-can race an abort; this is harmless because __do_request() re-checks
-the terminal state under `r_completion_lock` and unregisters the
-request instead of resending it.
-
-This weakens one invariant: previously, the abort path held
-`ceph_mds_client.mutex`, so it was mutually exclusive with
-__do_request() and a request could never be sent once
-`CEPH_MDS_R_ABORTED` was set.  With the abort now protected only by
-`r_completion_lock`, the bit can be set concurrently with a
-resend-path __do_request() (kick_requests(), __wake_requests(),
-handle_forward()) after that function's one-time entry check, so an
-aborted request may still be sent or queued.  This is harmless:
-`ABORTED` is re-checked at every consumer: handle_reply() discards the
-reply, ceph_fill_trace() skips the dcache work that depends on locks
-held by the (now returned) caller, and the next __do_request()
-unregisters it.  This matches the existing property that an
-interrupted request may still execute on the MDS.
-
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
----
- fs/ceph/locks.c      | 21 ++++++----
- fs/ceph/mds_client.c | 99 ++++++++++++++++++++++++++++++++++----------
- fs/ceph/mds_client.h | 10 +++++
- 3 files changed, 102 insertions(+), 28 deletions(-)
-
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index 677221bd64e0..35cadcd7cb2a 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -177,25 +177,32 @@ static int ceph_lock_wait_for_completion(struct ceph_mds_client *mdsc,
- 
- 	doutc(cl, "request %llu was interrupted\n", req->r_tid);
- 
-+	/*
-+	 * mdsc->mutex guards the r_session check below.  The terminal-state
-+	 * arbitration against a concurrent reply/forward handler is done under
-+	 * r_completion_lock (the same lock ceph_mdsc_wait_request() uses),
-+	 * since those handlers no longer serialize on mdsc->mutex.
-+	 * r_fill_mutex additionally fences ceph_fill_trace() /
-+	 * ceph_readdir_prepopulate(), which consult CEPH_MDS_R_ABORTED while
-+	 * relying on locks (dir mutex) held by our caller.
-+	 * Lock ordering: mdsc->mutex -> r_fill_mutex -> r_completion_lock.
-+	 */
- 	mutex_lock(&mdsc->mutex);
-+	mutex_lock(&req->r_fill_mutex);
-+	spin_lock(&req->r_completion_lock);
- 	if (test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
- 		err = 0;
- 	} else {
--		/*
--		 * ensure we aren't running concurrently with
--		 * ceph_fill_trace or ceph_readdir_prepopulate, which
--		 * rely on locks (dir mutex) held by our caller.
--		 */
--		mutex_lock(&req->r_fill_mutex);
- 		req->r_err = err;
- 		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
--		mutex_unlock(&req->r_fill_mutex);
- 
- 		if (!req->r_session) {
- 			// haven't sent the request
- 			err = 0;
- 		}
- 	}
-+	spin_unlock(&req->r_completion_lock);
-+	mutex_unlock(&req->r_fill_mutex);
- 	mutex_unlock(&mdsc->mutex);
- 	if (!err)
- 		return 0;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 853bf698b356..824d271e55c9 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2722,6 +2722,7 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
- 		return ERR_PTR(-ENOMEM);
- 
- 	mutex_init(&req->r_fill_mutex);
-+	spin_lock_init(&req->r_completion_lock);
- 	req->r_mdsc = mdsc;
- 	req->r_started = jiffies;
- 	req->r_start_latency = ktime_get();
-@@ -3528,7 +3529,9 @@ static int __prepare_send_request(struct ceph_mds_session *session,
- 	}
- 	msg = create_request_message(session, req, drop_cap_releases);
- 	if (IS_ERR(msg)) {
-+		spin_lock(&req->r_completion_lock);
- 		req->r_err = PTR_ERR(msg);
-+		spin_unlock(&req->r_completion_lock);
- 		return PTR_ERR(msg);
- 	}
- 	req->r_request = msg;
-@@ -3586,9 +3589,34 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 	int mds = -1;
- 	int err = 0;
- 	bool random;
-+	bool done, aborted;
- 
--	if (req->r_err || test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
--		if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
-+	/*
-+	 * The request may already have reached its terminal state,
-+	 * either because a reply/forward arrived or because
-+	 * ceph_mdsc_wait_request() aborted it.  Sample that state
-+	 * under r_completion_lock so we agree with those paths, which
-+	 * no longer all serialize on mdsc->mutex.
-+	 *
-+	 * This is only a point-in-time check.  Since the abort path
-+	 * does not own mdsc->mutex, CEPH_MDS_R_ABORTED may be set
-+	 * concurrently after this snapshot while we go on to choose a
-+	 * MDS and send the request, so a request can be sent (or
-+	 * queued) after it has been aborted.  That is harmless:
-+	 * ABORTED is re-checked at every consumer: handle_reply()
-+	 * discards the reply, ceph_fill_trace() skips the work that
-+	 * relies on locks held by the (now returned) caller, and the
-+	 * next __do_request() sees the flag and unregisters the
-+	 * request.  ABORTED is an advisory "stop waiting" flag, not a
-+	 * send barrier.
-+	 */
-+	spin_lock(&req->r_completion_lock);
-+	done = req->r_err || test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags);
-+	aborted = test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
-+	spin_unlock(&req->r_completion_lock);
-+
-+	if (done) {
-+		if (aborted)
- 			__unregister_request(mdsc, req);
- 		return;
- 	}
-@@ -3742,7 +3770,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 					  TASK_KILLABLE);
- 			if (err) {
- 				mutex_lock(&req->r_fill_mutex);
-+				spin_lock(&req->r_completion_lock);
- 				set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
-+				spin_unlock(&req->r_completion_lock);
- 				mutex_unlock(&req->r_fill_mutex);
- 				goto out_session;
- 			}
-@@ -3783,7 +3813,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
- finish:
- 	if (err) {
- 		doutc(cl, "early error %d\n", err);
-+		spin_lock(&req->r_completion_lock);
- 		req->r_err = err;
-+		spin_unlock(&req->r_completion_lock);
- 		complete_request(mdsc, req);
- 		__unregister_request(mdsc, req);
- 	}
-@@ -3910,6 +3942,8 @@ int ceph_mdsc_wait_request(struct ceph_mds_client *mdsc,
- 			   ceph_mds_request_wait_callback_t wait_func)
- {
- 	struct ceph_client *cl = mdsc->fsc->client;
-+	bool aborted = false;
-+	bool got_result;
- 	int err;
- 
- 	/* wait */
-@@ -3928,32 +3962,47 @@ int ceph_mdsc_wait_request(struct ceph_mds_client *mdsc,
- 			err = timeleft;  /* killed */
- 	}
- 	doutc(cl, "do_request waited, got %d\n", err);
--	mutex_lock(&mdsc->mutex);
--
--	/* only abort if we didn't race with a real reply */
--	if (test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
--		err = le32_to_cpu(req->r_reply_info.head->result);
--	} else if (err < 0) {
--		doutc(cl, "aborted request %lld with %d\n", req->r_tid, err);
- 
-+	if (err < 0) {
- 		/*
--		 * ensure we aren't running concurrently with
--		 * ceph_fill_trace or ceph_readdir_prepopulate, which
--		 * rely on locks (dir mutex) held by our caller.
-+		 * Timed out or killed.  A reply may be getting published
-+		 * concurrently, so serialize against handle_reply() on
-+		 * r_completion_lock before deciding to abort.  r_fill_mutex
-+		 * additionally fences ceph_fill_trace()/ceph_readdir_prepopulate(),
-+		 * which consult CEPH_MDS_R_ABORTED while relying on locks (dir
-+		 * mutex) held by our caller.
- 		 */
- 		mutex_lock(&req->r_fill_mutex);
--		req->r_err = err;
--		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
-+		spin_lock(&req->r_completion_lock);
-+		got_result = test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags);
-+		if (!got_result) {
-+			req->r_err = err;
-+			set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
-+			aborted = true;
-+		}
-+		spin_unlock(&req->r_completion_lock);
- 		mutex_unlock(&req->r_fill_mutex);
-+	} else {
-+		/*
-+		 * The wait completed, so complete_all() has run and the terminal
-+		 * state stored by handle_reply()/__do_request() before it is
-+		 * visible without locking.
-+		 */
-+		got_result = test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags);
-+	}
- 
-+	if (got_result)
-+		err = le32_to_cpu(req->r_reply_info.head->result);
-+	else if (!aborted)
-+		err = req->r_err;
-+
-+	if (aborted) {
-+		doutc(cl, "aborted request %lld with %d\n", req->r_tid, err);
- 		if (req->r_parent &&
- 		    (req->r_op & CEPH_MDS_OP_WRITE))
- 			ceph_invalidate_dir_request(req);
--	} else {
--		err = req->r_err;
- 	}
- 
--	mutex_unlock(&mdsc->mutex);
- 	return err;
- }
- 
-@@ -4186,7 +4235,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 		ceph_unreserve_caps(mdsc, &req->r_caps_reservation);
- 	}
- out_err:
--	mutex_lock(&mdsc->mutex);
-+	spin_lock(&req->r_completion_lock);
- 	if (!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
- 		if (err) {
- 			req->r_err = err;
-@@ -4197,7 +4246,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 	} else {
- 		doutc(cl, "reply arrived after request %lld was aborted\n", tid);
- 	}
--	mutex_unlock(&mdsc->mutex);
-+	spin_unlock(&req->r_completion_lock);
- 
- 	mutex_unlock(&session->s_mutex);
- 
-@@ -4259,8 +4308,10 @@ static void handle_forward(struct ceph_mds_client *mdsc,
- 		 * 8 bits.
- 		 */
- 		mutex_lock(&req->r_fill_mutex);
-+		spin_lock(&req->r_completion_lock);
- 		req->r_err = -EMULTIHOP;
- 		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
-+		spin_unlock(&req->r_completion_lock);
- 		mutex_unlock(&req->r_fill_mutex);
- 		aborted = true;
- 		pr_warn_ratelimited_client(cl, "forward tid %llu seq overflow\n",
-@@ -4268,8 +4319,14 @@ static void handle_forward(struct ceph_mds_client *mdsc,
- 	} else {
- 		/* resend. forward race not possible; mds would drop */
- 		doutc(cl, "forward tid %llu to mds%d (we resend)\n", tid, next_mds);
--		BUG_ON(req->r_err);
--		BUG_ON(test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags));
-+		/*
-+		 * The request had not reached its terminal state when sampled
-+		 * above.  It may now race an abort from
-+		 * ceph_mdsc_wait_request(), which no longer serializes on
-+		 * mdsc->mutex; __do_request() re-checks the terminal state
-+		 * under r_completion_lock and unregisters instead of resending
-+		 * if that happened, so this is safe.
-+		 */
- 		req->r_attempts = 0;
- 		req->r_num_fwd = fwd_seq;
- 		req->r_resend_mds = next_mds;
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 731d6ad04956..449b5e28b2de 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -394,6 +394,16 @@ struct ceph_mds_request {
- 	struct ceph_msg  *r_reply;
- 	struct ceph_mds_reply_info_parsed r_reply_info;
- 	int r_err;
-+
-+	/*
-+	 * Serializes the request's terminal state (r_err, r_reply,
-+	 * CEPH_MDS_R_GOT_RESULT and CEPH_MDS_R_ABORTED) between the reply and
-+	 * forward handlers, __do_request() and ceph_mdsc_wait_request().
-+	 *
-+	 * Lock ordering: mdsc->mutex -> r_fill_mutex -> r_completion_lock.
-+	 */
-+	spinlock_t r_completion_lock;
-+
- 	u32               r_readdir_offset;
- 
- 	struct page *r_locked_page;
--- 
-2.47.3
-
+T24gVHVlLCAyMDI2LTA3LTA3IGF0IDE5OjQ2IC0wNTAwLCBDaHJpcyBKIEFyZ2VzIHdyb3RlOg0K
+PiBoYW5kbGVfdGltZW91dCgpIGluIG9zZF9jbGllbnQuYyBzZW5kcyBDRVBIX01TR1IyX1RBR19L
+RUVQQUxJVkUyIGZyYW1lcw0KPiB0byBPU0RzIHdpdGggc3RhbGxlZCByZXF1ZXN0cywgYnV0IGxp
+YmNlcGggbmV2ZXIgdmVyaWZpZXMgaWYgdGhlIEFDS3MNCj4gYWN0dWFsbHkgcmV0dXJuLg0KPiAN
+Cj4gQ29uc2VxdWVudGx5LCBpZiBhbiBPU0QgbWVzc2VuZ2VyIHF1ZXVlIHdlZGdlcyB3aGlsZSB0
+aGUgdW5kZXJseWluZw0KPiBUQ1Agc29ja2V0IHJlbWFpbnMgRVNUQUJMSVNIRUQsIHRoZSBjbGll
+bnQgd2lsbCBibG9jayBpbmRlZmluaXRlbHkgaW4NCj4gY2VwaF9vc2RjX3dhaXRfcmVxdWVzdCgp
+LCBjYXVzaW5nIHRhc2tzIHRvIGhhbmcgaW4gRCBzdGF0ZS4NCj4gDQo+IEZpeCB0aGlzIGJ5IGlu
+dHJvZHVjaW5nIGEgd2F0Y2hkb2cgaW4gaGFuZGxlX3RpbWVvdXQoKSB0aGF0IGNoZWNrcw0KPiBj
+ZXBoX2Nvbl9rZWVwYWxpdmVfZXhwaXJlZCgpIGFnYWluc3QgYSBuZXcgQ0VQSF9PU0RfUElOR19U
+SU1FT1VUICg2MHMpLg0KPiBPbiBleHBpcnksIHJlc2V0IHRoZSBzcGFyc2UtcmVhZCBzdGF0ZSwg
+Y2FsbCByZW9wZW5fb3NkKCksIGFuZCBraWNrDQo+IG91dHN0YW5kaW5nIHJlcXVlc3RzIHdoZW4g
+dGhlIHNlc3Npb24gaXMgcmVvcGVuZWQuDQo+IA0KPiBCZWNhdXNlIE9TRCBrZWVwYWxpdmVzIGFy
+ZSBvbmx5IHNlbnQgdG8gT1NEcyB3aXRoIHN0YWxsZWQgcmVxdWVzdHMsDQo+IGxhc3Rfa2VlcGFs
+aXZlX2FjayBjYW4gYmUgc3RhbGUgb24gYW4gb3RoZXJ3aXNlIGhlYWx0aHkgY29ubmVjdGlvbiB0
+aGF0DQo+IGhhcyBzaW1wbHkgYmVlbiBpZGxlLiBUcmFjayB0aGUgc3RhcnQgb2YgZWFjaCBzbG93
+L3Byb2JpbmcgZXBpc29kZSBwZXINCj4gT1NEIGFuZCByZXF1aXJlIHRoZSBlcGlzb2RlIHRvIGxh
+c3QgQ0VQSF9PU0RfUElOR19USU1FT1VUIGJlZm9yZSBjaGVja2luZw0KPiBmb3IgYW4gZXhwaXJl
+ZCBrZWVwYWxpdmUgYWNrLCBzbyB0aGUgd2F0Y2hkb2cgb25seSBmaXJlcyBhZnRlciB3ZSBoYXZl
+DQo+IGJlZW4gYWN0aXZlbHkgcGluZ2luZy4NCj4gDQo+IEFkZGl0aW9uYWxseSwgc2VlZCBsYXN0
+X2tlZXBhbGl2ZV9hY2sgdG8gdGhlIGN1cnJlbnQgdGltZSBpbg0KPiBjZXBoX2Nvbl9vcGVuKCkg
+dG8gcHJldmVudCB0aGUgd2F0Y2hkb2cgZnJvbSBmaXJpbmcgc3B1cmlvdXNseSBvbiBmcmVzaA0K
+PiBjb25uZWN0aW9ucyBmb3IgYm90aCBPU0QgYW5kIG1vbml0b3IgY2xpZW50cy4NCj4gDQo+IEZp
+eGVzOiA4Yjk1NThhYWI4NTMgKCJsaWJjZXBoOiB1c2Uga2VlcGFsaXZlMiB0byB2ZXJpZnkgdGhl
+IG1vbiBzZXNzaW9uIGlzIGFsaXZlIikNCj4gTGluazogaHR0cHM6Ly91cmxkZWZlbnNlLnByb29m
+cG9pbnQuY29tL3YyL3VybD91PWh0dHBzLTNBX190cmFja2VyLmNlcGguY29tX2lzc3Vlc183NjIw
+MiZkPUR3SUNhUSZjPUJTRGljcUJRQkRqREk5UmtWeVRjSFEmcj1xNWJJbTRBWE16YzhOSnUxX1JH
+bW5RMmZNV0txNFk0UkFrRWx2VWdTczAwJm09OHVkUnFIMzdhUVhiT0ZsYVQyZUNGZjlWNU4ydW1a
+RXBSSHlqUldxUFk5bk9hYXhuQmI1LV9rdVAwazZZclQ0TyZzPTRJQUhPUU5jU3pzT3NtcEltM25J
+c2dxWEdIQ3gtYnhtZ2QxeURKM20tVlUmZT0gDQo+IENvLWRldmVsb3BlZC1ieTogQW5kcmV3IERl
+TWFyaWEgPGFkZW1hcmlhQGNsb3VkZmxhcmUuY29tPg0KPiBTaWduZWQtb2ZmLWJ5OiBBbmRyZXcg
+RGVNYXJpYSA8YWRlbWFyaWFAY2xvdWRmbGFyZS5jb20+DQo+IFNpZ25lZC1vZmYtYnk6IENocmlz
+IEogQXJnZXMgPGNhcmdlc0BjbG91ZGZsYXJlLmNvbT4NCj4gLS0tDQo+IFRoaXMgcGF0Y2ggZml4
+ZXMgYW4gaXNzdWUgd2hlcmUgdGhlIGtlcm5lbCByYmQgY2xpZW50IGFuZCBhbiBPU0QgaGF2ZSBh
+bg0KPiBFU1RBQkxJU0hFRCBUQ1AgY29ubmVjdGlvbiwgYnV0IGtlZXBhbGl2ZTIgQUNLcyBzdG9w
+IHJldHVybmluZyBmcm9tIHRoZQ0KPiBPU0QuIFdoZW4gdGhhdCBoYXBwZW5zLCBvdXRzdGFuZGlu
+ZyBPU0QgcmVxdWVzdHMgY2FuIHJlbWFpbiBoZWxkIGJ5IHRoZQ0KPiBjbGllbnQgYW5kIGNhbGxl
+cnMgY2FuIGhhbmcgaW4gRCBzdGF0ZS4gV2Ugd2VyZSBhYmxlIHRvIG1pdGdpYXRlIHRoaXMNCj4g
+aXNzdWUgYnkgdXNpbmcgc3MgLUsgdG8ga2lsbCB0aGUgYWZmZWN0ZWQgT1NEIFRDUCBjb25uZWN0
+aW9uIHdoaWNoDQo+IHJlb3BlbmVkIHRoZSBPU0Qgc2Vzc2lvbi4NCj4gDQo+IFdlIHdlcmUgYWJs
+ZSB0byByZXByb2R1Y2UgdGhpcyBpc3N1ZSBpbiBwcm9kdWN0aW9uIGEgZmV3IHRpbWVzLCBhbmQN
+Cj4gc3ludGhldGljYWxseSBieSBkcm9wcGluZyBPU0QgdG8gcmJkIGFwcGxpY2F0aW9uIGZyYW1l
+cyB3aGlsZSBhbGxvd2luZw0KPiBUQ1AgQUNLcyB0aHJvdWdoLg0KPiANCj4gaHR0cHM6Ly91cmxk
+ZWZlbnNlLnByb29mcG9pbnQuY29tL3YyL3VybD91PWh0dHBzLTNBX190cmFja2VyLmNlcGguY29t
+X2lzc3Vlc183NjIwMiZkPUR3SUNhUSZjPUJTRGljcUJRQkRqREk5UmtWeVRjSFEmcj1xNWJJbTRB
+WE16YzhOSnUxX1JHbW5RMmZNV0txNFk0UkFrRWx2VWdTczAwJm09OHVkUnFIMzdhUVhiT0ZsYVQy
+ZUNGZjlWNU4ydW1aRXBSSHlqUldxUFk5bk9hYXhuQmI1LV9rdVAwazZZclQ0TyZzPTRJQUhPUU5j
+U3pzT3NtcEltM25Jc2dxWEdIQ3gtYnhtZ2QxeURKM20tVlUmZT0gIGRlc2NyaWJlcyB0aGUgc2Ft
+ZSBzaXR1YXRpb24uDQo+IA0KPiBUaGUgZm9sbG93aW5nIHBhdGNoIGFkZHJlc3NlcyB0aGlzIGJ5
+IGNyZWF0aW5nIGEgd2F0Y2hkb2cgdGhhdCByZXNldHMgdGhlDQo+IE9TRCBzZXNzaW9uIGlmIHRo
+aXMgc2l0dWF0aW9uIGlzIGRldGVjdGVkLg0KPiAtLS0NCj4gIGluY2x1ZGUvbGludXgvY2VwaC9s
+aWJjZXBoLmggICAgfCAgMSArDQo+ICBpbmNsdWRlL2xpbnV4L2NlcGgvb3NkX2NsaWVudC5oIHwg
+IDEgKw0KPiAgbmV0L2NlcGgvbWVzc2VuZ2VyLmMgICAgICAgICAgICB8ICAzICsrKw0KPiAgbmV0
+L2NlcGgvb3NkX2NsaWVudC5jICAgICAgICAgICB8IDIzICsrKysrKysrKysrKysrKysrKysrKyst
+DQo+ICA0IGZpbGVzIGNoYW5nZWQsIDI3IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCj4g
+DQo+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L2NlcGgvbGliY2VwaC5oIGIvaW5jbHVkZS9s
+aW51eC9jZXBoL2xpYmNlcGguaA0KPiBpbmRleCA2M2UwZTJhYTFjZTkuLjFhMTE3YzVmMTk2NCAx
+MDA2NDQNCj4gLS0tIGEvaW5jbHVkZS9saW51eC9jZXBoL2xpYmNlcGguaA0KPiArKysgYi9pbmNs
+dWRlL2xpbnV4L2NlcGgvbGliY2VwaC5oDQo+IEBAIC03NCw2ICs3NCw3IEBAIHN0cnVjdCBjZXBo
+X29wdGlvbnMgew0KPiAgICovDQo+ICAjZGVmaW5lIENFUEhfTU9VTlRfVElNRU9VVF9ERUZBVUxU
+CW1zZWNzX3RvX2ppZmZpZXMoNjAgKiAxMDAwKQ0KPiAgI2RlZmluZSBDRVBIX09TRF9LRUVQQUxJ
+VkVfREVGQVVMVAltc2Vjc190b19qaWZmaWVzKDUgKiAxMDAwKQ0KPiArI2RlZmluZSBDRVBIX09T
+RF9QSU5HX1RJTUVPVVQJCW1zZWNzX3RvX2ppZmZpZXMoNjAgKiAxMDAwKQ0KDQpDb3VsZCB3ZSBy
+ZXVzZSB0aGUgdXNlci1jb25maWd1cmFibGUgb3NkX2tlZXBhbGl2ZV90aW1lb3V0IChkZWZhdWx0
+IDVzKT8gV2h5DQpleGFjdGx5IDYwcyBoYXMgYmVlbiBzZWxlY3RlZD8NCg0KVGhhbmtzLA0KU2xh
+dmEuDQoNCj4gICNkZWZpbmUgQ0VQSF9PU0RfSURMRV9UVExfREVGQVVMVAltc2Vjc190b19qaWZm
+aWVzKDYwICogMTAwMCkNCj4gICNkZWZpbmUgQ0VQSF9PU0RfUkVRVUVTVF9USU1FT1VUX0RFRkFV
+TFQgMCAgLyogbm8gdGltZW91dCAqLw0KPiAgI2RlZmluZSBDRVBIX1JFQURfRlJPTV9SRVBMSUNB
+X0RFRkFVTFQJMCAgLyogcmVhZCBmcm9tIHByaW1hcnkgKi8NCj4gZGlmZiAtLWdpdCBhL2luY2x1
+ZGUvbGludXgvY2VwaC9vc2RfY2xpZW50LmggYi9pbmNsdWRlL2xpbnV4L2NlcGgvb3NkX2NsaWVu
+dC5oDQo+IGluZGV4IDUwYjE0YTU2NjFjNy4uNTJlYjc2ZTlkNjJhIDEwMDY0NA0KPiAtLS0gYS9p
+bmNsdWRlL2xpbnV4L2NlcGgvb3NkX2NsaWVudC5oDQo+ICsrKyBiL2luY2x1ZGUvbGludXgvY2Vw
+aC9vc2RfY2xpZW50LmgNCj4gQEAgLTk0LDYgKzk0LDcgQEAgc3RydWN0IGNlcGhfb3NkIHsNCj4g
+IAlzdHJ1Y3QgY2VwaF9hdXRoX2hhbmRzaGFrZSBvX2F1dGg7DQo+ICAJdW5zaWduZWQgbG9uZyBs
+cnVfdHRsOw0KPiAgCXN0cnVjdCBsaXN0X2hlYWQgb19rZWVwYWxpdmVfaXRlbTsNCj4gKwl1bnNp
+Z25lZCBsb25nIG9fa2VlcGFsaXZlX3N0YW1wOw0KPiAgCXN0cnVjdCBtdXRleCBsb2NrOw0KPiAg
+CXN0cnVjdCBjZXBoX3NwYXJzZV9yZWFkCW9fc3BhcnNlX3JlYWQ7DQo+ICB9Ow0KPiBkaWZmIC0t
+Z2l0IGEvbmV0L2NlcGgvbWVzc2VuZ2VyLmMgYi9uZXQvY2VwaC9tZXNzZW5nZXIuYw0KPiBpbmRl
+eCAzNGIzMDk3YjRjN2IuLmY3Nzc2ZDgzZDUwNiAxMDA2NDQNCj4gLS0tIGEvbmV0L2NlcGgvbWVz
+c2VuZ2VyLmMNCj4gKysrIGIvbmV0L2NlcGgvbWVzc2VuZ2VyLmMNCj4gQEAgLTYxMCw2ICs2MTAs
+OSBAQCB2b2lkIGNlcGhfY29uX29wZW4oc3RydWN0IGNlcGhfY29ubmVjdGlvbiAqY29uLA0KPiAg
+DQo+ICAJbWVtY3B5KCZjb24tPnBlZXJfYWRkciwgYWRkciwgc2l6ZW9mKCphZGRyKSk7DQo+ICAJ
+Y29uLT5kZWxheSA9IDA7ICAgICAgLyogcmVzZXQgYmFja29mZiBtZW1vcnkgKi8NCj4gKw0KPiAr
+CWt0aW1lX2dldF9yZWFsX3RzNjQoJmNvbi0+bGFzdF9rZWVwYWxpdmVfYWNrKTsNCj4gKw0KPiAg
+CW11dGV4X3VubG9jaygmY29uLT5tdXRleCk7DQo+ICAJcXVldWVfY29uKGNvbik7DQo+ICB9DQo+
+IGRpZmYgLS1naXQgYS9uZXQvY2VwaC9vc2RfY2xpZW50LmMgYi9uZXQvY2VwaC9vc2RfY2xpZW50
+LmMNCj4gaW5kZXggMmZmMDAwNzBjMTgxLi42ZDk1MzBiZWIyZTMgMTAwNjQ0DQo+IC0tLSBhL25l
+dC9jZXBoL29zZF9jbGllbnQuYw0KPiArKysgYi9uZXQvY2VwaC9vc2RfY2xpZW50LmMNCj4gQEAg
+LTUzLDYgKzUzLDcgQEAgc3RhdGljIHZvaWQgbGlua19saW5nZXIoc3RydWN0IGNlcGhfb3NkICpv
+c2QsDQo+ICBzdGF0aWMgdm9pZCB1bmxpbmtfbGluZ2VyKHN0cnVjdCBjZXBoX29zZCAqb3NkLA0K
+PiAgCQkJICBzdHJ1Y3QgY2VwaF9vc2RfbGluZ2VyX3JlcXVlc3QgKmxyZXEpOw0KPiAgc3RhdGlj
+IHZvaWQgY2xlYXJfYmFja29mZnMoc3RydWN0IGNlcGhfb3NkICpvc2QpOw0KPiArc3RhdGljIHZv
+aWQga2lja19vc2RfcmVxdWVzdHMoc3RydWN0IGNlcGhfb3NkICpvc2QpOw0KPiAgDQo+ICAjaWYg
+MQ0KPiAgc3RhdGljIGlubGluZSBib29sIHJ3c2VtX2lzX3dybG9ja2VkKHN0cnVjdCByd19zZW1h
+cGhvcmUgKnNlbSkNCj4gQEAgLTM0ODAsOCArMzQ4MSwxMSBAQCBzdGF0aWMgdm9pZCBoYW5kbGVf
+dGltZW91dChzdHJ1Y3Qgd29ya19zdHJ1Y3QgKndvcmspDQo+ICAJCQltdXRleF91bmxvY2soJmxy
+ZXEtPmxvY2spOw0KPiAgCQl9DQo+ICANCj4gLQkJaWYgKGZvdW5kKQ0KPiArCQlpZiAoZm91bmQp
+IHsNCj4gIAkJCWxpc3RfbW92ZV90YWlsKCZvc2QtPm9fa2VlcGFsaXZlX2l0ZW0sICZzbG93X29z
+ZHMpOw0KPiArCQl9IGVsc2Ugew0KPiArCQkJb3NkLT5vX2tlZXBhbGl2ZV9zdGFtcCA9IDA7DQo+
+ICsJCX0NCj4gIAl9DQo+ICANCj4gIAlpZiAob3B0cy0+b3NkX3JlcXVlc3RfdGltZW91dCkgew0K
+PiBAQCAtMzUwNyw2ICszNTExLDIzIEBAIHN0YXRpYyB2b2lkIGhhbmRsZV90aW1lb3V0KHN0cnVj
+dCB3b3JrX3N0cnVjdCAqd29yaykNCj4gIAkJCQkJCQlzdHJ1Y3QgY2VwaF9vc2QsDQo+ICAJCQkJ
+CQkJb19rZWVwYWxpdmVfaXRlbSk7DQo+ICAJCWxpc3RfZGVsX2luaXQoJm9zZC0+b19rZWVwYWxp
+dmVfaXRlbSk7DQo+ICsNCj4gKwkJLyogUmVjb3JkIHN0YXJ0IG9mIHBpbmcgdGltZW91dCBmcm9t
+IHRoZSBmaXJzdCBzbG93IHRpY2suICovDQo+ICsJCWlmICghb3NkLT5vX2tlZXBhbGl2ZV9zdGFt
+cCkgew0KPiArCQkJb3NkLT5vX2tlZXBhbGl2ZV9zdGFtcCA9IGppZmZpZXM7DQo+ICsJCX0gZWxz
+ZSBpZiAodGltZV9hZnRlcl9lcShqaWZmaWVzLA0KPiArCQkJCSAgb3NkLT5vX2tlZXBhbGl2ZV9z
+dGFtcCArIENFUEhfT1NEX1BJTkdfVElNRU9VVCkgJiYNCj4gKwkJICAgIGNlcGhfY29uX2tlZXBh
+bGl2ZV9leHBpcmVkKCZvc2QtPm9fY29uLA0KPiArCQkJCQkgICAgICAgQ0VQSF9PU0RfUElOR19U
+SU1FT1VUKSkgew0KPiArCQkJcHJfd2Fybl9yYXRlbGltaXRlZCgib3NkJWQgbm90IHJlc3BvbmRp
+bmcgdG8ga2VlcGFsaXZlcywgcmVzZXR0aW5nIHNlc3Npb25cbiIsDQo+ICsJCQkJCSAgICBvc2Qt
+Pm9fb3NkKTsNCj4gKwkJCW9zZC0+b19zcGFyc2Vfb3BfaWR4ID0gLTE7DQo+ICsJCQljZXBoX2lu
+aXRfc3BhcnNlX3JlYWQoJm9zZC0+b19zcGFyc2VfcmVhZCk7DQo+ICsJCQlpZiAoIXJlb3Blbl9v
+c2Qob3NkKSkNCj4gKwkJCQlraWNrX29zZF9yZXF1ZXN0cyhvc2QpOw0KPiArCQkJY29udGludWU7
+DQo+ICsJCX0NCj4gKw0KPiAgCQljZXBoX2Nvbl9rZWVwYWxpdmUoJm9zZC0+b19jb24pOw0KPiAg
+CX0NCj4gIA0KPiANCj4gLS0tDQo+IGJhc2UtY29tbWl0OiAwZTM1YjliNmVjMGZmY2M1ZTIzY2Jk
+ZWMwOWY1YzYyMmFkNTMyYjUzDQo+IGNoYW5nZS1pZDogMjAyNjA3MDctZml4LXJiZC1rZWVwYWxp
+dmVzLTY2NGZlOTI2NmMzNQ0KPiANCj4gQmVzdCByZWdhcmRzLA0KPiAtLSAgDQo+IENocmlzIEog
+QXJnZXMgPGNhcmdlc0BjbG91ZGZsYXJlLmNvbT4NCj4gDQo=
