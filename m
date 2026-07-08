@@ -1,238 +1,116 @@
-Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C72A3C4175
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 08:34:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 142F543CECC
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Jul 2026 12:18:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783499702; cv=none; b=gu67pi9L5uQ/P8WxRwm0n8R0NlkOnht4rUF6Hs9x5vXhMsUj/KDOWzBzO1CzTpKwp1cljbmoT/J8Eer1+vxD3ivs0AiIuYWYyEMogIZnbcvnKF3oP1vkz/fcT49caCBYB3ZxwNZ0IsZGZtTF7xEcq+uFC/Ey5V2ODu5wArXUUXo=
+	t=1783513090; cv=none; b=SVPNedZiJrNIhRLcGZHZ/xhkKC5/MqwhaH077hdciM3xVDqQQVGg60ynSDxBz+q0YmkJB5Gn8DgTgwKIW1XMQBIma7VFH7q5ZVxlLmHwHMa6K+iS87A6MERN6tScjaYO+LW/TRGxNo7P4wWgvTaPl8Jn0t0n6J9eSMmN9Z2VPS8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783499702; c=relaxed/simple;
-	bh=dLmmIlj9N1NiA7Ot724T1FgAL7l92e+3nlMDgR8eGcI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FKR25yVKAhoXtTHyf32DSzBRCjWBLXGwYfSloXytULFDoFQc7FPuMzej3t1jycojA6ZQ5qbaW9tOhqjTb7XeLR5lwv/ZACTJ1lM0N1OilzHgKij0mEcxzEITUJ21QFxFMVY5sOlJ/Ab5XGKITowq61+FFOa9SmrXD/NvPiBkTJc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=WFwtQ9cV; arc=none smtp.client-ip=209.85.221.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
+	s=arc-20240116; t=1783513090; c=relaxed/simple;
+	bh=xY7MmDUXYT5M8fK1mIEqLU/hPG2jut359lSrc9T9JOw=;
+	h=Date:From:To:Cc:Subject:Message-ID; b=ekSyiFGgE4xkjiyxjLNk8ng1npdwPRfKwZ+aEfjQ+SZJvEYLBjZqsC7hIb6PHiSlOhbdN603yOfudTY/gu9V3vw/ppIXcKpRxEvUJQ++FvRYNfUWiS1sSRB//Yo2CEJpIXL9pKC1G2VjZP50FVA4OiWcIcx6oe13Wlb5ioQB3C0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=TYwydYwo; arc=none smtp.client-ip=192.198.163.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="WFwtQ9cV"
-Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-4728c12ba97so231719f8f.0
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Jul 2026 01:34:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1783499697; x=1784104497; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=sJVaNu/kRhXEiG33uhV6T2P8pqMXFDgQie3+CcB+PTI=;
-        b=WFwtQ9cV/91dae4WZ/R9QmFQvKSNtStR3YOhJDzjSCNzD4B3CeFZfZpE7Uj878zNpH
-         X2E2bxbUT6Mfo9/LuV93U7gsOFDJHDH6b2GWkYhIa9L8Sh/8aUxUQh3Hrer2fZmlGrp2
-         BJxkGiya1iWj5GEToZJ0Rg3CTD02mkBw+X36ZaFvMME62wF4YPHec6PFQbV6OhnAS2CG
-         kDbTfP/YczjIQPfnqso0SoXgfrkdHwF+fCD/fzaEif/UJnofqIRC97qMwvPqmSxWgxAl
-         4Lh63wrCNwoY5qAQUsS9AmLv5LEN/XqH2ZPL14CC5sOVgNJSwiVOevLn8W8QultDXIqe
-         YlJQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783499697; x=1784104497;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=sJVaNu/kRhXEiG33uhV6T2P8pqMXFDgQie3+CcB+PTI=;
-        b=nzI0I7KgZTS+E5ugHYHPZ1SwRLwElnvMBFqrE0LktdrjJ7DhVH+r3GvFjKEwGonq1H
-         YHQKbVjSxMNlVVa2l8y9MdF8JVGi+X5biAa+ibinPVUGHhli/SsAuqJF/bRQDN4dQK4+
-         2RikGB2JIZo/5W02BIMblWV1JwgaNGrVcY4EApr8CFy4lnM4Vm1MNFEWZtUZW7Ay1X5m
-         oSaq9+lev2wH9An5/9sMVyVOA+/FAOdKy2LOzM883l8ffKaiXVY9miYfHOGP1/41+sRY
-         jwyD8GLAUtjWWOiqCMbJh2AD4pqIijQWGlQHOICYxIU6ZBFFnTnOMtygTMOnB1FHwAdn
-         Zmlg==
-X-Forwarded-Encrypted: i=1; AHgh+Rr/ccHLZG4ABzsW82ba1Wgi7umxLxIBziI+2Fro6I7qNRzxo0hiKhW4cUtW5br1d1NVgCnNXU9yMETj@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx+wztCcuJZCGduOSA/Fk8okBGnGyMVqWCFKwAz1hG4ywjCdaPi
-	bo+vFR+1l/0J4A0mICMMDa/gO1Lr51NGlx7RgOkBndaTO7KDJ+NTXMOJu1WYTWfCShc=
-X-Gm-Gg: AfdE7cleBhWZrtDSRbGoYbn9ANoL8Eo/aPPckd2vRJEqUogRpSBS0cEHiTu2vFnwYLu
-	6n1zhNce5nNjP0RK4kXCffcyzlRNaCPW6TitxPAoSx8Y1zQg5oSrIhoZPErXNdWxBpEwe52oZol
-	WTgNIWC7cBpPtnAQuoq9Zm159rH6dhRO3p+NkuW9xwAPG+q5V2tvF0pRcr8wmDXwReg85m2HCJJ
-	Vb83HKKrt/ioe9tHDZQMUfdmXrvXhzPNW3w+id+k+54mWg0q1o06sBAZzjdN+pCOINbgXY5l+Zv
-	K2w7a7EWRMrt5KaXBOIArIaghfVa1/bfiyg5fuol6bv22W4t6wjjrrxF1bThg6YAAKOywuoPeaK
-	tFJmJYUO0/YuV4gddt62y/uyoTt7AhWqhhFGVCTq4Y5RMuvhWwGQVZNeGLifXEdYcqYYVhwgnWM
-	Eo+ezDNRU6CjWFTqcmrQQF2he+eoj7DbapZ/7jsmaoSfOJMr0hgNh5Ken+qYSo1STRqIN3eIq/r
-	l0GMUeTGocZqLOO
-X-Received: by 2002:a5d:59c9:0:b0:479:190:5873 with SMTP id ffacd0b85a97d-47df0787185mr1481796f8f.49.1783499697385;
-        Wed, 08 Jul 2026 01:34:57 -0700 (PDT)
-Received: from raven.intern.cm-ag (p200300dc6f45eb00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f45:eb00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47aa039ae4fsm42019951f8f.18.2026.07.08.01.34.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Jul 2026 01:34:57 -0700 (PDT)
-From: Max Kellermann <max.kellermann@ionos.com>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH] fs/ceph/super: document struct ceph_dentry_info and its flags
-Date: Wed,  8 Jul 2026 10:34:55 +0200
-Message-ID: <20260708083455.78487-1-max.kellermann@ionos.com>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="TYwydYwo"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1783513088; x=1815049088;
+  h=date:from:to:cc:subject:message-id;
+  bh=xY7MmDUXYT5M8fK1mIEqLU/hPG2jut359lSrc9T9JOw=;
+  b=TYwydYwoLxHQIpwv/BAtJzXRLlZEWoHCoZRbibySloNa/bdzIlnqYQIz
+   DeX05uJOWMpWuKnO4qwTb9KHJc6feRqmt4myuazslwD0b8Kqg38IldtqR
+   uUMeaqI9qwNWaEmxmIUCZf2NzHyhBVf5QzVvlvjzsMZtAzGMuCVRt1f0I
+   GNonY5lNVjBpUv/CoOrOWeDPXPxq3s8w27uoBdyX2Tmm1RHjK3mI3xhZ3
+   YN4qdUxDefIxHdBV7Mxk589U0JvxZTUIeO7/XAyuQ35BIWo7ZmFPWwe7l
+   WagFmroULX3F7SMDw7h4OwZyRsSyytF37hEHoAD+y42Z3369MQ2oSMmeS
+   w==;
+X-CSE-ConnectionGUID: tFdz2jI7TmipIIRROk69JQ==
+X-CSE-MsgGUID: OlusofXLTIOBfEjztvNkyQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11840"; a="71694193"
+X-IronPort-AV: E=Sophos;i="6.25,153,1779174000"; 
+   d="scan'208";a="71694193"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jul 2026 05:18:07 -0700
+X-CSE-ConnectionGUID: xaw/PQO0T7OSB+N6/RjUVA==
+X-CSE-MsgGUID: HZNjucsJQg2laeoegfbczQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.25,153,1779174000"; 
+   d="scan'208";a="278654052"
+Received: from lkp-server02.sh.intel.com (HELO ea128546eb3d) ([10.239.97.151])
+  by fmviesa001.fm.intel.com with ESMTP; 08 Jul 2026 05:18:05 -0700
+Received: from kbuild by ea128546eb3d with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1whRDt-00000000GLn-2M1U;
+	Wed, 08 Jul 2026 12:17:57 +0000
+Date: Wed, 08 Jul 2026 20:17:26 +0800
+From: kernel test robot <lkp@intel.com>
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: oe-kbuild-all@lists.linux.dev, ceph-devel@vger.kernel.org,
+ Alex Markuze <amarkuze@redhat.com>
+Subject: [ceph-client:testing 25/27] fs/ceph/super.h:60:43: error:
+ 'CEPH_MOUNT_OPT_NEARFULL_SYNC' undeclared; did you mean
+ 'CEPH_MOUNT_OPT_DEFAULT'?
+Message-ID: <202607082010.oE2EyFrA-lkp@intel.com>
+User-Agent: s-nail v14.9.25
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
----
- fs/ceph/super.h | 122 ++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 119 insertions(+), 3 deletions(-)
+tree:   https://github.com/ceph/ceph-client.git testing
+head:   fc67edb66b3c9924c4e0bb366a92b32ea13c526a
+commit: cb4ac0e6565fe667dba2760b6a012306e6f796e0 [25/27] ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
+config: sh-allmodconfig (https://download.01.org/0day-ci/archive/20260708/202607082010.oE2EyFrA-lkp@intel.com/config)
+compiler: sh4-linux-gcc (GCC) 16.1.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260708/202607082010.oE2EyFrA-lkp@intel.com/reproduce)
 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 1d6aab060780..82d81b35a2eb 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -326,29 +326,145 @@ struct ceph_inode_xattr {
- 	int should_free_val;
- };
- 
--/*
-- * Ceph dentry state
-+/**
-+ * Ceph-specific dentry data (for `dentry.d_fsdata`).  Call
-+ * ceph_dentry() to obtain the #ceph_dentry_info pointer from a
-+ * #dentry.
-  */
- struct ceph_dentry_info {
-+	/**
-+	 * A pointer back to the #dentry owning this object.
-+	 */
- 	struct dentry *dentry;
-+
-+	/**
-+	 * The #ceph_mds_session that issued the lease; holds a
-+	 * reference that must be freed with ceph_put_mds_session().
-+	 * May be NULL.
-+	 */
- 	struct ceph_mds_session *lease_session;
-+
-+	/**
-+	 * List hook; depending on the flags, it may be in
-+	 * ceph_mds_client.dentry_leases,
-+	 * ceph_mds_client.dentry_dir_leases or in
-+	 * __dentry_leases_walk().dispose (or in no list at all if
-+	 * this #list_head is empty).
-+	 */
- 	struct list_head lease_list;
-+
-+	/**
-+	 * Hook for `ceph_fs_client.async_unlink_conflict`, protected
-+	 * by `ceph_fs_client.async_unlink_conflict_lock`.
-+	 */
- 	struct hlist_node hnode;
-+
-+	/**
-+	 * Bit mask of CEPH_DENTRY_*
-+	 */
- 	unsigned long flags;
-+
-+	/**
-+	 * Snapshot of the parent directory's
-+	 * `ceph_inode_info.i_shared_gen` taken when this dentry was
-+	 * last validated against the directory lease.  When the
-+	 * directory's `i_shared_gen` moves on, all cached dentries
-+	 * below it (including this one's #offset) are stale.
-+	 */
- 	int lease_shared_gen;
-+
-+	/**
-+	 * Snapshot of the issuing `ceph_mds_session.s_cap_gen` taken
-+	 * when the (single-dentry) lease was granted.  The lease is
-+	 * only valid while this matches the session's current
-+	 * generation; a session reconnect bumps `s_cap_gen` and thus
-+	 * invalidates all of its leases.  Zero means "no valid
-+	 * lease".
-+	 */
- 	u32 lease_gen;
-+
-+	/**
-+	 * The lease sequence number as received from the MDS
-+	 * (`ceph_mds_reply_lease.seq`).  It is echoed back to the MDS
-+	 * in lease RENEW/REVOKE messages.
-+	 */
- 	u32 lease_seq;
--	unsigned long lease_renew_after, lease_renew_from;
-+
-+	/**
-+	 * Jiffies timestamp: the earliest time at which a proactive
-+	 * lease renewal should be initiated (roughly half the lease
-+	 * TTL).  Zero while a renewal is already in flight (see
-+	 * #lease_renew_from).
-+	 */
-+	unsigned long lease_renew_after;
-+
-+	/**
-+	 * Jiffies timestamp recorded when a lease renewal request was
-+	 * sent; the new TTL and #lease_renew_after are computed
-+	 * relative to it once the reply arrives.  Zero when no
-+	 * renewal is pending.
-+	 */
-+	unsigned long lease_renew_from;
-+
-+	/**
-+	 * Jiffies timestamp whose meaning depends on which lease this
-+	 * dentry holds: for a single-dentry lease it is the expiry
-+	 * time (TTL); for a directory lease it is when the dir lease
-+	 * was last touched (compared against
-+	 * `ceph_lease_walk_control.dir_lease_ttl`).
-+	 */
- 	unsigned long time;
-+
-+	/**
-+	 * This dentry's position (an encoded file position; see
-+	 * ceph_make_fpos()) within its parent directory's readdir
-+	 * stream, used to preserve readdir ordering when serving
-+	 * entries from cached dentries.  Zero if unknown/invalid.
-+	 */
- 	u64 offset;
- };
- 
-+/**
-+ * Second-chance ("referenced") bit for the dentry-lease shrinker: set
-+ * when a dentry already queued on the shrink list is touched again, so
-+ * the shrinker spares it for another round instead of disposing of it
-+ * (a clock/LRU-style approximation).
-+ */
- #define CEPH_DENTRY_REFERENCED		(1 << 0)
-+
-+/**
-+ * `ceph_dentry_info.lease_list` is on the
-+ * `ceph_mds_client.dentry_leases` list.
-+ */
- #define CEPH_DENTRY_LEASE_LIST		(1 << 1)
-+
-+/**
-+ * `ceph_dentry_info.lease_list` is on the
-+ * __dentry_leases_walk().dispose list.
-+ */
- #define CEPH_DENTRY_SHRINK_LIST		(1 << 2)
-+
-+/**
-+ * This dentry is the primary link to its inode (as opposed to a
-+ * remote/hard link).  Reflected from #CEPH_LEASE_PRIMARY_LINK in the
-+ * MDS lease mask.
-+ */
- #define CEPH_DENTRY_PRIMARY_LINK	(1 << 3)
-+
-+/**
-+ * An asynchronous unlink is in flight for this dentry.  While set,
-+ * the dentry is on the `ceph_fs_client.async_unlink_conflict` hash
-+ * (via `ceph_dentry_info.hnode`); other operations on a conflicting
-+ * name must wait for the bit to clear
-+ * (ceph_wait_on_conflict_unlink()).
-+ */
- #define CEPH_DENTRY_ASYNC_UNLINK_BIT	(4)
- #define CEPH_DENTRY_ASYNC_UNLINK	(1 << CEPH_DENTRY_ASYNC_UNLINK_BIT)
-+
-+/**
-+ * An asynchronous create is in flight for this dentry; waiters block
-+ * on the bit until the create completes.
-+ */
- #define CEPH_DENTRY_ASYNC_CREATE_BIT	(5)
- #define CEPH_DENTRY_ASYNC_CREATE	(1 << CEPH_DENTRY_ASYNC_CREATE_BIT)
- 
--- 
-2.47.3
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202607082010.oE2EyFrA-lkp@intel.com/
 
+All errors (new ones prefixed by >>):
+
+   In file included from fs/ceph/file.c:17:
+   fs/ceph/file.c: In function 'ceph_write_iter':
+>> fs/ceph/super.h:60:43: error: 'CEPH_MOUNT_OPT_NEARFULL_SYNC' undeclared (first use in this function); did you mean 'CEPH_MOUNT_OPT_DEFAULT'?
+      60 |         (!!((fsc)->mount_options->flags & CEPH_MOUNT_OPT_##opt))
+         |                                           ^~~~~~~~~~~~~~~
+   fs/ceph/file.c:2573:21: note: in expansion of macro 'ceph_test_mount_opt'
+    2573 |                 if (ceph_test_mount_opt(fsc, NEARFULL_SYNC) &&
+         |                     ^~~~~~~~~~~~~~~~~~~
+   fs/ceph/super.h:60:43: note: each undeclared identifier is reported only once for each function it appears in
+   fs/ceph/file.c:2573:21: note: in expansion of macro 'ceph_test_mount_opt'
+    2573 |                 if (ceph_test_mount_opt(fsc, NEARFULL_SYNC) &&
+         |                     ^~~~~~~~~~~~~~~~~~~
+
+
+vim +60 fs/ceph/super.h
+
+6a2593823ababd Sage Weil      2010-07-07  49  
+6f9718fe41c3a4 Luis Henriques 2018-12-10  50  #define CEPH_MOUNT_OPT_DEFAULT			\
+6f9718fe41c3a4 Luis Henriques 2018-12-10  51  	(CEPH_MOUNT_OPT_DCACHE |		\
+f7a67b463fb83a Jeff Layton    2021-08-09  52  	 CEPH_MOUNT_OPT_NOCOPYFROM |		\
+f7a67b463fb83a Jeff Layton    2021-08-09  53  	 CEPH_MOUNT_OPT_ASYNC_DIROPS)
+de57606c23afde Sage Weil      2009-10-06  54  
+3d14c5d2b6e15c Yehuda Sadeh   2010-04-06  55  #define ceph_set_mount_opt(fsc, opt) \
+2ccb45462aeaf0 Jeff Layton    2019-04-02  56  	(fsc)->mount_options->flags |= CEPH_MOUNT_OPT_##opt
+2ccb45462aeaf0 Jeff Layton    2019-04-02  57  #define ceph_clear_mount_opt(fsc, opt) \
+2ccb45462aeaf0 Jeff Layton    2019-04-02  58  	(fsc)->mount_options->flags &= ~CEPH_MOUNT_OPT_##opt
+3d14c5d2b6e15c Yehuda Sadeh   2010-04-06  59  #define ceph_test_mount_opt(fsc, opt) \
+3d14c5d2b6e15c Yehuda Sadeh   2010-04-06 @60  	(!!((fsc)->mount_options->flags & CEPH_MOUNT_OPT_##opt))
+de57606c23afde Sage Weil      2009-10-06  61  
+
+:::::: The code at line 60 was first introduced by commit
+:::::: 3d14c5d2b6e15c21d8e5467dc62d33127c23a644 ceph: factor out libceph from Ceph file system
+
+:::::: TO: Yehuda Sadeh <yehuda@hq.newdream.net>
+:::::: CC: Sage Weil <sage@newdream.net>
+
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
