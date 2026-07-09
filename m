@@ -1,71 +1,71 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
+Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A75F13D3327
-	for <ceph-devel@vger.kernel.org>; Thu,  9 Jul 2026 10:41:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 373E740B6E9
+	for <ceph-devel@vger.kernel.org>; Thu,  9 Jul 2026 10:49:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783593695; cv=none; b=mRU15xcURtvLcHphl//ARQysRZqICOtN8xVJ4AQZlJQ3DbNxNSVedjK43D2f7Kdwa8wngaxe/l2O3HDoHUq0WLt7SgcUYiYDAO0zYjA8PRXAaT9mgAvC4jxpdWyROW+T6CcVmVAU3EJbE4FgedI03G6+0uGoxd5+cCRtWd/Wa1M=
+	t=1783594145; cv=none; b=itnPXwLD5sfUJpJfeRJAjjNN5aCqz9BDT6xemovj/I1KC4udfQnbg22DmmNbrQJ2KUB4wY36lzX/0nx6UZwNFYQli8zsmQkvIIaXKmkLf/fWs7OcbRplu2vVl/YLD6IJmbUs+kmOqLmp+fsXu6TvgQGucv/5e7mccjg5+UvJGXA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783593695; c=relaxed/simple;
-	bh=KPbPCOJupLtgbfkwQuiY9y4rmSQ6+kX2kfa34PpTai8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Q+6rlBzoHCnOwcPKHglDAan+7aaWUfNRt2VS4fpkVuV2wFvao0NCawiUR/IlmK91FJpCdQjxgnZuAO+YdVl3CCxw/tdsGHux06zXA5igbnmOLGXM2E8S5RnYm3U9qqFSnMDLTGRbmdt6WSE57vaEbemEHmzlibYmXbGZpy74oaw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=IROYPzcG; arc=none smtp.client-ip=209.85.128.48
+	s=arc-20240116; t=1783594145; c=relaxed/simple;
+	bh=2bapFKTI8KuLGPzadOh6PDSko5p/br/j9Mta7iuaqCM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=CEoqeYw44nZdd0t6P4GAPjGUxYYQXrmaELWQl9fwlbZVLSb1hvWZ/ksZWJQebwQlhvMoY+bHQbcoqgSdPC8EgfyuxogxSlOYX8YiyHGJw4N3XVsNmTdeQ9aDx0Jzqe4i39elUe1zt8k9w3putv38lyWT04+5FRKNUMSE1qbTm3o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=e8z+9XdO; arc=none smtp.client-ip=209.85.128.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="IROYPzcG"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-493bb510ce4so6006775e9.1
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2026 03:41:32 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="e8z+9XdO"
+Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-493c733f15aso7603455e9.0
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2026 03:49:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1783593691; x=1784198491; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1783594141; x=1784198941; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=VcxBreFtU0+wtDz0xoOBoUPW2Ts808RC7/+0WsMP7qU=;
-        b=IROYPzcGNs0XcLt62LkXDbF8wcv2aZT9W7UKDo3fwrdyYQUcqnBusjL8NcsGRHFNPh
-         u2Pl1k/2yH+GfMPaV6c6cXidreF5rLpkmOOf7ygyLxfs3Djds7FYXJYFuwgA3qYmRpf+
-         C26os9LU3r5GgBhbuDtT/6+NK++hKwD4KlD1j5Y32566SoK1ix/hARNJwXT8DmjzErlk
-         uZ4kNreC0f+eShSm9cSoandkZrbPqczWBgwnUaz8VsIPfJ+VKp2p5jLfGxIU4404zvs9
-         qIa54QbG5vq2KUB6Spk8zLtgm4Zf4t0WNGq5UJlUJWBcy1WHk7BNxIYtbG9ckzxtN2C/
-         FFTg==
+        bh=cnCwMjjX6byF7x1aokdy0MnPmpqS+QrEx0Ph45vdvQw=;
+        b=e8z+9XdOcDUzZPRQFSNvkvrVg3SFOHDTmDwWRNNVMSWhrk8W1lcDnB7FW3tdqzV9VZ
+         pYV7F+/X4kW6CDoo7YSZ7bAN60+VZavX09V3qWBaKH7yi6+SfSdyzKPWfYT3y0eeMLSY
+         8rS90LHlL2C+Y/xxtjcoa6blnucIrmoeaQwWrkZU0Mq66MpXUoFPsZsK6VlymikjrMUf
+         mEvFZyPPTyLNoFGLPlco6qgaWA47rRFURVXcliZBH+URBj6IW9Lfd604905YzTrOEkHE
+         3tgNGKK/RtFXGdqw68XLJ7j03aYgwYo02/eFw4Xz3Lob0CGEZOipFA48eZePmslpGelB
+         MbeQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783593691; x=1784198491;
+        d=1e100.net; s=20251104; t=1783594141; x=1784198941;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=VcxBreFtU0+wtDz0xoOBoUPW2Ts808RC7/+0WsMP7qU=;
-        b=ddzHD7wOaiPyMYG/ov4SikaWZkfLJHkfqBKn9wAMpKF+7bt1Bl4z43+9vvER+WXjDB
-         pJEuU0apxpCRKXAPjlR+BDmxsIPNvJvWwRNRD21PBxYQMuVlW9nttzU8hMwMvHcomNbC
-         4QqT1yS8DrvSBMIL5+lsATLMeV+sXtCHZp5UND38jIFPPLTEj8OnA2ynVXdLHatn8XwH
-         u7of1rkiYDj0RBRBHI4M5pFyWtE1SQHT3kux1Dpwm31NDk9l4KZM+TkbPPlV/ECBRGmC
-         2EXaYcb13HMS1NmUMXREooucNFERGe8gdBjKqIEzRsn6scfjUA1kcLCbiDQJshcXeCrD
-         FYcg==
-X-Forwarded-Encrypted: i=1; AHgh+RqCJwG8OY3d3wkb95rzuQzvTTXJYBBLXdSOCGNQVVGRnm0G0bVYo1UsQ3dKKLBXvhBerLnWVSKr87Jm@vger.kernel.org
-X-Gm-Message-State: AOJu0YznRNazyCHONYC3YF/HXoimTplv8GMAhCyvqStOtUwPuuLxIQO2
-	M2VsV3FSScFe3Bzg/1XVEeVPdqVBN3/u3mI8em3yIKHjCx3A4O9x4M+cxF/2bHty/z8=
-X-Gm-Gg: AfdE7clRcqF6bCDGdoThHOCUI9ml40+IxFSkX40GzLcE4v2GNrg4pAMALgDcPD3uIHZ
-	tXhijMAmQQqzJrq/9WeF4kY97dabaJN4Njh+V9nKaLxdt9NPfwkl62YJXCBr1WzSMF47LAVGalW
-	OtjlnqgenniEp6+U9ZA4CdUKkfOHAaWbLfWy6IGsq/1pPWW/fTvVrB7q2+nTDomPJbIeTwjZhfq
-	3+DaDBph3ihmupR+XZ+Ub3fOESi7erRJf71Nebe8wGsB9CwMBVaVWx475u0P1CjqsvZM/EoOsRy
-	D+qfzl53w4aaNicGVOJy+IsykLlIGMyUhdsH7VXAq7aAzbvQe6o5hlyiNQQBSzV/qdRJ/mnHqwG
-	n1HQfI2cT3TuThgTscbC6HE6ZuEaYvVC81Z/F/KTTfVBHGVMBbIsqKPiKTRZ2TSYltTMYGzht7N
-	81ZC2ykJ2/PHCZ5LQtn3pxFx2xFuPWuEGS6r+fFtW9IaIK+YpzEt9l4XJ6tswvBwh0imTH5arpA
-	YW6wkf4lTiCZ7fH
-X-Received: by 2002:a05:600c:6095:b0:493:c453:600f with SMTP id 5b1f17b1804b1-493e68aed40mr60747805e9.6.1783593691014;
-        Thu, 09 Jul 2026 03:41:31 -0700 (PDT)
+        bh=cnCwMjjX6byF7x1aokdy0MnPmpqS+QrEx0Ph45vdvQw=;
+        b=PxFoNUBXzyjRqyKYnlLYPZV7pmhqR5F8l3g1pxMqY8ts1vyM+gtODCFPQmrF0xq25Q
+         MBTKfDPrXv1uBQaJzv1KJLafdGCc2cf6Gvi09DslfQUk51M0azhUX8BSQvaeeyMJxXiG
+         3yaJ7yMQnawcTev8hK9ust3+kJLr3B5X5P3nNInIVZ/1FGUcAZrY2aTyhtZ803mcAnZC
+         D6BUOO6NUpik+NwW+jqCJ39wY3v6RDUKfiQe5y3BZm+1oPDZZlhynmTTQF8Lp8wgAayq
+         O/ltQDEiIBIn1s1rI8821Aml485ODxp3JtUa53NsclMFR1TiU6VEqm+lNvIuIrvEdXbn
+         RwrQ==
+X-Forwarded-Encrypted: i=1; AHgh+RqHKtGtcw5ngAaOlzyMnvqrT/ycR0sQ2meupw2TBc3N1YOd90qAXe5Nesy8gxU9/QeRPoh/fYoSXMjM@vger.kernel.org
+X-Gm-Message-State: AOJu0YxQGgzorFPr404cqnyv/hEG/fKJvlu5SUtjPcAluUqpL9e+tToA
+	5ye8tGcbGAzAF2137UeVdInKpl7Oc9L+HdDnnepKBXjoXdb2Uw7Njgq2Qm3YZGgmEY4=
+X-Gm-Gg: AfdE7cl7ehQEQI43oeQ5CVMUlqxKpDYvj22V8f7weNi8BgHMaXzOiSqYL3JJ4OjkPKP
+	6DB2PMsuIfUzAe4UQhftNiZfBOzrXtqYMTGZWN5ZNWKrXkZseCm3PfRFaDoeAJq+x1j7u5CYoWk
+	4A5ZAvUgQTubA5YVgjbrOzPwucOuoCF+inVpAHnSQZVfsLhNYYp9vI4C2OQI5tc4ab8H/a5FFNz
+	KvuZBdHeD97Q5cgqYuX7Cxa6Lr9cJ1ePwNYqXIUn83iHhk6o7Bq4wFkPA10PJ58NHG2LaSYmTBk
+	kD0/E//BAJsrI1GDk5P0aDl0XE1teDoCC+aYEFglJodc++p9rnYKRAj4cYBXV1HMAcyEBXT2Nmd
+	GE9OOniYUMVjGHN0jCqj8Hcno49LkPwY8DF9yynKfaMs+A6irDZmrJo/LIwcv6q/yG1Eoo7eccT
+	NVOkM1jAgyabj5z25jdzx7oCMYKuqmqXsH2ImtuB2zu1+EiHN4uwoYGFBixhozlqDe+GDNUFxDo
+	JiK42kS9+Eoci7U
+X-Received: by 2002:a05:600c:a44:b0:493:bcba:3d5f with SMTP id 5b1f17b1804b1-493e68a566cmr66664435e9.13.1783594141505;
+        Thu, 09 Jul 2026 03:49:01 -0700 (PDT)
 Received: from raven.intern.cm-ag (p200300dc6f34b400023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f34:b400:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-493eb742a49sm50255765e9.12.2026.07.09.03.41.30
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47a9e4d8410sm51397483f8f.15.2026.07.09.03.49.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Jul 2026 03:41:30 -0700 (PDT)
+        Thu, 09 Jul 2026 03:49:01 -0700 (PDT)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: idryomov@gmail.com,
 	amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH] fs/ceph/dir: __{dir,dentry}_lease_check() returns an enum
-Date: Thu,  9 Jul 2026 12:41:21 +0200
-Message-ID: <20260709104121.884183-1-max.kellermann@ionos.com>
+Subject: [PATCH] fs/ceph/mds_client: use detach_cap_releases() in ceph_send_cap_releases()
+Date: Thu,  9 Jul 2026 12:48:56 +0200
+Message-ID: <20260709104856.900685-1-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -75,110 +75,50 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The declaration of these return valued (KEEP, DELETE, TOUCH, STOP) and
-their use in __dentry_leases_walk() suggests that these are bit flags,
-but there is only ever one bit set.  Converting these to a
-non-anonymous enum expresses the intent more clearly.
+Eliminate some redundant code.
 
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/dir.c | 33 ++++++++++++++++++---------------
- 1 file changed, 18 insertions(+), 15 deletions(-)
+ fs/ceph/mds_client.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 27ce9e55e947..6b1891289ff9 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1626,11 +1626,14 @@ static void __dentry_lease_unlist(struct ceph_dentry_info *di)
- 	spin_unlock(&mdsc->dentry_list_lock);
- }
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 853bf698b356..578c1909e18f 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1799,16 +1799,19 @@ static void __open_export_target_sessions(struct ceph_mds_client *mdsc,
+  * session caps
+  */
  
--enum {
--	KEEP	= 0,
--	DELETE	= 1,
--	TOUCH	= 2,
--	STOP	= 4,
-+/**
-+ * Result of __dir_lease_check() and __dentry_lease_check().
-+ */
-+enum lease_check_result {
-+	KEEP,
-+	DELETE,
-+	TOUCH,
-+	STOP,
- };
+-static void detach_cap_releases(struct ceph_mds_session *session,
+-				struct list_head *target)
++static int detach_cap_releases(struct ceph_mds_session *session,
++			       struct list_head *target)
+ {
+ 	struct ceph_client *cl = session->s_mdsc->fsc->client;
++	const int num_cap_releases = session->s_num_cap_releases;
  
- struct ceph_lease_walk_control {
-@@ -1640,8 +1643,8 @@ struct ceph_lease_walk_control {
- 	unsigned long dir_lease_ttl;
- };
+ 	lockdep_assert_held(&session->s_cap_lock);
  
--static int __dir_lease_check(const struct dentry *, struct ceph_lease_walk_control *);
--static int __dentry_lease_check(const struct dentry *);
-+static enum lease_check_result __dir_lease_check(const struct dentry *, struct ceph_lease_walk_control *);
-+static enum lease_check_result __dentry_lease_check(const struct dentry *);
- 
- static unsigned long
- __dentry_leases_walk(struct ceph_mds_client *mdsc,
-@@ -1652,11 +1655,12 @@ __dentry_leases_walk(struct ceph_mds_client *mdsc,
- 	struct list_head* list;
-         LIST_HEAD(dispose);
- 	unsigned long freed = 0;
--	int ret = 0;
- 
- 	list = lwc->dir_lease ? &mdsc->dentry_dir_leases : &mdsc->dentry_leases;
- 	spin_lock(&mdsc->dentry_list_lock);
- 	list_for_each_entry_safe(di, tmp, list, lease_list) {
-+		enum lease_check_result ret = KEEP;
+ 	list_splice_init(&session->s_cap_releases, target);
+ 	session->s_num_cap_releases = 0;
+ 	doutc(cl, "mds%d\n", session->s_mds);
 +
- 		if (!lwc->nr_to_scan)
- 			break;
- 		--lwc->nr_to_scan;
-@@ -1677,13 +1681,12 @@ __dentry_leases_walk(struct ceph_mds_client *mdsc,
- 			ret = __dir_lease_check(dentry, lwc);
- 		else
- 			ret = __dentry_lease_check(dentry);
--		if (ret & TOUCH) {
-+		if (ret == TOUCH) {
- 			/* move it into tail of dir lease list */
- 			__dentry_dir_lease_touch(mdsc, di);
- 			if (!last)
- 				last = dentry;
--		}
--		if (ret & DELETE) {
-+		} else if (ret == DELETE) {
- 			/* stale lease */
- 			di->flags &= ~CEPH_DENTRY_REFERENCED;
- 			if (dentry->d_lockref.count > 0) {
-@@ -1700,7 +1703,7 @@ __dentry_leases_walk(struct ceph_mds_client *mdsc,
- 		}
- next:
- 		spin_unlock(&dentry->d_lock);
--		if (ret & STOP)
-+		if (ret == STOP)
- 			break;
- 	}
- 	spin_unlock(&mdsc->dentry_list_lock);
-@@ -1733,7 +1736,7 @@ __dentry_leases_walk(struct ceph_mds_client *mdsc,
- 	return freed;
++	return num_cap_releases;
  }
  
--static int __dentry_lease_check(const struct dentry *dentry)
-+static enum lease_check_result __dentry_lease_check(const struct dentry *dentry)
- {
- 	struct ceph_dentry_info *di = ceph_dentry(dentry);
- 	int ret;
-@@ -1748,8 +1751,8 @@ static int __dentry_lease_check(const struct dentry *dentry)
- 	return DELETE;
- }
+ static void dispose_cap_releases(struct ceph_mds_client *mdsc,
+@@ -2464,9 +2467,7 @@ static void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
  
--static int __dir_lease_check(const struct dentry *dentry,
--			     struct ceph_lease_walk_control *lwc)
-+static enum lease_check_result __dir_lease_check(const struct dentry *dentry,
-+						 struct ceph_lease_walk_control *lwc)
- {
- 	struct ceph_dentry_info *di = ceph_dentry(dentry);
+ 	spin_lock(&session->s_cap_lock);
+ again:
+-	list_splice_init(&session->s_cap_releases, &tmp_list);
+-	num_cap_releases = session->s_num_cap_releases;
+-	session->s_num_cap_releases = 0;
++	num_cap_releases = detach_cap_releases(session, &tmp_list);
+ 	spin_unlock(&session->s_cap_lock);
  
+ 	while (!list_empty(&tmp_list)) {
 -- 
 2.47.3
 
