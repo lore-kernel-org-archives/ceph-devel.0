@@ -1,306 +1,263 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ot1-f49.google.com (mail-ot1-f49.google.com [209.85.210.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39BBE3B6343
-	for <ceph-devel@vger.kernel.org>; Thu,  9 Jul 2026 11:40:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E18392EEE9D
+	for <ceph-devel@vger.kernel.org>; Thu,  9 Jul 2026 22:16:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783597217; cv=none; b=PZwe2PBFNoggNx8ZHgjhdsP8u3AXU8bKr1FW3FS4IgZ9zIOQzLZtjJ+Dtv0hL3Q5zgFpbsyqTf5K3A3nBttxVD3s3Mt93AFmOklsObR3r9C0/EkKFSXP8gnHS/dvLUc+THg6+aspiVvA5mz0WNESQw2sFkaenfzKqb70HAwqTgc=
+	t=1783635406; cv=none; b=TrQ+Auuht+8MIWg6j45gUDWbJLYyYakDDLsn5zclNEpsQpvRvln4ToRrOvdZ/uLhGZn1wpbXjttggI+s4VUMHRPZ3yxcvR8RdNdJgN4dER99n+A5VnEL6Y4i21Z5G6OWaGlDc8cyxlFX+vOvB5h9K+9YGv3gmvJvlB6EQEohjmk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783597217; c=relaxed/simple;
-	bh=3dgnVPhdiNpvwEeeOSIVBGfnP7BYD/duLG9C3U70PVA=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=Vbxv6AiRPCEXMC08EZTBfflG6n5FFEthusk1J6f+MjOp+EZyPeY7NeZEu8+eIrguPfBiEjDb2GLZykA5RYIFX6He3ybe6VBY0p4TSPWN4z8O+Vcyien/ZEiiHCRtUDkbTI0zsCoRKqzu0XYW8T2LBWp0x31yFwSoniB0aVp9xFM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=k/U73edG; arc=none smtp.client-ip=192.198.163.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1783635406; c=relaxed/simple;
+	bh=0fau16+oxtmESNBbvRL+F+38Vn0xU/vpRgQPxP/zi/I=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=bl5Ky53F55jJ9m/IGPjne6t3DxP9N0ED7pZazFn4ldbXP3WRmn0+P1qqn3gkWQR3HKgo1adNUuy01EtmWOnp0AHcD6DkNuIvhlKPfnNTUEJkMGFqQ+EYTtnCVHP0LKUEK5qLqFAQos6mwEq6bYQU9+EU4uYJwoYQIIqw0CmB150=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com; spf=pass smtp.mailfrom=cloudflare.com; dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b=WNyJWuQI; arc=none smtp.client-ip=209.85.210.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloudflare.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="k/U73edG"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1783597215; x=1815133215;
-  h=date:from:to:cc:subject:message-id;
-  bh=3dgnVPhdiNpvwEeeOSIVBGfnP7BYD/duLG9C3U70PVA=;
-  b=k/U73edGgquXZdyVyvgs0sGYQlMsURHhttSsE3en/bPwRmyEZGZd2WXT
-   7GM+jCvmI1ECxUfR5yAju7FTKpuLFJYWeCLdl/jdztIxaXsFIX4YDwdkl
-   nV08gGXolH0ju1vEBimYAVgf4lgQBZmp0OX+GsXiobCmZL3LJOS35YGCr
-   IcdL6/+bKfV1/5QRQKBtIB1EZNICggD1HkAaPO7vyG44DmHm8wPppmnNY
-   sT964YYCX5zSokysnw5sQXPD6pHM5xR/kNWI2eEOUaqc9j27jSRjBuKGq
-   9W4RvZrgdIR6wzOBGbLiDLVi1wcIynsdFoKsPUGQ/iVeVRLXS6wNuGbMf
-   Q==;
-X-CSE-ConnectionGUID: b9tM/qSTSMC8OyvuG0mxjQ==
-X-CSE-MsgGUID: hoFFrEB6QZCjJoZ8Kzup/A==
-X-IronPort-AV: E=McAfee;i="6800,10657,11841"; a="86816966"
-X-IronPort-AV: E=Sophos;i="6.25,154,1779174000"; 
-   d="scan'208";a="86816966"
-Received: from orviesa003.jf.intel.com ([10.64.159.143])
-  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2026 04:40:15 -0700
-X-CSE-ConnectionGUID: nrZvI1NbTnqJZ2TZz6MO9w==
-X-CSE-MsgGUID: 1yV6akxeTs6OFkQl7NGBBQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,154,1779174000"; 
-   d="scan'208";a="258167362"
-Received: from lkp-server02.sh.intel.com (HELO ea128546eb3d) ([10.239.97.151])
-  by orviesa003.jf.intel.com with ESMTP; 09 Jul 2026 04:40:13 -0700
-Received: from kbuild by ea128546eb3d with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1whn6v-00000000HdH-3OmJ;
-	Thu, 09 Jul 2026 11:40:09 +0000
-Date: Thu, 09 Jul 2026 19:39:29 +0800
-From: kernel test robot <lkp@intel.com>
-To: Max Kellermann <max.kellermann@ionos.com>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
- ceph-devel@vger.kernel.org, Alex Markuze <amarkuze@redhat.com>
-Subject: [ceph-client:testing 25/27] fs/ceph/file.c:2573:7: error:
- use of undeclared identifier 'CEPH_MOUNT_OPT_NEARFULL_SYNC'
-Message-ID: <202607091959.qta0A0pW-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b="WNyJWuQI"
+Received: by mail-ot1-f49.google.com with SMTP id 46e09a7af769-7eb68bdf53aso146155a34.3
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jul 2026 15:16:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=cloudflare.com; s=google09082023; t=1783635404; x=1784240204; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:content-type
+         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=pVPNWissv5HEN5RE+5TpeN3CMvB/OKvbY5pu74lvCoQ=;
+        b=WNyJWuQIAcM6Zz12G9owCuIl3ZqDZ2fVQOZJWGMyMPYc7gOkfZEIhaeq6zxzJKL1wU
+         hSzauvlrD/psjR45KQLyCu+3Pl2w3e3MU735EzFkdutyU1b4prygdNE1ssm/6uT8uA/V
+         yjo/kye3SG5pPgYeYAM9TqSwLLf0+xQHgFbJKAgZH5N9fL1JkGRdI6sXEwwvXpzhT+a4
+         JRr7yEBWn7hvxvZCZtFRhKyo5oZ4C72SNOrHyeb1hx6j5ORmoCckrfKZHf7VYUfAX1sd
+         LU/y21IHMGRiIsaawjmf5rmS6yyIXwA0dKwnXwTpy/aku9gFV/Vl30wpp92ueC3g0RAX
+         RITQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1783635404; x=1784240204;
+        h=cc:to:message-id:content-transfer-encoding:content-type
+         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=pVPNWissv5HEN5RE+5TpeN3CMvB/OKvbY5pu74lvCoQ=;
+        b=nxe0RqktZG0V+nPSYiLI5o3k9KVFE26POjE+Lbrbs71WeLMbTF3f956hpu5IQ8DZaj
+         B8OU/up5vCtYratis1Hu1oFjQhAaxyxhPrwgpIaR07ppcBdbsE69l2eYlLoZ0gTs9cI1
+         sZGEI/IVcFMpK+Ed/3AzSHBwDxG39lF8CKCOzMw3CNoBLPHyqrkWaid0mOkk6eK5RSU7
+         jVkmu0EC8vtZpks+GYL/rlGELgGxU7MzrDgHYqcTrLliod2baZM4E24wCY5cgeXSiJvz
+         kD4ieF2K/DLnWVwTWOW/H+zOLlWSgJxtWhfuzHi0BJtfzaGpZN8349r/WM035y3GzJza
+         iKFw==
+X-Gm-Message-State: AOJu0Yw9qivrZoArXTVtOhnkQk15smUm3UdZTDVliqI6yLkIXsbKyylZ
+	tcjnmi1pWCX1i8rEZSYa1Ycq/d3mL4rrgyIq93olzQnM0JL2AuiiapMgXn/K5CJepQ8=
+X-Gm-Gg: AfdE7clNOUVb28ajky2wgTH+YLFuUUR50Dca+yhQPrDfoPySSZRKvoo2PVh+WgM6SRl
+	MIqblORA6n+971/3QprDMUxaKVb3x8o3u2WAb9KPnlQUi1cZMsmwB695sjno1Z9+hWq746pfnit
+	9+siNmcY/4UWtjWsd0ww7O/LoyWXN8jYGf+CCOZTNmlvndPdKJYiHzuUGdssItdE+dpQ2Fe4OUK
+	k0z5Hm+5QjOXBa06LWV13j5wFFNgPG4wIFTHQPFdaUpsNE3TOT22KLLWkG+Msmq3DoIIdFxwfc/
+	P7/cGEVoKhDLtdtMexx72p2BUn+RmOOBOOY+16WdsrzIr3gUxxCKYwCUCxmjtjZNq2Pa7q+AkoE
+	m4Uyw/jGEFN/G3yYFbCqVmdgv3u+jbpEZz3g3dpDUL7L7N4bc4yvlTonUUMwvHeX1NIaL9pLW5/
+	7rwBBQnKR/VDna
+X-Received: by 2002:a05:6830:314c:b0:7e9:b772:9aae with SMTP id 46e09a7af769-7ebcff87a83mr6559127a34.23.1783635403805;
+        Thu, 09 Jul 2026 15:16:43 -0700 (PDT)
+Received: from [127.0.1.1] ([2a09:bac6:bf21:2632::3ce:25])
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7ebcae20782sm5242763a34.4.2026.07.09.15.16.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 09 Jul 2026 15:16:43 -0700 (PDT)
+From: Chris J Arges <carges@cloudflare.com>
+Date: Thu, 09 Jul 2026 17:16:37 -0500
+Subject: [PATCH v2] libceph: reset OSD session when keepalive2 acks stop
+ arriving
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260709-fix-rbd-keepalives-v2-1-39d4846a95ce@cloudflare.com>
+X-B4-Tracking: v=1; b=H4sIAMQdUGoC/32NQQ7CIBBFr9LM2jEULUVX3sN0QWFqJ9bSgBJNw
+ 93FHsDl+/n//RUiBaYI52qFQIkj+7mA3FVgRzPfCNkVBimkEq1oceA3ht7hnWgxEyeKqNRxoJN
+ Uyh4aKMMlUGlt0mtXeOT49OGzfaT6l/7VpRpr7Elr7RrZOGUudvIvN0wm0N76B3Q55y87gqLbu
+ QAAAA==
+X-Change-ID: 20260707-fix-rbd-keepalives-664fe9266c35
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Andrew DeMaria <ademaria@cloudflare.com>, 
+ Chris J Arges <carges@cloudflare.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=openssh-sha256; t=1783635402; l=6552;
+ i=carges@cloudflare.com; h=from:subject:message-id;
+ bh=0fau16+oxtmESNBbvRL+F+38Vn0xU/vpRgQPxP/zi/I=;
+ b=U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgaxY1IIT5oTohBZJmhnVgJo2HsM7Sv
+ 9I0LdJCgpeGX6gAAAAGcGF0YXR0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAA
+ QFvhUjIqfegM5sWiAImY++hh61w1qT6Po404Wr3My8N0cd54HLQCA46QxrN162PmfijeBeKVAjq
+ NJo4SkrNMPgU=
+X-Developer-Key: i=carges@cloudflare.com; a=openssh;
+ fpr=SHA256:Cun99EBiH0EV7wvmfTBF9eDrld2NJx+aD4ScWZ45Q5M
 
-tree:   https://github.com/ceph/ceph-client.git testing
-head:   fc67edb66b3c9924c4e0bb366a92b32ea13c526a
-commit: cb4ac0e6565fe667dba2760b6a012306e6f796e0 [25/27] ceph: fix hanging __ceph_get_caps() with stale `mds_wanted`
-config: um-allmodconfig (https://download.01.org/0day-ci/archive/20260709/202607091959.qta0A0pW-lkp@intel.com/config)
-compiler: clang version 17.0.6 (https://github.com/llvm/llvm-project 6009708b4367171ccdbf4b5905cb6a803753fe18)
-rustc: rustc 1.96.0 (ac68faa20 2026-05-25)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260709/202607091959.qta0A0pW-lkp@intel.com/reproduce)
+handle_timeout() in osd_client.c sends CEPH_MSGR2_TAG_KEEPALIVE2 frames
+to OSDs with stalled requests, but libceph never verifies if the ACKs
+actually return.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202607091959.qta0A0pW-lkp@intel.com/
+Consequently, if an OSD messenger queue wedges while the underlying
+TCP socket remains ESTABLISHED, the client will block indefinitely in
+ceph_osdc_wait_request(), causing tasks to hang in D state.
 
-All errors (new ones prefixed by >>):
+Fix this by introducing a watchdog in handle_timeout() that checks
+ceph_con_keepalive_expired() against a new CEPH_OSD_PING_TIMEOUT (60s).
+On expiry, reset the sparse-read state, call reopen_osd(), and kick
+outstanding requests when the session is reopened.
 
-   In file included from fs/ceph/file.c:11:
-   In file included from include/linux/writeback.h:13:
-   In file included from include/linux/blk_types.h:10:
-   In file included from include/linux/bvec.h:10:
-   In file included from include/linux/highmem.h:12:
-   In file included from include/linux/hardirq.h:11:
-   In file included from arch/um/include/asm/hardirq.h:24:
-   In file included from include/linux/irq.h:20:
-   In file included from include/linux/io.h:12:
-   In file included from arch/um/include/asm/io.h:24:
-   include/asm-generic/io.h:1209:55: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
-    1209 |         return (port > MMIO_UPPER_LIMIT) ? NULL : PCI_IOBASE + port;
-         |                                                   ~~~~~~~~~~ ^
->> fs/ceph/file.c:2573:7: error: use of undeclared identifier 'CEPH_MOUNT_OPT_NEARFULL_SYNC'
-    2573 |                 if (ceph_test_mount_opt(fsc, NEARFULL_SYNC) &&
-         |                     ^
-   fs/ceph/super.h:60:36: note: expanded from macro 'ceph_test_mount_opt'
-      60 |         (!!((fsc)->mount_options->flags & CEPH_MOUNT_OPT_##opt))
-         |                                           ^
-   <scratch space>:131:1: note: expanded from here
-     131 | CEPH_MOUNT_OPT_NEARFULL_SYNC
-         | ^
-   1 warning and 1 error generated.
+Because OSD keepalives are only sent to OSDs with stalled requests,
+last_keepalive_ack can be stale on an otherwise healthy connection that
+has simply been idle. Track the start of each slow/probing episode per
+OSD and require the episode to last CEPH_OSD_PING_TIMEOUT before checking
+for an expired keepalive ack, so the watchdog only fires after we have
+been actively pinging.
 
+Additionally, seed last_keepalive_ack to the current time in
+ceph_con_open() to prevent the watchdog from firing spuriously on fresh
+connections for both OSD and monitor clients.
 
-vim +/CEPH_MOUNT_OPT_NEARFULL_SYNC +2573 fs/ceph/file.c
+Fixes: 8b9558aab853 ("libceph: use keepalive2 to verify the mon session is alive")
+Link: https://tracker.ceph.com/issues/76202
+Co-developed-by: Andrew DeMaria <ademaria@cloudflare.com>
+Signed-off-by: Andrew DeMaria <ademaria@cloudflare.com>
+Signed-off-by: Chris J Arges <carges@cloudflare.com>
+---
+This patch fixes an issue where the kernel rbd client and an OSD have an
+ESTABLISHED TCP connection, but keepalive2 ACKs stop returning from the
+OSD. When that happens, outstanding OSD requests can remain held by the
+client and callers can hang in D state. We were able to mitgiate this
+issue by using ss -K to kill the affected OSD TCP connection which
+reopened the OSD session.
 
-  2395	
-  2396	/*
-  2397	 * Take cap references to avoid releasing caps to MDS mid-write.
-  2398	 *
-  2399	 * If we are synchronous, and write with an old snap context, the OSD
-  2400	 * may return EOLDSNAPC.  In that case, retry the write.. _after_
-  2401	 * dropping our cap refs and allowing the pending snap to logically
-  2402	 * complete _before_ this write occurs.
-  2403	 *
-  2404	 * If requested, nearfull writes are synced to preserve the legacy
-  2405	 * client-side backpressure behavior.
-  2406	 */
-  2407	static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
-  2408	{
-  2409		struct file *file = iocb->ki_filp;
-  2410		struct ceph_file_info *fi = file->private_data;
-  2411		struct inode *inode = file_inode(file);
-  2412		struct ceph_inode_info *ci = ceph_inode(inode);
-  2413		struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
-  2414		struct ceph_client *cl = fsc->client;
-  2415		struct ceph_osd_client *osdc = &fsc->client->osdc;
-  2416		struct ceph_cap_flush *prealloc_cf;
-  2417		ssize_t count, written = 0;
-  2418		int err, want = 0, got;
-  2419		bool direct_lock = false;
-  2420		u32 map_flags;
-  2421		u64 pool_flags;
-  2422		loff_t pos;
-  2423		loff_t limit = max(i_size_read(inode), fsc->max_file_size);
-  2424	
-  2425		if (ceph_inode_is_shutdown(inode))
-  2426			return -ESTALE;
-  2427	
-  2428		if (ceph_snap(inode) != CEPH_NOSNAP)
-  2429			return -EROFS;
-  2430	
-  2431		prealloc_cf = ceph_alloc_cap_flush();
-  2432		if (!prealloc_cf)
-  2433			return -ENOMEM;
-  2434	
-  2435		if ((iocb->ki_flags & (IOCB_DIRECT | IOCB_APPEND)) == IOCB_DIRECT)
-  2436			direct_lock = true;
-  2437	
-  2438	retry_snap:
-  2439		err = direct_lock ? ceph_start_io_direct(inode) :
-  2440				    ceph_start_io_write(inode);
-  2441		if (err)
-  2442			goto out_unlocked;
-  2443	
-  2444		if (iocb->ki_flags & IOCB_APPEND) {
-  2445			err = ceph_do_getattr(inode, CEPH_STAT_CAP_SIZE, false);
-  2446			if (err < 0)
-  2447				goto out;
-  2448		}
-  2449	
-  2450		err = generic_write_checks(iocb, from);
-  2451		if (err <= 0)
-  2452			goto out;
-  2453	
-  2454		pos = iocb->ki_pos;
-  2455		if (unlikely(pos >= limit)) {
-  2456			err = -EFBIG;
-  2457			goto out;
-  2458		} else {
-  2459			iov_iter_truncate(from, limit - pos);
-  2460		}
-  2461	
-  2462		count = iov_iter_count(from);
-  2463		if (ceph_quota_is_max_bytes_exceeded(inode, pos + count)) {
-  2464			err = -EDQUOT;
-  2465			goto out;
-  2466		}
-  2467	
-  2468		down_read(&osdc->lock);
-  2469		map_flags = osdc->osdmap->flags;
-  2470		pool_flags = ceph_pg_pool_flags(osdc->osdmap, ci->i_layout.pool_id);
-  2471		up_read(&osdc->lock);
-  2472		if ((map_flags & CEPH_OSDMAP_FULL) ||
-  2473		    (pool_flags & CEPH_POOL_FLAG_FULL)) {
-  2474			err = -ENOSPC;
-  2475			goto out;
-  2476		}
-  2477	
-  2478		err = file_remove_privs(file);
-  2479		if (err)
-  2480			goto out;
-  2481	
-  2482		doutc(cl, "%p %llx.%llx %llu~%zd getting caps. i_size %llu\n",
-  2483		      inode, ceph_vinop(inode), pos, count,
-  2484		      i_size_read(inode));
-  2485		if (!(fi->flags & CEPH_F_SYNC) && !direct_lock)
-  2486			want |= CEPH_CAP_FILE_BUFFER;
-  2487		if (fi->fmode & CEPH_FILE_MODE_LAZY)
-  2488			want |= CEPH_CAP_FILE_LAZYIO;
-  2489		got = 0;
-  2490		err = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, pos + count, &got);
-  2491		if (err < 0)
-  2492			goto out;
-  2493	
-  2494		err = file_update_time(file);
-  2495		if (err)
-  2496			goto out_caps;
-  2497	
-  2498		inode_inc_iversion_raw(inode);
-  2499	
-  2500		doutc(cl, "%p %llx.%llx %llu~%zd got cap refs on %s\n",
-  2501		      inode, ceph_vinop(inode), pos, count, ceph_cap_string(got));
-  2502	
-  2503		if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
-  2504		    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
-  2505		    test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
-  2506			struct ceph_snap_context *snapc;
-  2507			struct iov_iter data;
-  2508	
-  2509			spin_lock(&ci->i_ceph_lock);
-  2510			if (__ceph_have_pending_cap_snap(ci)) {
-  2511				struct ceph_cap_snap *capsnap =
-  2512						list_last_entry(&ci->i_cap_snaps,
-  2513								struct ceph_cap_snap,
-  2514								ci_item);
-  2515				snapc = ceph_get_snap_context(capsnap->context);
-  2516			} else {
-  2517				BUG_ON(!ci->i_head_snapc);
-  2518				snapc = ceph_get_snap_context(ci->i_head_snapc);
-  2519			}
-  2520			spin_unlock(&ci->i_ceph_lock);
-  2521	
-  2522			/* we might need to revert back to that point */
-  2523			data = *from;
-  2524			if ((iocb->ki_flags & IOCB_DIRECT) && !IS_ENCRYPTED(inode))
-  2525				written = ceph_direct_read_write(iocb, &data, snapc,
-  2526								 &prealloc_cf);
-  2527			else
-  2528				written = ceph_sync_write(iocb, &data, pos, snapc);
-  2529			if (direct_lock)
-  2530				ceph_end_io_direct(inode);
-  2531			else
-  2532				ceph_end_io_write(inode);
-  2533			if (written > 0)
-  2534				iov_iter_advance(from, written);
-  2535			ceph_put_snap_context(snapc);
-  2536		} else {
-  2537			/*
-  2538			 * No need to acquire the i_truncate_mutex. Because
-  2539			 * the MDS revokes Fwb caps before sending truncate
-  2540			 * message to us. We can't get Fwb cap while there
-  2541			 * are pending vmtruncate. So write and vmtruncate
-  2542			 * can not run at the same time
-  2543			 */
-  2544			written = generic_perform_write(iocb, from);
-  2545			ceph_end_io_write(inode);
-  2546		}
-  2547	
-  2548		if (written >= 0) {
-  2549			int dirty;
-  2550	
-  2551			spin_lock(&ci->i_ceph_lock);
-  2552			dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR,
-  2553						       &prealloc_cf);
-  2554			spin_unlock(&ci->i_ceph_lock);
-  2555			if (dirty)
-  2556				__mark_inode_dirty(inode, dirty);
-  2557			if (ceph_quota_is_max_bytes_approaching(inode, iocb->ki_pos))
-  2558				ceph_check_caps(ci, CHECK_CAPS_FLUSH);
-  2559		}
-  2560	
-  2561		doutc(cl, "%p %llx.%llx %llu~%u  dropping cap refs on %s\n",
-  2562		      inode, ceph_vinop(inode), pos, (unsigned)count,
-  2563		      ceph_cap_string(got));
-  2564		ceph_put_cap_refs(ci, got);
-  2565	
-  2566		if (written == -EOLDSNAPC) {
-  2567			doutc(cl, "%p %llx.%llx %llu~%u" "got EOLDSNAPC, retrying\n",
-  2568			      inode, ceph_vinop(inode), pos, (unsigned)count);
-  2569			goto retry_snap;
-  2570		}
-  2571	
-  2572		if (written >= 0) {
-> 2573			if (ceph_test_mount_opt(fsc, NEARFULL_SYNC) &&
-  2574			    ((map_flags & CEPH_OSDMAP_NEARFULL) ||
-  2575			     (pool_flags & CEPH_POOL_FLAG_NEARFULL)))
-  2576				iocb->ki_flags |= IOCB_DSYNC;
-  2577			written = generic_write_sync(iocb, written);
-  2578		}
-  2579	
-  2580		goto out_unlocked;
-  2581	out_caps:
-  2582		ceph_put_cap_refs(ci, got);
-  2583	out:
-  2584		if (direct_lock)
-  2585			ceph_end_io_direct(inode);
-  2586		else
-  2587			ceph_end_io_write(inode);
-  2588	out_unlocked:
-  2589		ceph_free_cap_flush(prealloc_cf);
-  2590		return written ? written : err;
-  2591	}
-  2592	
+We were able to reproduce this issue in production a few times, and
+synthetically by dropping OSD to rbd application frames while allowing
+TCP ACKs through.
 
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+https://tracker.ceph.com/issues/76202 describes the same situation.
+
+The following patch addresses this by creating a watchdog that resets the
+OSD session if this situation is detected.
+---
+Changes in v2:
+- add static function to check if osd keepalive timed out
+- Link to v1: https://patch.msgid.link/20260707-fix-rbd-keepalives-v1-1-be888d525d6a@cloudflare.com
+
+To: Ilya Dryomov <idryomov@gmail.com>
+To: Alex Markuze <amarkuze@redhat.com>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+---
+ include/linux/ceph/libceph.h    |  1 +
+ include/linux/ceph/osd_client.h |  1 +
+ net/ceph/messenger.c            |  3 +++
+ net/ceph/osd_client.c           | 29 ++++++++++++++++++++++++++++-
+ 4 files changed, 33 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 63e0e2aa1ce9..1a117c5f1964 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -74,6 +74,7 @@ struct ceph_options {
+  */
+ #define CEPH_MOUNT_TIMEOUT_DEFAULT	msecs_to_jiffies(60 * 1000)
+ #define CEPH_OSD_KEEPALIVE_DEFAULT	msecs_to_jiffies(5 * 1000)
++#define CEPH_OSD_PING_TIMEOUT		msecs_to_jiffies(60 * 1000)
+ #define CEPH_OSD_IDLE_TTL_DEFAULT	msecs_to_jiffies(60 * 1000)
+ #define CEPH_OSD_REQUEST_TIMEOUT_DEFAULT 0  /* no timeout */
+ #define CEPH_READ_FROM_REPLICA_DEFAULT	0  /* read from primary */
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 50b14a5661c7..52eb76e9d62a 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -94,6 +94,7 @@ struct ceph_osd {
+ 	struct ceph_auth_handshake o_auth;
+ 	unsigned long lru_ttl;
+ 	struct list_head o_keepalive_item;
++	unsigned long o_keepalive_stamp;
+ 	struct mutex lock;
+ 	struct ceph_sparse_read	o_sparse_read;
+ };
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 34b3097b4c7b..f7776d83d506 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -610,6 +610,9 @@ void ceph_con_open(struct ceph_connection *con,
+ 
+ 	memcpy(&con->peer_addr, addr, sizeof(*addr));
+ 	con->delay = 0;      /* reset backoff memory */
++
++	ktime_get_real_ts64(&con->last_keepalive_ack);
++
+ 	mutex_unlock(&con->mutex);
+ 	queue_con(con);
+ }
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 2ff00070c181..c4e1c0534801 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -53,6 +53,7 @@ static void link_linger(struct ceph_osd *osd,
+ static void unlink_linger(struct ceph_osd *osd,
+ 			  struct ceph_osd_linger_request *lreq);
+ static void clear_backoffs(struct ceph_osd *osd);
++static void kick_osd_requests(struct ceph_osd *osd);
+ 
+ #if 1
+ static inline bool rwsem_is_wrlocked(struct rw_semaphore *sem)
+@@ -3420,6 +3421,15 @@ static int linger_notify_finish_wait(struct ceph_osd_linger_request *lreq,
+ 	return left;
+ }
+ 
++static bool osd_keepalive_timed_out(struct ceph_osd *osd)
++{
++	if (!time_after_eq(jiffies,
++			   osd->o_keepalive_stamp + CEPH_OSD_PING_TIMEOUT))
++		return false;
++
++	return ceph_con_keepalive_expired(&osd->o_con, CEPH_OSD_PING_TIMEOUT);
++}
++
+ /*
+  * Timeout callback, called every N seconds.  When 1 or more OSD
+  * requests has been active for more than N seconds, we send a keepalive
+@@ -3480,8 +3490,11 @@ static void handle_timeout(struct work_struct *work)
+ 			mutex_unlock(&lreq->lock);
+ 		}
+ 
+-		if (found)
++		if (found) {
+ 			list_move_tail(&osd->o_keepalive_item, &slow_osds);
++		} else {
++			osd->o_keepalive_stamp = 0;
++		}
+ 	}
+ 
+ 	if (opts->osd_request_timeout) {
+@@ -3507,6 +3520,20 @@ static void handle_timeout(struct work_struct *work)
+ 							struct ceph_osd,
+ 							o_keepalive_item);
+ 		list_del_init(&osd->o_keepalive_item);
++
++		/* Record start of ping timeout from the first slow tick. */
++		if (!osd->o_keepalive_stamp) {
++			osd->o_keepalive_stamp = jiffies;
++		} else if (osd_keepalive_timed_out(osd)) {
++			pr_warn_ratelimited("osd%d not responding to keepalives, resetting session\n",
++					    osd->o_osd);
++			osd->o_sparse_op_idx = -1;
++			ceph_init_sparse_read(&osd->o_sparse_read);
++			if (!reopen_osd(osd))
++				kick_osd_requests(osd);
++			continue;
++		}
++
+ 		ceph_con_keepalive(&osd->o_con);
+ 	}
+ 
+
+---
+base-commit: 0e35b9b6ec0ffcc5e23cbdec09f5c622ad532b53
+change-id: 20260707-fix-rbd-keepalives-664fe9266c35
+
+Best regards,
+--  
+Chris J Arges <carges@cloudflare.com>
+
