@@ -1,78 +1,77 @@
-Received: from mail-pg1-f171.google.com (mail-pg1-f171.google.com [209.85.215.171])
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A64A03859EF
-	for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 22:10:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 093E323C4FA
+	for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 22:18:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783980644; cv=none; b=uWQCelmLaFqGJcXveLOJ5KqWgrVtkdudY2kTmfujo6GL1mjQph70mgV9djUtsxfC6faR4oaNBUTi5GYIBqFLA69cYQfIURKMbjtSK1ibgaCcXx2AehXu0Of4T6uReFE/C3rlSotrJtpDFT2hlw9QeHx90thmDVZSjktuUdy5y88=
+	t=1783981098; cv=none; b=OfRZF/YbIKyU52NoSxFS1PJq9GmgpRAzmBpKUqu6YgJjaqBRU3TOZjIzgfMWrbBrckUVJ2QC4i1hYqxkebZp4LmZc5O4i9Iy8M+Sk/pxPdKkV9/P802nwIwOaUlWBvBJLX9fdHes8Q/agrXMV0EaBzYIUMgf4BGZGITzsq0KEHM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783980644; c=relaxed/simple;
-	bh=CwJTMYygCv/JaRgNbe10GD8Vt7eNgAwHwBZ/hvnXZmE=;
+	s=arc-20240116; t=1783981098; c=relaxed/simple;
+	bh=oeI3Kt/oLN83aiTdZRHAV7sAwB0A30e6bwrN7cjSOrw=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=BkMZnAKvVzaztg3J/tQ6snxGCN8C24/HWVGSjqV84wWett9eSOn/bKWelDKfup+ry8KajqNE5tESSr4MTdMcpDSqEe4EQiOyZSPBljuFkxo/Of1VsR++puPWEOGzZbICLhnW5vjjsuR2eNxNsTqbj+lkMczwcRyZU9u8xrSBM2g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=P5JZShzl; arc=none smtp.client-ip=209.85.215.171
+	 Content-Type:MIME-Version; b=mrcX7J+wOONS04evhkuN+mncknPwDqEasxt8uh61kuTl1JBtzrN7NM2DuIIOf1UM2FA41lU7zn33OiSYEMqpcbQn27nqB8IMoOt9rPkXfV+93Rnr9claCdKezwrzAMLPggHAQm5i55SYyF4PqcAZmLDv5CfXfbOiJ4jtb2rBFiU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=N9Qz1kWR; arc=none smtp.client-ip=209.85.128.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="P5JZShzl"
-Received: by mail-pg1-f171.google.com with SMTP id 41be03b00d2f7-c95d0a54ea5so2576911a12.0
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 15:10:42 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="N9Qz1kWR"
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-7dbcb505578so3945347b3.3
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 15:18:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1783980642; x=1784585442; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1783981095; x=1784585895; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=+EqwXaLTzrQ7/tg8kgTdNias/PrMpv3hWIhbdY8WmeI=;
-        b=P5JZShzlp7tywwlY0U/oBfszKHCgMOw5rC9Rm3a0SS8/OS/quHu52QABQPu7u3+c1g
-         wW56PCIcIy5XgE9fmrWlyMUiKN+tdPsq7ng62Ev3fh2gv7oMymJaKtYC7HjNG5RNGpXh
-         KH8XGRU9C5BOVt8Dyr67bMe4Q//VhEJRnUnoEfVyY9IDLqN/3alDR4+oJ0SKHsuO88VW
-         y4OsYkGP3V6OMcadGnrIKzs8/5ge0YsY8tNcSBA04j35lAHshvmu0SsSL+FEmxms61cK
-         lqL4zJ6ssqTtW4aD6m4bQHYsCylRhnRIOINxyl0qNbEM2glVNkBmADw8zn+2dFjITAek
-         mU/Q==
+        bh=pqaK3Z8YRCEFnaHsTzpcKOTWIVBfZiTGCGeSlpmO3nI=;
+        b=N9Qz1kWRJqMNHM69hE1pd3tGzkqAbu14cXaicuNIODF1ULMmDiN0ahmavyW2hTBkUi
+         zAoCqsZ+KA986UVLIve5sSJQiwVR7jOvXA6YqV73yKt/TkOE383tRfzmHhgzssWPBguE
+         z4TcN5aZWZVs5NTlSTFWtW93oBbm4gzJR5WiTQDH9ZzVkd6H0wjq4/Dvg0Vzblzrq6b8
+         IcpznlbGh3Whniygtd11KMBsx4ywabMBhd5Hl65HDv+j52wxTaCxQzfm5b3JHIbnMF/g
+         YB1l78aP83sNLwHw8BOetC6BbNOA17KZexgHahn5uZsgx1WodSbKHlZPx6OUGHMXSLit
+         IzoQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783980642; x=1784585442;
+        d=1e100.net; s=20251104; t=1783981095; x=1784585895;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=+EqwXaLTzrQ7/tg8kgTdNias/PrMpv3hWIhbdY8WmeI=;
-        b=jWm2y6BF5fFwyoVg0Tuimoch/neE6KdEaHQx+TmKvASOzPNluR4qxEuEOApbrp0KIv
-         9T35rFU4SqEMvwnbZ8Rq3+wXVaOiIofBs3FUnr+DH1o5t6w+1264Oli+LaB3nNcSqhJc
-         pVjsb9Ji4lAQybqhfskS8Beft0nhhhNLNO3N/cHu2Wgv8RL+ZTpMQ3D+BH0k5o3c6+ce
-         EZjO6Z40DOhZIw2vqkwH06QWzB+4NAbDIWDg3t37Gai4S0MEExmwPCQ7CG9EQTijus5D
-         7fl3FSk4CmQ1ZbLPusuu8oj/Hx6Ya3o27DB1MWxoxbl+PPALlVovM6o3hAM5NheTE4dB
-         gzZQ==
-X-Forwarded-Encrypted: i=1; AHgh+RpGB6NaDd20AikMpyYy2Fuma8tIt5WsiakdAJwe4BNRNZSS2nvxAxAkvO0nKYdh7VHfZE+AKErC1SY8@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw6MBGanststpbmv306Xo0IhbLdaSB5WZKAtGaY9UeMYuPZX34c
-	9lTvNJ1Z+YQO07jjBc7kWCNyjaX08EQk575XquzcHV5xTCXePzU35xDpHcxRS9Zm+Gb6j9GdT1m
-	jbfq8uto2Mw==
-X-Gm-Gg: AfdE7clfRgt8DZXx4SCJIdWTSh9vVPdCRuJHrHwEdYG4cdVhYpQxMhN1eXWkqMS7s1+
-	ju4sOSRBLCBVJhzmKDEduUS4lndyvEIjMa2aqoGu4AB87TdL5xXYNH9Gf/AD3425erQM8ocMZ69
-	muMby++ixteYh4xabBth48fVM9fh9uA+gEUZSckxlx9yzUAySEfX47r34eUkrFTRB9xnPRDooSn
-	XkhkIKvaP3wWU+KfEdX2PnMrtgZG1bfOacWaCNpK5hb33PxsyrS9qjvXPxJ3db77pok7/njHhVg
-	mwdBb6Ld6LJWexCIYBB9Q2ZsNksh30PQRWA0BsrYGyCF4CjyWEKht2cuTevDXBeNK/8+ge9Qbt5
-	VxIuaI5WGcJ7Jc8vgUKvn2Hes4RirxDhLS19XZuraPBGJjod/Qe67/Ztc+RJ3zQkb1o8MwtrV5K
-	2PezSDuGmMPACJJkubU5gxYQClFIqLMaG/u0ux0qaA9FcJu8ndDodFR6WIzdfQca1MGbQFmQoMU
-	XE2Yr9p/37RTtGeh1QOznPLQHWDihFP/P5UD0wdT+8Jxe0AYu4r0Oa+39vm0AMuHIf++JDoFV9x
-	nb7HaA==
-X-Received: by 2002:a05:6a20:c6cb:b0:3c1:a0c:ab85 with SMTP id adf61e73a8af0-3c34d8dfee4mr1014343637.76.1783980642064;
-        Mon, 13 Jul 2026 15:10:42 -0700 (PDT)
+        bh=pqaK3Z8YRCEFnaHsTzpcKOTWIVBfZiTGCGeSlpmO3nI=;
+        b=ScmzSKS03oj7zK4bGvSP6wrGxTltOcBxOb6MX7KJZoqxIumaIahMtoqg5vZjOPltVx
+         DSmigHuaJAPVXNXWFWptCk9rctOFNE8Y3KW67UFkN+w9hNiHEWdhiwF2v1vCTCk8cSE/
+         QdHMW/9Wxnt9E9U3CzoQH0pPfKuK0YLnJ02i9t+eu/+WlN9RZw2xahsdAfYBQFPio1Y+
+         SyOHXm7UhKijr7yt5ghOXXImmN2+iAeGy/eYB0tXjbg+pISw8guTpN2ZkhGPjQ2kYvdU
+         1R1h7VoH071eHrc5R+EsiHnbQZZTBW1YXhseEqwIKHklitJj6MyENuFYMTajPVxNl+zS
+         wkrQ==
+X-Gm-Message-State: AOJu0YwNvCD9UWam5RRh2dZpFtnMv1pSrVkLPu7Dt35nf7atnplGpn0Z
+	fdCIl/ibZOzeS1Wogk4tujAePQj3CeHjpdk0gf1bPZrD+UCC0PI48VK7a7fWOy1pSWM=
+X-Gm-Gg: AfdE7clnpiWz/Zl4teiyhlSDXoL+A+hy2autu6A9msNbdzsXVXpn57TWwy36vI/UdRF
+	hcA57mTe21VS+00TLpBJNMKA1ntys6DT12bMAymexur71qBjW2B60E4poHfuHPOg8HaLr8GfR6U
+	BE6c32PAUdCJHWwg3b6GmQxNs9aUDcCr14iOd4x+RHl8+z27uUulklT+X7+FTne7beqnGwTRHhT
+	TjpDfBSI/1sxnzHvU6y09M53VoJiwm3Cx3HYC2Qf8qAqI4CGu/LAq7Z925DGk4I1emZZ3NyXpx8
+	MjlSUDUmM0mH68ctGwECsJR7rNeL3r8DFryHUhrdfAx5IHzucaKbQ7CUhVL0IX6LGwGKuTHySSw
+	S3Q+ZKdud0Ou3KpOR4sfs6h1+5QuxNwFGH7gdisjdcrRQT/cGlUg6I2j6HTg3rhTSJh1jUxAdLt
+	Tsfog6QvHEPGjr8N/oG8ohhNaPKq/LdesKpklO9duRYmuAFtdpaMHqAZr2Pv43GggzV1Cx2Qt+P
+	NlzBmOFXZ7/kHUiomKbAt/y1JIFuxqeBM0+kqx/R0TxsREJZnShj1fSh6Y+bSE+kFAbb3f/JeMb
+	uCLsUGmKwu/UG+HZ
+X-Received: by 2002:a05:690c:6982:b0:80c:85b6:7651 with SMTP id 00721157ae682-81e902e2eaamr71357287b3.70.1783981095063;
+        Mon, 13 Jul 2026 15:18:15 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:e472:ff2d:20b0:742d? ([2600:1700:6476:1430:e472:ff2d:20b0:742d])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3117d847e17sm73171868eec.18.2026.07.13.15.10.40
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e6c23939fsm126683337b3.46.2026.07.13.15.18.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jul 2026 15:10:41 -0700 (PDT)
-Message-ID: <bd15b4d5ccdcf01a8730380c4d974afaab2c782a.camel@dubeyko.com>
-Subject: Re: [PATCH] ceph: Move a variable assignment behind a condition
- check in __ceph_remove_cap()
+        Mon, 13 Jul 2026 15:18:14 -0700 (PDT)
+Message-ID: <39b2049e2143e72d8b22e3db39a53a4ac1fd88c0.camel@dubeyko.com>
+Subject: Re: [PATCH] ceph: bound copied dentry name length in NFS export
+ get_name
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Markus Elfring <Markus.Elfring@web.de>, ceph-devel@vger.kernel.org, Alex
- Markuze <amarkuze@redhat.com>, Helge Deller <deller@gmx.de>, Ilya Dryomov
- <idryomov@gmail.com>,  Kees Cook <kees@kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
-Date: Mon, 13 Jul 2026 15:10:40 -0700
-In-Reply-To: <5010d7d4-e321-4999-aca6-1caa040f3037@web.de>
-References: <5010d7d4-e321-4999-aca6-1caa040f3037@web.de>
+To: Michael Bommarito <michael.bommarito@gmail.com>, Ilya Dryomov
+	 <idryomov@gmail.com>, Xiubo Li <xiubli@redhat.com>, Alex Markuze
+	 <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Date: Mon, 13 Jul 2026 15:18:13 -0700
+In-Reply-To: <20260711150706.2915970-1-michael.bommarito@gmail.com>
+References: <20260711150706.2915970-1-michael.bommarito@gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,54 +126,107 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Mon, 2026-07-13 at 13:35 +0200, Markus Elfring wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Mon, 13 Jul 2026 13:21:29 +0200
+On Sat, 2026-07-11 at 11:07 -0400, Michael Bommarito wrote:
+> ceph_get_name() copies the MDS-supplied name into the caller's
+> NAME_MAX-sized buffer with memcpy(name, rinfo->dname, rinfo-
+> >dname_len)
+> and then writes name[rinfo->dname_len] =3D 0, without checking
+> dname_len
+> against NAME_MAX. A malicious or buggy MDS that returns a LOOKUPNAME
+> reply
+> with dname_len > NAME_MAX overflows the buffer. __get_snap_name()
+> copies
+> rde->name / rde->name_len the same unchecked way.
 >=20
-> The address of a data structure member was determined before
-> a corresponding null pointer check in the implementation of
-> the function =E2=80=9C__ceph_remove_cap=E2=80=9D.
+> Impact: a malicious or compromised Ceph MDS overflows the NAME_MAX
+> name
+> buffer in a client's NFS-export get_name path, a slab out-of-bounds
+> write
+> reported by KASAN. Reachable when a CephFS mount is re-exported over
+> NFS.
 >=20
-> Thus avoid the risk for undefined behaviour by moving the assignment
-> for the variable =E2=80=9Cinode=E2=80=9D behind a condition check.
+> Add ceph_export_copy_name(), which rejects lengths above NAME_MAX
+> with
+> -ENAMETOOLONG before the copy, and use it in both ceph_get_name() and
+> __get_snap_name().
 >=20
-> This issue was detected by using the Coccinelle software.
->=20
-> Fixes: 38d46409c4639a1d659ebfa70e27a8bed6b8ee1d ("ceph: print cluster
-> fsid and client global_id in all debug logs")
+> Fixes: 19913b4eac4a ("ceph: add get_name() NFS export callback")
 > Cc: stable@vger.kernel.org
-> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+> Assisted-by: Claude:claude-opus-4-8
+> Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
 > ---
-> =C2=A0fs/ceph/caps.c | 4 ++--
-> =C2=A01 file changed, 2 insertions(+), 2 deletions(-)
+> =C2=A0fs/ceph/export.c | 26 +++++++++++++++++---------
+> =C2=A01 file changed, 17 insertions(+), 9 deletions(-)
 >=20
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 4b37d9ffdf7f..5b6640707949 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1124,7 +1124,7 @@ void __ceph_remove_cap(struct ceph_cap *cap,
-> bool queue_release)
-> =C2=A0	struct ceph_mds_session *session =3D cap->session;
-> =C2=A0	struct ceph_client *cl =3D session->s_mdsc->fsc->client;
-> =C2=A0	struct ceph_inode_info *ci =3D cap->ci;
-> -	struct inode *inode =3D &ci->netfs.inode;
-> +	struct inode *inode;
-> =C2=A0	struct ceph_mds_client *mdsc;
-> =C2=A0	int removed =3D 0;
+> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> index b2f2af1046791..debb9634b9e3d 100644
+> --- a/fs/ceph/export.c
+> +++ b/fs/ceph/export.c
+> @@ -442,6 +442,16 @@ static struct dentry *ceph_fh_to_parent(struct
+> super_block *sb,
+> =C2=A0	return dentry;
+> =C2=A0}
 > =C2=A0
-> @@ -1135,7 +1135,7 @@ void __ceph_remove_cap(struct ceph_cap *cap,
-> bool queue_release)
+> +static int ceph_export_copy_name(char *name, const char *src, u32
+> len)
+> +{
+> +	if (len > NAME_MAX)
+> +		return -ENAMETOOLONG;
+> +
+> +	memcpy(name, src, len);
+> +	name[len] =3D '\0';
+> +	return 0;
+> +}
+> +
+> =C2=A0static int __get_snap_name(struct dentry *parent, char *name,
+> =C2=A0			=C2=A0=C2=A0 struct dentry *child)
+> =C2=A0{
+> @@ -513,9 +523,8 @@ static int __get_snap_name(struct dentry *parent,
+> char *name,
+> =C2=A0			BUG_ON(!rde->inode.in);
+> =C2=A0			if (ceph_snap(inode) =3D=3D
+> =C2=A0			=C2=A0=C2=A0=C2=A0 le64_to_cpu(rde->inode.in->snapid)) {
+> -				memcpy(name, rde->name, rde-
+> >name_len);
+> -				name[rde->name_len] =3D '\0';
+> -				err =3D 0;
+> +				err =3D ceph_export_copy_name(name,
+> rde->name,
+> +							=C2=A0=C2=A0=C2=A0 rde-
+> >name_len);
+> =C2=A0				goto out;
+> =C2=A0			}
+> =C2=A0		}
+> @@ -580,8 +589,8 @@ static int ceph_get_name(struct dentry *parent,
+> char *name,
+> =C2=A0
+> =C2=A0	rinfo =3D &req->r_reply_info;
+> =C2=A0	if (!IS_ENCRYPTED(dir)) {
+> -		memcpy(name, rinfo->dname, rinfo->dname_len);
+> -		name[rinfo->dname_len] =3D 0;
+> +		err =3D ceph_export_copy_name(name, rinfo->dname,
+> +					=C2=A0=C2=A0=C2=A0 rinfo->dname_len);
+> =C2=A0	} else {
+> =C2=A0		struct fscrypt_str oname =3D FSTR_INIT(NULL, 0);
+> =C2=A0		struct ceph_fname fname =3D { .dir	=3D dir,
+> @@ -595,10 +604,9 @@ static int ceph_get_name(struct dentry *parent,
+> char *name,
+> =C2=A0			goto out;
+> =C2=A0
+> =C2=A0		err =3D ceph_fname_to_usr(&fname, NULL, &oname, NULL);
+> -		if (!err) {
+> -			memcpy(name, oname.name, oname.len);
+> -			name[oname.len] =3D 0;
+> -		}
+> +		if (!err)
+> +			err =3D ceph_export_copy_name(name,
+> oname.name,
+> +						=C2=A0=C2=A0=C2=A0 oname.len);
+> =C2=A0		ceph_fname_free_buffer(dir, &oname);
 > =C2=A0	}
-> =C2=A0
-> =C2=A0	lockdep_assert_held(&ci->i_ceph_lock);
-> -
-> +	inode =3D &ci->netfs.inode;
-> =C2=A0	doutc(cl, "%p from %p %llx.%llx\n", cap, inode,
-> ceph_vinop(inode));
-> =C2=A0
-> =C2=A0	mdsc =3D ceph_inode_to_fs_client(&ci->netfs.inode)->mdsc;
+> =C2=A0out:
 
-Makes sense.
+Looks good from my point of view.
 
 Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
 
