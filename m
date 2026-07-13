@@ -1,84 +1,77 @@
-Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
+Received: from mail-yx1-f52.google.com (mail-yx1-f52.google.com [74.125.224.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28F51376481
-	for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 22:22:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C64AE38CFEE
+	for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 22:27:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783981359; cv=none; b=hDh0ib1BF78Veb5ex5dl8umhu6u+Sju+6FGwOJHGdbERGR9xkU5hbxVXuA+CXS0uSE3eKrEd88KQQ1M7UV0qZAvG+Xmk6YzvJBFM0yc4OwF2oHIuWDz1jktxgPSNnoAEgKe3rWO0RuAY99MJRaGS60fwn8rPjmpNBYjMxpXWCk4=
+	t=1783981680; cv=none; b=gDlR3cUR49/FZ3rsY7sm+TtigvU4sFX46W13WewUz97hAapbKfeJmkbmUM9RZXjInzMKe3I2h25UrC/0+Gj+TgAonQLsSgZaT9qZD2YQ6iLuTrSwuprK4WCnfeuQ/fSt6vX0F6zVOm9Py4IlVkC8WindAkZqB270WDereN/iZWc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783981359; c=relaxed/simple;
-	bh=0nkRg+yGBX2KyDmifQ52n3jZZ0WvpalWWXKsAaN8hKg=;
+	s=arc-20240116; t=1783981680; c=relaxed/simple;
+	bh=B2PMpUvblp5hyxjnA/hFM71N7/kvSkCyfKwQezd7D7k=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=Vgs3XnUUgm38ThxrCWG6OtESRjyjiqf7FIOEVvplqQ29YfoqyvZwkO+n16lwHCJKrmHi16FxZtyqKeRBjgZxf56i6YluPlQ0mbtIvJjx9d3hkHOra2h+MO6rBeALOhxq+2+cTX/Pd9hhML3czvz0Oef4bcW62PElVWMxMvnulVc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=DFbJ/jXs; arc=none smtp.client-ip=209.85.128.171
+	 Content-Type:MIME-Version; b=kN4vvVEwbV7J64ej2ryxLOCSNk3dWbBERx24PtGNFseVItPDpsyTdt5Vvtf1aRK0MtvZdd3fKLD8K3i/hrPq2LSu2/Gj0BTlC0eaREoe8CmMDEZnVuIs8ZRaZammXdIpGt0Zu8m2elUOEefehlpJJugPUDqOKjanSMTlwtg0uTc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=PW/KNB5w; arc=none smtp.client-ip=74.125.224.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="DFbJ/jXs"
-Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-7dbcb505578so3971327b3.3
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 15:22:37 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="PW/KNB5w"
+Received: by mail-yx1-f52.google.com with SMTP id 956f58d0204a3-664d530fcfdso6442738d50.2
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 15:27:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1783981357; x=1784586157; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1783981678; x=1784586478; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=0nkRg+yGBX2KyDmifQ52n3jZZ0WvpalWWXKsAaN8hKg=;
-        b=DFbJ/jXsUi+MwE8IPjqJvqOG7ntTdJ94XZkENB0C2OktKjeFUcBpSkIutvwlIDfb8a
-         NdbWrdK8or3F18DeCNXO9OFFgKf6z1WO0SwvTVJmTZYTimhPxP0+2SrCqCzFOiW+ZOJK
-         NtJoBab3J58EigSBhswjCTG4bFBTfY3faw7R6be8eWhvS006WMuzaR9kFZnhVdpY39Fj
-         xqrhiJQ1hFuKA7VNUDoK/4zXdx3k5muBozTWA189acsCmBXQsyrdlwnPGPNxkJnOYwiT
-         K8nR7k8B5/fIl7+Byll2ea4PLMKdLli2ghChlcatuS1lsSRrQf5m+WWFQxy+GbfUZ/Ri
-         HKbA==
+        bh=K+d9JIH+nqFpF2LO/9v6L6+WLXY2mSweMKR5vNXN1VU=;
+        b=PW/KNB5w8NegITRt9T+zxUQ8u703i/DfAluoZ22EwzzqxolTOsT+7+kJBzx2KAfGPd
+         tx390vdcDqwoEZv6I+1Rsc7zcI8fApCUNhHK+8d1HJyWcbwO7GpuP6rFLFyHDjnYSNV9
+         e75RUiLp+ahyMMhOZhTDfW4m+EaJTgOEe2b5Q5SMxYVPjlfMTzBuEPK7V1+xogqPfajw
+         m+TTxXYiZDTm5kv96StZCcPlJ0Jw0T5lLoFsfs/IwCZWcn2S1tyod/QTNpQGRt4drfY6
+         nqgZ7U2f6xlb93XRZquyvEayAyHdjwI4UmiWVEfN/Af7qLJOkmKILKuRl93CcdONBwX/
+         VNfw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783981357; x=1784586157;
+        d=1e100.net; s=20251104; t=1783981678; x=1784586478;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=0nkRg+yGBX2KyDmifQ52n3jZZ0WvpalWWXKsAaN8hKg=;
-        b=BqfIE4y4rqKgi0uaeM3Npacel+eS0XZmsDdPP1xqL/cInAF8ZCNN3t3xwBPJ3X0obw
-         v3IFEE6UhBsypikgP1G/AXCdvzIi2A0AxrOZWEU/5dqI5pYqlQRoP27JMfmzoAnKs0lZ
-         kBJFYeosaW0CE6IpYZq0qZWpFeAmjBiYWWchuZgEI9R+Wb5et/7sJ9CUTW/KZJGk5gaS
-         EJPCCrkHJO7SNCsAD52JlNNPR1dfknzcRfSaEjnGacBjrOOa9TU9hiGhj5MMsEUrAvoi
-         kbxemuPyHk5U1pFZxV39FrVTre5vFTOsKY7RxribLWLZxGKbtT+9SU+nltI+ALZD0dcU
-         IKUg==
-X-Forwarded-Encrypted: i=1; AHgh+Rq4Ei/zqFnSAX9EgWqNMXGJUgcxhMnAlw+ekxrvuE2E8ND65b46V5ukkIQYeqrMBp/iU6s0TqCShDLR@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzqjvtujfs1qWjYJARI3MB8A5ng0/9KN3ugND+w5jWBc0x8jcMn
-	Sr/MuRPbQ2CFqc1gZ8CiccAPXXaaCxynzqgc5VfIXoMOFrF4Ky13AthF0wpSwYm7dxI=
-X-Gm-Gg: AfdE7clqH0Or7Cs3JmeRt2YJEOqeTpzNkMLIWDEPiitY/YHIa+kq6uKQOXeEqQSqZxB
-	QoOfxzGxgkU2/72X9m+hvk/HDsDbO60gew7McMHu7zy7tNEjU5VznQD4/WVKZOgLB6wlnpt3nZ9
-	QADErUuyEAqlxvT4F+9K1S+Ve0WcqEIt8CInPf27ORmtpUrArAjOQOijxj/VXoMAU4J4L3zLrhs
-	AIlkkd6GCvFmE6+H2Vp4b7nKJvVqTqZygZwNN8kDTDiWbH7KX+T6blPENZOguY46KZZBQslLpW6
-	6V5REqk7CArT4l5SjOt+jJAWNES0nrbeWOapKzP7UUhtdUCkMZknB1fSRhOzin9/QW84E0zJntX
-	ckjj2lBDYNFPjo1oWpn3qsbWpl0tGEkqcGmx3JYaETQ8B+f+IlhaCpZr2r0b2xTAXa3CABEeFJu
-	3KigzBAjCpxEAUSjtxpFocTu2Y/UVaasnh3Uso2BjuXMxYGqq1NBEihg+cheR+52ijCIr4DcbD+
-	Z9LHZpx7UDgJp5mFVWpjqP+SdYBG7MoyBX8fytP0DlHrQ==
-X-Received: by 2002:a05:690c:6e88:b0:81e:3eba:b10 with SMTP id 00721157ae682-81e90139b71mr83411667b3.43.1783981357059;
-        Mon, 13 Jul 2026 15:22:37 -0700 (PDT)
-Received: from pop-os.attlocal.net ([2600:1700:6476:1430:e472:ff2d:20b0:742d])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e6c22441csm127429897b3.43.2026.07.13.15.22.35
+        bh=K+d9JIH+nqFpF2LO/9v6L6+WLXY2mSweMKR5vNXN1VU=;
+        b=mMqB3JKTFvvP8xhNUPugUZ+NEaEifIawlYi4Lq26Z9FlHV3Ff6zQpuNqMz+s4gaGpG
+         xSpTddaRtXyr77/WGAqKeWHIDcOHC2Qix+2zzquzmc35MG625MspvWwOZaM3j2XXauLV
+         IwDaXRm+V6ZCreWBdrENJQZx5JB53lP8MA45myFPu9llhvXg1pmnD0GdAekV7DpAl4Vc
+         E9m7N0RVIzkl78cIXUN42GGpi4z3gIO+tJn2tvqXCQh3/D5lvj+QL0oCdkMZ1EL6qdw3
+         yhKVxxbaT+roXudUHGbVkAm1Qu+zLtpdocEa5/CUOUBCOP05KfpdOkOPoxVgZmbYmWRt
+         cdpg==
+X-Forwarded-Encrypted: i=1; AHgh+RqWragbeMptvk5TcYagCcLTa3QtvonJu/8GgwMC5JEMA7IBD5/UBAc+8LuqNbci9JgQSCSPUgjACH0f@vger.kernel.org
+X-Gm-Message-State: AOJu0YxZYjg2lzYUi94OHXpDS16nkEC2+6BLZQRYA6aWMJMNzqgFaYxM
+	yXhhpcW9Pm/tDFQ5kqdGcs8jolcOTLoNsKhQlawfRrdjoFeTosMdhRPK14AXyHk/zMo=
+X-Gm-Gg: AfdE7cnwvdCofFR5hITZzxgYrsX8CC1QhoD/ic4VlxucgRt9SFTZI04quuGvKh8srdr
+	8L6KEsxJ8xTGjp16FlOlPrNIP31rPwciO8LYrIRpgZO49lJczejnOKhcFUujYWBb8Yi4mUmw8RT
+	L27h2oxG2kRo2f4krWHlJMOKB0lRAiTDOa8TOa8MIHwESIqWLewrr1R29onHwHH291xXxuVi2h7
+	zASUhtvSeyVCFeRNTjmrVmqjkKMj4Q10iW2k8gI4OfNeTVcfuSjo3lyt6L0vpkVTFCIIpAs+HFN
+	v4cy9nf0UNdPIFQh2KtpKHKaiMixuHLElPP+H6cSlRiPDRH4a676PlY64Oh8DZOXEmikvh8bo06
+	Ca89o1Dm4Hwt/kRO+ZyXOtgSH76xLjVmJ6L5t+XiEWQIpQwicjkzWA5w0AGX7knApeajJBRAEZZ
+	BUkP3/BHcDKn3BUdoHOw9mmo+74ri3aRxUOhgFoVoAClfWxXOnHneKfdKmBxIjZogfj6NemzxLz
+	r5ZkO4T5xzgIqpwdOWC9EY3YSoD74a2GIXPc28h9d8R3EzoOSd209VyyGaHS8+H0k6kBgAZkVDK
+	9JBCig==
+X-Received: by 2002:a53:ecd7:0:b0:667:6276:63b4 with SMTP id 956f58d0204a3-667d7c426damr5293391d50.60.1783981677773;
+        Mon, 13 Jul 2026 15:27:57 -0700 (PDT)
+Received: from ?IPv6:2600:1700:6476:1430:e472:ff2d:20b0:742d? ([2600:1700:6476:1430:e472:ff2d:20b0:742d])
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-66787a5a9b4sm14860155d50.17.2026.07.13.15.27.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jul 2026 15:22:36 -0700 (PDT)
-Message-ID: <ee478394c5d2ec19dd0b5ce39adb9476c826cf39.camel@dubeyko.com>
-Subject: Re: [PATCH 1/1] libceph: use RCU to protect monmap in
- ceph_compare_options()
+        Mon, 13 Jul 2026 15:27:57 -0700 (PDT)
+Message-ID: <1115c1f9c91381f2b6ceba9b62e28aa336776dbf.camel@dubeyko.com>
+Subject: Re: [PATCH] libceph: validate OSD extent maps before cursor advance
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Yong Wang <edragain@163.com>, Viacheslav Dubeyko
- <Slava.Dubeyko@ibm.com>,  "ceph-devel@vger.kernel.org"	
- <ceph-devel@vger.kernel.org>, "enjou1224z@gmail.com" <enjou1224z@gmail.com>
-Cc: "sage@newdream.net" <sage@newdream.net>, "idryomov@gmail.com"	
- <idryomov@gmail.com>, "dstsmallbird@foxmail.com"
- <dstsmallbird@foxmail.com>,  Alex Markuze <amarkuze@redhat.com>,
- "yuantan098@gmail.com" <yuantan098@gmail.com>
-Date: Mon, 13 Jul 2026 15:22:34 -0700
-In-Reply-To: <7a71431b-4c39-47cb-baac-0cbad03e13c9@163.com>
-References: <cover.1783423648.git.edragain@163.com>
-	 <f9b8b94904378d14111606a3cfee801c60492681.1783423648.git.edragain@163.com>
-	 <f5c76ebace1493337d01385088c5ad066abc1689.camel@ibm.com>
-	 <235ac7b2-cb4d-474b-87f0-53a5962de59e@163.com>
-	 <522d0bf88c127d2c8ca4f4e5055e77e2918d4bd2.camel@ibm.com>
-	 <7a71431b-4c39-47cb-baac-0cbad03e13c9@163.com>
+To: Michael Bommarito <michael.bommarito@gmail.com>, Ilya Dryomov
+	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>
+Cc: Milind Changire <mchangir@redhat.com>, Xiubo Li <xiubli@redhat.com>, 
+ Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+ linux-kernel@vger.kernel.org, 	stable@vger.kernel.org
+Date: Mon, 13 Jul 2026 15:27:55 -0700
+In-Reply-To: <20260710022818.3737468-1-michael.bommarito@gmail.com>
+References: <20260710022818.3737468-1-michael.bommarito@gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -133,119 +126,112 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Sun, 2026-07-12 at 14:28 +0800, Yong Wang wrote:
+On Thu, 2026-07-09 at 22:28 -0400, Michael Bommarito wrote:
+> net/ceph/osd_client.c:osd_sparse_read() validates that the sparse-
+> read
+> data length matches the summed extent lengths, but it does not
+> validate
+> that each OSD-supplied extent is monotonic and lies inside the
+> original
+> request range. A malformed authenticated OSD reply can advertise a
+> far-forward nonzero extent offset with a matching data length and
+> make
+> the client advance the message-data cursor beyond the request buffer.
+> This reaches the BUG_ON(!*length) assertion in ceph_msg_data_next()
+> from
+> the client receive path.
 >=20
+> Impact: A malicious or compromised authenticated Ceph OSD peer can
+> crash
+> a kernel Ceph client via a malformed sparse-read reply.
 >=20
-> =E5=9C=A8 2026/7/11 0:33, Viacheslav Dubeyko =E5=86=99=E9=81=93:
-> > On Fri, 2026-07-10 at 10:16 +0800, Yong Wang wrote:
-> > >=20
-> > > =E5=9C=A8 2026/7/9 6:43, Viacheslav Dubeyko =E5=86=99=E9=81=93:
-> > > > On Wed, 2026-07-08 at 11:03 +0800, Ren Wei wrote:
-> > > > > From: Yong Wang <edragain@163.com>
-> > > > >=20
-> > > > > ceph_compare_options() checks whether a new mount shares any
-> > > > > monitor
-> > > > > address with an existing client by walking client-
-> > > > > >monc.monmap via
-> > > > > ceph_monmap_contains().=C2=A0 That comparison can run under
-> > > > > sb_lock or
-> > > > > rbd_client_list_lock, so it cannot take monc->mutex.
-> > > > >=20
-> > > > > Meanwhile, monmap update handling replaces monc->monmap under
-> > > > > monc->mutex and frees the old map immediately.=C2=A0 A concurrent
-> > > > > shared-
-> > > > > mount comparison can therefore dereference a freed monmap and
-> > > > > walk
-> > > > > stale mon_inst[] entries, triggering a use-after-free.
-> > > > >=20
-> > > > > Protect the compare path with RCU and publish/free monitor
-> > > > > maps with
-> > > > > rcu_assign_pointer() and kfree_rcu().=C2=A0 Annotate monc->monmap
-> > > > > as an
-> > > > > RCU pointer and use rcu_dereference_protected() in mutex-
-> > > > > protected
-> > > > > paths to keep the accesses consistent with the new pointer
-> > > > > contract.
-> > > > >=20
-> > > > > This keeps the existing non-blocking comparison semantics
-> > > > > while
-> > > > > ensuring that replaced monmaps remain alive until readers are
-> > > > > done.
-> > > >=20
-> > > > The approach makes sense to me. However, I have some concern.
-> > > > If the replaced
-> > > > monmap(s) could be in use with newly allocated one(s), then are
-> > > > we safe here?
-> > >=20
-> > > The new monmap is fully allocated and initialized before
-> > > publication, then
-> > > installed with rcu_assign_pointer() under monc->mutex. Readers
-> > > only dereference
-> > > an RCU snapshot and treat the monmap as immutable, while the
-> > > replaced monmap is
-> > > freed with kfree_rcu(), which means the old map is not reclaimed
-> > > immediately,=20
-> > > but is delayed until all readers that are still accessing it have
-> > > exited the=20
-> > > read-side critical section.Readers only see either the old map or
-> > > the new map.
-> > >=20
-> > > So it is safe to use.
-> > >=20
-> > > > Have you tried to run xfstests for the patch?
-> > >=20
-> > > I ran the ceph xfstests in QEMU on the patched kernel, and all
-> > > ceph-
-> > > specific tests in the current tree passed: ceph/001-006.
-> > >=20
-> > >=20
-> >=20
-> > The running only Ceph specific test-cases is not enough. The patch
-> > should
-> > survive the auto group of xfstests.
-> >=20
-> I reran the tests on a baseline kernel before the RCU patch.
+> Reject sparse extent maps that overflow, move backwards, overlap, or
+> extend outside the original sparse-read request before advancing the
+> cursor.
 >=20
-> Excluding the notrun cases, the following tests failed both before
-> and after the patch:
+> Fixes: f628d7999727 ("libceph: add sparse read support to OSD
+> client")
+> Cc: stable@vger.kernel.org
+> Assisted-by: Codex:gpt-5-5-xhigh
+> Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
+> ---
 >=20
-> - generic/363: fsx reported READ BAD DATA
-> - generic/429: encrypted dentry/key revalidation behavior did not
-> match expectations
-> - generic/440: encrypted name/key cache consistency behavior did not
-> match expectations
-> - generic/580: encrypted files became inaccessible after key
-> removal/re-addition
-> - generic/593: filesystem-level/provisioning-key encryption flow
-> failed
-> - generic/595: encrypted file remained inaccessible after key
-> eviction/re-addition
-> - generic/631: overlayfs-on-Ceph scratch mount path failed
->=20
-> generic/650 and generic/777 could not be completed reliably in my
-> local environment because=20
-> they caused the terminal to become unresponsive, so I do not have a
-> meaningful=20
-> before/after comparison for them.
->=20
-> So from this comparison, I do not have evidence that the above
-> failures were introduced=20
-> by the RCU patch.
->=20
-> Kernel(net) commit tested before the patch:
-> =C2=A0 6d27e29a90bc6a717b97c6ddcd866db7bd8e4adc
->=20
-> xfstests commit:
-> =C2=A0 ffc8bad17e5b2f56e48dbac43f7c5ae8ac368fe5
->=20
->=20
+> I reproduced this with a same-translation-unit KUnit test on
+> f5459048c38a, x86_64 with panic_on_oops=3D1. Without the patch, the
+> malformed extent triggers kernel BUG at net/ceph/messenger.c:1117
+> after
+> the benign in-range control passes. With the patch, the malformed map
+> returns -EREMOTEIO and both KUnit cases pass; net/ceph/osd_client.o
 
-It's interesting that you can reproduce more failures that I can
-reproduce in my environment. :) Usually, I can see around 3 failed
-xfstests. I've already shared fixes for several ones. But my fixes
-haven't been accepted. We still need to fix some xfstests failures. :)
+Do you have KUnit test? Why do not send the patch with adding KUnit
+test(s)?
 
-The patch makes sense to me and it looks good.
+> builds cleanly with W=3D1.
+> =C2=A0net/ceph/osd_client.c | 30 ++++++++++++++++++++++++++++++
+> =C2=A01 file changed, 30 insertions(+)
+>=20
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 2ff00070c1810..76ba3abdad9b1 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -6,6 +6,7 @@
+> =C2=A0#include <linux/err.h>
+> =C2=A0#include <linux/highmem.h>
+> =C2=A0#include <linux/mm.h>
+> +#include <linux/overflow.h>
+> =C2=A0#include <linux/pagemap.h>
+> =C2=A0#include <linux/slab.h>
+> =C2=A0#include <linux/uaccess.h>
+> @@ -5799,6 +5800,31 @@ static inline void convert_extent_map(struct
+> ceph_sparse_read *sr)
+> =C2=A0}
+> =C2=A0#endif
+> =C2=A0
+> +static bool sparse_extent_map_valid(struct ceph_sparse_read *sr)
+> +{
+> +	u64 req_end, pos;
+> +	int i;
+> +
+> +	if (check_add_overflow(sr->sr_req_off, sr->sr_req_len,
+> &req_end))
+> +		return false;
+> +
+> +	pos =3D sr->sr_req_off;
+> +	for (i =3D 0; i < sr->sr_count; i++) {
+> +		struct ceph_sparse_extent *ext =3D &sr->sr_extent[i];
+> +		u64 end;
+> +
+> +		if (ext->off < pos)
+> +			return false;
+> +		if (check_add_overflow(ext->off, ext->len, &end))
+> +			return false;
+> +		if (end > req_end)
+> +			return false;
+> +		pos =3D end;
+> +	}
+> +
+> +	return true;
+> +}
+> +
+> =C2=A0static int osd_sparse_read(struct ceph_connection *con,
+> =C2=A0			=C2=A0=C2=A0 struct ceph_msg_data_cursor *cursor,
+> =C2=A0			=C2=A0=C2=A0 char **pbuf)
+> @@ -5856,6 +5882,10 @@ static int osd_sparse_read(struct
+> ceph_connection *con,
+> =C2=A0	case CEPH_SPARSE_READ_DATA_PRE:
+> =C2=A0		/* Convert sr_datalen to host-endian */
+> =C2=A0		sr->sr_datalen =3D le32_to_cpu((__force __le32)sr-
+> >sr_datalen);
+> +		if (!sparse_extent_map_valid(sr)) {
+> +			pr_warn_ratelimited("invalid sparse extent
+> map\n");
+> +			return -EREMOTEIO;
+> +		}
+> =C2=A0		for (i =3D 0; i < count; i++)
+> =C2=A0			len +=3D sr->sr_extent[i].len;
+> =C2=A0		if (sr->sr_datalen !=3D len) {
+
+Makes sense to me.
 
 Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
 
