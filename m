@@ -1,128 +1,182 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3267930C62D
-	for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 02:39:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49821376BE0;
+	Mon, 13 Jul 2026 09:47:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783910390; cv=none; b=sawDuTLtU1okoIsU3yIhBYRMhdkoK/F+Vci87E5mieWruVES3UHQqoZzCQg3ZtfhU+a29r7FHtNYpRBQh3SpW9e5miE++TAJvveF2FeF03B41fClsaEgn8EznvL4LyoPjMO14nkf6gszV7UN75M4Zmf+6c0BBgsfU8/e65PmtAc=
+	t=1783936021; cv=none; b=ikP7GTaxqqYPYSakbUYfFRvYdjAzSLIQ1OjVaRlHvl6rF30jaUzWjw9nUU4fUKK6ZRvdkGfkCMorasZNpd5Mtk5klf3o+tUZcj5t9Dbot19NSINWSztpRNAf8aIZXHPJDhXBPAtB7AAW7vFWdToIdEhibFnOj3VdrQg7IEqHBCM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783910390; c=relaxed/simple;
-	bh=4fPcKPIkeUHtdpiFSsZvZ74s5LFmLbW2+JZAnJdgJho=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JEnNT47MUyjMKH2qThUVSPAtQLkxgF5NHdSMPNgqmdfBZPRqKi+FsjDjWBdEXOx1mv7ErouPhy+n9NPGzwvr91dtR/3VuAA2wSq+Zzrcz5Bzm6e2pQSocKg7KSXXJ+R9fxPet/pReLbFT3oIg8vZ+OErMMHnwGYSQj3mMg1L+pU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IkqbrDrH; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1783936021; c=relaxed/simple;
+	bh=e9iMPlkuziCv8yWN07h/xt2GTIksRXCyEIzNgVSqYw4=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=hozeXYspgxjgGjJpedMRmamkaGNk0+NILOhrwn17e98GbDnNHFWbBQZeF7NNJ6cSn7DLnbwrxgRC2yWQf/aZRIh962MOjw/CeyfNpCQsWZ8JbVM9yxIn+j75eRpVjvR1ByHvt18zRE52RJnqYT2Z61hhQLkee+HbJbhw0lGLq1c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=J8o1sWTC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IkqbrDrH"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41CC01F00ACA
-	for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 02:39:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1783910387;
-	bh=G4X/G9+3fNMwSNtcRhFS5Z9eItDJqgBVCll3I6QiQ0Y=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=IkqbrDrHVuIvkyxO7HB9yC3IrHSKMdRR7twj21xc5C2U+zKVqCQ2M/VCqu5/WKj9H
-	 E5LhfE4LrVyT8Q29XDxxZfnKBNb8DkpczKE1rHTqFia+MJ6xF8bu5sSaq/Xhavurrc
-	 jWD0W62Lg7sKKV+vsHqOrC5jr8Ht9T+AsGoX163GiqwVHPHV6TxvSxlbYDQrHOanA/
-	 wJTPySGKgPAs6d3bQhgcrJDUbhgY0tb9rEqK+rRNIbPyGuCP0OpoRmE7fw/5LQN1lz
-	 N1oSRb3Kjve6rISx0pLWIPauZVqBglSkF78IkLb8QJqsqnm2/eFt+Vh1P2wduMZEQq
-	 /vqQEeyBkmkpw==
-Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-39b51882d71so20871671fa.2
-        for <ceph-devel@vger.kernel.org>; Sun, 12 Jul 2026 19:39:47 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AHgh+RpoVjqIbE0XcxsklBq4DJzHtcRPp63NEsQ5QKIX/snkVVEu3jXoqjjLlvv0PYulofpAfvcuDQ5h0AOe@vger.kernel.org
-X-Gm-Message-State: AOJu0YxnaO6GjEmOLqczbnAI28Ao1EnmHVWE3npTLKftd19Q6w83ujXq
-	VqILmEwUdTT1UyftAsMRiRS6YLPtoICIqmjdv1lMW47ID7E1sr2MQ+97WsLM+aj1jcEsPWk+wRe
-	25h111bo0qNWxZKDDilVAJ4hYafW870c=
-X-Received: by 2002:a19:ee1a:0:b0:5ae:b015:3f35 with SMTP id
- 2adb3069b0e04-5b0236be0e4mr1246237e87.56.1783910386012; Sun, 12 Jul 2026
- 19:39:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="J8o1sWTC"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 1BE88C2BCF7;
+	Mon, 13 Jul 2026 09:47:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1783936021;
+	bh=e9iMPlkuziCv8yWN07h/xt2GTIksRXCyEIzNgVSqYw4=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=J8o1sWTCvSztkFQfm9/zlGW9YPBg/9NISf24IEMlZrv9cjRRHqC6Qwmo2hUPck/yI
+	 0945ICMwp48I59TaTPttd6HsiLPoJoaok5d/VFtuJOAzNe4evYCwB8Q8SM5kIE3ak5
+	 IcBoFcJn0bfOy2BQgVqtpMXUCOaHbmPJlKGle74cgyCT75KVZ8pp+5QxfkkQ3509oC
+	 p7TGiAAG86FW2EKItNUG9dEl5yFUoy0i2gHhnGPkKLXm4bWZFRvtdO3AeN5Qlkc504
+	 b9SMb597B+Y50UvWADi7SdvJNa+gQ0ox4muLccGS1qiUO01SEcPZvl2U0NXHcMmQJ7
+	 gjdv9ikj6ZTug==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01E44C44506;
+	Mon, 13 Jul 2026 09:47:01 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Mon, 13 Jul 2026 17:46:09 +0800
+Subject: [PATCH 3/5] ceph: add wait_list_lock for wait-list serialization
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260708204022.263578-1-max.kellermann@ionos.com>
-In-Reply-To: <20260708204022.263578-1-max.kellermann@ionos.com>
-From: Xiubo Li <xiubli@kernel.org>
-Date: Mon, 13 Jul 2026 10:39:33 +0800
-X-Gmail-Original-Message-ID: <CAOuZWzw_=jQgM=T0P+wTHqNDm415gOqX4=SnCAx9eY8G3ZSzxw@mail.gmail.com>
-X-Gm-Features: AUfX_myqwTjg4L0UzIDUwrev9krXs210JrCWD-QBZveOxs9zq5Hn_U-KNVdMfBI
-Message-ID: <CAOuZWzw_=jQgM=T0P+wTHqNDm415gOqX4=SnCAx9eY8G3ZSzxw@mail.gmail.com>
-Subject: Re: [PATCH] fs/ceph/mds_client: drop mdsc->mutex before decoding the
- MDS reply
-To: Max Kellermann <max.kellermann@ionos.com>
-Cc: idryomov@gmail.com, amarkuze@redhat.com, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260713-ceph-mdsc-mutex-optimization-v1-3-9ae5ac135c34@clyso.com>
+References: <20260713-ceph-mdsc-mutex-optimization-v1-0-9ae5ac135c34@clyso.com>
+In-Reply-To: <20260713-ceph-mdsc-mutex-optimization-v1-0-9ae5ac135c34@clyso.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1783936018; l=4380;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=J7oEObT3LMGtmwTthR3MugHZb7zCkSg8x13b9qZBoVw=;
+ b=pkey4ZKEKkXCwSUEK7FuG5kl8MBucKSAkoT/5SoxxCLNDpm1uI5bvPGe4zon4bCLzeiGOygLh
+ fnSovYeLfGbAyf0yf7+H6Ducq0CFW//KTgPS2zKFJ1HC2pweHSTfi8/
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-Hi Max
+From: Xiubo Li <xiubo.li@clyso.com>
 
-Nice catch and nice improvement. LGTM.
+Add a dedicated spinlock to protect the waiting_for_map and
+s_waiting lists, which are currently serialized by mdsc->mutex.
+This is a preparatory step for removing mdsc->mutex from the
+kick_requests() path: xa_for_each() is internally locked and the
+per-request filter checks are lockless, so only list_del_init()
+needs external protection.
 
-Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+ fs/ceph/mds_client.c | 18 +++++++++++++++++-
+ fs/ceph/mds_client.h |  3 +++
+ 2 files changed, 20 insertions(+), 1 deletion(-)
 
-Thanks
-- Xiubo
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 909f909b64ed..6f9049148721 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -3609,7 +3609,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 			doutc(cl, "no mdsmap, waiting for map\n");
+ 			trace_ceph_mdsc_suspend_request(mdsc, session, req,
+ 							ceph_mdsc_suspend_reason_no_mdsmap);
++			spin_lock(&mdsc->wait_list_lock);
+ 			list_add(&req->r_wait, &mdsc->waiting_for_map);
++			spin_unlock(&mdsc->wait_list_lock);
+ 			return;
+ 		}
+ 		if (!(mdsc->fsc->mount_options->flags &
+@@ -3632,7 +3634,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 		doutc(cl, "no mds or not active, waiting for map\n");
+ 		trace_ceph_mdsc_suspend_request(mdsc, session, req,
+ 						ceph_mdsc_suspend_reason_no_active_mds);
++		spin_lock(&mdsc->wait_list_lock);
+ 		list_add(&req->r_wait, &mdsc->waiting_for_map);
++		spin_unlock(&mdsc->wait_list_lock);
+ 		return;
+ 	}
+ 
+@@ -3680,9 +3684,12 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 			if (ceph_test_mount_opt(mdsc->fsc, CLEANRECOVER)) {
+ 				trace_ceph_mdsc_suspend_request(mdsc, session, req,
+ 								ceph_mdsc_suspend_reason_rejected);
++				spin_lock(&mdsc->wait_list_lock);
+ 				list_add(&req->r_wait, &mdsc->waiting_for_map);
+-			} else
++				spin_unlock(&mdsc->wait_list_lock);
++			} else {
+ 				err = -EACCES;
++			}
+ 			goto out_session;
+ 		}
+ 
+@@ -3697,7 +3704,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 		}
+ 		trace_ceph_mdsc_suspend_request(mdsc, session, req,
+ 						ceph_mdsc_suspend_reason_session);
++		spin_lock(&mdsc->wait_list_lock);
+ 		list_add(&req->r_wait, &session->s_waiting);
++		spin_unlock(&mdsc->wait_list_lock);
+ 		goto out_session;
+ 	}
+ 
+@@ -3790,7 +3799,9 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
+ 	struct ceph_mds_request *req;
+ 	LIST_HEAD(tmp_list);
+ 
++	spin_lock(&mdsc->wait_list_lock);
+ 	list_splice_init(head, &tmp_list);
++	spin_unlock(&mdsc->wait_list_lock);
+ 
+ 	while (!list_empty(&tmp_list)) {
+ 		req = list_entry(tmp_list.next,
+@@ -3823,7 +3834,9 @@ static void kick_requests(struct ceph_mds_client *mdsc, int mds)
+ 		if (req->r_session &&
+ 		    req->r_session->s_mds == mds) {
+ 			doutc(cl, " kicking tid %llu\n", req->r_tid);
++			spin_lock(&mdsc->wait_list_lock);
+ 			list_del_init(&req->r_wait);
++			spin_unlock(&mdsc->wait_list_lock);
+ 			trace_ceph_mdsc_resume_request(mdsc, req);
+ 			__do_request(mdsc, req);
+ 		}
+@@ -6258,6 +6271,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 	mdsc->snap_realms = RB_ROOT;
+ 	INIT_LIST_HEAD(&mdsc->snap_empty);
+ 	spin_lock_init(&mdsc->snap_empty_lock);
++	spin_lock_init(&mdsc->wait_list_lock);
+ 	xa_init(&mdsc->request_tree);
+ 	INIT_DELAYED_WORK(&mdsc->delayed_work, delayed_work);
+ 	mdsc->last_renew_caps = jiffies;
+@@ -6340,7 +6354,9 @@ static void wait_requests(struct ceph_mds_client *mdsc)
+ 		mutex_lock(&mdsc->mutex);
+ 		while ((req = __get_oldest_req(mdsc))) {
+ 			doutc(cl, "timed out on tid %llu\n", req->r_tid);
++			spin_lock(&mdsc->wait_list_lock);
+ 			list_del_init(&req->r_wait);
++			spin_unlock(&mdsc->wait_list_lock);
+ 			__unregister_request(mdsc, req);
+ 		}
+ 	}
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 00ca993ed583..cd5dacfb42bd 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -529,6 +529,9 @@ struct ceph_mds_client {
+ 	struct list_head        snap_empty;
+ 	int			num_snap_realms;
+ 	spinlock_t              snap_empty_lock;  /* protect snap_empty */
++	spinlock_t              wait_list_lock;   /* protect waiting_for_map
++						   * and s_waiting lists
++						   */
+ 
+ 	u64                    last_tid;      /* most recent mds request */
+ 	atomic64_t             oldest_tid;    /* oldest incomplete mds request,
 
-Max Kellermann <max.kellermann@ionos.com> =E4=BA=8E2026=E5=B9=B47=E6=9C=889=
-=E6=97=A5=E5=91=A8=E5=9B=9B 04:40=E5=86=99=E9=81=93=EF=BC=9A
->
-> handle_reply() held `mdsc->mutex` across parse_reply_info(),
-> i.e. across the full decode of the reply message.  For large replies
-> (a big readdir allocates and parses many dir_entries), this can take a
-> while and blocks ceph_mdsc_submit_request() calls meanwhile.
->
-> The decode does not need `mdsc->mutex`: parse_reply_info() mostly
-> fills the request's `r_reply_info`.  Create replies may also add
-> delegated inode numbers to the session xarray, but that xarray is
-> protected by its own lock and is not serialized by `mdsc->mutex`
-> today.  By the time we reach parse_reply_info(), all
-> `mdsc->mutex`-protected state has already been updated under the lock
-> (the request has either been unregistered (safe reply) or added to the
-> session's unsafe list (unsafe reply)) and the request is pinned by the
-> reference taken in lookup_get_request().
->
-> Drop `mdsc->mutex` before calling parse_reply_info() so reply decoding
-> no longer blocks request submission.  This only widens the existing
-> unlocked window that already covers the heavier ceph_fill_trace() /
-> ceph_readdir_prepopulate() processing, so no new races are introduced.
->
-> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
-> ---
->  fs/ceph/mds_client.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 853bf698b356..bb8570d31208 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -4089,13 +4089,19 @@ static void handle_reply(struct ceph_mds_session =
-*session, struct ceph_msg *msg)
->                 list_add_tail(&req->r_unsafe_item, &req->r_session->s_uns=
-afe);
->         }
->
-> +       /*
-> +        * Now that all mutex-protected state has been updated above
-> +        * (the request has been unregistered or added to the
-> +        * session's unsafe list), we can unlock it.
-> +        */
-> +       mutex_unlock(&mdsc->mutex);
-> +
->         doutc(cl, "tid %lld result %d\n", tid, result);
->         if (test_bit(CEPHFS_FEATURE_REPLY_ENCODING, &session->s_features)=
-)
->                 err =3D parse_reply_info(session, msg, req, (u64)-1);
->         else
->                 err =3D parse_reply_info(session, msg, req,
->                                        session->s_con.peer_features);
-> -       mutex_unlock(&mdsc->mutex);
->
->         /* Must find target inode outside of mutexes to avoid deadlocks *=
-/
->         rinfo =3D &req->r_reply_info;
-> --
-> 2.47.3
->
->
+-- 
+2.53.0
+
+
