@@ -1,75 +1,75 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B774832D7F1
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 17:46:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF0283CF96B
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 18:21:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784051182; cv=none; b=bRvbAyOB6qXILmF2wiN3TUKvWevrq1PmKiHNWi6kcrS7QM5yG5Sr+Dnzd88jdM/0WiJCRn/UpNTwQfbpdKpHWRw9EXvcJeEtZahKA7RPpWZCqjTV/N4rIrwTKyf004NlcHaT8tJ3boFN+BUPr1sYoQkwyn8Ae8FvLFUGOsaYeqk=
+	t=1784053300; cv=none; b=F6ECgvi/wfFkfHENPtp/p27KdH9Hd0jL/5f/leFosra3D8Bgn/H4xLS8dw9CET6dTqA7Ls++kAp3tv/gNZGItBVHZ3exg9Bs/jzNC5dUmqUVMATnYJjBHTeg6cUSVvUHWQC5SzhAAm40ZyfFTosp6zkk6uRXurTTpiRndKaDkdk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784051182; c=relaxed/simple;
-	bh=pqgiUQ8Aree+HXnmxytV76FdOcu+NjbYsQ5Sqga17zg=;
+	s=arc-20240116; t=1784053300; c=relaxed/simple;
+	bh=Ju18sMtQhBz3bKYi8jjqOv58ZPPj/Q+O5CEmEgFKF8c=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=QL3Y591TRLIIe03lzFgde5K37CUjk141fa6IwK2zcrGI0ozYKLYjFRRjcK82niNwfwIUVdFbNF9jcImGPtE69Z2kpdwaojlSSfc25K41/IEZkk3BSFgodKYGGEAcuRox9KuidH8wN57Xh6WcVvOT8IG9kvMqu9DRuD8hCSermUc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=K0qYntzP; arc=none smtp.client-ip=209.85.128.172
+	 Content-Type:MIME-Version; b=B5WvmAT/6RdzDjl0Z+2f2hOEG3E0aGHLfrJmmokqIqOL/3yGcSQcuyDYG9uWPyVDplArFHUx1mka+LszR2DWerMz1pU23dcoX+a/aYWSIioDx0gmdbvW5LPCzrxh8ADm0fxZs3bujP/Wt9gvihQJ3o1ReaKCssaH7gM2dEzTJ2k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=IlGJ5SYY; arc=none smtp.client-ip=209.85.128.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="K0qYntzP"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-81ead20e4a0so13775207b3.1
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 10:46:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="IlGJ5SYY"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-80e2cfe6918so11439547b3.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 11:21:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784051170; x=1784655970; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784053296; x=1784658096; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=auOM2in7FUxpk9Gq8+vuwppWS4BPHDL3/0AxxfS0YzI=;
-        b=K0qYntzPk070f9+WIroen4HdH+CNsSKhETQfRKGycewc15jRk5jAlVcvl+iU7yQmOD
-         TN9hye4HymUV23i6gI4/pJfIoQan4DUaBZTykI0hFGrAk4ML9AU3Fhhyr2GUp7sknTef
-         /jRh8WLoMHRtulPDAVObKtchuE9X9ckWJ1AHZiynjR3sk2BB82AFdNxEGDqeq3CJ4YL9
-         oPpyf52eGcay4b1C9IPdPhMGi6ucqvwwDW3RYMblQUrDEm2B4GE/D+pwvbAsI/CorvbG
-         ZNnjEHut/nw5KZRrZwiIt+dghNMPFaIUqfamB/TuZ89HBV9SAG8emQ1ol990ECPBxJn8
-         uDLQ==
+        bh=aIpyRCJEO+murZwZ2HHOq1/GHssodeM+RHwwFHxBPt0=;
+        b=IlGJ5SYYdrfGlb7P0Ulm7xdMYJoBSXG4Z8mRUAtingcbLilT8XYclyOSGjCkcHxEOm
+         uYajyBoQXMzcUfU7+lLinqvpeZOJjIc5scYJYqyTfH00JLIY4maV1O7GYDqNzl7Tdaus
+         b9oUlYtxGyncAvqlp9NKAafgOXvdwDTttcsoO8mR7lSHqA0OAVVUsUjJzM3SEaxSpH2P
+         rv3LwHy5MVxSQW+0sypqV/y9Aq6hO7JXAMJBBo59Je/R6aMXkOtljWgL5DxMh+/nC5Vo
+         eqpHh0hMbI1XbPMMfxUFYY+mDpmu4nXccFxNJHI5mlb7y70quZ1wcHibvFhMK3K4PYnh
+         A/yw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784051170; x=1784655970;
+        d=1e100.net; s=20251104; t=1784053296; x=1784658096;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=auOM2in7FUxpk9Gq8+vuwppWS4BPHDL3/0AxxfS0YzI=;
-        b=RStI0PUwnvwvlx9ZUlkaa29S3QUQqzFT/JrXsZCW2zSZoJkzpEThFSbBKxQtOPgJ2L
-         QEe7ybwhmnB33kLi91zDHU06jZoBASZ0BpdczqbboMDBjrUPCKl9Tn1dXIhcrPBmS9bc
-         TiM4KSA536Hos/AAyxIdvsuooiiBnJHt824eCcqBAAawLklf0VkJ3kUtnWCKU5CyqhqP
-         SzPY/TFI+BXzGdZ056/rbzLp//yAhhvauJnubTxmzLIjcR3zaisoBcMBO6xIOvxCKMKa
-         qih83MbZuOGWJRc2zZjlwQ6ktS9bVYzct7AvuhUjhBB5C6CZPi/0x8e/jMYSG5MuAZHP
-         /vFA==
-X-Gm-Message-State: AOJu0Ywe1BmP8dLHO1hsGUl0lFHQFjMOPHIf/1cbOzFp+B24FKCjFwjO
-	cKF0ycHYtLiupH5hNrh/Q2ncaiSaV80lzwomICbhLGpoQUOM4bv1tr38hci9WMfYSug=
-X-Gm-Gg: AfdE7cmM+KfXFAzZ3CI9y48Q1bueKuxjlAxxbqm1VL680/4JMC3JD+nbuJe3g/L2GQH
-	JnHduDyupGRvOi/xdYWmMOyTYjlHq/oHc4X2wTh50W6cqTEk6lI1MGe2+yWbBlOi9w8lhctYQE6
-	C/Oj6dBwDhBIwTXpjdxiKskGjfMtg9dEkkmSt3wok2tre1rEgVKAxoV9sUNPXalY+dQOeWsPoMe
-	hNk+oHC3oDxnjYDw9VjSAkJbYrsjcxCo/xh71OkbIBO1CrTLPkN6lLp6kKnYJd/qHqGDer4FdzZ
-	NrkHEtcvdcirhzBfrehuzXv8Tl4148zonRCyVPH8GDPPseO5qNB+FKc7cidexRiA/pWaeCt/Hri
-	g9ZhcO/eSuTBPGRvE/4rCxkS3WdiUka7Nkezfp0Eb7Zd24ihx5yOYiWYmwXQkYoH2npYp9L1zlN
-	arRUrqCQP6abynTQo1qX4c/ixLGoSyZ9s2P9EX7DSGmUVsbZO4ubteJritlFm73Y5kd5K7VxK7+
-	Rz6MnrCEt1iZDcrJdCLSOfk8CNGoh4+hJbvDxQxqtogHCo1VbuedDRHbX4GEwPu8qou8uMNF/qp
-	gWPQbQ==
-X-Received: by 2002:a05:690c:6706:b0:81d:489e:8847 with SMTP id 00721157ae682-81e8ffe88b7mr103966577b3.2.1784051169576;
-        Tue, 14 Jul 2026 10:46:09 -0700 (PDT)
-Received: from ?IPv6:2600:1700:6476:1430:9b87:2209:14fb:1802? ([2600:1700:6476:1430:9b87:2209:14fb:1802])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e6c1a44e1sm149844887b3.29.2026.07.14.10.46.08
+        bh=aIpyRCJEO+murZwZ2HHOq1/GHssodeM+RHwwFHxBPt0=;
+        b=FMUBjKMWjAIIpD2PGqboZ9M9kJmLEPl0TFs5xLebNMhIoMOGMckaHK85gRhI04j1aY
+         r4Pxwt1M2cZqPJU2VET4rdCKDteGa+tncpulEPisfnFcrh05KITLyz6OzbfAfpSLGJk9
+         XdW/xMv2NRb4Rbw1t8jjFw3rnztfQUQj2jIUkLjqN8yTAjCwY5EejzrutPP2aCcKJjqT
+         cdRSwn6B+NUWchp/U+ySc7IQBzfxCgt4iXPdSzeagwGin8VWKemYZ2CRI6151AGKNqeS
+         vJAauQYTrWEJCSrX3Dk/w7E87Z1XpZDURO8HYd+l6LN2BSEBbYA5X6tCkygRrCeI27xK
+         X/EA==
+X-Gm-Message-State: AOJu0YwoB8IB9NCA0eLkQL2phmEoUhhAvZqYZrEjXUOMIHUJg1KyHtiC
+	uB5HWQ3BiuieboXLoZyrgmXJNNB/NimKgEBf+0EKcJUnsqRchcH3686EioTwrsONeB4=
+X-Gm-Gg: AfdE7clEDPEUOU+vspTj/XV88Ww69qyQmyJfgYdSSB6hVsis5QjsunYJNA+piaLVTTd
+	FZxrf3PnTQvtSgNLJCgvbdR84ArqUKYzsWtaVQ2G5himm8kohKsRJnVf1xJ6bvLEEwV4t+iWZ4R
+	eBJvgMqWSphtH3VEfylBcdrDXMftLmuMHdpqwHcNnTQ3+CWhA74CFC3pAVnglVCQrXWmsRo3x+6
+	05iHopYTU3CKn1G49/nx5/tk/SxJa7WkKRqlUhAX49p+TVE9QwyGlFq67pJRdCpEfZNK+v4l7D+
+	NZBrRHWiYhimlUFuJuPs+sjFwh5mqIH5pC2q0Dy6T8dxF4xtWCnJmxTn7963JatJROP57oYnUMf
+	pz0sLNtm5WVNtxxHb+F7jn2S37ub3wwhgsfF/Eqhi6CdPpM5dgdQlioxnQplaLoQ4zd2L91bQls
+	jrbtV3NJGQV94SoQ1aaBIZHxyT2M6Es/qD2KKfXa9GgX1esHAlIJwWBzDPFPnPuowPPwgiOxaSM
+	6Ks3n1aqTZFFiylDRLGS5tap6d/1oOmk5JI0wonYAxGQQ==
+X-Received: by 2002:a05:690c:6985:b0:814:5312:47bb with SMTP id 00721157ae682-81e902edf4cmr109419627b3.69.1784053295745;
+        Tue, 14 Jul 2026 11:21:35 -0700 (PDT)
+Received: from pop-os.attlocal.net ([2600:1700:6476:1430:9b87:2209:14fb:1802])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e6bf7ab9bsm148299457b3.20.2026.07.14.11.21.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Jul 2026 10:46:09 -0700 (PDT)
-Message-ID: <581f04a3a5002e496a76888edddf69a30512aeff.camel@dubeyko.com>
-Subject: Re: [PATCH] ceph: fix use-after-dereference of NULL ci in
- __ceph_remove_cap()
+        Tue, 14 Jul 2026 11:21:35 -0700 (PDT)
+Message-ID: <1cc1c984a02aa892a7edb67d82adde547778bda3.camel@dubeyko.com>
+Subject: Re: [PATCH 1/5] ceph: convert oldest_tid to atomic64_t
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: xiubo.li@clyso.com, Ilya Dryomov <idryomov@gmail.com>, Alex Markuze
 	 <amarkuze@redhat.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date: Tue, 14 Jul 2026 10:46:07 -0700
-In-Reply-To: <20260714-ceph-fix-remove-cap-v1-1-27b5bc6ee2f6@clyso.com>
-References: <20260714-ceph-fix-remove-cap-v1-1-27b5bc6ee2f6@clyso.com>
+Date: Tue, 14 Jul 2026 11:21:33 -0700
+In-Reply-To: <20260713-ceph-mdsc-mutex-optimization-v1-1-9ae5ac135c34@clyso.com>
+References: 
+	<20260713-ceph-mdsc-mutex-optimization-v1-0-9ae5ac135c34@clyso.com>
+	 <20260713-ceph-mdsc-mutex-optimization-v1-1-9ae5ac135c34@clyso.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -124,70 +124,145 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Tue, 2026-07-14 at 14:20 +0800, Xiubo Li via B4 Relay wrote:
+On Mon, 2026-07-13 at 17:46 +0800, Xiubo Li via B4 Relay wrote:
 > From: Xiubo Li <xiubo.li@clyso.com>
 >=20
-> The NULL check for "ci" in __ceph_remove_cap() was dead code because
-> ci was dereferenced via &ci->netfs.inode before the check, and
-> cap->session was dereferenced via session->s_mdsc->fsc->client even
-> earlier.=C2=A0 On a double-remove, both cap->ci and cap->session are set
-> to NULL by the first call, so the second call would crash before
-> ever reaching the guard.
+> The oldest_client_tid sent in the MDS request header is advisory:
+> a stale value is harmless -- at worst the MDS may resend a reply
+> we already have, or skip one we still need (which will just be
+> retried).=C2=A0 With the plain u64 read, however, the compiler is free
+> to split or cache the load, which is undefined behaviour when the
+> write side runs under mdsc->mutex on a different CPU.
 >=20
-> Move ci, session, cl, and inode initializations after the NULL check
-> so that the early-return actually works.
+> Convert mdsc->oldest_tid from u64 to atomic64_t so that reads
+> are guaranteed to be single-copy atomic on all architectures.
+> This removes the one remaining reason __prepare_send_request()
+> and __send_request() needed to be called under mdsc->mutex, so
+> drop those comments as well.
+>=20
+> All write sites (__register_request, __unregister_request) still
+> run under mdsc->mutex, so use atomic64_set() for clarity.
 >=20
 > Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 > ---
-> =C2=A0fs/ceph/caps.c | 17 ++++++++++-------
-> =C2=A01 file changed, 10 insertions(+), 7 deletions(-)
+> =C2=A0fs/ceph/mds_client.c | 21 ++++++++-------------
+> =C2=A0fs/ceph/mds_client.h |=C2=A0 2 +-
+> =C2=A02 files changed, 9 insertions(+), 14 deletions(-)
 >=20
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index f8d898ad091e..8568edf494b5 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1154,18 +1154,21 @@ int ceph_is_any_caps(struct inode *inode)
-> =C2=A0 */
-> =C2=A0void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 9f84ef2ac6e4..98d0a5baff70 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -1235,8 +1235,9 @@ static void __register_request(struct
+> ceph_mds_client *mdsc,
+> =C2=A0	if (!req->r_mnt_idmap)
+> =C2=A0		req->r_mnt_idmap =3D &nop_mnt_idmap;
+> =C2=A0
+> -	if (mdsc->oldest_tid =3D=3D 0 && req->r_op !=3D
+> CEPH_MDS_OP_SETFILELOCK)
+> -		mdsc->oldest_tid =3D req->r_tid;
+> +	if (atomic64_read(&mdsc->oldest_tid) =3D=3D 0 &&
+> +	=C2=A0=C2=A0=C2=A0 req->r_op !=3D CEPH_MDS_OP_SETFILELOCK)
+> +		atomic64_set(&mdsc->oldest_tid, req->r_tid);
+> =C2=A0
+> =C2=A0	if (dir) {
+> =C2=A0		struct ceph_inode_info *ci =3D ceph_inode(dir);
+> @@ -1257,14 +1258,14 @@ static void __unregister_request(struct
+> ceph_mds_client *mdsc,
+> =C2=A0	/* Never leave an unregistered request on an unsafe list! */
+> =C2=A0	list_del_init(&req->r_unsafe_item);
+> =C2=A0
+> -	if (req->r_tid =3D=3D mdsc->oldest_tid) {
+> +	if (req->r_tid =3D=3D atomic64_read(&mdsc->oldest_tid)) {
+> =C2=A0		struct rb_node *p =3D rb_next(&req->r_node);
+> -		mdsc->oldest_tid =3D 0;
+> +		atomic64_set(&mdsc->oldest_tid, 0);
+> =C2=A0		while (p) {
+> =C2=A0			struct ceph_mds_request *next_req =3D
+> =C2=A0				rb_entry(p, struct ceph_mds_request,
+> r_node);
+> =C2=A0			if (next_req->r_op !=3D
+> CEPH_MDS_OP_SETFILELOCK) {
+> -				mdsc->oldest_tid =3D next_req->r_tid;
+> +				atomic64_set(&mdsc->oldest_tid,
+> next_req->r_tid);
+> =C2=A0				break;
+> =C2=A0			}
+> =C2=A0			p =3D rb_next(p);
+> @@ -1693,7 +1694,7 @@ create_session_full_msg(struct ceph_mds_client
+> *mdsc, int op, u64 seq)
+> =C2=A0	ceph_encode_32(&p, 0);
+> =C2=A0
+> =C2=A0	/* version =3D=3D 7, oldest_client_tid */
+> -	ceph_encode_64(&p, mdsc->oldest_tid);
+> +	ceph_encode_64(&p, atomic64_read(&mdsc->oldest_tid));
+> =C2=A0
+> =C2=A0	msg->front.iov_len =3D p - msg->front.iov_base;
+> =C2=A0	msg->hdr.front_len =3D cpu_to_le32(msg->front.iov_len);
+> @@ -2759,7 +2760,7 @@ static struct ceph_mds_request
+> *__get_oldest_req(struct ceph_mds_client *mdsc)
+> =C2=A0
+> =C2=A0static inline=C2=A0 u64 __get_oldest_tid(struct ceph_mds_client *md=
+sc)
 > =C2=A0{
-> -	struct ceph_mds_session *session =3D cap->session;
-> -	struct ceph_client *cl =3D session->s_mdsc->fsc->client;
-> -	struct ceph_inode_info *ci =3D cap->ci;
-> -	struct inode *inode =3D &ci->netfs.inode;
-> +	struct ceph_mds_session *session;
-> +	struct ceph_client *cl;
-> +	struct ceph_inode_info *ci;
-> +	struct inode *inode;
-> =C2=A0	struct ceph_mds_client *mdsc;
-> =C2=A0	int removed =3D 0;
+> -	return mdsc->oldest_tid;
+> +	return atomic64_read(&mdsc->oldest_tid);
+> =C2=A0}
 > =C2=A0
-> =C2=A0	/* 'ci' being NULL means the remove have already occurred */
-> -	if (!ci) {
-> -		doutc(cl, "inode is NULL\n");
-> +	ci =3D cap->ci;
-> +	if (!ci)
-> =C2=A0		return;
-> -	}
-> +
-> +	session =3D cap->session;
-> +	cl =3D session->s_mdsc->fsc->client;
-> +	inode =3D &ci->netfs.inode;
+> =C2=A0#if IS_ENABLED(CONFIG_FS_ENCRYPTION)
+> @@ -3438,9 +3439,6 @@ static void complete_request(struct
+> ceph_mds_client *mdsc,
+> =C2=A0	complete_all(&req->r_completion);
+> =C2=A0}
 > =C2=A0
-> =C2=A0	lockdep_assert_held(&ci->i_ceph_lock);
+> -/*
+> - * called under mdsc->mutex
+> - */
+> =C2=A0static int __prepare_send_request(struct ceph_mds_session *session,
+> =C2=A0				=C2=A0 struct ceph_mds_request *req,
+> =C2=A0				=C2=A0 bool drop_cap_releases)
+> @@ -3555,9 +3553,6 @@ static int __prepare_send_request(struct
+> ceph_mds_session *session,
+> =C2=A0	return 0;
+> =C2=A0}
 > =C2=A0
->=20
-> ---
-> base-commit: fc67edb66b3c9924c4e0bb366a92b32ea13c526a
-> change-id: 20260714-ceph-fix-remove-cap-cf7d8a7a242a
->=20
-> Best regards,
-> --=C2=A0=20
-> Xiubo Li <xiubo.li@clyso.com>
+> -/*
+> - * called under mdsc->mutex
+> - */
+> =C2=A0static int __send_request(struct ceph_mds_session *session,
+> =C2=A0			=C2=A0 struct ceph_mds_request *req,
+> =C2=A0			=C2=A0 bool drop_cap_releases)
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index 731d6ad04956..3b614b5df18c 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -532,7 +532,7 @@ struct ceph_mds_client {
+> =C2=A0	spinlock_t=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0 snap_empty_lock;=C2=A0 /* protect
+> snap_empty */
+> =C2=A0
+> =C2=A0	u64=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 last_tid;=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0 /* most recent mds
+> request */
+> -	u64=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 oldest_tid;=C2=A0=C2=A0=C2=
+=A0 /* oldest incomplete
+> mds request,
+> +	atomic64_t=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0 oldest_tid;=C2=A0=C2=A0=C2=A0 /* oldest incomplete
+> mds request,
+> =C2=A0						 excluding
+> setfilelock requests */
+> =C2=A0	struct rb_root=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 req=
+uest_tree;=C2=A0 /* pending mds
+> requests */
+> =C2=A0	struct delayed_work=C2=A0=C2=A0=C2=A0 delayed_work;=C2=A0 /* delay=
+ed work */
 
-Makes sense.
+Looks good.
 
 Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
 
 Thanks,
 Slava.
-
