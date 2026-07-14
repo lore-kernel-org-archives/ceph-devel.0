@@ -1,124 +1,115 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f54.google.com (mail-oo1-f54.google.com [209.85.161.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 157BA37A847;
-	Tue, 14 Jul 2026 06:20:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBBFB3DF001
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 07:19:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784010048; cv=none; b=pYwMpxusDWmDK3hpf8u7+LcmF3mxDCCwgs6rlYa4ew6CPYLTyO0+YClm1PwlAi1aascWVsUcNL824AZTcRw/f5hoMDTZCb1xn81R5IhW7bFcPpuG5OveTWOOfPuJDlXUfpLNwbMtHyEbPc2CKTMDdjJsSLc2YRuvruJGWGMDfIc=
+	t=1784013560; cv=none; b=DVcPvQDMQYd6/nFqNEKUKPxYtxye3MsPSuuCYqSP/zcMmuILNKcDaIkazHqXYeYmg2BLp7vaA/v/Et5Bm9cob7/zhyY+iZIp4XGOsUs57cor0OtsLvmOBhyqPXQAO2v7NzADp37vkhtwDLIZ1QQeuo4+mZwamcHO8WBf1ULBVG8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784010048; c=relaxed/simple;
-	bh=A0MW+KjCx8TWRjHL9RMq3OieHzYG7xFT6vyAAjg+tIo=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=K7yImJNQMpJaHZHpeErEL9G7VOKvnDzkd75qk+fTp9MxHscNYSpSqr/g2qf54Cyrc/ag1z4A089lniquynyFM6Qy8BWwxbmVrgxzGwicWPllueFGcwS22phlAeWEzn5xo5zIq1o56KgQ3KCJKOCofuHfJvkS8+IFnQt0nSioulc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TB80AOQU; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1784013560; c=relaxed/simple;
+	bh=kIERie8dbqx2+eAvdsr037DRwXWzmtXALWanJlNJzi4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=l7ubf4miLvLUW9dwUDe8i0410DS8jHSJiOjmWj3BxEd+/KYdib2vjYdZyINkQ4JWmX4Gi6FelYwvGjQFyXZ9RE1zuWRq6jARP9fPfoz20FXM8Ab2/MGf10B+NQpTuN779pyp7lYEuYnepe26gPaBqEtXKf1vUj5FIngmv6KSbD4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=l9Ty8bRM; arc=none smtp.client-ip=209.85.161.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TB80AOQU"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id A0071C2BCC9;
-	Tue, 14 Jul 2026 06:20:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1784010047;
-	bh=A0MW+KjCx8TWRjHL9RMq3OieHzYG7xFT6vyAAjg+tIo=;
-	h=From:Date:Subject:To:Cc:Reply-To:From;
-	b=TB80AOQUpHA7yjseRWzlaD35hjDETjDFX2SOP3Ao5vO59gcs+YRv4b+XmiDLo6ZgU
-	 ihBPlMYL5BYsDVy63FChRBGwFApHtdx8/cblXnNO1YiHmnnkVbYEwcHEkG3oo5Q0cM
-	 4OZxNoUwzpe2JbLEp4klhAwz6o/j+XcPE3+JSmr5fl9E/m/Cck4LUrQtyvxllRPXjl
-	 RSPVqJ297KUjMQcB/kXOC/7cY6ju78QAidbE+PnMOWqcXEN6LPbTTdAqgpXGmR32wH
-	 ZejGXJUGj3BPOO8kRmR0teoOq8eigeWL37rikcLkAP0NvqkC2W1qGvKvOJZmNifsHy
-	 qcu1ABF8wXtrQ==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DD1BC43458;
-	Tue, 14 Jul 2026 06:20:47 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Tue, 14 Jul 2026 14:20:37 +0800
-Subject: [PATCH] ceph: fix use-after-dereference of NULL ci in
- __ceph_remove_cap()
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="l9Ty8bRM"
+Received: by mail-oo1-f54.google.com with SMTP id 006d021491bc7-6a37b2643e2so440037eaf.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 00:19:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1784013558; x=1784618358; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :content-type:mime-version:references:message-id:subject:cc:to:from
+         :date:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=/lycI0z8Y1t9+PubOdFL76Fa/oKSxmR3LtUe6RN9X5A=;
+        b=l9Ty8bRMZ40fguL72C53R45aZma+3XUfdp1+oyWyLdLSpl6D4C19CO5zGNDenqXBA6
+         BJFBTqlnwiQDe2FZZQEI+7POWvE/QpgaJ1FVcxqoR5JwpKq4hpWIMgDL2RVl5NTZwQtD
+         FhySSE6dSng+C2FsveUkpRjryk2W9p523f9Jf2s2GtNcV8i6NxDR1dbviFrnE4dCc6uV
+         EAONsTw/CJyvOfMrS2OOF2uzbr3/uCExtYIplMQ8/CLOknMYtaZHhBBmcSriFVVDvHgZ
+         W8rkDjs7oieEilvbNCfz+YasMoZrTdAGQlerxfioFmE7PTPKHf5kelbKLHDbF8yXQO32
+         UiJw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784013558; x=1784618358;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :content-type:mime-version:references:message-id:subject:cc:to:from
+         :date:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=/lycI0z8Y1t9+PubOdFL76Fa/oKSxmR3LtUe6RN9X5A=;
+        b=MY123tc7npw/N20nxaGNRzdXe4Ke1+DmKcyajAMAmbPWW0Ni/A64tAqYjzoKh5UfX4
+         D+1bszkMUhLP5AznWDZz3I0KERARWj+Mqt2CVQXFpfUyiqSH5d87Yv30I76k0+SO8pCs
+         aWp7WQj0C9FzpKxSrPLtRIkfYHHRMHs7mF7viXnjYbYdXhKlKm6vOJfG5MJp665eBU97
+         AzdJ4TJ3o9rxKCU8P+bV+00+TPe06XdtFZJSQV8OqOEspTmx+Aa53jSIlNOTqOwGqA1W
+         ZOF/HQvw9HwyVs4adyR+MlMM8YG3RRDy9jcnL8Br9xWoXutfusXywNO/E+Q3vvYdJ1yC
+         ks6w==
+X-Forwarded-Encrypted: i=1; AFNElJ/l7s+NVmbPmTe0sA2JFH/d5vmNNz+B2J1Gu0BHT7DN/495NyyaxZFn6P8jm20KetryV/e1hMxYmhKg@vger.kernel.org
+X-Gm-Message-State: AOJu0YzCZESiQLwRsVMmDeTTZbINzS8xZ9rK64a8/uXDYHOnjCa4s+qG
+	rxfyEDhmoaZGKtg01e70DcxNFoVJT7Ek2dAJFR8UyaNDlifw1tpJPf+8
+X-Gm-Gg: AfdE7ck3MpdbnLtd++frjvmrdZH9xtvK3FZOel/wegI7dPpO+4Lwsl+pBJ4VZ4ejbJw
+	DoosJssHpzyRo9tipb4kLWFNviMaP9Evi4dZqFBfXg1y7LSXS3MQKmFqwGECYlZIVx7tpxqn8rk
+	sZkdd1IwQ+mumrgyaVKmUY1mBK6XP/pWoIcoJFCeigNeB9j0sszxcnsO1Rh6Kjytzf98iBsfdSI
+	tdBG2d/J3tjZzFSsznEYXUefFh3/DWtGNgcGpaFg71QB6nXZ+3fIqsy8/UxzJK88BHeX47HBUiJ
+	baYYYlI6xvWWQLm9e89Z9gqgIV4l8ZugyP7dwGKL1cTb4ZVIBYzyH0x+RDELbsUylAlCT7HSHkq
+	wlDmmZV0XFcDI4j2tZ0unjO3DNXbvjK6K5/bCgPQAUzzp0II1FVP2Tm7V6lWcyKgyQil1DPNlJD
+	fXZUPL
+X-Received: by 2002:a05:6820:4cc1:b0:6a3:916a:1d26 with SMTP id 006d021491bc7-6a39a8561bemr7965231eaf.61.1784013557982;
+        Tue, 14 Jul 2026 00:19:17 -0700 (PDT)
+Received: from localhost ([74.80.182.78])
+        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7ec14489139sm6783167a34.5.2026.07.14.00.19.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 14 Jul 2026 00:19:16 -0700 (PDT)
+Date: Tue, 14 Jul 2026 10:19:11 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: Markus Elfring <Markus.Elfring@web.de>, ceph-devel@vger.kernel.org,
+	Alex Markuze <amarkuze@redhat.com>, Helge Deller <deller@gmx.de>,
+	Ilya Dryomov <idryomov@gmail.com>, Kees Cook <kees@kernel.org>,
+	LKML <linux-kernel@vger.kernel.org>,
+	kernel-janitors@vger.kernel.org
+Subject: Re: [PATCH] ceph: Move a variable assignment behind a condition
+ check in __ceph_remove_cap()
+Message-ID: <alXi78mFuDLaVQ4b@stanley.mountain>
+References: <5010d7d4-e321-4999-aca6-1caa040f3037@web.de>
+ <bd15b4d5ccdcf01a8730380c4d974afaab2c782a.camel@dubeyko.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260714-ceph-fix-remove-cap-v1-1-27b5bc6ee2f6@clyso.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMUQqDMBCE4avIPrugQZrSq5Q+rOtYt1ANiYog3
- t3YPn4w8++UEA2JHsVOEaslm8aMuixIBxnfYOuyyVXuVvm6YUUYuLeNI77TClYJrL3v7uLFNU4
- oP0NEXvyqz9ffaWk/0PlK0XGcpd+6AHcAAAA=
-X-Change-ID: 20260714-ceph-fix-remove-cap-cf7d8a7a242a
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1784010045; l=1741;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=ooSqkK6IVYP8K/OVskBxW937t4pyDtOQPUpfeEISEHY=;
- b=4//FPhq6KgagTG7f41be8cBiCVClaxaFVnSh67AOzk1hzSy6SbXQvnVf2R60XFFiAHUbODHSR
- gtMFoGu8RKWBfFyD7Ojs+kZstipgGwStwiWiMciXlZWJ7Tpgy1a/kAr
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <bd15b4d5ccdcf01a8730380c4d974afaab2c782a.camel@dubeyko.com>
 
-From: Xiubo Li <xiubo.li@clyso.com>
+On Mon, Jul 13, 2026 at 03:10:40PM -0700, Viacheslav Dubeyko wrote:
+> On Mon, 2026-07-13 at 13:35 +0200, Markus Elfring wrote:
+> > From: Markus Elfring <elfring@users.sourceforge.net>
+> > Date: Mon, 13 Jul 2026 13:21:29 +0200
+> > 
+> > The address of a data structure member was determined before
+> > a corresponding null pointer check in the implementation of
+> > the function “__ceph_remove_cap”.
+> > 
+> > Thus avoid the risk for undefined behaviour by moving the assignment
+> > for the variable “inode” behind a condition check.
+> > 
+> > This issue was detected by using the Coccinelle software.
+> > 
+> > Fixes: 38d46409c4639a1d659ebfa70e27a8bed6b8ee1d ("ceph: print cluster
+> > fsid and client global_id in all debug logs")
+> > Cc: stable@vger.kernel.org
+> > Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 
-The NULL check for "ci" in __ceph_remove_cap() was dead code because
-ci was dereferenced via &ci->netfs.inode before the check, and
-cap->session was dereferenced via session->s_mdsc->fsc->client even
-earlier.  On a double-remove, both cap->ci and cap->session are set
-to NULL by the first call, so the second call would crash before
-ever reaching the guard.
+I have explained to Markus many times that these are not dereferences,
+they are just pointer math.  So the original code works fine and does
+not need a Fixes tag or a CC to stable.
 
-Move ci, session, cl, and inode initializations after the NULL check
-so that the early-return actually works.
+And then Markus responds, "the C standard says we are not allowed to
+dereference NULL pointers"...  Which is true, but again, it's not a
+dereference.
 
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
- fs/ceph/caps.c | 17 ++++++++++-------
- 1 file changed, 10 insertions(+), 7 deletions(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index f8d898ad091e..8568edf494b5 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1154,18 +1154,21 @@ int ceph_is_any_caps(struct inode *inode)
-  */
- void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
- {
--	struct ceph_mds_session *session = cap->session;
--	struct ceph_client *cl = session->s_mdsc->fsc->client;
--	struct ceph_inode_info *ci = cap->ci;
--	struct inode *inode = &ci->netfs.inode;
-+	struct ceph_mds_session *session;
-+	struct ceph_client *cl;
-+	struct ceph_inode_info *ci;
-+	struct inode *inode;
- 	struct ceph_mds_client *mdsc;
- 	int removed = 0;
- 
- 	/* 'ci' being NULL means the remove have already occurred */
--	if (!ci) {
--		doutc(cl, "inode is NULL\n");
-+	ci = cap->ci;
-+	if (!ci)
- 		return;
--	}
-+
-+	session = cap->session;
-+	cl = session->s_mdsc->fsc->client;
-+	inode = &ci->netfs.inode;
- 
- 	lockdep_assert_held(&ci->i_ceph_lock);
- 
-
----
-base-commit: fc67edb66b3c9924c4e0bb366a92b32ea13c526a
-change-id: 20260714-ceph-fix-remove-cap-cf7d8a7a242a
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
-
+regards,
+dan carpenter
 
