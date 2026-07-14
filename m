@@ -1,144 +1,125 @@
-Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
+Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 130EE223707
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 03:45:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBEB933EC
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 03:51:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.54
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784000742; cv=pass; b=MVeOtmCaUoP/EuZLtGKP/OVEvJfLxAsIIt4xANsB2Dmf5YdpJteaER+vBi5aycHAAFzDk9y4ESZpvEhU2hXmvmbAQvDBh62y+sxM9sF1GDKE31YGrix5ulYZ0yxRO90/mm4BimHfq8hUqhQhsWkoSwRoqxD2VNmlW/yicObhhqM=
+	t=1784001117; cv=pass; b=OTZ6BhdrWhwaEalfFn4Lmcf1Z4xIAgEUDUsTNdTN+ZfJHH/NlMKDQGxtonDcmZtookany1n/XRhpQIsL+gyQ99qrLYSAcnXfocUtSDcZWWBs2bdmTwd4F1MGfGLl26OD4sF6fNXcxwI+CZxjVdw2F04M9rb7IMlffzusIFZHTXg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784000742; c=relaxed/simple;
-	bh=fcZrkBeof9TpXVPQEyvtcMEm4cRLNYMqYdOmuCcMd0w=;
+	s=arc-20240116; t=1784001117; c=relaxed/simple;
+	bh=/4vd/ynLVEt73kODiOVbUd9oFRKPKmhd0CMjaZEujjI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=l13Ar9dFfjGSyoNDFdjSfq/RdKrDI66rJEl/qUwnY4FMOGXfpfnf9M9L6I7J6CeysHir2GxuD0GLwXnxoFpT/lLK7jFxxcb7lobzwvj1JIrUKbkZSC22+cjKtt2uajepGKPn0msABQ5IJPeZF4Dm9gmWA0nTPeZmdm9l2fq7JCA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=A8LeGzK7; arc=pass smtp.client-ip=209.85.218.49
+	 To:Cc:Content-Type; b=bTFqEr2ZGhCnYsTHtkQAeXUAZSIFZIxMNRKJ0XC8p3wMK+RfU/H1MDJEjJjaiyAokdmWgtFrErbCYX4VOS3nuHoNlyyJ9ZjO2xTuhX7MiEwKzWr0XCGmoBjBiv7tzp0M40k4Q9j2ZZUC6szDtvFutb2vlvK4zFAqwZN2TxOYGz8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=eP2uJjfa; arc=pass smtp.client-ip=209.85.218.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="A8LeGzK7"
-Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-c165a41a52bso110787866b.3
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 20:45:39 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1784000738; cv=none;
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="eP2uJjfa"
+Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-c15bf399d3bso74734566b.2
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jul 2026 20:51:54 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784001113; cv=none;
         d=google.com; s=arc-20260327;
-        b=ZK28YZGcUsO/kocVhiKjBimToHURHgn1La51vEsZ9AUob/qFxbPRFXVMVRbQOm/uYp
-         5jUZJ3+KwfrTjw/45v8YQIZGs6BG+db0PJU16SzNiBbj/UyQh5q93wYaivrCvO02cnzV
-         LrJYx8ajOACiG7vqz0SSqJw05IW6HbZkdIc0Po+wQKEkOgfQ8xeyHqG1+zcLt+RlLVvb
-         7Yc0R8ymml8Cc2lIcTfXaUkjP/bW7wpAbSK0FFg4N8EBRvL3/ELKk48ab7rNYM2NZ/Qs
-         SURIMV5vgF6v/gGXHJEaJfKxJspsS9zNqHXUyDc5YZBN422+a5HtbSxzfvuOtb/jATTl
-         C2hA==
+        b=bSAyS9jqIBlCTkTCKD4tl+QexeOH06h79gdaCtZc+IBTMcemSWrODm7CWMqVXVLIEF
+         tJYZMFCAh0uYOp6TktZxOSgXDynR/C3tfm3ZPjlqDcv38IQK7dY/JQT6jIybkNEkDobq
+         aKLKx3xedyrVWyucsWDT7noB3KtzAsDRSK/3hH2WRDBP76HyJ0AaFNG4eD8i0CDd78e+
+         jjNupsbQ+xFOvc6q8rQ66dINFOHB/rj7MauI8yz4FgNTe7D+i7BnODbi810IkRvYUJaR
+         VBolbyJbegcEPlRFGO2Ke/sROm8b6P+c7DjyBX8mAMD7hzzktzUVOgt9+M0x1d508xFj
+         sqbQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=P2wJalT5NoWAaDPg81hyWRcv08HRVj1DzDRyhb4A7zU=;
+        bh=BqhgOXrIRwjzJj/3hydnAR7acV/T/DUa6V0q7Bsse2c=;
         fh=QakNoIeExC3YD1Mwx7BqTBiwNoySi6Sh1/4FibovBYw=;
-        b=jyKZ53SR4Sy32k+K9ejLv1DVbq0BzoEjYVpCox5K3B6hDSbeALtUaffWvpUbifZEeQ
-         wq9aH//uFNegXwn6+kW2rptqytcC9twutxs9Yky1JT8qsNI/m2auswFJqUMOl7rDexXp
-         4kUsOMouF0F7D8AlIxYyI/Fe99QpQ/BvJRNpXXCJf4mXto7OgZHNvoKk15YsFk3VrsSL
-         R5D42523E7yZAaSl1jRqiUs/o+2VJZXQP3khFpP6ddHWJPtKVk3fEHKEsaSs1pjna4Tj
-         nWb2KWd85ZMmnH+ayE9nJgB8HLk7JXnRXVldW1Fsz7fC52aR+3GlMZmk07r6HSGwDtdl
-         GOSg==;
+        b=L+7e4zCd90auKWLPPYl6WqMUYKgkQ5FBSsbgocWLTUwsgnnngz6rSfUYHVPurt6Pw2
+         7oS9G95S1LdinGPxb3veN7pw1K0zHAd4uUIr0Ly6m4NBZ46y20ZKIpK6UZqk+3DyLTEf
+         dRTsziWfaHWLbudsu687zXexc2z9rSqse/SsyfN75irSsEhZec/OFD7fBHvVcbV3xD7g
+         Tcnzn+IV67Qo9E2rMSxjt6hGVHoc9J9r3V0rV1jf41DhD6MSkWW15KYktJ0jMaI+Kc12
+         +C8pOCaa1rURTqVdWAJv56SJGKIqBN+8oyXXU65p7hJE0nw/kqRciOf52DqYB3kPasj4
+         08PA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1784000738; x=1784605538; darn=vger.kernel.org;
+        d=clyso.com; s=google; t=1784001113; x=1784605913; darn=vger.kernel.org;
         h=content-type:cc:to:subject:message-id:date:from:in-reply-to
          :references:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=P2wJalT5NoWAaDPg81hyWRcv08HRVj1DzDRyhb4A7zU=;
-        b=A8LeGzK7iHqp+a3+d6v9OkVbPZfq02vFQL38B70afmx7yZVxxetT2Ggppagr6YzhvO
-         UrrH/jijuGU/puPw82jRktQ3f9f2EhM5lgtz0HDG6NgDB0W5gpK2jPBYFTIQ5XgUYVa2
-         VyWIpq1Kep/2841y/jtz3WvKymif6yB7VvgObh/HlBmG5XDMY1Dl6DjkVUcB2RsAT6Jd
-         kUi6OrAAITq3d5L4pu5TJLyLudX9wBuLvh28OY0yPtFQCrlkCjs64aigTUibgmFCN5Gc
-         XSEieJaROw0uCj3+j5XwOWNVzKmpEzDWMuN2xZbILXTOPYl8ySD0/Qf5rcG5MNZlHUAe
-         LIhw==
+        bh=BqhgOXrIRwjzJj/3hydnAR7acV/T/DUa6V0q7Bsse2c=;
+        b=eP2uJjfa8/J51bBvI9N22Uvw34X+EIonQmsaEonzBSO+5cVwlGOUKjkE9tutO40EYd
+         Fh0G8fT5XayffAZHmoJ05FA4OfoPbdvpTToc9hsqXhwhuzwYcAb1oUyODvPWIVFdjq92
+         oSMW221lDZl3jvCxs9D/xiKQ8Y2tjZlf5jA5qPojTYae79ub76/oHTAXlJ+X/z24m1Wi
+         fI+HwGqwMM6LJrZzuX2tfDK/9Zqv8+/u18fUw0uLkwh9E9CsOfcNSGWHQ5rKYQTFcdy4
+         y7gDlNoqGdF4qtgVzf9rDgvc3OkndoS/NSa/rAc0tV0ceVpYTrgdhdfaPNTwdw0SfPzb
+         DQ9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784000738; x=1784605538;
+        d=1e100.net; s=20251104; t=1784001113; x=1784605913;
         h=content-type:cc:to:subject:message-id:date:from:in-reply-to
          :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to:content-type;
-        bh=P2wJalT5NoWAaDPg81hyWRcv08HRVj1DzDRyhb4A7zU=;
-        b=RfkMlJh4KzkCk2xEHQJWYvejkr1c/z6wlvTPvYtuRwAclPi6pDFIHuDMuY4VVeE7NU
-         +ZDcfcfbQ3lYEYIgLYHFQlG38zdMjnQFv4bzCTNJI2/C80tnTu/nh/7gD4eMF4b7Jru7
-         JPqICTvdlYgQGYK45eBuqPK+xNGxfz7w87YEy2MpbAPJc0ZoK+RIcOzsd7Wj9mcucRxe
-         PqsbEn6TAFyvQv6t52EQI248iGUtWU2z5XVmar9cMvYIQLHNasD6T/WcLwTMSswRLhuL
-         HPywoI/NVjhmb2DugiFrIksEOmvA9yZhMW7uPbpvp5eUMI+kBuxWfTtrZQryeAFITZtF
-         XuaA==
-X-Gm-Message-State: AOJu0YzFKOnsJulcBSr61hNvicGZPONVjPmy+PzuQlv8HeD/ks9KUFYx
-	yw8yJP1XCAsavHO+7T8FXEb1/KcddCKz87S7kNiNOoPVMjypjh1x8wD/qblINUrM4r5AorylZj6
-	JnY880zY9vzYkFv3PvAoYG1kEHgMFpxx9uY4s2ypVWg==
-X-Gm-Gg: AfdE7clK2dWlRAy1kvBBAXwSa1ivSi4Yn4I2jDBQszU9A9K/ekBMN2eXtWnsKybXkQp
-	lOz3CxLcdyvIjfdm3kQEZ4s0YRtZ8sIiXieSM1yhm/3mQfjaSJTzmnR40GfxBYJYVcZb5nwdK0h
-	XVUEvpru5yY/iifGN0hIOhY82bCu0SJD6M7QMVlEOyM22YpqhJSnFDXZ5iMMe1RryM81duqfXh7
-	z7rRU4dGwW+CUsBdnq6qhBxlpYkmSwlj/gH8L1r8swTRkcPQozfuhFsljRecHMQLWz58A==
-X-Received: by 2002:a17:907:9721:b0:c15:bd3c:5bda with SMTP id
- a640c23a62f3a-c16678c8f3amr21753566b.13.1784000738548; Mon, 13 Jul 2026
- 20:45:38 -0700 (PDT)
+        bh=BqhgOXrIRwjzJj/3hydnAR7acV/T/DUa6V0q7Bsse2c=;
+        b=Z0+55SGwPXiAwH0ng/7sWz7NBL0C4O/ASNPiIDoJ55AYSqe3UfVOfSoQNEW0+1plqI
+         TGWPCZ45zhPruHPR09W9gOnwUq8NWJlN0DbfxNrmNwcUHPUJuHHD/J8Q9gsysQLOqSdJ
+         cFqzPnT8zwuOxa61MuS8VpgMsW7M1RlrkqA2zc3jb1IfWhPeB6xtAbXiMUKNYtXLdHDK
+         T6LgeNesgewm4T+aqE+I7BAr75nfbObCpJXXoyYNSEN3wQIRSHT4ns9YWjd47ftxO7uB
+         iEHMMtlOiW/YGnTI6SYwYcSK9z6U1bImYLUf+9TVHDzObQYdI3+C/nLRNHy6OTVN5T+S
+         bijw==
+X-Gm-Message-State: AOJu0YwnxE0yCEaZpRzYBxNWYkBuxZbPiRBjldGpLurKKxgjvjRZEbfj
+	4G9O4hl8r0/4luyXF1wIUt60Uhe04RXuxrMZR27I5g877oopKNnhRite5M1Jj3vosdt/FilJR7n
+	kC/Q3vcBXSQ7HfhRm+qkfgf9pf1UanWUg5eIVu8F+5Q==
+X-Gm-Gg: AfdE7cmmwRD4h32sNMPCox2M3pILhig4qZzd2ZjYIn9FaT7r3S++miIOKm51cNluASA
+	f5MmjfQnO4uMWWUkMGNCqXPkk0krSJLLiLlNFQVt06uUT2eN/j/AarmjJUOQsoK3BphaWpQ7hOC
+	sl483UuwBUlAT0XBUVChbRZsFQf1dcdr4zQOUa6XTYEUr+pFSlMY20wWmAtUQw2Kp/KXUCuicSw
+	hKGSg177eui6lbnNyrMgpkQT4ZuIKQd7HlXdRnhG5Ly5iozrFLF+KMBr3d1iIALaBnJbA==
+X-Received: by 2002:a17:907:7211:b0:c16:2e4f:a372 with SMTP id
+ a640c23a62f3a-c162e4fb897mr432711166b.13.1784001113412; Mon, 13 Jul 2026
+ 20:51:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260706143843.1980879-1-amarkuze@redhat.com> <20260706143843.1980879-3-amarkuze@redhat.com>
-In-Reply-To: <20260706143843.1980879-3-amarkuze@redhat.com>
+References: <20260706143843.1980879-1-amarkuze@redhat.com> <20260706143843.1980879-4-amarkuze@redhat.com>
+In-Reply-To: <20260706143843.1980879-4-amarkuze@redhat.com>
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Tue, 14 Jul 2026 11:45:26 +0800
-X-Gm-Features: AUfX_mxJZNLghQmHjTJl0j-xnCCZuP_0KaRaoE3IEz75t2GcK2KvVGJ75twmGVw
-Message-ID: <CAOJNxRKg+PKtX=WKUDyQ1E+E+Sk9LtGcpLQOWfVzuSZDiRu5tw@mail.gmail.com>
-Subject: Re: [PATCH v2 02/15] ceph: add BLOG deserialization support
+Date: Tue, 14 Jul 2026 11:51:41 +0800
+X-Gm-Features: AUfX_mzXyw7QeRGU696lnvbobSBbRphTHZax9qcKHvvI4jKeGlfx3KXz9F4-n3E
+Message-ID: <CAOJNxR+n-496jNQFrOVv+X-nN2_-n-SnLpQ7TYc19-vkmLaqKg@mail.gmail.com>
+Subject: Re: [PATCH v2 03/15] ceph: add BLOG page-fragment allocator
 To: Alex Markuze <amarkuze@redhat.com>
 Cc: ceph-devel@vger.kernel.org, idryomov@gmail.com, jlayton@kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
 On Mon, 6 Jul 2026 at 22:38, Alex Markuze <amarkuze@redhat.com> wrote:
 >
-> Add blog_des.c implementing the binary record deserialization engine
-> used by the debugfs read paths.  Supports %d, %i, %u, %o, %x, %X,
-> %s, %p, %c, and length modifiers (l, ll, h, hh, z).
+> Add blog_pagefrag.c: lockless page-fragment buffer allocator for
+> per-task BLOG contexts.
 >
 > Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 > ---
->  fs/ceph/blog_des.c | 332 +++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 332 insertions(+)
->  create mode 100644 fs/ceph/blog_des.c
+>  fs/ceph/blog_pagefrag.c | 95 +++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 95 insertions(+)
+>  create mode 100644 fs/ceph/blog_pagefrag.c
 >
-> diff --git a/fs/ceph/blog_des.c b/fs/ceph/blog_des.c
+> diff --git a/fs/ceph/blog_pagefrag.c b/fs/ceph/blog_pagefrag.c
 > new file mode 100644
-> index 000000000000..e84ca3fa156c
+> index 000000000000..bae88ea82aec
 > --- /dev/null
-> +++ b/fs/ceph/blog_des.c
-> @@ -0,0 +1,332 @@
+> +++ b/fs/ceph/blog_pagefrag.c
+> @@ -0,0 +1,95 @@
 > +// SPDX-License-Identifier: GPL-2.0
 > +/*
-> + * Binary Logging Deserialization
+> + * Binary Logging Page Fragment Management
 > + */
 > +
+> +#include <linux/printk.h>
+> +#include <linux/slab.h>
+> +#include <linux/mm.h>
+> +#include <linux/module.h>
 
-[......]
+This file is simple and it seems the three headers above are never used?
 
-> +               case 'p': {
-> +                       void *ptr;
-> +
-> +                       if (buf_ptr + sizeof(void *) > buf_end)
-> +                               return -EBADMSG;
-> +
-> +                       ptr = (void *)(unsigned long)get_unaligned((unsigned long *)buf_ptr);
-> +                       buf_ptr += sizeof(void *);
-> +
-> +                       /*
-> +                        * Skip kernel %p sub-specifiers (U, I, d, D, etc.).
-> +                        * bout/boutc do not support %p extensions; call sites
-> +                        * must pre-format them with snprintf and pass %s.
-> +                        */
-> +                       while (fmt_ptr[1] && isalpha(fmt_ptr[1]))
+I removed them locally and the compile succeeded.
 
-s/isalpha()/isalnum()/ ?
 
-Because %p can also include numbers, likes:
-
-sprintf(tbuf, "%pI4", n->key);  <<== For IPv4 address
-
-> +                               fmt_ptr++;
-> +
-> +                       ret = snprintf(out_ptr, remaining, "%p", ptr);
 [......]
