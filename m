@@ -1,115 +1,177 @@
-Received: from mail-oo1-f54.google.com (mail-oo1-f54.google.com [209.85.161.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.web.de (mout.web.de [212.227.15.4])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBBFB3DF001
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 07:19:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD00C125AA;
+	Tue, 14 Jul 2026 07:33:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.4
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784013560; cv=none; b=DVcPvQDMQYd6/nFqNEKUKPxYtxye3MsPSuuCYqSP/zcMmuILNKcDaIkazHqXYeYmg2BLp7vaA/v/Et5Bm9cob7/zhyY+iZIp4XGOsUs57cor0OtsLvmOBhyqPXQAO2v7NzADp37vkhtwDLIZ1QQeuo4+mZwamcHO8WBf1ULBVG8=
+	t=1784014429; cv=none; b=oFDGu5py91kzXBhyr5y+gqslvhXuMTjnZ/49Wc4/+piy+HYdqU3p9z83yZbeNNxLjYWmjsy2OIkMpgZo80PA8NFqmEvRXgjvF58e5AxZgmm2FzbqSGJ+VXq/NtBzBS7rC66w8lA7MG6LymgbwV8NJHQGGN+mWGC0FkB5/hJdzH4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784013560; c=relaxed/simple;
-	bh=kIERie8dbqx2+eAvdsr037DRwXWzmtXALWanJlNJzi4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=l7ubf4miLvLUW9dwUDe8i0410DS8jHSJiOjmWj3BxEd+/KYdib2vjYdZyINkQ4JWmX4Gi6FelYwvGjQFyXZ9RE1zuWRq6jARP9fPfoz20FXM8Ab2/MGf10B+NQpTuN779pyp7lYEuYnepe26gPaBqEtXKf1vUj5FIngmv6KSbD4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=l9Ty8bRM; arc=none smtp.client-ip=209.85.161.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1784014429; c=relaxed/simple;
+	bh=5sFLzjVg3/3Ur9xUDRCAPnOGK3vuVyo/t8PTF8bN4N4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=CX2G5VK6QiU4dOKBLlSCKBdNl7Nmz2+uv96PWdPWkJm/8u7RomNUiuc+PYrAZi5Npzw7ejTFbxT71ewlwwLJcOpkQ6DU1Zwurtf/lj433VIKAZLyFtYEVbOZa6I1MYRd10xdNpvUXyrIpNKDCCbiv+8TR1tEgR6YNU21NxhalNE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de; spf=pass smtp.mailfrom=web.de; dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b=hZiFRzRN; arc=none smtp.client-ip=212.227.15.4
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="l9Ty8bRM"
-Received: by mail-oo1-f54.google.com with SMTP id 006d021491bc7-6a37b2643e2so440037eaf.0
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 00:19:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1784013558; x=1784618358; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :content-type:mime-version:references:message-id:subject:cc:to:from
-         :date:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=/lycI0z8Y1t9+PubOdFL76Fa/oKSxmR3LtUe6RN9X5A=;
-        b=l9Ty8bRMZ40fguL72C53R45aZma+3XUfdp1+oyWyLdLSpl6D4C19CO5zGNDenqXBA6
-         BJFBTqlnwiQDe2FZZQEI+7POWvE/QpgaJ1FVcxqoR5JwpKq4hpWIMgDL2RVl5NTZwQtD
-         FhySSE6dSng+C2FsveUkpRjryk2W9p523f9Jf2s2GtNcV8i6NxDR1dbviFrnE4dCc6uV
-         EAONsTw/CJyvOfMrS2OOF2uzbr3/uCExtYIplMQ8/CLOknMYtaZHhBBmcSriFVVDvHgZ
-         W8rkDjs7oieEilvbNCfz+YasMoZrTdAGQlerxfioFmE7PTPKHf5kelbKLHDbF8yXQO32
-         UiJw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784013558; x=1784618358;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :content-type:mime-version:references:message-id:subject:cc:to:from
-         :date:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=/lycI0z8Y1t9+PubOdFL76Fa/oKSxmR3LtUe6RN9X5A=;
-        b=MY123tc7npw/N20nxaGNRzdXe4Ke1+DmKcyajAMAmbPWW0Ni/A64tAqYjzoKh5UfX4
-         D+1bszkMUhLP5AznWDZz3I0KERARWj+Mqt2CVQXFpfUyiqSH5d87Yv30I76k0+SO8pCs
-         aWp7WQj0C9FzpKxSrPLtRIkfYHHRMHs7mF7viXnjYbYdXhKlKm6vOJfG5MJp665eBU97
-         AzdJ4TJ3o9rxKCU8P+bV+00+TPe06XdtFZJSQV8OqOEspTmx+Aa53jSIlNOTqOwGqA1W
-         ZOF/HQvw9HwyVs4adyR+MlMM8YG3RRDy9jcnL8Br9xWoXutfusXywNO/E+Q3vvYdJ1yC
-         ks6w==
-X-Forwarded-Encrypted: i=1; AFNElJ/l7s+NVmbPmTe0sA2JFH/d5vmNNz+B2J1Gu0BHT7DN/495NyyaxZFn6P8jm20KetryV/e1hMxYmhKg@vger.kernel.org
-X-Gm-Message-State: AOJu0YzCZESiQLwRsVMmDeTTZbINzS8xZ9rK64a8/uXDYHOnjCa4s+qG
-	rxfyEDhmoaZGKtg01e70DcxNFoVJT7Ek2dAJFR8UyaNDlifw1tpJPf+8
-X-Gm-Gg: AfdE7ck3MpdbnLtd++frjvmrdZH9xtvK3FZOel/wegI7dPpO+4Lwsl+pBJ4VZ4ejbJw
-	DoosJssHpzyRo9tipb4kLWFNviMaP9Evi4dZqFBfXg1y7LSXS3MQKmFqwGECYlZIVx7tpxqn8rk
-	sZkdd1IwQ+mumrgyaVKmUY1mBK6XP/pWoIcoJFCeigNeB9j0sszxcnsO1Rh6Kjytzf98iBsfdSI
-	tdBG2d/J3tjZzFSsznEYXUefFh3/DWtGNgcGpaFg71QB6nXZ+3fIqsy8/UxzJK88BHeX47HBUiJ
-	baYYYlI6xvWWQLm9e89Z9gqgIV4l8ZugyP7dwGKL1cTb4ZVIBYzyH0x+RDELbsUylAlCT7HSHkq
-	wlDmmZV0XFcDI4j2tZ0unjO3DNXbvjK6K5/bCgPQAUzzp0II1FVP2Tm7V6lWcyKgyQil1DPNlJD
-	fXZUPL
-X-Received: by 2002:a05:6820:4cc1:b0:6a3:916a:1d26 with SMTP id 006d021491bc7-6a39a8561bemr7965231eaf.61.1784013557982;
-        Tue, 14 Jul 2026 00:19:17 -0700 (PDT)
-Received: from localhost ([74.80.182.78])
-        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7ec14489139sm6783167a34.5.2026.07.14.00.19.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Jul 2026 00:19:16 -0700 (PDT)
-Date: Tue, 14 Jul 2026 10:19:11 +0300
-From: Dan Carpenter <error27@gmail.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: Markus Elfring <Markus.Elfring@web.de>, ceph-devel@vger.kernel.org,
-	Alex Markuze <amarkuze@redhat.com>, Helge Deller <deller@gmx.de>,
-	Ilya Dryomov <idryomov@gmail.com>, Kees Cook <kees@kernel.org>,
-	LKML <linux-kernel@vger.kernel.org>,
-	kernel-janitors@vger.kernel.org
-Subject: Re: [PATCH] ceph: Move a variable assignment behind a condition
- check in __ceph_remove_cap()
-Message-ID: <alXi78mFuDLaVQ4b@stanley.mountain>
-References: <5010d7d4-e321-4999-aca6-1caa040f3037@web.de>
- <bd15b4d5ccdcf01a8730380c4d974afaab2c782a.camel@dubeyko.com>
+	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="hZiFRzRN"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=web.de;
+	s=s29768273; t=1784014407; x=1784619207; i=markus.elfring@web.de;
+	bh=85qE3Kchsh70a2/0rrIr8Q1Ar+DD8lFotLQBFTihFl4=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=hZiFRzRNAZ4IGPg+GxpgfN/xpicCnsty3axuYdu34UvDWcfzENjg2lb0KOq7zzSK
+	 E70FUOMmtv9wAlZRHiLl6WYPd5e4KhpC6X0T5xJChTrVEggj3RprvP9g5R6MmZb3u
+	 myippvWNzkIZlJEPi8h1B6QZxe+sim1zz2qOb57PRCb52njcnCH+CKgjQa8Ga5JTE
+	 T+jT421cZWa+rq8uEtXSp/LrU07OLvGSvP+p1IJANV7Bhurso3i9dQ77nsdoKbSOk
+	 xjF5vQnfyDAhjKfOu4xZmHiJjjE9Ss0TJ0LkuFQtcdDngqW9Hbtc/pF44qebA3lXs
+	 pvQDxlh1xCOkBMM/rA==
+X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
+Received: from client.hidden.invalid by smtp.web.de (mrweb006
+ [213.165.67.108]) with ESMTPSA (Nemesis) id 1MZjEJ-1wVQTw346B-00UKK9; Tue, 14
+ Jul 2026 09:33:27 +0200
+Message-ID: <9a9f104b-5c9b-4268-9622-706829e67a6d@web.de>
+Date: Tue, 14 Jul 2026 09:33:18 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <bd15b4d5ccdcf01a8730380c4d974afaab2c782a.camel@dubeyko.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: ceph: Move a variable assignment behind a condition check in
+ __ceph_remove_cap()
+To: Dan Carpenter <error27@gmail.com>, Viacheslav Dubeyko
+ <slava@dubeyko.com>, ceph-devel@vger.kernel.org,
+ kernel-janitors@vger.kernel.org
+Cc: Alex Markuze <amarkuze@redhat.com>, Helge Deller <deller@gmx.de>,
+ Ilya Dryomov <idryomov@gmail.com>, Kees Cook <kees@kernel.org>,
+ LKML <linux-kernel@vger.kernel.org>
+References: <5010d7d4-e321-4999-aca6-1caa040f3037@web.de>
+ <bd15b4d5ccdcf01a8730380c4d974afaab2c782a.camel@dubeyko.com>
+ <alXi78mFuDLaVQ4b@stanley.mountain>
+Content-Language: en-GB, de-DE
+From: Markus Elfring <Markus.Elfring@web.de>
+In-Reply-To: <alXi78mFuDLaVQ4b@stanley.mountain>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:oDkva4Afp0k8AboJ4l+Etu3dd+G9/nsseSY3jzkZrcn8ryWOpsX
+ fE6umDOmbZRoBf0I0t26rntKbn4+unLvqwr+4xd8InP00+YtMmIyAMt8WNa7SGzWrLwMfje
+ iT55uqP2CaN1/9MFOPNp2Qn2HJ76X/7Ond532g/Nr7A96+yVCkThIzD7sQYTB9gMQXkOZCj
+ 7d4PaEOLxWTkYUOHI5vcQ==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:4iKB1Nzjmi8=;K/mi93wK0GwJ9z1yfVaZ0SAN7H6
+ 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
+ Fx/cmV3mXppOoPamSVm7SfDSFmBStxzWqlH8DR1
 
-On Mon, Jul 13, 2026 at 03:10:40PM -0700, Viacheslav Dubeyko wrote:
-> On Mon, 2026-07-13 at 13:35 +0200, Markus Elfring wrote:
-> > From: Markus Elfring <elfring@users.sourceforge.net>
-> > Date: Mon, 13 Jul 2026 13:21:29 +0200
-> > 
-> > The address of a data structure member was determined before
-> > a corresponding null pointer check in the implementation of
-> > the function “__ceph_remove_cap”.
-> > 
-> > Thus avoid the risk for undefined behaviour by moving the assignment
-> > for the variable “inode” behind a condition check.
-> > 
-> > This issue was detected by using the Coccinelle software.
-> > 
-> > Fixes: 38d46409c4639a1d659ebfa70e27a8bed6b8ee1d ("ceph: print cluster
-> > fsid and client global_id in all debug logs")
-> > Cc: stable@vger.kernel.org
-> > Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+>>> The address of a data structure member was determined before
+>>> a corresponding null pointer check in the implementation of
+>>> the function =E2=80=9C__ceph_remove_cap=E2=80=9D.
+>>>
+>>> Thus avoid the risk for undefined behaviour by moving the assignment
+>>> for the variable =E2=80=9Cinode=E2=80=9D behind a condition check.
+>>>
+>>> This issue was detected by using the Coccinelle software.
+>>>
+>>> Fixes: 38d46409c4639a1d659ebfa70e27a8bed6b8ee1d ("ceph: print cluster
+>>> fsid and client global_id in all debug logs")
+=E2=80=A6
+> I have explained to Markus many times that these are not dereferences,
+> they are just pointer math.
 
-I have explained to Markus many times that these are not dereferences,
-they are just pointer math.  So the original code works fine and does
-not need a Fixes tag or a CC to stable.
+How does it help to repeat such a questionable development view?
 
-And then Markus responds, "the C standard says we are not allowed to
-dereference NULL pointers"...  Which is true, but again, it's not a
-dereference.
 
-regards,
-dan carpenter
+>                              So the original code works fine and does
+> not need a Fixes tag or a CC to stable.
+>=20
+> And then Markus responds, "the C standard says we are not allowed to
+> dereference NULL pointers"...  Which is true, but again, it's not a
+> dereference.
+Why did you get special difficulties with adhering to standard specificati=
+ons
+also in the discussed case?
 
+Regards,
+Markus
