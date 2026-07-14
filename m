@@ -1,288 +1,376 @@
-Received: from mail-qk1-f173.google.com (mail-qk1-f173.google.com [209.85.222.173])
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2EF89392C5F
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 11:51:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9EE34156EB
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 17:43:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784029909; cv=none; b=q6XzUPhoLl0He85ClspTsGp9e2mg0HaSk1MUFnKzFpaartXeITEhQFS76cmOSWdrhcBpqGk7xHeom36f/C9n5q3xO0wuAjAVoRD393N1C/a0htD0YCxtDndWHGkVnAGl3CSkAItws9T5wwUEekPEw+2GPSKzV981Ca0ZjYJZbnk=
+	t=1784051021; cv=none; b=S3lGMcskj3Ao5R1x4Vy5yE/fHF0aqzqcyuePe9+vlLd1CKTHk1tFnV+ZUAka5FFJkwTDQkk3lq7PjSDE89jgsDnpcY1G+KbHXKQL0A6DsH6egDs0NSQ+aIVO8fLYro2sXtChzdFm9c8PPVyfJVIDm5UQKYc/HZsXSBuLqGegm1w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784029909; c=relaxed/simple;
-	bh=p2+stEBi4BElrza3ht2ZDPtC7TCuwqQDOOPe33VgEbE=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rx5cYchp1gNiVxGEF8SrMWeHRcDkDYQj1+ul50H3imFwhAew9jkJIoiHpCPWhVanlYMOrXipeb6t8j1dViuqysS0lrp6ymgHwyHrHsid4lslsau+GLkbhwRhHZCkH8iy0jYZe+3qUoX0Klft5rxCBsTxgtdZ4FrfemZoJu0mbx4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=o9nPdpiy; arc=none smtp.client-ip=209.85.222.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1784051021; c=relaxed/simple;
+	bh=rrheX9zLnTW0q9CUdPKHOxyibv+wv7jJL8WMfHrf2G0=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=DKtt9S+feCW+OWy5XLVWz/xOZ5BsEoF7vXBxqfxHjYejolDlSirWbBYXk1qZQGxgGK4aA14bm6fUaQHbvtaHkJiL1jMNWa4YX7KBNDJhdDcTUIBzrmOLymJ8V0SMAz30QI3x+yhNckP/LwnR3PLMd6t08GkYBH8ZyaAOVssN1Tk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=QXod+ipn; arc=none smtp.client-ip=209.85.128.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="o9nPdpiy"
-Received: by mail-qk1-f173.google.com with SMTP id af79cd13be357-92f0b5ed131so134759385a.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 04:51:48 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="QXod+ipn"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-81e9f7491ffso43534367b3.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Jul 2026 10:43:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1784029907; x=1784634707; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=Y3h+GE7dRUK0jTaidLd+LkoAa9P1Kl0QyikD71h1Zag=;
-        b=o9nPdpiyiWXVHL+eDWUnoXmzHcjcAMp5jc7cjAFEfNb9VytbgL2UY0hJ9AUZ4QKvqY
-         cXCJB5oXzLiB2NLov8NP1jHW7m+aiy5JKgEkivx830ryj95sieaNbfglAxojSXdqVmZr
-         dPsoQ47rHBjEkLKhGuhK79aR3PJfptT3HUpl/Fa56VJk+Bp3tmHk/t28OloJ8+VrVXZ6
-         9HvqLb+6seXlOeJR/jnWsRk1sgufNEJQHSJ9JAB7kZ9/xWIgF1h+vRRIDN2WT+2eOVRc
-         DMHOpeYu/z7nXyOLov2dh/nFvtIyJJzZTn9qPpVqlsuhay5wBzyWv+UcyPGkg9bCRfS8
-         KGeg==
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784051012; x=1784655812; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:content-type
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
+         :from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=G9wlwE1qc1NCTa5GQJy5k8lqlcIm2ec1yJpzofB80Ug=;
+        b=QXod+ipnxSKfyJ6+TksfrOr0XbppMP8+9VZlmW6ZH9jmJ8gvYip+5uu7HYGBmrUX8O
+         l2y329JroToourITPBLwgoE2NcaPMLSTg5UAcaa5VprxxY9VOW1V+02aZS5M4LdOf4ug
+         nHc21DWY1o5sP5GXpZXBq1hMLZP7MBnnteON6rKksDFPnGxpGmHq5XgmZAvs1XfQMPlB
+         Yt3t8TDpliYJ9Ii/jMsTyWIM5jilqklMTkuq8zoD5yCbXLYPjJjfUj0E1Y+ZwYTnytZO
+         iphFFvk80L4q/x/WRcpi4exmKdSWzRKBxhz0SKvAzp+OO48+oLOYxLad7VZwkLqVGdNk
+         /xuQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784029907; x=1784634707;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Y3h+GE7dRUK0jTaidLd+LkoAa9P1Kl0QyikD71h1Zag=;
-        b=KVANn8oXaFgOaQ7oc8ssZmiUC+7S6ooIlAgcv2rJuY2RRK8Xf78nBknIVgBzGiSi2L
-         kvh3pTFOsUYcE+BBVspb8AvFU3m9O1Ex/j5C8x97gcNxi0b2Ewjpm2IP6FRSSXeMoX+K
-         dZVhOgnZxYCzpFT/2+/CQrcDz1E8X11OO4yEIjl2F3XCOOO97D6pdTyUafM3ZDR3IEGH
-         xXNRq5uxfIvdvth4qCW4Emn5rElAVMWdE3bSDpnVk+SAmR+g6ZMI625bVFCs0UNOyTCA
-         I827bwPvCN65uQWCymBf/bIy5/STxy5NpS9zOEPOkzXUsgZnJnXS6GTeb56s7FG8gx5y
-         RkJQ==
-X-Forwarded-Encrypted: i=1; AHgh+RqlPn1Gc5PEYPLd3uyOCeM/1vATgb2pGUb78c3ypIwDFd0taRe8PVQD49Oc78iIHFq9b+1c9PT2AKQV@vger.kernel.org
-X-Gm-Message-State: AOJu0YyI8JnZ4VZyPs6ppkBgKoC2tXb6IDh0I5vyXt1y9CREa6xA+q1Y
-	5iARE9Wx9gOPA/SWBhMoq+RihPH6Q3Mrf2noN7f+8fiWiIJUTNcJpuN/
-X-Gm-Gg: AfdE7ckqZvjnvIeAT3HfL+AMBfHgsxAzLHcmfmyKoF0MRMeU8O75BOOUOLjWk+1UrJZ
-	TBBxlXMclrt6n7h//CKOlSHzwRI9Jcj80kRp1qh28DE0vD7qAYClfqFg8dAkw+Inq31PBTDhXDH
-	MPhzQaC3fmCPmt5po9EdU3i7A2jQkK1umXsPAyYqFwusjG+gJNbSPxTd/JHdl1jmbtJFPXmqLFG
-	9f55aBMxL0f6zJbinhQ1X7gETLGwfo1H9vH5umIuxcZh3J9Sl9A9VxwDysXhl37buiqlWEgL4rL
-	EnbOzXwELeyfs54IKEbOrg+QJGl/O4h9UTMuJ+8AF24NDBUcAVvB+hInvVVoH3fVo2f5Mb6hYlm
-	oudzBX6GQymNvYvuuwxd2W1zx9hcdYYBZEp0AIEKxiPmjoNCQB4/PVOk8x7+2S6OpDDJOoyH8/E
-	KCp6zxcTTs407Ekr/0MpKUy0BjufjVLwSjzuJrw0ASYClsh90Ig736wQyW1VK/xueFPoW7u0v5g
-	i6rYf2eHg==
-X-Received: by 2002:a05:620a:a1c5:b0:92b:6805:91bc with SMTP id af79cd13be357-92ef2c83ec3mr1042554585a.68.1784029907021;
-        Tue, 14 Jul 2026 04:51:47 -0700 (PDT)
-Received: from server0 (c-68-48-65-54.hsd1.mi.comcast.net. [68.48.65.54])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-92ee5d6c28bsm1479415585a.46.2026.07.14.04.51.45
+        d=1e100.net; s=20251104; t=1784051012; x=1784655812;
+        h=mime-version:user-agent:content-transfer-encoding:content-type
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=G9wlwE1qc1NCTa5GQJy5k8lqlcIm2ec1yJpzofB80Ug=;
+        b=DkvgHbFtIfw1L36O87M4tvWgO+UB2E5GVS5xKDNpHjVkshnFMcEX7XXk0uCzZEvwxv
+         Foe/t1hvkFr0cz6C/rOn1Y69jp3ZKHt4up2Tf1/QdrMMJdW8FkTpEVR6P7/KG/8D6qzK
+         s8SJkJl4d/nEMVsfswBguol5UjYhl7Ki3kXXf0e4DnKs7J6GYjfV/1gqaoh/u/YU27B9
+         BciozwDbepdxrsebwIF5SA/PwYm5MWDvlz0N+kaGMkHf3tIYE/3uxOz9xIDr9qnx5vuU
+         BGH35YUBRkAmgy4lEArTvcJY4em/fLRGirJmBQrtFUPqmj+FrsY6XpAd6hRW4TT9bpfh
+         iPHw==
+X-Gm-Message-State: AOJu0YwdehLtQD02YjKODL50eNPld9EgtH1KK2se9vFX2rfnNHaZMZ0m
+	z+sXL6UTkiMviLrf6cKVP5/n7Uc7WSNGCPz12W5vSyP34QgsCyoTadXUBlEYPkicgUg=
+X-Gm-Gg: AfdE7cnW78eYVnZBMJjiz9gYhe++yUvdQUYL/3MB2ZDCn5NnMsq6g4Y98B54o8REQ1O
+	ixDEgCBbTDIgmcSDFFaLLcEK7ljY6ZFnc1JL8tfgQ8vXjOV8qDf17Tq4itYCGNvhgVJkOVfkD0x
+	yH4fZYuCD7vqmKwyctFMG/ctKJT5p0hacVckrkn0aXL09x8ktH1alehETDEskGyIWIVxqgYumb/
+	vGGDyle/+dsRFXwtJc3F8BAizjvKgxjtWNECIIzrxFIXqTon3ONYLBGgGCml13jQKfjCFJcl7au
+	CoehsgSztx/goobmMy5pzgBXRPNAfDTScHQlbPHkbeoIwz9oCaMZTCEcg3wJU+bq3MevdNqZ/Mk
+	d0/havSaaI8dp+XqJzWkkimFCVlLrnjnho3Ts8bNd23SYSsMe5Ft+4mFW6A9XiKbqIrTrSFw8v8
+	o6HkflM7W4WJ4lyGxCUxbdySXhK0GQC/l8bgw9eEmbNEdJkKHcwz7QgNRQx+3Qyr5LDKZBp5n4t
+	HdXmMixGoR1vWxhiVgvutSKmMfaAvnJcJvqxnkoY4kUobX1hZN6D3nJh76/oi6QaNIdiRyX6ovy
+	THcB/C2joEI3AOVd
+X-Received: by 2002:a05:690c:660a:b0:81e:6d9b:1556 with SMTP id 00721157ae682-81ec0076513mr23814757b3.42.1784051011994;
+        Tue, 14 Jul 2026 10:43:31 -0700 (PDT)
+Received: from ?IPv6:2600:1700:6476:1430:9b87:2209:14fb:1802? ([2600:1700:6476:1430:9b87:2209:14fb:1802])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e6be98397sm147788057b3.6.2026.07.14.10.43.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Jul 2026 04:51:46 -0700 (PDT)
-From: Michael Bommarito <michael.bommarito@gmail.com>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Viacheslav Dubeyko <slava@dubeyko.com>,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
+        Tue, 14 Jul 2026 10:43:31 -0700 (PDT)
+Message-ID: <94afbe7aab19700afa9ec7200675e6c15cf344af.camel@dubeyko.com>
+Subject: Re: [PATCH v2 2/2] libceph: add KUnit coverage for OSD sparse-read
+ extent validation
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: Michael Bommarito <michael.bommarito@gmail.com>, Ilya Dryomov
+	 <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
 	stable@vger.kernel.org
-Subject: [PATCH v2 2/2] libceph: add KUnit coverage for OSD sparse-read extent validation
-Date: Tue, 14 Jul 2026 07:51:40 -0400
-Message-ID: <20260714115141.3768034-3-michael.bommarito@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260714115141.3768034-1-michael.bommarito@gmail.com>
+Date: Tue, 14 Jul 2026 10:43:29 -0700
+In-Reply-To: <20260714115141.3768034-3-michael.bommarito@gmail.com>
 References: <20260714115141.3768034-1-michael.bommarito@gmail.com>
+	 <20260714115141.3768034-3-michael.bommarito@gmail.com>
+Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
+ keydata=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
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.60.1 (by Flathub.org) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
 
-Add KUnit coverage for the sparse-read extent-map validation added by the
-previous patch. The tests drive the real osd_sparse_read() state machine
-over a synthesized OSD reply (no OSD or network): an in-range single
-extent is accepted and advances the cursor, and an extent whose offset
-lies outside the original request range is rejected with -EREMOTEIO before
-the message-data cursor is advanced.
+On Tue, 2026-07-14 at 07:51 -0400, Michael Bommarito wrote:
+> Add KUnit coverage for the sparse-read extent-map validation added by
+> the
+> previous patch. The tests drive the real osd_sparse_read() state
+> machine
+> over a synthesized OSD reply (no OSD or network): an in-range single
+> extent is accepted and advances the cursor, and an extent whose
+> offset
+> lies outside the original request range is rejected with -EREMOTEIO
+> before
+> the message-data cursor is advanced.
+>=20
+> The suite is included from osd_client.c so it can exercise the static
+> sparse-read parser and cursor-advance helpers without exporting test-
+> only
+> symbols, guarded by CONFIG_CEPH_LIB_KUNIT_TEST.
+>=20
+> Assisted-by: Codex:gpt-5-5-xhigh
+> Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
+> ---
+> =C2=A0net/ceph/Kconfig=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 |=C2=A0 12 +++
+> =C2=A0net/ceph/osd_client-kunit.c | 146
+> ++++++++++++++++++++++++++++++++++++
+> =C2=A0net/ceph/osd_client.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0=
+=C2=A0 4 +
+> =C2=A03 files changed, 162 insertions(+)
+> =C2=A0create mode 100644 net/ceph/osd_client-kunit.c
+>=20
+> diff --git a/net/ceph/Kconfig b/net/ceph/Kconfig
+> index 7e2528cde4b94..6b78fe4a0f8a4 100644
+> --- a/net/ceph/Kconfig
+> +++ b/net/ceph/Kconfig
+> @@ -45,3 +45,15 @@ config CEPH_LIB_USE_DNS_RESOLVER
+> =C2=A0	=C2=A0 Documentation/networking/dns_resolver.rst
+> =C2=A0
+> =C2=A0	=C2=A0 If unsure, say N.
+> +
+> +config CEPH_LIB_KUNIT_TEST
+> +	bool "KUnit tests for the Ceph core library" if
+> !KUNIT_ALL_TESTS
+> +	depends on CEPH_LIB && KUNIT
+> +	default KUNIT_ALL_TESTS
+> +	help
+> +	=C2=A0 This builds KUnit coverage for selected Ceph core-library
+> parser
+> +	=C2=A0 and state-machine helpers. The tests exercise internal
+> libceph
+> +	=C2=A0 behavior with synthesized state and are intended for
+> developer
+> +	=C2=A0 validation rather than production systems.
+> +
+> +	=C2=A0 If unsure, say N.
+> diff --git a/net/ceph/osd_client-kunit.c b/net/ceph/osd_client-
+> kunit.c
+> new file mode 100644
+> index 0000000000000..713f24675f68f
+> --- /dev/null
+> +++ b/net/ceph/osd_client-kunit.c
+> @@ -0,0 +1,146 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * KUnit coverage for net/ceph/osd_client.c internals.
+> + *
+> + * Included from osd_client.c so the test can drive the real static
+> sparse-read
+> + * parser and cursor-advance helper without exporting test-only
+> symbols.
+> + */
+> +
+> +#include <kunit/test.h>
+> +
+> +struct ceph_osd_sparse_read_test {
+> +	struct ceph_osd osd;
+> +	struct ceph_connection con;
+> +	struct ceph_msg *msg;
+> +	struct ceph_msg_data_cursor cursor;
+> +	struct ceph_osd_request *req;
+> +	struct page **pages;
+> +	struct page *page;
+> +};
+> +
+> +static int ceph_osd_sparse_read_test_init(struct kunit *test)
+> +{
+> +	struct ceph_osd_sparse_read_test *ctx;
+> +
+> +	ctx =3D kunit_kzalloc(test, sizeof(*ctx), GFP_KERNEL);
+> +	KUNIT_ASSERT_NOT_NULL(test, ctx);
+> +
+> +	ctx->req =3D kunit_kzalloc(test, struct_size(ctx->req, r_ops,
+> 1),
+> +				 GFP_KERNEL);
+> +	KUNIT_ASSERT_NOT_NULL(test, ctx->req);
+> +
+> +	ctx->pages =3D kunit_kcalloc(test, 1, sizeof(*ctx->pages),
+> GFP_KERNEL);
+> +	KUNIT_ASSERT_NOT_NULL(test, ctx->pages);
+> +
+> +	ctx->page =3D alloc_page(GFP_KERNEL);
+> +	KUNIT_ASSERT_NOT_NULL(test, ctx->page);
+> +	ctx->pages[0] =3D ctx->page;
+> +
+> +	ctx->msg =3D ceph_msg_new2(CEPH_MSG_OSD_OPREPLY, 0, 1,
+> GFP_KERNEL, true);
+> +	KUNIT_ASSERT_NOT_NULL(test, ctx->msg);
+> +
+> +	osd_init(&ctx->osd);
+> +	ctx->osd.o_sparse_op_idx =3D -1;
+> +	ceph_init_sparse_read(&ctx->osd.o_sparse_read);
+> +
+> +	request_init(ctx->req);
+> +	ctx->req->r_tid =3D 1;
+> +	ctx->req->r_num_ops =3D 1;
+> +	osd_req_op_extent_init(ctx->req, 0, CEPH_OSD_OP_SPARSE_READ,
+> +			=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 0, PAGE_SIZE, 0, 0);
+> +	KUNIT_ASSERT_EQ(test, ctx->req->r_ops[0].op,
+> CEPH_OSD_OP_SPARSE_READ);
+> +
+> +	insert_request(&ctx->osd.o_requests, ctx->req);
+> +
+> +	ctx->msg->hdr.tid =3D cpu_to_le64(ctx->req->r_tid);
+> +	ceph_msg_data_add_pages(ctx->msg, ctx->pages, PAGE_SIZE, 0,
+> false);
+> +	ceph_msg_data_cursor_init(&ctx->cursor, ctx->msg,
+> PAGE_SIZE);
+> +
+> +	ctx->con.private =3D &ctx->osd;
+> +	ctx->con.in_msg =3D ctx->msg;
+> +
+> +	test->priv =3D ctx;
+> +	return 0;
+> +}
+> +
+> +static void ceph_osd_sparse_read_test_exit(struct kunit *test)
+> +{
+> +	struct ceph_osd_sparse_read_test *ctx =3D test->priv;
+> +
+> +	if (!ctx)
+> +		return;
+> +
+> +	if (ctx->req && !RB_EMPTY_NODE(&ctx->req->r_node))
+> +		erase_request(&ctx->osd.o_requests, ctx->req);
+> +	ceph_init_sparse_read(&ctx->osd.o_sparse_read);
+> +	if (ctx->msg)
+> +		ceph_msg_put(ctx->msg);
+> +	if (ctx->page)
+> +		__free_page(ctx->page);
+> +}
+> +
+> +static int ceph_osd_sparse_read_feed_one_extent(struct kunit *test,
+> +						u64 off, u64 len,
+> u32 datalen)
+> +{
+> +	struct ceph_osd_sparse_read_test *ctx =3D test->priv;
+> +	struct ceph_sparse_read *sr =3D &ctx->osd.o_sparse_read;
+> +	char *buf =3D NULL;
+> +	int ret;
+> +
+> +	ret =3D osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
+> +	KUNIT_ASSERT_EQ(test, ret, (int)sizeof(sr->sr_count));
+> +	KUNIT_ASSERT_PTR_EQ(test, buf, (char *)&sr->sr_count);
+> +
+> +	sr->sr_count =3D (__force u32)cpu_to_le32(1);
+> +	ret =3D osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
+> +	KUNIT_ASSERT_EQ(test, ret, (int)sizeof(*sr->sr_extent));
+> +	KUNIT_ASSERT_NOT_NULL(test, sr->sr_extent);
+> +	KUNIT_ASSERT_PTR_EQ(test, buf, (char *)sr->sr_extent);
+> +
+> +	sr->sr_extent[0].off =3D (__force u64)cpu_to_le64(off);
+> +	sr->sr_extent[0].len =3D (__force u64)cpu_to_le64(len);
+> +	ret =3D osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
+> +	KUNIT_ASSERT_EQ(test, ret, (int)sizeof(sr->sr_datalen));
+> +	KUNIT_ASSERT_PTR_EQ(test, buf, (char *)&sr->sr_datalen);
+> +
+> +	sr->sr_datalen =3D (__force u32)cpu_to_le32(datalen);
+> +	return osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
+> +}
+> +
+> +static void ceph_osd_sparse_read_in_range_extent(struct kunit *test)
+> +{
+> +	struct ceph_osd_sparse_read_test *ctx =3D test->priv;
+> +	struct ceph_sparse_read *sr =3D &ctx->osd.o_sparse_read;
+> +	int ret;
+> +
+> +	ret =3D ceph_osd_sparse_read_feed_one_extent(test, 0, 16, 16);
+> +
+> +	KUNIT_EXPECT_EQ(test, ret, 16);
+> +	KUNIT_EXPECT_EQ(test, sr->sr_pos, 16);
+> +	KUNIT_EXPECT_EQ(test, ctx->cursor.sr_resid, 16);
+> +	KUNIT_EXPECT_EQ(test, ctx->cursor.resid, PAGE_SIZE);
+> +}
+> +
+> +static void ceph_osd_sparse_read_rejects_out_of_range_extent(struct
+> kunit *test)
+> +{
+> +	int ret;
+> +
+> +	ret =3D ceph_osd_sparse_read_feed_one_extent(test, PAGE_SIZE +
+> 16, 16, 16);
+> +
+> +	KUNIT_EXPECT_EQ(test, ret, -EREMOTEIO);
+> +}
+> +
+> +static struct kunit_case ceph_osd_sparse_read_test_cases[] =3D {
+> +	KUNIT_CASE(ceph_osd_sparse_read_in_range_extent),
+> +	KUNIT_CASE(ceph_osd_sparse_read_rejects_out_of_range_extent)
+> ,
+> +	{}
+> +};
+> +
+> +static struct kunit_suite ceph_osd_sparse_read_test_suite =3D {
+> +	.name =3D "ceph_osd_sparse_read",
+> +	.init =3D ceph_osd_sparse_read_test_init,
+> +	.exit =3D ceph_osd_sparse_read_test_exit,
+> +	.test_cases =3D ceph_osd_sparse_read_test_cases,
+> +};
+> +
+> +kunit_test_suite(ceph_osd_sparse_read_test_suite);
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 76ba3abdad9b1..b9ab9608ec88e 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -5951,3 +5951,7 @@ static const struct ceph_connection_operations
+> osd_con_ops =3D {
+> =C2=A0	.handle_auth_done =3D osd_handle_auth_done,
+> =C2=A0	.handle_auth_bad_method =3D osd_handle_auth_bad_method,
+> =C2=A0};
+> +
+> +#ifdef CONFIG_CEPH_LIB_KUNIT_TEST
+> +#include "osd_client-kunit.c"
+> +#endif
 
-The suite is included from osd_client.c so it can exercise the static
-sparse-read parser and cursor-advance helpers without exporting test-only
-symbols, guarded by CONFIG_CEPH_LIB_KUNIT_TEST.
+Usually, KUnit test requires .kunitconfig file and I don't see it.
+Because, there are several ways to run Kunit tests: (1) python script,
+(2) running kernel module.
 
-Assisted-by: Codex:gpt-5-5-xhigh
-Signed-off-by: Michael Bommarito <michael.bommarito@gmail.com>
----
- net/ceph/Kconfig            |  12 +++
- net/ceph/osd_client-kunit.c | 146 ++++++++++++++++++++++++++++++++++++
- net/ceph/osd_client.c       |   4 +
- 3 files changed, 162 insertions(+)
- create mode 100644 net/ceph/osd_client-kunit.c
+The osd_client-kunit.c should contains:
+MODULE_LICENSE()
+MODULE_AUTHOR()
+MODULE_DESCRIPTION()
+MODULE_IMPORT_NS("EXPORTED_FOR_KUNIT_TESTING");
 
-diff --git a/net/ceph/Kconfig b/net/ceph/Kconfig
-index 7e2528cde4b94..6b78fe4a0f8a4 100644
---- a/net/ceph/Kconfig
-+++ b/net/ceph/Kconfig
-@@ -45,3 +45,15 @@ config CEPH_LIB_USE_DNS_RESOLVER
- 	  Documentation/networking/dns_resolver.rst
- 
- 	  If unsure, say N.
-+
-+config CEPH_LIB_KUNIT_TEST
-+	bool "KUnit tests for the Ceph core library" if !KUNIT_ALL_TESTS
-+	depends on CEPH_LIB && KUNIT
-+	default KUNIT_ALL_TESTS
-+	help
-+	  This builds KUnit coverage for selected Ceph core-library parser
-+	  and state-machine helpers. The tests exercise internal libceph
-+	  behavior with synthesized state and are intended for developer
-+	  validation rather than production systems.
-+
-+	  If unsure, say N.
-diff --git a/net/ceph/osd_client-kunit.c b/net/ceph/osd_client-kunit.c
-new file mode 100644
-index 0000000000000..713f24675f68f
---- /dev/null
-+++ b/net/ceph/osd_client-kunit.c
-@@ -0,0 +1,146 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * KUnit coverage for net/ceph/osd_client.c internals.
-+ *
-+ * Included from osd_client.c so the test can drive the real static sparse-read
-+ * parser and cursor-advance helper without exporting test-only symbols.
-+ */
-+
-+#include <kunit/test.h>
-+
-+struct ceph_osd_sparse_read_test {
-+	struct ceph_osd osd;
-+	struct ceph_connection con;
-+	struct ceph_msg *msg;
-+	struct ceph_msg_data_cursor cursor;
-+	struct ceph_osd_request *req;
-+	struct page **pages;
-+	struct page *page;
-+};
-+
-+static int ceph_osd_sparse_read_test_init(struct kunit *test)
-+{
-+	struct ceph_osd_sparse_read_test *ctx;
-+
-+	ctx = kunit_kzalloc(test, sizeof(*ctx), GFP_KERNEL);
-+	KUNIT_ASSERT_NOT_NULL(test, ctx);
-+
-+	ctx->req = kunit_kzalloc(test, struct_size(ctx->req, r_ops, 1),
-+				 GFP_KERNEL);
-+	KUNIT_ASSERT_NOT_NULL(test, ctx->req);
-+
-+	ctx->pages = kunit_kcalloc(test, 1, sizeof(*ctx->pages), GFP_KERNEL);
-+	KUNIT_ASSERT_NOT_NULL(test, ctx->pages);
-+
-+	ctx->page = alloc_page(GFP_KERNEL);
-+	KUNIT_ASSERT_NOT_NULL(test, ctx->page);
-+	ctx->pages[0] = ctx->page;
-+
-+	ctx->msg = ceph_msg_new2(CEPH_MSG_OSD_OPREPLY, 0, 1, GFP_KERNEL, true);
-+	KUNIT_ASSERT_NOT_NULL(test, ctx->msg);
-+
-+	osd_init(&ctx->osd);
-+	ctx->osd.o_sparse_op_idx = -1;
-+	ceph_init_sparse_read(&ctx->osd.o_sparse_read);
-+
-+	request_init(ctx->req);
-+	ctx->req->r_tid = 1;
-+	ctx->req->r_num_ops = 1;
-+	osd_req_op_extent_init(ctx->req, 0, CEPH_OSD_OP_SPARSE_READ,
-+			       0, PAGE_SIZE, 0, 0);
-+	KUNIT_ASSERT_EQ(test, ctx->req->r_ops[0].op, CEPH_OSD_OP_SPARSE_READ);
-+
-+	insert_request(&ctx->osd.o_requests, ctx->req);
-+
-+	ctx->msg->hdr.tid = cpu_to_le64(ctx->req->r_tid);
-+	ceph_msg_data_add_pages(ctx->msg, ctx->pages, PAGE_SIZE, 0, false);
-+	ceph_msg_data_cursor_init(&ctx->cursor, ctx->msg, PAGE_SIZE);
-+
-+	ctx->con.private = &ctx->osd;
-+	ctx->con.in_msg = ctx->msg;
-+
-+	test->priv = ctx;
-+	return 0;
-+}
-+
-+static void ceph_osd_sparse_read_test_exit(struct kunit *test)
-+{
-+	struct ceph_osd_sparse_read_test *ctx = test->priv;
-+
-+	if (!ctx)
-+		return;
-+
-+	if (ctx->req && !RB_EMPTY_NODE(&ctx->req->r_node))
-+		erase_request(&ctx->osd.o_requests, ctx->req);
-+	ceph_init_sparse_read(&ctx->osd.o_sparse_read);
-+	if (ctx->msg)
-+		ceph_msg_put(ctx->msg);
-+	if (ctx->page)
-+		__free_page(ctx->page);
-+}
-+
-+static int ceph_osd_sparse_read_feed_one_extent(struct kunit *test,
-+						u64 off, u64 len, u32 datalen)
-+{
-+	struct ceph_osd_sparse_read_test *ctx = test->priv;
-+	struct ceph_sparse_read *sr = &ctx->osd.o_sparse_read;
-+	char *buf = NULL;
-+	int ret;
-+
-+	ret = osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
-+	KUNIT_ASSERT_EQ(test, ret, (int)sizeof(sr->sr_count));
-+	KUNIT_ASSERT_PTR_EQ(test, buf, (char *)&sr->sr_count);
-+
-+	sr->sr_count = (__force u32)cpu_to_le32(1);
-+	ret = osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
-+	KUNIT_ASSERT_EQ(test, ret, (int)sizeof(*sr->sr_extent));
-+	KUNIT_ASSERT_NOT_NULL(test, sr->sr_extent);
-+	KUNIT_ASSERT_PTR_EQ(test, buf, (char *)sr->sr_extent);
-+
-+	sr->sr_extent[0].off = (__force u64)cpu_to_le64(off);
-+	sr->sr_extent[0].len = (__force u64)cpu_to_le64(len);
-+	ret = osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
-+	KUNIT_ASSERT_EQ(test, ret, (int)sizeof(sr->sr_datalen));
-+	KUNIT_ASSERT_PTR_EQ(test, buf, (char *)&sr->sr_datalen);
-+
-+	sr->sr_datalen = (__force u32)cpu_to_le32(datalen);
-+	return osd_sparse_read(&ctx->con, &ctx->cursor, &buf);
-+}
-+
-+static void ceph_osd_sparse_read_in_range_extent(struct kunit *test)
-+{
-+	struct ceph_osd_sparse_read_test *ctx = test->priv;
-+	struct ceph_sparse_read *sr = &ctx->osd.o_sparse_read;
-+	int ret;
-+
-+	ret = ceph_osd_sparse_read_feed_one_extent(test, 0, 16, 16);
-+
-+	KUNIT_EXPECT_EQ(test, ret, 16);
-+	KUNIT_EXPECT_EQ(test, sr->sr_pos, 16);
-+	KUNIT_EXPECT_EQ(test, ctx->cursor.sr_resid, 16);
-+	KUNIT_EXPECT_EQ(test, ctx->cursor.resid, PAGE_SIZE);
-+}
-+
-+static void ceph_osd_sparse_read_rejects_out_of_range_extent(struct kunit *test)
-+{
-+	int ret;
-+
-+	ret = ceph_osd_sparse_read_feed_one_extent(test, PAGE_SIZE + 16, 16, 16);
-+
-+	KUNIT_EXPECT_EQ(test, ret, -EREMOTEIO);
-+}
-+
-+static struct kunit_case ceph_osd_sparse_read_test_cases[] = {
-+	KUNIT_CASE(ceph_osd_sparse_read_in_range_extent),
-+	KUNIT_CASE(ceph_osd_sparse_read_rejects_out_of_range_extent),
-+	{}
-+};
-+
-+static struct kunit_suite ceph_osd_sparse_read_test_suite = {
-+	.name = "ceph_osd_sparse_read",
-+	.init = ceph_osd_sparse_read_test_init,
-+	.exit = ceph_osd_sparse_read_test_exit,
-+	.test_cases = ceph_osd_sparse_read_test_cases,
-+};
-+
-+kunit_test_suite(ceph_osd_sparse_read_test_suite);
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 76ba3abdad9b1..b9ab9608ec88e 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -5951,3 +5951,7 @@ static const struct ceph_connection_operations osd_con_ops = {
- 	.handle_auth_done = osd_handle_auth_done,
- 	.handle_auth_bad_method = osd_handle_auth_bad_method,
- };
-+
-+#ifdef CONFIG_CEPH_LIB_KUNIT_TEST
-+#include "osd_client-kunit.c"
-+#endif
--- 
-2.53.0
+The tested function needs to be properly exported:
 
+EXPORT_SYMBOL_IF_KUNIT(<function_name>);
+
+Thanks,
+Slava.
