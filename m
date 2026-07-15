@@ -1,211 +1,107 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D90F41A91D
-	for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 09:55:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E099648095F
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 14:37:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784109348; cv=none; b=M3ZT/2QQGOHCs+Fd/7mu8yxhI6XPcRdH7L+fSZpC0G4tnu43RZtn+Sym5HRJgVXdWOltg0NDbuegF8K88Sj5ZlqkkyJjzDT2x2I1T2RWEFASIGIhEV/cTyqiQv7Puslo5QVzL1HekIg81siRvZY3uFuT8rln3jWCf1oq9ctbCH0=
+	t=1784126229; cv=none; b=Oo87jF5WTxxBou8qIc9twrcbe1W2Z4nYNMvNKwd3FYAImZ1MNsLyIAYYakc566Ou/fKCpKPCLLXIU3Tw68OtLxRZXgZNHcj80DW46Nk7fVV+g6YXrERc06kxP3YAliwKDSjahUPQ43I8IA7dC0SIxPqdlBnYo0/qYTLGYBaA904=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784109348; c=relaxed/simple;
-	bh=oYK+gCC914eqIrK4ZTZTIe7d267fdW8UbM2mRCte3qY=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=rRM1LizXgeTuHdCyeTaLODGiFmvxkI1PVsFznYhEODAeOs6+8nSGa/xYoPYikL5RNN5QzNX48Et2cV90goFQSt9Z+1dypbKgG1d6bkYsGX/QAwcXE0CBKlOiI9P4FSjmnsg26IBz4ETIRhle0UhdLhuU8e7cePjoAtl58WFAZjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gCp3mLEE; arc=none smtp.client-ip=209.85.221.44
+	s=arc-20240116; t=1784126229; c=relaxed/simple;
+	bh=QHlAcyhY3qbJdc8EpVKuySc+CLEQ45GK88npe2CgNGI=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=V9Crp5USSsltj6tMUCqzeOtmBjCDF/dj1Rg5NhM5RttJf+Vala62RLPj4Jcg918Z/EPBufa0lbj5bsDxWeaZb4lFAubwfuvecb+7daIvL+92gGjN6Uv91grHn866JxQwIbCIGsCdwb0aM3ZKGbp3xFWNWOobUKRMeHy5v9J5nnc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=X2xJYI0c; arc=none smtp.client-ip=209.85.216.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gCp3mLEE"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-4720f3bf164so266577f8f.1
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 02:55:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X2xJYI0c"
+Received: by mail-pj1-f54.google.com with SMTP id 98e67ed59e1d1-38a0c7e841fso2395158a91.2
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 07:37:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1784109345; x=1784714145; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=Kc0K293/4fM80/O9eYHRM16XnwLDqdrVKGEztVuHn7g=;
-        b=gCp3mLEEO5emdRvK+Mcxzal8uQ5nSs0lNsoCvBYx7BFRYtQj9q3Ap4ozosrJPewL7p
-         1NcV6TDMSL0F7R9qyGfrVqYEvd7UCP+V8IEj8UC8z0Ou7aaIFbB0oQiDKjVDdRZzZxN7
-         xmRehmZ63NwVwDbUuxRuDJK5v29sXi0F11ZrFo3qr7/QvW0kFc4qwqaG7MR5y7W/Mk6h
-         vVhyyTZRfMFHrDvSccOwtJ23lmo8vPa3OcqHlabmOe2J29JzLyEf6GjFaOifVt3G3NyT
-         GXN8T8+fEjoWIGrz4KRLoTqqV2N9Y5eKHS5hZwkiFnnnyfrhkB+s3zI8qPMp4jJ2Pi9X
-         UrlA==
+        d=gmail.com; s=20251104; t=1784126227; x=1784731027; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:sender:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=rQmdLX5tvY3UqorwHkfxKBPQI7i/9/6KxbDE+/LuHoY=;
+        b=X2xJYI0cBf5jkF+qsumiTdvfJzbFqXPNFtgM9guN3LFeQ2pWWEqK4fAwir0kvDVi2O
+         MhZkawv/WYxDO3mdrIC9Ey1nLzSnPrS7fHAoK8A3B0dML57CZhU3hiRx+lz8RlIiohwl
+         NJfQVHo0DMVJ8WnExImqU9ycqlOo+Zmh3AO5t370PV3GywwpqMYxU/b7XMOyGhrJPkq7
+         lmIhrCBAdRPRCk7JCqdGSWl1sPTn3BpgeJy2hr2vPDvLeX3tDVF1au/NBs71ipgEUCo+
+         WPELxF728CglTFrCJrUFFJnlOPithU5Z0qLNuw8xOQbAAkzDVvLiEuE9ER1wkpxFyo8u
+         cuNg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784109345; x=1784714145;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Kc0K293/4fM80/O9eYHRM16XnwLDqdrVKGEztVuHn7g=;
-        b=TuH15t5a2qLergXo/oCxvAxxt6xbKjNrPWh6O9s45/kRsY5ODcqq0ZXwfQCGq6egsn
-         0ZtPO/jkk1nnvrAhPRi+51BMVR/CN076U9zNuFS5nXXZ0xKFihM2lLKI1YdGnBuTvI90
-         JBUPLOarTyib2EUcpdsVcn2incBlKdhfIJ9pPUG4qoLravmwr0s9vbNlY0KvAkqfmzcO
-         SBN7Kq6XIEh0Gqwvxm0gdUeyN9bKCuOgxiCuDzVg7NvtbRCO6l4Fz45JCAJONPuBgJXl
-         Pkr400bae84LDuyRvjEh9GL2tJQkvlgfmuEyZrAa9DOug9QtcDdAosgX4Z4MhfJwz2Qx
-         x2dg==
-X-Forwarded-Encrypted: i=1; AHgh+Roy8+06qUQ9OZy+bwAj9o3gj1YEV4Ur0iaqycJCPewoRDQnu06lZFBm0xFKy5a5KEferJxCAJS8hcFH@vger.kernel.org
-X-Gm-Message-State: AOJu0YzDnoF0TvFmQn/wM2EwJ8RmAc2nJo2jaLYMKE6PX1gEeRw5qhpV
-	gNL1s29l2YwJps0LhJ8Hu3f2xxZ1RXl2S54cTJ9DHkeCAoywiGaSgG1w
-X-Gm-Gg: AfdE7cliQw3x+uFlDFPzICjsdChYUbWR4BwTuGjTafneszKBcPlXzq4rUCDV58OvWDY
-	7UqZ46bIv2yqDNUIM9tt7LnAtqqr0GWk2ZeVU00kS12sdsqcDpARmm110mZt0GNl00EbJQumCvu
-	RsrvgVjOjC5SquUb5lsr72cXD1HJn7UpxcnAJIrH80EWhkP/T6E8AFrRqOId2UImjOGU3KiPIES
-	LjaR9FADMiqgdry10cpyNwHWiuCtp5Xy9N+sZLBQkWK1kwEyoLoPws/ux1IJQM+Lv0wlguHsW/m
-	cUEAoLkhZUU9rluTZhhp2Pd5K5PPL0I9XboyD+q7W/g4tqkcLyGZ7FiqEJ2ZIT3d3Ba84mb4mnF
-	dgHR7bWiMuaLyWa35Ke9Z/3SRmCrudCqlqENhjvj1YHdRnndkKlysGAeC6SdDElWkBGcBKq3fFW
-	WzQiXq9VKOXitIdT3K5WkqncCvc4z6OBgnk1/Y46nTJqAAnIYJ4g==
-X-Received: by 2002:a05:6000:22ca:b0:470:b344:22e3 with SMTP id ffacd0b85a97d-47ef697ee3dmr26100855f8f.18.1784109345131;
-        Wed, 15 Jul 2026 02:55:45 -0700 (PDT)
-Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47f464a96cfsm15407548f8f.20.2026.07.15.02.55.44
+        d=1e100.net; s=20251104; t=1784126227; x=1784731027;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:sender:x-gm-gg:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=rQmdLX5tvY3UqorwHkfxKBPQI7i/9/6KxbDE+/LuHoY=;
+        b=hrfhRSR2pgQdD14WEmrHiK10uSjZSoWE46H59pAU5kFmGW27jqoysUMRw97GXHqEm1
+         dve/wW6ksI0FO0cpn2KzZDR/sVaadHRj7s9j5Z7wIxmebwYA9syeqz3633W/91Hkh6gg
+         duEXQlxZVxGzLvuGwfvleJKjqYHsq+qQ/RFgDiFraCuOs/U7TPsEsWQcTasOHGtD0H0Y
+         cM4pQM+mporCAwl5TGlUXXQs5eDy+kUL0ZLMQcY3ixwvQgm9Oe7X+CIoz5AINVuZ1DKq
+         EV/e8ks1vEZ5E+DqjjjgAzM5Hz5t7gUu8igPki71/CCfSWiOxlBBC5/oend26Zg0hFkt
+         CcBQ==
+X-Forwarded-Encrypted: i=1; AHgh+RqfsayELNCR/0ONxqjcBe+JfCFfWcE4pJmCMh1uJLHp8ezPlYZyAgkNvGmV1NTN64II9U1vDs7PO5bi@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx2jB78IgVWh1NLjE2kXfn1+cpa0bWgSxmXyijZ2XVqmws9p468
+	JTVPr67uy+1GgXleLYh9Xj26/BSs19IlnNrLIN6qx4FYo2Kkj4dTi2Izvga5dC7U
+X-Gm-Gg: AfdE7ck/3dhp8YjA2V606e2VIwGGPCVis6Z1gJd7fLyuSOLdFZUdyB/HXAcdLaY1XY6
+	PbxdIMcaZJjhvRXzvBQPzlBknynHgPswlxpMr7J09OiJ+g/+5ZGjXiHwMZmDsSX+Q42RjQTOtoZ
+	sP0ttc49egMCoh0AujlUxrU7JeeZtTD4mtIE7TDD3Up79aC5pE56MSQkAV3tfaKqWWLWdvraiCx
+	OukGv+NfDN8yUihwbNMSFEfJyMk/il3Hd9yLdDaO11zP47Dy4oNchixrsHKH97xWrV2H/q0SiSj
+	aus36+8zxT6U+kbT0f+N6dj6el2z3BGpeffwptTma5vzDXNNiT5fnbtzbIp3lJdP6ydR87iT+jD
+	9KEF5Spqvs6A6U1M0ALhgg5pP9xeHQLd6xwbVraqXDlfUZs6ybH98//0NqaGbWySHkinJKTRT/l
+	OF68MMKO4zs3PaKrJ4/uEAMC5bTN7TKbAClJwnnrabWfTrkHbiP4g=
+X-Received: by 2002:a17:90b:35c4:b0:381:21c1:75c0 with SMTP id 98e67ed59e1d1-38dc74cfa71mr16782817a91.15.1784126227181;
+        Wed, 15 Jul 2026 07:37:07 -0700 (PDT)
+Received: from localhost.localdomain ([2406:7400:90:2db1:3066:c473:74d2:497d])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3140e4fd3e9sm2020161eec.1.2026.07.15.07.37.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Jul 2026 02:55:44 -0700 (PDT)
-Date: Wed, 15 Jul 2026 10:55:43 +0100
-From: David Laight <david.laight.linux@gmail.com>
-To: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Cc: xiubo.li@clyso.com, Ilya Dryomov <idryomov@gmail.com>, Alex Markuze
- <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>,
- ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 1/5] ceph: convert oldest_tid to atomic64_t
-Message-ID: <20260715105543.1e58cc13@pumpkin>
-In-Reply-To: <20260713-ceph-mdsc-mutex-optimization-v1-1-9ae5ac135c34@clyso.com>
-References: <20260713-ceph-mdsc-mutex-optimization-v1-0-9ae5ac135c34@clyso.com>
-	<20260713-ceph-mdsc-mutex-optimization-v1-1-9ae5ac135c34@clyso.com>
-X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
+        Wed, 15 Jul 2026 07:37:06 -0700 (PDT)
+Sender: Deepak Rao Gaikwad <deepaksraog@gmail.com>
+From: deepakraog <gaikwad.dcg@gmail.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 4/4] ceph: release unused cap reservation on readdir error
+Date: Wed, 15 Jul 2026 20:06:44 +0530
+Message-ID: <20260715143646.15828-4-gaikwad.dcg@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260715143646.15828-1-gaikwad.dcg@gmail.com>
+References: <20260715143646.15828-1-gaikwad.dcg@gmail.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On Mon, 13 Jul 2026 17:46:07 +0800
-Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org> wrote:
+ceph_readdir_prepopulate() can exit with an error after partially
+consuming the request's cap reservation. Return unused reserved caps to
+the MDS client pool on the error path so they are not held until request
+teardown.
 
-> From: Xiubo Li <xiubo.li@clyso.com>
-> 
-> The oldest_client_tid sent in the MDS request header is advisory:
-> a stale value is harmless -- at worst the MDS may resend a reply
-> we already have, or skip one we still need (which will just be
-> retried).  With the plain u64 read, however, the compiler is free
-> to split or cache the load, which is undefined behaviour when the
-> write side runs under mdsc->mutex on a different CPU.
-> 
-> Convert mdsc->oldest_tid from u64 to atomic64_t so that reads
-> are guaranteed to be single-copy atomic on all architectures.
-> This removes the one remaining reason __prepare_send_request()
-> and __send_request() needed to be called under mdsc->mutex, so
-> drop those comments as well.
-> 
-> All write sites (__register_request, __unregister_request) still
-> run under mdsc->mutex, so use atomic64_set() for clarity.
+Signed-off-by: deepakraog <gaikwad.dcg@gmail.com>
+---
+ fs/ceph/inode.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-If the read side doesn't hold the lock then it makes little difference
-whether the write side holds it.
-It the write is split (eg on 32bit) then even an atomic read could
-get an invalid value.
-
-On 64bit this change probably has no effect.
-But some 32bit architectures cannot do atomic 64bit read/write so
-they are expensive operations.
-x86-32 now requires the 64bit 'compare exchange' that can be used
-for 64bit load/store so they are only moderately expensive not
-stupidly expensive.
-
-	David
-
-> 
-> Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
-> ---
->  fs/ceph/mds_client.c | 21 ++++++++-------------
->  fs/ceph/mds_client.h |  2 +-
->  2 files changed, 9 insertions(+), 14 deletions(-)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 9f84ef2ac6e4..98d0a5baff70 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -1235,8 +1235,9 @@ static void __register_request(struct ceph_mds_client *mdsc,
->  	if (!req->r_mnt_idmap)
->  		req->r_mnt_idmap = &nop_mnt_idmap;
->  
-> -	if (mdsc->oldest_tid == 0 && req->r_op != CEPH_MDS_OP_SETFILELOCK)
-> -		mdsc->oldest_tid = req->r_tid;
-> +	if (atomic64_read(&mdsc->oldest_tid) == 0 &&
-> +	    req->r_op != CEPH_MDS_OP_SETFILELOCK)
-> +		atomic64_set(&mdsc->oldest_tid, req->r_tid);
->  
->  	if (dir) {
->  		struct ceph_inode_info *ci = ceph_inode(dir);
-> @@ -1257,14 +1258,14 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
->  	/* Never leave an unregistered request on an unsafe list! */
->  	list_del_init(&req->r_unsafe_item);
->  
-> -	if (req->r_tid == mdsc->oldest_tid) {
-> +	if (req->r_tid == atomic64_read(&mdsc->oldest_tid)) {
->  		struct rb_node *p = rb_next(&req->r_node);
-> -		mdsc->oldest_tid = 0;
-> +		atomic64_set(&mdsc->oldest_tid, 0);
->  		while (p) {
->  			struct ceph_mds_request *next_req =
->  				rb_entry(p, struct ceph_mds_request, r_node);
->  			if (next_req->r_op != CEPH_MDS_OP_SETFILELOCK) {
-> -				mdsc->oldest_tid = next_req->r_tid;
-> +				atomic64_set(&mdsc->oldest_tid, next_req->r_tid);
->  				break;
->  			}
->  			p = rb_next(p);
-> @@ -1693,7 +1694,7 @@ create_session_full_msg(struct ceph_mds_client *mdsc, int op, u64 seq)
->  	ceph_encode_32(&p, 0);
->  
->  	/* version == 7, oldest_client_tid */
-> -	ceph_encode_64(&p, mdsc->oldest_tid);
-> +	ceph_encode_64(&p, atomic64_read(&mdsc->oldest_tid));
->  
->  	msg->front.iov_len = p - msg->front.iov_base;
->  	msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
-> @@ -2759,7 +2760,7 @@ static struct ceph_mds_request *__get_oldest_req(struct ceph_mds_client *mdsc)
->  
->  static inline  u64 __get_oldest_tid(struct ceph_mds_client *mdsc)
->  {
-> -	return mdsc->oldest_tid;
-> +	return atomic64_read(&mdsc->oldest_tid);
->  }
->  
->  #if IS_ENABLED(CONFIG_FS_ENCRYPTION)
-> @@ -3438,9 +3439,6 @@ static void complete_request(struct ceph_mds_client *mdsc,
->  	complete_all(&req->r_completion);
->  }
->  
-> -/*
-> - * called under mdsc->mutex
-> - */
->  static int __prepare_send_request(struct ceph_mds_session *session,
->  				  struct ceph_mds_request *req,
->  				  bool drop_cap_releases)
-> @@ -3555,9 +3553,6 @@ static int __prepare_send_request(struct ceph_mds_session *session,
->  	return 0;
->  }
->  
-> -/*
-> - * called under mdsc->mutex
-> - */
->  static int __send_request(struct ceph_mds_session *session,
->  			  struct ceph_mds_request *req,
->  			  bool drop_cap_releases)
-> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index 731d6ad04956..3b614b5df18c 100644
-> --- a/fs/ceph/mds_client.h
-> +++ b/fs/ceph/mds_client.h
-> @@ -532,7 +532,7 @@ struct ceph_mds_client {
->  	spinlock_t              snap_empty_lock;  /* protect snap_empty */
->  
->  	u64                    last_tid;      /* most recent mds request */
-> -	u64                    oldest_tid;    /* oldest incomplete mds request,
-> +	atomic64_t             oldest_tid;    /* oldest incomplete mds request,
->  						 excluding setfilelock requests */
->  	struct rb_root         request_tree;  /* pending mds requests */
->  	struct delayed_work    delayed_work;  /* delayed work */
-> 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 61d7c0b81..2d6a80054 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -2188,6 +2188,8 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 		dput(dn);
+ 	}
+ out:
++	if (err)
++		ceph_unreserve_caps(req->r_mdsc, &req->r_caps_reservation);
+ 	if (err == 0 && skipped == 0) {
+ 		set_bit(CEPH_MDS_R_DID_PREPOPULATE, &req->r_req_flags);
+ 		req->r_readdir_cache_idx = cache_ctl.index;
+-- 
+Deepak Rao Gaikwad
 
