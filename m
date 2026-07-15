@@ -1,78 +1,80 @@
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
+Received: from mail-yx1-f54.google.com (mail-yx1-f54.google.com [74.125.224.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C2D64A1399
-	for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 17:51:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 112244A33F6
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 17:56:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784137897; cv=none; b=m+FF7ZOjFF3zg/CUyRURwuvn+i6LQf6ouHDOt9mC1JeevDzzY/cQ7dsdQnueNohV2Xfwe1NfYT29yDTaABAF7mLPNB/qStb1M35iZnAWYgB9jgHHkVnlPmIZj3msAGVt32TRt7V2BHLW7XlLqoxRka7NmAkgRBlLF/0Dv8OuSmI=
+	t=1784138211; cv=none; b=buFmRfi1RUAMdas94/IfGyfa/t3H5y+FD8x3DQaTAGv0RmYsf6wnPjSbJqOXbAw+CRaoyL1gyNwVug1tFmzBgcUuaFjH5HOi3s44df+3t5UCsifReTUBp6tSyQcFV5q64tAoNG/By9xvazEDYw2F8PUkvSOg/bM8o+DXdJ/6dFA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784137897; c=relaxed/simple;
-	bh=3WB6DNf1xk14Xxosd3dsF2oSQXuZN3ym9c54bVMqS/Y=;
-	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=jFSKqm2Q0LQnLxjqJTK/O0bTlDdeA2kWNnR8aIO4gGxbXopt8WHJRaslXJP5XgTWxifO2EsKj7w1a0+yY1zWnfx2BAfecYRoOAFcRasnBUUNJijhi7Rummq446ZgACv9Ji6HM8Geeg6RUigliqwJaUGZK52PWLan1PGA3PZ88yk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=cHLG6lWm; arc=none smtp.client-ip=209.85.128.179
+	s=arc-20240116; t=1784138211; c=relaxed/simple;
+	bh=UEQowC5eTNKUqDdm/b4R0DrYY2kHm84+wJvTQB+qfFg=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=XbQfVxwjbh8pmiwMEn0RJMecqLIDiSyi6Hvx9Q/hdyXjSPoi7sSpHl8FJHbub9+2McMuLg7R8NezOZswN3SePa7/DzLOR5au6vI1HFRXZ/effNF6Z9HCQRXg/NOF2nouQ5dspUUYeHyF0x9DZp6guyvapxZaxElgdpgj0p7rN2U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=aY1Mns0I; arc=none smtp.client-ip=74.125.224.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="cHLG6lWm"
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-80cebd41372so56308107b3.3
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 10:51:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="aY1Mns0I"
+Received: by mail-yx1-f54.google.com with SMTP id 956f58d0204a3-664e3ed58bcso1305026d50.1
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 10:56:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784137894; x=1784742694; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784138209; x=1784743009; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:to:from:subject:message-id
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=gV9UHv1FVMFJV/mrKWANR8uUYmepHxhDQGReXLFTg6M=;
-        b=cHLG6lWm3P6hsjYdk5elw0PKxWVBxl1Xh+lhU4tAORP8NEV8Upda4Hkn2YNuzabXoV
-         KeiGnjT1hfBSHAx8kNs3ercHCzoml6YYEE8Rgb8LPTIRmHC30PU+u1yNcbftG4oMSLG4
-         4CxEAkGYZ0b1vxlLE8PcOWBKM7nE+TqEXQLWapE0dnfVfZ75/BHx31s3fKDJqUzWoBt3
-         Fnq0gJ3XP8qiWN/+Sr+MsQsDbMEyNUZuYQb88TB6Hj5fJbw71c4WGxPC6zYQkzJhtqVw
-         eEkTJ9XjtqiYl8biZfK16AQC4UxtZtRIxBYVnVoOgiTPwKpgtCtqWS15kHNUIKhzsHaj
-         ni+g==
+        bh=UEQowC5eTNKUqDdm/b4R0DrYY2kHm84+wJvTQB+qfFg=;
+        b=aY1Mns0IMyROqiR1TVAvtQ3WyPNXRORTLPHifab//Pb6PdhysHxBXvh4ZWmNTugQqg
+         3lrbKUuLNTefCFh7ZzRaSxNAPWGc1AfKlHxq27B82QYY4KHVura2HLX26W4VoZiXnIxx
+         /nbISYCYUfXuOr2fe6CAzSaJyFWtDIaLR70qLibNPA1FxHngFyhv/qTrxuRnNS4IcdxF
+         E1tUjLEZom7KT84pnJZSrSy5EEwhnwqTgZ9LsD0OIftNlsCWz/Mn+CPBjX/IwhCpq258
+         OURuCt1ZpmtqbEYnpipZDSdXjnpCxMF6rbzP68v2HFcA25m7WylgRGhCj3cTq5NXyfmc
+         rivg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784137894; x=1784742694;
+        d=1e100.net; s=20251104; t=1784138209; x=1784743009;
         h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:to:from:subject:message-id
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=gV9UHv1FVMFJV/mrKWANR8uUYmepHxhDQGReXLFTg6M=;
-        b=DabLvw8nO5pa0vg9mI/MD4Sha53JqydH12zs6uceGie/KVW5ZuYG09FTAYGJebDl6c
-         GRBV1jckDN/gn/C6Im3NZHGSQQ3+bq3cIgpv6oHle/7wRwk4Wz7KxQ2B+9sM+fW2xe/Q
-         3P/m5rw32wVIIHRZFbAXvFILQzw5Q6BxELUrrMOyLjlcw1ZZ60YjcQz/jzOgFXO3a/h2
-         GsospMh+R1fLnEguhHZfrBJ4rqVcfAfvoG6sYWsv2XHyYM4DtnxdIDWGEB39v0r+nzUQ
-         KcmLQIS7QDZ+HNqBAe98KW24QWa01lDyIDt65F3ohKmRI0sf7Gnog2tedL1OR0Ykhyj8
-         80+Q==
-X-Forwarded-Encrypted: i=1; AHgh+Rqd94AjYcMCjQKD+r91OF4zQ+s4qBlB8dxTlyz9DjpmeINM+H5sOglIJrpSiUDOLHU1/XMBCcM//mjm@vger.kernel.org
-X-Gm-Message-State: AOJu0YyHjPwm2haeSIk/Mo6zp9t3Ym1KxZgsfBVIuIDY9hWhq55GA2+X
-	9muOUCcIGHg6DCEIABHvIRszOlnkZJxSN4TwVDG+HrO5v27eYsT3UB4RfD71qWC47MIYr4maHQN
-	YuB1HN001XQ==
-X-Gm-Gg: AfdE7clDHSuNCgbrJ1OKorbaAAkZNh5/8gTUTj4MysehsTtW+Ntm1IYHlXoFJ96M6Ht
-	UboRbYFOvY5OVOzoTx47dH7ECxpgp0+/WNtOG3Iiv+84T9fI4prCOJdpHiEjjtVwwpVCSzA9BT8
-	vkE0x/B/0t70oI8O3zw4IBEGTrwzRlxGeQab6RTBrboaHd1nuIqAZoYHKL7n/1abUwrSUViKUoT
-	HqhlLwHRPjWT3Ot739m6cybaYV1DuNz5ecKYlbexEpMOmEyVvwKwgYZ+tuypSR/9XlykwBAhFm+
-	GC4Hpo5+T1zhK9w/785kXC7Mj1upSeeDm3446G+N0XyzgNfCcxHNgzjkKtI+EWn+kMM8+iaC3F9
-	joMHO10/VEL8A8pK1otyzGXUeP1BUAqqIM5nXn+ARQd1a0RHqXs/tG/JbI0+G72iOkHohCQ/ABa
-	VbgSY6aTax0l0D2OrK+pCnwtY9y1Ya6ZvXBJ4wftKd16Q0hiWxf5bbvP4y8HdMPcrlYxXcsG9sW
-	w6UNr4RoAsIKENMHgsbDZX5+RfLKSs2bGzSI4t165S5sUDEYFr8ORns2BCmeUbjAbPvhW0nlK05
-	cPpAp2jJPz7JZ8XZ
-X-Received: by 2002:a05:690c:6888:b0:80e:1ad2:afc3 with SMTP id 00721157ae682-81ecf7af68amr28483067b3.15.1784137893807;
-        Wed, 15 Jul 2026 10:51:33 -0700 (PDT)
-Received: from ?IPv6:2600:1700:6476:1430:3705:6d89:7b16:2a59? ([2600:1700:6476:1430:3705:6d89:7b16:2a59])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81ebe67d857sm49978237b3.28.2026.07.15.10.51.32
+        bh=UEQowC5eTNKUqDdm/b4R0DrYY2kHm84+wJvTQB+qfFg=;
+        b=MqnQxsDW6hRlhRNmdsO9cukKC8xxsPN/JWZ7xfUvcqu5n28RDRH5aHuJmdFXlH7UbJ
+         ysXLhK5wap/7PuBSU9wRpIahmnpveQvi4itEnPXtavwL4b1tHMXhjWP/l2LZIkQ9w1ZR
+         FuL6kz4IwTZMP3P0sELO7cpT616+/uY6VzS/TeSOPsnfvyfPXPBk/jJ3dwy5H+dWaEno
+         8w1x+IHvnlCHmV68e3ELX9xwxSFmykyMxP5LwO/1obxSiPu0++CvThk4Nj8oCISvAbbK
+         14Bmyrt1af6uS5j/g8SNjRtCiRp5BwcGQektrnFzcMm/Q5udgyQfC8Y9P4u2KQ0OhjAw
+         j4fA==
+X-Forwarded-Encrypted: i=1; AHgh+RqKAlytEWPigWBFvT8F1ife1isX4Np8kpuzVui/bVvHhZZXjf5in1TlcLuhw8CVm+BUGU2IoFXU2sHS@vger.kernel.org
+X-Gm-Message-State: AOJu0YxmaSCyDOM4EC38s6JEw4uuttSo9cNjDE/7IL3NR0c58SrrQcbx
+	8Dtq/xpHEjdkqheMEgpLmvtbkulCwVpcZhFi48WNe4O+/+33sK1tTYyj6zHdHv8CiCQYPkXiOWL
+	f7CCR6e5usA==
+X-Gm-Gg: AfdE7cnFZbvYSB3rpEAIsN6DwLik5QFhAsuDoTe+crRfqgpKZshWkDMc6KcLMEPIYmO
+	8ookvGSLsDoRuoosRlULrL4D8zuFvcflgbB1lFHA63ce+8V7igDOVxODT+I2N7AQD4StpgW25Rv
+	KRgAXUzzR8dhC5VQH+coMvkA9Wjj/Rq8RnbG4kDNBACZF+8FqpPZNtM+YQ7qVWicqkKj5e9P9//
+	ebUSKIhX7C5ayXfObph5AuE8sHxyIcTYD5oDyO+cWo7QPFxRRmiwaH114uVYQ5NceZ3CVbIjaeS
+	0koV0xAdgY4L5ITcfYZh+QiWR+dbc35dyclat75xOcGoGxz/6LSRipV9ewmyb0hijA+CPwZkiCJ
+	zKoAeERxoXnd9HQlEjPBYLHgoqTbCcurBjKw812PRFdNG6XM4QhNrbgFI8AT7EfEW2HlQ78EDq/
+	1nUhMsbRc07JvfBfbLTwxjY82oyOmbryFVDt+fJQ+mYbSjE/yzhfPKFSskZu6fJSx0541s2YYF6
+	/lm754aLFadMyr4533+cbQSAKra5IfiFEHuX/aNJWUcdA==
+X-Received: by 2002:a05:690c:ec3:b0:81e:a590:54cd with SMTP id 00721157ae682-81ede3c3c6emr3795077b3.6.1784138208789;
+        Wed, 15 Jul 2026 10:56:48 -0700 (PDT)
+Received: from pop-os.attlocal.net ([2600:1700:6476:1430:3705:6d89:7b16:2a59])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e6c1f11bbsm175425537b3.35.2026.07.15.10.56.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Jul 2026 10:51:33 -0700 (PDT)
-Message-ID: <00fbda82bd63f3c7560898531b97a1b061fa6e2b.camel@dubeyko.com>
-Subject: Re: [PATCH 4/4] ceph: release unused cap reservation on readdir
- error
+        Wed, 15 Jul 2026 10:56:48 -0700 (PDT)
+Message-ID: <884864acb978e1ec8b4aead973f2295531b20c57.camel@dubeyko.com>
+Subject: Re: [PATCH 2/5] ceph: replace the request_tree rbtree with an
+ xarray keyed by r_tid.
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: deepakraog <gaikwad.dcg@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, 
- Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Date: Wed, 15 Jul 2026 10:51:31 -0700
-In-Reply-To: <20260715143646.15828-4-gaikwad.dcg@gmail.com>
-References: <20260715143646.15828-1-gaikwad.dcg@gmail.com>
-	 <20260715143646.15828-4-gaikwad.dcg@gmail.com>
+To: Xiubo Li <xiubo.li@clyso.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Wed, 15 Jul 2026 10:56:46 -0700
+In-Reply-To: <CAOJNxR+cyR-BJx_39MDnTH_AOLckxLgSPDezAswpbpHeWVjjwg@mail.gmail.com>
+References: 
+	<20260713-ceph-mdsc-mutex-optimization-v1-0-9ae5ac135c34@clyso.com>
+	 <20260713-ceph-mdsc-mutex-optimization-v1-2-9ae5ac135c34@clyso.com>
+	 <4e8172e54217e10625a81e40ec0f6c253a568f04.camel@dubeyko.com>
+	 <CAOJNxR+cyR-BJx_39MDnTH_AOLckxLgSPDezAswpbpHeWVjjwg@mail.gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -127,42 +129,133 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Wed, 2026-07-15 at 20:06 +0530, deepakraog wrote:
-> ceph_readdir_prepopulate() can exit with an error after partially
-> consuming the request's cap reservation. Return unused reserved caps
-> to
-> the MDS client pool on the error path so they are not held until
-> request
-> teardown.
+On Wed, 2026-07-15 at 10:21 +0800, Xiubo Li wrote:
+> Hi Slava,
+>=20
+> On Wed, 15 Jul 2026 at 02:35, Viacheslav Dubeyko <slava@dubeyko.com>
+> wrote:
+> >=20
+> > On Mon, 2026-07-13 at 17:46 +0800, Xiubo Li via B4 Relay wrote:
+> > > From: Xiubo Li <xiubo.li@clyso.com>
+> > >=20
+> [......]
+> > > --- a/fs/ceph/mds_client.c
+> > > +++ b/fs/ceph/mds_client.c
+> > > @@ -1183,7 +1183,6 @@ void ceph_mdsc_release_request(struct kref
+> > > *kref)
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 kmem_cache_free(ceph_mds_request_cache=
+p, req);
+> > > =C2=A0}
+> > >=20
+> > > -DEFINE_RB_FUNCS(request, struct ceph_mds_request, r_tid, r_node)
+> > >=20
+> > > =C2=A0/*
+> > > =C2=A0 * lookup session, bump ref if found.
+> > > @@ -1195,7 +1194,7 @@ lookup_get_request(struct ceph_mds_client
+> > > *mdsc, u64 tid)
+> > > =C2=A0{
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 struct ceph_mds_request *req;
+> > >=20
+> > > -=C2=A0=C2=A0=C2=A0=C2=A0 req =3D lookup_request(&mdsc->request_tree,=
+ tid);
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0 req =3D xa_load(&mdsc->request_tree, tid);
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (req)
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0 ceph_mdsc_get_request(req);
+> > >=20
+> > > @@ -1229,7 +1228,7 @@ static void __register_request(struct
+> > > ceph_mds_client *mdsc,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 doutc(cl, "%p tid %lld\n", req, req->r=
+_tid);
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ceph_mdsc_get_request(req);
+> > > -=C2=A0=C2=A0=C2=A0=C2=A0 insert_request(&mdsc->request_tree, req);
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0 xa_store(&mdsc->request_tree, req->r_tid, r=
+eq, GFP_NOFS);
+> >=20
+> > Should we check the return value of xa_store()? What about this?
+> >=20
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 err =3D xa_err(xa_store(&mds=
+c->request_tree, req->r_tid, req,
+> > GFP_NOFS));
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (err) {
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 ceph_mdsc_put_request(req);
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 return err;
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }
+> >=20
+>=20
+> Good Catch. Let me fix it.
+>=20
+> > >=20
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 req->r_cred =3D get_current_cred();
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (!req->r_mnt_idmap)
+> > > @@ -1259,20 +1258,20 @@ static void __unregister_request(struct
+> > > ceph_mds_client *mdsc,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 list_del_init(&req->r_unsafe_item);
+> > >=20
+>=20
+> [......]
+>=20
+> > > @@ -534,7 +533,7 @@ struct ceph_mds_client {
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 u64=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0 last_tid;=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* most recent mds
+> > > request */
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 atomic64_t=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 oldest_tid;=C2=A0=C2=A0=C2=A0=
+ /* oldest incomplete
+> > > mds request,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 excluding
+> > > setfilelock requests */
+> > > -=C2=A0=C2=A0=C2=A0=C2=A0 struct rb_root=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 request_tree;=C2=A0 /* pending mds
+> > > requests */
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0 struct xarray=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 request_tree;=C2=A0 /* pending mds
+> > > requests */
+> >=20
+> > Transaction IDs are u64; xarray indices are unsigned long. req-
+> > >r_tid,
+> > mdsc->last_tid, and want_tid/last_tid in the drain paths are all
+> > u64,
+> > but xa_store(), xa_load(), xa_erase(), and xa_find()'s max
+> > parameter
+> > all take unsigned long. CEPH_FS in fs/ceph/Kconfig only depends on
+> > INET
+> > =E2=80=94 it's not gated on 64BIT =E2=80=94 so this driver still builds=
+ for 32-bit
+> > targets, where unsigned long truncates r_tid to 32 bits. Are we
+> > safe
+> > here?
+> >=20
+>=20
+> Yeah, you are right. We have two options to fix it. Just add
+> "depends on 64BIT" in Kconfig or fall back to the rbtree code on
+> 32-bit with an #if BITS_PER_LONG =3D=3D 64 guard, similar to what we
+> already do for s_delegated_inos. I went with the #if guard in v2
+> because it keeps the driver buildable on 32-bit without introducing
+> a regression =E2=80=94 the rbtree handles u64 keys correctly there. The
+> downside is a few extra #if/#else/#endif blocks, but they are
+> mostly confined to the iteration headers; the loop bodies are
+> shared. Only flush_mdlog_and_wait_mdsc_unsafe_requests() needs a
+> full alternate implementation because the two control flows are
+> fundamentally different.
+>=20
+> What do you prefer?
+>=20
+>=20
 
-The ceph-devel list has received only 4/4 patch. Is it some patchset?
-If so, then why we haven't received the rest patches in series?
-
-Do you have any issue related to the fix? How have you encountered the
-issue? Could you please explain more about the issue?
+Do we know any customer that uses 32-bit builds? If there is no such
+users, then we can restrict the builds by "depends on 64BIT" in
+Kconfig. Otherwise, we have to provide opportunity to execute 32-bit
+builds by proper supporting rbtree for this case. But, frankly
+speaking, I would like to prefer simple solution like "depends on
+64BIT".
 
 Thanks,
 Slava.
-
->=20
-> Signed-off-by: deepakraog <gaikwad.dcg@gmail.com>
-> ---
-> =C2=A0fs/ceph/inode.c | 2 ++
-> =C2=A01 file changed, 2 insertions(+)
->=20
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 61d7c0b81..2d6a80054 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -2188,6 +2188,8 @@ int ceph_readdir_prepopulate(struct
-> ceph_mds_request *req,
-> =C2=A0		dput(dn);
-> =C2=A0	}
-> =C2=A0out:
-> +	if (err)
-> +		ceph_unreserve_caps(req->r_mdsc, &req-
-> >r_caps_reservation);
-> =C2=A0	if (err =3D=3D 0 && skipped =3D=3D 0) {
-> =C2=A0		set_bit(CEPH_MDS_R_DID_PREPOPULATE, &req-
-> >r_req_flags);
-> =C2=A0		req->r_readdir_cache_idx =3D cache_ctl.index;
