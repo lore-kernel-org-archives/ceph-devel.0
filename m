@@ -1,239 +1,119 @@
 Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com [209.85.218.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD61F382F1F
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 04:50:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD8163C416B
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 08:54:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.44
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784177455; cv=pass; b=FmJf4d0RSS2O47RpvrOv/Ii/LK7QJo83lxacsXLpmYGNHLN9CqQB3tkoz2V9KwUFDLrUkEfuRXvlIHTCQIgMxVNcqvSQojwO2JETRCR+EHzTKm4jV5dLy9EKvOPll/xPDDNNcY3Vxi2Ob66RCQSbaXxMvplUPXqAX93+9wVzVdA=
+	t=1784192055; cv=pass; b=SxLsBD1hX23z9U0Sr4rDUa/83clyCVOYQDEj4nkHQg/I/KcoC/QkS3OXdsJzu8WijimEl6qHiS+3RX1hyX9rjIx+21ElVeW6+Mv64Ps25+F6d2y22+y83Ech8Eyrj4lAzEr3PlQx6QlvhPufVyXQpw5whz7FRnEoQTML1oA5NIk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784177455; c=relaxed/simple;
-	bh=Yp88bq/Uio6Fe1B73zXzKjlr6SafSJJfZ10M6u7sq9A=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=aQ43qavkQXVKhu1unWIjCW6Up7Y4lXIdurlbD/UKfR5GWDd+5S4sLlObztJ9Alg/XCBZV5UqFNtZ4liSQPknJ4oSfXunMPQNGFbgD+BFPyka6HRwKPt+9us3uj85I/2BNHGxcqmKOK2DtyZC67CjbBqTU6K0gALyjqny9D5nBlU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=Nv5bPyLi; arc=pass smtp.client-ip=209.85.218.44
+	s=arc-20240116; t=1784192055; c=relaxed/simple;
+	bh=rpZ2HRn8yDCkjqg/qobHlnCtwYoIgQM1/o7K0LE+uB8=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=lD6t0a0V/02tTLNrmtjbxdXkdWzA8oL2hh2yMy9gTYYEHb5z8TWVM2BR3HZAIN03ct/K/UgyPw7kVEFp2aeceBR68U3slxP8fqirLqIT9RwHcu242X2ovndAtY8YD+sTdraa4d2d89SJMFQPJC50TfcUqx4ViayE2r2Tmx2YARc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=aIwwgiqC; arc=pass smtp.client-ip=209.85.218.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="Nv5bPyLi"
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-c15c42a45adso34360066b.0
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Jul 2026 21:50:51 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1784177450; cv=none;
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="aIwwgiqC"
+Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-c1671ec8692so262427866b.0
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 01:54:12 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784192050; cv=none;
         d=google.com; s=arc-20260327;
-        b=enK73oq0eno7JthX1IqrJBAzq2RXelfHznbEtfnan/Rjl6XVp1I4MQhNUk2K2ycIgr
-         zjpXe4Q9EGUcoo0ig3txbHJyCh10AywpFpvGvVF+2x8GA1E+jNkjUe89EAroWSQp0KvA
-         6xlNIh2P8SRWEexKZ+DsKt62LaVs37ywV9a9WwERDrCFVE4HZMYbvE74hDSyf2/EHUlp
-         KfMrVmici3kXEugLbV04IuSmPFj6B9vqaonjXhGiafkW1g7XDI+lA/dHkqoEJ177TT0h
-         R2G6krKf/cqkyn4WSguRixzMykAOasRt7Nu1+PXPDxBgk46U0qkIjlM7yDOtyidCaZ3Q
-         0RXw==
+        b=LJNZKiNRJCnJQ+EjFpXcBvwrZ2j7KO+S66NhYJZWJ3o4MkatwN4zcd7ixaUdEuK4iX
+         p34FqLOjW0k/FqLUuFOmsLhK7D+jLJvJR/KfEmMnRmoRm5JAaTJmsGYdq9tQKyAqoDdo
+         FaUvqQQuMvtzwk7fG18ZNmDjU3j9LdjlKfc56PkFDewmWvcZW2YQL0gNyR/6jkZ85jxa
+         J6/yg3jYD/jb5OfYJ/VudOzClzDQD31o0Udi6w18MlhEvIF2rHXmS6v8LFaU55t+Ox6V
+         7EL8Wb69ZTdiOy97CxGnOESwsV6UQT/OPD6VvIEW/R9oZYcz7vcFcfasbTw4W7LHceLG
+         qFNw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=PZ9hziPWAp8IhVg3lRvrhKLmXhCilUOpc7UuKP0N5qo=;
-        fh=O1TtJK0UvnQ4ak89qzVcMjc8uHkIfAbB7QHralLoZog=;
-        b=AxDNgNHSTzJEYrDLSbl1q8dMoHD1844UUv1+aQ39du9VRFTKty3ouH1Eh6t2T20iou
-         Bt82DZeK+jpSQj6gbsMSIYaP8nrE3JsybFIvVQAosmVGMdiT+ttfRyt+6ALdJX1Pt3sl
-         XW0CIOFUpkbrJWesYyZ8LZ3Jmzz5qdIW5qjNQwyMuShkwzrvkndMW/rWT4uDcsErFgK4
-         ze4/ZEZiAFnNhUvdoOIf06I3tj+1sB67sskzF6ekHZRnMmb0KMmAiQ6Oo6koe+paXtia
-         MhLJGcSu5CZ/1xuimwHjcKWMowsq0C3Bxy8+YX++XMFyDOQLS4oqgtpbTpaBWuiaWKIS
-         Qmpg==;
+         :mime-version:dkim-signature;
+        bh=rpZ2HRn8yDCkjqg/qobHlnCtwYoIgQM1/o7K0LE+uB8=;
+        fh=lIj2fP9TLY8J0+u4Z5gxpYmcsDjYZerPZxdPGefRbRM=;
+        b=JkfD5AeaCJ9S5Ma6fSFKd/w5NzK6NS+8tM8mr5YOzsQc0Shpf6y3BCz1dAh+n+nRZe
+         r6mWkuPvBiDY/bhRj8wdZDbUvmQOErEW09VWkib4Xp5RfnEU8MipF8qh/+B6aOxYf/LB
+         R5kVan5vmf2o44JrN9h9PcOIDLcAZy+HEqP4d1IVmd3bD7jvLbAp2nnS0SVuXetmG934
+         J5dvpJHuWBACoEw/7f9w02Z4t14vfcBJO1TliOUlH4W69YK3UlOPnRTekI9Z/s8vb0Ya
+         M1ILG04oNRUomTfxS66rpLGmzDXdQfVCBQ7Q5UCc7BRueZ3fyx7ev5ZCApnExjRIcNIc
+         Uo2g==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1784177450; x=1784782250; darn=vger.kernel.org;
+        d=clyso.com; s=google; t=1784192050; x=1784796850; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=PZ9hziPWAp8IhVg3lRvrhKLmXhCilUOpc7UuKP0N5qo=;
-        b=Nv5bPyLibDKXmuqIigaFSPJkSoscziT4+y9onVdm0SpLP3CwV6pL2AO66CFXBU4OqR
-         NPlYxyufqO/2Hl9kgB4DfmGWOHs819TpbHYFTWE/97UmjlJa6U2IXA3jDhnTaEqAY6JJ
-         XNKmKn07Ic9Q5entNHbC6A8GjODIZC4OXXtBH39lYxqlU92j762fPQ6I8cT5bbfa+wI2
-         nMGWRFQWACrId+yafhIDg/CnX6MQm1a8O+5t2gAUzQ5zPh6wAkRnGckhZ18Khin32U0q
-         WRfahbbWD+osJVb4RQbOMYPXWFh+toFN4v93K9QyxmjsBVkFRegGWtMISRM2NgdyhCz4
-         ewMA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784177450; x=1784782250;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :date:from:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=PZ9hziPWAp8IhVg3lRvrhKLmXhCilUOpc7UuKP0N5qo=;
-        b=sK3kPrh1p8icJqkSqXjp6CyNvlW52cFTGNNbSxyiZG/rhBIh80lzmzMqTM2au3ehwT
-         wir7xNLFIFKNjVjSxUksV8eJjNKybwhKftBdVg0QXEWNzqPlXh07AYwKhY8SVxIAZaZ6
-         ZxFp/Of77g2Fr8EWBjsuFswJCXNbO1TcCRLiC1MaOWTMF6roulbTe4R3jn5tSZgSi9FL
-         D4NnR2SMpIwfIOvb5X5uICtsLtv1hjMBG5XrAd74l6FuNLGkIkVG6OQ4kHeBXqNLMfpE
-         B6rFu/pCA/mlR4+F4+ZnutOMsKsdcWlU78WeUmTZ4mh5uKCuCWEl6Lw2qPU+gJbPbnJp
-         IhRg==
-X-Forwarded-Encrypted: i=1; AHgh+Ro5Pz2RP/AyFZyHhPCtgx7gkhSqTdFxM2gVb2I3UmCL4m4+UsOgEHSob7888i7gurCpR4DoxZM+MKAT@vger.kernel.org
-X-Gm-Message-State: AOJu0YyyyrLRlFwK/oT9T/A/I5vjlRuLsTgdM4oJanfeflmTmVl2JffP
-	mXMS+R1gtu555tm7NRsnRa+wiXuN8M1iJ9n28tP36e7mm45q7VUPRvH1z1NAOFp3nM3IaB244bO
-	CzgloO+aZG0+Pu5IZxvYPvKvYhPyRjYIzRWZK2cG3rA==
-X-Gm-Gg: AfdE7cmWVA0rrCqvt2f3CwnRxp8ZrEk/lDUDkLZ55yxSn6kyMediHCNee6ynjJ+8pnV
-	dZXc7ZBPNehnEKRwmRPGaHDlULt2QtpoWovwrEeMU4NaHVsXnKM8k6r9BVrYU+XGtuIIPaLgh2u
-	JQ4deJbsbHMafpe8exY0Lyh3kVQc5DMI1dhq/9HzYl2fMHjqVPAfouO0LHaTimv8EC6lYKBg4kU
-	tnLOhjtUhDaX3yDleq7/4Dd0sSPaxGvGBMXJV6nzGihlMAop2Ty+RQFdpUTEPB4LKpGeA==
-X-Received: by 2002:a17:907:a70c:b0:c12:cb91:58aa with SMTP id
- a640c23a62f3a-c169229c0camr45321166b.24.1784177450047; Wed, 15 Jul 2026
- 21:50:50 -0700 (PDT)
+        bh=rpZ2HRn8yDCkjqg/qobHlnCtwYoIgQM1/o7K0LE+uB8=;
+        b=aIwwgiqCnHlx8X3Bt/ACFBbf8K0JCYUiOg8FXGnSSI0Gnt/ONJJbbT4+oMZtBQz86m
+         inI1507cJRYS/lOtZturH8jij/7CfukcWHJN2QtSzaHdstOEkOU2CUuBOKW8uxHCIIP4
+         /fo7a8nNkT25HT5oA38MP8HEHUcwsyC7FQhE3Edeor2WxssojutS1e+QmeP0RGBVnaSx
+         qUeUGiyxZlgZ688BNCE74I1wlYO5qjWYVjz8vsmAeE3waKqzO2TKMJ3Uaok9ONd7I1Ge
+         EuNvOT8ad5ZtwVRZQt1zJLIlF+5/q/II84folZXeimFZcAAzMCw1szQnrrRnYXelwe5R
+         XwDw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784192050; x=1784796850;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=rpZ2HRn8yDCkjqg/qobHlnCtwYoIgQM1/o7K0LE+uB8=;
+        b=Zc6+qnCwXPyPouWZnyqAiQRtE4ximuDkwnd2lYiXg+FC8fW4XtJ3z/2KClm12cyb1y
+         dDE2ThVQro3AKRN4pJ7W9w65pzS0jZreD72n9O3+b4UHYiSd9qgRCMg0V95M3KGcpl59
+         +Tbh2M4ml1A6PZKhEAGiYhCao+nMMT1TPXS1SwrZlONkUBh5JzMuI06BmEext1wpvs0T
+         lwA0QDh8azzhjvM5JZOUb8WwBK1/vVpM2vtqkhwvByLlmdY8OZ65FikI9/x7FIqeqrJW
+         1nNeGOg1/HMwwaZRXc2XkCwUruXVYVTWJO4Ti9CYetjFda4QX2n7rW94Ym9GXMs9J2lq
+         eAkA==
+X-Gm-Message-State: AOJu0YxKv7C5QplnipeNn6NGLra/EIQts/ToCd9yu/BmsOwm1Z7b+0UW
+	hB2ne2LAKyG2DDST5boTKH6y4cByGYbESKKtFQhb1b/msMLokO5iF3xpm9oMZZo+/R/p5bTpXLL
+	KNYvM+AYTdyRJeeLLxYLdiR1GdSI49S76IrAi5dq6sQ==
+X-Gm-Gg: AfdE7clVuhO5jnzjo7s91bMVn1gVvLG+GCt/MDI5TYRBAuCiwf1l1wKPfe3HX4o7RzN
+	DMr9qh9rrchcvRAH+0wzLA88XqoxpGBQI663MRJbH+hW0brdG3ga1d4C9GccBWHuLKFKysREBeF
+	FD/iQ5GElitks+cLvc5hmT63lbMJQeprn/1vOVrdGszX0ChE5dMpfL2eujznjDW4BywaLPCDA6y
+	BRbeh5ZwjoB5HiEhsKNCTr6jZnFfN9Gii7tP6vvdV7gJRZ/0206lmkq/Bo=
+X-Received: by 2002:a17:907:d643:b0:bf0:2253:ad67 with SMTP id
+ a640c23a62f3a-c16793109f4mr374067466b.46.1784192050005; Thu, 16 Jul 2026
+ 01:54:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260715-ceph-mdsc-mutex-optimization-v2-0-90e81b726724@clyso.com>
- <20260715-ceph-mdsc-mutex-optimization-v2-5-90e81b726724@clyso.com> <c9ce608055763b943837451367b90716a343845f.camel@dubeyko.com>
-In-Reply-To: <c9ce608055763b943837451367b90716a343845f.camel@dubeyko.com>
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Thu, 16 Jul 2026 12:50:39 +0800
-X-Gm-Features: AUfX_myfYzS95UJ5BqVBdq7-RpC0hTXzXwofcPfy4Zk3VmDFY-6ARRvlD74n3FY
-Message-ID: <CAOJNxR+POiN4GG8V_5AHd6JHHSKCx=CoffzU0E0G6z_iHs5JoQ@mail.gmail.com>
-Subject: Re: [PATCH v2 5/5] ceph: narrow mdsc->mutex scope in replay_unsafe_requests
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Thu, 16 Jul 2026 16:53:59 +0800
+X-Gm-Features: AUfX_mwr1iYS_S5AhMW1IIPrEGzoUEEjjSFVp5Qc3XXmPpAI9L8P0a8GuxlSDQo
+Message-ID: <CAOJNxR+9tBWfnQ3-wyBdYeJ-ipVM+0oyULtUGk15C5-xnXHqcg@mail.gmail.com>
+Subject: Survey: Is anyone using 32-bit builds of the CephFS kernel client?
+To: ceph-users@ceph.io
+Cc: ceph-devel@vger.kernel.org, dev@ceph.io
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-=E3=80=82
+Hi everyone,
 
-On Thu, 16 Jul 2026 at 03:12, Viacheslav Dubeyko <slava@dubeyko.com> wrote:
->
-> On Wed, 2026-07-15 at 11:58 +0800, Xiubo Li via B4 Relay wrote:
-> > From: Xiubo Li <xiubo.li@clyso.com>
-> >
-> > __send_request() is lockless so holding mdsc->mutex across the
-> > replay loop only serializes the list iteration itself.  Collect
-> > the unsafe list entries under the mutex, then replay them without
-> > it.  The old-request tree walk uses xa_for_each() which is
-> > internally locked.
-> >
-> > Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
-> > ---
-> >  fs/ceph/mds_client.c | 51
-> > ++++++++++++++++++++++++++++++++++++++++++++-------
-> >  1 file changed, 44 insertions(+), 7 deletions(-)
-> >
-> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > index be0dae919d69..c313574def74 100644
-> > --- a/fs/ceph/mds_client.c
-> > +++ b/fs/ceph/mds_client.c
-> > @@ -4744,30 +4744,66 @@ static void replay_unsafe_requests(struct
-> > ceph_mds_client *mdsc,
-> >  #else
-> >       struct rb_node *p;
-> >  #endif
-> > +     LIST_HEAD(replay_list);
-> >
-> >       doutc(mdsc->fsc->client, "mds%d\n", session->s_mds);
-> >
-> > +#if BITS_PER_LONG =3D=3D 64
-> > +     /* collect unsafe requests under the mutex */
-> >       mutex_lock(&mdsc->mutex);
-> > -     list_for_each_entry_safe(req, nreq, &session->s_unsafe,
-> > r_unsafe_item)
-> > +     list_for_each_entry_safe(req, nreq, &session->s_unsafe,
-> > +                              r_unsafe_item) {
-> > +             ceph_mdsc_get_request(req);
-> > +             list_move(&req->r_unsafe_item, &replay_list);
-> > +     }
-> > +     mutex_unlock(&mdsc->mutex);
-> > +
-> > +     /* replay unsafe requests (local list, no mutex needed) */
-> > +     list_for_each_entry_safe(req, nreq, &replay_list,
-> > r_unsafe_item) {
-> >               __send_request(session, req, true);
-> > +             list_del_init(&req->r_unsafe_item);
-> > +             ceph_mdsc_put_request(req);
-> > +     }
-> >
-> >       /*
-> > -      * also re-send old requests when MDS enters reconnect
-> > stage. So that MDS
-> > -      * can process completed request in clientreplay stage.
-> > +      * also re-send old requests when MDS enters reconnect
-> > stage.
-> > +      * xa_for_each() is internally locked.
-> >        */
-> > -#if BITS_PER_LONG =3D=3D 64
-> >       idx =3D 0;
-> >       xa_for_each(&mdsc->request_tree, idx, req) {
-> > -#else
-> > +             if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req-
-> > >r_req_flags))
-> > +                     continue;
-> > +             if (req->r_attempts =3D=3D 0)
-> > +                     continue;
-> > +             if (!req->r_session)
-> > +                     continue;
-> > +             if (req->r_session->s_mds !=3D session->s_mds)
-> > +                     continue;
-> > +
-> > +             ceph_mdsc_release_dir_caps_async(req);
-> > +
-> > +             ceph_mdsc_get_request(req);
-> > +             __send_request(session, req, true);
-> > +             ceph_mdsc_put_request(req);
-> > +     }
-> > +#else /* BITS_PER_LONG !=3D 64 =E2=80=94 keep mutex for rb-tree iterat=
-ion */
-> > +     mutex_lock(&mdsc->mutex);
-> > +     list_for_each_entry_safe(req, nreq, &session->s_unsafe,
-> > +                              r_unsafe_item)
-> > +             __send_request(session, req, true);
-> > +
-> > +     /*
-> > +      * also re-send old requests when MDS enters reconnect
-> > stage.
-> > +      * Must hold mutex for rb_first()/rb_next().
-> > +      */
-> >       p =3D rb_first(&mdsc->request_tree);
-> >       while (p) {
-> >               req =3D rb_entry(p, struct ceph_mds_request, r_node);
-> >               p =3D rb_next(p);
-> > -#endif
-> >               if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req-
-> > >r_req_flags))
-> >                       continue;
-> >               if (req->r_attempts =3D=3D 0)
-> > -                     continue; /* only old requests */
-> > +                     continue;
-> >               if (!req->r_session)
-> >                       continue;
-> >               if (req->r_session->s_mds !=3D session->s_mds)
-> > @@ -4778,6 +4814,7 @@ static void replay_unsafe_requests(struct
-> > ceph_mds_client *mdsc,
-> >               __send_request(session, req, true);
-> >       }
-> >       mutex_unlock(&mdsc->mutex);
-> > +#endif
-> >  }
-> >
-> >  static int send_reconnect_partial(struct ceph_reconnect_state
-> > *recon_state)
->
-> I believe we have problem in the patch.
->
-> Once mdsc->mutex is dropped in the new code, a concurrent "safe" reply
-> for one of the unsafe requests currently sitting on the private
-> replay_list can call __unregister_request() =E2=86=92 list_del_init(&req-
-> >r_unsafe_item) on a node that Thread A (running
-> replay_unsafe_requests()) is simultaneously iterating and unlinking via
-> its own unlocked list_for_each_entry_safe(...) { ...;
-> list_del_init(&req->r_unsafe_item); ... }.
->
-> Two threads mutating the same prev/next pointers with no shared lock is
-> a linked-list corruption =E2=80=94 it can skip or duplicate entries in
-> replay_list, dereference a pointer clobbered mid-update, or trigger a
-> list_del corruption BUG() if that's enabled.
->
-> What do you think?
->
+We are considering a performance improvement for the CephFS kernel
+client (kclient) that would be significantly simpler and cleaner to
+implement as 64-bit-only. Supporting 32-bit in this case adds
+non-trivial complexity and ongoing maintenance burden, so we'd like to
+understand whether continuing 32-bit support is still necessary.
 
-You're right. Let me fix this.
+Before making any decision, we want to hear from the community:
 
-Thanks
-Xiubo
+- Are you currently using, or planning to use, 32-bit (arm/armhf,
+i386/i686) builds of the CephFS kernel client?
+- If yes, is this for production workloads? Or legacy/testing purposes?
+- What is your platform (distribution, kernel version, architecture)?
 
-> Thanks,
-> Slava.
+If there are no active 32-bit users, we would proceed with a
+64-bit-only implementation and clearly document the deprecation in the
+release notes with appropriate warnings.
+
+If 32-bit support is still needed, we will explore alternative
+approaches =E2=80=94 for example, keeping the current code path for 32-bit
+while the new fast path is 64-bit-only, or finding a way to cleanly
+abstract the difference.
+
+Please reply by August 6, 2026 so we can factor your feedback into the plan=
+.
+
+Thanks!
+Xiubo Li
