@@ -1,75 +1,75 @@
-Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
+Received: from mail-yx1-f45.google.com (mail-yx1-f45.google.com [74.125.224.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88C5C42FCD8
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 17:24:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E20B38239A
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 17:41:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784222683; cv=none; b=J2MHsxQ4GM0XXTk8N0wkgVyUwDBNYtTa2cmE32by5BdAOdiI5jCdHeoujDv4K7I3SWff6wFurWOjqc65k3oFFVdFEBg6lY2G/bUKKJ5t7vsydEURxQ8mV7fmgt9Tvt4Hw2QNSYoKb7byJlscrzJzUUuaGFxjCz+OZGNSC2Ya7aY=
+	t=1784223692; cv=none; b=iGMK12JMDPm1q7J4Wnhd7poK+wdjLvEfo+SFcRVEkKLF3IdfXMQnGgJwPPmgqiTfYh4g88OGJbMbOJDVUaUpsSqZH4wWl5StKp2+APUGxVc1hOXutd2TH0rHNL7vOIeQCMQrWd9l2TMWcfbj1UoEo3hvcQ1jxp4rh3yU3oKono4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784222683; c=relaxed/simple;
-	bh=MGezBw6L/N2P7majkjEUq3jbpgpgj2L0JiCmDuCi8y8=;
-	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=QfgXg6enFpB7w12pTJjoBRml/Ty8ZHL0WNK7sYh6I2bv2p8xIp1cuVuiOaStLyjXhP4dmJWKjtKnz5WQJnzCaEADaQciMXLkRhKQBmGxlvTzn/7e7xRko4Dbco+/jsmpy/RHToMZUjg8GmwzTxy5a7JDU73kdw9hfV1iI2Th2+M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=kf8IX1iV; arc=none smtp.client-ip=209.85.128.169
+	s=arc-20240116; t=1784223692; c=relaxed/simple;
+	bh=PbvKh6Wf38cq6+Th408bowM35wUIlFwKRcxkATo7I7c=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=KlaWfqFZAB/vzy4Pf//h2kNJobQ7RF4HwoAJ18D2ZdaLLga5b5IckgKjgZh02Jv0D7yA70ppqhJ+CC2LE+fReZNd6TXzO2VArGKNf/qJlNLVHfGLOIyCiU+FCTD09CSrlKsM3ED5feoLCjGVCQ78d6tl1yk0pG2Ll14pfrYCrN4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=l3fbeyKE; arc=none smtp.client-ip=74.125.224.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="kf8IX1iV"
-Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-8114a4542b2so10610777b3.1
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 10:24:41 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="l3fbeyKE"
+Received: by mail-yx1-f45.google.com with SMTP id 956f58d0204a3-664e3ed58bcso791473d50.1
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 10:41:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784222680; x=1784827480; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784223690; x=1784828490; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:to:from:subject:message-id
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=L8pbCIS5VqFPHr1kZm8UluOHfD6jnfTXYimRQ16f+8g=;
-        b=kf8IX1iV26OdlluMKhYcQqjDFqvS784PLT8EBYUNLpxW4aPw+Uj045gyf7I1eqN1ao
-         BwZPIyDdovA3oragxSQQQEZpr5cNgCGWxbGgtn4jew6V9rjqu3Ov5T9ojX4lh9woG6Q5
-         FYGKTm8lKf7NXAkFR3Yrnc0PgpsMoR78H0GWL51mQk1mqFcg2ANDjaGU7QmIEXyZFAte
-         WpufjHMMDOtCflxJULSogJxpjpRE6p2L0HtFHRwq29bOLG3hvpMjdrejEh3JQbcOUDoK
-         2d23xl1VrLmgs1F1y/Le7ihzpLMsWrvyWC04dk/qGE9TVe5PMDqhIMt2EFwejY2Mg2Ya
-         vP1g==
+        bh=yiEKy87CA5aNgjktQWoDYIpiJ3ToUfP9M91vtDoLKS8=;
+        b=l3fbeyKEay0KHu5AyJznMxKwLWIQOZBJu0lY5IAwKFFeFBcx8CG5vC7oq1Q5CaT3mP
+         39AjKG5fWZi7JvOJ4E4VPVt0w4sZVEhtsuX/YkYhwVdzvxT9SClONwhpGJ2BGDYIEeyA
+         hgMsXh2NCOgiGy1f4SYk6hhawrQtPEtwhkqi/DaLuAoonqkyiRFKLdp55H/vODxO1Z1v
+         E0TV+86aiDdmbdiscAlUdofT2x5cF7QyOrMavxh36DNsdjaEjF0UUy7GSQpjlDd/CVOx
+         iSLBUnWRm3TsrMG4r+dwzEwb/ZoFlnm3ibaJ06ioc8Tv9tJSQYtyQSoV1dl3Bf7CnRx+
+         igrw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784222680; x=1784827480;
+        d=1e100.net; s=20251104; t=1784223690; x=1784828490;
         h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:to:from:subject:message-id
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=L8pbCIS5VqFPHr1kZm8UluOHfD6jnfTXYimRQ16f+8g=;
-        b=krjHf034m84QK04+F3tdqj8fp7S+sGEV/kT2m2smkE76MRQoo3bYsvVkwJCGXlvSSc
-         L2/YdTQ/8xcBvjLXdTN+KtmSiCFvTwRWBE7C8Xnl0caXxkf0PKN00+e2//EIGwbbvp7J
-         z4xdbHtuLeV9QmNe0TvftMGJ/BOqwOZoWu9vZKVY7bG/nKMNPbl1GHquxHXt04ykYwLx
-         iDyH4QX+h4umkrD9OJ5KakWXaOWd11WHZq5zRUAMpnwcsJS6TjG7aljpPyHnFkwPUWLU
-         2n/RVJ5io/hYdDm0MzlPawaKlmnp3obP9T51ypGFRMZ/wTp6RKY7tCeKAayYmL+gF1xq
-         3n9Q==
-X-Forwarded-Encrypted: i=1; AHgh+RrpI+AxkNDt442oyHS1oSEeTv861j8NNYIm3zhHpvwf9eC4PUjrhdaFePpCIJpyNjUT65juQpbS3go0@vger.kernel.org
-X-Gm-Message-State: AOJu0Yybzy1j7W0FGYCqAfrMkib1ABrDOxgbKHkDXa5NxFR64aNwt6I6
-	2GqJXvcVCHCszbv5tj85krHb1kNzYKqj704Hz+diOZJEX1w6/Q7XGyjjalE7WihK6zs=
-X-Gm-Gg: AfdE7cl9SCZPYNtoq4GTLFj8S2IvDWf7BcHPXVe8z3r6DFKfSAIYhKCevL5+bBh/F+B
-	XFMAtDfUm2hNqF77j7pA6abFE8vsL1FNLKQAEQ20O7US2vU8wHdVuscvwHnz6tegn6NqtsUgJDw
-	6Ktqs7V04pKhQMbzbOKs8bsaCz1x87+CSjUvfHg5h9O+X2tvfib2Jsd5IvEpmUbWEdEsL6hTziT
-	FiWYDmZcuN05rOqewCKT5CQBK9i/dJE03VhTYV+YRIdZq/N0S2QHWRnP6JAT1/q2KCQLRF94yaT
-	W/NeQ4bKCDxPBUFuiuq/MOr0YZdobFwKYFJKGo4lcuKWq7fZvFWMwycvaDMjgr0BqC5d3s4xmbp
-	auEocHgBNgrL5sFAL2yoUotZudE3fJAI22gwxAnFrxVGBc1dyjmvepML6F1XeCc1oyG23egMYiE
-	/ePVlPTnwbwsUK4SALzN2BTZova8sJiHMHWc9Wwj5fWY9M/zGxoTrm4lGDrbr/xwhbS/Et9wln5
-	UqzOcuNZPHNobyMuO/2SgbuCDgXYZYHqYQn5ltgRAojucT6qRQDMn1MCTl/qNdMfh3GYMs=
-X-Received: by 2002:a05:690c:9b0e:b0:806:5a1c:d892 with SMTP id 00721157ae682-81ecfa136e6mr64858037b3.47.1784222680322;
-        Thu, 16 Jul 2026 10:24:40 -0700 (PDT)
+        bh=yiEKy87CA5aNgjktQWoDYIpiJ3ToUfP9M91vtDoLKS8=;
+        b=Wr8LTuKxEjb3cILUTeXUUKpBnURxky2xrlQ/cX/MZhUEWgAqFQBkWIcbp3dQxh2omk
+         EV98RRNnURv/vZ+90PVMdtkGQ1JBdftq5+CImQI7L93csvMJbzaScDxcfjp4EEgg/gpu
+         KOedkBWtBrPlVYffiuNm55WA0HuUgxNB+oT4K7AsO6JzA6fjY6H0TEHRqc3tX5h2FT2B
+         82GFg/HFpwVfbTv9YOmiuszdzayeE8D99XNmxKgjTX8XxqOEWlucDPpMgqQIdRm2PICf
+         Qa0NTf9oItvFj8la2do7LsYR/q+TZnHStnJGd1gxHS6eKDTfH9beI6T1V4cX/dGYr85W
+         Nz4g==
+X-Gm-Message-State: AOJu0Yyh73wAblWBV8+/LUHsXhfCHMroK04BZvcCqmBgMNQV7m1GkZzS
+	KwH7yW+FZKoXS9nRs3+iMoLwc4wQ5rfcWMQ1TnbQeCPC5NY2DZnRCUrFr/IicUzg3FA=
+X-Gm-Gg: AfdE7ckV4SDUQMHLPrUq2s6+fJeHRmiJitCHsG5VYRyd0mavGpyogkkx7DC9wTM3TP+
+	PrVwToudSx24Ak00sqKZloxVCAssGG9pPynuUWLGxtQxMESpRNkQEl48oecr5iC1PWNqGWEFpeV
+	K+GQM+UHMnLvb/PwnzrzPCGqWHBb/WYOjHfA30Bg43oi0J0FjCwYDPr9scZ0EH107aqNPZm+qts
+	HSn0PfqOIWpMSNmyO3v+stAfJm8q2/wc/Inu2t0vWPUVKXehIWN+Pxtn/kFjUDKym3/jMsriLcy
+	ge4+KJeileE3R6BvW6oHeqRv0yH4R/PK7QxcbRaydvMWVRQeICdEvNjm4l/b8FbgxZxfBe9HIpT
+	u6T1Io/a3jEpivKSwumDNsg0hBYFeg3lJp8w2xr2yr7V845k2q2odttA93TbppRLL+YgWFRg5dU
+	bc3l21xFvacn3Q2XllBSJVlfQBI66n4tW/NX0u1XXYmA0T0grayn4qWs/pMpwqOGN1Wq/ehvZsa
+	EJn7nMzyGh7vzSNbw7jP1GRRhFKfIhNTUlfXdn2lFYijxuItEnVUKa9fxXknS2HLMtMkdM=
+X-Received: by 2002:a05:690c:4881:b0:81e:6b13:445f with SMTP id 00721157ae682-81ee28562d6mr22942577b3.23.1784223689978;
+        Thu, 16 Jul 2026 10:41:29 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:1ec9:9caa:73bc:e646? ([2600:1700:6476:1430:1ec9:9caa:73bc:e646])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e950567eesm140320917b3.13.2026.07.16.10.24.39
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81e6bf653desm202930077b3.17.2026.07.16.10.41.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 16 Jul 2026 10:24:39 -0700 (PDT)
-Message-ID: <544d89dcd4303cde366537744fb2182ebc1622ba.camel@dubeyko.com>
-Subject: Re: [PATCH] fix: release unused ceph cap reservation on readdir
- error
+        Thu, 16 Jul 2026 10:41:29 -0700 (PDT)
+Message-ID: <466ff292547ad3907d7cec28ee1b04847701816f.camel@dubeyko.com>
+Subject: Re: [PATCH 1/2] ceph: fix UAF in __kick_flushing_caps() on cf entry
+ freed during unlock
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: deepakroag <gaikwad.dcg@gmail.com>, Ilya Dryomov <idryomov@gmail.com>, 
- Alex Markuze <amarkuze@redhat.com>, ceph-devel@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Date: Thu, 16 Jul 2026 10:24:38 -0700
-In-Reply-To: <20260715181612.18192-1-gaikwad.dcg@gmail.com>
-References: <20260715181612.18192-1-gaikwad.dcg@gmail.com>
+To: xiubo.li@clyso.com, Ilya Dryomov <idryomov@gmail.com>, Alex Markuze
+	 <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Thu, 16 Jul 2026 10:41:24 -0700
+In-Reply-To: <20260714-ceph-uaf-fixes-v1-1-5c7603c181d5@clyso.com>
+References: <20260714-ceph-uaf-fixes-v1-0-5c7603c181d5@clyso.com>
+	 <20260714-ceph-uaf-fixes-v1-1-5c7603c181d5@clyso.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -124,63 +124,118 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Wed, 2026-07-15 at 23:46 +0530, deepakroag wrote:
-> Return unused reserved caps to the MDS client pool when
-> ceph_readdir_prepopulate() exits with an error.
+On Tue, 2026-07-14 at 16:13 +0800, Xiubo Li via B4 Relay wrote:
+> From: Xiubo Li <xiubo.li@clyso.com>
 >=20
-> Corrected standalone submission: this patch was mistakenly
-> sent earlier as [PATCH 4/4] in an unrelated multi-subsystem
-> series.=C2=A0 It is ceph-only and resubmitted here as [PATCH 1/1].
-
-Frankly speaking, it will be better to explain the issue detection and
-analysis here.
-
+> list_for_each_entry() iterates ci->i_cap_flush_list but drops
+> i_ceph_lock to send cap messages.=C2=A0 During the unlock window,
+> handle_cap_flush_ack() can acquire i_ceph_lock, detach cf entries
+> with tid <=3D flush_tid from the list, release i_ceph_lock, and free
+> them via ceph_free_cap_flush() outside any lock.=C2=A0 When the original
+> thread reacquires i_ceph_lock and the for-loop macro advances via
+> cf =3D list_next_entry(cf, i_list), it dereferences cf->i_list.next
+> on freed memory.
 >=20
-> Link:
-> https://lore.kernel.org/ceph-devel/20260715143646.15828-4-gaikwad.dcg@gma=
-il.com/
+> The race timeline:
 >=20
-> Signed-off-by: deepakroag <gaikwad.dcg@gmail.com>
+> =C2=A0 __kick_flushing_caps()=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 handle_cap_flush_ack()
+> =C2=A0 -----------------------=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 -----------------------
+> =C2=A0 holds i_ceph_lock=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 <---
+> =C2=A0 iterates to cf (tid=3D10)
+> =C2=A0 prepares FLUSH message
+> =C2=A0 drops i_ceph_lock=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 <---
+> =C2=A0 __send_cap() =E2=94=80=E2=94=80 FLUSH(tid=3D10)
+> 	=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0 MDS sends FLUSH_ACK(tid=3D10)
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0 --->=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 acquires i_ceph_lock
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+ cf->tid(10) <=3D flush_tid(10),
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+ detaches cf from
+> i_cap_flush_list
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+ drops i_ceph_lock
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+ ceph_free_cap_flush(cf) <-
+> frees it!
+> =C2=A0 acquires i_ceph_lock=C2=A0=C2=A0=C2=A0=C2=A0 <---
+> =C2=A0 for-loop advances:
+> =C2=A0=C2=A0=C2=A0 cf =3D list_next_entry(cf, i_list)
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 -- UAF on freed cf->i_list.next
+>=20
+> The cf was just sent by __kick_flushing_caps itself via __send_cap().
+> The MDS may respond with FLUSH_ACK quickly enough that
+> handle_cap_flush_ack() frees cf before __kick_flushing_caps can
+> finish the iteration.
+>=20
+> Fix by converting to a manual while loop: save the next pointer
+> under i_ceph_lock before dropping it, then use the saved pointer
+> after reacquiring, so the potentially-freed cf is never accessed
+> again.
+>=20
+> Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 > ---
-> =C2=A0fs/ceph/inode.c | 2 ++
-> =C2=A01 file changed, 2 insertions(+)
+> =C2=A0fs/ceph/caps.c | 11 +++++++++--
+> =C2=A01 file changed, 9 insertions(+), 2 deletions(-)
 >=20
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 61d7c0b81..2d6a80054 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -2188,6 +2188,8 @@ int ceph_readdir_prepopulate(struct
-> ceph_mds_request *req,
-> =C2=A0		dput(dn);
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index f8d898ad091e..358ee4f14524 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -2626,9 +2626,14 @@ static void __kick_flushing_caps(struct
+> ceph_mds_client *mdsc,
+> =C2=A0		}
 > =C2=A0	}
-> =C2=A0out:
-> +	if (err)
-> +		ceph_unreserve_caps(req->r_mdsc, &req-
-> >r_caps_reservation);
-> =C2=A0	if (err =3D=3D 0 && skipped =3D=3D 0) {
-> =C2=A0		set_bit(CEPH_MDS_R_DID_PREPOPULATE, &req-
-> >r_req_flags);
-> =C2=A0		req->r_readdir_cache_idx =3D cache_ctl.index;
+> =C2=A0
+> -	list_for_each_entry(cf, &ci->i_cap_flush_list, i_list) {
+> -		if (cf->tid < first_tid)
+> +	cf =3D list_first_entry(&ci->i_cap_flush_list, struct
+> ceph_cap_flush, i_list);
+> +	while (&cf->i_list !=3D &ci->i_cap_flush_list) {
+> +		struct ceph_cap_flush *next;
+> +
+> +		if (cf->tid < first_tid) {
+> +			cf =3D list_next_entry(cf, i_list);
+> =C2=A0			continue;
+> +		}
+> =C2=A0
+> =C2=A0		cap =3D ci->i_auth_cap;
+> =C2=A0		if (!(cap && cap->session =3D=3D session)) {
+> @@ -2638,6 +2643,7 @@ static void __kick_flushing_caps(struct
+> ceph_mds_client *mdsc,
+> =C2=A0		}
+> =C2=A0
+> =C2=A0		first_tid =3D cf->tid + 1;
+> +		next =3D list_next_entry(cf, i_list);
+> =C2=A0
+> =C2=A0		if (!cf->is_capsnap) {
+> =C2=A0			struct cap_msg_args arg;
+> @@ -2678,6 +2684,7 @@ static void __kick_flushing_caps(struct
+> ceph_mds_client *mdsc,
+> =C2=A0		}
+> =C2=A0
+> =C2=A0		spin_lock(&ci->i_ceph_lock);
+> +		cf =3D next;
+> =C2=A0	}
+> =C2=A0}
+> =C2=A0
 
-OK. So, we need to do this because handle_reply() [1] execute this
-after ceph_readdir_prepopulate():
+I don't see any issues with the patch.
 
-  if (err =3D=3D 0) {
-      ...
-      ceph_unreserve_caps(mdsc, &req->r_caps_reservation);
-  }
-
-However, we are missing another execution branch [2]:
-
-  if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
-      return readdir_prepopulate_inodes_only(req, session);
-
-I believe that we need to improve the patch.
+Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
 
 Thanks,
 Slava.
-
-[1]
-https://elixir.bootlin.com/linux/v7.2-rc3/source/fs/ceph/mds_client.c#L4186
-[2]
-https://elixir.bootlin.com/linux/v7.2-rc3/source/fs/ceph/inode.c#L2017
