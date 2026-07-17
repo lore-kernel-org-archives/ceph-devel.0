@@ -1,132 +1,150 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67E7A3264D1
-	for <ceph-devel@vger.kernel.org>; Fri, 17 Jul 2026 06:27:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.47
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784269635; cv=pass; b=VwRNBhu5lxnuNcp7lqctAEoerTOv25p6LXnK8zpjfyKi/kGstMBT33Np4qrQpkPB+ULycbVNPd1Ec+RbukohYq9ay3xNRYFjnfcQMTG7wz32EVvrl/lKrK1xKIg7rWdIVHbNnDc3gknHmbRXVJ3CCfbZVRnU/V5NPPHFZKynerQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784269635; c=relaxed/simple;
-	bh=QJA16BA/QASuJOil8clU31p6Fuh18DMT5tfaMSxoL28=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=crR6L69S9rIbv9XgRR/vofgcKEc8DSPoodN5Am8qjbwWAuPJlUjqRpOc4UYgiSQXfPTU+9PJ6cNJT9c5Vb1YTOwGZszG7W/5S+n22U51dy3suH1Ho7sjXc8H1sc8uJGsuA6e8HVxT5hjMLWZ238DwleNPpLMWNTTCuDL/mC0LSY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=mzOlxP4U; arc=pass smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85C953C3F56;
+	Fri, 17 Jul 2026 09:34:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784280861; cv=none; b=Mvs9DSaYt/P/E9VnEj4LTIIjz/9CcWRQ/GXeTCO2gJD8IoLQBDPB3kQN5Jq2uboJX4NhrN+vw8iMyv6oTXlEaYGw+7kx77oKnr3UQExzDh9d6meW0VLIHSJBNMf90+fMiHL9QwC1trf868cXfYbjn4aQktvDmgvBzPhQzi5iiuQ=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784280861; c=relaxed/simple;
+	bh=SnEaQY71MuuKnk08iVTdYkxopsKcjqKzgbZ/VlYecJ8=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=SOwsVKAMSgiipSGnirveDcfEMMZGGQktkkqCnSzkKHD+M43xN9U0SvIL3stY3fpGCJdZ5Obas4uVA0WsA8+a98XpEWbC8uKOl1fNH4aCmDIVSHn5VBaMfET6yIPmgA/EB3idwR6LfcTO2Q3iejAjev33fbn7o3NChmyG95kiPi8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V26xEDoy; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="mzOlxP4U"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-c1601d552a8so782878966b.2
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Jul 2026 23:27:11 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1784269630; cv=none;
-        d=google.com; s=arc-20260327;
-        b=bxAO0pi/eZzpIQAKlgjc6k/UhAjp9KiscEAFpdZaZlfYx0PvAkU2nnYOsAwJkJ0GII
-         eLWRtzZyJ4U0OVOQ1UHY5MQgtfU0WhkaWMy2oFbUB1YkzwxzFI701TthQVdCBNlvPBF8
-         ffdg0HNo/jGD9W6oOfhfaxrWdtvb/TCMLwdXndHHbpEAke67lb62LCkP4MIQNeDBxVGy
-         phd7BwDiLT2+9F852NDAawzPyXAVgNiy1VE510wsZdSceVJjUUVX0v3LsaqXVn4eyqEj
-         OTvgUu8B4vGtn96fQdCDzcJSProCg2q3xUiSln0prdyUm5iIp3dVYQnpx08ZQuxaG3mV
-         Lkrw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=QJA16BA/QASuJOil8clU31p6Fuh18DMT5tfaMSxoL28=;
-        fh=lIj2fP9TLY8J0+u4Z5gxpYmcsDjYZerPZxdPGefRbRM=;
-        b=XqRPQj7G0qT4ggbwd+e+roU3TFMkosGFiKv3MxK1loZs/rrpy/xT7XsxLDs0K6jUdn
-         MezXXNEKwduHNu3ZMNYDwGPDckAa2hUqK9okaItcPDJ2HKGDLcMa9N3S5VBW3qsjh6Nj
-         GlEymBDXsPLCEeF7cQGZZoUtqgBiOrAYa/TL2goDzNsV+TW2TOsgIhmeoDT3DqiKHkzI
-         WCfXNk5ZVQ4cp28QR+tVriw62GGRkHDns/EwC5l4DhbgxQ3Mp7+G2aP6DbhRfvriJolp
-         DqwjDGW9i3QQJW/0NloDdtKXo9KgKZYqWscCVFtBGpjwtpi48FlU+/hpadv4Ybbzs2Of
-         3yNw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1784269630; x=1784874430; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=QJA16BA/QASuJOil8clU31p6Fuh18DMT5tfaMSxoL28=;
-        b=mzOlxP4UC4umfY5fypAsUIuPR2t2ksX9VD/UbiwCITZxSv03kwn0Mx/S9r13zkHlsr
-         1lerW18EKwAiTMYImI5swN1uZgcVQ7fGu02aNLIqLefygoezEtO7uNUbwTuUDdy/s9vO
-         0GW4ZwqaqvHJLqdF0hsacWh0nioR64R6AfC6UCstwSG9tnvppRsIvtlD/GkCllVfb4gx
-         RmIyeDRK1oGfjNB9qxjICV6kcoOecX6Mk9hNrH17Si2uF20/WB2VHFwnTU7xiv4Rdsgu
-         pTJzoG8MAVNjogsD+jjlllRHBgWg1VQ0XLaqUxOzyk4kSZhkNSxFInr/l22s7RmJ656N
-         d2rQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784269630; x=1784874430;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=QJA16BA/QASuJOil8clU31p6Fuh18DMT5tfaMSxoL28=;
-        b=HwWO6tgfAYfYPBl3stb1FpUMGR6tUZwbkkfkTml0WsWi7WVqcgG/8HeXrl07sIma/s
-         Rg8IIASxgCbulK/tihcSHIZQokFesRguD0s2jqNkwyUtaDgQX1iD6YMOQ5eE5UQgem3/
-         PVVestGCRnGB5IwGRFpFJcx+e3hKYjQ1YCa8n/1oG/KYUuk58sKFuvNAatoxQDK/0Q89
-         0LqVSwsovCoCdVXw95Ckw8NncN1NXZ+/9VA9iZU67Z4wBSR+u/B5oCmCL0LRCKHX6BGw
-         CFZO1NS/Q8ltNdCr+QqRfXHVGrbuPhM1fu1ZOeiI4lWt/I4ssGv31B5glbzaKXfhyOsk
-         7nJg==
-X-Gm-Message-State: AOJu0YxSG/IY/8a0gi2gdNRiP/NUiiurIszTfgtM0Kl+aHWJSJipfEeL
-	Kb9iF6gR0KzvETIrp6XQ42n8KpSM+3i1Lwdv/gaH5EF7Tf3ft/2Q8+GSSdLc0djFB36B75hQ0CJ
-	+Xw6/pgUku6htk4LuytrNW7tO2OxSo5GAS7bEkJEFWA==
-X-Gm-Gg: AfdE7cmrFII0abtiOSUVtuZdPhT55XF5E7Zz46nFjfrmzWwTjdZAAJ7s0XicaaxXjZS
-	3m1jwsxcx+tcj2No5kBWsWBfIH5S+ujANYD9yS6lV6qLfy7rKS+gMTHhlSgVlYebNLCFqzn6HBi
-	myrkDvAGnDh7L39HuGG89K1MBy9G6eRvmlioQZTDiNKPBwqJR7WMVnrGkczvf0f7OCUJPJlZGPI
-	2gOsq2YLlXEiVTTk3Exl/hMALFy73qTyY3hTeShxAyA4N+UW6ERgksr3YIsd7aZ063KXA==
-X-Received: by 2002:a17:907:972a:b0:c16:46b1:e0c2 with SMTP id
- a640c23a62f3a-c16b48a8b9dmr41309166b.62.1784269630263; Thu, 16 Jul 2026
- 23:27:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V26xEDoy"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id AAD1BC2BCB8;
+	Fri, 17 Jul 2026 09:34:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1784280860;
+	bh=SnEaQY71MuuKnk08iVTdYkxopsKcjqKzgbZ/VlYecJ8=;
+	h=From:Date:Subject:To:Cc:Reply-To:From;
+	b=V26xEDoy5/QqOaC/etNVb1mmqMv03S41B1K7pp+EkXZtuGMWYQrWyQMziTg/FbaQ0
+	 Rvxs5dmIWFBoTzTcCptulae1uWcPdWIasqoG734oVi7czvf04cgsmK2+1NrXZYNILO
+	 xwDFW9liu+4x8d2te+pxnL3x6v0KymISmlM3+GZKfc1DezBR5ES5Ci2wHdB9YFhnvm
+	 ULA5bJ50BRCgHdR7pGdSOIcE6IHOn+jnlBFNQJlPy0ECQw/QvpEi+7U2Zrkwu1xCOa
+	 UK3aEaZUyoux2FQ+xO2Ymc4L88mbRMNUJVY7wTSM39F214+TS0q+h0CEAnpgrtZt6v
+	 Ihmg9sSFawGRw==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92A38C44516;
+	Fri, 17 Jul 2026 09:34:20 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Fri, 17 Jul 2026 17:33:42 +0800
+Subject: [PATCH] ceph: revalidate ki_pos for O_APPEND writes after cap
+ acquisition
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAOJNxR+9tBWfnQ3-wyBdYeJ-ipVM+0oyULtUGk15C5-xnXHqcg@mail.gmail.com>
-In-Reply-To: <CAOJNxR+9tBWfnQ3-wyBdYeJ-ipVM+0oyULtUGk15C5-xnXHqcg@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Message-Id: <20260717-ceph-append-fix-v1-1-c51907ac8e36@clyso.com>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMwQqDMBCE4VeRPbuQRDDaVykeYpzW9ZCGpJaC+
+ O5GPX4D82+UkQSZHtVGCT/J8gkFuq7Izy68wTIVk1GmVVZb9ogzuxgRJn7Jn/vOKDSjdrbzVF4
+ xocxX8Tnczuu4wH/PDO37ARDDs0pzAAAA
+X-Change-ID: 20260717-ceph-append-fix-9820e3b1a78c
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1784280859; l=3198;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=Yw5DgupygwidMrShTyytzkydWyOnKoHEMS/lC2aH5aE=;
+ b=QHcnFItQZPyLEMzc/JfulHuqvJbIDzojQQJGXuOnbbSf9tU6eejTHZbJygY5c/8TlAf1Mmm8/
+ Vc632Pprc1LDVnpaVVOBsgVSn0pThk6KIctb0V0J1D61qS6NWu+K/OQ
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
+
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Fri, 17 Jul 2026 14:26:58 +0800
-X-Gm-Features: AUfX_mwmpaSJxCINpmKtX-qXBvOfYgeP0BLRrUyCX4Silkmr4vRIyKuGFxEjDMg
-Message-ID: <CAOJNxRJQogEWqx8V0D0vj6GiTJMJ5Y9RSk9F6xq+vR3GqrgRbQ@mail.gmail.com>
-Subject: Re: Survey: Is anyone using 32-bit builds of the CephFS kernel client?
-To: ceph-users@ceph.io
-Cc: ceph-devel@vger.kernel.org, dev@ceph.io
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Just forward this since I wasn't in the ceph-users mail list and it
-was reject yesterday.
+For O_APPEND writes, ki_pos is set to the current EOF via
+generic_write_checks() after fetching i_size from the MDS.  However,
+ceph_get_caps() may need to wait for Fwx exclusive caps if the write
+extends the file (endoff > i_max_size).  While waiting for Fwx, the
+previous Fwx holder (another client) may have already extended the
+file.  When the MDS grants us Fwx, the cap grant message updates the
+local i_size, but ki_pos remains at the old EOF, causing the append
+write to land at a stale offset and overwrite data from the other
+client.
 
-Thanks
-Xiubo Li
+Fix by re-reading i_size_read(inode) after ceph_get_caps() returns.
+At this point we hold Fwx exclusive caps, no other client can modify
+the file, and i_size reflects the true EOF from the MDS cap grant.
+No extra MDS round-trip is needed.  Only adjust ki_pos when the EOF
+has actually changed.
 
-On Thu, 16 Jul 2026 at 16:53, Xiubo Li <xiubo.li@clyso.com> wrote:
->
-> Hi everyone,
->
-> We are considering a performance improvement for the CephFS kernel
-> client (kclient) that would be significantly simpler and cleaner to
-> implement as 64-bit-only. Supporting 32-bit in this case adds
-> non-trivial complexity and ongoing maintenance burden, so we'd like to
-> understand whether continuing 32-bit support is still necessary.
->
-> Before making any decision, we want to hear from the community:
->
-> - Are you currently using, or planning to use, 32-bit (arm/armhf,
-> i386/i686) builds of the CephFS kernel client?
-> - If yes, is this for production workloads? Or legacy/testing purposes?
-> - What is your platform (distribution, kernel version, architecture)?
->
-> If there are no active 32-bit users, we would proceed with a
-> 64-bit-only implementation and clearly document the deprecation in the
-> release notes with appropriate warnings.
->
-> If 32-bit support is still needed, we will explore alternative
-> approaches =E2=80=94 for example, keeping the current code path for 32-bi=
-t
-> while the new fast path is 64-bit-only, or finding a way to cleanly
-> abstract the difference.
->
-> Please reply by August 6, 2026 so we can factor your feedback into the pl=
-an.
->
-> Thanks!
-> Xiubo Li
+Link: https://tracker.ceph.com/issues/7333
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+For O_APPEND writes, ki_pos is set to EOF via generic_write_checks()
+after fetching i_size from the MDS via ceph_do_getattr().  However,
+ceph_get_caps() may wait for Fwx exclusive caps (because endoff >
+i_max_size).  During that wait, the previous Fwx holder may have
+already extended the file.  When the MDS grants us Fwx, the local
+i_size is updated via the cap grant message, but ki_pos is still
+the old EOF, resulting in the append write overwriting data.
+
+Fix by revalidating ki_pos against i_size_read(inode) after
+ceph_get_caps() returns.  We now hold Fwx — no other client can
+change the file, so i_size is stable and correct.
+
+Fixes: 8e4473bb50a1 ("ceph: do not execute direct write in parallel if O_APPEND is specified")
+Link: https://tracker.ceph.com/issues/7333
+---
+ fs/ceph/file.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 9d89d7fc1095..b35c9aee48dd 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -2491,6 +2491,32 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 	if (err < 0)
+ 		goto out;
+ 
++	/*
++	 * For O_APPEND writes we may have waited for Fwx exclusive caps
++	 * while the previous Fwx holder (another client) extended the
++	 * file.  i_size has been updated via the cap grant message from
++	 * the MDS, but ki_pos is still the old EOF.  Re-read i_size here
++	 * (no extra MDS round-trip needed) and adjust ki_pos to the true
++	 * EOF.  Since we hold Fwx, no other client can change the file.
++	 */
++	if (iocb->ki_flags & IOCB_APPEND) {
++		loff_t cur_eof = i_size_read(inode);
++
++		if (cur_eof != pos) {
++			doutc(cl,
++			      "%p %llx.%llx O_APPEND: pos adjusted %lld -> %lld\n",
++			      inode, ceph_vinop(inode), pos, cur_eof);
++			iocb->ki_pos = cur_eof;
++			pos = cur_eof;
++			if (pos >= limit) {
++				err = -EFBIG;
++				goto out_caps;
++			}
++			iov_iter_truncate(from, limit - pos);
++			count = iov_iter_count(from);
++		}
++	}
++
+ 	err = file_update_time(file);
+ 	if (err)
+ 		goto out_caps;
+
+---
+base-commit: df47791ab9f12cd9144aca477ddae195f68072a5
+change-id: 20260717-ceph-append-fix-9820e3b1a78c
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
+
+
