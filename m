@@ -1,229 +1,267 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+Received: from mail-oo1-f44.google.com (mail-oo1-f44.google.com [209.85.161.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD6B64499AD
-	for <ceph-devel@vger.kernel.org>; Mon, 20 Jul 2026 17:50:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57B8743C7C8
+	for <ceph-devel@vger.kernel.org>; Mon, 20 Jul 2026 22:43:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784569836; cv=none; b=AL2/IreQaVurwDbtsm/qtCqBrY70A0qVQVdmNePHqEvFSUm/nhnEVKbImNlNIV7Eohd2af1Ym4Zyoe76XRwIPAFCrA+YKrD5Vef/KKN+/Luw2o2q+KmoYVModX+DwKW2jjQWDmtoYw9k61iFlmtQ7rwDdUEq8qL6izaUdaOyXZc=
+	t=1784587385; cv=none; b=E/GSPmkfXYFhmvln8CQNaMeYL93bQqsHLPWzoSW1Uv8bzrdjzbXh1dtKKlLSFWN1gZ5jCqCOukKDxK0+LrxHQsVzBDfd6iMqRtvh6IL3h7CZHRXE/mLPrScgyQWAZ6A2wUUs0lJEOSEGodpjBvwOJlerUpdyi6Zb1dBB075nQh0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784569836; c=relaxed/simple;
-	bh=Mug6mdvOzfZiPSR2hwKfq3W/EClr6r8ewyDrw+dd8QM=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=bvL5Y1a41j4rvdXLpD7fWxlIwfszTPXfLDQrZsgyMPCccsn6IU5RvgB9e/btp7EzRkjhkNaNPmmk+snLlhL9DZB2tOteyvcknDwhKcf6xcJij8Mde48ZhHQlv4kGPAu6O+fB530C1zsdY8C7QzlXebcVG+ViDRtnMtbCnWW5f+Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=K0PJE6/7; arc=none smtp.client-ip=209.85.128.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
+	s=arc-20240116; t=1784587385; c=relaxed/simple;
+	bh=pLkqvurGLvdYqh8GtQi6XdHxsYN0BqH3eXrptf9i3g8=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=msBbEstOXKrhEQw0MAdNleFiD+key6tzWIPlhNvsQgZv9Ta0S2R+LOlQMrlztJfpr3sg3bUehmlqd2VK9sjBUIlBhxOKe6Ikmautk3sdSZ0nMjASCAbYvv61D1tz5nSK9Z+Al/qBmq3GdKa+gUrL7Cxn6yCgLbD644bndlbVK5k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com; spf=pass smtp.mailfrom=cloudflare.com; dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b=b4qez36e; arc=none smtp.client-ip=209.85.161.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloudflare.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="K0PJE6/7"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-81e69a2db34so55447357b3.0
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Jul 2026 10:50:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b="b4qez36e"
+Received: by mail-oo1-f44.google.com with SMTP id 006d021491bc7-6a3d915616fso1467445eaf.2
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Jul 2026 15:43:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784569828; x=1785174628; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=egWhZ76W8oq2GbxOKW2F7G35JG/AS23dvrE0KrllWRI=;
-        b=K0PJE6/7ZF0sEYZndITODs0ADbxrLlVENNHYcZTh/SdxfyzcmRiurhqBNviuoyYhak
-         BMWIvn+OT76SnBaFhhBnwem6OCfp1T8xQzinOKUUYoPojtbVRdhH31PMITl+d/P8rCM8
-         c7+j6M4CpfVJ7ZGX//J+ljM+AI6QDpukwMoal09QXoy01GdwO3GvsFWUrP6tujkgOiE1
-         ULlf0m+LpVJ2ioCwhpjLDA4hTNvsM6RJlX+1W1IltGaunPwycMmRLgDrCYw86Ryihtkj
-         E9zn9ltX0zTgHVu6G46UZ9yOaQM623+X52V5i76LwAC64EjXPfrXrxbFET6fRVFrPqFc
-         CGkg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784569828; x=1785174628;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=cloudflare.com; s=google09082023; t=1784587381; x=1785192181; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:content-type
+         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=egWhZ76W8oq2GbxOKW2F7G35JG/AS23dvrE0KrllWRI=;
-        b=Go72WgYmPj7yxtDj7w9y4m/Zw+9QMNfF9GHeEpMdQRQlbC8DYuRjXF/Rdzu8K5phaK
-         K0YurncY15+Hfkb7QGQ5fQmSJyjtRsdSuUff+pUR0rRHPfrQUZBXa0vCty3kius3uH3Q
-         CTXocPJ63D39LqSWOQDZE/KzXDhp4I7FvRgDhFOQsY07AbObmlQHqWH1mx0UVS0OHLfo
-         ApYg9oEzqEMqCfk8F8l0aezlA/rIfQsXpDSIVvYjJRXX8a8D4H+uoVtnKwsvwXLU1BjP
-         BppcOfp+BuoQrwMi2dqrDY1j1VLKUZwI7VnteaBv2VfSdNNbfNRiVejbXV/CgWdQ6sts
-         uWaw==
-X-Forwarded-Encrypted: i=1; AHgh+RpIvjY+oAVSTHQgEL4Gn0PJLFvDHMc6PHuXeDtgai6eTqSk/jmu0rW9IivWfzKGbaBRuzjd+gKBiAwH@vger.kernel.org
-X-Gm-Message-State: AOJu0YwRFZZwZfwm/OZibJR4KehmJQKzFg3KvYm9pq3kshZQhrGgF3K3
-	rVL+rEPKdfC11/2eOlo76ivrlYUL1oa9yVahFBiMmgrmF4j7XJD4IwtPWPA2f/HMILo=
-X-Gm-Gg: AR+sD10da/1DyI8v4tmNOm47XbQ4EoSXRRiaogOUoknvEelgz1Bjnxc50fcs7ryf0CE
-	D6mF2JXEp8Q5GlOXq5VK6gbF+CmHMxLrOY/iO8NOyWZDxPv6CMqPHnQgnkx5BZKbcuwxharndGJ
-	CyO7zgsIme8Rsaw+V61x1/DefDqPG4m2HvFMMqrOh79j/StnYXp6zxuFHb9DcDfEVYD4Z4TOTaU
-	DxAb6U68QwHkaLv4+Xgzq8JenWKbnVezn7zAogVoM4QbaS/icymov9NataYEwWb9rNgpp+A2BHe
-	uN7X7SayhFUJrvZR+T+wbMasKjEPygU0xu04fJ9zk8xbjkQIaQxBuxEjar1a2m94E2xyW9lcUX7
-	G/JpZDRiwmE79d24A1nt9di/9iRsBERbnaSca0VHe0KI57yKm6VdNqA51MTJU9kHUQtO7toPayE
-	5pyuiLHFbU3sUsMqYfRP74b3aIsm/E0bYnsux3oUAB/edblCpw8If1oPezaF4+J0J34vEZgMXdi
-	gGDRw8gsR6VDQ37S1V51qWTdeph6VsNgGaGgmZoo9GM4BLf11j0osNLSBotdEQ3mn0t
-X-Received: by 2002:a05:690c:4b93:b0:81c:eca8:dbaf with SMTP id 00721157ae682-81ef278d84fmr46500557b3.31.1784569827720;
-        Mon, 20 Jul 2026 10:50:27 -0700 (PDT)
-Received: from ?IPv6:2600:1700:6476:1430:8546:6986:b83:77a3? ([2600:1700:6476:1430:8546:6986:b83:77a3])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81ef42c5c84sm53944337b3.41.2026.07.20.10.50.26
+        bh=LRBIfkf3wdoxL+p/2humIPxU7mFmQ4bE3UFfQNRbQcs=;
+        b=b4qez36ezgldzbDVjioJYk9G0qz9z6OfsInr4RTJIQnyAJyiUPthk65HzC5SzdxVYu
+         mncnDkM98SkjS7uRFFCwr/t4U0JMgRRIwmgMMiuqKvSKYgCH/gxYEKMYtRoXJAvtolzU
+         LR51UlDlEYe0C4iuu4WBS+tm/m+VoOJVKqVCEtjq0EZVT3RzBrGl5fPC07G4s2bZRTYx
+         K54c+BsORBYrvzndAm9Bnmvn1NsBglaPdW3BniLwLpzNUrjp8n6Oh0JuJcS4UUkdouP5
+         3quE/H/rt40gshup53ORTIVx0ARrBJEM9kPszAfyf6zq8CHyU1zzSYHQ4La2hj6WbFBC
+         Ua2w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784587381; x=1785192181;
+        h=cc:to:message-id:content-transfer-encoding:content-type
+         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=LRBIfkf3wdoxL+p/2humIPxU7mFmQ4bE3UFfQNRbQcs=;
+        b=Ob8CVhrpZwzWye24rhcZvi67Ip413R+U65CSXFIdZjQv6FbJOeMxmWoaLM9j+HvQ6F
+         +VMXvhG5NGggtvtQ5ES8TSvvDytv8lR0tjN21o5hh8yW1obd9o5TmCT4jFnMMG87LhN1
+         q/rcRzs8+//EBe1MUVRe7SU5LBkfXkFlsEFd8TTtfbplqylrRiCV9HWvlN936JhO0WRZ
+         ijBzXI4eTlGgOTsJHCy6o23Jj9Z723QcJvhrmpkBfO4atkDL8jAHf0ti7eptxDUsTsqc
+         bizGfRo4xz+zLfF8mfXo5GLhV7uxvjGj9/hwwRU958dzKjv+9BH8Hvv3FckNpsioFjLU
+         FkqQ==
+X-Gm-Message-State: AOJu0Yyuz1CjT2uTHXjLUPsoyYmwqSHf88bhNe5hg2ECip3YWo0I84kO
+	Ina2t2Iaj0hyJReHn1KsPJHT0aqMIPDeUHJqWWWe/ZbPDeyuVuk0YYSZklgHHi8wxAQ=
+X-Gm-Gg: AfdE7cm47+l5DiU7NUnFJ0USwcinF0q8v0YDPUXchbUX2Z+nlECbICx8J08y+pnzTA8
+	LAzuLO6O/FrlNyZJWhQkKAG7vABNVSpS+EiU2Wkp4MlUY7qFsAt3E3kE2s2wIcBlHrgNmnd05v4
+	bWV4gA0F0RYXc9fUwEOVc5xobYKmSlOqE7Ic2VkTbZRojp0kKkCTQDBUvXc0PbCkEeHK4r0BUai
+	yrRgGMu/rESvLKV6Pw7znwWNMRrQIYBxvMlx3+J9JCWtCGJAnEzxtdYPIIcZepWEOowEmEzgmCg
+	ng4G71TT2vYaNic6xqdsTZokh3cGn0kYzChWG5Hptyk0ql5X9W5+GoYnZGa4OKEWvXQMHinQ/Ob
+	xsBuNZcivnHC3j8wxao2fcqo76AOsLIoYI8HJfkyC9mBMx8sCR0itGxuZRsEE5raayE8=
+X-Received: by 2002:a05:6820:81c9:b0:69e:2cb4:2ed8 with SMTP id 006d021491bc7-6a5367e83d3mr8090305eaf.26.1784587380935;
+        Mon, 20 Jul 2026 15:43:00 -0700 (PDT)
+Received: from [127.0.1.1] ([2a09:bac6:bf21:2632::3ce:1b])
+        by smtp.gmail.com with ESMTPSA id 586e51a60fabf-4568e6a8c92sm9629886fac.14.2026.07.20.15.42.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Jul 2026 10:50:27 -0700 (PDT)
-Message-ID: <9952b19ffac512d2cce2036a4f2d7f20418b6b32.camel@dubeyko.com>
-Subject: Re: [PATCH 1/1] libceph: unpublish osdmap before destroying it on
- stop
-From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Ren Wei <enjou1224z@gmail.com>, ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com, amarkuze@redhat.com, sage@newdream.net,
- vega@nebusec.ai, 	xizh2024@lzu.edu.cn
-Date: Mon, 20 Jul 2026 10:50:24 -0700
-In-Reply-To: <bbcdd44d07efd11c7211195b6302b179918cb253.1784371311.git.xizh2024@lzu.edu.cn>
-References: <cover.1784371310.git.xizh2024@lzu.edu.cn>
-	 <bbcdd44d07efd11c7211195b6302b179918cb253.1784371311.git.xizh2024@lzu.edu.cn>
-Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
- keydata=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
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.60.1 (by Flathub.org) 
+        Mon, 20 Jul 2026 15:43:00 -0700 (PDT)
+From: Chris J Arges <carges@cloudflare.com>
+Date: Mon, 20 Jul 2026 17:42:43 -0500
+Subject: [PATCH v3] libceph: reset OSD session when keepalive2 acks stop
+ arriving
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260720-fix-rbd-keepalives-v3-1-c344fbad63a4@cloudflare.com>
+X-B4-Tracking: v=1; b=H4sIAGKkXmoC/33NwQ7CIAyA4VdZehazwWDgyfcwHhh0jjjHAko0y
+ 95dtpOJxuPftF9niBgcRjgUMwRMLjo/5mC7AkyvxwsSZ3MDLakom7IhnXuS0FpyRZz04BJGIkT
+ doaJCGMYhH04B89aGns65exfvPry2H6lap3+5VJGKtCiltJxyK/TRDP5hu0EH3Bt/g9VM9NNRP
+ x2aHaZsLWuhFTf45SzL8gagrsurAQEAAA==
+X-Change-ID: 20260707-fix-rbd-keepalives-664fe9266c35
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ kernel-team@cloudflare.com, Andrew DeMaria <ademaria@cloudflare.com>, 
+ Chris J Arges <carges@cloudflare.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=openssh-sha256; t=1784587379; l=6764;
+ i=carges@cloudflare.com; h=from:subject:message-id;
+ bh=pLkqvurGLvdYqh8GtQi6XdHxsYN0BqH3eXrptf9i3g8=;
+ b=U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgaxY1IIT5oTohBZJmhnVgJo2HsM7Sv
+ 9I0LdJCgpeGX6gAAAAGcGF0YXR0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAA
+ QBmmRH8n21GUCpfoJ/zD/gO92+C16VxjAFJUwUX0InSE5LeD9/tucii/WhP7w7S5bblPCG2uEWY
+ +aEbW5XftpwI=
+X-Developer-Key: i=carges@cloudflare.com; a=openssh;
+ fpr=SHA256:Cun99EBiH0EV7wvmfTBF9eDrld2NJx+aD4ScWZ45Q5M
 
-On Mon, 2026-07-20 at 11:49 +0800, Ren Wei wrote:
-> From: Zihan Xi <xizh2024@lzu.edu.cn>
->=20
-> osdmap_show() takes osdc->lock for reading and then walks
-> osdc->osdmap while formatting the debugfs osdmap file. During client
-> teardown, ceph_osdc_stop() closes the OSD state under the write side
-> of
-> that lock, drops the lock, and only then destroys osdc->osdmap while
-> the
-> pointer is still published.
->=20
-> A concurrent debugfs reader can therefore acquire the read side after
-> the
-> stop path has dropped it and traverse an osdmap that is being freed
-> or has
-> already been freed.
->=20
-> Take the osdmap pointer out of osdc under the write lock before
-> dropping
-> that lock, then destroy the saved pointer after unlocking. This makes
-> the
-> write lock wait for any current osdmap_show() reader and makes later
-> readers observe a NULL osdmap instead of a freed object. Also make
-> queued
-> OSD map messages return after taking the lock if teardown has already
-> unpublished the osdmap.
->=20
-> Fixes: 76aa844d5b2f ("ceph: debugfs")
-> Cc: stable@vger.kernel.org
-> Reported-by: Vega <vega@nebusec.ai>
-> Assisted-by: Codex:gpt-5.4
-> Signed-off-by: Zihan Xi <xizh2024@lzu.edu.cn>
-> Reviewed-by: Ren Wei <enjou1224z@gmail.com>
-> ---
-> =C2=A0net/ceph/osd_client.c | 12 ++++++++++--
-> =C2=A01 file changed, 10 insertions(+), 2 deletions(-)
->=20
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 2ff00070c181..70467eede336 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -4145,8 +4145,11 @@ void ceph_osdc_handle_map(struct
-> ceph_osd_client *osdc, struct ceph_msg *msg)
-> =C2=A0	bool pauserd, pausewr;
-> =C2=A0	int err;
-> =C2=A0
-> -	dout("%s have %u\n", __func__, osdc->osdmap->epoch);
-> =C2=A0	down_write(&osdc->lock);
-> +	if (!osdc->osdmap)
-> +		goto out_unlock;
-> +
-> +	dout("%s have %u\n", __func__, osdc->osdmap->epoch);
-> =C2=A0
-> =C2=A0	/* verify fsid */
-> =C2=A0	ceph_decode_need(&p, end, sizeof(fsid), bad);
-> @@ -4238,6 +4241,7 @@ void ceph_osdc_handle_map(struct
-> ceph_osd_client *osdc, struct ceph_msg *msg)
-> =C2=A0bad:
-> =C2=A0	pr_err("osdc handle_map corrupt msg\n");
-> =C2=A0	ceph_msg_dump(msg);
-> +out_unlock:
-> =C2=A0	up_write(&osdc->lock);
-> =C2=A0}
-> =C2=A0
-> @@ -5268,6 +5272,8 @@ int ceph_osdc_init(struct ceph_osd_client
-> *osdc, struct ceph_client *client)
-> =C2=A0
-> =C2=A0void ceph_osdc_stop(struct ceph_osd_client *osdc)
-> =C2=A0{
-> +	struct ceph_osdmap *osdmap;
-> +
-> =C2=A0	destroy_workqueue(osdc->completion_wq);
-> =C2=A0	destroy_workqueue(osdc->notify_wq);
-> =C2=A0	cancel_delayed_work_sync(&osdc->timeout_work);
-> @@ -5279,6 +5285,8 @@ void ceph_osdc_stop(struct ceph_osd_client
-> *osdc)
-> =C2=A0						struct ceph_osd,
-> o_node);
-> =C2=A0		close_osd(osd);
-> =C2=A0	}
-> +	osdmap =3D osdc->osdmap;
-> +	osdc->osdmap =3D NULL;
-> =C2=A0	up_write(&osdc->lock);
-> =C2=A0	WARN_ON(refcount_read(&osdc->homeless_osd.o_ref) !=3D 1);
-> =C2=A0	osd_cleanup(&osdc->homeless_osd);
-> @@ -5290,7 +5298,7 @@ void ceph_osdc_stop(struct ceph_osd_client
-> *osdc)
-> =C2=A0	WARN_ON(atomic_read(&osdc->num_requests));
-> =C2=A0	WARN_ON(atomic_read(&osdc->num_homeless));
-> =C2=A0
-> -	ceph_osdmap_destroy(osdc->osdmap);
-> +	ceph_osdmap_destroy(osdmap);
-> =C2=A0	mempool_destroy(osdc->req_mempool);
-> =C2=A0	ceph_msgpool_destroy(&osdc->msgpool_op);
-> =C2=A0	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
+handle_timeout() in osd_client.c sends CEPH_MSGR2_TAG_KEEPALIVE2 frames
+to OSDs with stalled requests, but libceph never verifies if the ACKs
+actually return.
 
-The fix looks really good.
+Consequently, if an OSD messenger queue wedges while the underlying
+TCP socket remains ESTABLISHED, the client will block indefinitely in
+ceph_osdc_wait_request(), causing tasks to hang in D state.
 
+Fix this by introducing a watchdog in handle_timeout() that checks
+ceph_con_keepalive_expired() against a new CEPH_OSD_PING_TIMEOUT (60s).
+On expiry, reset the sparse-read state, call reopen_osd(), and kick
+outstanding requests when the session is reopened.
+
+Because OSD keepalives are only sent to OSDs with stalled requests,
+last_keepalive_ack can be stale on an otherwise healthy connection that
+has simply been idle. Track the start of each slow/probing episode per
+OSD and require the episode to last CEPH_OSD_PING_TIMEOUT before checking
+for an expired keepalive ack, so the watchdog only fires after we have
+been actively pinging.
+
+Additionally, seed last_keepalive_ack to the current time in
+ceph_con_open() to prevent the watchdog from firing spuriously on fresh
+connections for both OSD and monitor clients.
+
+Fixes: 8b9558aab853 ("libceph: use keepalive2 to verify the mon session is alive")
+Link: https://tracker.ceph.com/issues/76202
+Co-developed-by: Andrew DeMaria <ademaria@cloudflare.com>
+Signed-off-by: Andrew DeMaria <ademaria@cloudflare.com>
+Signed-off-by: Chris J Arges <carges@cloudflare.com>
 Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
+---
+This patch fixes an issue where the kernel rbd client and an OSD have an
+ESTABLISHED TCP connection, but keepalive2 ACKs stop returning from the
+OSD. When that happens, outstanding OSD requests can remain held by the
+client and callers can hang in D state. We were able to mitgiate this
+issue by using ss -K to kill the affected OSD TCP connection which
+reopened the OSD session.
 
-Thanks,
-Slava.
+We were able to reproduce this issue in production a few times, and
+synthetically by dropping OSD to rbd application frames while allowing
+TCP ACKs through.
+
+https://tracker.ceph.com/issues/76202 describes the same situation.
+
+The following patch addresses this by creating a watchdog that resets the
+OSD session if this situation is detected.
+---
+Changes in v3:
+- Rebase and collected Reviewed-By tag
+- Link to v2: https://patch.msgid.link/20260709-fix-rbd-keepalives-v2-1-39d4846a95ce@cloudflare.com
+
+Changes in v2:
+- add static function to check if osd keepalive timed out
+- Link to v1: https://patch.msgid.link/20260707-fix-rbd-keepalives-v1-1-be888d525d6a@cloudflare.com
+
+To: Ilya Dryomov <idryomov@gmail.com>
+To: Alex Markuze <amarkuze@redhat.com>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+---
+ include/linux/ceph/libceph.h    |  1 +
+ include/linux/ceph/osd_client.h |  1 +
+ net/ceph/messenger.c            |  3 +++
+ net/ceph/osd_client.c           | 29 ++++++++++++++++++++++++++++-
+ 4 files changed, 33 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 63e0e2aa1ce9..1a117c5f1964 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -74,6 +74,7 @@ struct ceph_options {
+  */
+ #define CEPH_MOUNT_TIMEOUT_DEFAULT	msecs_to_jiffies(60 * 1000)
+ #define CEPH_OSD_KEEPALIVE_DEFAULT	msecs_to_jiffies(5 * 1000)
++#define CEPH_OSD_PING_TIMEOUT		msecs_to_jiffies(60 * 1000)
+ #define CEPH_OSD_IDLE_TTL_DEFAULT	msecs_to_jiffies(60 * 1000)
+ #define CEPH_OSD_REQUEST_TIMEOUT_DEFAULT 0  /* no timeout */
+ #define CEPH_READ_FROM_REPLICA_DEFAULT	0  /* read from primary */
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 50b14a5661c7..52eb76e9d62a 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -94,6 +94,7 @@ struct ceph_osd {
+ 	struct ceph_auth_handshake o_auth;
+ 	unsigned long lru_ttl;
+ 	struct list_head o_keepalive_item;
++	unsigned long o_keepalive_stamp;
+ 	struct mutex lock;
+ 	struct ceph_sparse_read	o_sparse_read;
+ };
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 34b3097b4c7b..f7776d83d506 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -610,6 +610,9 @@ void ceph_con_open(struct ceph_connection *con,
+ 
+ 	memcpy(&con->peer_addr, addr, sizeof(*addr));
+ 	con->delay = 0;      /* reset backoff memory */
++
++	ktime_get_real_ts64(&con->last_keepalive_ack);
++
+ 	mutex_unlock(&con->mutex);
+ 	queue_con(con);
+ }
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 2ff00070c181..c4e1c0534801 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -53,6 +53,7 @@ static void link_linger(struct ceph_osd *osd,
+ static void unlink_linger(struct ceph_osd *osd,
+ 			  struct ceph_osd_linger_request *lreq);
+ static void clear_backoffs(struct ceph_osd *osd);
++static void kick_osd_requests(struct ceph_osd *osd);
+ 
+ #if 1
+ static inline bool rwsem_is_wrlocked(struct rw_semaphore *sem)
+@@ -3420,6 +3421,15 @@ static int linger_notify_finish_wait(struct ceph_osd_linger_request *lreq,
+ 	return left;
+ }
+ 
++static bool osd_keepalive_timed_out(struct ceph_osd *osd)
++{
++	if (!time_after_eq(jiffies,
++			   osd->o_keepalive_stamp + CEPH_OSD_PING_TIMEOUT))
++		return false;
++
++	return ceph_con_keepalive_expired(&osd->o_con, CEPH_OSD_PING_TIMEOUT);
++}
++
+ /*
+  * Timeout callback, called every N seconds.  When 1 or more OSD
+  * requests has been active for more than N seconds, we send a keepalive
+@@ -3480,8 +3490,11 @@ static void handle_timeout(struct work_struct *work)
+ 			mutex_unlock(&lreq->lock);
+ 		}
+ 
+-		if (found)
++		if (found) {
+ 			list_move_tail(&osd->o_keepalive_item, &slow_osds);
++		} else {
++			osd->o_keepalive_stamp = 0;
++		}
+ 	}
+ 
+ 	if (opts->osd_request_timeout) {
+@@ -3507,6 +3520,20 @@ static void handle_timeout(struct work_struct *work)
+ 							struct ceph_osd,
+ 							o_keepalive_item);
+ 		list_del_init(&osd->o_keepalive_item);
++
++		/* Record start of ping timeout from the first slow tick. */
++		if (!osd->o_keepalive_stamp) {
++			osd->o_keepalive_stamp = jiffies;
++		} else if (osd_keepalive_timed_out(osd)) {
++			pr_warn_ratelimited("osd%d not responding to keepalives, resetting session\n",
++					    osd->o_osd);
++			osd->o_sparse_op_idx = -1;
++			ceph_init_sparse_read(&osd->o_sparse_read);
++			if (!reopen_osd(osd))
++				kick_osd_requests(osd);
++			continue;
++		}
++
+ 		ceph_con_keepalive(&osd->o_con);
+ 	}
+ 
+
+---
+base-commit: b95f03f04d475aa6719d15a636ddf32222d55657
+change-id: 20260707-fix-rbd-keepalives-664fe9266c35
+
+Best regards,
+--  
+Chris J Arges <carges@cloudflare.com>
+
