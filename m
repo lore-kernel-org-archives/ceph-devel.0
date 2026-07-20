@@ -1,165 +1,329 @@
-Received: from mail-pf1-f181.google.com (mail-pf1-f181.google.com [209.85.210.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F05ED25B0B7
-	for <ceph-devel@vger.kernel.org>; Mon, 20 Jul 2026 03:49:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B3E4412274;
+	Mon, 20 Jul 2026 12:39:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784519371; cv=none; b=TkGj5JYY9ZgeNLVW+MZg/dXam/ACSz1A8yxLrrjo2abTuuzpXg39/AWFzoyGK2UWkg0WZ4MN3+9QJz/+H6cJVEY61aAwT3VAuB5NMOvcZ0qbRYOKF8RGWF/utRUaDbA2l9RwU3OBVNTYSfWO/rU6srbKQ1O52XxB630xIg1itxs=
+	t=1784551179; cv=none; b=p8RlYNa9i5p4r7grEVCKYv9leaJsWwt9jYwRm+azY0en0ehjSVJBa1K0GrXTKQGcA2WZSYh+WcNIXG2xqHcugU4Syil73Ahdb9TrbrnMEOz/DNoYQqZhMF4Lec7gb4F5i2eagubPay5+c7/wSeQ4PrZwFEAncdlYMaoOt1OLR0w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784519371; c=relaxed/simple;
-	bh=kir6JiAv6OiNotS/NBmbZrriUiOsqxo9mWwzbHaFv5E=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=AjVZeKGvWVx42DXSDzvUEqKpC4Qr88i3DPRsw47e6K4/oXdhgtP693uXChngmyQoF8OT/WFOuHT9ZGZtFj9yxVd6nl1LhbY159iNCdsZd/kc1qY+CefYndR/9hijHU7RAMAFKIIZITy9cca1JQmiDn+/xBVxDFZzylQ8wrgSxjM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FfkfhVwu; arc=none smtp.client-ip=209.85.210.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1784551179; c=relaxed/simple;
+	bh=TsD4vh+Uvz3r3g/6HzQVavPJYOiyZvbfqnIBytRZoWk=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=j0sYsuxZ9cDfLDJQ2zEAP0OAhM9X6bKbFUYh+yiXmUlS4mZgxbW6GOBCRXUY2B/us7Yvg3KOBop30uS9v9LmRT8aLZK0orEdAAiPO8AgfRWtZIi3ccwgBa21u2aRTWA2MkEmSS3qilP99NnwIYi8uI4z3tVZ273NISmYiIN2j8o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=asg/KliM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FfkfhVwu"
-Received: by mail-pf1-f181.google.com with SMTP id d2e1a72fcca58-84867f07d63so10795521b3a.2
-        for <ceph-devel@vger.kernel.org>; Sun, 19 Jul 2026 20:49:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1784519368; x=1785124168; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=iLVd1C7N0pqHmxO4TslxwiJZdDfXSAWMp+9yvVkftLk=;
-        b=FfkfhVwumgkqzFVPfN3jcvj92rbZmhQN2P1VKfdL5gfgB4PPuaXAgSosXQWG9mUsli
-         GSrIJsQ7lqhA1x1RVj/blYOx3IeSYX9N9jkVq6Qfi3wsOexOFA8xLru6QBEVB5sHO/rY
-         /4TxLrV7Fe7GtzD5eWFys1M/D0hU3ZLRLJuT7CQPbR/m/p1GVXYyo3JyJXmzP1hdIcmw
-         fc5mdGCriYZNT274elwhvOLaOgggl3L2TcWnkD2e0bKsAmldjJVr6Q8QlRTfVJ1D3uI4
-         GFN1d9tOYdve2xXHcV/JV66Z3JQLAqn2emSPO8Z/nV5BsETwhT/kzWDQvPU+7X6GemJ3
-         Y4+A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784519368; x=1785124168;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=iLVd1C7N0pqHmxO4TslxwiJZdDfXSAWMp+9yvVkftLk=;
-        b=scLn0mxYs7QGrFQGsAvP6/1nKFhxXuK5WgVMIMP0q4mnaSPHJ1TW/gCdkhiyqP7gZ0
-         TQSbgpVVXO3iXrjl0YGTFWetQKJ9FNaD8UbyF7Ra1eIvuz7JXdJW4KX+dI0xcpkw+t1i
-         bfbfggSGA9j8E9inqXOmFousEU0dda00pIqPNDewaWbPls9C7PQ6cbQf7K4BXhp2Ac8Z
-         fxvuDA4F4k/qFiFn1jR85FsSjub9Njb1IDmeITfmY0mG4fnH3ShpgJuqX+3VGFFV8o8c
-         U3/mRMzgzINaAo83t7rQFHMLfWvwbG3Zg0tFh+7N0znnai7Fm8R1gvcvD528yAfpIDu8
-         2VSQ==
-X-Gm-Message-State: AOJu0YzpG42P7yeFeEoN91ixVOkYrT/jFUIzTp92WLqRcpXUOQ3wc/cM
-	FQA8XlJUtqAuKq/v2Uwy0uCe7hLLWSruh5/CnSZmHuiS2zXDlqjhXiNlxOvVznZTS1U=
-X-Gm-Gg: AfdE7cntwdi13pKGQZ3slQWh3gczCBd/Pn8Cj8cOZ78uc2Y1gBI+hZeqorsRTtTIicW
-	+f6Mj1CndsO5fHIEG4ZyMeKfPe3PEgEWNLrAtyP7ddYfNOwo5ZjdKXB//tBrzyRfpBFT5zow4wU
-	j2g/pID5pqcx7c6vJH8tLG8KHH7hxWfcMq77IVzwFR1fznh8NP576vkFr9ttlBl7oISokZaa7du
-	zOw+N440u0Y5ykSS3AyB6+drfIKGNm1e61ermSmT5F6GpqyfwhlSJuUjI/n2BbViZZoSBVlvEqf
-	jIGVhvD9hc7sNWLLnm5hKzX+CxRAX/9wGktsg5T3bpc/dh+r9n3rC5mXUSKWGw4dfVTdAUTHT+l
-	d5KX3ZMstEAA0q6QRGfd6YQaO97LBYwc/MyBja2HVH4T6qdZcrNqEhsL0JdqFkdIJ5Yyr9oZDwf
-	EYuobzUZiKvQFmRswMuw==
-X-Received: by 2002:a05:6a00:6ca0:b0:848:2f7a:2e52 with SMTP id d2e1a72fcca58-84c294df7b6mr11491219b3a.65.1784519368200;
-        Sun, 19 Jul 2026 20:49:28 -0700 (PDT)
-Received: from enjou-Legion-Y7000P-2019 ([144.48.80.242])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-84c2af6e3f6sm4813498b3a.44.2026.07.19.20.49.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Jul 2026 20:49:27 -0700 (PDT)
-From: Ren Wei <enjou1224z@gmail.com>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	slava@dubeyko.com,
-	sage@newdream.net,
-	vega@nebusec.ai,
-	xizh2024@lzu.edu.cn,
-	enjou1224z@gmail.com
-Subject: [PATCH 1/1] libceph: unpublish osdmap before destroying it on stop
-Date: Mon, 20 Jul 2026 11:49:06 +0800
-Message-ID: <bbcdd44d07efd11c7211195b6302b179918cb253.1784371311.git.xizh2024@lzu.edu.cn>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <cover.1784371310.git.xizh2024@lzu.edu.cn>
-References: <cover.1784371310.git.xizh2024@lzu.edu.cn>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="asg/KliM"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id C9BC4C2BCB8;
+	Mon, 20 Jul 2026 12:39:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1784551178;
+	bh=TsD4vh+Uvz3r3g/6HzQVavPJYOiyZvbfqnIBytRZoWk=;
+	h=From:Date:Subject:To:Cc:Reply-To:From;
+	b=asg/KliMhJssvBffz7SWYVPpMgPzMOzkMaagAi2cLg1QhuJw0sy8woUPN7DBmfy4I
+	 rNirHwijAkiph4WKhELmJJYgHiuoXu+Uz3p78Z2FvcLvKbq+kf8lrHjfia8nbufRU7
+	 SiTsLNQHskTvcAXZgYBq7/MAKEt4Ujqhy28hNYK6kg5rO8s3w5xC9IV7wjNJyZu+Mi
+	 UT6EGhozNT9OOYwEuDQJXVkfaAsaAOr1X8CCxFpZT11bo5q6bHKr7b9t/M/dP5gt70
+	 LPfCCPtP6bo6dykCHpM7UzLI5fh8af+dGyYHohHheqXXFFtJsJmtAi41GrGoku9RcB
+	 s20BY2trSQGRA==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6D33C4452A;
+	Mon, 20 Jul 2026 12:39:38 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Mon, 20 Jul 2026 20:39:24 +0800
+Subject: [PATCH] ceph: parallelize object copy in ceph_do_objects_copy()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
+Message-Id: <20260720-b4-ceph-copyfrom-v1-1-9a4c229df6e2@clyso.com>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMQQqDMBBA0avIrB2IoUzFq4gLM451CpqQaGkR7
+ 260y7f4f4ckUSVBU+wQ5aNJ/ZJRlQXw1C8vQR2ywRpL5mkNugeyhAnZh98Y/YxcU22cHYgqgpy
+ FKKN+72Xb/Z029xZerw8cxwlGjrXYdAAAAA==
+X-Change-ID: 20260720-b4-ceph-copyfrom-c8680b2d6616
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1784551170; l=9188;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=tBKXfCJ+NgJ+kSb6ibcSYY9ADa5eQQQSOPM+cAzJ68Y=;
+ b=lLJhX844uCwzYJMues2rQhaN+mW0jEx8/TKpFwSdDCXZh6Dtm6LVBoohNC+AMIeMwEhTemzMb
+ mdBHAOXmAB2D92Tdny88+GmPKW+v18diP2t9lx5QvPdNICTq+B6v/nK
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-From: Zihan Xi <xizh2024@lzu.edu.cn>
+From: Xiubo Li <xiubo.li@clyso.com>
 
-osdmap_show() takes osdc->lock for reading and then walks
-osdc->osdmap while formatting the debugfs osdmap file. During client
-teardown, ceph_osdc_stop() closes the OSD state under the write side of
-that lock, drops the lock, and only then destroys osdc->osdmap while the
-pointer is still published.
+The current ceph_do_objects_copy() submits COPY_FROM2 requests serially
+(submit-wait-submit-wait), which means the total latency scales linearly
+with the number of objects being copied.
 
-A concurrent debugfs reader can therefore acquire the read side after the
-stop path has dropped it and traverse an osdmap that is being freed or has
-already been freed.
+Convert to a sliding-window parallel model: submit up to
+CEPH_COPY_FROM_MAX_INFLIGHT (16) requests concurrently, then wait for
+them in FIFO order.  Because all in-flight requests make progress while
+we wait for the oldest one, the total wait time is MAX(latency_i)
+rather than SUM(latency_i).
 
-Take the osdmap pointer out of osdc under the write lock before dropping
-that lock, then destroy the saved pointer after unlocking. This makes the
-write lock wait for any current osdmap_show() reader and makes later
-readers observe a NULL osdmap instead of a freed object. Also make queued
-OSD map messages return after taking the lock if teardown has already
-unpublished the osdmap.
+Error handling uses a 'truncate at first failure' strategy: all
+submitted requests are allowed to complete, results are scanned in
+offset order, and the copy is truncated at the first failing object.
+Objects beyond the truncation point that were successfully written by
+the OSD become orphaned beyond EOF, which is harmless — they are
+unreachable through reads and are cleaned up on file deletion.
 
-Fixes: 76aa844d5b2f ("ceph: debugfs")
-Cc: stable@vger.kernel.org
-Reported-by: Vega <vega@nebusec.ai>
-Assisted-by: Codex:gpt-5.4
-Signed-off-by: Zihan Xi <xizh2024@lzu.edu.cn>
-Reviewed-by: Ren Wei <enjou1224z@gmail.com>
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
- net/ceph/osd_client.c | 12 ++++++++++--
- 1 file changed, 10 insertions(+), 2 deletions(-)
+ fs/ceph/file.c | 193 +++++++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 152 insertions(+), 41 deletions(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 2ff00070c181..70467eede336 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -4145,8 +4145,11 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	bool pauserd, pausewr;
- 	int err;
- 
--	dout("%s have %u\n", __func__, osdc->osdmap->epoch);
- 	down_write(&osdc->lock);
-+	if (!osdc->osdmap)
-+		goto out_unlock;
-+
-+	dout("%s have %u\n", __func__, osdc->osdmap->epoch);
- 
- 	/* verify fsid */
- 	ceph_decode_need(&p, end, sizeof(fsid), bad);
-@@ -4238,6 +4241,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- bad:
- 	pr_err("osdc handle_map corrupt msg\n");
- 	ceph_msg_dump(msg);
-+out_unlock:
- 	up_write(&osdc->lock);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 9d89d7fc1095..32147c719c35 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -2965,6 +2965,20 @@ ceph_alloc_copyfrom_request(struct ceph_osd_client *osdc,
+ 	return ERR_PTR(ret);
  }
  
-@@ -5268,6 +5272,8 @@ int ceph_osdc_init(struct ceph_osd_client *osdc, struct ceph_client *client)
- 
- void ceph_osdc_stop(struct ceph_osd_client *osdc)
- {
-+	struct ceph_osdmap *osdmap;
++/*
++ * Default maximum number of in-flight COPY_FROM2 requests.  Can be
++ * overridden at module load time via the copyfrom_max_inflight parameter.
++ *
++ * Higher values improve throughput over high-latency links, but too many
++ * concurrent requests can saturate OSD disk queues, especially in small
++ * clusters.  Tune this to match the number of OSDs and their concurrency
++ * capability.  For most clusters 16--64 is a reasonable range.
++ */
++static unsigned int copyfrom_max_inflight = 16;
++module_param(copyfrom_max_inflight, uint, 0644);
++MODULE_PARM_DESC(copyfrom_max_inflight,
++		 "Maximum in-flight COPY_FROM2 requests per copy_file_range call");
 +
- 	destroy_workqueue(osdc->completion_wq);
- 	destroy_workqueue(osdc->notify_wq);
- 	cancel_delayed_work_sync(&osdc->timeout_work);
-@@ -5279,6 +5285,8 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
- 						struct ceph_osd, o_node);
- 		close_osd(osd);
- 	}
-+	osdmap = osdc->osdmap;
-+	osdc->osdmap = NULL;
- 	up_write(&osdc->lock);
- 	WARN_ON(refcount_read(&osdc->homeless_osd.o_ref) != 1);
- 	osd_cleanup(&osdc->homeless_osd);
-@@ -5290,7 +5298,7 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
- 	WARN_ON(atomic_read(&osdc->num_requests));
- 	WARN_ON(atomic_read(&osdc->num_homeless));
+ static ssize_t ceph_do_objects_copy(struct ceph_inode_info *src_ci, u64 *src_off,
+ 				    struct ceph_inode_info *dst_ci, u64 *dst_off,
+ 				    struct ceph_fs_client *fsc,
+@@ -2973,13 +2987,19 @@ static ssize_t ceph_do_objects_copy(struct ceph_inode_info *src_ci, u64 *src_off
+ 	struct ceph_object_locator src_oloc, dst_oloc;
+ 	struct ceph_object_id src_oid, dst_oid;
+ 	struct ceph_osd_client *osdc;
++	struct ceph_osd_request **reqs = NULL;
+ 	struct ceph_osd_request *req;
+ 	ssize_t bytes = 0;
+ 	u64 src_objnum, src_objoff, dst_objnum, dst_objoff;
+ 	u32 src_objlen, dst_objlen;
+ 	u32 object_size = src_ci->i_layout.object_size;
+ 	struct ceph_client *cl = fsc->client;
+-	int ret;
++	u64 orig_src_off = *src_off;
++	u64 orig_dst_off = *dst_off;
++	int num_objects, head = 0, tail = 0, inflight = 0;
++	int first_fail_obj = -1, first_fail_err = 0;
++	int slot, ret;
++	bool have_eopnotsupp = false;
  
--	ceph_osdmap_destroy(osdc->osdmap);
-+	ceph_osdmap_destroy(osdmap);
- 	mempool_destroy(osdc->req_mempool);
- 	ceph_msgpool_destroy(&osdc->msgpool_op);
- 	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
--- 
-2.43.0
+ 	src_oloc.pool = src_ci->i_layout.pool_id;
+ 	src_oloc.pool_ns = ceph_try_get_string(src_ci->i_layout.pool_ns);
+@@ -2987,54 +3007,145 @@ static ssize_t ceph_do_objects_copy(struct ceph_inode_info *src_ci, u64 *src_off
+ 	dst_oloc.pool_ns = ceph_try_get_string(dst_ci->i_layout.pool_ns);
+ 	osdc = &fsc->client->osdc;
+ 
+-	while (len >= object_size) {
+-		ceph_calc_file_object_mapping(&src_ci->i_layout, *src_off,
+-					      object_size, &src_objnum,
+-					      &src_objoff, &src_objlen);
+-		ceph_calc_file_object_mapping(&dst_ci->i_layout, *dst_off,
+-					      object_size, &dst_objnum,
+-					      &dst_objoff, &dst_objlen);
+-		ceph_oid_init(&src_oid);
+-		ceph_oid_printf(&src_oid, "%llx.%08llx",
+-				src_ci->i_vino.ino, src_objnum);
+-		ceph_oid_init(&dst_oid);
+-		ceph_oid_printf(&dst_oid, "%llx.%08llx",
+-				dst_ci->i_vino.ino, dst_objnum);
+-		/* Do an object remote copy */
+-		req = ceph_alloc_copyfrom_request(osdc, src_ci->i_vino.snap,
+-						  &src_oid, &src_oloc,
+-						  &dst_oid, &dst_oloc,
+-						  dst_ci->i_truncate_seq,
+-						  dst_ci->i_truncate_size);
+-		if (IS_ERR(req))
+-			ret = PTR_ERR(req);
+-		else {
++	num_objects = len / object_size;
++	if (!num_objects)
++		goto out;
++
++	reqs = kvmalloc_array(copyfrom_max_inflight, sizeof(*reqs), GFP_KERNEL);
++	if (!reqs) {
++		bytes = -ENOMEM;
++		goto out;
++	}
++
++	/*
++	 * Sliding window: submit requests up to MAX_INFLIGHT, then wait for
++	 * the oldest in-flight request to complete before submitting more.
++	 * The reqs[] ring buffer is indexed by (slot % MAX_INFLIGHT), so
++	 * memory is bounded to MAX_INFLIGHT regardless of num_objects.
++	 * First-failure and EOPNOTSUPP detection happen inline — no post-scan
++	 * needed.
++	 */
++	while (head < num_objects) {
++		/* Submit new requests while the window has room */
++		while (tail < num_objects &&
++		       first_fail_obj == -1 &&
++		       inflight < copyfrom_max_inflight) {
++			u64 object_src_off = orig_src_off +
++					     (u64)tail * object_size;
++			u64 object_dst_off = orig_dst_off +
++					     (u64)tail * object_size;
++
++			ceph_calc_file_object_mapping(&src_ci->i_layout,
++						      object_src_off,
++						      object_size,
++						      &src_objnum,
++						      &src_objoff,
++						      &src_objlen);
++			ceph_calc_file_object_mapping(&dst_ci->i_layout,
++						      object_dst_off,
++						      object_size,
++						      &dst_objnum,
++						      &dst_objoff,
++						      &dst_objlen);
++			ceph_oid_init(&src_oid);
++			ceph_oid_printf(&src_oid, "%llx.%08llx",
++					src_ci->i_vino.ino, src_objnum);
++			ceph_oid_init(&dst_oid);
++			ceph_oid_printf(&dst_oid, "%llx.%08llx",
++					dst_ci->i_vino.ino, dst_objnum);
++
++			/* Do an object remote copy */
++			slot = tail % copyfrom_max_inflight;
++			req = ceph_alloc_copyfrom_request(osdc,
++						src_ci->i_vino.snap,
++						&src_oid, &src_oloc,
++						&dst_oid, &dst_oloc,
++						dst_ci->i_truncate_seq,
++						dst_ci->i_truncate_size);
++			if (IS_ERR(req)) {
++				/*
++				 * Allocation failed: treat as first failure
++				 * and stop submitting.  Drain inflight
++				 * requests to check for EOPNOTSUPP.
++				 */
++				if (first_fail_obj == -1) {
++					first_fail_obj = tail;
++					first_fail_err = PTR_ERR(req);
++				}
++				reqs[slot] = NULL;
++				tail++;
++				continue;
++			}
+ 			ceph_osdc_start_request(osdc, req);
+-			ret = ceph_osdc_wait_request(osdc, req);
++			reqs[slot] = req;
++			tail++;
++			inflight++;
++		}
++
++		/*
++		 * Wait for the oldest in-flight request (FIFO order).
++		 * This is required for correctness: we must determine the
++		 * first failure in object-offset order to know how many
++		 * bytes were successfully copied.  It does not hurt
++		 * performance because all requests in the window are
++		 * submitted concurrently -- later requests complete in
++		 * the background while we wait, so the wall-clock time
++		 * is dominated by the slowest request, not the sum.
++		 */
++		slot = head % copyfrom_max_inflight;
++		if (reqs[slot]) {
++			ret = ceph_osdc_wait_request(osdc, reqs[slot]);
+ 			ceph_update_copyfrom_metrics(&fsc->mdsc->metric,
+-						     req->r_start_latency,
+-						     req->r_end_latency,
++						     reqs[slot]->r_start_latency,
++						     reqs[slot]->r_end_latency,
+ 						     object_size, ret);
+-			ceph_osdc_put_request(req);
+-		}
+-		if (ret) {
+-			if (ret == -EOPNOTSUPP) {
+-				fsc->have_copy_from2 = false;
+-				pr_notice_client(cl,
+-					"OSDs don't support copy-from2; disabling copy offload\n");
++			ceph_osdc_put_request(reqs[slot]);
++			inflight--;
++
++			if (ret == -EOPNOTSUPP)
++				have_eopnotsupp = true;
++
++			if (ret < 0 && first_fail_obj == -1) {
++				first_fail_obj = head;
++				first_fail_err = ret;
+ 			}
+-			doutc(cl, "returned %d\n", ret);
+-			if (bytes <= 0)
+-				bytes = ret;
+-			goto out;
++			if (ret)
++				doutc(cl, "object %d returned %d\n", head, ret);
+ 		}
+-		len -= object_size;
+-		bytes += object_size;
+-		*src_off += object_size;
+-		*dst_off += object_size;
++		/*
++		 * If reqs[slot] was NULL, allocation for this object had
++		 * failed earlier; first_fail_obj was already set in the
++		 * submit loop -- just drain past it.
++		 */
++		head++;
+ 	}
+ 
++	/*
++	 * Determine bytes copied: all objects before the first failure
++	 * succeeded.  Any objects beyond the truncation point that were
++	 * successfully written by the OSD become unreachable orphans
++	 * (beyond EOF) and are harmless.
++	 */
++	if (first_fail_obj == -1) {
++		bytes = (ssize_t)num_objects * object_size;
++	} else if (first_fail_obj == 0) {
++		bytes = first_fail_err;
++	} else {
++		bytes = (ssize_t)first_fail_obj * object_size;
++	}
++
++	if (have_eopnotsupp) {
++		fsc->have_copy_from2 = false;
++		pr_notice_client(cl,
++			"OSDs don't support copy-from2; disabling copy offload\n");
++	}
++
++	if (bytes > 0) {
++		*src_off = orig_src_off + bytes;
++		*dst_off = orig_dst_off + bytes;
++	}
+ out:
++	kvfree(reqs);
+ 	ceph_oloc_destroy(&src_oloc);
+ 	ceph_oloc_destroy(&dst_oloc);
+ 	return bytes;
+
+---
+base-commit: fc67edb66b3c9924c4e0bb366a92b32ea13c526a
+change-id: 20260720-b4-ceph-copyfrom-c8680b2d6616
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
+
+
