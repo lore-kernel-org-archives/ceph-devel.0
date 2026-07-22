@@ -1,251 +1,183 @@
-Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
+Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F4253612F3
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2026 01:19:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784683154; cv=pass; b=QHDChvwZ1pKj0TFxnUxRnMEvmyz0b9whbIpFKwMD2GjzJ0OK4Ez+XLW/EEmvXozwecXsnZ0xfPxZBk60jK+JRz5pNv4TvMifBO95q+EDiyNBRlnk69G6suWFiHP5tkfGCSbSIiJAzNcmO+LkYB7PLBJ+/L6bcsDlt3WBhk/2mQc=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784683154; c=relaxed/simple;
-	bh=D4DDm3K95W+MDAC/Jrao+JGarvzQBha3V+vBXG31Bmk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=sJfkJ7amrzFRtojrcrc/zreg3XFGQYPkXzqHSE0+ZJRaz24OOz1kuQBllhswceGbfQ0tLE18zc3ek4MFSEP50tbHaMJdlDkaDUA9vZCq7levvwW3JqCNAtVnpcp27bAO9ZN1zC1HzocrqNKTw4vmGTxXnRP+mpcT/tv4Mb/X8PE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=EMQ0syzy; arc=pass smtp.client-ip=209.85.208.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13CBE40F72F
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2026 11:49:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784720979; cv=none; b=P7Ybm67BuRjFIw1LY+3hYzyMmnmUvd2jVfyAnrwZ38eBCZ5O7tEj/ZQFFGNyKvusZ3d1S8ehma4zV6xE/TQtJHx3TY73VTmYBU75UOmHcnZfLSPfaVLMUZJCTtv/5Nc2tvtqboOzmojc0Ypd5UIr552zq5U1xVZyzOLKhboELR8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784720979; c=relaxed/simple;
+	bh=+XDFmOkPEzlJtKktx5wuL9JV6AFHisnnK0NmMTtC1VU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ruTEiPEDhTZWOF/ijLw9gJHnv0Q/SbF4ax2N8xC1NzWUUVCdHAwVD+qYIHqBX4LEflHE1AlUTZx1wF2u+EAPmx/R5YelI967/xUOaf/MYAUD66fdyDhSXryUaMa0LZ47WPsqpcdp0WRGMQVN7Sbg2IBLUrPLtek8LIPNgYoKr1Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=dAImpa7L; arc=none smtp.client-ip=209.85.221.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="EMQ0syzy"
-Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-697cee2eb6dso8846813a12.0
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Jul 2026 18:19:11 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1784683150; cv=none;
-        d=google.com; s=arc-20260327;
-        b=XzMOs4nbBWBurAqxiknzhGTxoRb5jMHxlP9DlIdzgTYrI2gY1KyVyNE5TLBtNus1DW
-         wtprfAqvp4ZOSE4CIF3FHhVmaLKUOgIW+uOvdLL8vtagWsMdANFJdv6Lo49GYSpBoahw
-         YUd5q/stQyYKOm0KV8e0dAzbGJbARddzgStf/OVHsiYjCc+7p18Jun9JwsyAt6nhmgSj
-         u+Pil6ib+Si/TY41QfufvIlrd/9pGOCPqF+QpM3XDHk62HkK075pM4/gwEA46nHz3aRb
-         zNKPnSSNd9j7lvgjrP8vLj1O4Lv2Nh/JlodhqWzdnE9/BLj+By6eyQCPvkvjq8cL8iXD
-         935A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=19EyWSL3UZZlkWYiqrw568DOimbAGv1dbfhOkHDF7/s=;
-        fh=+I4bq4BpqP/cE/EsT02dacoTp4NaosxOJ/DHoRYuBbs=;
-        b=iJ3AqYYOvOZNJPurHShTSuZ2HDX6+4Uko4xaCKfVeMxNTe8kTow6V50CN2q1pNorj+
-         5+VDbdzW5llRz4wQ4lM4+criJh9yaQmqcCEcQVlvtpePLeErINL1QFwKeIR7rQ5NINxX
-         ATw5VKF/+8z/+PP4gUW4X4ssZlOvIwigwFp+r6l2cKeyZsCOGHpICmTYyATUIrwSPBN/
-         FoZ9owqx9lKW35H7+eRP5qF1A/L94UHSqITJE+1RG7blKtW++vvDopK9vvEnSyQWm4QM
-         wqJNg58zkNR+P60CZjLhR86KgGNtRawOFekVnY9amRinfM6Wdaj0SOZR+W/IWUA8GcqD
-         ub2A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="dAImpa7L"
+Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-47f6609c657so2077575f8f.2
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2026 04:49:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1784683150; x=1785287950; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=19EyWSL3UZZlkWYiqrw568DOimbAGv1dbfhOkHDF7/s=;
-        b=EMQ0syzya5phpiAaEKjdnd7FPaqxFFqWC7Cy3bV/Xg7ED5L+DP0J2B4QiEGtOGUCq8
-         xtyq+AXzILBG0LuTqgHytmZKyAOgYxgSt2cWAHbLj7RTLBIgPUBfTIBqUl44DqZdo6tR
-         f1hauAAw/ijIDM7YGj9k2at+0xKDQz6t2zCqzFRQ5iGJ3WETxtxuTwEJ8cDkNoE44kCW
-         A6XLShMNDZWmB+yHGXeCMVbfGjaqMgdSruHXiRYJfFceu7fMlovzHnymz8tDorJ5yvJZ
-         8bwQwAQQj0Ag1sZKPPBTWk7EOk70vMwdszpUUeYOpB1yssrsvaTimz1GGth0smkdtimC
-         qfNg==
+        d=ionos.com; s=google; t=1784720974; x=1785325774; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=CK3HSXUL/NSEp0MJpgE4zEb+gkyu2Vmxsop6Xyf02c8=;
+        b=dAImpa7Lx8+vjqKtfwqZhVBXhDHMQfz8fuqjDb0DpKr8WEHTe+xvfvmfJf57sZzQqo
+         1fUAvPJsJ+YQe1NAchi0UTV++6OFF8gTDpfzIugChJYcvMMgN4RDkfH2EglHtAe5ACW6
+         9Sv2U5uiBoBiKMM6eYrhE8ciqYdYUDA5S8gma5tBA7bxAj6njyeBxliSkHMmq/AJMRm9
+         z2uSH8QWXTUOMKKvKgCX7HlOlvmULBYg/iO2XKuihrrg+mDBLLqvViBzEJjSn7v6EVum
+         9RcsBsvYUGNJpOQ/vf3vuljUXQbS/5zQV82GStwJ34lhFjTMO24msf5mJk1E3oKT56Kn
+         2DtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784683150; x=1785287950;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=19EyWSL3UZZlkWYiqrw568DOimbAGv1dbfhOkHDF7/s=;
-        b=pkKbPb4O0H3CATZkRaJX7Tsg8l17+EdswkWZjbS1WOPjQaYdAqeX8V9FrPui3gdS0k
-         wXjSRRgd1ppcNJ6crf0UcgD3mZCkK3Qb6XO7/FOP17iGiEktVxdBKYUBe4I8BHeOs0x5
-         7cjZ8yg4aAW6KEWp9VBqAFcP9I1CR90+SFPXTd+Lz3v83k1Wc47EuXVUFGH9t2wS9/9M
-         9YNGjOlD7UOzDJ63dRnI8j+IWzlBSp8UxihkJFc9N7bDy999Cx/f8ZWoAcq+7mJ+FqCA
-         rjIuYNqHuPO7t7kh0KepRSHZzL6U16g0pKwRTcWkUPqphsf9GdV6qlB429xnzElr6B9i
-         da+A==
-X-Forwarded-Encrypted: i=1; AHgh+RoXiTFvgEls5+1iAvQFg6H9qvJB2PpxC8L7BIock4oKjb1BIHuHsgux5ut1oYNtCz2fEYrMvIoKBU4H@vger.kernel.org
-X-Gm-Message-State: AOJu0YySOpfd8xyocsddxpLQulzqTeC187SOknB1IGNmaP37wwlDczVt
-	hnj8t9iH4KLiOKzKwh7QDY2VkjNFYq43Zz0zOcS2Bf3rsavYS+Rt8vqRUCZs/ZsjxQB/M/mHsNv
-	pYLctLBKpntmU7SMy1q+Mq8KSZauaNzkLZq9ekyyI4Q==
-X-Gm-Gg: AfdE7cmatyPnltBGls1EZx9Mx+ZvAe/gvSikIVkRH+CcSwpW8WNReqEGjOfT7/MWbjT
-	kE9O2XpjkvMq+HGNGeAR/HabiwKDMrSVjlgB/9sFmSzmYkEhBiBCGV9A1WYiDq3uVE8okz/Ma9m
-	JyfSdLCmIKzRCQPskyOSbWLDm6cZslRvSFTjrKfSIkGy0Ou/dW9KBKf1FmbCXTazhYeuM4/ZFRL
-	BMIHTBzlBIKETse+jyQFPvkZ6GLsFvkp2X+H97sA3w15o5q7keUnFP4sl8d4tV+
-X-Received: by 2002:a17:907:c8a4:b0:c16:af70:f981 with SMTP id
- a640c23a62f3a-c16b48551d8mr733382066b.32.1784683150003; Tue, 21 Jul 2026
- 18:19:10 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1784720974; x=1785325774;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=CK3HSXUL/NSEp0MJpgE4zEb+gkyu2Vmxsop6Xyf02c8=;
+        b=q6Jkc1SD8ymuNovO9H1cpipD+l1KuuSEaImsqPb6eKkaMkIFa9F6hpQfUp5UDL1gqT
+         gDJuN9jqFy52rxqDlmvZM902gqqixsoVvTAAEssv+hMO31rbweel6Va1sA4iVHffcsBe
+         i019d15dbqximg7j4dVh/lZtzoUK4saRqlZ+eFBLXtT/MvfM3bGtA83E38VzlWauny4O
+         WEykQP9/iE6sR5+ydJfxBuXBxBhBO8YF0WMtu2AwTJ6J/br0fk0GU+baEhAc9W/moRya
+         t4f7qt0oCFsQJJTn72Ob20AzCt1kT26e2F0Oi3kyhDsIpqlTME+5Ru8uXsN7JFJ6fF+1
+         CE0A==
+X-Forwarded-Encrypted: i=1; AHgh+Rosha8BA3in4HEFsAL0Do4jOzzBVg2i7P9m6rLpvl3iKtNDA+JhlLfhrpxP9fjYIHz6XMRXGLj4QzFJ@vger.kernel.org
+X-Gm-Message-State: AOJu0YxuEliQ1uITp6UtoIlDyJcEM5M6xzyJz2ajrOfXuwBZTPKIv+wn
+	FuX7pzac8eYADAF3pmRCdGTG6xLlk1MWhKD6B30C8my3Y8qFNH26hKCpT+pJQajDeWA=
+X-Gm-Gg: AR+sD10rC63RiDcKorAiYiFLfcG8ggaJQiQEkm8bKsPGTWaavPrSX1iLkSzBIARrFDQ
+	eEtHI5KUwiIVNkkqxMtzPxSoAOdkIDsSIpn9dkYWbTJf5PEXR/30ruofKAvOqDdg+lMvjaVWmng
+	zYsv+Fd93rj1ooLnW4Dg3sQ1xErRUxZKr4BgTOIds8rKl4d4UF+7wknSX2qbN6xUBkz2Qd/xfW0
+	F8H0SjUyCFzUhSmy06GwomvcCuGTadej/k0C+OTGewuomeP8DwRS1d0OsppwZhEeYi8IJ3/Wzh2
+	9cN4XCZtf/ci0r4P367Aq1dwEsAZgW2G5zgXiKpID1dCsf8Xnkim8i1GK8lMGvTLuDRte+Iws3N
+	MMDkpr9bXUQ6a8CH5mzU+xvLaeB2ck7Hr06MI7JAOLZeatQjGWcpZfJX59jBVk7kJK0zw5MMJ6E
+	nQoZZ2qCrZfd6f4rNu7fKCAZxqP740ug3ENNJ6wQlePHwkS1wddsCYNqw78mnxSglS1xprGHgsz
+	iUiN/lbMnohyu4Q
+X-Received: by 2002:a05:6000:1869:b0:47f:7030:bfbd with SMTP id ffacd0b85a97d-47f817fa7ddmr7823949f8f.48.1784720974278;
+        Wed, 22 Jul 2026 04:49:34 -0700 (PDT)
+Received: from raven.intern.cm-ag (p200300dc6f484700023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f48:4700:230:64ff:fe74:809])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47f85b9a659sm5699475f8f.6.2026.07.22.04.49.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 22 Jul 2026 04:49:33 -0700 (PDT)
+From: Max Kellermann <max.kellermann@ionos.com>
+To: idryomov@gmail.com,
+	amarkuze@redhat.com,
+	xiubo.li@clyso.com,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Max Kellermann <max.kellermann@ionos.com>,
+	stable@vger.kernel.org
+Subject: [PATCH] ceph: avoid fs reclaim while using `current->journal_info`
+Date: Wed, 22 Jul 2026 13:49:31 +0200
+Message-ID: <20260722114931.3557110-1-max.kellermann@ionos.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260721-ceph-append-fix-v3-1-403d1b5204d3@clyso.com> <c3e7be316a957f5363322991529c0c4a69937beb.camel@dubeyko.com>
-In-Reply-To: <c3e7be316a957f5363322991529c0c4a69937beb.camel@dubeyko.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Wed, 22 Jul 2026 09:18:58 +0800
-X-Gm-Features: AUfX_mw0eVmrZZX8gNNhon90Eb17vwAAQbrSO3t1SdjlBmwRTTQ7MMB1UrWtfac
-Message-ID: <CAOJNxRKVKnUwwrC9NjOGD5LhD92S9xQBWH62sM+YNhsWE8g-yA@mail.gmail.com>
-Subject: Re: [PATCH v3] ceph: revalidate ki_pos for O_APPEND writes after cap acquisition
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-Hi Slava,
+handle_reply() stores a `ceph_mds_request` pointer in
+`current->journal_info` while filling the inode and dentry cache from
+an MDS reply.
 
-Sounds good. I'll stick with the current implementation since you
-agree it's not critical. Thanks for reviewing and adding the
-Reviewed-by tag.
+An allocation in this section can enter direct reclaim and prune
+dentries from another filesystem.  If this dirties an ext4 inode, ext4
+starts a JBD2 transaction.  JBD2 interprets the Ceph request in
+`current->journal_info` as a journal handle and dereferences the
+request's `r_tid` as `h_transaction`, causing a kernel crash, e.g.:
 
-Thanks
-Xiubo
+ Unable to handle kernel paging request at virtual address 00000000077b4818
+ [...]
+ Internal error: Oops: 0000000096000004 [#1]  SMP
+ Modules linked in:
+ CPU: 6 UID: 0 PID: 2699135 Comm: kworker/6:3 Tainted: G        W           6.18.38-i3 #1113 NONE
+ [...]
+ Workqueue: ceph-msgr ceph_con_workfn
+ pstate: 80400009 (Nzcv daif +PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+ pc : jbd2__journal_start+0x2c/0x208
+ lr : __ext4_journal_start_sb+0x100/0x178
+ [...]
+ Call trace:
+  jbd2__journal_start+0x2c/0x208 (P)
+  __ext4_journal_start_sb+0x100/0x178
+  ext4_dirty_inode+0x3c/0x90
+  __mark_inode_dirty+0x58/0x400
+  iput.part.0+0x2b0/0x370
+  iput+0x18/0x30
+  dentry_unlink_inode+0xc0/0x158
+  __dentry_kill+0x80/0x250
+  shrink_dentry_list+0x90/0x130
+  prune_dcache_sb+0x60/0x98
+  super_cache_scan+0xe8/0x190
+  do_shrink_slab+0x174/0x388
+  shrink_slab+0xd8/0x4c0
+  shrink_node+0x31c/0x908
+  do_try_to_free_pages+0xd0/0x508
+  try_to_free_pages+0x11c/0x238
+  __alloc_frozen_pages_noprof+0x4d0/0xdd0
+  __folio_alloc_noprof+0x18/0x70
+  __filemap_get_folio+0x248/0x440
+  ceph_readdir_prepopulate+0x570/0x9e8
+  mds_dispatch+0x1424/0x1ba0
+  ceph_con_process_message+0x74/0xa0
+  ceph_con_v1_try_read+0x3a0/0x1510
+  ceph_con_workfn+0x260/0x460
 
-On Wed, 22 Jul 2026 at 01:23, Viacheslav Dubeyko <slava@dubeyko.com> wrote:
->
-> On Tue, 2026-07-21 at 13:06 +0800, Xiubo Li via B4 Relay wrote:
-> > From: Xiubo Li <xiubo.li@clyso.com>
-> >
-> > For O_APPEND writes, ki_pos is set to the current EOF via
-> > generic_write_checks() after fetching i_size from the MDS.  However,
-> > ceph_get_caps() may need to wait for Fwx exclusive caps if the write
-> > extends the file (endoff > i_max_size).  While waiting for Fwx, the
-> > previous Fwx holder (another client) may have already extended the
-> > file.  When the MDS grants us Fwx, the cap grant message updates the
-> > local i_size, but ki_pos remains at the old EOF, causing the append
-> > write to land at a stale offset and overwrite data from the other
-> > client.
-> >
-> > Fix by re-reading i_size_read(inode) after ceph_get_caps() returns.
-> > At this point we hold Fwx exclusive caps, no other client can modify
-> > the file, and i_size reflects the true EOF from the MDS cap grant.
-> > No extra MDS round-trip is needed.  Only adjust ki_pos when the EOF
-> > has actually changed.
-> >
-> > After adjusting ki_pos forward, the write range [pos, pos+count) may
-> > now exceed the i_max_size that was validated by ceph_get_caps() for
-> > the old range.  Re-check against i_max_size and truncate the write
-> > if necessary to stay within the MDS-granted limit.
-> >
-> > Fixes: 8e4473bb50a1 ("ceph: do not execute direct write in parallel
-> > if O_APPEND is specified")
-> > Link: https://tracker.ceph.com/issues/7333
-> > Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
-> > ---
-> > Changes in v3:
-> > - Protect ci->i_max_size access with i_ceph_lock to avoid data race
-> > with handle_cap_grant() which updates i_max_size from the messenger
-> > thread.(Viacheslav Dubeyko)
-> > - Link to v2:
-> > https://patch.msgid.link/20260718-ceph-append-fix-v2-1-88dcc4f8371f@clyso.com
-> >
-> > Changes in v2:
-> > - Re-check write range against i_max_size after adjusting ki_pos
-> > forward, and truncate if it exceeds the MDS-granted limit.(Viacheslav
-> > Dubeyko)
-> > - Link to v1:
-> > https://patch.msgid.link/20260717-ceph-append-fix-v1-1-c51907ac8e36@clyso.com
-> > ---
-> >  fs/ceph/file.c | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 48 insertions(+)
-> >
-> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > index 3823671ab95a..c26bd4fef7d3 100644
-> > --- a/fs/ceph/file.c
-> > +++ b/fs/ceph/file.c
-> > @@ -2489,6 +2489,54 @@ static ssize_t ceph_write_iter(struct kiocb
-> > *iocb, struct iov_iter *from)
-> >       if (err < 0)
-> >               goto out;
-> >
-> > +     /*
-> > +      * For O_APPEND writes we may have waited for Fwx exclusive
-> > caps
-> > +      * while the previous Fwx holder (another client) extended
-> > the
-> > +      * file.  i_size has been updated via the cap grant message
-> > from
-> > +      * the MDS, but ki_pos is still the old EOF.  Re-read i_size
-> > here
-> > +      * (no extra MDS round-trip needed) and adjust ki_pos to the
-> > true
-> > +      * EOF.  Since we hold Fwx, no other client can change the
-> > file.
-> > +      */
-> > +     if (iocb->ki_flags & IOCB_APPEND) {
-> > +             loff_t cur_eof = i_size_read(inode);
-> > +
-> > +             if (cur_eof != pos) {
-> > +                     doutc(cl,
-> > +                           "%p %llx.%llx O_APPEND: pos adjusted
-> > %lld -> %lld\n",
-> > +                           inode, ceph_vinop(inode), pos,
-> > cur_eof);
-> > +                     iocb->ki_pos = cur_eof;
-> > +                     pos = cur_eof;
-> > +                     if (pos >= limit) {
-> > +                             err = -EFBIG;
-> > +                             goto out_caps;
-> > +                     }
-> > +                     iov_iter_truncate(from, limit - pos);
-> > +                     count = iov_iter_count(from);
-> > +
-> > +                     /*
-> > +                      * ceph_get_caps() validated the old endoff
-> > +                      * against i_max_size; adjusting ki_pos
-> > forward
-> > +                      * may have shifted the write range beyond
-> > the
-> > +                      * granted max_size.  Re-check and truncate
-> > if
-> > +                      * necessary.
-> > +                      */
-> > +                     spin_lock(&ci->i_ceph_lock);
-> > +                     if (pos + count > (loff_t)ci->i_max_size) {
-> > +                             loff_t max_size = ci->i_max_size;
-> > +
-> > +                             spin_unlock(&ci->i_ceph_lock);
-> > +                             if (pos >= max_size) {
-> > +                                     err = -EFBIG;
-> > +                                     goto out_caps;
-> > +                             }
-> > +                             iov_iter_truncate(from, max_size -
-> > pos);
-> > +                             count = iov_iter_count(from);
-> > +                     } else {
-> > +                             spin_unlock(&ci->i_ceph_lock);
-> > +                     }
-> > +             }
-> > +     }
->
-> Just comment... :) For my taste, it is better to take the i_max_size
-> under the lock and then to use it:
->
-> spin_lock(&ci->i_ceph_lock);
-> loff_t max_size = ci->i_max_size;
-> spin_unlock(&ci->i_ceph_lock);
->
-> But it is not critical remarks and I don't see any issue with the
-> current implementation.
->
-> Looks good.
->
-> Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
->
-> Thanks,
-> Slava.
->
-> > +
-> >       err = file_update_time(file);
-> >       if (err)
-> >               goto out_caps;
-> >
-> > ---
-> > base-commit: afffcd98d2d22f2e7ebe42f71231d52d4eed8ef7
-> > change-id: 20260717-ceph-append-fix-9820e3b1a78c
-> >
-> > Best regards,
-> > --
-> > Xiubo Li <xiubo.li@clyso.com>
-> >
+Enter a scoped NOFS allocation context and leave it after clearing
+`journal_info`.  This prevents filesystem reclaim from recursing into
+another filesystem while the field contains Ceph-private data.
+
+Fixes: 315f24088048 ("ceph: fix security xattr deadlock")
+Cc: stable@vger.kernel.org
+Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+---
+ fs/ceph/mds_client.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 853bf698b356..3c692ad02c85 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -6,6 +6,7 @@
+ #include <linux/slab.h>
+ #include <linux/gfp.h>
+ #include <linux/sched.h>
++#include <linux/sched/mm.h>
+ #include <linux/delay.h>
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
+@@ -4015,6 +4016,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 	struct ceph_mds_reply_head *head = msg->front.iov_base;
+ 	struct ceph_mds_reply_info_parsed *rinfo;  /* parsed reply info */
+ 	struct ceph_snap_realm *realm;
++	unsigned int nofs_flags;
+ 	u64 tid;
+ 	int err, result;
+ 	int mds = session->s_mds;
+@@ -4158,6 +4160,14 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 
+ 	/* insert trace into our cache */
+ 	mutex_lock(&req->r_fill_mutex);
++
++	/* disable fs reclaim while we are using current->journal_info
++	 * for our own purposes, or else shrinkers of other
++	 * filesystems might dereference this pointer as a different
++	 * type
++	 */
++	nofs_flags = memalloc_nofs_save();
++
+ 	current->journal_info = req;
+ 	err = ceph_fill_trace(mdsc->fsc->sb, req);
+ 	if (err == 0) {
+@@ -4166,6 +4176,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+ 			err = ceph_readdir_prepopulate(req, req->r_session);
+ 	}
+ 	current->journal_info = NULL;
++	memalloc_nofs_restore(nofs_flags);
+ 	mutex_unlock(&req->r_fill_mutex);
+ 
+ 	up_read(&mdsc->snap_rwsem);
+-- 
+2.47.3
+
