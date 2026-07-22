@@ -1,248 +1,152 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
+Received: from mail-ua1-f52.google.com (mail-ua1-f52.google.com [209.85.222.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22E42411FB8
-	for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2026 17:20:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784740823; cv=none; b=TVs6ZCDbpLqU0Ru7Q3LK+7pTCfrU5NJY+M0+Uox+33hXEY1e41671Huka8CJEIHmUbEP0ArHwZAAnd451HF6w6yKxzb43pdgjR6Lq7exflU8W8L28s4RZU4PbuvOkAbJgDoLUlG2fA26tsCnTsKlOeiExrx57vS5uHHxXhN0HM0=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784740823; c=relaxed/simple;
-	bh=hSwoM5fYECzpJjInQHh4DeaEIkR/oeowe2f3PU+yB5Q=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=HGsU+T99/apAkC49N0UHlIKHeh8DaNdKdv3pPRB/vSIDe6J2LT58RCVHlyoC5FO1Alyid4Ga1nrsikl2pbP3mseAurH6mqNn88DICcuSQLsMkUo06nAxqk95E2CFgKx+naAyWNEpH2jyM0AO2qH+lcZxNxB71P0UoCs+bE8o1J0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=JIB9zQYh; arc=none smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E84542F6E2
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2026 20:17:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.52
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784751425; cv=pass; b=DbLauN70YOQ07ZZlS0OnSad9BQtnFN6YIuwTWzbzYo8SFUmQ61st/+Zm0xaUiiKt1ECw7XRiydHy2e7mWBWav4S+6vV3J+VR7IimWSBSky5dmdH38SHfUMdI0SwNtcLQN+19NcPraEL9ypIrtiCE/OLjfkpCt86i8fEL5zHZ/9o=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784751425; c=relaxed/simple;
+	bh=R/H7i6hShZyRr/Z9cecb26G3znEmUv8W2scXXCzt0n0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=nf0Vkfu/2N6Yya3ouV3bGxcl0honyu8qCrRwSVal7l1hvYGE9YWvON2S7xgEcoHgzCV9+2cywYoYvgz2RpWvA0Xi5YOwO9z1qUkSCWIa6XQLkhql8BLPwMNYtVNxhvIpf/6oGOC09v3E5OWRdcipwo5bVoY3hMe1L8qkA3J4GF0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gGVR3yWP; arc=pass smtp.client-ip=209.85.222.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="JIB9zQYh"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-81f36179d72so11246227b3.2
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2026 10:20:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gGVR3yWP"
+Received: by mail-ua1-f52.google.com with SMTP id a1e0cc1a2514c-9773c6ea885so685484241.3
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Jul 2026 13:17:03 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784751422; cv=none;
+        d=google.com; s=arc-20260327;
+        b=Jq2UmKkOpSZ8tc3TeqAbsTNlKYAR1QSK0y/UjNRD6l4jGDKcjWw7kPOlQFJYN5aiEC
+         1iPAu5J/RBmgQ/GUTdlthsFTc1PcW95Irz1qt6yxBDlhIhHIVV74qKqNF8c/y2oP9HA/
+         bWrJh1ZlzyR/+ARKmAGDzyE93ANltQzbBIcz2bkO88QVydR26msvgea68dCOWeemjsB7
+         NoyO008AJMFQnt1kuM9+7oUrpq3iaV7dd7r325QvoKwyCrSGoLrzeTjKJAgOqmswSukb
+         4nrSxIiS+AIBc25Rq/IJ/23nhdRB7Z+aVdOH4urbOsPhp2KvfFmO5J/mPVm08xRhiWwB
+         F12g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=ctgAd9wg0GRoSGzcHXcHc1w0XtOYIWZCmYqQKxqHkHE=;
+        fh=8LgzqN6dVJrRINj4FA5FSvYujPRdJT3foLwZhX4q9RI=;
+        b=rM4K92Z28IB1Af9VCCemZXQGah4svGqgGHV3KUKwj0db3s/brXReqS2dX1WBsfdJTm
+         mIuCSl6n6b3Y8k0OwzW75prEmitpGunMeypsLXaS4jUnO/fsrx3yiNs9jNWAr7dKRzbc
+         y5gQs/aKpfp7GlOdGMzJ5gnXbtsphviyMSvLX48kQFBk4tuEGj2keiZKjM99vQosmfZo
+         oHCt1kb5QotTa/2XfaL0AQE0gEz33zG/eaCHutbTElSMH0wwgPWjQMNmtS7rKsXWyIsT
+         fedNyANznxTDP4RC/BdhUPtmQB/G2H3s8B38wpyEWrc2envGA70YH1DNa8EsCoLLTCs3
+         mBEQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784740820; x=1785345620; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=MSzUPgIh+xa7YWqApOSZw6hzwFlIazSNiDaMddWGUUs=;
-        b=JIB9zQYh/Rb+9OiqcvXVLuLbVb8EeopEpxqG1dm9oR1GczhbN0MpzC4+xTn12D3zG0
-         k+jhLefuCNxi6MwdXgQ4J+YOlXurHZI+S0Qe9UAZAdswVx96g+N0WGZZCod96hfSojy7
-         vKpQPwKjagaApsem43vfweSHV2vs463h8aMjyaSV1CWEoPZI+EvO4TcObuz4HNzx0Rlr
-         jB31zZobNcHNUNc7sBqkDcQU42CPu53cZWv+92T7ECSB5uHuReZdwNnOa7fLjRVoMV13
-         72DFzEcbSbMrYAus7L/c4z1qSycIicBaSS866IZFUe+s3U4dIeYoNdLtDE4BkJX267+B
-         AKxA==
+        d=gmail.com; s=20251104; t=1784751422; x=1785356222; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=ctgAd9wg0GRoSGzcHXcHc1w0XtOYIWZCmYqQKxqHkHE=;
+        b=gGVR3yWPtJOBOTfJOTWMVx0q79y7J0VwtPGpj6HYUuEaoenRFlycSCHxkMezz+HkHd
+         CjZx9YktqQWt9JAgkm44cYocr5DxinF1KrfwlVScJ3BrU9QFuK8T65hnYMhuq7brAw3P
+         aqdwWaPG4bUjc2EkFtn5+1juWdJk3LliBB07uP6W7Rc/rPuQcnh/WGB0JwtsBdFfq4Ks
+         z1cpzN99+MbvWhV1vSbGhhWfPFWjEhBsG13c8ux9e2xynkqnROo3heibNtUuIY7sYPuo
+         w2RbWbY7BYhn1Z63Ou4TqdEFcqPtZ9R1ui09WDvs7gEO6p92PojRTbrvVbUgyuqr+QrP
+         EEOA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784740820; x=1785345620;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=MSzUPgIh+xa7YWqApOSZw6hzwFlIazSNiDaMddWGUUs=;
-        b=DWyIwrZyGYL3sLvwo2zdgHg+haxmRaUrE9zGNXndRNP8Zq3h9+LSA7dF2voHfwvxFI
-         wMhlYoVYXxf5p1QMuvVXtXjpoSxikJLbPepcA2YQ8GxOG5AMQfLfTZlbmMKNbkURJVwG
-         I38Zm0thQTYKCZ9OpVPHv9xKEsEbC/Twt/hxRGV+a/dPrdpfzkaC/k+vyIxuDYpufIbD
-         C2PsuE6sV+AI2te5ValAdAFOrhBRv4LDgOw9VBse/rBh5IdLpfta1D8axio9ry4ufJN4
-         +03O2T/22ukI68PBiGGSkq/VA8v/TFK1/U2hHoPAQOdADklNKE0BvV7bdtjnMLQabpxR
-         DUgg==
-X-Forwarded-Encrypted: i=1; AHgh+Rp40AuYJPNPxpRCqjejAiBMh75b18kEC0H0DALV3O68hNCoF4C5FZgb/EozoVAvGcPwusvcOKDnn0Nh@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx8t0sbcoB84ojFDhd0XWejlq6ZYyD03cnZaCWPDT2M9//bo7wf
-	XwjJ5dnFMUguuOJPwhOs1VFVLxsVKOn6i56YOqLow+/5UqW00QR9d+nldVRKzHWhLOw=
-X-Gm-Gg: AR+sD1332bz9iuOUIXXJcB4PjaiX8Qxn7UPl5RX34WbAE1cxIZ3E8Gbd+JVTG3Y0ZmV
-	F3U2P26tPiC21pQpy/zz1i+jsxaTN6wEQHzzHOLut0nJeBcj34uFdoi+ToQJMdHmu9H/ohYlutL
-	78tV33J3FNWl9OszGVxVtonH4EgloUezUIJSYg5aa8P/LueKpejetXoyV62RiN9yMs7JyiM6bR0
-	+eY9qqm+1w8PzxUSglepKhvcGbvEC73nEIlRXOq8l9Pd1vyub5AHgr0pfr+rqSHvKalnxfOS3XY
-	htw5ZizlCnbf8DrjZcKAxaNP4KeWa2ocSXmMlQR7dXJZmthtJAVG85Ec3XkjslJ0ikZi9ufERC2
-	G4dwbcaiCGeiFp8t/lzkVdS2jkukNkTa4VobwY1JXeoxmYcu9aNOTFihLz1yXxMrRwdxwrTcITF
-	w1v8vweNJWOvXkXbX9GlYtkOUtUh1cLxnAu7/7VAzW+KkPAX8E+xBqbkoqHTtgo1CoDncyqC1+g
-	iu1943g8N1NuU3qciV5SKRVbM/XEEWQeXbbZNe1aKqgcK1Wzw/WuGuhlIULt6pL/SW2FvY=
-X-Received: by 2002:a05:690c:360e:b0:81d:2194:6c4a with SMTP id 00721157ae682-81ef2610887mr78447727b3.47.1784740819725;
-        Wed, 22 Jul 2026 10:20:19 -0700 (PDT)
-Received: from ?IPv6:2600:1700:6476:1430:12d8:c69b:ed00:1fe4? ([2600:1700:6476:1430:12d8:c69b:ed00:1fe4])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81f33d9fd46sm16658927b3.28.2026.07.22.10.20.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Jul 2026 10:20:19 -0700 (PDT)
-Message-ID: <afb662b8da9c1365546f658d75f27c88903f8a9f.camel@dubeyko.com>
-Subject: Re: [PATCH] ceph: avoid fs reclaim while using
- `current->journal_info`
-From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Max Kellermann <max.kellermann@ionos.com>, idryomov@gmail.com, 
-	amarkuze@redhat.com, xiubo.li@clyso.com, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Cc: stable@vger.kernel.org
-Date: Wed, 22 Jul 2026 10:20:17 -0700
-In-Reply-To: <20260722114931.3557110-1-max.kellermann@ionos.com>
-References: <20260722114931.3557110-1-max.kellermann@ionos.com>
-Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
- keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
- zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
- ZcvScAX2n/PlhpTnzJKf3JkHh3nM1ACO3jzSe2/muSQJvqMLG2D71ccekr1RyUh8V+OZdrPtfkDam
- V6GOT6IvyE+d+55fzmo20nJKecvbyvdikWwZvjjCENsG9qOf3TcCJ9DDYwjyYe1To8b+mQM9nHcxp
- jUsUuH074BhISFwt99/htZdSgp4csiGeXr8f9BEotRB6+kjMBHaiJ6B7BIlDmlffyR4f3oR/5hxgy
- dvIxMocqyc03xVyM6tA4ZrshKkwDgZIFEKkx37ec22ZJczNwGywKQW2TGXUTZVbdooiG4tXbRBLxe
- ga/NTZ52ZdEkSxAUGw/l0y0InTtdDIWvfUT+WXtQcEPRBE6HHhoeFehLzWL/o7w5Hog+0hXhNjqte
- fzKpI2fWmYzoIb6ueNmE/8sP9fWXo6Av9m8B5hRvF/hVWfEysr/2LSqN+xjt9NEbg8WNRMLy/Y0MS
- p5fgf9pmGF78waFiBvgZIQNuQnHrM+0BmYOhR0JKoHjt7r5wLyNiKFc8b7xXndyCDYfniO3ljbr0j
- tXWRGxx4to6FwARAQABtCZWaWFjaGVzbGF2IER1YmV5a28gPHNsYXZhQGR1YmV5a28uY29tPokCVw
- QTAQoAQQIbAQUJA8JnAAULCQgHAgYVCgkICwIEFgIDAQIeAQIXgBYhBFXDC2tnzsoLQtrbBDlc2cL
- fhEB1BQJoGl5PAhkBAAoJEDlc2cLfhEB17DsP/jy/Dx19MtxWOniPqpQf2s65enkDZuMIQ94jSg7B
- F2qTKIbNR9SmsczjyjC+/J7m7WZRmcqnwFYMOyNfh12aF2WhjT7p5xEAbvfGVYwUpUrg/lcacdT0D
- Yk61GGc5ZB89OAWHLr0FJjI54bd7kn7E/JRQF4dqNsxU8qcPXQ0wLHxTHUPZu/w5Zu/cO+lQ3H0Pj
- pSEGaTAh+tBYGSvQ4YPYBcV8+qjTxzeNwkw4ARza8EjTwWKP2jWAfA/ay4VobRfqNQ2zLoo84qDtN
- Uxe0zPE2wobIXELWkbuW/6hoQFPpMlJWz+mbvVms57NAA1HO8F5c1SLFaJ6dN0AQbxrHi45/cQXla
- 9hSEOJjxcEnJG/ZmcomYHFneM9K1p1K6HcGajiY2BFWkVet9vuHygkLWXVYZ0lr1paLFR52S7T+cf
- 6dkxOqu1ZiRegvFoyzBUzlLh/elgp3tWUfG2VmJD3lGpB3m5ZhwQ3rFpK8A7cKzgKjwPp61Me0o9z
- HX53THoG+QG+o0nnIKK7M8+coToTSyznYoq9C3eKeM/J97x9+h9tbizaeUQvWzQOgG8myUJ5u5Dr4
- 6tv9KXrOJy0iy/dcyreMYV5lwODaFfOeA4Lbnn5vRn9OjuMg1PFhCi3yMI4lA4umXFw0V2/OI5rgW
- BQELhfvW6mxkihkl6KLZX8m1zcHitCpWaWFjaGVzbGF2IER1YmV5a28gPFNsYXZhLkR1YmV5a29Aa
- WJtLmNvbT6JAlQEEwEKAD4WIQRVwwtrZ87KC0La2wQ5XNnC34RAdQUCaBpd7AIbAQUJA8JnAAULCQ
- gHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRA5XNnC34RAdYjFEACiWBEybMt1xjRbEgaZ3UP5i2bSway
- DwYDvgWW5EbRP7JcqOcZ2vkJwrK3gsqC3FKpjOPh7ecE0I4vrabH1Qobe2N8B2Y396z24mGnkTBbb
- 16Uz3PC93nFN1BA0wuOjlr1/oOTy5gBY563vybhnXPfSEUcXRd28jI7z8tRyzXh2tL8ZLdv1u4vQ8
- E0O7lVJ55p9yGxbwgb5vXU4T2irqRKLxRvU80rZIXoEM7zLf5r7RaRxgwjTKdu6rYMUOfoyEQQZTD
- 4Xg9YE/X8pZzcbYFs4IlscyK6cXU0pjwr2ssjearOLLDJ7ygvfOiOuCZL+6zHRunLwq2JH/RmwuLV
- mWWSbgosZD6c5+wu6DxV15y7zZaR3NFPOR5ErpCFUorKzBO1nA4dwOAbNym9OGkhRgLAyxwpea0V0
- ZlStfp0kfVaSZYo7PXd8Bbtyjali0niBjPpEVZdgtVUpBlPr97jBYZ+L5GF3hd6WJFbEYgj+5Af7C
- UjbX9DHweGQ/tdXWRnJHRzorxzjOS3003ddRnPtQDDN3Z/XzdAZwQAs0RqqXrTeeJrLppFUbAP+HZ
- TyOLVJcAAlVQROoq8PbM3ZKIaOygjj6Yw0emJi1D9OsN2UKjoe4W185vamFWX4Ba41jmCPrYJWAWH
- fAMjjkInIPg7RLGs8FiwxfcpkILP0YbVWHiNAabQoVmlhY2hlc2xhdiBEdWJleWtvIDx2ZHViZXlr
- b0BrZXJuZWwub3JnPokCVAQTAQoAPhYhBFXDC2tnzsoLQtrbBDlc2cLfhEB1BQJoVemuAhsBBQkDw
- mcABQsJCAcCBhUKCQgLAgQWAgMBAh4BAheAAAoJEDlc2cLfhEB1GRwP/1scX5HO9Sk7dRicLD/fxo
- ipwEs+UbeA0/TM8OQfdRI4C/tFBYbQCR7lD05dfq8VsYLEyrgeLqP/iRhabLky8LTaEdwoAqPDc/O
- 9HRffx/faJZqkKc1dZryjqS6b8NExhKOVWmDqN357+Cl/H4hT9wnvjCj1YEqXIxSd/2Pc8+yw/KRC
- AP7jtRzXHcc/49Lpz/NU5irScusxy2GLKa5o/13jFK3F1fWX1wsOJF8NlTx3rLtBy4GWHITwkBmu8
- zI4qcJGp7eudI0l4xmIKKQWanEhVdzBm5UnfyLIa7gQ2T48UbxJlWnMhLxMPrxgtC4Kos1G3zovEy
- Ep+fJN7D1pwN9aR36jVKvRsX7V4leIDWGzCdfw1FGWkMUfrRwgIl6i3wgqcCP6r9YSWVQYXdmwdMu
- 1RFLC44iF9340S0hw9+30yGP8TWwd1mm8V/+zsdDAFAoAwisi5QLLkQnEsJSgLzJ9daAsE8KjMthv
- hUWHdpiUSjyCpigT+KPl9YunZhyrC1jZXERCDPCQVYgaPt+Xbhdjcem/ykv8UVIDAGVXjuk4OW8la
- nf8SP+uxkTTDKcPHOa5rYRaeNj7T/NClRSd4z6aV3F6pKEJnEGvv/DFMXtSHlbylhyiGKN2Amd0b4
- 9jg+DW85oNN7q2UYzYuPwkHsFFq5iyF1QggiwYYTpoVXsw
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.60.1 (by Flathub.org) 
+        d=1e100.net; s=20251104; t=1784751422; x=1785356222;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ctgAd9wg0GRoSGzcHXcHc1w0XtOYIWZCmYqQKxqHkHE=;
+        b=OWmQndEEAow4w08rGoG6ycLV2f3VxStRm5u47nZ9cPbMVz4oIM82+zIN5DnB/Y22k2
+         1dQG2cb7Q2Ot9RUTnWU0IvkzUzdvcsx98YhcHxla+IsNH/CUgfTsKZ0yKrhmDpZGYAtW
+         +1UiDxDodwvPGLXXy/NfsNBYnku6jDNBPx2tMR5xaqFVl8nLV8rRTh93LHCwTI8dD1q5
+         4bluopfCMtuqStUY3UKT73jB9SoDqzfbJgj6KYwCdZ6783/xspHfT8+ySpWSbRffKe+f
+         GdVe1DlOL3zk74xGe0LqcJadITdhugBiz0IZlyAj173Txcf1OEw1wPQSiaBr/VwmAQeb
+         wasg==
+X-Forwarded-Encrypted: i=1; AHgh+RrRDSBDyusEVaeCd8D4UlQIW70SIB0n2hmxJAtoHMyhCns+j+KbOXWP90IEgtZxOkhzD+/0tD3QM2y8@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz8ZaeN9WS05XFZik4jghMY4IsMSltvOBXfqz7jVau2Pk5RZW0l
+	oJL5CLHWmVnfBeMSvtLxwDHAM4xjSX6zmuyFHekAzU9boiiMx5UoUa9rvhXDce+GgogYC2NdSgZ
+	Zm67A1q/zgW0N39eVdQhvoBdjZQgaVME=
+X-Gm-Gg: AR+sD11SnJaiPRzabaKRN1nIFwRAsRCDfH3Ao5RDaVhKAEPJsYhlMHOrENybV7eeGaD
+	ZUlq/QaplzECU5NZAQK33d0Mhn+Bc/2x5y3/YHe31PRUaVSnjWsVutSAazPxMDrcOKTizsX+lyR
+	IxClixJmzgLO+aFdLxVZw+Y3gLN8DpQN9j7NRCcHfSUIKxyOSyP8SZu+sFAz4/3f6Nh0sfdE+UO
+	/ZmQ73g/3KeFIyJpfUncxc1fDx65dJ9GknpFrhMTYJ2bh6jauR44ugFuAUcLp5hTbekT5moRiVr
+	rY18NQbjrU6jgsUH5IwXw0DhigI45w==
+X-Received: by 2002:a05:6102:5788:b0:6f0:6293:747d with SMTP id
+ ada2fe7eead31-747536b1402mr6696333137.14.1784751422409; Wed, 22 Jul 2026
+ 13:17:02 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <cover.1780640154.git.ldy3087146292@gmail.com>
+In-Reply-To: <cover.1780640154.git.ldy3087146292@gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Wed, 22 Jul 2026 22:16:51 +0200
+X-Gm-Features: AUfX_mxT0ZHctWRApNg3PEgJzlysrWSxa24rucIWCILUw4qqoEr2Q6Ehc0Njyvo
+Message-ID: <CAOi1vP_tQV-v9R3=-kdUj26s-0AutxaxaFOJkMLjeVbPuRQbXw@mail.gmail.com>
+Subject: Re: [PATCH v5 0/2] libceph: reject zero bucket types and clean up
+ type 0 uses
+To: Ren Wei <n05ec@lzu.edu.cn>
+Cc: Viacheslav Dubeyko <vdubeyko@redhat.com>, ceph-devel@vger.kernel.org, amarkuze@redhat.com, 
+	slava@dubeyko.com, sage@newdream.net, Slava.Dubeyko@ibm.com, 
+	yuantan098@gmail.com, zcliangcn@gmail.com, bird@lzu.edu.cn, 
+	ldy3087146292@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, 2026-07-22 at 13:49 +0200, Max Kellermann wrote:
-> handle_reply() stores a `ceph_mds_request` pointer in
-> `current->journal_info` while filling the inode and dentry cache from
-> an MDS reply.
->=20
-> An allocation in this section can enter direct reclaim and prune
-> dentries from another filesystem.=C2=A0 If this dirties an ext4 inode,
-> ext4
-> starts a JBD2 transaction.=C2=A0 JBD2 interprets the Ceph request in
-> `current->journal_info` as a journal handle and dereferences the
-> request's `r_tid` as `h_transaction`, causing a kernel crash, e.g.:
->=20
-> =C2=A0Unable to handle kernel paging request at virtual address
-> 00000000077b4818
-> =C2=A0[...]
-> =C2=A0Internal error: Oops: 0000000096000004 [#1]=C2=A0 SMP
-> =C2=A0Modules linked in:
-> =C2=A0CPU: 6 UID: 0 PID: 2699135 Comm: kworker/6:3 Tainted: G=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
-> W=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 6.18.38-i3 =
-#1113 NONE
-> =C2=A0[...]
-> =C2=A0Workqueue: ceph-msgr ceph_con_workfn
-> =C2=A0pstate: 80400009 (Nzcv daif +PAN -UAO -TCO -DIT -SSBS BTYPE=3D--)
-> =C2=A0pc : jbd2__journal_start+0x2c/0x208
-> =C2=A0lr : __ext4_journal_start_sb+0x100/0x178
-> =C2=A0[...]
-> =C2=A0Call trace:
-> =C2=A0 jbd2__journal_start+0x2c/0x208 (P)
-> =C2=A0 __ext4_journal_start_sb+0x100/0x178
-> =C2=A0 ext4_dirty_inode+0x3c/0x90
-> =C2=A0 __mark_inode_dirty+0x58/0x400
-> =C2=A0 iput.part.0+0x2b0/0x370
-> =C2=A0 iput+0x18/0x30
-> =C2=A0 dentry_unlink_inode+0xc0/0x158
-> =C2=A0 __dentry_kill+0x80/0x250
-> =C2=A0 shrink_dentry_list+0x90/0x130
-> =C2=A0 prune_dcache_sb+0x60/0x98
-> =C2=A0 super_cache_scan+0xe8/0x190
-> =C2=A0 do_shrink_slab+0x174/0x388
-> =C2=A0 shrink_slab+0xd8/0x4c0
-> =C2=A0 shrink_node+0x31c/0x908
-> =C2=A0 do_try_to_free_pages+0xd0/0x508
-> =C2=A0 try_to_free_pages+0x11c/0x238
-> =C2=A0 __alloc_frozen_pages_noprof+0x4d0/0xdd0
-> =C2=A0 __folio_alloc_noprof+0x18/0x70
-> =C2=A0 __filemap_get_folio+0x248/0x440
-> =C2=A0 ceph_readdir_prepopulate+0x570/0x9e8
-> =C2=A0 mds_dispatch+0x1424/0x1ba0
-> =C2=A0 ceph_con_process_message+0x74/0xa0
-> =C2=A0 ceph_con_v1_try_read+0x3a0/0x1510
-> =C2=A0 ceph_con_workfn+0x260/0x460
->=20
-> Enter a scoped NOFS allocation context and leave it after clearing
-> `journal_info`.=C2=A0 This prevents filesystem reclaim from recursing int=
-o
-> another filesystem while the field contains Ceph-private data.
->=20
-> Fixes: 315f24088048 ("ceph: fix security xattr deadlock")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
-> ---
-> =C2=A0fs/ceph/mds_client.c | 11 +++++++++++
-> =C2=A01 file changed, 11 insertions(+)
->=20
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 853bf698b356..3c692ad02c85 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -6,6 +6,7 @@
-> =C2=A0#include <linux/slab.h>
-> =C2=A0#include <linux/gfp.h>
-> =C2=A0#include <linux/sched.h>
-> +#include <linux/sched/mm.h>
-> =C2=A0#include <linux/delay.h>
-> =C2=A0#include <linux/debugfs.h>
-> =C2=A0#include <linux/seq_file.h>
-> @@ -4015,6 +4016,7 @@ static void handle_reply(struct
-> ceph_mds_session *session, struct ceph_msg *msg)
-> =C2=A0	struct ceph_mds_reply_head *head =3D msg->front.iov_base;
-> =C2=A0	struct ceph_mds_reply_info_parsed *rinfo;=C2=A0 /* parsed reply
-> info */
-> =C2=A0	struct ceph_snap_realm *realm;
-> +	unsigned int nofs_flags;
-> =C2=A0	u64 tid;
-> =C2=A0	int err, result;
-> =C2=A0	int mds =3D session->s_mds;
-> @@ -4158,6 +4160,14 @@ static void handle_reply(struct
-> ceph_mds_session *session, struct ceph_msg *msg)
-> =C2=A0
-> =C2=A0	/* insert trace into our cache */
-> =C2=A0	mutex_lock(&req->r_fill_mutex);
-> +
-> +	/* disable fs reclaim while we are using current-
-> >journal_info
-> +	 * for our own purposes, or else shrinkers of other
-> +	 * filesystems might dereference this pointer as a different
-> +	 * type
-> +	 */
-> +	nofs_flags =3D memalloc_nofs_save();
-> +
-> =C2=A0	current->journal_info =3D req;
-> =C2=A0	err =3D ceph_fill_trace(mdsc->fsc->sb, req);
-> =C2=A0	if (err =3D=3D 0) {
-> @@ -4166,6 +4176,7 @@ static void handle_reply(struct
-> ceph_mds_session *session, struct ceph_msg *msg)
-> =C2=A0			err =3D ceph_readdir_prepopulate(req, req-
-> >r_session);
-> =C2=A0	}
-> =C2=A0	current->journal_info =3D NULL;
-> +	memalloc_nofs_restore(nofs_flags);
-> =C2=A0	mutex_unlock(&req->r_fill_mutex);
-> =C2=A0
-> =C2=A0	up_read(&mdsc->snap_rwsem);
+On Fri, Jun 5, 2026 at 10:43=E2=80=AFAM Ren Wei <n05ec@lzu.edu.cn> wrote:
+>
+> From: Douya Le <ldy3087146292@gmail.com>
+>
+> This series fixes a CRUSH map decode issue in libceph and keeps the
+> follow-up type-0-to-constant cleanup in a separate patch.
+>
+> Patch 1/2 rejects bucket type 0 during CRUSH map decode and defines the
+> reserved device type in a separate enum.
+>
+> Patch 2/2 uses that type constant consistently in the CRUSH mapper
+> paths that identify leaf devices.
+>
+> Douya Le (2):
+>   libceph: reject zero bucket types in crush_decode
+>   libceph: crush: use CRUSH_ITEM_TYPE_DEVICE for leaf device checks
+>
+>  include/linux/crush/crush.h | 6 +++++-
+>  net/ceph/crush/mapper.c     | 8 ++++----
+>  net/ceph/osdmap.c           | 2 ++
+>  3 files changed, 11 insertions(+), 5 deletions(-)
+>
+> --
+> 2.47.3
+>
 
-Makes sense.
+Hi Ren,
 
-Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
+I have staged v1 of this fix (i.e. the version without the new
+CRUSH_ITEM_TYPE_DEVICE constant, touching only net/ceph/osdmap.c).
+While I don't mind the constant, there was some discussion about its
+name, it being in a separate enum, etc which needs to be agreed upon on
+the userpace side first.  The implementation of the CRUSH algorithm
+(include/linux/crush/* and net/ceph/crush/*) is shared with userspace
+and the userspace side is considered to be the reference, so the flow
+for changes there is supposed to be userspace -> kernel.
+
+In userspace currently there is no constant and "device" is also
+referred to as "leaf" or "osd" in some places, so it's not clear if
+CRUSH_ITEM_TYPE_DEVICE is going to stick.
+
+    if (type =3D=3D 0) {
+      // want leaf?
+      children->push_back(id);
+    }
+
+        if (type =3D=3D 0) // osd
+          break;
 
 Thanks,
-Slava.
+
+                Ilya
