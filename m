@@ -1,75 +1,75 @@
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F7C5374E46
-	for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2026 16:59:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E6E138F239
+	for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2026 17:11:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784825960; cv=none; b=AuL3ZbGtKRtq8R5BZ3QBP6qGj4uer1SlD1h7lh3msq3o5hbFqQjGzR5ukhBTovzDwvr1gW1yIGPPl1xclTiqXwOKVUhSg9ztX5U6yMpg+T2Ysf0rhICV/si6S9n9bX6kVMIS1ZSUwSEi/VGOzu5uF7RH9HAyXzltGRW5IkjSDTo=
+	t=1784826682; cv=none; b=gqfNUnHaXZ7aA7eDJdlOuSQSpmGu6yYdA0Y+6UtluKgbFFcp03ywCa12tH8Xvtq7wlHRf2WpIFVixt+KmjhVyXYWq5VZgJZRePF/Cz2F6tUxCcZijR69QiCCKg2JjkMlJ07WLPruhfeTt1VW3axMD/k/mATwCYCHjDQoxhPdUTU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784825960; c=relaxed/simple;
-	bh=GJmZ3H2skT6fM817BKeZuZm5Oxv1vcfERG3g8NXaPyk=;
+	s=arc-20240116; t=1784826682; c=relaxed/simple;
+	bh=Z7DDk0g4P9zYW6y19aHVOoIAtslOiynYnFGQh2M/D8k=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=Dt2s9j0QhvARt6w9NnK4rlprtVw1ssskjv5aXSfRgNTNCxw9uZGa4Y/6fytrj0fZrKDwD2Zq6bZ0fZIqi6rGu4X4k6jCKczMwYV4N+5a6/GkDIizMxP0ifT8t0Yi9ZhPd6nCO0i10iF7pgC+/5m8dEcK8sAt8SDPwaLAtd0OERo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=gQFRQaOF; arc=none smtp.client-ip=209.85.128.182
+	 Content-Type:MIME-Version; b=CtPoz1v61mWHDo2jKzHT1M7C/79zjfTPGvjTDExRQwNqYUYXeM1P1NIKZqwjT4R8faxXaLwyRaZCEHFIa8OUEeuHsZwrRzFNaEiCMnVJ8SnSTIkSbjSTP2LFliFHsA0gZbwTRVzdEedjxzEG1pt/Xj1p6hhTND8VDb4uk8BEiRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=i8uUGlpQ; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="gQFRQaOF"
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-81e83f1f15aso6555297b3.1
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2026 09:59:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="i8uUGlpQ"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-81e6f2ee60bso5611117b3.1
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Jul 2026 10:11:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784825957; x=1785430757; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784826673; x=1785431473; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=GJmZ3H2skT6fM817BKeZuZm5Oxv1vcfERG3g8NXaPyk=;
-        b=gQFRQaOF/R45V83E+vH4E7cbsvi5Q5EPtU8KoeZ+aNo/V3WaZXNHJlXGZ2I/NoGccC
-         uAbgXuUjIdxZpg/czw9aJBefG3Y0+8h90x6W5IkCstUhC4uL1cD5oUI6XsFjY0qJjifj
-         8AsthoNR8uN429WipSZ6mlmeECGBDRrXLQMjMhyqqz8r8gtUprj0Yl5GomhXjgaSfEVv
-         nC73TIqOCbjIw7TcVPqEjQ4q4eUXUTXuWLTKkSN8SlZS8nU7nGrpJSYuk1htNB2ojeYk
-         KcykflRAdb1BtIDkYWl85mDyH/8OLRM48mLbTvyPQ6kmmqDCMYxij+HKh5FH+Ltm9DRl
-         WaLg==
+        bh=X4kthdTehAmvC+C2ux71FfIfqArWCpYYj3jAIMqnIW8=;
+        b=i8uUGlpQKumY85pwQcjebvgZm0KKiFc4732BruxrQwMKmDP6B3mS0dvignNUftwakz
+         ywPIMixX2nki3/sAPrxdQpiXqTqEjRBpGZupU5lI6ivSuwF9ReOcyq711aY4gF2Ua8hs
+         ixR+yxVQw3jKbC2tyPuvgTxDxi1sWZSTMA1KDgfid4OI2Tapfs9AWvvBWBa4DRUkckco
+         hPJo+57ExtjCmqRIq7+Ger46W05YK62YDZYVUlJ6Kv5JPcPMeYz2ydNsvovs7QlIKPSW
+         lJj8dVqN7WtTLFPuTb0jZIMSZ1D/k6sHZe3DFKsivbUuYgJGyz5iVpLUxlkZjQfaLbDL
+         54qQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784825957; x=1785430757;
+        d=1e100.net; s=20251104; t=1784826673; x=1785431473;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=GJmZ3H2skT6fM817BKeZuZm5Oxv1vcfERG3g8NXaPyk=;
-        b=ajGfCkl9C8J6XUCiy6UjCMsG2hqI9FvbKIZ8eAXunmJVgZ6RCcL9TvF7TCtp7is0Yx
-         Rrlr3hdXao6laWxgOJ4BV1xqGiHx6x+e65rLZcsJT5RMkHkLcm2dh4zr27hmYuA0AZfn
-         fp54KdOC9lTvhS0Z4aS4XQIOu7AR76HajMV4UKZoP6LfNNBDvdrk4fat7oxlvKXiZ/hU
-         fW4vidiXXWD/qWSrC94J+6XI+yCMkG2NBhSeACuoy348njmePUejP7DImxKRWLgMudeg
-         nwAEXZy+b/J4GfjfLFQ2c35bq5uCb2SdpUqn9XNIfbsqB8vSw4lF5maXOBlXN2AyYzIM
-         mIaQ==
-X-Gm-Message-State: AOJu0YwG6czn8LFPMMvlXbLB0RRBp8P20GoK7Hy992BTjWifkdsJsbui
-	hHGctdjJ/lXglkqEVO4O8ydper+Y3mj2qDdzGU/dac0Mq0C9xnVNND4nxNyyiIfRQFQ=
-X-Gm-Gg: AR+sD11SJF/NzxdT/f+IVBFoyUHt0BHbPeLAGFDulcCT2kh6k/AZtNsjL9QvtARN+pI
-	ycacakkfopBEXOnGDXRwdy8H3zzSTYHeLiCeBmyUIOH5vEIeuOa3VVWKr2i42Z6oTl/9FsnlSZ8
-	fxF0TLWXXSB8a2VA0bwTDxBjhiRL8kp/UHdzEcf1IwOrNNNwbPSIQv9XbOhXenWwIIaAw+DFe5r
-	bDMCoM1XWdHpUSfXCH7dQCEfemi1yKmFw7A+ztAf+MUbtXAapQKuXO0NksH6PBig4nETh/baTU1
-	zjONyAy5uW9XLMH2YuNmKCHlRwixkYRSUUtm38eITL2Buybp8T33hv/qkpNCbaG3tuxBmXxseU6
-	s+UO1vFKJpLzIHtxghRJVZ7M3hyLeEvONW/I/Ph5tmIzXmFxzuunTDlgmxlSd2Y09HusNv5jURQ
-	ReqyeMbzLn/bF5jtKJN0mck1pcFob0JwMQARqbxntlHBE0UgCH37Sv2RbnrMqLxBmWsgw9YXJYX
-	HOeCHD4NB6PE8cLTijZTkxYwRClWQprXJ1U38hUdEwgUIiD+w+kUi7egbwY9YDVZY2vT48=
-X-Received: by 2002:a05:690c:9a84:b0:7ef:9fd9:db07 with SMTP id 00721157ae682-81f4d3b5baamr10860447b3.12.1784825957564;
-        Thu, 23 Jul 2026 09:59:17 -0700 (PDT)
+        bh=X4kthdTehAmvC+C2ux71FfIfqArWCpYYj3jAIMqnIW8=;
+        b=mWv9QF+siR4YYFaY7+haZHUtjwnFzzhAHX7JAXb9u5bQrUrPy4NF4GWaW9V/C6Q38n
+         axAIu6FVdkxvP4qLuSMTfWsVbpmJOatDDvDuYNgNR3xdOz5LC+PR4Is8Kor4zm2od9LX
+         0/qZQXjDA5Wprzb1js3sbb2D8HlcLYN1DWVD05u8GKTQg87IF5jG7UqRHRHhkvWh4mSg
+         btPXdkaUL82AJ3G9ejXmxyFMdBkpy28RQ/hv82kC/9y5u7lHyuVzf+VneokXVs1QFe7L
+         r7wnUS7r2GaZXLe01UOHCwZVk9oULg4IZ74EfYjnt1t3JqHfw7xGFhaplGhb+TWZh9zt
+         zi1Q==
+X-Gm-Message-State: AOJu0YwXbkIO4eg/irNVHRU9XkF0Z8ZoauQsnkAB6HtYJKihCLXA7yko
+	fbdJR9TILreHjXRiJZwSYXt4CexbA5u8I5RFW2DVBCIzSNwRtZ2hztNiT4LGOwSClMs=
+X-Gm-Gg: AR+sD12NFPN0OoGlf+WkCQaynMDOdDpGmJLjGmuX6ZBC7UiThCW9oqUfEmyPyg9Sm4c
+	KMgsP6N30uTk33L6WjBaWhW+LRF2i92aJNpTlSj0RmpPACbUG5uIL5euuQVmcHZQyDrTniGvxWt
+	Cek0gaZQjNYuuyRGAa0glSkKWURPAQsYrDRir5n+1fhptBv5xSsjIE8Zp85HDEmhoMjHzUB5OE4
+	tWEvra1aUJbRpsQAQ4FS3droCMm4oYASPrmgVl66KTukYNe5et84l5a1IFIylumO0PzIcfq4Dkx
+	uX72/2gIwbrOtoTGfcapIBB8nJPV+zs9o1PfP2k6LtBSzCy0W0IUpx9xgL0VXN9hWL1q6jKn6ZB
+	tZdB/jtWb59fQCvam8qmUOnLI4fAX734B429HvRf2aVQm0bAzJHR9TplkeQ95UG/kKZTDkkVIwN
+	GftLizDDcKBdOhsxOkVrP5vhgSSFnObvAiZ0UnUEMvooRcPmdtMxygtCeODprPToF31BvQduj9O
+	ZfXJDb+9ndt78yUs9G4cDmlbHZsFSp7oaengT2NSwMFsimcZEJp6xTXKvcbePWPAfsUcxE=
+X-Received: by 2002:a05:690c:4483:b0:81e:6b13:445f with SMTP id 00721157ae682-81f4d42b32amr2819477b3.23.1784826673561;
+        Thu, 23 Jul 2026 10:11:13 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:8af4:3b7a:515e:7808? ([2600:1700:6476:1430:8af4:3b7a:515e:7808])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-81f33d9fd2dsm31607727b3.30.2026.07.23.09.59.14
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81f33447e54sm31375907b3.0.2026.07.23.10.11.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Jul 2026 09:59:17 -0700 (PDT)
-Message-ID: <0c01ca7ecdc824a366344890850a34e39b5d2251.camel@dubeyko.com>
-Subject: Re: [PATCH 1/2] ceph: use GFP_NOFS for cap flush allocation in
- writeback path
+        Thu, 23 Jul 2026 10:11:12 -0700 (PDT)
+Message-ID: <5ad4cdfc709dbb58d17472e78d97bb8571944f98.camel@dubeyko.com>
+Subject: Re: [PATCH 2/2] ceph: use GFP_KERNEL consistently in
+ __ceph_pool_perm_get()
 From: Viacheslav Dubeyko <slava@dubeyko.com>
 To: xiubo.li@clyso.com, Ilya Dryomov <idryomov@gmail.com>, Alex Markuze
 	 <amarkuze@redhat.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date: Thu, 23 Jul 2026 09:59:12 -0700
-In-Reply-To: <20260723-b4-gfp_nofs-v1-1-c06b40354ec9@clyso.com>
+Date: Thu, 23 Jul 2026 10:11:10 -0700
+In-Reply-To: <20260723-b4-gfp_nofs-v1-2-c06b40354ec9@clyso.com>
 References: <20260723-b4-gfp_nofs-v1-0-c06b40354ec9@clyso.com>
-	 <20260723-b4-gfp_nofs-v1-1-c06b40354ec9@clyso.com>
+	 <20260723-b4-gfp_nofs-v1-2-c06b40354ec9@clyso.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -115,7 +115,7 @@ Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  nf8SP+uxkTTDKcPHOa5rYRaeNj7T/NClRSd4z6aV3F6pKEJnEGvv/DFMXtSHlbylhyiGKN2Amd0b4
  9jg+DW85oNN7q2UYzYuPwkHsFFq5iyF1QggiwYYTpoVXsw
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.60.1 (by Flathub.org) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -124,42 +124,74 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-T24gVGh1LCAyMDI2LTA3LTIzIGF0IDEzOjQ3ICswODAwLCBYaXVibyBMaSB2aWEgQjQgUmVsYXkg
-d3JvdGU6Cj4gRnJvbTogWGl1Ym8gTGkgPHhpdWJvLmxpQGNseXNvLmNvbT4KPiAKPiBjZXBoX2Fs
-bG9jX2NhcF9mbHVzaCgpIGlzIGNhbGxlZCBmcm9tIGNlcGhfd3JpdGVwYWdlc19zdGFydCgpIGlu
-c2lkZQo+IHRoZSB3cml0ZWJhY2sgbGF5ZXIsIHdoZXJlIG90aGVyIGFsbG9jYXRpb25zIGluIHRo
-ZSBzYW1lIHBhdGgKPiAoY2VwaF9vc2RjX2FsbG9jX3JlcXVlc3QsIGNlcGhfb3NkY19hbGxvY19t
-ZXNzYWdlcykgYWxyZWFkeSB1c2UKPiBHRlBfTk9GUy7CoCBBIEdGUF9LRVJORUwgYWxsb2NhdGlv
-biBoZXJlIGNhbiB0cmlnZ2VyIGRpcmVjdCByZWNsYWltCj4gdGhhdCByZWN1cnNpdmVseSBlbnRl
-cnMgdGhlIGZpbGVzeXN0ZW0gd3JpdGViYWNrIHBhdGg6Cj4gCj4gwqAgY2VwaF93cml0ZXBhZ2Vz
-X3N0YXJ0KCnCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCAvLyBp
-bm9kZSBBIHdyaXRlYmFjawo+IMKgwqDCoCBjZXBoX2FsbG9jX2NhcF9mbHVzaCgpCj4gwqDCoMKg
-wqDCoCBrbWVtX2NhY2hlX2FsbG9jKC4uLiwgR0ZQX0tFUk5FTCkKPiDCoMKgwqDCoMKgwqDCoCBb
-ZGlyZWN0IHJlY2xhaW1dCj4gwqDCoMKgwqDCoMKgwqDCoMKgIHRyeV90b19mcmVlX3BhZ2VzKCkK
-PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIHNocmlua19zbGFiKCkKPiDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoCBzdXBlcl9jYWNoZV9zY2FuKCkKPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqAgcHJ1bmVfaWNhY2hlX3NiKCkKPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgIGlub2RlX2xydV9pc29sYXRlKCkKPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoCBpcHV0KCkgLT4gZXZpY3QoaW5vZGVfQikKPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqAgW2lub2RlX0IgaGFzIGRpcnR5IHBhZ2VzXQo+IMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBmaWxlbWFwX2ZsdXNoKCkKPiDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIGNlcGhfd3JpdGVwYWdl
-c19zdGFydCgpwqAgLy8gcmUtZW50ZXJzCj4gd3JpdGViYWNrCj4gwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgY2VwaF9hbGxvY19jYXBfZmx1c2goKQo+
-IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCAt
-PiBSRUNVUlNJT04gLyBTVEFDSyBPVkVSRkxPVwo+IAo+IEFsbCAxMSBjYWxsZXJzIG9mIGNlcGhf
-YWxsb2NfY2FwX2ZsdXNoKCkgYXJlIGluIHdyaXRlIG9yIHdyaXRlYmFjawo+IGNvbnRleHRzOiB3
-cml0ZXBhZ2VzICh4MiksIHdyaXRlX2l0ZXIsIGZhbGxvY2F0ZSwgY29weV9maWxlX3JhbmdlLAo+
-IHNldHhhdHRyLCBzZXRhdHRyLCBhbmQgcGFnZV9ta3dyaXRlLgo+IAo+IFNpZ25lZC1vZmYtYnk6
-IFhpdWJvIExpIDx4aXViby5saUBjbHlzby5jb20+Cj4gLS0tCj4gwqBmcy9jZXBoL2NhcHMuYyB8
-IDIgKy0KPiDCoDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQo+
-IAo+IGRpZmYgLS1naXQgYS9mcy9jZXBoL2NhcHMuYyBiL2ZzL2NlcGgvY2Fwcy5jCj4gaW5kZXgg
-ZjhkODk4YWQwOTFlLi5jYmFlYmVhYzA2ZjcgMTAwNjQ0Cj4gLS0tIGEvZnMvY2VwaC9jYXBzLmMK
-PiArKysgYi9mcy9jZXBoL2NhcHMuYwo+IEBAIC0xODc1LDcgKzE4NzUsNyBAQCBzdHJ1Y3QgY2Vw
-aF9jYXBfZmx1c2gKPiAqY2VwaF9hbGxvY19jYXBfZmx1c2godm9pZCkKPiDCoHsKPiDCoAlzdHJ1
-Y3QgY2VwaF9jYXBfZmx1c2ggKmNmOwo+IMKgCj4gLQljZiA9IGttZW1fY2FjaGVfYWxsb2MoY2Vw
-aF9jYXBfZmx1c2hfY2FjaGVwLCBHRlBfS0VSTkVMKTsKPiArCWNmID0ga21lbV9jYWNoZV9hbGxv
-YyhjZXBoX2NhcF9mbHVzaF9jYWNoZXAsIEdGUF9OT0ZTKTsKPiDCoAlpZiAoIWNmKQo+IMKgCQly
-ZXR1cm4gTlVMTDsKPiDCoAoKTG9va3MgZ29vZC4KClJldmlld2VkLWJ5OiBWaWFjaGVzbGF2IER1
-YmV5a28gPHNsYXZhQGR1YmV5a28uY29tPgoKVGhhbmtzLApTbGF2YS4K
+On Thu, 2026-07-23 at 13:47 +0800, Xiubo Li via B4 Relay wrote:
+> From: Xiubo Li <xiubo.li@clyso.com>
+>=20
+> __ceph_pool_perm_get() has four allocations for building OSD STAT
+> requests, three of which used GFP_NOFS and one (the page vector
+> allocation) used GFP_KERNEL, making them inconsistent.
 
+__ceph_pool_perm_get() has six allocation calls, not four:
+
+2457: rd_req =3D ceph_osdc_alloc_request(..., GFP_NOFS);      // (1) NOT
+touched by this patch
+2471: err =3D ceph_osdc_alloc_messages(rd_req, GFP_NOFS);     // (2)
+changed -> GFP_KERNEL
+2475: wr_req =3D ceph_osdc_alloc_request(..., GFP_NOFS);      // (3)
+changed -> GFP_KERNEL
+2487: err =3D ceph_osdc_alloc_messages(wr_req, GFP_NOFS);     // (4)
+changed -> GFP_KERNEL
+2492: pages =3D ceph_alloc_page_vector(1, GFP_KERNEL);         // (5)
+already GFP_KERNEL
+2526: perm =3D kmalloc_flex(*perm, pool_ns, ..., GFP_NOFS);    // (6) NOT
+touched by this patch
+
+Should we change other places too?
+
+Thanks,
+Slava.
+
+>=20
+> The function is only called from ceph_try_get_caps() and
+> __ceph_get_caps(), both of which are in the user I/O path (read,
+> write, fallocate, mmap fault), not in the writeback path.=C2=A0 There is
+> no risk of recursive writeback, so GFP_NOFS is unnecessarily
+> restrictive.=C2=A0 Use GFP_KERNEL consistently for all four allocations.
+>=20
+> Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+> ---
+> =C2=A0fs/ceph/addr.c | 6 +++---
+> =C2=A01 file changed, 3 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index e2da3ab9f808..d2ac3df47e97 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -2479,12 +2479,12 @@ static int __ceph_pool_perm_get(struct
+> ceph_inode_info *ci,
+> =C2=A0		rd_req->r_base_oloc.pool_ns =3D
+> ceph_get_string(pool_ns);
+> =C2=A0	ceph_oid_printf(&rd_req->r_base_oid, "%llx.00000000", ci-
+> >i_vino.ino);
+> =C2=A0
+> -	err =3D ceph_osdc_alloc_messages(rd_req, GFP_NOFS);
+> +	err =3D ceph_osdc_alloc_messages(rd_req, GFP_KERNEL);
+> =C2=A0	if (err)
+> =C2=A0		goto out_unlock;
+> =C2=A0
+> =C2=A0	wr_req =3D ceph_osdc_alloc_request(&fsc->client->osdc, NULL,
+> -					 1, false, GFP_NOFS);
+> +					 1, false, GFP_KERNEL);
+> =C2=A0	if (!wr_req) {
+> =C2=A0		err =3D -ENOMEM;
+> =C2=A0		goto out_unlock;
+> @@ -2495,7 +2495,7 @@ static int __ceph_pool_perm_get(struct
+> ceph_inode_info *ci,
+> =C2=A0	ceph_oloc_copy(&wr_req->r_base_oloc, &rd_req->r_base_oloc);
+> =C2=A0	ceph_oid_copy(&wr_req->r_base_oid, &rd_req->r_base_oid);
+> =C2=A0
+> -	err =3D ceph_osdc_alloc_messages(wr_req, GFP_NOFS);
+> +	err =3D ceph_osdc_alloc_messages(wr_req, GFP_KERNEL);
+> =C2=A0	if (err)
+> =C2=A0		goto out_unlock;
+> =C2=A0
