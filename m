@@ -1,158 +1,150 @@
-Received: from mail-ua1-f43.google.com (mail-ua1-f43.google.com [209.85.222.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17C8B3DDAE1
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Jul 2026 08:44:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.43
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785141859; cv=pass; b=CBgIMSi/funNYqOXN+dgXA8/+7yk8ItY9mG9imd5MljngGQIX/Huww8kAqCtoVPyTNc3kRXUYlEVRT9vPCsRTaqJqNaCDOHwIJZCvGxu+JMRPMCHt0qGiqp+BvimUDU79Q+aeDiFab0IIwgltVy6YiI8RpHSSRsM7B4mcujuEc4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785141859; c=relaxed/simple;
-	bh=YFn+SG3jt0W8ClbW1A5ZvhnjFO3y0/T59yYvALkEpOc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nv2OFY4RknlRVs3kw+AuyczXzTRInpn58UVmDRRAR7bzpy4QVRB+YmHR0cFDDc8MVuqlge7zJr17XEEw65xEWjjhn2m12Yp0N3sLjzqSJr0ejDNsrhCbe/pvP4eQtncWLlka0tbZO43rCJaShS/lTKsqPjKdZvq+QdwaQ+UJ6u8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EZI9xoAZ; arc=pass smtp.client-ip=209.85.222.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A028376A1E
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Jul 2026 08:49:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1785142180; cv=none; b=NH5p1F9gIqqVVisd+KP8OAvTC7t3GffbWuLxehc6dSjwYd2tGuZ7ZeyINQt0SjS3hR3sFsz3FWjEzWUCyyu4OM1Bn5BonuKuRXcg4n2bPlJvz77PYGRuea5TzcaPiag43Nd5HGyE6+RIt4ii0v3Z96bJyfYOsyBDe8N3M3cchaY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1785142180; c=relaxed/simple;
+	bh=82J2lATTuJaszwWfjk8Ce2XEgLw4H1wJ7frUZvIFPvk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=r1ud0wP8FQxKK2MxubB5qUFpnhQid7Cc05y5xscrAwNfB+cE4qVXAtj9nXfpBZl7NPL6sAKAiOS0Fh4eAc6/PyfZwlIbev7pb5ZXPVETQPbcvRrOz7dUscGUAhy7m69SowjueS74oQrgPNkegAqJIvSA0Q8yl+0cxiyZSGWXJbM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=vpq64ic0; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EZI9xoAZ"
-Received: by mail-ua1-f43.google.com with SMTP id a1e0cc1a2514c-97723f98735so1659123241.3
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Jul 2026 01:44:16 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1785141856; cv=none;
-        d=google.com; s=arc-20260327;
-        b=pZuOxDfcsyIR699hXMnnm9rsoaS+Ad46l8MxESj9nnjmzcTQNKV+5Db2IFOuNWOx/i
-         zOegsgo3wjUxVudY/v1hQ4bQtsNrJCNJkzVieT0408M6ef32SpYs5LgvsD8dDLkJPjR7
-         js+r/ahjTxTC8HHMXF+IGcqDJeI4YPCRlAcShCCO62xlBuYEtMVwV/PI6+bTCyRWCuH/
-         f9R6dVf6R+KgvQ5cYy3pkwc4NDr9q0ygRS6KW4bevK2sQpEEij0lAZXRIj7+KVXo5TEW
-         LFKCRraWBex/5n5JQeOkt5KdQ3NJEk23p56RVSvOKmFtOEf5x0OrCJFpor1Wbzvj7LtW
-         g+cQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=C6ZJtMg2ZwUmSn3lFbPCBamJdEbDXw6UU/0/bZEAB3g=;
-        fh=fhJPsWkkqYAFx7ufgZZauNIwrnwuftRRHenS3BG2YXs=;
-        b=Co4MOo+I1S2e2guOgESqkZHe5f3PLzv8oJVgaqwN5L3n4BcJszOIEM7C2D6O43th+P
-         PpSpWb2T1+9sQVq0gEq7BMY0yEoDrmmH+wJ0A7crNPnJgMMoTIzQ7QQzVFKdvKkGyRAT
-         w43lIDccMqvMSIyu9raltJ1ZNUhELQJaNDggsdXgQBpHtMPLBt/NjRe0a8f4TupMDW3R
-         FJB2YtlOngOh8lYLjOs9mxuX92hTCWqiseK4CvfcvKoFDJsg6ZRuNHZUdwYrWocxFCjj
-         N9fgzSsRqFEiv0g9jSn8wfMh7vhmxna42VFweNwjhrnn9YtUgSeXJkER2nc4gV7R0k8t
-         94+A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1785141856; x=1785746656; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=C6ZJtMg2ZwUmSn3lFbPCBamJdEbDXw6UU/0/bZEAB3g=;
-        b=EZI9xoAZbvODmBSux/cJ/a+6T1/UIO2yDCT7uFxWhmMDMcnk9XC0F1hGVBlIwVI9Fa
-         JdJxPevAc6CST4aFSSv7r6X7zBkGUzM9Prb5FzWIxFuFKvbdc9bXVkjKljPctxk1kkMY
-         Jz4XMK6/RHaC7f0TRdDVMTPH8m7zNbtfV8LyRXmDWqLvNZqtqc8IMzo12XqNakYwrTAS
-         hG6Q4D9r2gmz2X6N072eP+uBdfaIp03RIDBR6Isg7Y4axnxLjcLVdMscHTuTUDnyPsCb
-         Q4RejeHj6OVkBHshHlIQbpIBeqn025/wqyRfc8sBQWcCzcIa/po0WZvdIC/aBCOVO1Ha
-         Jwug==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785141856; x=1785746656;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=C6ZJtMg2ZwUmSn3lFbPCBamJdEbDXw6UU/0/bZEAB3g=;
-        b=QW6i8JJpOqZAkLmjeCltNy4+q6fnc5XUdSgob5kMF173A9d3ZO9J0aG6V+qtcLD5iZ
-         wRLGBPV//woz6xnZQyUovyC1e5DJlLRODrSJZJVZ7srCv5Ls5XDXVwvlcFWsbtmBRRQD
-         R8/UD9lbg+OABuEpetbK/7p3xXPyv7mu+t3d6h+hT1lOCZgb6HALVMObKqMXPf9INOYh
-         1DuhfPbI2h3aNXoY8q6Apvjz1by62oFKErjsNO/Bdj0HQPO4aQ0R1fsKa+Exss+rwvDG
-         q3xCJYTdYWv/ayX+WH+HQd0zJAxFAkZCc2M9Utq+Eb+IyGbZRyIq4y33gyRICWqQjt2f
-         mBaA==
-X-Forwarded-Encrypted: i=1; AHgh+Rp0ffPcEA6OlK0Adw5HIEOOnifekdFmDxi6Fbz/tLulZbF65i8xgHZfQOSqZVVnxvwglhcpesPqzDBb@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz4eFuCMyYTZOrnPVZbZEkejFdOeW0XI2Pdc4JaGj2XXT+zLbHW
-	knHE/GZ3NuQ5UrnBikvQAk0xNkwm1JwAOqNFWmPCbGz7uGNee4SH9BZ7zwfwwWtUgtyW2ii0sN7
-	xcjT+GqkZRxiqrF/20i3/pap3o7Wr3+WVaBG4
-X-Gm-Gg: AR+sD10s8DBsKbGzskHlwIq7hHihOYGo7eQ2nw2X9j2XFDdg//EW5JqBYyubqi76Ypv
-	2juOo988NiJ6GEASjrpOZ6Aax9wgtkqWITfdMMug4CNd3wRRNGMYbQ06NtXJ1Cv7H4y0asDgut3
-	pvylwgzbFWprgr6u8GkTEwN3MmI7FEqU+9if58opCdTg0geXDPZFc5jjMq2MGok62z9Acl+5wqa
-	Z0F5p5gWOFjeN+CGX6mOF99rGismSgxWmZ02YVj+JUQCr7RYcNkKY1F2aMEmL5h5ZROfhQLQlsM
-	HzIpVXFLt7hrmPXG53E=
-X-Received: by 2002:a05:6102:80aa:b0:736:e4c0:cddf with SMTP id
- ada2fe7eead31-7503e05c0e3mr4177154137.6.1785141856027; Mon, 27 Jul 2026
- 01:44:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="vpq64ic0"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1785142045; h=message-id
+ : date : mime-version : subject : to : cc : references : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=82J2lATTuJaszwWfjk8Ce2XEgLw4H1wJ7frUZvIFPvk=;
+ b=vpq64ic0th5IXLHpNd+xWGNiiz6btebHRu8fDMgBxQd2sbcA9GNmo1sCoTuM/k+heqMCg
+ W3Oxj1WHj2q2wou3BvaN/rBV+V2tGA/0Y0V4EIrAZ42NdiwMOXUlqJI6VVnYhBLcsvqv09+
+ 0zpgRkHwgAfX98o5JzuUMvVIohtv43eEjuyHaX3swBRpiGHeDxustgpqWjIcZxJMuWw9lH2
+ lDmOzRiXrFxfyJpiio/a5x8D4mK6DfG2kwtQmKgyXAJ03f0u6W9oZwZnZ1nvNwz4WzlkY0W
+ GI/FwDM+/4RibMijbr5D+LCNLeFuwTPQWQuqKq3FLiPc6o/b2LG1EELP8/yA==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 09CEA5FCA3;
+	Mon, 27 Jul 2026 10:47:24 +0200 (CEST)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id C89D05FB1D;
+	Mon, 27 Jul 2026 10:47:23 +0200 (CEST)
+Message-ID: <74b2b4f6-7401-4146-adb4-54d4069d1edc@tu-ilmenau.de>
+Date: Mon, 27 Jul 2026 10:47:23 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260724104920.6493-1-zhuyiming@kuaishou.com> <F5EF2BE9-F97C-4E06-806C-E0EB694F162A@kuaishou.com>
- <103949f23bb3169381422344cd924d6897171e71.camel@dubeyko.com>
-In-Reply-To: <103949f23bb3169381422344cd924d6897171e71.camel@dubeyko.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Mon, 27 Jul 2026 10:44:04 +0200
-X-Gm-Features: AUfX_mwPft2RaWQR3lusQ0AdXwEBit482lAfq2XN61nxaMw3mFMqLwj4V9u202s
-Message-ID: <CAOi1vP9D1RbVkKLg1P+4ia1T+0QiwXp2hxOgnN6u=S7EVU5J3g@mail.gmail.com>
-Subject: Re: [PATCH] ceph: fix mds random selection readiness predicate
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: =?UTF-8?B?5pyx5LiA6bij?= <zhuyiming@kuaishou.com>, 
-	"xiubli@redhat.com" <xiubli@redhat.com>, "amarkuze@redhat.com" <amarkuze@redhat.com>, 
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"stable@vger.kernel.org" <stable@vger.kernel.org>, "jlayton@kernel.org" <jlayton@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3] libceph: Fix multiplication overflow in
+ __decode_pg_upmap_items()
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko
+ <slava@dubeyko.com>, ceph-devel@vger.kernel.org
+References: <20260519110130.2189287-1-raphael.zimmer@tu-ilmenau.de>
+ <CAOi1vP_6WjqQp-7a_g6g=U9100cW54G-1jSjWRH3ieh4u9u-bA@mail.gmail.com>
+Content-Language: en-US
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
+ 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
+In-Reply-To: <CAOi1vP_6WjqQp-7a_g6g=U9100cW54G-1jSjWRH3ieh4u9u-bA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jul 24, 2026 at 7:59=E2=80=AFPM Viacheslav Dubeyko <slava@dubeyko.c=
-om> wrote:
->
-> On Fri, 2026-07-24 at 11:40 +0000, =E6=9C=B1=E4=B8=80=E9=B8=A3 wrote:
-> > Adding the current Ceph client maintainer list
-> >
-> > > On Jul 24, 2026, at 18:49, =E6=9C=B1=E4=B8=80=E9=B8=A3 <zhuyiming@kua=
-ishou.com> wrote:
-> > >
-> > > CEPH_MDS_IS_READY() is parsed so that the ternary expression can
-> > > return true for an MDS entry with state 0 when it is not laggy.
-> > > This
-> > > allows the random selector to choose a down/DNE rank.
-> > >
-> > > Group the ternary expression under the state check so zero-state
-> > > ranks
-> > > are not treated as ready.
-> > >
-> > > Fixes: b38c9eb4757d ("ceph: allow choose random mds")
-> > > Cc: stable@vger.kernel.org
-> > > Link: https://tracker.ceph.com/issues/78648
-> > > Signed-off-by: Yiming Zhu <zhuyiming@kuaishou.com>
-> > > ---
-> > > fs/ceph/mdsmap.c | 2 +-
-> > > 1 file changed, 1 insertion(+), 1 deletion(-)
-> > >
-> > > diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
-> > > index d8e46eb7e5eb..450a4dc9662e 100644
-> > > --- a/fs/ceph/mdsmap.c
-> > > +++ b/fs/ceph/mdsmap.c
-> > > @@ -15,7 +15,7 @@
-> > > #include "super.h"
-> > >
-> > > #define CEPH_MDS_IS_READY(i, ignore_laggy) \
-> > > -   (m->m_info[i].state > 0 && ignore_laggy ? true : !m-
-> > > >m_info[i].laggy)
-> > > +   (m->m_info[i].state > 0 && (ignore_laggy ? true : !m-
-> > > >m_info[i].laggy))
-> > >
-> > > static int __mdsmap_get_random_mds(struct ceph_mdsmap *m, bool
-> > > ignore_laggy)
-> > > {
-> > >
-> > > base-commit: 48a5a7ab8d6ab7090564339e039c421f315de912
-> > > --
-> > > 2.55.0
-> > >
->
-> Good catch.
->
-> Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
+On 23.07.26 10:41 PM, Ilya Dryomov wrote:
+> On Tue, May 19, 2026 at 1:01 PM Raphael Zimmer
+> <raphael.zimmer@tu-ilmenau.de> wrote:
+>>
+>> A message of type CEPH_MSG_OSD_MAP holds an OSD map, which typically
+>> contains a pg_upmap part at its end. When decoding this part in
+>> __decode_pg_upmap_items(), a len value is decoded from the message to
+>> determine the number of items and the size of the allocation needed for
+>> them. If the len value is greater than or equal to 2^31, an overflow
+>> occurs in the multiplication that is performed to determine the needed
+>> size of the incoming buffer to decode, as well as for the length of the
+>> allocation for the ceph_pg_mapping struct. Subsequently, this results in
+>> out-of-bounds writes (and reads) when decoding the incoming message
+>> fields into the ceph_pg_mapping struct.
+>>
+>> This patch fixes the issue by splitting the computation into multiple
+>> parts and storing the results in local variables of type size_t. This
+>> prevents the overflow by performing the multiplication in the
+>> appropriate data type and ensures that the result is calculated only
+>> once.
+>>
+>> Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+>> ---
+>>  net/ceph/osdmap.c | 9 ++++++---
+>>  1 file changed, 6 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+>> index 8b5b0587a0cf..076763420b1d 100644
+>> --- a/net/ceph/osdmap.c
+>> +++ b/net/ceph/osdmap.c
+>> @@ -1615,13 +1615,16 @@ static struct ceph_pg_mapping *__decode_pg_upmap_items(void **p, void *end,
+>>  {
+>>         struct ceph_pg_mapping *pg;
+>>         u32 len, i;
+>> +       const size_t item_size = 2 * sizeof(u32);
+>> +       size_t payload_len;
+>>
+>>         ceph_decode_32_safe(p, end, len, e_inval);
+>> -       if ((size_t)len > (SIZE_MAX - sizeof(*pg)) / (2 * sizeof(u32)))
+>> +       if ((size_t)len > (SIZE_MAX - sizeof(*pg)) / item_size)
+> 
+> Hi Raphael,
+> 
+> I think this can be just len > CEPH_PG_MAX_SIZE.  I have folded the
+> corresponding fixup into someone else's patch that originally did that
+> only for __decode_pg_temp():
+> 
+> https://github.com/ceph/ceph-client/commit/9f00f9cf2be293efe899db67dc5272e3a9c62717
+> 
+> If you agree, we can retire this patch.
+> 
+> Thanks,
+> 
+>                 Ilya
 
-Applied.
+Hi Ilya,
+this solution with "len > CEPH_PG_MAX_SIZE" will equally solve the
+issue. Therefore, I'm fine with doing it this way.
 
-Thanks,
+Best regards,
+Raphael
 
-                Ilya
