@@ -1,678 +1,720 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37787383328;
-	Tue, 28 Jul 2026 04:09:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785211799; cv=none; b=SiS4xyMu3D7BshXYK4z7bv0Bkfz4KCpgeIomV19ODdD7iZXsOnnHd+W530U9KIW4/07f/7dN3Ojc7hp9bqL81D4GFgGvYThY75yQICJHyA+DaEbGLdQykFLPXYZ6ekAYBL7n7nnVwRupgetoaKtaeCKQVtuJk3iu6XBFyUdaQ5w=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785211799; c=relaxed/simple;
-	bh=ZlmQbt/pHh8pYM81qKbZY/oM2WjX9ds0v8cdE+RZSmo=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=MbBMeWVVsY8D/g97WiK7tamXiSJkKAFz2ljVL9+SpDChYb743EPi4Shhe6wJLxQ0zwmeOdVOP3XkeRxVMDd7MDsu3nDu/iDbbVHShglFEsK/xsxiU6svUDk6+Oxq9z2IUGSN7G5VJtUd0j9ouDYxLzMQ8gKDamyY4jAjPh0baWw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PA5a1lj2; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA6D93C3F4D
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2026 08:02:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.54
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1785225734; cv=pass; b=fchYuqwFFMS2i3wAhHWVKi1CWKNuy0xxsRcOgdcOChB/uY9Y6It44WI+VcYmjf2zkcpkb40oWOKBEQxAMz/uIwHJj7kI1FaqJ0dlOiAIU92R/ZScdATpnR6XwajGd7eqt2QVR2NM7QzRsdrawolUG0hQWZ6bmaT6lH9MYtQQwjE=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1785225734; c=relaxed/simple;
+	bh=H6nARRlXgP5l4K791DdPrpWXmY0SD4hroOMNoxfDKUY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=L6Q1lGLLHdrAgjlKnyPoh3rZ4x3bf7VGyYUkC/RXtNrd2XjLgvkE8uZXPEUtjX0PAXch9lTo2RbLgEbYV0hVNWLAoEADl5j46bnodA5H+/mR/zbgnRyIHk+aiBHaElLFEFG3MzTE+s6zZW+ilbg1ujLN7i03MwlwctPMXTnkGDM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=bwbWbdvt; arc=pass smtp.client-ip=209.85.218.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PA5a1lj2"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 917AFC2BCC6;
-	Tue, 28 Jul 2026 04:09:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1785211798;
-	bh=ZlmQbt/pHh8pYM81qKbZY/oM2WjX9ds0v8cdE+RZSmo=;
-	h=From:Date:Subject:To:Cc:Reply-To:From;
-	b=PA5a1lj2DguwNnRN5E943ZvHyrUijWVY9l9CaIrnEiVHthwCfXm11chm+3c5aAk1h
-	 6kzPw40lDnWOthbN+XiLjGzqfDofQ7AXRd3s6g4Rj1pQgjF5kupE6yEyblPH1Ar+xw
-	 cDp2T1WgrFov7kWQsSRz9NW1vx4Wi0bKt5OTogOHeCMxUXC62z3W/9KBg8c9V+w+/0
-	 I1ByMzHE0d8GBOypnHb3S46qEuCKDu5ynVkghTyyW3gIiNKj6n+7yW43YfDRlpywUP
-	 iqFq1WyfWvwvoZ/i5YoBEJ/NQe2iJiM/GIa/3QQD39C2rQXA3MlORXhUWNSkrBvNF8
-	 O+OJgkQ/M+AeQ==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69D03C54F4C;
-	Tue, 28 Jul 2026 04:09:58 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Tue, 28 Jul 2026 12:09:42 +0800
-Subject: [PATCH] ceph: remove the inline data support
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="bwbWbdvt"
+Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-c1f7666a90bso31680066b.3
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2026 01:02:10 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1785225729; cv=none;
+        d=google.com; s=arc-20260327;
+        b=JvkCOjzfSeY/UoZVjSDjhvO327liQXekNM6ST7hnW4r1VWHnixiavQUFGo8iKJiG9y
+         53DkAjnGtjTHc/1Jr3zyUz45bym0EcZAzQkV1ZffQs1MVIyApzQ3MqBHpQcc5o67N8xx
+         UlHF/vjrSvD0FRvhVhHUPCV1A/FJPlGpSNEHprkDKP7seNuyHbSUMG6E4QxUJJQtwzqG
+         VTeWJvBAlJP4E9vOfvTmiOtmpp2ieEtpyBryMajOBXVvWyqfd6+XgeC0XgLKxUD3XUSY
+         MS/izEpZEEbjUpHdqwNOR3MOMG7oQNZRYcsvjK6Dz3CIMppQzZlSRwdbDXHUfLhClpte
+         PXuA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=wDYKxq0zFLl2x11jEd0KUfg0+a6tKgbinPrI68F/GD4=;
+        fh=LN+9QTbbLK6ziIbO14s7mtKItPJxgry+QX6xnK9GmGU=;
+        b=Uu8IwEr/ePWLmsLqfitRQLpONST7nXpU46RFFRHoY0t9UuDdDhGm4VXgnFbIvG43eq
+         fpXAtiMo9hT/zP6eJZ4XcuV64BPZC0y5aXk69vFmMhORxhAiSfcXFKXxCfwRugkSdTAZ
+         1bNyygZcfE22AiuJhD0pV4sydBVJS/9uoN4V1UxVZk6+k33i68cme9ibD7yqT10ryXAc
+         zi63tb0GCHZ+w0SYyLHkA8PZ30tUlnIne34B9j/IzGaGP4pXwz4Mr9l25/1gHvZe9mu1
+         TtqD5vRrx7BeszB+MK2ZGSz7ZnC7pRhCZ5noDuRl+U8A3MCu4csTEO0BSp9uEzCNdexf
+         VLBA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=clyso.com; s=google; t=1785225729; x=1785830529; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=wDYKxq0zFLl2x11jEd0KUfg0+a6tKgbinPrI68F/GD4=;
+        b=bwbWbdvtSy6LCn6Foexio2PHrw/ggN7lULT9j7rnbOXQzvJ821odXNRjZaggGlJoqB
+         udWU9f+tFzxDfHADMEgAwmIQwAtnDDg6eVPxeBAsKJnM5y4HYXtaI9JZ4nmgC0bstN4t
+         ME69pfGh1CKb2aC6wewKx0wgej1EiTLaUBIuhp/Wdvx0wkmFC2O98GYEvURbjQDNuVTY
+         Vxvw3LVoupbEC4MsLVKA4f9vnpZd8ABsTHZlWJ1JjrUtZDDYuf5nNKNeuVDRyeM3EnYv
+         6bD2WZf5CKRXevAp511NuO8rDUdSYMjlG8iAFayvnlaBoi+nmIUdBf7oud4E45xm1CRu
+         7/cg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785225729; x=1785830529;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=wDYKxq0zFLl2x11jEd0KUfg0+a6tKgbinPrI68F/GD4=;
+        b=fVtFtxA2TK3SPzx8/OoYnAqVyfSpt15a6UoV6UVoUfKMAPhYFgjNdV2v9+9NC71rsq
+         Qw+uCJmWkyFSIMcA+H+P97i/PBTsXIE0vROENCYt5pFJSx+LT2HfedFKcLq5vazlx+kK
+         Cvk/soarwkIuIU4fOPYFZHa0pLMXD1fcE+gjTJ9ZxlxFSQwCVQvCzau2oQfihpYlXNTL
+         /DMP/ZLJs48ofj3okAskzlAddVyULO0RXh+AFM0YTqzwuH7GDuQoBPWWUC74PJEA2/18
+         cx19nQL0f4Ese8RfzS/1U/+kILDm1FgYPY39JVzXWU2bsEY8PBw0W+VoRgSRM9txwlII
+         I77g==
+X-Forwarded-Encrypted: i=1; AHgh+Ro30h8gOY913em56fGVjaPM0H4dpYycXzptTVr2Xx4oDhRyo13wfnOW0GkAFu0Uvuj9TiA6kGxs6jw6@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx8kFblLCyNab8js4AHhPYh50h8Gqt7wwB3DElBV+E6PKbKLTkP
+	A5l1phBZLlY3bzt31bitf8ExRfXGdlbtykuYCTSmQGZdEw6fb8xEEcr9GjgXERr7Xg0fAYye7w/
+	Nmv5MC+5BF6XFJRwpmRzyVgeB4HBStMM9QiKC7mHSIg==
+X-Gm-Gg: AR+sD13cEP2DYXbGLoscLHadbKzqCH2MBWyDmGYkN1yloHEqxZYp7isX2458LsVDlkP
+	5IY/oCyegDc3ngDNbwDkLtJi6JBGXfJmtudnfrh5fP3pKkjrzexEPSTyWUyEY/jKNiygWznnN+e
+	j2mjNDwBBIhfnCj7hrzWtlTh/OEHMMsgB5RgKP9Gqf5/VNRZFetH53sWI77a/yNP7wvx99hVqhJ
+	6DqVHqI2uJ7EvYoa6vaw16NOgx3yF/dEWnYy14ZmlzMbcriATt+JXa+3XbUzUeQ
+X-Received: by 2002:a17:907:3d48:b0:c16:7c76:b1ff with SMTP id
+ a640c23a62f3a-c1f724da4b1mr51512066b.57.1785225728285; Tue, 28 Jul 2026
+ 01:02:08 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260728-b4-ceph-remove-inline-data-v1-1-8ffa7e08459a@clyso.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMQQqDMBBG4avIrDtgg8biVUoXMfNbp9QoiUpBv
- HvTuvx48HZKiIpEbbFTxKZJp5BxvRTkBxeeYJVsMqWxZWNu3FXsMQ8cMU5bruGtASxucSx17W1
- lrUgDyoM5otfPf35/nE5r94Jffkc6ji+eFYmDfgAAAA==
-X-Change-ID: 20260728-b4-ceph-remove-inline-data-d55c6466dd7e
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1785211795; l=20642;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=ZPovioZZPMkZ+UfTUywDlH5WMvVyJ/X82k/+XFYXDUE=;
- b=2vv4zKLLmNaKOX6Ip82Ngo2BVz3cMzuE25TswR2Zw94E6dtamUCqlQWT0YiO3QTCLCyKH8Lid
- xZUoyF6q84xAeOToFCtCN0OAERPWcHNW4ErZmSR8OvryDDz7tC5JW5X
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
-
+References: <20260728-b4-ceph-remove-inline-data-v1-1-8ffa7e08459a@clyso.com>
+In-Reply-To: <20260728-b4-ceph-remove-inline-data-v1-1-8ffa7e08459a@clyso.com>
 From: Xiubo Li <xiubo.li@clyso.com>
+Date: Tue, 28 Jul 2026 16:01:55 +0800
+X-Gm-Features: AUfX_mwn7s8tCiD5hD426Hjrcx7tsDM_sAtzB8DXHqKYI5k6iuhvndTJ2__4z_A
+Message-ID: <CAOJNxRLs4kukpxPDD0BPfhr=1Vh2q0DQMBE3wpqVCbo9HyzCJg@mail.gmail.com>
+Subject: Re: [PATCH] ceph: remove the inline data support
+To: xiubo.li@clyso.com
+Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Inline data support has been deprecated in the CephFS MDS and is
-being formally removed.  Existing inline data can be migrated to
-data pool objects via MDS scrub (see PR #44359).
+On Tue, 28 Jul 2026 at 12:10, Xiubo Li via B4 Relay
+<devnull+xiubo.li.clyso.com@kernel.org> wrote:
+>
+> From: Xiubo Li <xiubo.li@clyso.com>
+>
+> Inline data support has been deprecated in the CephFS MDS and is
+> being formally removed.  Existing inline data can be migrated to
+> data pool objects via MDS scrub (see PR #44359).
+>
+> Add CONFIG_CEPH_FS_INLINE_DATA (default n) to gate all inline data
+> code in the kclient.  When disabled, CEPH_FEATURE_MDS_INLINE_DATA
+> is defined as 0 so that the kclient no longer advertises the
+> feature to the MDS.  The MDS will then refuse to open files that
+> still have inline data, returning -EPERM, preventing silent data
+> corruption that would occur if the kclient tried to read inline
+> data from OSD objects that do not contain it.
+>
+> This config option will be kept for a transitional period to
+> allow existing CephFS deployments to migrate inline data via
+> MDS scrub.  Once the migration period ends, the option and all
+> inline data code will be permanently removed.
+>
+> Users upgrading from an older Ceph release should ensure all inline
+> data has been migrated before deploying a kclient with this option
+> disabled:
+>   1. Enable and run MDS scrub to uninline existing data
+>   2. Disable inline_data on the filesystem:
+>      ceph fs set <fs> inline_data false --yes-i-really-really-mean-it
+>
+> Link: https://tracker-origin.ceph.com/issues/67769
+> Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+> ---
+>  fs/ceph/Kconfig                    | 12 ++++++++++++
+>  fs/ceph/addr.c                     | 16 +++++++++++++++
+>  fs/ceph/caps.c                     | 40 +++++++++++++++++++++++++++++++++++++-
+>  fs/ceph/file.c                     | 20 +++++++++++++++++++
+>  fs/ceph/inode.c                    | 10 ++++++++++
+>  fs/ceph/mds_client.c               | 30 ++++++++++++++++++++++++++++
+>  fs/ceph/mds_client.h               |  2 ++
+>  fs/ceph/snap.c                     |  2 ++
+>  fs/ceph/super.h                    | 13 +++++++++++++
+>  include/linux/ceph/ceph_features.h |  4 ++++
+>  10 files changed, 148 insertions(+), 1 deletion(-)
+>
+> diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
+> index 3d64a316ca31..be1c8ada5665 100644
+> --- a/fs/ceph/Kconfig
+> +++ b/fs/ceph/Kconfig
+> @@ -17,6 +17,18 @@ config CEPH_FS
+>           If unsure, say N.
+>
+>  if CEPH_FS
+> +config CEPH_FS_INLINE_DATA
+> +       bool "Enable CephFS inline data support (deprecated)"
+> +       depends on CEPH_FS
+> +       default n
+> +       help
+> +         Inline data support has been deprecated in the CephFS MDS
+> +         and is being formally removed.  Existing inline data can be
+> +         migrated to data pool objects via MDS scrub.  Choose N
+> +         unless you have a legacy filesystem that requires it,
+> +         and ensure all inline data has been migrated (see
+> +         ceph fs set <fs> inline_data false) before enabling.
+> +
+>  config CEPH_FSCACHE
+>         bool "Enable Ceph client caching support"
+>         depends on CEPH_FS=m && FSCACHE || CEPH_FS=y && FSCACHE=y
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index e2da3ab9f808..5211320a50ac 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -274,6 +274,7 @@ static void finish_netfs_read(struct ceph_osd_request *req)
+>         ceph_dec_osd_stopping_blocker(fsc->mdsc);
+>  }
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>  static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
+>  {
+>         struct netfs_io_request *rreq = subreq->rreq;
+> @@ -335,6 +336,7 @@ static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
+>         netfs_read_subreq_terminated(subreq);
+>         return true;
+>  }
+> +#endif /* CONFIG_CEPH_FS_INLINE_DATA */
+>
+>  static int ceph_netfs_prepare_read(struct netfs_io_subrequest *subreq)
+>  {
+> @@ -372,8 +374,10 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
+>                 goto out;
+>         }
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if (ceph_has_inline_data(ci) && ceph_netfs_issue_op_inline(subreq))
+>                 return;
+> +#endif
+>
+>         // TODO: This rounding here is slightly dodgy.  It *should* work, for
+>         // now, as the cache only deals in blocks that are a multiple of
+> @@ -2006,7 +2010,11 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
+>               off, ceph_cap_string(got));
+>
+>         if ((got & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) ||
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>             !ceph_has_inline_data(ci)) {
+> +#else
+> +           true) {
+> +#endif
+>                 CEPH_DEFINE_RW_CONTEXT(rw_ctx, got);
+>                 ceph_add_rw_context(fi, &rw_ctx);
+>                 ret = filemap_fault(vmf);
+> @@ -2037,7 +2045,11 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
+>                         goto out_inline;
+>                 }
+>                 err = __ceph_do_getattr(inode, page,
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>                                          CEPH_STAT_CAP_INLINE_DATA, true);
+> +#else
+> +                                        0, true);
+> +#endif
+>                 if (err < 0 || off >= i_size_read(inode)) {
+>                         unlock_page(page);
+>                         put_page(page);
+> @@ -2168,6 +2180,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+>         return ret;
+>  }
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>  void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+>                            char *data, size_t len)
+>  {
+> @@ -2214,7 +2227,9 @@ void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+>                 put_page(page);
+>         }
+>  }
+> +#endif /* CONFIG_CEPH_FS_INLINE_DATA */
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>  int ceph_uninline_data(struct file *file)
+>  {
+>         struct inode *inode = file_inode(file);
+> @@ -2370,6 +2385,7 @@ int ceph_uninline_data(struct file *file)
+>               ceph_vinop(inode), inline_version, err);
+>         return err;
+>  }
+> +#endif /* CONFIG_CEPH_FS_INLINE_DATA */
+>
+>  static const struct vm_operations_struct ceph_vmops = {
+>         .fault          = ceph_filemap_fault,
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index f8d898ad091e..2fd2116a3308 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -1266,7 +1266,9 @@ struct cap_msg_args {
+>         kuid_t                  uid;
+>         kgid_t                  gid;
+>         umode_t                 mode;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         bool                    inline_data;
+> +#endif
+>         bool                    wake;
+>         bool                    encrypted;
+>         u32                     fscrypt_auth_len;
+> @@ -1336,8 +1338,16 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
+>         p = fc + 1;
+>         /* flock buffer size (version 2) */
+>         ceph_encode_32(&p, 0);
+> -       /* inline version (version 4) */
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         ceph_encode_64(&p, arg->inline_data ? 0 : CEPH_INLINE_NONE);
+> +#else
+> +       /*
+> +        * Inline data support has been removed.  The field is still
+> +        * encoded for protocol compatibility; always advertise
+> +        * CEPH_INLINE_NONE to indicate no inline data is present.
+> +        */
+> +       ceph_encode_64(&p, CEPH_INLINE_NONE);
+> +#endif
+>         /* inline data size */
+>         ceph_encode_32(&p, 0);
+>         /*
+> @@ -1499,7 +1509,9 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
+>         arg->gid = inode->i_gid;
+>         arg->mode = inode->i_mode;
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         arg->inline_data = ci->i_inline_version != CEPH_INLINE_NONE;
+> +#endif
+>         if (!(flags & CEPH_CLIENT_CAPS_PENDING_CAPSNAP) &&
+>             !list_empty(&ci->i_cap_snaps)) {
+>                 struct ceph_cap_snap *capsnap;
+> @@ -1620,7 +1632,9 @@ static inline int __send_flush_snap(struct inode *inode,
+>         arg.gid = capsnap->gid;
+>         arg.mode = capsnap->mode;
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         arg.inline_data = capsnap->inline_data;
+> +#endif
+>         arg.flags = 0;
+>         arg.wake = false;
+>         arg.encrypted = IS_ENCRYPTED(inode);
+> @@ -3192,6 +3206,7 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
+>                         return ret;
+>                 }
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>                 if (S_ISREG(ci->netfs.inode.i_mode) &&
+>                     ceph_has_inline_data(ci) &&
+>                     (_got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) &&
+> @@ -3223,6 +3238,7 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
+>                                 return ret;
+>                         continue;
+>                 }
+> +#endif
+>                 break;
+>         }
+>         *got = _got;
+> @@ -3518,10 +3534,12 @@ static void invalidate_aliases(struct inode *inode)
+>
+>  struct cap_extra_info {
+>         struct ceph_string *pool_ns;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         /* inline data */
+>         u64 inline_version;
+>         void *inline_data;
+>         u32 inline_len;
+> +#endif
+>         /* dirstat */
+>         bool dirstat_valid;
+>         u64 nfiles;
+> @@ -3564,7 +3582,9 @@ static void handle_cap_grant(struct inode *inode,
+>         bool queue_trunc = false;
+>         bool queue_invalidate = false;
+>         bool deleted_inode = false;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         bool fill_inline = false;
+> +#endif
+>         bool revoke_wait = false;
+>         int flags = 0;
+>
+> @@ -3830,6 +3850,7 @@ static void handle_cap_grant(struct inode *inode,
+>                         check_caps = 2; /* check all caps */
+>         }
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if (extra_info->inline_version > 0 &&
+>             extra_info->inline_version >= ci->i_inline_version) {
+>                 ci->i_inline_version = extra_info->inline_version;
+> @@ -3837,6 +3858,7 @@ static void handle_cap_grant(struct inode *inode,
+>                     (newcaps & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)))
+>                         fill_inline = true;
+>         }
+> +#endif
+>
+>         if (le32_to_cpu(grant->op) == CEPH_CAP_OP_IMPORT) {
+>                 if (ci->i_auth_cap == cap) {
+> @@ -3856,9 +3878,11 @@ static void handle_cap_grant(struct inode *inode,
+>         }
+>         spin_unlock(&ci->i_ceph_lock);
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if (fill_inline)
+>                 ceph_fill_inline_data(inode, NULL, extra_info->inline_data,
+>                                       extra_info->inline_len);
+> +#endif
+>
+>         if (queue_trunc)
+>                 ceph_queue_vmtruncate(inode);
+> @@ -4476,12 +4500,26 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+>         }
+>
+>         if (msg_version >= 4) {
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>                 ceph_decode_64_safe(&p, end, extra_info.inline_version, bad);
+>                 ceph_decode_32_safe(&p, end, extra_info.inline_len, bad);
+>                 if (p + extra_info.inline_len > end)
+>                         goto bad;
+>                 extra_info.inline_data = p;
+>                 p += extra_info.inline_len;
+> +#else
+> +               /*
+> +                * Inline data support has been removed, but cap grant
+> +                * messages (msg_version >= 4) always carry inline_version
+> +                * + inline_data.  We must consume the fields to keep the
+> +                * decode pointer in sync.
+> +                */
+> +               u32 __len;
+> +
+> +               ceph_decode_skip_64(&p, end, bad);
+> +               ceph_decode_32_safe(&p, end, __len, bad);
+> +               ceph_decode_skip_n(&p, end, __len, bad);
+> +#endif
+>         }
+>
+>         if (msg_version >= 5) {
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 3823671ab95a..901ed97b1963 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -224,7 +224,9 @@ static int ceph_init_file_info(struct inode *inode, struct file *file,
+>                 ceph_inode_to_fs_client(&ci->netfs.inode)->mount_options;
+>         struct ceph_client *cl = ceph_inode_to_client(inode);
+>         struct ceph_file_info *fi;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         int ret;
+> +#endif
+>
+>         doutc(cl, "%p %llx.%llx %p 0%o (%s)\n", inode, ceph_vinop(inode),
+>               file, inode->i_mode, isdir ? "dir" : "regular");
+> @@ -258,14 +260,17 @@ static int ceph_init_file_info(struct inode *inode, struct file *file,
+>         INIT_LIST_HEAD(&fi->rw_contexts);
+>         fi->filp_gen = READ_ONCE(ceph_inode_to_fs_client(inode)->filp_gen);
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if ((file->f_mode & FMODE_WRITE) && ceph_has_inline_data(ci)) {
+>                 ret = ceph_uninline_data(file);
+>                 if (ret < 0)
+>                         goto error;
+>         }
+> +#endif
+>
+>         return 0;
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>  error:
+>         ceph_fscache_unuse_cookie(inode, file->f_mode & FMODE_WRITE);
+>         ceph_put_fmode(ci, fi->fmode, 1);
+> @@ -273,6 +278,7 @@ static int ceph_init_file_info(struct inode *inode, struct file *file,
+>         /* wake up anyone waiting for caps on this inode */
+>         wake_up_all(&ci->i_cap_wq);
+>         return ret;
+> +#endif
+>  }
+>
+>  /*
+> @@ -702,7 +708,9 @@ static int ceph_finish_async_create(struct inode *dir, struct inode *inode,
+>
+>         ktime_get_real_ts64(&now);
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         iinfo.inline_version = CEPH_INLINE_NONE;
+> +#endif
+>         iinfo.change_attr = 1;
+>         ceph_encode_timespec64(&iinfo.btime, &now);
+>
+> @@ -2224,7 +2232,11 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+>                       inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len,
+>                       ceph_cap_string(got));
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>                 if (!ceph_has_inline_data(ci)) {
+> +#else
+> +               if (true) {
+> +#endif
+>                         if (!retry_op &&
+>                             (iocb->ki_flags & IOCB_DIRECT) &&
+>                             !IS_ENCRYPTED(inode)) {
+> @@ -2267,7 +2279,11 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+>                         if (!page)
+>                                 return -ENOMEM;
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>                         mask = CEPH_STAT_CAP_INLINE_DATA;
+> +#else
+> +                       mask = 0;
+> +#endif
+>                 }
+>
+>                 statret = __ceph_do_getattr(inode, page, mask, !!page);
+> @@ -2349,8 +2365,12 @@ static ssize_t ceph_splice_read(struct file *in, loff_t *ppos,
+>         if (ceph_inode_is_shutdown(inode))
+>                 return -ESTALE;
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if (ceph_has_inline_data(ci) ||
+>             (fi->flags & CEPH_F_SYNC))
+> +#else
+> +       if (fi->flags & CEPH_F_SYNC)
+> +#endif
+>                 return copy_splice_read(in, ppos, pipe, len, flags);
+>
+>         ret = ceph_start_io_read(inode);
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 61d7c0b8161f..20abf7dc9c64 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -627,7 +627,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+>         spin_lock_init(&ci->i_ceph_lock);
+>
+>         ci->i_version = 0;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         ci->i_inline_version = 0;
+> +#endif
+>         ci->i_time_warp_seq = 0;
+>         ci->i_ceph_flags = 0;
+>         atomic64_set(&ci->i_ordered_count, 1);
+> @@ -1030,7 +1032,9 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+>         bool wake = false;
+>         bool queue_trunc = false;
+>         bool new_version = false;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         bool fill_inline = false;
+> +#endif
+>         umode_t mode = le32_to_cpu(info->mode);
+>         dev_t rdev = le32_to_cpu(info->rdev);
+>
+> @@ -1362,6 +1366,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+>                 }
+>         }
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if (iinfo->inline_version > 0 &&
+>             iinfo->inline_version >= ci->i_inline_version) {
+>                 int cache_caps = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
+> @@ -1370,6 +1375,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+>                     (locked_page || (info_caps & cache_caps)))
+>                         fill_inline = true;
+>         }
+> +#endif
+>
+>         if (cap_fmode >= 0) {
+>                 if (!info_caps)
+> @@ -1382,9 +1388,11 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+>
+>         ceph_fscache_register_inode_cookie(inode);
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if (fill_inline)
+>                 ceph_fill_inline_data(inode, locked_page,
+>                                       iinfo->inline_data, iinfo->inline_len);
+> +#endif
+>
+>         if (wake)
+>                 wake_up_all(&ci->i_cap_wq);
+> @@ -3022,6 +3030,7 @@ int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
+>         req->r_args.getattr.mask = cpu_to_le32(mask);
+>         req->r_locked_page = locked_page;
+>         err = ceph_mdsc_do_request(mdsc, NULL, req);
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         if (locked_page && err == 0) {
+>                 u64 inline_version = req->r_reply_info.targeti.inline_version;
+>                 if (inline_version == 0) {
+> @@ -3034,6 +3043,7 @@ int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
+>                         err = req->r_reply_info.targeti.inline_len;
+>                 }
+>         }
+> +#endif
+>         ceph_mdsc_put_request(req);
+>         doutc(cl, "result=%d\n", err);
+>         return err;
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 18be36c2e9e8..6a439da76616 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -156,12 +156,26 @@ static int parse_reply_info_in(void **p, void *end,
+>         *p += info->xattr_len;
+>
+>         if (features == (u64)-1) {
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>                 /* inline data */
+>                 ceph_decode_64_safe(p, end, info->inline_version, bad);
+>                 ceph_decode_32_safe(p, end, info->inline_len, bad);
+>                 ceph_decode_need(p, end, info->inline_len, bad);
+>                 info->inline_data = *p;
+>                 *p += info->inline_len;
+> +#else
+> +               /*
+> +                * Inline data support has been removed, but the MDS always
+> +                * encodes inline_version + inline_data in versioned replies.
+> +                * We must consume these fields from the message to keep the
+> +                * decode pointer in sync, even though we discard them.
+> +                */
+> +               u32 __len;
+> +
+> +               ceph_decode_skip_64(p, end, bad);
+> +               ceph_decode_32_safe(p, end, __len, bad);
+> +               ceph_decode_skip_n(p, end, __len, bad);
+> +#endif
+>                 /* quota */
+>                 err = parse_reply_info_quota(p, end, info);
+>                 if (err < 0)
+> @@ -276,6 +290,7 @@ static int parse_reply_info_in(void **p, void *end,
+>                 *p = end;
+>         } else {
+>                 /* legacy (unversioned) struct */
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>                 if (features & CEPH_FEATURE_MDS_INLINE_DATA) {
+>                         ceph_decode_64_safe(p, end, info->inline_version, bad);
+>                         ceph_decode_32_safe(p, end, info->inline_len, bad);
+> @@ -284,6 +299,21 @@ static int parse_reply_info_in(void **p, void *end,
+>                         *p += info->inline_len;
+>                 } else
+>                         info->inline_version = CEPH_INLINE_NONE;
+> +#else
+> +               /*
+> +                * Inline data support has been removed.  When the MDS
+> +                * advertises CEPH_FEATURE_MDS_INLINE_DATA it includes
+> +                * inline_version + inline_data in legacy replies.  We
+> +                * must consume them to keep the decode pointer in sync.
+> +                */
+> +               if (features & CEPH_FEATURE_MDS_INLINE_DATA) {
+> +                       u32 __len;
+> +
+> +                       ceph_decode_skip_64(p, end, bad);
+> +                       ceph_decode_32_safe(p, end, __len, bad);
+> +                       ceph_decode_skip_n(p, end, __len, bad);
+> +               }
+> +#endif
+>
+>                 if (features & CEPH_FEATURE_MDS_QUOTA) {
+>                         err = parse_reply_info_quota(p, end, info);
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index 731d6ad04956..9bcf1a9d5ba8 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -149,9 +149,11 @@ struct ceph_mds_reply_info_in {
+>         char *symlink;
+>         u32 xattr_len;
+>         char *xattr_data;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         u64 inline_version;
+>         u32 inline_len;
+>         char *inline_data;
+> +#endif
+>         u32 pool_ns_len;
+>         char *pool_ns_data;
+>         u64 max_bytes;
+> diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+> index e5d8d59ffc17..3bc3a2ce72a2 100644
+> --- a/fs/ceph/snap.c
+> +++ b/fs/ceph/snap.c
+> @@ -613,7 +613,9 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
+>                 capsnap->xattr_version = 0;
+>         }
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         capsnap->inline_data = ci->i_inline_version != CEPH_INLINE_NONE;
+> +#endif
+>
+>         /* dirty page count moved from _head to this cap_snap;
+>            all subsequent writes page dirties occur _after_ this
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 3737ea7ed88b..eced08f52b79 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -274,7 +274,9 @@ struct ceph_cap_snap {
+>         u32 truncate_seq;
+>         int writing;   /* a sync write is still in progress */
+>         int dirty_pages;     /* dirty pages awaiting writeback */
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         bool inline_data;
+> +#endif
+>         bool need_flush;
+>  };
+>
+> @@ -381,7 +383,9 @@ struct ceph_inode_info {
+>         spinlock_t i_ceph_lock;
+>
+>         u64 i_version;
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>         u64 i_inline_version;
+> +#endif
+>         u32 i_time_warp_seq;
+>
+>         unsigned long i_ceph_flags;
+> @@ -1335,11 +1339,14 @@ extern void __ceph_touch_fmode(struct ceph_inode_info *ci,
+>  extern const struct address_space_operations ceph_aops;
+>  extern const struct netfs_request_ops ceph_netfs_ops;
+>  int ceph_mmap_prepare(struct vm_area_desc *desc);
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>  extern int ceph_uninline_data(struct file *file);
+> +#endif
+>  extern int ceph_pool_perm_check(struct inode *inode, int need);
+>  extern void ceph_pool_perm_destroy(struct ceph_mds_client* mdsc);
+>  int ceph_purge_inode_cap(struct inode *inode, struct ceph_cap *cap, bool *invalidate);
+>
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>  static inline bool ceph_has_inline_data(struct ceph_inode_info *ci)
+>  {
+>         if (ci->i_inline_version == CEPH_INLINE_NONE ||
+> @@ -1347,6 +1354,12 @@ static inline bool ceph_has_inline_data(struct ceph_inode_info *ci)
+>                 return false;
+>         return true;
+>  }
+> +#else
+> +static inline bool ceph_has_inline_data(struct ceph_inode_info *ci)
+> +{
+> +       return false;
+> +}
+> +#endif
+>
+>  /* file.c */
+>  extern const struct file_operations ceph_file_fops;
+> diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+> index 3a47acd9cc14..d1cb571cc131 100644
+> --- a/include/linux/ceph/ceph_features.h
+> +++ b/include/linux/ceph/ceph_features.h
+> @@ -131,7 +131,11 @@ DEFINE_CEPH_FEATURE(37, 1, EXPORT_PEER)
+>  DEFINE_CEPH_FEATURE(38, 1, OSD_ERASURE_CODES)
+>  DEFINE_CEPH_FEATURE(38, 1, OSD_OSD_TMAP2OMAP) // overlap
+>  DEFINE_CEPH_FEATURE(39, 1, OSDMAP_ENC)
+> +#ifdef CONFIG_CEPH_FS_INLINE_DATA
+>  DEFINE_CEPH_FEATURE(40, 1, MDS_INLINE_DATA)
+> +#else
+> +#define CEPH_FEATURE_MDS_INLINE_DATA   0
+> +#endif
 
-Add CONFIG_CEPH_FS_INLINE_DATA (default n) to gate all inline data
-code in the kclient.  When disabled, CEPH_FEATURE_MDS_INLINE_DATA
-is defined as 0 so that the kclient no longer advertises the
-feature to the MDS.  The MDS will then refuse to open files that
-still have inline data, returning -EPERM, preventing silent data
-corruption that would occur if the kclient tried to read inline
-data from OSD objects that do not contain it.
+Comment myself:
 
-This config option will be kept for a transitional period to
-allow existing CephFS deployments to migrate inline data via
-MDS scrub.  Once the migration period ends, the option and all
-inline data code will be permanently removed.
-
-Users upgrading from an older Ceph release should ensure all inline
-data has been migrated before deploying a kclient with this option
-disabled:
-  1. Enable and run MDS scrub to uninline existing data
-  2. Disable inline_data on the filesystem:
-     ceph fs set <fs> inline_data false --yes-i-really-really-mean-it
-
-Link: https://tracker-origin.ceph.com/issues/67769
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
- fs/ceph/Kconfig                    | 12 ++++++++++++
- fs/ceph/addr.c                     | 16 +++++++++++++++
- fs/ceph/caps.c                     | 40 +++++++++++++++++++++++++++++++++++++-
- fs/ceph/file.c                     | 20 +++++++++++++++++++
- fs/ceph/inode.c                    | 10 ++++++++++
- fs/ceph/mds_client.c               | 30 ++++++++++++++++++++++++++++
- fs/ceph/mds_client.h               |  2 ++
- fs/ceph/snap.c                     |  2 ++
- fs/ceph/super.h                    | 13 +++++++++++++
- include/linux/ceph/ceph_features.h |  4 ++++
- 10 files changed, 148 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
-index 3d64a316ca31..be1c8ada5665 100644
---- a/fs/ceph/Kconfig
-+++ b/fs/ceph/Kconfig
-@@ -17,6 +17,18 @@ config CEPH_FS
- 	  If unsure, say N.
- 
- if CEPH_FS
-+config CEPH_FS_INLINE_DATA
-+	bool "Enable CephFS inline data support (deprecated)"
-+	depends on CEPH_FS
-+	default n
-+	help
-+	  Inline data support has been deprecated in the CephFS MDS
-+	  and is being formally removed.  Existing inline data can be
-+	  migrated to data pool objects via MDS scrub.  Choose N
-+	  unless you have a legacy filesystem that requires it,
-+	  and ensure all inline data has been migrated (see
-+	  ceph fs set <fs> inline_data false) before enabling.
-+
- config CEPH_FSCACHE
- 	bool "Enable Ceph client caching support"
- 	depends on CEPH_FS=m && FSCACHE || CEPH_FS=y && FSCACHE=y
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index e2da3ab9f808..5211320a50ac 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -274,6 +274,7 @@ static void finish_netfs_read(struct ceph_osd_request *req)
- 	ceph_dec_osd_stopping_blocker(fsc->mdsc);
- }
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
- {
- 	struct netfs_io_request *rreq = subreq->rreq;
-@@ -335,6 +336,7 @@ static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
- 	netfs_read_subreq_terminated(subreq);
- 	return true;
- }
-+#endif /* CONFIG_CEPH_FS_INLINE_DATA */
- 
- static int ceph_netfs_prepare_read(struct netfs_io_subrequest *subreq)
- {
-@@ -372,8 +374,10 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
- 		goto out;
- 	}
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if (ceph_has_inline_data(ci) && ceph_netfs_issue_op_inline(subreq))
- 		return;
-+#endif
- 
- 	// TODO: This rounding here is slightly dodgy.  It *should* work, for
- 	// now, as the cache only deals in blocks that are a multiple of
-@@ -2006,7 +2010,11 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
- 	      off, ceph_cap_string(got));
- 
- 	if ((got & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) ||
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	    !ceph_has_inline_data(ci)) {
-+#else
-+	    true) {
-+#endif
- 		CEPH_DEFINE_RW_CONTEXT(rw_ctx, got);
- 		ceph_add_rw_context(fi, &rw_ctx);
- 		ret = filemap_fault(vmf);
-@@ -2037,7 +2045,11 @@ static vm_fault_t ceph_filemap_fault(struct vm_fault *vmf)
- 			goto out_inline;
- 		}
- 		err = __ceph_do_getattr(inode, page,
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 					 CEPH_STAT_CAP_INLINE_DATA, true);
-+#else
-+					 0, true);
-+#endif
- 		if (err < 0 || off >= i_size_read(inode)) {
- 			unlock_page(page);
- 			put_page(page);
-@@ -2168,6 +2180,7 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
- 	return ret;
- }
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
- 			   char	*data, size_t len)
- {
-@@ -2214,7 +2227,9 @@ void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
- 		put_page(page);
- 	}
- }
-+#endif /* CONFIG_CEPH_FS_INLINE_DATA */
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- int ceph_uninline_data(struct file *file)
- {
- 	struct inode *inode = file_inode(file);
-@@ -2370,6 +2385,7 @@ int ceph_uninline_data(struct file *file)
- 	      ceph_vinop(inode), inline_version, err);
- 	return err;
- }
-+#endif /* CONFIG_CEPH_FS_INLINE_DATA */
- 
- static const struct vm_operations_struct ceph_vmops = {
- 	.fault		= ceph_filemap_fault,
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index f8d898ad091e..2fd2116a3308 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1266,7 +1266,9 @@ struct cap_msg_args {
- 	kuid_t			uid;
- 	kgid_t			gid;
- 	umode_t			mode;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	bool			inline_data;
-+#endif
- 	bool			wake;
- 	bool			encrypted;
- 	u32			fscrypt_auth_len;
-@@ -1336,8 +1338,16 @@ static void encode_cap_msg(struct ceph_msg *msg, struct cap_msg_args *arg)
- 	p = fc + 1;
- 	/* flock buffer size (version 2) */
- 	ceph_encode_32(&p, 0);
--	/* inline version (version 4) */
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	ceph_encode_64(&p, arg->inline_data ? 0 : CEPH_INLINE_NONE);
-+#else
-+	/*
-+	 * Inline data support has been removed.  The field is still
-+	 * encoded for protocol compatibility; always advertise
-+	 * CEPH_INLINE_NONE to indicate no inline data is present.
-+	 */
-+	ceph_encode_64(&p, CEPH_INLINE_NONE);
-+#endif
- 	/* inline data size */
- 	ceph_encode_32(&p, 0);
- 	/*
-@@ -1499,7 +1509,9 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 	arg->gid = inode->i_gid;
- 	arg->mode = inode->i_mode;
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	arg->inline_data = ci->i_inline_version != CEPH_INLINE_NONE;
-+#endif
- 	if (!(flags & CEPH_CLIENT_CAPS_PENDING_CAPSNAP) &&
- 	    !list_empty(&ci->i_cap_snaps)) {
- 		struct ceph_cap_snap *capsnap;
-@@ -1620,7 +1632,9 @@ static inline int __send_flush_snap(struct inode *inode,
- 	arg.gid = capsnap->gid;
- 	arg.mode = capsnap->mode;
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	arg.inline_data = capsnap->inline_data;
-+#endif
- 	arg.flags = 0;
- 	arg.wake = false;
- 	arg.encrypted = IS_ENCRYPTED(inode);
-@@ -3192,6 +3206,7 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
- 			return ret;
- 		}
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 		if (S_ISREG(ci->netfs.inode.i_mode) &&
- 		    ceph_has_inline_data(ci) &&
- 		    (_got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) &&
-@@ -3223,6 +3238,7 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
- 				return ret;
- 			continue;
- 		}
-+#endif
- 		break;
- 	}
- 	*got = _got;
-@@ -3518,10 +3534,12 @@ static void invalidate_aliases(struct inode *inode)
- 
- struct cap_extra_info {
- 	struct ceph_string *pool_ns;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	/* inline data */
- 	u64 inline_version;
- 	void *inline_data;
- 	u32 inline_len;
-+#endif
- 	/* dirstat */
- 	bool dirstat_valid;
- 	u64 nfiles;
-@@ -3564,7 +3582,9 @@ static void handle_cap_grant(struct inode *inode,
- 	bool queue_trunc = false;
- 	bool queue_invalidate = false;
- 	bool deleted_inode = false;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	bool fill_inline = false;
-+#endif
- 	bool revoke_wait = false;
- 	int flags = 0;
- 
-@@ -3830,6 +3850,7 @@ static void handle_cap_grant(struct inode *inode,
- 			check_caps = 2; /* check all caps */
- 	}
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if (extra_info->inline_version > 0 &&
- 	    extra_info->inline_version >= ci->i_inline_version) {
- 		ci->i_inline_version = extra_info->inline_version;
-@@ -3837,6 +3858,7 @@ static void handle_cap_grant(struct inode *inode,
- 		    (newcaps & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)))
- 			fill_inline = true;
- 	}
-+#endif
- 
- 	if (le32_to_cpu(grant->op) == CEPH_CAP_OP_IMPORT) {
- 		if (ci->i_auth_cap == cap) {
-@@ -3856,9 +3878,11 @@ static void handle_cap_grant(struct inode *inode,
- 	}
- 	spin_unlock(&ci->i_ceph_lock);
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if (fill_inline)
- 		ceph_fill_inline_data(inode, NULL, extra_info->inline_data,
- 				      extra_info->inline_len);
-+#endif
- 
- 	if (queue_trunc)
- 		ceph_queue_vmtruncate(inode);
-@@ -4476,12 +4500,26 @@ void ceph_handle_caps(struct ceph_mds_session *session,
- 	}
- 
- 	if (msg_version >= 4) {
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 		ceph_decode_64_safe(&p, end, extra_info.inline_version, bad);
- 		ceph_decode_32_safe(&p, end, extra_info.inline_len, bad);
- 		if (p + extra_info.inline_len > end)
- 			goto bad;
- 		extra_info.inline_data = p;
- 		p += extra_info.inline_len;
-+#else
-+		/*
-+		 * Inline data support has been removed, but cap grant
-+		 * messages (msg_version >= 4) always carry inline_version
-+		 * + inline_data.  We must consume the fields to keep the
-+		 * decode pointer in sync.
-+		 */
-+		u32 __len;
-+
-+		ceph_decode_skip_64(&p, end, bad);
-+		ceph_decode_32_safe(&p, end, __len, bad);
-+		ceph_decode_skip_n(&p, end, __len, bad);
-+#endif
- 	}
- 
- 	if (msg_version >= 5) {
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 3823671ab95a..901ed97b1963 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -224,7 +224,9 @@ static int ceph_init_file_info(struct inode *inode, struct file *file,
- 		ceph_inode_to_fs_client(&ci->netfs.inode)->mount_options;
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	struct ceph_file_info *fi;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	int ret;
-+#endif
- 
- 	doutc(cl, "%p %llx.%llx %p 0%o (%s)\n", inode, ceph_vinop(inode),
- 	      file, inode->i_mode, isdir ? "dir" : "regular");
-@@ -258,14 +260,17 @@ static int ceph_init_file_info(struct inode *inode, struct file *file,
- 	INIT_LIST_HEAD(&fi->rw_contexts);
- 	fi->filp_gen = READ_ONCE(ceph_inode_to_fs_client(inode)->filp_gen);
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if ((file->f_mode & FMODE_WRITE) && ceph_has_inline_data(ci)) {
- 		ret = ceph_uninline_data(file);
- 		if (ret < 0)
- 			goto error;
- 	}
-+#endif
- 
- 	return 0;
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- error:
- 	ceph_fscache_unuse_cookie(inode, file->f_mode & FMODE_WRITE);
- 	ceph_put_fmode(ci, fi->fmode, 1);
-@@ -273,6 +278,7 @@ static int ceph_init_file_info(struct inode *inode, struct file *file,
- 	/* wake up anyone waiting for caps on this inode */
- 	wake_up_all(&ci->i_cap_wq);
- 	return ret;
-+#endif
- }
- 
- /*
-@@ -702,7 +708,9 @@ static int ceph_finish_async_create(struct inode *dir, struct inode *inode,
- 
- 	ktime_get_real_ts64(&now);
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	iinfo.inline_version = CEPH_INLINE_NONE;
-+#endif
- 	iinfo.change_attr = 1;
- 	ceph_encode_timespec64(&iinfo.btime, &now);
- 
-@@ -2224,7 +2232,11 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- 		      inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len,
- 		      ceph_cap_string(got));
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 		if (!ceph_has_inline_data(ci)) {
-+#else
-+		if (true) {
-+#endif
- 			if (!retry_op &&
- 			    (iocb->ki_flags & IOCB_DIRECT) &&
- 			    !IS_ENCRYPTED(inode)) {
-@@ -2267,7 +2279,11 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- 			if (!page)
- 				return -ENOMEM;
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 			mask = CEPH_STAT_CAP_INLINE_DATA;
-+#else
-+			mask = 0;
-+#endif
- 		}
- 
- 		statret = __ceph_do_getattr(inode, page, mask, !!page);
-@@ -2349,8 +2365,12 @@ static ssize_t ceph_splice_read(struct file *in, loff_t *ppos,
- 	if (ceph_inode_is_shutdown(inode))
- 		return -ESTALE;
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if (ceph_has_inline_data(ci) ||
- 	    (fi->flags & CEPH_F_SYNC))
-+#else
-+	if (fi->flags & CEPH_F_SYNC)
-+#endif
- 		return copy_splice_read(in, ppos, pipe, len, flags);
- 
- 	ret = ceph_start_io_read(inode);
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 61d7c0b8161f..20abf7dc9c64 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -627,7 +627,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
- 	spin_lock_init(&ci->i_ceph_lock);
- 
- 	ci->i_version = 0;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	ci->i_inline_version = 0;
-+#endif
- 	ci->i_time_warp_seq = 0;
- 	ci->i_ceph_flags = 0;
- 	atomic64_set(&ci->i_ordered_count, 1);
-@@ -1030,7 +1032,9 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 	bool wake = false;
- 	bool queue_trunc = false;
- 	bool new_version = false;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	bool fill_inline = false;
-+#endif
- 	umode_t mode = le32_to_cpu(info->mode);
- 	dev_t rdev = le32_to_cpu(info->rdev);
- 
-@@ -1362,6 +1366,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		}
- 	}
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if (iinfo->inline_version > 0 &&
- 	    iinfo->inline_version >= ci->i_inline_version) {
- 		int cache_caps = CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO;
-@@ -1370,6 +1375,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		    (locked_page || (info_caps & cache_caps)))
- 			fill_inline = true;
- 	}
-+#endif
- 
- 	if (cap_fmode >= 0) {
- 		if (!info_caps)
-@@ -1382,9 +1388,11 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 
- 	ceph_fscache_register_inode_cookie(inode);
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if (fill_inline)
- 		ceph_fill_inline_data(inode, locked_page,
- 				      iinfo->inline_data, iinfo->inline_len);
-+#endif
- 
- 	if (wake)
- 		wake_up_all(&ci->i_cap_wq);
-@@ -3022,6 +3030,7 @@ int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
- 	req->r_args.getattr.mask = cpu_to_le32(mask);
- 	req->r_locked_page = locked_page;
- 	err = ceph_mdsc_do_request(mdsc, NULL, req);
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	if (locked_page && err == 0) {
- 		u64 inline_version = req->r_reply_info.targeti.inline_version;
- 		if (inline_version == 0) {
-@@ -3034,6 +3043,7 @@ int __ceph_do_getattr(struct inode *inode, struct page *locked_page,
- 			err = req->r_reply_info.targeti.inline_len;
- 		}
- 	}
-+#endif
- 	ceph_mdsc_put_request(req);
- 	doutc(cl, "result=%d\n", err);
- 	return err;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 18be36c2e9e8..6a439da76616 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -156,12 +156,26 @@ static int parse_reply_info_in(void **p, void *end,
- 	*p += info->xattr_len;
- 
- 	if (features == (u64)-1) {
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 		/* inline data */
- 		ceph_decode_64_safe(p, end, info->inline_version, bad);
- 		ceph_decode_32_safe(p, end, info->inline_len, bad);
- 		ceph_decode_need(p, end, info->inline_len, bad);
- 		info->inline_data = *p;
- 		*p += info->inline_len;
-+#else
-+		/*
-+		 * Inline data support has been removed, but the MDS always
-+		 * encodes inline_version + inline_data in versioned replies.
-+		 * We must consume these fields from the message to keep the
-+		 * decode pointer in sync, even though we discard them.
-+		 */
-+		u32 __len;
-+
-+		ceph_decode_skip_64(p, end, bad);
-+		ceph_decode_32_safe(p, end, __len, bad);
-+		ceph_decode_skip_n(p, end, __len, bad);
-+#endif
- 		/* quota */
- 		err = parse_reply_info_quota(p, end, info);
- 		if (err < 0)
-@@ -276,6 +290,7 @@ static int parse_reply_info_in(void **p, void *end,
- 		*p = end;
- 	} else {
- 		/* legacy (unversioned) struct */
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 		if (features & CEPH_FEATURE_MDS_INLINE_DATA) {
- 			ceph_decode_64_safe(p, end, info->inline_version, bad);
- 			ceph_decode_32_safe(p, end, info->inline_len, bad);
-@@ -284,6 +299,21 @@ static int parse_reply_info_in(void **p, void *end,
- 			*p += info->inline_len;
- 		} else
- 			info->inline_version = CEPH_INLINE_NONE;
-+#else
-+		/*
-+		 * Inline data support has been removed.  When the MDS
-+		 * advertises CEPH_FEATURE_MDS_INLINE_DATA it includes
-+		 * inline_version + inline_data in legacy replies.  We
-+		 * must consume them to keep the decode pointer in sync.
-+		 */
-+		if (features & CEPH_FEATURE_MDS_INLINE_DATA) {
-+			u32 __len;
-+
-+			ceph_decode_skip_64(p, end, bad);
-+			ceph_decode_32_safe(p, end, __len, bad);
-+			ceph_decode_skip_n(p, end, __len, bad);
-+		}
-+#endif
- 
- 		if (features & CEPH_FEATURE_MDS_QUOTA) {
- 			err = parse_reply_info_quota(p, end, info);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 731d6ad04956..9bcf1a9d5ba8 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -149,9 +149,11 @@ struct ceph_mds_reply_info_in {
- 	char *symlink;
- 	u32 xattr_len;
- 	char *xattr_data;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	u64 inline_version;
- 	u32 inline_len;
- 	char *inline_data;
-+#endif
- 	u32 pool_ns_len;
- 	char *pool_ns_data;
- 	u64 max_bytes;
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index e5d8d59ffc17..3bc3a2ce72a2 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -613,7 +613,9 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
- 		capsnap->xattr_version = 0;
- 	}
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	capsnap->inline_data = ci->i_inline_version != CEPH_INLINE_NONE;
-+#endif
- 
- 	/* dirty page count moved from _head to this cap_snap;
- 	   all subsequent writes page dirties occur _after_ this
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 3737ea7ed88b..eced08f52b79 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -274,7 +274,9 @@ struct ceph_cap_snap {
- 	u32 truncate_seq;
- 	int writing;   /* a sync write is still in progress */
- 	int dirty_pages;     /* dirty pages awaiting writeback */
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	bool inline_data;
-+#endif
- 	bool need_flush;
- };
- 
-@@ -381,7 +383,9 @@ struct ceph_inode_info {
- 	spinlock_t i_ceph_lock;
- 
- 	u64 i_version;
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- 	u64 i_inline_version;
-+#endif
- 	u32 i_time_warp_seq;
- 
- 	unsigned long i_ceph_flags;
-@@ -1335,11 +1339,14 @@ extern void __ceph_touch_fmode(struct ceph_inode_info *ci,
- extern const struct address_space_operations ceph_aops;
- extern const struct netfs_request_ops ceph_netfs_ops;
- int ceph_mmap_prepare(struct vm_area_desc *desc);
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- extern int ceph_uninline_data(struct file *file);
-+#endif
- extern int ceph_pool_perm_check(struct inode *inode, int need);
- extern void ceph_pool_perm_destroy(struct ceph_mds_client* mdsc);
- int ceph_purge_inode_cap(struct inode *inode, struct ceph_cap *cap, bool *invalidate);
- 
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- static inline bool ceph_has_inline_data(struct ceph_inode_info *ci)
- {
- 	if (ci->i_inline_version == CEPH_INLINE_NONE ||
-@@ -1347,6 +1354,12 @@ static inline bool ceph_has_inline_data(struct ceph_inode_info *ci)
- 		return false;
- 	return true;
- }
-+#else
-+static inline bool ceph_has_inline_data(struct ceph_inode_info *ci)
-+{
-+	return false;
-+}
-+#endif
- 
- /* file.c */
- extern const struct file_operations ceph_file_fops;
-diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-index 3a47acd9cc14..d1cb571cc131 100644
---- a/include/linux/ceph/ceph_features.h
-+++ b/include/linux/ceph/ceph_features.h
-@@ -131,7 +131,11 @@ DEFINE_CEPH_FEATURE(37, 1, EXPORT_PEER)
- DEFINE_CEPH_FEATURE(38, 1, OSD_ERASURE_CODES)
- DEFINE_CEPH_FEATURE(38, 1, OSD_OSD_TMAP2OMAP) // overlap
- DEFINE_CEPH_FEATURE(39, 1, OSDMAP_ENC)
-+#ifdef CONFIG_CEPH_FS_INLINE_DATA
- DEFINE_CEPH_FEATURE(40, 1, MDS_INLINE_DATA)
-+#else
-+#define CEPH_FEATURE_MDS_INLINE_DATA	0
-+#endif
- DEFINE_CEPH_FEATURE(41, 1, CRUSH_TUNABLES3)
- DEFINE_CEPH_FEATURE(41, 1, OSD_PRIMARY_AFFINITY) // overlap
- DEFINE_CEPH_FEATURE(42, 1, MSGR_KEEPALIVE2)
-
----
-base-commit: 602bb4525c8146865b7f6e44c81d54bf97861aed
-change-id: 20260728-b4-ceph-remove-inline-data-d55c6466dd7e
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
+This is buggy because we need use the real INLINE feature bit to
+decode the message from the MDS side. I will fix it in V2.
 
 
+>  DEFINE_CEPH_FEATURE(41, 1, CRUSH_TUNABLES3)
+>  DEFINE_CEPH_FEATURE(41, 1, OSD_PRIMARY_AFFINITY) // overlap
+>  DEFINE_CEPH_FEATURE(42, 1, MSGR_KEEPALIVE2)
+>
+> ---
+> base-commit: 602bb4525c8146865b7f6e44c81d54bf97861aed
+> change-id: 20260728-b4-ceph-remove-inline-data-d55c6466dd7e
+>
+> Best regards,
+> --
+> Xiubo Li <xiubo.li@clyso.com>
+>
+>
