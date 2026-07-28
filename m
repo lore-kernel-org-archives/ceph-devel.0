@@ -1,504 +1,161 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86C4347FAFF
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2026 21:30:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0DE035975
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2026 23:15:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785274217; cv=none; b=Bk+DJoixbsd2DvH0hoDUXhYi1fzGNC8hi2lr+kbUvepf4e3tnSnwy+bgn9cg+eO7k0EJ3iT3HKwrlylu+iu5h2zYJAn3TGASi6Zv7thXY3M9V2m7pEP93r8b0hEsUMSBJ6eMOIaJFjKOhyUGznn79dVIBAQa8qinTDtEoZwEw98=
+	t=1785280549; cv=none; b=YmzKtuuIeGEd2d27sc+OI3Er68l/6MHD6HT35gaDDhfRJbfICf89lDz/82/BhOTHt0q1gVkoYesEkeofDlkceX9JOatI+yOvutvZU9P+7RZKy7PEIhsI4wii6KLhBpPmUsvElYpWgEwJYrF6AQmQuqlAvt/RbdC4NgffEy2khsU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785274217; c=relaxed/simple;
-	bh=rd/AmBpbmKqj+156AKnJfNtSMPtgc6wewE914z4k3k0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=RRckPEUfnRG1rxhGWZZrw24slZKoSwImr6Of4uEf9IcaZx0KtAY6Eap4i0u1w4y/7nhjvdO5aYB8ODgmEAKtZHYESWz88cILQ5od6nY5tIwz91uB3YYEDDxa9wztdVMwBqfIRtec89NzT156P5psO0rfgxNZ8SeHcbLszGKPRjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ihW+4H6P; arc=none smtp.client-ip=209.85.128.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1785280549; c=relaxed/simple;
+	bh=dT+3gtFCWBHqmUjb5xl/LQAG6Yr+VBHDaoUPJyDf9cM=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=UzrB4dQpsaLY9MuZDygcvH3H9eaKwIVD4T78+fE4og0UsXYbtLNODg2RxGxM/i639Xh4R0NWaZ9of8HewFkQgz+dysruoCUZWeSylBB5IS9g4UTWf5L7Itjd3Fm2zVhKpJ/Rw5KID7YFXrxlveje45vBSZ6WMtj77ikd+FUxQ9o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=CZGLqYh/; arc=none smtp.client-ip=209.85.128.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ihW+4H6P"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4954c0833b4so1960885e9.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2026 14:30:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="CZGLqYh/"
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-81ed073fed0so6367747b3.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Jul 2026 16:15:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1785274213; x=1785879013; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=h4lFfo5ZGoFgQzeJsrKlXRAyOLh0g5mqIoi0J3evNaQ=;
-        b=ihW+4H6PjEvaiPosA07SxOh+O/aEm2AFZna5ob8G9mnyDp1FPZslI4ZONB9/lbEeFt
-         MvaQmXM8aUhqNBrA3r28idAvdi0XmyJsvqsClHq7rHQp2OJM62uojdAWd989xV0orC7K
-         UGSRUHPCjLfzozXves/44nR7jVJjue5776A+lsJ5FoGXD7V5SU7cZ1betkK1MrFgkVaG
-         nayDYakWSpjZCZS5PhFeItN9fYOQgy4tHUCaTP5EhAB5rd0GQYb4PmcC9VNEujVoMQmQ
-         r7Xupnj5Uf9R1EfY4Y83OyR4IigNud5pvEOfeqHyYbU9rO6ru3tc+nvV36FR6uBXbdre
-         8Z9Q==
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1785280547; x=1785885347; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:content-type
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
+         :from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=dT+3gtFCWBHqmUjb5xl/LQAG6Yr+VBHDaoUPJyDf9cM=;
+        b=CZGLqYh/zu61uhdPTh0UxUXsazogyH8akHkeA31rPuAzPxPy5bgTVyJLgNHn26ld+W
+         aV+HxPiqzbNKzM1o9MmAZeXfnqH2xm+ufDwESQk2zi3JndCNN+rEqNme+ljYs15Jzm5W
+         0IW1eOeZPRnxAndWbqv4migcnesgLEfy6jFXUxv+FkOROdmfH4jMxc32tY5xED3UXZp8
+         GvHw7hHlPPgUsR5qbyMzVWiqOfOxKum7yBxB14mQzBjIFJ4Wv0YTdss8y/nC3Rr3SRal
+         Hh1uee/Auq5w8GAErAGQRvNxxrA0tLj9+R0Uccx55DR5dJ9ci8o29E8pwDpKxqSXEy6v
+         GSEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785274213; x=1785879013;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=h4lFfo5ZGoFgQzeJsrKlXRAyOLh0g5mqIoi0J3evNaQ=;
-        b=kN99PRmn0yWt72vbV0xG1VavqADOGDvRZDhcMam7CKKuVNNsJ2ZUkze9E2i78vHfVi
-         mr47D/dIluXxnPF/eAyw6S4+F1CQd8qC31zUAKBJA0N56kiCqcVFjYJXtE8nSK5EBiF5
-         P0dIu7lOLXpkxvhRYSASRQY7mY57Cy1W0yXCMcpjO1MpqdMA3/hY2jzb2euBDp074xz6
-         j65wqPCjW3hUnWpLBdSLZ1F9ecRdVt/0wfdM5SSX7VnVZOX34bBQfVaigWR6UO2jq2QT
-         IU87Jq4fnvVgn1WVfBFhnahi6EqJ650+Yw9UQkHzJiyPZ4r/WT2ej94kf8eCxLCtlgxm
-         lz8A==
-X-Forwarded-Encrypted: i=1; AHgh+Ro3uC1e6qys4D72Y22Q3jrMUWIZpnkovUlzSMg8PUxhctPANMaYLKueedN3lxOo6bctDHoFHCyoNYGP@vger.kernel.org
-X-Gm-Message-State: AOJu0YwrZq8dDN3uohZjC0GzgO2vM4DnDyJRrFKzP8XqYOGqPkrvAbOW
-	9Ta9AQ9wAVEzpzDCy+zrtOFozN/QqlToV3S53cc2wm7zh2aBPi2LXlzw
-X-Gm-Gg: AR+sD13OdxnGBbxFslBAba8TsGFV/3WqAAfPfEO35D14DLf8xRgCxXhxLI4fpuo5eVc
-	wdg0qK5KGfDZEBVkSUCoUHzMirOOTqTlDBelf24+bnYfG2LlTcOK2ZnssYzX8VFWv6XzzmgNhbc
-	R42s7aewsdeodrm4ZH8yanMDToDmrt6HaGOGtUKTiNVnRqA24K4LKK4/llMP2x4CgI1xQKNUW3E
-	i72mWKnW4fU5FdyWg+RP1ZyiYqOixR9rkETQHuJicTAk7twAr0MRx08N82GHuIqqMpYqkBzkigU
-	z5v763DsA8/wY+dGcZYz0hu2X+LhG4sBuH+OuuYm0i9HKJlssFquSCUZlhC70mryqXW5W6U3snj
-	aBlQuKyllBwH2niG9g4r7otwg2sWK+q4l0+JFutdBFHpAzxBR0iYDn4MzXQ7WfllQrL/byv6zGL
-	KbQ39HXaZ7g8dwVSagvKVYUnXmNf8KXcZaC9D40ICyaElNHF5d9yDBlY/dmOHys3oiCKfI/N11g
-	ttHSVM4s8KAUd6Qici4oVpUctOytoOyiteNYzPXXxBFGu7J9muyIvlUtaCZ/pq5dwk=
-X-Received: by 2002:a05:600c:4755:b0:495:3fe8:880f with SMTP id 5b1f17b1804b1-496c6414fe3mr44424285e9.4.1785274212668;
-        Tue, 28 Jul 2026 14:30:12 -0700 (PDT)
-Received: from 127.mynet ([2a01:4b00:bd21:4f00:7cc6:d3ca:494:116c])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47fb6ac44bcsm2245329f8f.11.2026.07.28.14.30.10
+        d=1e100.net; s=20251104; t=1785280547; x=1785885347;
+        h=mime-version:user-agent:content-transfer-encoding:content-type
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=dT+3gtFCWBHqmUjb5xl/LQAG6Yr+VBHDaoUPJyDf9cM=;
+        b=TPv/ovzCupCun03OL8gW0dV60CMki7vxcW8Tb5K+57NQtMwmLZS/P26P4cphQQHKMj
+         PGUQt1aMID0LDxz5ZZT48C7+TCd+aokvRrfgWdA6OgPvPMN33kN8RR9ZijRyAkClpTwp
+         8ICJmuhKpGZ1d/bl+nuP8Jw8FwYYWFAzLmTtjh0194oNS0XDumjEy0+CsG30n9OzHBAR
+         zRrvk8n6shzdevJI/1Ozhb5LzB2ZkUK3YMeNJWZhBf6mmbKK9tMGHDf5LlOSjl26iUe1
+         CvrpRENF+rrWFvTH7+5HeqBtAx0B94Ei5CMU2G1r5iGTOcqtzZff6n9aBSqq5w1J7Heu
+         FknQ==
+X-Forwarded-Encrypted: i=1; AHgh+RoDnnMZP+qJ9R7FIqtPjMRK6tbXxgi/QMvDlPqBJPr3gSU4XybdofH+nWMt9MCRi0CfwABWsMhHwUxD@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxxo9+YC7AmlAPKjAz/VypBIbVkFZGcwiZgPXSAEamS91XGdFdV
+	n/cBZnwp5Gl7xczd5+5jYkVq8Jglp6RrG5gwWleJcHz5FdEXQStlcZwDOua+rfiA+XQ=
+X-Gm-Gg: AR+sD12fXxq2D15j5xL7ZKw2PgR84bZQarpSB9KZr1D6qGUDfj1gz1IpYfPQFov8lzj
+	WUQBUjv7OoDPHJdIobyn+y9ib+lblSSPLfUWKPna8w4uWHBrhwR0HJBOx+yvCYAFohrDLP4u0/5
+	SPTcvdShsLr9nbsNuBdFrus+lumuTGOb7MAb/pu2s9WH7eKm3m0urHdHUyPIF+p+uJu64xc8CiA
+	lOKqcNFEPby9JiyHYjtR2K6HECEgvPFtk12R4V6jOPs+FQNug7J2s5hXOCwtA/khHLhkxI/9/2q
+	MLrE3r4ZTaLmzaLXXWk2RgYePHG1z1VvybqWZLB9Gfzeb7dGF3jnZRDbJMULggn2geKNXLPg/4s
+	2QVUOy+4YzWA8Uz3OBqZfb34GHh/iUvYjOnyZ3XBmYDrVwVphnBGIoXITtNLdqKg7Ggqx6/2HJd
+	Q85PNx74sLm5ELFTm3+MrqcpWfP5Q4tRxubNyI8WDnDrsUvVpQmZ+4CJguIzsFiz7M2lgn3Qi+j
+	G/rWJjMVFYyX3yp9KYcGjSbaYrAfxm4kSSJkIa51TeKQuqgQQ+El4t4S354ginTqhJtdB2XBYAU
+	h+2BXYJuHn+DynyUZN7d8Nge46ULHUetJ1p4Zni3hpq2Tp38ZIY0phw=
+X-Received: by 2002:a05:690c:6a0e:b0:80d:66b2:84e with SMTP id 00721157ae682-81f992b328amr23743647b3.50.1785280546865;
+        Tue, 28 Jul 2026 16:15:46 -0700 (PDT)
+Received: from [10.0.0.3] (162-197-212-70.lightspeed.sntcca.sbcglobal.net. [162.197.212.70])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-81fa292a6ccsm7754917b3.29.2026.07.28.16.15.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Jul 2026 14:30:11 -0700 (PDT)
-From: Pavel Begunkov <asml.silence@gmail.com>
-To: Jens Axboe <axboe@kernel.dk>,
-	Keith Busch <kbusch@kernel.org>,
-	Christoph Hellwig <hch@lst.de>,
-	Sagi Grimberg <sagi@grimberg.me>,
-	linux-block@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-nvme@lists.infradead.org,
-	linux-fsdevel@vger.kernel.org,
-	io-uring@vger.kernel.org,
-	linux-media@vger.kernel.org,
-	dri-devel@lists.freedesktop.org,
-	linaro-mm-sig@lists.linaro.org
-Cc: asml.silence@gmail.com,
-	Alexander Viro <viro@zeniv.linux.org.uk>,
-	Christian Brauner <brauner@kernel.org>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Sumit Semwal <sumit.semwal@linaro.org>,
-	=?UTF-8?q?Christian=20K=C3=B6nig?= <christian.koenig@amd.com>,
-	Nitesh Shetty <nj.shetty@samsung.com>,
-	Kanchan Joshi <joshi.k@samsung.com>,
-	Anuj Gupta <anuj20.g@samsung.com>,
-	Tushar Gohad <tushar.gohad@intel.com>,
-	William Power <william.power@intel.com>,
-	Phil Cayton <phil.cayton@intel.com>,
-	Jason Gunthorpe <jgg@nvidia.com>,
-	Damien Le Moal <dlemoal@kernel.org>,
-	Alasdair Kergon <agk@redhat.com>,
-	Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>,
-	Benjamin Marzinski <bmarzins@redhat.com>,
-	Vishal Verma <vishal.l.verma@intel.com>,
-	David Sterba <dsterba@suse.com>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	dm-devel@lists.linux.dev,
-	nvdimm@lists.linux.dev,
-	linux-btrfs@vger.kernel.org,
-	ceph-devel@vger.kernel.org
-Subject: [PATCH v4 14/14] io_uring/rsrc: add dmabuf backed registered buffers
-Date: Tue, 28 Jul 2026 22:29:26 +0100
-Message-ID: <26dcd0ae5c87a3ada5710b14b6894ef343cec6fe.1785274111.git.asml.silence@gmail.com>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <cover.1785274111.git.asml.silence@gmail.com>
-References: <cover.1785274111.git.asml.silence@gmail.com>
+        Tue, 28 Jul 2026 16:15:45 -0700 (PDT)
+Message-ID: <56b420789e339d168e825cc162ddaf6a66daeec2.camel@dubeyko.com>
+Subject: Re: [PATCH 1/1] libceph: use RCU to protect monmap in
+ ceph_compare_options()
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: Yong Wang <edragain@163.com>, Viacheslav Dubeyko
+ <Slava.Dubeyko@ibm.com>,  "ceph-devel@vger.kernel.org"	
+ <ceph-devel@vger.kernel.org>, "enjou1224z@gmail.com" <enjou1224z@gmail.com>
+Cc: "sage@newdream.net" <sage@newdream.net>, "idryomov@gmail.com"	
+ <idryomov@gmail.com>, "dstsmallbird@foxmail.com"
+ <dstsmallbird@foxmail.com>,  Alex Markuze <amarkuze@redhat.com>,
+ "yuantan098@gmail.com" <yuantan098@gmail.com>
+Date: Tue, 28 Jul 2026 16:15:43 -0700
+In-Reply-To: <c7648fd0-d311-4757-aeeb-f66d261e3fbf@163.com>
+References: <cover.1783423648.git.edragain@163.com>
+	 <f9b8b94904378d14111606a3cfee801c60492681.1783423648.git.edragain@163.com>
+	 <f5c76ebace1493337d01385088c5ad066abc1689.camel@ibm.com>
+	 <235ac7b2-cb4d-474b-87f0-53a5962de59e@163.com>
+	 <522d0bf88c127d2c8ca4f4e5055e77e2918d4bd2.camel@ibm.com>
+	 <7a71431b-4c39-47cb-baac-0cbad03e13c9@163.com>
+	 <ee478394c5d2ec19dd0b5ce39adb9476c826cf39.camel@dubeyko.com>
+	 <c7648fd0-d311-4757-aeeb-f66d261e3fbf@163.com>
+Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
+ keydata=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
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.60.1 (by Flathub.org) 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-Implement dmabuf backed registered buffers. To register them, the user
-should specify IO_REGBUF_TYPE_DMABUF for the regitration and pass the
-desired dmabuf fd and a file for which it should be registered.
+Hi Yong,
 
-From there, it can be used with io_uring read/write requests
-IORING_OP_{READ,WRITE}_FIXED) as normal. The requests should be issued
-against the file specified during registration, and otherwise they'll be
-failed. The user should also be prepared to handle spurious -EAGAIN by
-reissuing the request.
+On Mon, 2026-07-27 at 11:35 +0800, Yong Wang wrote:
+>=20
+>=20
 
-Internally, dmabuf registered buffers is an optin feature for io_uring
-request opcodes and they should pass a special flag on import to use it.
+<skipped>
 
-Suggested-by: David Wei <dw@davidwei.uk>
-Suggested-by: Vishal Verma <vishal1.verma@intel.com>
-Suggested-by: Tushar Gohad <tushar.gohad@intel.com>
-Signed-off-by: Pavel Begunkov <asml.silence@gmail.com>
----
- include/linux/io_uring_types.h |   5 +
- include/uapi/linux/io_uring.h  |   6 +-
- io_uring/io_uring.c            |   3 +-
- io_uring/rsrc.c                | 168 ++++++++++++++++++++++++++++++++-
- io_uring/rsrc.h                |  18 ++++
- io_uring/rw.c                  |   6 +-
- 6 files changed, 198 insertions(+), 8 deletions(-)
+> Hi Slava,
+>=20
+> Thank you for your review.
+>=20
+> This patch has been sitting for quite a while, so I wanted to
+> politely
+> check whether there has been any progress on it, or if there is
+> anything
+> more I should do on my side to help move it forward.
+>=20
 
-diff --git a/include/linux/io_uring_types.h b/include/linux/io_uring_types.h
-index a2c623a67a25..f90586d353c1 100644
---- a/include/linux/io_uring_types.h
-+++ b/include/linux/io_uring_types.h
-@@ -10,6 +10,7 @@
- 
- struct iou_loop_params;
- struct io_uring_bpf_ops;
-+struct dma_buf_io_map;
- 
- enum {
- 	/*
-@@ -594,6 +595,7 @@ enum {
- 	REQ_F_IMPORT_BUFFER_BIT,
- 	REQ_F_SQE_COPIED_BIT,
- 	REQ_F_IOPOLL_BIT,
-+	REQ_F_DROP_DMABUF_BIT,
- 
- 	/* not a real bit, just to check we're not overflowing the space */
- 	__REQ_F_LAST_BIT,
-@@ -689,6 +691,8 @@ enum {
- 	REQ_F_SQE_COPIED	= IO_REQ_FLAG(REQ_F_SQE_COPIED_BIT),
- 	/* request must be iopolled to completion (set in ->issue()) */
- 	REQ_F_IOPOLL		= IO_REQ_FLAG(REQ_F_IOPOLL_BIT),
-+	/* there is a dma map attached to request that needs to be dropped */
-+	REQ_F_DROP_DMABUF	= IO_REQ_FLAG(REQ_F_DROP_DMABUF_BIT),
- };
- 
- struct io_tw_req {
-@@ -811,6 +815,7 @@ struct io_kiocb {
- 	/* custom credentials, valid IFF REQ_F_CREDS is set */
- 	const struct cred		*creds;
- 	struct io_wq_work		work;
-+	struct dma_buf_io_map		*dmabuf_map;
- 
- 	struct io_big_cqe {
- 		u64			extra1;
-diff --git a/include/uapi/linux/io_uring.h b/include/uapi/linux/io_uring.h
-index 98b259901185..c39297e8beb6 100644
---- a/include/uapi/linux/io_uring.h
-+++ b/include/uapi/linux/io_uring.h
-@@ -810,6 +810,7 @@ enum io_uring_rsrc_reg_flags {
- enum io_uring_regbuf_type {
- 	IO_REGBUF_TYPE_EMPTY,
- 	IO_REGBUF_TYPE_UADDR,
-+	IO_REGBUF_TYPE_DMABUF,
- 
- 	__IO_REGBUF_TYPE_MAX,
- };
-@@ -819,7 +820,10 @@ struct io_uring_regbuf_desc {
- 	__u32 flags;
- 	__u64 size;
- 	__u64 uaddr;
--	__u64 __resv[7];
-+
-+	__s32 dmabuf_fd;
-+	__s32 target_fd;
-+	__u64 __resv[6];
- };
- 
- /* Skip updating fd indexes set to this value in the fd table */
-diff --git a/io_uring/io_uring.c b/io_uring/io_uring.c
-index 1279e27c2c6d..cb88d19c8fb2 100644
---- a/io_uring/io_uring.c
-+++ b/io_uring/io_uring.c
-@@ -109,7 +109,7 @@
- 
- #define IO_REQ_CLEAN_SLOW_FLAGS (REQ_F_REFCOUNT | IO_REQ_LINK_FLAGS | \
- 				 REQ_F_REISSUE | REQ_F_POLLED | \
--				 IO_REQ_CLEAN_FLAGS)
-+				 IO_REQ_CLEAN_FLAGS | REQ_F_DROP_DMABUF)
- 
- #define IO_TCTX_REFS_CACHE_NR	(1U << 10)
- 
-@@ -1125,6 +1125,7 @@ static void io_free_batch_list(struct io_ring_ctx *ctx,
- 				io_queue_next(req);
- 			if (unlikely(req->flags & IO_REQ_CLEAN_FLAGS))
- 				io_clean_op(req);
-+			io_req_drop_dmabuf(req);
- 		}
- 		io_put_file(req);
- 		io_req_put_rsrc_nodes(req);
-diff --git a/io_uring/rsrc.c b/io_uring/rsrc.c
-index 05877b4c0ee5..d23dbb0dd6b8 100644
---- a/io_uring/rsrc.c
-+++ b/io_uring/rsrc.c
-@@ -10,6 +10,7 @@
- #include <linux/compat.h>
- #include <linux/io_uring.h>
- #include <linux/io_uring/cmd.h>
-+#include <linux/dma-buf-io.h>
- 
- #include <uapi/linux/io_uring.h>
- 
-@@ -881,6 +882,95 @@ bool io_check_coalesce_buffer(struct page **page_array, int nr_pages,
- 	return true;
- }
- 
-+struct io_regbuf_dma {
-+	struct dma_buf_io_ctx		ctx;
-+	struct file			*target_file;
-+};
-+
-+static void io_release_reg_dmabuf(void *priv)
-+{
-+	struct io_regbuf_dma *db = priv;
-+
-+	fput(db->target_file);
-+	dma_buf_io_ctx_release(&db->ctx);
-+}
-+
-+static struct io_rsrc_node *io_register_dmabuf(struct io_ring_ctx *ctx,
-+						struct io_uring_regbuf_desc *desc)
-+{
-+	struct io_rsrc_node *node = NULL;
-+	struct io_mapped_ubuf *imu = NULL;
-+	struct io_regbuf_dma *regbuf = NULL;
-+	struct file *target_file = NULL;
-+	struct dma_buf *dmabuf = NULL;
-+	int ret;
-+
-+	if (!IS_ENABLED(CONFIG_DMA_SHARED_BUFFER))
-+		return ERR_PTR(-EOPNOTSUPP);
-+	if (ctx->flags & IORING_SETUP_IOPOLL)
-+		return ERR_PTR(-EOPNOTSUPP);
-+	if (desc->uaddr || desc->size)
-+		return ERR_PTR(-EINVAL);
-+
-+	ret = -ENOMEM;
-+	node = io_rsrc_node_alloc(ctx, IORING_RSRC_BUFFER);
-+	if (!node)
-+		return ERR_PTR(-ENOMEM);
-+	imu = io_alloc_imu(ctx, 0);
-+	if (!imu)
-+		goto err;
-+	regbuf = kzalloc(sizeof(*regbuf), GFP_KERNEL);
-+	if (!regbuf)
-+		goto err;
-+
-+	ret = -EBADF;
-+	target_file = fget(desc->target_fd);
-+	if (!target_file)
-+		goto err;
-+
-+	dmabuf = dma_buf_get(desc->dmabuf_fd);
-+	if (IS_ERR(dmabuf)) {
-+		ret = PTR_ERR(dmabuf);
-+		dmabuf = NULL;
-+		goto err;
-+	}
-+	if (dmabuf->size > SZ_1G) {
-+		ret = -EINVAL;
-+		goto err;
-+	}
-+
-+	ret = dma_buf_io_ctx_create(target_file, &regbuf->ctx, dmabuf,
-+				    DMA_BIDIRECTIONAL);
-+	if (ret)
-+		goto err;
-+
-+	regbuf->target_file = target_file;
-+	imu->nr_bvecs = 1;
-+	imu->ubuf = 0;
-+	imu->len = dmabuf->size;
-+	imu->folio_shift = 0;
-+	imu->release = io_release_reg_dmabuf;
-+	imu->priv = regbuf;
-+	imu->flags = IO_REGBUF_F_DMABUF;
-+	imu->dir = IO_IMU_DEST | IO_IMU_SOURCE;
-+	refcount_set(&imu->refs, 1);
-+	node->buf = imu;
-+	dma_buf_put(dmabuf);
-+	return node;
-+err:
-+	kfree(regbuf);
-+	if (imu)
-+		io_free_imu(ctx, imu);
-+	if (node)
-+		io_cache_free(&ctx->node_cache, node);
-+	if (target_file)
-+		fput(target_file);
-+	if (dmabuf)
-+		dma_buf_put(dmabuf);
-+	return ERR_PTR(ret);
-+}
-+
-+
- static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
- 						   struct io_uring_regbuf_desc *desc)
- {
-@@ -899,6 +989,12 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
- 	if (!mem_is_zero(&desc->__resv, sizeof(desc->__resv)))
- 		return ERR_PTR(-EINVAL);
- 
-+	if (desc->type == IO_REGBUF_TYPE_DMABUF)
-+		return io_register_dmabuf(ctx, desc);
-+
-+	if (desc->dmabuf_fd || desc->target_fd)
-+		return ERR_PTR(-EINVAL);
-+
- 	if (desc->type == IO_REGBUF_TYPE_EMPTY) {
- 		if (uaddr || size)
- 			return ERR_PTR(-EFAULT);
-@@ -1170,9 +1266,64 @@ static int io_import_kbuf(int ddir, struct iov_iter *iter,
- 	return 0;
- }
- 
--static int io_import_fixed(int ddir, struct iov_iter *iter,
-+void io_drop_dmabuf_node(struct io_kiocb *req)
-+{
-+	struct io_mapped_ubuf *imu;
-+
-+	if (!IS_ENABLED(CONFIG_DMA_SHARED_BUFFER))
-+		return;
-+	if (WARN_ON_ONCE(req->buf_node->type != IORING_RSRC_BUFFER))
-+		return;
-+	imu = req->buf_node->buf;
-+	if (WARN_ON_ONCE(!(imu->flags & IO_REGBUF_F_DMABUF)))
-+		return;
-+	dma_buf_io_map_drop(req->dmabuf_map);
-+	req->flags &= ~REQ_F_DROP_DMABUF;
-+}
-+
-+static int io_import_dmabuf(struct io_kiocb *req,
-+			   int ddir, struct iov_iter *iter,
-+			   struct io_mapped_ubuf *imu,
-+			   size_t len, size_t offset,
-+			   unsigned issue_flags)
-+{
-+	struct io_regbuf_dma *db = imu->priv;
-+	struct dma_buf_io_map *map;
-+
-+	if (!IS_ENABLED(CONFIG_DMA_SHARED_BUFFER))
-+		return -EOPNOTSUPP;
-+	if (!len)
-+		return -EFAULT;
-+	if (req->file != db->target_file)
-+		return -EBADF;
-+
-+	if (req->flags & REQ_F_DROP_DMABUF) {
-+		map = req->dmabuf_map;
-+		goto init_iter;
-+	}
-+
-+	map = dma_buf_io_get_map(&db->ctx);
-+	if (unlikely(!map)) {
-+		if (!(issue_flags & IO_URING_F_IOWQ))
-+			return -EAGAIN;
-+		map = dma_buf_io_create_map(&db->ctx);
-+		if (IS_ERR(map))
-+			return PTR_ERR(map);
-+	}
-+
-+	req->dmabuf_map = map;
-+	req->flags |= REQ_F_DROP_DMABUF;
-+init_iter:
-+	iov_iter_dmabuf_map(iter, ddir, map, offset, len);
-+	return 0;
-+}
-+
-+static int io_import_fixed(struct io_kiocb *req,
-+			   int ddir, struct iov_iter *iter,
- 			   struct io_mapped_ubuf *imu,
--			   u64 buf_addr, size_t len)
-+			   u64 buf_addr, size_t len,
-+			   unsigned issue_flags,
-+			   unsigned import_flags)
- {
- 	const struct bio_vec *bvec;
- 	size_t folio_mask;
-@@ -1192,6 +1343,12 @@ static int io_import_fixed(int ddir, struct iov_iter *iter,
- 
- 	offset = buf_addr - imu->ubuf;
- 
-+	if (imu->flags & IO_REGBUF_F_DMABUF) {
-+		if (!(import_flags & IO_REGBUF_IMPORT_ALLOW_DMABUF))
-+			return -EFAULT;
-+		return io_import_dmabuf(req, ddir, iter, imu, len, offset,
-+					issue_flags);
-+	}
- 	if (imu->flags & IO_REGBUF_F_KBUF)
- 		return io_import_kbuf(ddir, iter, imu, len, offset);
- 
-@@ -1254,7 +1411,8 @@ int __io_import_reg_buf(struct io_kiocb *req, struct iov_iter *iter,
- 	node = io_find_buf_node(req, issue_flags);
- 	if (!node)
- 		return -EFAULT;
--	return io_import_fixed(ddir, iter, node->buf, buf_addr, len);
-+	return io_import_fixed(req, ddir, iter, node->buf, buf_addr, len,
-+				issue_flags, import_flags);
- }
- 
- static int io_buffer_acct_cloned_hpages(struct io_ring_ctx *ctx,
-@@ -1676,7 +1834,9 @@ int __io_import_reg_vec(int ddir, struct iov_iter *iter,
- 	iovec_off = vec->nr - nr_iovs;
- 	iov = vec->iovec + iovec_off;
- 
--	if (imu->flags & IO_REGBUF_F_KBUF) {
-+	if (imu->flags & IO_REGBUF_F_DMABUF) {
-+		return -EOPNOTSUPP;
-+	} else if (imu->flags & IO_REGBUF_F_KBUF) {
- 		int ret = io_kern_bvec_size(iov, nr_iovs, imu, &nr_segs);
- 
- 		if (unlikely(ret))
-diff --git a/io_uring/rsrc.h b/io_uring/rsrc.h
-index f12abaf63270..3cb9b57f159b 100644
---- a/io_uring/rsrc.h
-+++ b/io_uring/rsrc.h
-@@ -31,6 +31,11 @@ enum {
- enum {
- 	IO_REGBUF_F_KBUF		= 1 << 0,
- 	IO_REGBUF_F_UNCLONEABLE		= 1 << 1,
-+	IO_REGBUF_F_DMABUF		= 1 << 3,
-+};
-+
-+enum {
-+	IO_REGBUF_IMPORT_ALLOW_DMABUF		= 1 << 1,
- };
- 
- struct io_mapped_ubuf {
-@@ -173,4 +178,17 @@ static inline void io_alloc_cache_vec_kasan(struct iou_vec *iv)
- 		io_vec_free(iv);
- }
- 
-+void io_drop_dmabuf_node(struct io_kiocb *req);
-+
-+static inline void io_req_drop_dmabuf(struct io_kiocb *req)
-+{
-+	if (!IS_ENABLED(CONFIG_DMA_SHARED_BUFFER))
-+		return;
-+	if (!(req->flags & REQ_F_DROP_DMABUF))
-+		return;
-+	if (WARN_ON_ONCE(!(req->flags & REQ_F_BUF_NODE)))
-+		return;
-+	io_drop_dmabuf_node(req);
-+}
-+
- #endif
-diff --git a/io_uring/rw.c b/io_uring/rw.c
-index 95038cfda615..11ff7b5a1164 100644
---- a/io_uring/rw.c
-+++ b/io_uring/rw.c
-@@ -380,8 +380,8 @@ static int io_init_rw_fixed(struct io_kiocb *req, unsigned int issue_flags,
- 	if (io->bytes_done)
- 		return 0;
- 
--	ret = io_import_reg_buf(req, &io->iter, rw->addr, rw->len, ddir,
--				issue_flags);
-+	ret = __io_import_reg_buf(req, &io->iter, rw->addr, rw->len, ddir,
-+				  issue_flags, IO_REGBUF_IMPORT_ALLOW_DMABUF);
- 	iov_iter_save_state(&io->iter, &io->iter_state);
- 	return ret;
- }
-@@ -591,6 +591,8 @@ static void io_complete_rw(struct kiocb *kiocb, long res)
- 	struct io_rw *rw = container_of(kiocb, struct io_rw, kiocb);
- 	struct io_kiocb *req = cmd_to_io_kiocb(rw);
- 
-+	io_req_drop_dmabuf(req);
-+
- 	__io_complete_rw_common(req, res);
- 	io_req_set_res(req, io_fixup_rw_res(req, res), 0);
- 	req->io_task_work.func = io_req_rw_complete;
--- 
-2.54.0
+Ilya sends patches upstream. So, please, ping the Ilya.
 
+Thanks,
+Slava.
