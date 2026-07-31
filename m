@@ -1,144 +1,130 @@
-Received: from mail-oa1-f44.google.com (mail-oa1-f44.google.com [209.85.160.44])
+Received: from mail-oi1-f208.google.com (mail-oi1-f208.google.com [209.85.167.208])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0690E44C51C
-	for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2026 16:17:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.44
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785428267; cv=pass; b=kfQH/J/3lYMA+UQdWfNxFMfDsq+lh8vpmg+ow7iwUDok24ShvBfZeLOavoSQpGI5hKhiXC5EvdIBFiCWr58aE3c5MIRrZW69gcJYpbhKqRRfGwLtXOXpMG5GgzZqnbTm8Agucib6eeVwpAnTJ9gXS24rpQIiSrN2FEKi3bQR0xI=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785428267; c=relaxed/simple;
-	bh=y9uL8axv/bSBp1hJEk9/5EREqK5uThhZ6LCPv7JfjT8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=pjUKAFxKyQff/YqcllRibFAwd2WEYDxHDgauwOWWgH3eiY/tBIc2UICZ2BzEBAPIi/UhzyglUCVFcP2wG/pZHpreo3cCqXYiTOnwC2MMUmpNIRY10U7qc5sUB2eGw8qlz0rTDztEz9BUPZUvZ3UzSdaEQy0D9aOZZiznEXTNMxg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=purestorage.com; spf=pass smtp.mailfrom=purestorage.com; dkim=pass (2048-bit key) header.d=purestorage.com header.i=@purestorage.com header.b=MqCUIO9y; arc=pass smtp.client-ip=209.85.160.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=purestorage.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=purestorage.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=purestorage.com header.i=@purestorage.com header.b="MqCUIO9y"
-Received: by mail-oa1-f44.google.com with SMTP id 586e51a60fabf-44c43edfcceso6621fac.3
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jul 2026 09:17:44 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1785428264; cv=none;
-        d=google.com; s=arc-20260327;
-        b=IfjT7Lpa5rkTknN16QreuEY0v26OGLIjGHirIloVMkC8JqHhKZV0hSnXB3kPzYpC70
-         v4Kva2EA0PCZQfeThBcl/c7/QhoBaJhX79z5euTYT40f/LD63LxIjflgXXYM1A9s4dNV
-         J3RkYjVLR/qiAJ5BmhrvFQjfsrNPj2EnIQUuaEfJtv4mjbt2T5EZjXq58oCbJsXT6r9o
-         KPnmq1eoGntOjjPNocGuIvIvoAfTqpCsM6DGSYWoF0xiTSivQzjIyyOwiJlZgGS/Jbdh
-         iDaoVPt1eLT1hVnUI2GiPC5yuRwZtvO8LApcNFWRCn2Vm8a5g7GQTtsBBJGMRVQcvAYJ
-         amMQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=y9uL8axv/bSBp1hJEk9/5EREqK5uThhZ6LCPv7JfjT8=;
-        fh=2U9pyo0TqRfxMozuV2melny+8E0I9mdKIQLRHQDxIO0=;
-        b=F/06y/S8X9jfJwATOkAiHVt0HYIr6PfuwBqtxLXxc12fIh5uveY/MQ53EPXTwTIEil
-         TsHT3B1fMK2bjhrRoahw72ZMVdmLRngx+4TNSIQJDVN0nd6Ezsr2BCzfF9agjirRdC8g
-         B2stG7kY4GR60LFs03uVtOrxfMTEvv99y8BBvVnrLKAM5haTGFwJ73qgyUXRi7776YGq
-         XB5n5xvmLsXgpx1Uu17kHShdT0ymRGHsufNNj26TuhMiPHXIHzxdY8EgdOze/w67ykkj
-         IEiExW21V7pb4yDiC8GCWS9QPfkGgcObWA1O2C+gLWF9/5wyRpZv0EmrEHRbGPo/DohP
-         gV7Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=purestorage.com; s=google2022; t=1785428264; x=1786033064; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=y9uL8axv/bSBp1hJEk9/5EREqK5uThhZ6LCPv7JfjT8=;
-        b=MqCUIO9yyYJwHrMDdiejiNqcDHA+nR86bfqK9iKWYUvi4dsxosqLK1HYtjLP+5hW70
-         k5P3caMtPDuMcCd+Q73b4jXiKqkWofjW7ZGye0Gp8XbL+MuQteuqTWNusN4S1MOtLD4h
-         f043KR8DclrbfQVIx1LIlJafF4mkqxY53CJGgcgKSlzzpPwATxfWrBB812Z2bO/xO5EC
-         elYoFSb15ifUMJi3Yt6rGgvVTnyac4gvXe8Q5aNLZI3twpMmhH335Lq9BUPv5Oxu/My9
-         v6K4aHa0gm3jyf/WIJFeYkP3hvhEKOXplgljdRIOV2CPW6euwywntOV8pDIXxSVXpgaz
-         L+fA==
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B0C23793B1
+	for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2026 07:09:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.208
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1785481774; cv=none; b=VgcANYjuuLAzRoIzjdSa4/kJBBpMty6iyp6XRXj9H4fCcteYrd5LQdi/h2q68y5E4nanvm/n8u8qPosrflBult1JdfMJeWKAm0mdNbYyk1zkvOR9rt53i7oiJX8nU1gvB45fLshQPtyYEzGxrNYpwBI2M5GLcVNY+gSEtG0sW2k=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1785481774; c=relaxed/simple;
+	bh=BGdvz7AuKqJqgWteXG2FyESZcoQUein1XaOA//oZFes=;
+	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=GIuIqQ1FiCDcKM2IBW8MItUYn6gHi1dJ7NkP5OBFSYcwADBMipzkA4wPTOKWwGzPN/QRS6+5Wu+ci/O34WQId9xo7xzHPQC/E11Roy8dohHKKsPbgUIxiZp28UdY3PsCkeZS+U1KtK/m2ArlPbt2U6oRDLiLB8wNq0B6C2FEZH8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=209.85.167.208
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-oi1-f208.google.com with SMTP id 5614622812f47-4a416619e8dso677107b6e.1
+        for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2026 00:09:29 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785428264; x=1786033064;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
+        d=1e100.net; s=20251104; t=1785481768; x=1786086568;
+        h=content-type:to:from:subject:message-id:date:mime-version
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=y9uL8axv/bSBp1hJEk9/5EREqK5uThhZ6LCPv7JfjT8=;
-        b=eFFjmJTTCgb+uidq/QKkbgRq2wTuS2c4RV2lbg0cp1/6p9zyceG28l7QAnXfp+L1wz
-         YNaJAjRtantMpbRpWiEwXpvvtotXp1DCpBqmcXjxj/Ehv+YXC+gj8P6M6pimFs2am5Zr
-         CPCYe9xv30hJMfbysxt0qYRBOlEyeS/6axjcIRdi4Wl2ZqRTE5W8RgUO1btAwdhABGad
-         IHh/3sZIeOr2xoINqFJF4FOZfshmrxDLUSdOU/N6y+FEUOYHjgK+rgMIC0GabaK9Mvpc
-         2AyX7rr+w3nFU3Lus3c00PFpJJq5W5XGzGCXaUSGFpC0SFCWdCdCRmLb0hGryD6BGL0q
-         dMLQ==
-X-Forwarded-Encrypted: i=1; AHgh+RofkQdoqseLEm1DMnHQ/G4CDdfJeI0oD2okhPDeeRyuKmm2YM0C7tgEauErZQia9Hr2TY7kXr1qDwrX@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz/CZd9WTDvHbfyMAAIaPkTfeu2O2UE5OVW4zM8uQVBW7a5dAfq
-	ZjiDzAY44DqXqJ7dBNgyjhmZZ5qOY8+2uAzZgo2WSr7iysUjSjgYOpPIaG4FvHBOPxcDX2S7tzu
-	GIEm7ECrlNtLhu3BRqcI7kLyalfP/+O6JBASmLRAOhA==
-X-Gm-Gg: AR+sD11zG59O3XY/jNzwBB6SZMvbeJu88bV6UYpQZ11p8Jm2o4OmmMu5CuiP+HC6+1C
-	t6BxyEFpmWqQqyVe1tFg3qn7ay73mie4YmHNZ7ORXKVfhKTB6DYSzk/EV0UhF5s6OctE6jfZ7aQ
-	xXsjDQvBRX1fwRfdkqO+9rsmnQGwaLHD38O9DHJnVigAMkwW+iUj84wq+RKE29sFHcZCth+TAEi
-	Dv4M4THuP11Dk8U2lYnRBNUiTiwVxH7rl0r9riyRoKKxCFNKOITOCfFCAkxOnNvVLtJUIt//6xs
-	58jhEkgdWosquF4LCHbetFW2gZT4bDzI3aNHbB1D3CkQ
-X-Received: by 2002:a05:6870:610c:b0:448:8595:1e8b with SMTP id
- 586e51a60fabf-458dd203cc6mr828125fac.4.1785428263717; Thu, 30 Jul 2026
- 09:17:43 -0700 (PDT)
+        bh=6TxOFRqDiLyKxI4NvkM6WuuKVCWvMgpQ+aQoyI5Utq4=;
+        b=LnyBAuWdz1zcJgY2oYX28hdbonVTsLk0DY0dMtUm+NZA2YOHrd51OLCUssUDws4Mb9
+         U4vHgZsQAfjhYXv4boVnoD81H2D39n8WyrhTQDrNvl7wh+rGt+xKY4ddycThpe/f1FHv
+         e5qK9xbew1IzOo+LxXaJ3W35H+n6F5aKXf4imoqDBjCrwvvUn6Sv6ImddnLsxnlojIlH
+         Dpdj3zLv8rGlPvD2lQi4TXBvmxQzNUihjhCbPHukhShRUhA9DjkqPkk7oOJhGC9NtOnC
+         IZJkLJYEg23nThtnqNacM1FFfmLkrhZzx+oMXEisaJI8tvctQ5CKrdjUTPjK03kFRLVQ
+         Ly/g==
+X-Forwarded-Encrypted: i=1; AHgh+Rog/T7wKpfWXwfVgSdzUnpMg9Rd4F7v95cMy4AXOwfDKCywvXNFWwBJyrGE37sBnTi9it/WKmUcwOLk@vger.kernel.org
+X-Gm-Message-State: AOJu0YzmyotPPWN5SxwpkkaK96xyTRPCZgpRCmlKrA92BWvzgWGEKfWb
+	KM9zB6cagG4ZsemR7WxYwTH0wFMTLMSmnSwtxyYEs2TOcJrcPj9YD6h6h/z9GdVokdd1sO0o5L/
+	clw1eIFNzgxyhRB0ZW8T10+bEvBwQvPzLmjZNc5aw7lbbtrB4V2MVOvzEHg8=
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1785274111.git.asml.silence@gmail.com> <19e5c945ea8114320c10f7951d19197d48b59249.1785274111.git.asml.silence@gmail.com>
- <CADUfDZpwF0jp2e=+c3w_NjWPbnQ858bkSD731M6+x27jzgcJiw@mail.gmail.com>
- <CGME20260730104131epcas5p4b52720519486f7ac774c317923a79c81@epcas5p4.samsung.com>
- <de4ec386-42ba-41c3-bcbe-1fe8b2f71ba9@gmail.com> <09134617-6d9e-4963-9319-1855e88a4df9@samsung.com>
-In-Reply-To: <09134617-6d9e-4963-9319-1855e88a4df9@samsung.com>
-From: Caleb Sander Mateos <csander@purestorage.com>
-Date: Thu, 30 Jul 2026 09:17:31 -0700
-X-Gm-Features: AUfX_mzVuCLkHKoQjKU1BgpL-X0Ty4OF1wEt1trnCKGouEKw-m3DZTMxHTHiuQw
-Message-ID: <CADUfDZoVUHMWK0KBnznB73o6Vg+iQBBzJE2NmF1Tf22Zvh4=Yw@mail.gmail.com>
-Subject: Re: [PATCH v4 08/14] nvme-pci: implement dma_token backed requests
-To: "Anuj Gupta/Anuj Gupta" <anuj20.g@samsung.com>
-Cc: Pavel Begunkov <asml.silence@gmail.com>, Jens Axboe <axboe@kernel.dk>, 
-	Keith Busch <kbusch@kernel.org>, Christoph Hellwig <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>, 
-	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-nvme@lists.infradead.org, linux-fsdevel@vger.kernel.org, 
-	io-uring@vger.kernel.org, linux-media@vger.kernel.org, 
-	dri-devel@lists.freedesktop.org, linaro-mm-sig@lists.linaro.org, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, 
-	Andrew Morton <akpm@linux-foundation.org>, Sumit Semwal <sumit.semwal@linaro.org>, 
-	=?UTF-8?Q?Christian_K=C3=B6nig?= <christian.koenig@amd.com>, 
-	Nitesh Shetty <nj.shetty@samsung.com>, Kanchan Joshi <joshi.k@samsung.com>, 
-	Jason Gunthorpe <jgg@nvidia.com>, Damien Le Moal <dlemoal@kernel.org>, Alasdair Kergon <agk@redhat.com>, 
-	Mike Snitzer <snitzer@kernel.org>, Mikulas Patocka <mpatocka@redhat.com>, 
-	Benjamin Marzinski <bmarzins@redhat.com>, David Sterba <dsterba@suse.com>, 
-	Ilya Dryomov <idryomov@gmail.com>, dm-devel@lists.linux.dev, nvdimm@lists.linux.dev, 
-	linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+X-Received: by 2002:a05:6808:19a8:b0:490:17f1:ac3b with SMTP id
+ 5614622812f47-4ae31a41dcdmr830283b6e.18.1785481768223; Fri, 31 Jul 2026
+ 00:09:28 -0700 (PDT)
+Date: Fri, 31 Jul 2026 00:09:28 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6a6c4a28.77639fcc.3d4fd0.001f.GAE@google.com>
+Subject: [syzbot] [ceph?] WARNING in ceph_con_v2_try_read
+From: syzbot <syzbot+87c7c2d63c44e41c77a3@syzkaller.appspotmail.com>
+To: amarkuze@redhat.com, ceph-devel@vger.kernel.org, idryomov@gmail.com, 
+	linux-kernel@vger.kernel.org, slava@dubeyko.com, 
+	syzkaller-bugs@googlegroups.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jul 30, 2026 at 4:36=E2=80=AFAM Anuj Gupta/Anuj Gupta
-<anuj20.g@samsung.com> wrote:
->
-> On 7/30/2026 4:11 PM, Pavel Begunkov wrote:
-> >>
-> >> I wonder if it's possible to perform the PRP list page allocations and
-> >> initialization in nvme_dma_buf_io_map() instead of the I/O path. The
-> >> NVMe dma_pools are per-NUMA-node linked lists protected by spinlocks,
-> >> making them significant CPU hotspots. If the dmabuf registration set
-> >> up a contiguous DMA-coherent list of PRP entries for the pages of the
-> >> registered buffer, any command using the dmabuf and requiring at most
-> >> 1 PRP list page (i.e. length <=3D 2 MB) could just set its PRP list
-> >> pointer to an offset into the dmabuf's PRP list.
-> >
-> > Possible to an extent, predecessor patches tried that, I left it for
-> > later to keep the series simpler. I guess chaining won't work in
-> > general case.
-> > I mentioned this to Kanchan, Anuj and Nitesh before, they were up to
-> > playing with nvme optimisations in general, and since sgl from Anuj
-> > is ready, maybe they already have a prototype somewhere for that.
-> >
->
-> Right, I have prototyped the PRP list optimisation before. I will send
-> it once the initial version of this series lands, to avoid adding new
-> review churn while the rest of the series is pretty settled.
+Hello,
 
-Sure, landing it subsequently makes sense. Glad to hear it's already
-in the works.
+syzbot found the following issue on:
 
-Thanks,
-Caleb
+HEAD commit:    4235cb24ec1e Merge tag 'vfs-7.2-rc5.fixes' of git://git.ke..
+git tree:       upstream
+console output: https://syzkaller.appspot.com/x/log.txt?x=129ba7b1580000
+kernel config:  https://syzkaller.appspot.com/x/.config?x=4e38b15c29e6a1d9
+dashboard link: https://syzkaller.appspot.com/bug?extid=87c7c2d63c44e41c77a3
+compiler:       Debian clang version 22.1.8 (++20260613092233+e80beda6e255-1~exp1~20260613092250.77), Debian LLD 22.1.8
+syz repro:      https://syzkaller.appspot.com/x/repro.syz?x=16d96499580000
+C reproducer:   https://syzkaller.appspot.com/x/repro.c?x=12eaf2ea580000
+
+Downloadable assets:
+disk image: https://storage.googleapis.com/syzbot-assets/906b09e16f16/disk-4235cb24.raw.xz
+vmlinux: https://storage.googleapis.com/syzbot-assets/2cb120bc3818/vmlinux-4235cb24.xz
+kernel image: https://storage.googleapis.com/syzbot-assets/880615d1b5d5/bzImage-4235cb24.xz
+
+IMPORTANT: if you fix the issue, please add the following tag to the commit:
+Reported-by: syzbot+87c7c2d63c44e41c77a3@syzkaller.appspotmail.com
+
+------------[ cut here ]------------
+!iov_iter_count(&con->v2.in_iter)
+WARNING: net/ceph/messenger_v2.c:3129 at populate_in_iter net/ceph/messenger_v2.c:3129 [inline], CPU#0: kworker/0:2/188
+WARNING: net/ceph/messenger_v2.c:3129 at ceph_con_v2_try_read+0x6634/0x6810 net/ceph/messenger_v2.c:3159, CPU#0: kworker/0:2/188
+Modules linked in:
+CPU: 0 UID: 0 PID: 188 Comm: kworker/0:2 Not tainted syzkaller #0 PREEMPT(full) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/16/2026
+Workqueue: ceph-msgr ceph_con_workfn
+RIP: 0010:populate_in_iter net/ceph/messenger_v2.c:3129 [inline]
+RIP: 0010:ceph_con_v2_try_read+0x6634/0x6810 net/ceph/messenger_v2.c:3159
+Code: 8d 3d 70 31 d5 04 43 0f b6 04 3e 84 c0 48 8b 54 24 38 0f 85 85 00 00 00 8b 32 67 48 0f b9 3a e9 40 ff ff ff e8 3d cd 31 f6 90 <0f> 0b 90 41 bd c3 ff ff ff e9 32 ff ff ff e8 29 cd 31 f6 90 0f 0b
+RSP: 0018:ffffc90002f574a0 EFLAGS: 00010293
+RAX: ffffffff8b9536c3 RBX: 0000000000000000 RCX: ffff888020b05d00
+RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
+RBP: ffffc90002f57a78 R08: ffff888033ca86a7 R09: ffff888033ca869b
+R10: dffffc0000000000 R11: ffffed10067950d5 R12: fffff520005eaee4
+R13: 0000000000000000 R14: 0000000000000010 R15: dffffc0000000000
+FS:  0000000000000000(0000) GS:ffff888124f4e000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007f7c5aa0fff8 CR3: 00000000251ca000 CR4: 0000000000350ef0
+Call Trace:
+ <TASK>
+ ceph_con_workfn+0x1f5/0x14a0 net/ceph/messenger.c:1575
+ process_one_work kernel/workqueue.c:3322 [inline]
+ process_scheduled_works+0xa8e/0x14e0 kernel/workqueue.c:3405
+ worker_thread+0xa47/0xfb0 kernel/workqueue.c:3486
+ kthread+0x388/0x470 kernel/kthread.c:436
+ ret_from_fork+0x514/0xb70 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
+
+
+---
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
+
+syzbot will keep track of this issue. See:
+https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
+
+If the report is already addressed, let syzbot know by replying with:
+#syz fix: exact-commit-title
+
+If you want syzbot to run the reproducer, reply with:
+#syz test: git://repo/address.git branch-or-commit-hash
+If you attach or paste a git patch, syzbot will apply it before testing.
+
+If you want to overwrite report's subsystems, reply with:
+#syz set subsystems: new-subsystem
+(See the list of subsystem names on the web dashboard)
+
+If the report is a duplicate of another one, reply with:
+#syz dup: exact-subject-of-another-report
+
+If you want to undo deduplication, reply with:
+#syz undup
