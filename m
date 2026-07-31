@@ -1,97 +1,60 @@
-Received: from mail-oi1-f208.google.com (mail-oi1-f208.google.com [209.85.167.208])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B0C23793B1
-	for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2026 07:09:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.208
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F6CE3C4172;
+	Fri, 31 Jul 2026 10:14:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785481774; cv=none; b=VgcANYjuuLAzRoIzjdSa4/kJBBpMty6iyp6XRXj9H4fCcteYrd5LQdi/h2q68y5E4nanvm/n8u8qPosrflBult1JdfMJeWKAm0mdNbYyk1zkvOR9rt53i7oiJX8nU1gvB45fLshQPtyYEzGxrNYpwBI2M5GLcVNY+gSEtG0sW2k=
+	t=1785492906; cv=none; b=bKVU1Edo0aRCk6x0jaYvUWXrrZvVt/j6BYPJ+vo0HhiY0hHAhmDfILDsCy+5nLqers+LnJvFAQ0eCmG23c/6PC84RzvsqqhCNGyJFrii0C2D0SV2PJtFX5cNbJPBSbF7vUPG5qYwqPgN0MBMxz3TpUk+EKhpVvwlgigj88Cf0mY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785481774; c=relaxed/simple;
-	bh=BGdvz7AuKqJqgWteXG2FyESZcoQUein1XaOA//oZFes=;
-	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=GIuIqQ1FiCDcKM2IBW8MItUYn6gHi1dJ7NkP5OBFSYcwADBMipzkA4wPTOKWwGzPN/QRS6+5Wu+ci/O34WQId9xo7xzHPQC/E11Roy8dohHKKsPbgUIxiZp28UdY3PsCkeZS+U1KtK/m2ArlPbt2U6oRDLiLB8wNq0B6C2FEZH8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=209.85.167.208
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
-Received: by mail-oi1-f208.google.com with SMTP id 5614622812f47-4a416619e8dso677107b6e.1
-        for <ceph-devel@vger.kernel.org>; Fri, 31 Jul 2026 00:09:29 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785481768; x=1786086568;
-        h=content-type:to:from:subject:message-id:date:mime-version
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=6TxOFRqDiLyKxI4NvkM6WuuKVCWvMgpQ+aQoyI5Utq4=;
-        b=LnyBAuWdz1zcJgY2oYX28hdbonVTsLk0DY0dMtUm+NZA2YOHrd51OLCUssUDws4Mb9
-         U4vHgZsQAfjhYXv4boVnoD81H2D39n8WyrhTQDrNvl7wh+rGt+xKY4ddycThpe/f1FHv
-         e5qK9xbew1IzOo+LxXaJ3W35H+n6F5aKXf4imoqDBjCrwvvUn6Sv6ImddnLsxnlojIlH
-         Dpdj3zLv8rGlPvD2lQi4TXBvmxQzNUihjhCbPHukhShRUhA9DjkqPkk7oOJhGC9NtOnC
-         IZJkLJYEg23nThtnqNacM1FFfmLkrhZzx+oMXEisaJI8tvctQ5CKrdjUTPjK03kFRLVQ
-         Ly/g==
-X-Forwarded-Encrypted: i=1; AHgh+Rog/T7wKpfWXwfVgSdzUnpMg9Rd4F7v95cMy4AXOwfDKCywvXNFWwBJyrGE37sBnTi9it/WKmUcwOLk@vger.kernel.org
-X-Gm-Message-State: AOJu0YzmyotPPWN5SxwpkkaK96xyTRPCZgpRCmlKrA92BWvzgWGEKfWb
-	KM9zB6cagG4ZsemR7WxYwTH0wFMTLMSmnSwtxyYEs2TOcJrcPj9YD6h6h/z9GdVokdd1sO0o5L/
-	clw1eIFNzgxyhRB0ZW8T10+bEvBwQvPzLmjZNc5aw7lbbtrB4V2MVOvzEHg8=
+	s=arc-20240116; t=1785492906; c=relaxed/simple;
+	bh=hOVBjEhj881AduAfxRM4Kkaam08OAvoklM/AEWeXIGU=;
+	h=From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:Date; b=mcPofQ89iW+eG0Q+Slu73YliI1X8gbF0mayq4sDiwqo0pPpwMY2Pl67oQlaDxcLh+j7FNOs07ZZw2tsZkxr0/j0mxMbN+y63k1+ApqbZJexI1X5hAiauh/wKg9olYWcyv7gVgs2RM2ce/I4A40BNwP3MssH/5g+o3lMOuHBB7A4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZOdnbWRB; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZOdnbWRB"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id A32E91F000E9;
+	Fri, 31 Jul 2026 10:14:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785492891;
+	bh=+kH9xojsM2T8bI2xbrx2KxKoYuIBEFYn1YpY4NiUPik=;
+	h=From:To:Cc:Subject:Date;
+	b=ZOdnbWRBBiYXh37AazNkz55xQ5rrmJA4j7sH800oh+MmowC0n/wO2Ku9rADhan4R1
+	 fYoNnLicSXnMkI+40Rlcg9ejYPrUJPLOuZSls6ylW5srN8ipTFBz0KifwjAtFw737q
+	 oXCv2MU275GXauob/oTqZ3JV2Z/60Z0E57ltHvGPjdbm9h3mWfB0a0qAI5mpHAhZLX
+	 RQRY2qS7PoZe32ehEtZKXWTRUmiQSj6Q2jXlNV4kqxgh8+6Ox64p5WHo0kBLTan0zr
+	 RGuxgJlLqkSF7xaDxtbRZod5/VDcBBybu5159bul950BgnuCLflR1SNVIhW7MY11L+
+	 y3Dma6bl5Bihg==
+From: "syzbot" <syzbot@kernel.org>
+To: syzkaller-bugs@googlegroups.com, Aleksandr Nogikh <nogikh@google.com>, "Alex Markuze" <amarkuze@redhat.com>, <ceph-devel@vger.kernel.org>, "Ilya Dryomov" <idryomov@gmail.com>, "Viacheslav Dubeyko" <slava@dubeyko.com>
+Cc: linux-kernel@vger.kernel.org, syzbot@lists.linux.dev
+Subject: [PATCH] libceph: validate banner payload length
+Message-ID: <88076cd2-1b1c-4988-905d-aa4745af3872@mail.kernel.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Received: by 2002:a05:6808:19a8:b0:490:17f1:ac3b with SMTP id
- 5614622812f47-4ae31a41dcdmr830283b6e.18.1785481768223; Fri, 31 Jul 2026
- 00:09:28 -0700 (PDT)
-Date: Fri, 31 Jul 2026 00:09:28 -0700
-X-Google-Appengine-App-Id: s~syzkaller
-X-Google-Appengine-App-Id-Alias: syzkaller
-Message-ID: <6a6c4a28.77639fcc.3d4fd0.001f.GAE@google.com>
-Subject: [syzbot] [ceph?] WARNING in ceph_con_v2_try_read
-From: syzbot <syzbot+87c7c2d63c44e41c77a3@syzkaller.appspotmail.com>
-To: amarkuze@redhat.com, ceph-devel@vger.kernel.org, idryomov@gmail.com, 
-	linux-kernel@vger.kernel.org, slava@dubeyko.com, 
-	syzkaller-bugs@googlegroups.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Date: Fri, 31 Jul 2026 10:14:50 +0000 (UTC)
 
-Hello,
+From: Aleksandr Nogikh <nogikh@google.com>
 
-syzbot found the following issue on:
-
-HEAD commit:    4235cb24ec1e Merge tag 'vfs-7.2-rc5.fixes' of git://git.ke..
-git tree:       upstream
-console output: https://syzkaller.appspot.com/x/log.txt?x=129ba7b1580000
-kernel config:  https://syzkaller.appspot.com/x/.config?x=4e38b15c29e6a1d9
-dashboard link: https://syzkaller.appspot.com/bug?extid=87c7c2d63c44e41c77a3
-compiler:       Debian clang version 22.1.8 (++20260613092233+e80beda6e255-1~exp1~20260613092250.77), Debian LLD 22.1.8
-syz repro:      https://syzkaller.appspot.com/x/repro.syz?x=16d96499580000
-C reproducer:   https://syzkaller.appspot.com/x/repro.c?x=12eaf2ea580000
-
-Downloadable assets:
-disk image: https://storage.googleapis.com/syzbot-assets/906b09e16f16/disk-4235cb24.raw.xz
-vmlinux: https://storage.googleapis.com/syzbot-assets/2cb120bc3818/vmlinux-4235cb24.xz
-kernel image: https://storage.googleapis.com/syzbot-assets/880615d1b5d5/bzImage-4235cb24.xz
-
-IMPORTANT: if you fix the issue, please add the following tag to the commit:
-Reported-by: syzbot+87c7c2d63c44e41c77a3@syzkaller.appspotmail.com
+When parsing the Ceph messenger v2 protocol banner, the `payload_len` field
+is decoded from the banner prefix. If a client sends a banner with a
+`payload_len` of 0, the kernel sets up a 0-length socket read. This
+violates an invariant in the state machine, triggering a warning in
+`populate_in_iter()`:
 
 ------------[ cut here ]------------
 !iov_iter_count(&con->v2.in_iter)
-WARNING: net/ceph/messenger_v2.c:3129 at populate_in_iter net/ceph/messenger_v2.c:3129 [inline], CPU#0: kworker/0:2/188
-WARNING: net/ceph/messenger_v2.c:3129 at ceph_con_v2_try_read+0x6634/0x6810 net/ceph/messenger_v2.c:3159, CPU#0: kworker/0:2/188
-Modules linked in:
-CPU: 0 UID: 0 PID: 188 Comm: kworker/0:2 Not tainted syzkaller #0 PREEMPT(full) 
-Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/16/2026
-Workqueue: ceph-msgr ceph_con_workfn
-RIP: 0010:populate_in_iter net/ceph/messenger_v2.c:3129 [inline]
-RIP: 0010:ceph_con_v2_try_read+0x6634/0x6810 net/ceph/messenger_v2.c:3159
-Code: 8d 3d 70 31 d5 04 43 0f b6 04 3e 84 c0 48 8b 54 24 38 0f 85 85 00 00 00 8b 32 67 48 0f b9 3a e9 40 ff ff ff e8 3d cd 31 f6 90 <0f> 0b 90 41 bd c3 ff ff ff e9 32 ff ff ff e8 29 cd 31 f6 90 0f 0b
-RSP: 0018:ffffc90002f574a0 EFLAGS: 00010293
-RAX: ffffffff8b9536c3 RBX: 0000000000000000 RCX: ffff888020b05d00
-RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
-RBP: ffffc90002f57a78 R08: ffff888033ca86a7 R09: ffff888033ca869b
-R10: dffffc0000000000 R11: ffffed10067950d5 R12: fffff520005eaee4
-R13: 0000000000000000 R14: 0000000000000010 R15: dffffc0000000000
-FS:  0000000000000000(0000) GS:ffff888124f4e000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 00007f7c5aa0fff8 CR3: 00000000251ca000 CR4: 0000000000350ef0
+WARNING: net/ceph/messenger_v2.c:3129 at populate_in_iter
+net/ceph/messenger_v2.c:3129 [inline], CPU#1: kworker/1:3/5070
+WARNING: net/ceph/messenger_v2.c:3129 at ceph_con_v2_try_read+0x6634/0x6810
+net/ceph/messenger_v2.c:3159, CPU#1: kworker/1:3/5070
+...
 Call Trace:
  <TASK>
  ceph_con_workfn+0x1f5/0x14a0 net/ceph/messenger.c:1575
@@ -103,28 +66,43 @@ Call Trace:
  ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
  </TASK>
 
+According to the msgr2 protocol specification, the banner payload is
+expected to contain at least two 64-bit integers (`server_feat` and
+`server_req_feat`). Therefore, `payload_len` must be at least 16 bytes.
+
+Fix this by adding a check in `process_banner_prefix()` to reject a
+`payload_len` smaller than 16 bytes. This prevents the 0-length read and
+correctly aborts the connection with a protocol error.
+
+Fixes: cd1a677cad99 ("libceph, ceph: implement msgr2.1 protocol (crc and secure modes)")
+Assisted-by: Gemini:gemini-3.5-flash Gemini:gemini-3.1-pro-preview syzbot
+Reported-by: syzbot+87c7c2d63c44e41c77a3@syzkaller.appspotmail.com
+Closes: https://syzkaller.appspot.com/bug?extid=87c7c2d63c44e41c77a3
+Link: https://syzkaller.appspot.com/ai_job?id=c8ca3d63-717a-4933-89ec-f3d761b8690d
+Signed-off-by: Aleksandr Nogikh <nogikh@google.com>
 
 ---
-This report is generated by a bot. It may contain errors.
-See https://goo.gl/tpsmEJ for more information about syzbot.
+diff --git a/net/ceph/messenger_v2.c b/net/ceph/messenger_v2.c
+index 05f6eea29..b323b61e7 100644
+--- a/net/ceph/messenger_v2.c
++++ b/net/ceph/messenger_v2.c
+@@ -2142,6 +2142,11 @@ static int process_banner_prefix(struct ceph_connection *con)
+ 	payload_len = ceph_decode_16(&p);
+ 	dout("%s con %p payload_len %d\n", __func__, con, payload_len);
+ 
++	if (payload_len < sizeof(u64) + sizeof(u64)) {
++		con->error_msg = "protocol error, bad banner payload len";
++		return -EINVAL;
++	}
++
+ 	return prepare_read_banner_payload(con, payload_len);
+ }
+ 
+
+
+base-commit: f5098b6bae761e346ebcd9da7f95622c04733cff
+-- 
+See https://goo.gle/syzbot-ai-patches for information about AI-generated patches.
+You can comment on the patch as usual, syzbot will try to address
+the comments and send a new version of the patch if necessary.
 syzbot engineers can be reached at syzkaller@googlegroups.com.
-
-syzbot will keep track of this issue. See:
-https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
-
-If the report is already addressed, let syzbot know by replying with:
-#syz fix: exact-commit-title
-
-If you want syzbot to run the reproducer, reply with:
-#syz test: git://repo/address.git branch-or-commit-hash
-If you attach or paste a git patch, syzbot will apply it before testing.
-
-If you want to overwrite report's subsystems, reply with:
-#syz set subsystems: new-subsystem
-(See the list of subsystem names on the web dashboard)
-
-If the report is a duplicate of another one, reply with:
-#syz dup: exact-subject-of-another-report
-
-If you want to undo deduplication, reply with:
-#syz undup
