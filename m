@@ -1,300 +1,255 @@
-Received: from DM1PR04CU001.outbound.protection.outlook.com (mail-centralusazon11010053.outbound.protection.outlook.com [52.101.61.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B1803D3488;
-	Sat,  1 Aug 2026 02:17:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.61.53
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785550648; cv=fail; b=fwE0P1TeUtTsX3YFPMdXuMedKUHNFAK3EmUcIN8vO/kW4srruPdm5QKBT02ZCMGPb4kkwEflhx755pjsy/RJU5QAhFlexTaYkf/2YNgH16BY27hYiXZm+FvQjvZTVbDg0oSYwP1Tqay1ZaNWrr133iFz1DabnyxThxyIBRWcFls=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785550648; c=relaxed/simple;
-	bh=d1qronFy9w/J6Cgcl7Cn9sKuhG1MUxv1S4B+7W7oq5Y=;
-	h=From:Date:Subject:Content-Type:Message-Id:References:In-Reply-To:
-	 To:Cc:MIME-Version; b=GaR0xU6EeSpUJieOmVI1mIkO6/M3U/a/vZ4Zh5d20/j3rQqkhtiGOEMiBjsCUlXuCr/AasHKJRvI8jtaDMiRzmNGXRTDgBwzvXNaIE2CLLuGBnPBVMY7YuastEXKn5NoAq/NvgerODb+LdeMs8C8MhgTQNrpUhSPEEJaN4kV934=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=bQtJCjRc; arc=fail smtp.client-ip=52.101.61.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4D75345EA3
+	for <ceph-devel@vger.kernel.org>; Sat,  1 Aug 2026 15:46:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1785599217; cv=none; b=LL7dEuyOjR8Z4l3019N4YxqGxE80M6nVk5zHfjZlU2AWg+XY4jlBrAbB7eviGfKJazrxJMPVFTJ5PrQqVQAgRnZXIl701yYJY6GltDg+LSuKA+StqXF7Txwrl1zix8hmTvRGeHsYdhYGFdOP7RbxZaGrgfhEFMk//Walxoc6r00=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1785599217; c=relaxed/simple;
+	bh=Y+F1HB+tbEbIakNHePIXL19RIP7js/Qa1d0d1IS0Cbc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=eXHlfNUyyTQslxv8elzxzX90mT/+9cTvLuzak6sa5Iiy6leLr0Er1HTSPP2MHj+HDji+JHh91uLo1UAH1PHd1louKtQ2LhJDQMNDlMd34cZTd2nnH9ejA0JC8iRMOX919B9JdTALqSlj5BZUY9p7F+ti/Hrb0Wk7I7784kvFHaQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZRsS50g5; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="bQtJCjRc"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=I7l9fgb+NuvuD+R5anVs9JYMUi9a35IiDvgs/M65huGyuB4XSkdcBFj96Qsd4fQvL+LYnCokcXI6YGNTMlUR0kRWAJcIqrrVFxwK1GqQbBT4G9mkU2Rtpb+gn3tfpqHFukVs+XDyiDlcfFXpgM6SfqhEKNEeMH8odAUvqlly9le4c5AAxlWKeJRxAwj5Gnn8e4oQP/kEpiJ8THYPCLFJNFAEis4FQ3uqsLh7sfktPtylKAhNuVq566pkwHsggmeS9yGNlWqyichD7oEh3WCkdI/EWxpxh5be4NNvmHAbubTIlg3U8hBOvdgGZKAOptr9V2j1Adpw2ZK1njjfNDT93g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=/N0f4pNTjlrvvsqDiA7ch3Ptmh4hKaDn1JOzG+v4I3A=;
- b=otux9MDqIdxHs+pCSiXtdqclJAYl+aMcQIF2miG1l8auumH8RAVQU45YSDDmdqPlBbRrKdGXePSBT47PY96SIUaKZoQAFHE6QsPHY/lxVFiPMXwFD7WtzHN2BkunjPTJ3GjhlIT6bSxw5/QpY8JZQqcPo89uSXkMoW/G6IoLetO44duPs2nJ0WHB15KS17gY04/9adoKp0Q9fJG0XSXA2obOWIWuOjb0Fsey2qeXVPEpvIrvimLa9ejG3l9ArcW79Yw8kOixwaTKjA23ZUTMoCR4lF9SldsS69a3r1Gf1arnPyKmXGySPDW/2sm+PtB6hr8w4HKEkJctyJZ6e0MIrw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=/N0f4pNTjlrvvsqDiA7ch3Ptmh4hKaDn1JOzG+v4I3A=;
- b=bQtJCjRcuc2HBPbuaVO6OGBKCBrhVaAsY8lmE7Ex1778BBK+IMVFgysRjbdvIzrFCaRgzn/qbt3MShUxgoiBRXklSIW+UCoAFsug+YoZ9y0O+vr3gBCzirSzNoQ2oEdnwYo8VbYvNpkI7Z0QRlfXFvxXLEkWOD5nMfIB5CbXCYbKyN8g9/Syo9+3EhGFsfZTED9pkxmvZIzyYoVpol+fDs572bq2BSRYUkcxPKDDlrdOxrOyE+JdAdHLO4OcDbwFg6RhJ5T39fdew36thYM0bD8bsjVlGiUVXTYicIv60i+Rt9ugM99iXTtLs9cc5jbSaIpcvhH0cP12p9ZTmp/gGw==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from IA0PR12MB8374.namprd12.prod.outlook.com (2603:10b6:208:40e::7)
- by PH8PR12MB7373.namprd12.prod.outlook.com (2603:10b6:510:217::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.270.16; Sat, 1 Aug
- 2026 02:17:19 +0000
-Received: from IA0PR12MB8374.namprd12.prod.outlook.com
- ([fe80::d85f:4c87:ae84:3f16]) by IA0PR12MB8374.namprd12.prod.outlook.com
- ([fe80::d85f:4c87:ae84:3f16%5]) with mapi id 15.21.0270.015; Sat, 1 Aug 2026
- 02:17:19 +0000
-From: Zi Yan <ziy@nvidia.com>
-Date: Fri, 31 Jul 2026 22:13:36 -0400
-Subject: [PATCH RFC 13/14] treewide: adjust comments on PagePrivate and
- PG_private
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260731-remove-pg_private-v1-13-142c97ba3562@nvidia.com>
-References: <20260731-remove-pg_private-v1-0-142c97ba3562@nvidia.com>
-In-Reply-To: <20260731-remove-pg_private-v1-0-142c97ba3562@nvidia.com>
-To: David Hildenbrand <david@kernel.org>, 
- "Matthew Wilcox (Oracle)" <willy@infradead.org>, 
- Andrew Morton <akpm@linux-foundation.org>, 
- Muchun Song <muchun.song@linux.dev>, Lorenzo Stoakes <ljs@kernel.org>, 
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, 
- Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
- Michal Hocko <mhocko@suse.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
- Nico Pache <nico.pache@linux.dev>, Ryan Roberts <ryan.roberts@arm.com>, 
- Dev Jain <dev.jain@arm.com>, Barry Song <baohua@kernel.org>, 
- Lance Yang <lance.yang@linux.dev>, Usama Arif <usama.arif@linux.dev>, 
- Gregory Price <gourry@gourry.net>, 
- Ying Huang <ying.huang@linux.alibaba.com>, 
- Alistair Popple <apopple@nvidia.com>, Johannes Weiner <hannes@cmpxchg.org>, 
- Qi Zheng <qi.zheng@linux.dev>, Shakeel Butt <shakeel.butt@linux.dev>, 
- Kairui Song <kasong@tencent.com>
-Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, 
- Zi Yan <ziy@nvidia.com>, Ilya Dryomov <idryomov@gmail.com>, 
- Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
- Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
- Richard Weinberger <richard@nod.at>, Zhihao Cheng <chengzhihao1@huawei.com>, 
- ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, 
- linux-mtd@lists.infradead.org
-X-Mailer: b4 0.14.3
-X-ClientProxiedBy: YQBPR0101CA0267.CANPRD01.PROD.OUTLOOK.COM
- (2603:10b6:c01:68::27) To IA0PR12MB8374.namprd12.prod.outlook.com
- (2603:10b6:208:40e::7)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZRsS50g5"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2caf228a910so14559475ad.2
+        for <ceph-devel@vger.kernel.org>; Sat, 01 Aug 2026 08:46:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785599213; x=1786204013; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=YTrKNi3+MrECxNlqKVpRT5BFV68pBJo2ri08VcWIuD4=;
+        b=ZRsS50g52b17YRQxkyDh/Htty0MwZ7IJBQTgQ/3LGYNl7sibKb5mgsuWphVmXdzZdK
+         FanDx2nEhYIl0Ox26Np3qgfs87ZfJKnpv9xS4ioAAW5TnhD8iEJ8Trv/GXDx4x6webiI
+         pjspR3yUNwy3stIJ6OCSaqws6p1EWmApg6uHFLvX3skdxzeHMPEby0pPSQpJDjyRf2lM
+         zCcmGPmBnQwCT+UMY4sUVyzaZMORRXrx0bnnSD5KYarkexXCzaOBGpl/UJXCLjNqnMl6
+         dTnyX5FQykzfy/aYD0C0EaWSjxm053JGJT/p70CFLNcKpBSNXH3W0pf4HwFyBElatQsH
+         hOMw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785599213; x=1786204013;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=YTrKNi3+MrECxNlqKVpRT5BFV68pBJo2ri08VcWIuD4=;
+        b=Rsye2ddjK1YeyGDex5QvfML4BdJfLDEoSS6SbKLZH9ez4/QkPyQEfRWNqhkQe6/GYw
+         fMg6BUnBevp/GQJ1RUx+nQcLsuGZw3rQGqRa4HjT88SX7HN8i/LS0J6w2gKDjrHJ8ADZ
+         VjV54vkoo7I6zYG8lWLQ9XIbArxya/dSfQtMDLtxfvg9TyIlhYMP5pBjrEmWOZrkc/nd
+         o/J5H62Y7UqyOzNjNTg8ImQTqD9IHkv8xHNxSfoFF+QzDS0C7Dy2ZcC4xMuT3Mkp59XU
+         t7cziWgC7sJHNEm3dnI5/vssC1vYfaDTd4BVQ75we6kAUQuylRq/lrPOXeU1c6ZTYv1t
+         VgOQ==
+X-Forwarded-Encrypted: i=1; AHgh+RqOBwbqg+U4dRj6V6fy9fFER5xG5ecMQZNA7FvCf7IxVKQWTyXew+Vb8sNEVlvQGWUu/cey3dxFLyDO@vger.kernel.org
+X-Gm-Message-State: AOJu0YwHz9QkkH7Q5yeJcA+G+nO9tfveOtYQrHdoyaFIspqs05vzgZVi
+	Fj2z1hjb8WQZHcBMRVUsUQR0n87ydw9B6dh5Nl3MnP9J4hEwops8Nfdo
+X-Gm-Gg: AR+sD109tW9KKvQ6MVCW5luT/L1bfPc/8aLOk+Ncf2WUxuIkx//XCkM7rL7l1b0JUdb
+	F2JSvySSUS20M5cJd6XNuKU/QrtY3KoCT+yZ3JSJkT7pqXcRhe47aszewvM/V/erKEvZJcMZExy
+	Nkod04qQ/ywJGUl8FOprODh8/SnwoNuAO57QxSsFRWhxZnn923CGSvPHvm9RuuO1fmAchlnWk2f
+	Ef4wUq3NAKTtIAwr90hX8UtXOIpC5cE9IXeuJ8LKQQIaABUD518q2J3b2NSmbYtKIEomnxQfpIH
+	P3vsEYr+iLgtDCG/Ml1YSqxNm4Cf+xEluTZpDQS1Vhsr8vhyJO6fP7tRD2hHXWe8VB1PoKjZzBY
+	z8sPQqNfDN26jsN8cUkVcU9kfn7sndW2VOHN/thPrYrl+u/ObyL1iZUOeqqC6jchuBeHK+fi8XL
+	9Nv6L56+s6zaNCUYMDDM4/3mwMFlnn/8yddLEs00pjWyDHetPL0pk5Q0OBZ0E7qKqCVHxO2he2n
+	ufidbH4qAQ6pKHEnQGLjXYz6kfwXYq7LAn78y7tKXIGPiI=
+X-Received: by 2002:a17:902:e943:b0:2cf:ba0c:aa5a with SMTP id d9443c01a7336-2d05241650emr38409935ad.47.1785599212500;
+        Sat, 01 Aug 2026 08:46:52 -0700 (PDT)
+Received: from 127.net ([2620:10d:c092:600::1:61d0])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2d04b12202bsm18287605ad.66.2026.08.01.08.46.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 01 Aug 2026 08:46:50 -0700 (PDT)
+From: Pavel Begunkov <asml.silence@gmail.com>
+To: Jens Axboe <axboe@kernel.dk>,
+	Keith Busch <kbusch@kernel.org>,
+	Christoph Hellwig <hch@lst.de>,
+	Sagi Grimberg <sagi@grimberg.me>,
+	linux-block@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-nvme@lists.infradead.org,
+	linux-fsdevel@vger.kernel.org,
+	io-uring@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	dri-devel@lists.freedesktop.org,
+	linaro-mm-sig@lists.linaro.org
+Cc: asml.silence@gmail.com,
+	Alexander Viro <viro@zeniv.linux.org.uk>,
+	Christian Brauner <brauner@kernel.org>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Sumit Semwal <sumit.semwal@linaro.org>,
+	=?UTF-8?q?Christian=20K=C3=B6nig?= <christian.koenig@amd.com>,
+	Nitesh Shetty <nj.shetty@samsung.com>,
+	Kanchan Joshi <joshi.k@samsung.com>,
+	Anuj Gupta <anuj20.g@samsung.com>,
+	Tushar Gohad <tushar.gohad@intel.com>,
+	William Power <william.power@intel.com>,
+	Phil Cayton <phil.cayton@intel.com>,
+	Jason Gunthorpe <jgg@nvidia.com>,
+	Damien Le Moal <dlemoal@kernel.org>,
+	Alasdair Kergon <agk@redhat.com>,
+	Mike Snitzer <snitzer@kernel.org>,
+	Mikulas Patocka <mpatocka@redhat.com>,
+	Benjamin Marzinski <bmarzins@redhat.com>,
+	Vishal Verma <vishal.l.verma@intel.com>,
+	David Sterba <dsterba@suse.com>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	dm-devel@lists.linux.dev,
+	nvdimm@lists.linux.dev,
+	linux-btrfs@vger.kernel.org,
+	ceph-devel@vger.kernel.org
+Subject: [PATCH v5 00/16] Add dmabuf read/write via io_uring
+Date: Sat,  1 Aug 2026 16:46:12 +0100
+Message-ID: <cover.1785596451.git.asml.silence@gmail.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA0PR12MB8374:EE_|PH8PR12MB7373:EE_
-X-MS-Office365-Filtering-Correlation-Id: 6e22c095-4377-4be3-2299-08deef730352
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|7416014|376014|1800799024|23010399003|366016|11063799006|56012099006|10067099003|18002099003|22082099003|6133799003|921020;
-X-Microsoft-Antispam-Message-Info:
-	OoYjSdhMB5/FfsvCLddwvHB3YtSqnSfRwAi2zUiLB3su4ahtVUwmwZpCFMxQd4VdnBKSiNSc/SztlIWSIGBg79kFjjGjBqNKL3942KARlODfOpGbrpIRfo+q2j/V7OwXX+KowJFPKGZd7wD62ww7NWgY7oY2gW0N8n0AGrs55SFHExmPgCLS4NExcTmjDFnaqe9lU659BDghGWhgVj5Zy5eqIleeFyopNPKNH0N7Tk4GpqxYWV4s5FTqTRsOGujCs9CdqtP8O9e482a48Jplnn+P+RWxDVMpRLp8QJ9cVG+6aCjDbaj/Xi3Li/cXLSRCuy75tW56lefPqC8QlruEpD7vpq2jIMBHxyz4dtnP8xCPe9ae/P2v+OEl90R14Z51vi6FWuCm0TyHS11233FRvyeNAK6FeFxn8ooz2YWMQS5STzBSJeslpXLSpJ7HXWnTTSw6oxsvPIvtNseb3B1mL9dRcssOMbqGXEKGfAZiUFrHBGX2VbR7G7mPJK/dskgRY+IEZnCvqha4ujE6bJvtYqksSsgiRfyRX+rDQzQzjOy5PAUkCF99pMfSv9V2DYJ+RNY6V1/kkDweSd+Z0AEJebIE5AmewKabCHJnac2l00cONWwKU44AoNqXel1wkqSYSmNF1JchPRWXn0bhrZ5mbX1pRK6Mafy74mJ7zLkmDVbG1GtMze2JrpjIMJ2WuyX2DFNf5Wa40SR1DlxVe8DJlA==
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA0PR12MB8374.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(1800799024)(23010399003)(366016)(11063799006)(56012099006)(10067099003)(18002099003)(22082099003)(6133799003)(921020);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?VFM3bzBmNVZ1WE15SmtDV004UFVkc0E5MDNqQ0Z4NEpVU3FUdTVndXQ4RVJr?=
- =?utf-8?B?RFc4eU1GY1dSY2U4ZndQVVFhSWZsSnZlelFXbWUvdkxGQXN0Z0ZRQjc1cENn?=
- =?utf-8?B?S25UVkNHQXZ0VDBxL2lmQW9Zd0NRdjI2RjY1NTRiTUxxcFZLNE1zTkRDdFVz?=
- =?utf-8?B?Ujh0WnpuQ2c0WFJrQURrTHdYWnE3NWFHMzhib3ZIKys0TnpTQ1ZvNlZ5ZEZT?=
- =?utf-8?B?OGYzU2JzdWJUQXBpbDdQajR4bkd0dGp0emFuTmR6eVdMeS9ESjhmeTdQRC9L?=
- =?utf-8?B?NU4xM3pvMXR3d2JOaGhaVER1MDRsRVo2cTRpTHFRdGdNbExqZnl0YWdqRFY5?=
- =?utf-8?B?TGJpeHYxNk10SE51NklHLzlKSWZQdTFsTkl5KzNydlV2QUlLcmYxSFpHMzY3?=
- =?utf-8?B?YlhvbWdwU3VCM3NoKyszc2JMcFZRL1hFK0JTQ1RGaU1tbEVualVHRDBaNzRx?=
- =?utf-8?B?SEtpcEhoYjB0TUd0VnNQckpqNUtCc2UrR2xPN2FlZFlDUzZSWlB2NHRWWHJL?=
- =?utf-8?B?anUyRzFRTmJoYklEZXR3T1FUQnFIcU1XZkxTeEVuYVEvU2JKVVFVSG9qY0gr?=
- =?utf-8?B?S3hlSGh1dzIrYTVucURtYU9HVXdMRnd0YVNGTVVVMnNoQk9QRHhITGZNZmx0?=
- =?utf-8?B?VmNHY2FYRTlWNm1FVWtVT0NuU3NtdUxHMDl1eDZOYTZPempRbDhvWXZJSWxC?=
- =?utf-8?B?c2gwanNKbnpNemM5UklxNmdhOGxLbDg3SitiWmIzbk5kaDc3dmFhWjU3d0hY?=
- =?utf-8?B?ejRLVmVuei8vTGpKdURleDBzSU9XV3BmdGI4dnhVWFBoaXFlUk9Nb0JRR0R4?=
- =?utf-8?B?b0FQYnJrdXRSM2dqN0k2TGE0T1hRa3pNMUo5V0VLNlpoZkVWVHYybjNsZWxk?=
- =?utf-8?B?K3JqYlA2UXlHbU9oZjNHOVcwdzRYVnBuTmNWaVU1eDNnUUc1V1JKS0RDTWFE?=
- =?utf-8?B?WWxWUHFnZjhxU0EvQTUrYm9QMFAxOFRZdmpIY1ZWUmJtTHEwRVNXS2NqWFV6?=
- =?utf-8?B?dWo1eTh1MlltenpQYlpyYlV5czJnMHdzQzljTGx4R0V5ODljUFIrc3RnYzFt?=
- =?utf-8?B?M0QrYktVbU8zRVJuK05ObFJ6NEtITngrUS9SUGxSZDhZSWl0MU5DYkhVb25p?=
- =?utf-8?B?REsyTStFZWhITUR6ajU2UmsvR0xNNk9EY3B5NFZlMkoxM3R4VE5hbDBQYTcz?=
- =?utf-8?B?QS9LRkVheUdWc0hvbzFycXlZTDRhNDd2L0x5cldoblNmL1VtbDJzNUE4d3hv?=
- =?utf-8?B?d1IwT0EvRkNnemxLOUg2NW03cFJaT00xV0pPQ0hKcHZzRkFKNEFUYlAraWhP?=
- =?utf-8?B?RmQzWTY5djRadVk5WXE4Zi80Qm1IVVhLTjVLWklxbGN4RE1hQThTQUN0YUNX?=
- =?utf-8?B?QlJxWCtMOHZHdU91ZE1vWGQwV0U5c1g1aXdpaFl5TlQ3UUZLNWQvMG9kRTZv?=
- =?utf-8?B?VkV5cXdrUUVySlAvdEliMXBrZjU0a1hITU5ka1piMUNUcGl2VG5DZXZQa3Ay?=
- =?utf-8?B?ZzFPSU51NkJNYW51eUoyUXhMT2JoMU9CaEpmRFliMXVtRXV2T3hIQndWOXpu?=
- =?utf-8?B?VnlyZWRva1FZZklmcVpieGpPN0R4dExMclI2K25rS3I5MnZ5NnFPM1lpVnB1?=
- =?utf-8?B?OWJjandxWkNtcVI4cFJqeFZBVXd0dldOSnc5Y0dya0UwRUhWckZDM1ErN2hR?=
- =?utf-8?B?N0dnOHg2Qm9BRGcxc2lyZDFtQTZTYmpoK0xFYlpBVk9zdnJtU3QrN3U3MXl6?=
- =?utf-8?B?dFRaSjlBWEJENm9iSUQ2NVdUNERMWTdZT1JWMllDMFBtSHY3WFJiY0NGQmZh?=
- =?utf-8?B?ejJTNGZKN2ZMeGFqOWJOdkpzTnZUakVJaHQ5OFEwb2VQQm9PZXFNcGNET1lD?=
- =?utf-8?B?MHJYWkRiUDU5UHRYdkFaYmcxUENmYzVGZUp0L1puZ2tObFpxaDJFQWtzMGJn?=
- =?utf-8?B?YVB5bStNTHVER3Z1M3M2QXovWlFrdmJ1WUNTMTV4VFE1RXVTZkpVNFVtV1pH?=
- =?utf-8?B?d08vQ2paQjI4cEYwZ2lQVFZoYUgxMVNnbEc2U1lXWGZyOWRVWXZ5T2hWcXpw?=
- =?utf-8?B?T2ZWTEtVVDNFK2ZQbVVVZ1hIajdVUlJ1WGg3K09yQ0crY0UxYVkveTQ4MmhN?=
- =?utf-8?B?WTFOL1lRYm5lWWpucE5qWTZVdDVaUGdORGJXaENkUGFiY2Q0aFdHcHozQzNM?=
- =?utf-8?B?WWN0YVVFRDNiNGlyaytXN29wNFpYU3JTd3l0aU9ZMHRaZm1hRHU1Ly9FTEZr?=
- =?utf-8?B?L1FRYUI5UHJmNDFuOWcrTzVhMEkrR1VWQzJBNlZpNHQvOTlvRmxydnVDajB4?=
- =?utf-8?Q?VLdTzrwyJUPM9wnHtc?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6e22c095-4377-4be3-2299-08deef730352
-X-MS-Exchange-CrossTenant-AuthSource: IA0PR12MB8374.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Aug 2026 02:17:19.0090
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: ZQcx0wEAAgsbUx6XDbEcd5FLzcwsmT5S3CHB9eIdlHDg8VSDseD9ewnL8NjsLF5S
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH8PR12MB7373
+Content-Transfer-Encoding: 8bit
 
-PG_private is going to be deleted. Adjust related comments to refer to
-page/folio->private instead.
+The patch set allows to register a dmabuf to an io_uring instance for
+a specified file and use it with io_uring read / write requests. The
+infrastructure is not tied to io_uring and there could be more users
+in the future. A similar idea was attempted some years ago by Keith [1]
+(from where I borrowed a good number of changes). Later it was brough
+back up to life by Tushar and Vishal.
 
-Assisted-by: Claude:claude-opus-4-8
-Assisted-by: Codex:gpt-5
-Signed-off-by: Zi Yan <ziy@nvidia.com>
-To: Ilya Dryomov <idryomov@gmail.com>
-To: Alex Markuze <amarkuze@redhat.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Trond Myklebust <trondmy@kernel.org>
-To: Anna Schumaker <anna@kernel.org>
-To: Richard Weinberger <richard@nod.at>
-To: Andrew Morton <akpm@linux-foundation.org>
-To: David Hildenbrand <david@kernel.org>
-Cc: Zhihao Cheng <chengzhihao1@huawei.com>
-Cc: Lorenzo Stoakes <ljs@kernel.org>
-Cc: "Liam R. Howlett" <liam@infradead.org>
-Cc: Vlastimil Babka <vbabka@kernel.org>
-Cc: Mike Rapoport <rppt@kernel.org>
-Cc: Suren Baghdasaryan <surenb@google.com>
-Cc: Michal Hocko <mhocko@suse.com>
-Cc: ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Cc: linux-nfs@vger.kernel.org
-Cc: linux-mtd@lists.infradead.org
-Cc: linux-mm@kvack.org
----
- fs/ceph/addr.c           | 4 ++--
- fs/nfs/file.c            | 4 ++--
- fs/ubifs/file.c          | 6 +++---
- include/linux/mm.h       | 6 +++---
- include/linux/mm_types.h | 4 ++--
- 5 files changed, 12 insertions(+), 12 deletions(-)
+It's an opt-in feature for files, and they need to implement a new
+file operation to use it. Only NVMe block devices are supported in this
+series. The user API is built on top of io_uring's "registered buffers",
+where a dmabuf is registered in a special way, but after it can be used
+as any other "registered buffer" with IORING_OP_{READ,WRITE}_FIXED
+requests. It's created via a new file operation and the resulted map is
+then passed through the I/O stack in a new iterator type. There is some
+additional infrastructure to glue it together, count requests, manage
+lifetime and implement invalidation.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 92074db8732ac..a4a463a9cef0a 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -122,8 +122,8 @@ static bool ceph_dirty_folio(struct address_space *mapping, struct folio *folio)
- 	spin_unlock(&ci->i_ceph_lock);
- 
- 	/*
--	 * Reference snap context in folio->private.  Also set
--	 * PagePrivate so that we get invalidate_folio callback.
-+	 * Reference snap context in folio->private. folio_attach_private()
-+	 * triggers invalidate_folio callback.
- 	 */
- 	VM_WARN_ON_FOLIO(folio->private, folio);
- 	folio_attach_private(folio, snapc);
-diff --git a/fs/nfs/file.c b/fs/nfs/file.c
-index 851d93a099889..fa3389d766d52 100644
---- a/fs/nfs/file.c
-+++ b/fs/nfs/file.c
-@@ -485,7 +485,7 @@ static int nfs_write_end(const struct kiocb *iocb,
-  * Partially or wholly invalidate a page
-  * - Release the private state associated with a page if undergoing complete
-  *   page invalidation
-- * - Called if either PG_private or PG_fscache is set on the page
-+ * - Called if either folio->private or PG_fscache is set on the page
-  * - Caller holds page lock
-  */
- static void nfs_invalidate_folio(struct folio *folio, size_t offset,
-@@ -556,7 +556,7 @@ static void nfs_check_dirty_writeback(struct folio *folio,
-  * Attempt to clear the private state associated with a page when an error
-  * occurs that requires the cached contents of an inode to be written back or
-  * destroyed
-- * - Called if either PG_private or fscache is set on the page
-+ * - Called if either page->private or fscache is set on the page
-  * - Caller holds page lock
-  * - Return 0 if successful, -error otherwise
-  */
-diff --git a/fs/ubifs/file.c b/fs/ubifs/file.c
-index e73c28b12f97f..61d6a56b8c8a4 100644
---- a/fs/ubifs/file.c
-+++ b/fs/ubifs/file.c
-@@ -12,14 +12,14 @@
-  * This file implements VFS file and inode operations for regular files, device
-  * nodes and symlinks as well as address space operations.
-  *
-- * UBIFS uses 2 page flags: @PG_private and @PG_checked. @PG_private is set if
-+ * UBIFS uses folio->private and page flag @PG_checked. folio->private is set if
-  * the page is dirty and is used for optimization purposes - dirty pages are
-  * not budgeted so the flag shows that 'ubifs_write_end()' should not release
-  * the budget for this page. The @PG_checked flag is set if full budgeting is
-  * required for the page e.g., when it corresponds to a file hole or it is
-  * beyond the file size. The budgeting is done in 'ubifs_write_begin()', because
-  * it is OK to fail in this function, and the budget is released in
-- * 'ubifs_write_end()'. So the @PG_private and @PG_checked flags carry
-+ * 'ubifs_write_end()'. So the folio->private and @PG_checked flags carry
-  * information about how the page was budgeted, to make it possible to release
-  * the budget properly.
-  *
-@@ -1509,7 +1509,7 @@ static vm_fault_t ubifs_vm_page_mkwrite(struct vm_fault *vmf)
- 	 *
- 	 * At the moment we do not know whether the folio is dirty or not, so we
- 	 * assume that it is not and budget for a new folio. We could look at
--	 * the @PG_private flag and figure this out, but we may race with write
-+	 * folio->private and figure this out, but we may race with write
- 	 * back and the folio state may change by the time we lock it, so this
- 	 * would need additional care. We do not bother with this at the
- 	 * moment, although it might be good idea to do. Instead, we allocate
-diff --git a/include/linux/mm.h b/include/linux/mm.h
-index a93eaf7aae545..fc33cc1914273 100644
---- a/include/linux/mm.h
-+++ b/include/linux/mm.h
-@@ -2073,8 +2073,8 @@ vm_fault_t finish_fault(struct vm_fault *vmf);
-  *
-  * A pagecache page contains an opaque `private' member, which belongs to the
-  * page's address_space. Usually, this is the address of a circular list of
-- * the page's disk buffers. PG_private must be set to tell the VM to call
-- * into the filesystem to release these pages.
-+ * the page's disk buffers. It tells the VM to call into the filesystem to
-+ * release these pages.
-  *
-  * A folio may belong to an inode's memory mapping. In this case,
-  * folio->mapping points to the inode, and folio->index is the file
-@@ -2085,7 +2085,7 @@ vm_fault_t finish_fault(struct vm_fault *vmf);
-  * case PG_swapcache is set, and page->private is an offset into the swapcache.
-  *
-  * In either case (swapcache or inode backed), the pagecache itself holds one
-- * reference to the page. Setting PG_private should also increment the
-+ * reference to the page. Setting page->private should also increment the
-  * refcount. The each user mapping also has a reference to the page.
-  *
-  * The pagecache pages are stored in a per-mapping radix tree, which is
-diff --git a/include/linux/mm_types.h b/include/linux/mm_types.h
-index b5d4cd3b067bf..f15290dde16d3 100644
---- a/include/linux/mm_types.h
-+++ b/include/linux/mm_types.h
-@@ -108,7 +108,7 @@ struct page {
- 			};
- 			/**
- 			 * @private: Mapping-private opaque data.
--			 * Usually used for buffer_heads if PagePrivate.
-+			 * Usually used for buffer_heads.
- 			 * Used for swp_entry_t if swapcache flag set.
- 			 * Indicates order in the buddy system if PageBuddy
- 			 * or on pcp_llist.
-@@ -675,7 +675,7 @@ static inline void ptdesc_pmd_pts_init(struct ptdesc *ptdesc)
- #define STRUCT_PAGE_MAX_SHIFT	(order_base_2(sizeof(struct page)))
- 
- /*
-- * page_private can be used on tail pages.  However, PagePrivate is only
-+ * page_private can be used on tail pages.  However, it is only
-  * checked by the VM on the head page.  So page_private on the tail pages
-  * should be used for data that's ancillary to the head page (eg attaching
-  * buffer heads to tail pages after attaching buffer heads to the head page)
+Tushar, William, Phil as well as Kanchan, Anuj and Nitesh did a lot of
+testing and experimentation on various devices with previous versions of
+the patch set (separate thanks for trying it out and investigating
+problems). Earlier benchmarks by Anuj for IOMMU optimisations with
+udmabuf showed:
+
+STRICT: before = 570 KIOPS, after = 5.01 MIOPS
+LAZY: before = 1.93 MIOPS, after = 5.01 MIOPS
+PASSTHROUGH: before = 5.01 MIOPS, after = 5.01 MIOPS
+
+# Patch set structure:
+- Patches 1-2 introduce internal API and infrastructure mediating
+  io_uring and target subsystem / devices
+- Patches 3-8: block layer support + prep patches
+- Patches 9-11 implement NVMe support
+- Patches 12-16 add io_uring support and uapi. Patch 14 specifically
+  enables dma-buf support, the rest are preparation patches.
+
+There are some liburing tests that can serve as an example:
+git: https://github.com/isilence/liburing.git rw-dmabuf-tests-v5
+url: https://github.com/isilence/liburing/tree/rw-dmabuf-tests-v5
+
+The patches are based on Jens' for-next. Also available as a branch:
+git: https://github.com/isilence/linux.git rw-dmabuf-v5
+url: https://github.com/isilence/linux/tree/rw-dmabuf-v5
+
+[1] https://lore.kernel.org/io-uring/20220805162444.3985535-1-kbusch@fb.com/
+
+v5: - Reject dma-buf with buffered IO for raw bdev
+    - Add lim->max_segments bio splitting
+    - Add bio_iov_iter_set() helper
+    - Fix io_uring uapi validation
+    - Other minor changes
+    NVMe:
+    - Rename nvme_pci_sgl_set_data() to nvme_pci_dma_iter_set_sgl(), split 
+      into its own prep patch.
+    - Convert segment walk loops to do-while.
+    - Drop adjacent segment coalescing logic.
+    - Drop first_dma/first_len from nvme_pci_dmabuf_sgl_nents()
+    - Remove entries > NVME_MAX_SEGS bailout; moving to the block layer.
+    - Factor SGL vs PRP decision making into a helper.
+
+v4: - https://lore.kernel.org/all/cover.1785274111.git.asml.silence@gmail.com/
+    - Add sgl support from Anuj
+    - Move it under drivers/dma-buf/ and rename
+    - Fix mis-sized allocations
+    - Fix io_uring re-import mishandling
+    - Drop map before io_uring "task work"
+    - Move blk-mq callback to block_device_operations
+    - Convert bio flag to REQ_OP*
+    - Other small changes
+
+v3: https://lore.kernel.org/io-uring/cover.1777475843.git.asml.silence@gmail.com/
+    - Rework io_uring registration
+    - Move token/map infrastructure code out of blk-mq
+    - Simplify callbacks: remove a separate blk-mq table, which was
+      mostly just forwarding calls (to nvme).
+    - Don't skip dma sync depending on request direction
+    - Fix a couple of hangs
+    - Rename s/dma/dmabuf/
+    - Other small changes
+
+v2: - Don't pass raw dma addresses, wrap it into a driver specific object
+    - Split into two objects: token and map
+    - Implement move_notify
+
+Anuj Gupta (2):
+  nvme-pci: rename nvme_pci_sgl_set_data to nvme_pci_dma_iter_set_sgl
+  nvme-pci: add SGL support for the dmabuf path
+
+Pavel Begunkov (14):
+  dma-buf: introduce initial file I/O infrastructure
+  iov_iter: add iterator type for dmabuf maps
+  block: rename bi_bvec_done
+  block: always adjust bi_offset on bio_advance_iter
+  block: move bvec init into __bio_clone
+  block: introduce bio_iov_iter_set()
+  block: introduce dma map backed bio type
+  block: add dma-buf support for raw bdev
+  nvme-pci: implement dma-buf backed requests
+  io_uring/rsrc: introduce buf registration structure
+  io_uring/rsrc: extend buffer update
+  io_uring/rsrc: add uncloneable regbuf flag
+  io_uring/rsrc: add regbuf import flags
+  io_uring/rsrc: add dmabuf backed registered buffers
+
+ Documentation/block/biovecs.rst |   8 +-
+ block/bio.c                     |  33 ++-
+ block/blk-map.c                 |   2 +-
+ block/blk-merge.c               |  45 +++-
+ block/blk-mq-dma.c              |   2 +-
+ block/blk.h                     |   2 +-
+ block/fops.c                    |  35 ++-
+ drivers/block/loop.c            |   2 +-
+ drivers/block/zloop.c           |   2 +-
+ drivers/dma-buf/Makefile        |   2 +-
+ drivers/dma-buf/dma-buf-io.c    | 278 +++++++++++++++++++++
+ drivers/md/dm-io-rewind.c       |  16 +-
+ drivers/md/dm-pcache/segment.c  |   4 +-
+ drivers/nvdimm/btt.c            |   2 +-
+ drivers/nvme/host/core.c        |  12 +
+ drivers/nvme/host/nvme.h        |   2 +
+ drivers/nvme/host/pci.c         | 424 +++++++++++++++++++++++++++++++-
+ drivers/nvme/host/tcp.c         |   2 +-
+ fs/btrfs/misc.h                 |   2 +-
+ include/linux/bio.h             |  23 +-
+ include/linux/blk-mq.h          |   7 +
+ include/linux/blk_types.h       |  14 +-
+ include/linux/blkdev.h          |   2 +
+ include/linux/bvec.h            |  17 +-
+ include/linux/dma-buf-io.h      |  92 +++++++
+ include/linux/fs.h              |   2 +
+ include/linux/io_uring_types.h  |   5 +
+ include/linux/uio.h             |  11 +
+ include/uapi/linux/io_uring.h   |  31 ++-
+ io_uring/io_uring.c             |   3 +-
+ io_uring/net.c                  |   4 +-
+ io_uring/rsrc.c                 | 280 ++++++++++++++++++---
+ io_uring/rsrc.h                 |  45 +++-
+ io_uring/rw.c                   |   6 +-
+ lib/iov_iter.c                  |  31 ++-
+ net/ceph/messenger.c            |   4 +-
+ 36 files changed, 1321 insertions(+), 131 deletions(-)
+ create mode 100644 drivers/dma-buf/dma-buf-io.c
+ create mode 100644 include/linux/dma-buf-io.h
 
 -- 
-2.53.0
+2.54.0
 
