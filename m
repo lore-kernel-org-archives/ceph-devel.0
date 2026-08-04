@@ -1,73 +1,73 @@
 Received: from mx0b-00364e01.pphosted.com (mx0b-00364e01.pphosted.com [148.163.139.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E07B247F2CA
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D26A747CA84
 	for <ceph-devel@vger.kernel.org>; Tue,  4 Aug 2026 18:52:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.139.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785869557; cv=none; b=kOptxT+aspPXpsWLaHwVp+T4PPQ+7rbyQ+6m5afBTZIOGwXOurhCL6JcqaZrionbqH35ZwGsFPVxqDcrJRrwHdm2zjjE6+bkiV5obynWokqJlZ/f+JL1wAphHETOGORe4bqfz7pmMGKrkHDYwnGokdfKvVyF66Tly1K94rw/Ank=
+	t=1785869558; cv=none; b=evU8edqehUyJREQbeYgl6DdB/pF09GFZo9mAyRwSJN4n9j/WqlAXRELatMh5/SD9Sth9aFI7s8M1MOCblCtm+r5t6f46ndT2Oiq5cCUjuGWBxApoOirtAFnewoTXJUosBTv5HmktgIuToUnWBSpjHGMwxkMBR56qcSjpUCf3xlU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785869557; c=relaxed/simple;
-	bh=6dxbAtDCmrnDYkfOuWrS6UKuWVd+lmgUjReNrbBmSH4=;
+	s=arc-20240116; t=1785869558; c=relaxed/simple;
+	bh=g8jPUs8pg/UEHyzRirqPZNurckpVqv7a3bIwEUEkAXw=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=ZarnTlwd60U1Dn0WHUR8A19GKeIjvQHl/QqdZoX2Sp2pQ+WwGVvMM+La0twGDMScg/bdPiPGwuMZG5aLxuO80FRhgZhtNo0rVZCfhcZphtOTfg6yCO/cuViTmDu3p89FVa5ZMitXRyRm+OlmbARrGY0KUQGmCBRi19qFS7XtB3A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=Ltf+xSeG; arc=none smtp.client-ip=148.163.139.74
+	 In-Reply-To:To:Cc; b=S5rooampPD9buCooYI+7sPQa1/1pAT524QgLcYhnh/wO7Q7Y6SbO4W+zLW4yTeVnkL80+vPDDMloeg6WKVgxRynytOYabHQQ9ZUUEnFD1PvbLyjTnwDGCpjss02m/jpqiMZN3vhzD5D4kkErwtJVvGgW6fXPym166QrtTqNwXZo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=L97s7PyH; arc=none smtp.client-ip=148.163.139.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="Ltf+xSeG"
-Received: from pps.filterd (m0167074.ppops.net [127.0.0.1])
-	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 674IY6ET2212929
-	for <ceph-devel@vger.kernel.org>; Tue, 4 Aug 2026 14:52:34 -0400
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="L97s7PyH"
+Received: from pps.filterd (m0167077.ppops.net [127.0.0.1])
+	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 674IYbNF2127315
+	for <ceph-devel@vger.kernel.org>; Tue, 4 Aug 2026 14:52:28 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pps01; bh=0np+
-	Mh4g6FbtGTotF1tdHYY92zqeAhsY3aQwW/2FAQ4=; b=Ltf+xSeGzv0AQkYnla7e
-	HMlda09qU+ceQAezbuwSwfpQ+s98hfRrxCrojTw200tDHO0KPJWtipa+mOndoYa2
-	0faFNVbhALn0z4heQK6KRc5vqT+Zw91vYGijd+tQ/ZVzSziPHadAUv6hDXtU/i/L
-	ynUN9BIQu2IK1g6uWXu4Mw7IZZ8V+TVEcfQWsxChodpUetUwIq3LZnyfE3QsqIFG
-	vJgQe4bLMhOxd1rU5LOMm87Bc4ADLQATL+mW4RUie+BXWiilIjbe7wLzh9I5LX83
-	evGCAdsnquSjRtxOwQG8Sj711pJ9EjNLgEJAZm/YC6jjB5BEeffKc1Rd2FDNTbTN
-	ZA==
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
-	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4fukgqs6ar-1
+	:message-id:mime-version:references:subject:to; s=pps01; bh=6cEc
+	Am4InXbaEDJaVpQUaZztPzUmrUXxaK7Mht5hSMw=; b=L97s7PyHs9MoxkJbnlnJ
+	bob3e54A+PzjFbMJqyEpOSP83Qfu462DaYwFPq0SP6TG/IgGCWXhz0Nemgz1N/tQ
+	YxEwK2Ez7Zn/m+S43x3BhSZWbb6ZajJUC/gMwuvpP2FqyHkUKrF+Ptz6Y0KAsw0m
+	m4ix2vYWYNqBphFd0e1bSmW/VexIogi+V3XUJMixmM9cePya+6IrVwLnmDMcFSrV
+	V1BOmk472SN3Q8+N79xBqvJtO1+AbYwc5WkRsjslFsVCPZsVPhI0vn1wIauvO5kZ
+	PjLcr+yUXpjmpwzW/8wej/OKEhWliJKDw7BL6BCdFun7MLDAZev+Hlbs119SpYSs
+	ig==
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
+	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4fuj0et13x-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Tue, 04 Aug 2026 14:52:33 -0400 (EDT)
-Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-51bff5c7035so1541741cf.2
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Aug 2026 11:52:33 -0700 (PDT)
+	for <ceph-devel@vger.kernel.org>; Tue, 04 Aug 2026 14:52:27 -0400 (EDT)
+Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-51c12e43b98so1217321cf.1
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Aug 2026 11:52:27 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785869553; x=1786474353;
+        d=1e100.net; s=20251104; t=1785869547; x=1786474347;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :content-type:mime-version:subject:date:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=0np+Mh4g6FbtGTotF1tdHYY92zqeAhsY3aQwW/2FAQ4=;
-        b=XvJJawfi80o5sIaXF9tBK14CgkO7D+c+RbnAiCvIU/8dzaFpEC0JrXblo6NqHM2QQy
-         B2JlJYdu7vK4fyLUJSfKp822ERNOuYdPZ103imFtgkN3WpzjLsyMFErGLkiEhS/jMMII
-         btYD8L2P09xA8JuFC6t4+oQ4gWRC/SWLiHEitbcwCudfht9axYif8FVJa02984ciNrnh
-         CmAhj8zCXzt6NZ+xAtBpw1u/IONM7nwU5PRCHe95OSYuwVq9eihY1MCC5uItkwVwir92
-         3zzzl16GlTmNFn92PDGhW4JS6SOJ3KI1O7Py24GMy6wbViXS97Zo7M/kFtbbT/uAg2oB
-         +VGQ==
-X-Gm-Message-State: AOJu0YyYp79MSfTSIWAPjP7HPC1/qs8fdisBRDsSDveReUQKkTEo31If
-	hiLzo1n2O1nu/egekTUFbOekONkXqcP5AaPqo5mdrPUXE/yYZsFQNVa+nI/b7dNr5tDSdryfzE4
-	sHiLEwFQZil6rmGWLuqjCNytCRyK2VL9Xkef0bFFYAAHlAGBP/6kP1gWJ1cQ=
-X-Gm-Gg: AR+sD131igpJJc8rWOh79LbK41YM0qk8lktFYfrwLV4LW4k5MOlqgeX+srtk26J4ilv
-	d2XkhIT2PlZm4lQNKAS5Ziu2KEPvFSBOu6+AAo6Jon2f4pnqaJWjoRuAAGyQ/p46eDMbKxFO6VY
-	AKnO33maLGX3itlOlNd2i/GmlUpduVa3um5FIhcegWxoYHuAQ0c46T1xCs/hoyxU32IePr0ocG6
-	Ivh9A3QBZ2c5/cIWQ7lfXQh8yrT095zRDVufggIaVUCUkoAVSBLiE5X7hDz+aeOTy9LyUr8sJOt
-	W0yvxPaet9qgwLMAfEIA9RYr8V6xRzUWmwZZnFsTTgG8gXQEo54KOmsX9LoDMxkSvkhqI/jDVeV
-	quCuIdHCl
-X-Received: by 2002:a05:622a:2615:b0:51b:fb82:67d1 with SMTP id d75a77b69052e-52ce6112cd9mr13729611cf.20.1785869553264;
-        Tue, 04 Aug 2026 11:52:33 -0700 (PDT)
-X-Received: by 2002:a05:622a:2615:b0:51b:fb82:67d1 with SMTP id d75a77b69052e-52ce6112cd9mr13728971cf.20.1785869552803;
-        Tue, 04 Aug 2026 11:52:32 -0700 (PDT)
+        bh=6cEcAm4InXbaEDJaVpQUaZztPzUmrUXxaK7Mht5hSMw=;
+        b=T2pDQC8StYanbu79M5xWFwPnIDM1qXILI3e87J4JHBscYcaRXTiklS5Jxblp0Dig6e
+         T0vSoY9+TH7yCYa5FYg03Okwr/Fh+Otc3Asffl8kXqNqqBxKAehefNUQh5i04YNhfllV
+         OprYycy129ou/0JwgoxtnUHQHc4n5gxYe/5J5vFtW9GiNo88MhU9HvqytKmdYiBpICQS
+         TLa4O8/6ebytc+giWDBz63LH9XDz7oAqtqvniii4fiwfDiy+EmeAmmUm+xC670Cmu0xx
+         dpD7owwRhgKFVnFFNGqtqamXg8tiG8j3JbsCWe54Zmex6TPDakxrIBdH1S/Y/3YdSqzS
+         W7vg==
+X-Gm-Message-State: AOJu0YyzjB1WMwqhtXaoc7q9gA2Xz+kn9MoB96SL/knjRtbd20Xf4Lgk
+	X/kQlXse/JTrL7gRKaQH3zpxpYCKqy5sLABRyfvCp0IJItdwTHhj+WpJwMqXBK9JVieZHa8SStB
+	AJ4kpDfe90+O2WZpJTCEKKbjXzxT81tQMivEJ/czv+GeExr7hTf+9mtNCL2I=
+X-Gm-Gg: AR+sD11mzR68Ryo6HdHdVgMwIHLFnO73Ptf7oD3rPLILym4TFGWZwxKsTgqpL5UNHdu
+	IQjiKYoAfW9vrqZdtuEhnWTUs48hLEMQwAfhICNL5i1yqkcIDmMLN9HAAiLwoQ8yjIBDK2BHnzl
+	LUYy2dQ14SdFCG64zpwFJjamUu2dRMe6zwyst3stN7U/LAdFHxV1Mg9dy1BSSyiIYRtdIfxzqvn
+	eisfmq6U7lUgMDjne4VUL4lhMk9cG//1kMiG27DybsMt8s0UeJ0XqnuB9XsaX3j0ld96UAf/e1M
+	BGYxn2xUlAuLXq0OjwFnwtaGH6H9StqwEOPkmDHttqfckab5mfK7wcxw9GGt7R9f8v8e5Noa5HY
+	dToxK6CBI
+X-Received: by 2002:a05:622a:258a:b0:51c:ba4:d837 with SMTP id d75a77b69052e-52ce6033864mr14931711cf.18.1785869547245;
+        Tue, 04 Aug 2026 11:52:27 -0700 (PDT)
+X-Received: by 2002:a05:622a:258a:b0:51c:ba4:d837 with SMTP id d75a77b69052e-52ce6033864mr14931161cf.18.1785869546719;
+        Tue, 04 Aug 2026 11:52:26 -0700 (PDT)
 Received: from [127.0.1.1] ([77.137.77.124])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47fec232d7fsm2313275f8f.20.2026.08.04.11.52.30
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47fec232d7fsm2313275f8f.20.2026.08.04.11.52.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Aug 2026 11:52:32 -0700 (PDT)
+        Tue, 04 Aug 2026 11:52:25 -0700 (PDT)
 From: Tal Zussman <tz2294@columbia.edu>
-Date: Tue, 04 Aug 2026 14:52:11 -0400
-Subject: [PATCH v2 03/10] mm: remove wait_on_page_writeback()
+Date: Tue, 04 Aug 2026 14:52:09 -0400
+Subject: [PATCH v2 01/10] ceph: add ceph_folio_snap_context()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -76,7 +76,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260804-remove-wait-on-page-writeback-v2-3-81f0ab065284@columbia.edu>
+Message-Id: <20260804-remove-wait-on-page-writeback-v2-1-81f0ab065284@columbia.edu>
 References: <20260804-remove-wait-on-page-writeback-v2-0-81f0ab065284@columbia.edu>
 In-Reply-To: <20260804-remove-wait-on-page-writeback-v2-0-81f0ab065284@columbia.edu>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
@@ -92,81 +92,96 @@ Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
         Tal Zussman <tz2294@columbia.edu>
 X-Mailer: b4 0.14.3-dev-d7477
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1785869541; l=1451;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1785869541; l=1926;
  i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
- bh=6dxbAtDCmrnDYkfOuWrS6UKuWVd+lmgUjReNrbBmSH4=;
- b=ZZvU1M4pLXeTAriOtmeOSI0mHfXaaquENtCXvCsHWefyUHy7xTa8qlvMhdOavhouCXtH/NY/9
- QkGdKcRbTsJBwgWtf4Ig/DUGBu4bGeMxHWQm7D+6O8sOhgz7BM0DOKW
+ bh=g8jPUs8pg/UEHyzRirqPZNurckpVqv7a3bIwEUEkAXw=;
+ b=kPzJerCbpMCCBKGAtZw8eKWb6/5ZVD4+Ug9RVQ0xo6KmV7nNnkpdLDMCwQucUV99QtMamuOod
+ lxHS1F8FsRxCiL9AoDQknGXRMPSE1dKxItslwY4r9TZxB1CubxQ3RQW
 X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
  pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
-X-Proofpoint-Spam-Info: AW1haW4tMjYwODA0MDE1MiBTYWx0ZWRfX1/5NoIPqggOf
- VUj59fGc0wsiGhxzvTOVkCfjzynC3mdtykelDfcrOp9fYXSINngWfdvRwKWgjL6zi2OCBo8P1g2
- iYsiHEyHgnxNGEsFkG3Mj5M8h9kyVl9HShZZcAnKVyyq3bX9ZrzG
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODA0MDE1MiBTYWx0ZWRfX2yG8MZyZRLwT
- 7N+UIxGwwmraG4N2XLZiQyeeAXL0Lj0ygKCKhOYboH6Ww9XIGAQnX/dcL+r9aE2ZElwHJoYj2bx
- cZndwvplBdXwCSlc+70kzrHwGMqdy4WS/CeCqpyhDEZhgYyZyBJdX7p2/lSgSKb6ebWYElvKIGK
- 4NqJYH2UY0VEjXqAm2zsI5La4EBRyk9/P9eOpe04OQ8NvUoW6wxR9DjEye4vOMceYJ4iNOpaDsT
- WzzzOj+gdHnwRnXuMgnaRCbJdMRbUTEdHSv0RrHXsRfzgDJ0TPkYWQK8pS4tyvfo362NCPYQoeN
- Ul+VnvBEQB2eulSWo1DMwRRqAhcGWXV4MNO6NLU1fZEFuH00oQ7e36nTrZerTESWT/mk1eyXkxh
- vLrKOg53nMzMurUusekUhtmiv0Ag+H3FzRbZUhfYRVivVcrtYnYm2p1ET8ovJmsLfi5fsg/98IS
- xeFmdX1hz9qMvXhcTvg==
-X-Proofpoint-ORIG-GUID: LUeGtYlESlVcj6aI__g0-jTqUq_yAqW_
-X-Authority-Analysis: v=2.4 cv=X+Ri7mTe c=1 sm=1 tr=0 ts=6a7234f1 cx=c_pps
- a=mPf7EqFMSY9/WdsSgAYMbA==:117 a=j1J1DEHOHTVaJYOjuVnKiw==:17
+X-Authority-Analysis: v=2.4 cv=ePIjSnp1 c=1 sm=1 tr=0 ts=6a7234eb cx=c_pps
+ a=EVbN6Ke/fEF3bsl7X48z0g==:117 a=j1J1DEHOHTVaJYOjuVnKiw==:17
  a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10 a=x7bEGLp0ZPQA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=azVShVRs0zEubeQ0wG0L:22
- a=JfrnYn6hAAAA:8 a=VwQbUJbxAAAA:8 a=qBqFc3eaEPVjc8k8qNUA:9 a=QEXdDO2ut3YA:10
- a=dawVfQjAaf238kedN5IG:22 a=1CNFftbPRP8L7MoqJWF3:22
-X-Proofpoint-GUID: LUeGtYlESlVcj6aI__g0-jTqUq_yAqW_
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=QOCMdifcju39GKoXhKua:22
+ a=ALYDsW89DncSylXEcn0A:9 a=QEXdDO2ut3YA:10 a=a_PwQJl-kcHnX1M80qC6:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODA0MDE1MiBTYWx0ZWRfX0VR0SjvhIXKk
+ PKxZ5hhga7QWKWavsHxk0ST3CqXd+5tEjjn7id81qnyiOAokRTg+nvI3ATLckoV+vURouejYWDT
+ CwDaD96FDL5oPCv7TjSdnxmmGRuNtgLq4PUYToPdwFoWcl5LfmFJ
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODA0MDE1MiBTYWx0ZWRfX4VOCIgBfBjmQ
+ LekNsZHz32F7ItpUJwvKb0VSD2iVjN8FFUL/0wIsy8mWd3/9+5UtFp1cXDdm4WV70uW4fvl9ybA
+ 8wCu2F/jJhPmdGRBwxn+KX1iHHYhOQOodA7Aer1e1w52WexXocwIwahPXsJoHxsBwT7AA0keueD
+ TvxOIRvIzwKdgOqD3tQukCjv0G7hcNyJW0D2s8VOrSeu6lONXAAANNH1Mxe+Fyqb1Iz/IQYWSr8
+ tSUN4H+yeyI2seWfmIcp6idsJDkxVTofTPO8RtXH4jJnt7vP6WU8jq8eWb2ZQrd6NmAqny4DR9X
+ ScuT3vsVjjQiJQ6hcfEP1P/EsvYwUrXyHpHOimUTECrQdsi6T4F94NU0hz9M1b969zt9oEAoVCY
+ f3Nv+xxTmW2dx48QcHFnR3VtTRBdBBFftkVAHbSDtUOX5tDWihz3i8IrM2YvAd4LFKlHgI/3iax
+ iM/JHnBPz43rjKVaUUg==
+X-Proofpoint-GUID: -k_TIHcVZWqrf0JX_iQpCq9AtLc3HTMA
+X-Proofpoint-ORIG-GUID: -k_TIHcVZWqrf0JX_iQpCq9AtLc3HTMA
 X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11865
  signatures=596817
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 lowpriorityscore=10 impostorscore=10 phishscore=0
- priorityscore=1501 suspectscore=0 clxscore=1015 bulkscore=10 spamscore=0
- adultscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ phishscore=0 malwarescore=0 adultscore=0 spamscore=0 priorityscore=1501
+ impostorscore=10 lowpriorityscore=10 bulkscore=10 suspectscore=0
+ clxscore=1015 classifier=typeunknown authscore=0 authtc= authcc=
  route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
  definitions=main-2608040152
 
-The last caller was converted to folio_wait_writeback(), so drop the
-wait_on_page_writeback() compatibility wrapper and its declaration.
+Add a folio-based counterpart to page_snap_context() that reads the
+snap context from folio->private directly.
 
-Reviewed-by: Matthew Wilcox (Oracle) <willy@infradead.org>
-Acked-by: David Hildenbrand (Arm) <david@kernel.org>
+Convert the three writeback paths that passed &folio->page to
+page_snap_context() to ceph_folio_snap_context(), removing three
+open-coded folio-to-page conversions. No functional change.
+
 Signed-off-by: Tal Zussman <tz2294@columbia.edu>
 ---
- include/linux/pagemap.h | 1 -
- mm/folio-compat.c       | 6 ------
- 2 files changed, 7 deletions(-)
+ fs/ceph/addr.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
 
-diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
-index 2c3718d592d6..3748dde2b97e 100644
---- a/include/linux/pagemap.h
-+++ b/include/linux/pagemap.h
-@@ -1240,7 +1240,6 @@ static inline int folio_wait_locked_killable(struct folio *folio)
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index e2da3ab9f808..8347366ce5d9 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -75,6 +75,12 @@ static inline struct ceph_snap_context *page_snap_context(struct page *page)
+ 	return NULL;
  }
  
- void folio_end_read(struct folio *folio, bool success);
--void wait_on_page_writeback(struct page *page);
- void folio_wait_writeback(struct folio *folio);
- int folio_wait_writeback_killable(struct folio *folio);
- void end_page_writeback(struct page *page);
-diff --git a/mm/folio-compat.c b/mm/folio-compat.c
-index a02179a0bded..ae0271591d37 100644
---- a/mm/folio-compat.c
-+++ b/mm/folio-compat.c
-@@ -23,12 +23,6 @@ void end_page_writeback(struct page *page)
- }
- EXPORT_SYMBOL(end_page_writeback);
++static inline
++struct ceph_snap_context *ceph_folio_snap_context(const struct folio *folio)
++{
++	return folio->private;
++}
++
+ /*
+  * Dirty a page.  Optimistically adjust accounting, on the assumption
+  * that we won't race with invalidate.  If we do, readjust.
+@@ -749,7 +755,7 @@ static int write_folio_nounlock(struct folio *folio,
+ 		return -EIO;
  
--void wait_on_page_writeback(struct page *page)
--{
--	return folio_wait_writeback(page_folio(page));
--}
--EXPORT_SYMBOL_GPL(wait_on_page_writeback);
--
- void mark_page_accessed(struct page *page)
- {
- 	folio_mark_accessed(page_folio(page));
+ 	/* verify this is a writeable snap context */
+-	snapc = page_snap_context(&folio->page);
++	snapc = ceph_folio_snap_context(folio);
+ 	if (!snapc) {
+ 		doutc(cl, "%llx.%llx folio %p not dirty?\n", ceph_vinop(inode),
+ 		      folio);
+@@ -1171,7 +1177,7 @@ int ceph_check_page_before_write(struct address_space *mapping,
+ 	}
+ 
+ 	/* only if matching snap context */
+-	pgsnapc = page_snap_context(&folio->page);
++	pgsnapc = ceph_folio_snap_context(folio);
+ 	if (pgsnapc != ceph_wbc->snapc) {
+ 		doutc(cl, "folio snapc %p %lld != oldest %p %lld\n",
+ 		      pgsnapc, pgsnapc->seq,
+@@ -1824,7 +1830,7 @@ ceph_find_incompatible(struct folio *folio)
+ 
+ 		folio_wait_writeback(folio);
+ 
+-		snapc = page_snap_context(&folio->page);
++		snapc = ceph_folio_snap_context(folio);
+ 		if (!snapc || snapc == ci->i_head_snapc)
+ 			break;
+ 
 
 -- 
 2.39.5
