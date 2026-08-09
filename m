@@ -1,189 +1,122 @@
-Received: from mx0a-00364e01.pphosted.com (mx0a-00364e01.pphosted.com [148.163.135.74])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vs1-f52.google.com (mail-vs1-f52.google.com [209.85.217.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B38D5384228
-	for <ceph-devel@vger.kernel.org>; Sun,  9 Aug 2026 15:04:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.135.74
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786287859; cv=none; b=AxG7NtOHbIX1UhQmkI1TjAQ09p0U46cckkg98rFFAkCG8UBGndaBTaHr0l3WG9aY4VZq7R4qnn4eYYwAW+LILjZEFM/+LMpzbXhXe0bkzPdQL1MRkAJ6AZ/BdpW1cFsXT/zK5jejXangc7AfSSnhFI4TAzUGSZUy1FguyeM3brM=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786287859; c=relaxed/simple;
-	bh=SQubqO9s+SFQ+/u9mawBkGl4SqexqjyU9fvp4DUIUc0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=djRtSn0TRFjxir3kxPBqHPsx73v4Zs+x9YT2B2aUdx9NDhDK0uHETNqMbKNVYVQsp9QLRS/80+5D09vbKI7uad2Np4bBrpdy7qS6S2qqHh7KyRcItLjNdkHnRkn3tnNa4CiLhSxJivxq+KHJr9JwL61x8CdZSA7uuc5ttNt8alo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=XYWhG7aN; arc=none smtp.client-ip=148.163.135.74
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8B5735A397
+	for <ceph-devel@vger.kernel.org>; Sun,  9 Aug 2026 17:33:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.217.52
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786296816; cv=pass; b=mVX0MKZVddkogUmsCnfiMQ6n8YvfGd70Sx1AUCN4REnKayzfRJ2xNNp4+BP7s7pxcV81pdzxRgKk/SFI26NkfntORuMzYJsy6i9hqukv01V+OnBj1hDGkIdOBCa0vH2ftiF3FCMf8JbF2FfMED0TRQIT5FfRNCic6aq4bQgSn+E=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786296816; c=relaxed/simple;
+	bh=mWlp5QNrExYXsGTZE+zqwgU6yWdZR31aZMXuOmCIjYo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=KJAEl5Ne232jBlPEVUg6CDzi2LCcapwLKZiwben2xm1oPtSj1x1zUuzQyjgXKlc//CgNgR9RY9V3cb+9j4rBFDN2nOVCk5KxGd3Mx5LI/maVwMmcLRzYmXcPXmtXVd9ennPGxl7xngeyyk74cIUG82Li05RFbzavEZk8zRsgH+M=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dULiT3du; arc=pass smtp.client-ip=209.85.217.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="XYWhG7aN"
-Received: from pps.filterd (m0167069.ppops.net [127.0.0.1])
-	by mx0a-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 679AxE151388009
-	for <ceph-devel@vger.kernel.org>; Sun, 9 Aug 2026 11:04:10 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
-	cc:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=pps01; bh=e7MG7FcsFjAqmMigfCDPr1wrq2
-	eq1+bdZSypJg/Psa4=; b=XYWhG7aN/SESWN+WZysRoKQQUtJBoHIj+jchDKEW36
-	XTrhqYjHXq8yLMdRf9/KUcPtQbd57WD4wmLbwJbK41mPCKld+ZMvm0P45opEFTbP
-	tT4cCac9ZK49ohYPTLGdHi6+8rxj9lIztUdloodqELl9CFS0eCOBtmtGpjiZRFR7
-	0P+LNRXmjFZcixjXvG0J1flsoPgMyUhIkelJTdGGV5M7SN5QpGoaMHcUXJXVhPVa
-	zH7q83FP38ins9aMYqq+UooSBFVjYQSNhzTzSoSlwlzxQXIUlc30Pfx9IKqzSrIx
-	Gk7ELv+uAphrihFZjcoHZe8WrOvY1jQmYVbbV5Fe603g==
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
-	by mx0a-00364e01.pphosted.com (PPS) with ESMTPS id 4fwwffnfwj-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Sun, 09 Aug 2026 11:04:09 -0400 (EDT)
-Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-5283fa0656dso43730011cf.1
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Aug 2026 08:04:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dULiT3du"
+Received: by mail-vs1-f52.google.com with SMTP id ada2fe7eead31-7377dde7bc6so2157572137.0
+        for <ceph-devel@vger.kernel.org>; Sun, 09 Aug 2026 10:33:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786296814; cv=none;
+        d=google.com; s=arc-20260327;
+        b=Y/k19RKZByJ6UAo3gk1ZrwhhiwLUZ6+Gw6VBVZpMOC4dX+iU4yFlXWKFed+KRljA2P
+         jCPCe1M/tF0VTgEiZk5KmqS7y+HD5J33lfBUAA9hp2bSryWAmOS+oWzyJKZPqgzHerHc
+         Epr+r7DiQgKZKnXHM0PKqnFFnRtXK8Vr+R6mj0BZJ/MOQo6/eSSIv3SgQ1W2Fp3BacWh
+         lXc4gC+Flso6u1CDrJlZM197rYwGpLfPJ+9BqxYM1n/4h3BL9wE8/rW5ETloklJ5Fm9j
+         uLKxbZbSEHCPEnrTPLL0hGCZT0zBwY7ZAqDxqeNyTZde0S75SvONPb9WzfOcHDImvcs+
+         8KNQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=Dnzny0f6nQDl/3k7kZ8Guokf4/cEXHhhetxys39MwOI=;
+        fh=1URUeC1+I+Dy6PwazdjTL3XkANxLk6Qe8GxhMWhL8g8=;
+        b=YHQPgH0qjAYWPecMDML/hFeq4Ze/KwQbc2QnJX5ED/1SQ/WJMyCzJTcHJFCVZGkmty
+         KF69gtVXhVfcV8vVSrtcSjzhVQedTOB2huHIXEBop0CBqEMOej658LdmfA4CuoA3P+TK
+         vuZoDnyfomkPGeS6MD4GIu+o0ZRBTjEvaV8BGPPZb8k1R7uPWSNGIewvV+Ngz4M2F3Sr
+         lY6hfYXluzwJqigAUCCjhW/ucxlZ3n1K3+KgzmMWfj7+nxucQFbYP6JY94MqCMdO+ZRP
+         aGaTl8NfBoVFT1qLXO+/uxfcD/nXjcFfidUFMGoYa2AOdKo+2GzDLQm1Zg4zVvvMhMsg
+         BaSQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1786296814; x=1786901614; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=Dnzny0f6nQDl/3k7kZ8Guokf4/cEXHhhetxys39MwOI=;
+        b=dULiT3du6l7QG6u93CVqzr3atDrTUbHxgFxv4W6Air89yJKedwPr8Qnn2H6/pXBz7V
+         acMp6wqniUr3hHCZzVP6V+Lo/fqp1QvoKc4nbCCNAMuqgLMVt6+aIvaz4E2A5o3Q6MWd
+         ZpD8wdzhlsGwyn4uk6Al2Xb2yLOz2T9DbZPhUluAQlVNI4CgC1Z6QgF2fFTnVKfM7rzL
+         tFSWXCviQjI0DXCuSTGG8yQMebKacd+kOagRByuGX2SMj6R8/mxLXAtzLV5hylY3nrq3
+         QVKIL+4QtlEromfPT2+AOR14kM/mvldmWMfBcuzhPy0tPyLSF2ue/6lhnPEqIYsNRMGm
+         UB1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786287849; x=1786892649;
-        h=cc:to:message-id:content-transfer-encoding:content-type
-         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to:content-type;
-        bh=e7MG7FcsFjAqmMigfCDPr1wrq2eq1+bdZSypJg/Psa4=;
-        b=ZicSU9gcMU7sTnJsKCauui4TXw0WyJ4+/8g0CuidCiQBLmfNqz4GBWsm9wFpHHi9TE
-         Jc4xAAD5vwQqMGS5EydXh6DzPdESxNWkHFNePonaSqaUupCzOn0tssvMMwT5zYSmp4oA
-         oUHGOy248SKpcc5XBcsrfseTVcGB6XhfWtP9XMtYTcxlh9FpJBozM669gM/q6Oa4xZ69
-         Lk2sKQm3wKPox/hDOkrdNtrgz1YeaSVHHQL3WcCmqMcZqcGpx85sk5nmu/nwjW9eOjdD
-         CLn2S8ObagzHN6jrKBrICfmHRfxXdoIvovxp3FKQHCnvb1WKV7BwiQc0rn2lipGsNDgY
-         3Yqw==
-X-Gm-Message-State: AOJu0YzwUYtf59w/YkHE4rjd0JFIUlRv7jeVMgxxr1d84P32DoxzkdPS
-	VdOW4BdlLiRfvsvlbAdYttm71kNDGpGRKY2ayY8jVEU4uBlYl5dDfRfBhyq5bfAPImMnf6QBGIF
-	tcNMs5vZxyMLZ+wf0sOPGOtjcsZW8TMKNtc0jpPL0vN0EFmO+yWznBufV/ZI=
-X-Gm-Gg: AR+sD121oug1Ap3iWAJe1ijmDvD75Mu9/HNNTy8mQk5Um5rKOvxUMhiZ0KMrKqfBssb
-	PU6xpKvutJIwZZYq1jK+9Jb+Sw/k7X3IO88idMcfNIxvuqYcwY/qmZCznI95Ff044wICY9B/0W5
-	QAM9m4QhzvU+VLM02ndd9SGS6+cBA5ELb5M0NjXHCno61gejVjtvYqEjeuhPt2P009lTexhjhVS
-	kP33LzRiXt9gdPOOzXbsIgykhU1Yy5eweh0YYnmXH9pnlr39gErmAoOE23THBHyesUPu/PHpTCy
-	wTLKiz1ZYor3uIVTJxDNYIvFyD3du6fO3U7r4MPO98jCEe6532fqzQSgkqT9wBkUcRQ4LEAEssO
-	uDeSO9xA=
-X-Received: by 2002:a05:622a:1341:b0:51c:d1c:10e2 with SMTP id d75a77b69052e-52d237a7091mr127493101cf.12.1786287848974;
-        Sun, 09 Aug 2026 08:04:08 -0700 (PDT)
-X-Received: by 2002:a05:622a:1341:b0:51c:d1c:10e2 with SMTP id d75a77b69052e-52d237a7091mr127492151cf.12.1786287848537;
-        Sun, 09 Aug 2026 08:04:08 -0700 (PDT)
-Received: from [127.0.1.1] ([77.137.73.83])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48002145966sm22739200f8f.5.2026.08.09.08.04.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2026 08:04:07 -0700 (PDT)
-From: Tal Zussman <tz2294@columbia.edu>
-Date: Sun, 09 Aug 2026 11:04:01 -0400
-Subject: [PATCH] libceph: remove the dead dirty path in
- ceph_put_page_vector()
+        d=1e100.net; s=20251104; t=1786296814; x=1786901614;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=Dnzny0f6nQDl/3k7kZ8Guokf4/cEXHhhetxys39MwOI=;
+        b=SKlA9IWCEIHdzNEGJdRw7hqjF5Z53fVBIt4qZ/h5jUYrTMzb0UAo1b5pD0Ql2XRIdX
+         8Gf0H0wwoD2xu9mkGUPV6bofz0e1gPtg88uVmtNOgVzyqIiTmL9gGGwVYCwoxjHMnUrt
+         hyjDhcNwVZqMy1AURso/7azZKTAdlJ1WAs+PsOsw2pNN7w9x0uZSubykdnXLQFFPqDAi
+         5YczTeENxTo4W7JLtBYwqGfJrHPNsPsmrB/6CHyiS83TyXsy9edeRvObjLS1e8XJSe/y
+         UXzk7pxiSVcefettcrnnNVpe2/GGiDK4d48vb+Afgs5AnxDiLMzpc4PESNVdUToFwgwA
+         uvyA==
+X-Forwarded-Encrypted: i=1; AHgh+RoPy+Rhax69AAGxDblw4e/O0h13XEHuPJq6gpWccqkMWaDaTKDuPM2WBc1rK2PryPrPobdAQ/u8pZi0@vger.kernel.org
+X-Gm-Message-State: AOJu0YyOpOhFaGMQ5beuAeUESKEYXUWev7/cEOcMXLTaIAyquDIA/IVW
+	Nkyg1WTQGEqCGAeiwRQIzRi1Rd0TtC976JtLVgGKTLL3jtkbwA5C12/ktjMd09VX0QiOsv5pKp9
+	AUe/gmO11Fy8LNIpXbHQp02eELf7MbwY=
+X-Gm-Gg: AR+sD12OunP8XgVVf3uSADlk/ceqAmKMNT8oMKUmC/0EuxCy87x0AhkGvD/7r5bj9ao
+	sk6KjewyMIyUm+eSztxpWzjtdASjxs40M6Zt52myqiQTGyhILDaeIuYu6CiEK5zY5RsW0O7YnQF
+	inG6/ycm9xZppOirvqRkY2xEnP2EOrB6g9pweiy4aLQRzTokml6kBf2oS3m8oDZMixDuGY0e+5b
+	imPS4KbfYpDjC8mbDepM1cEHUG1cedMwyGr1Ly2UNmIUacI+y5+Ffjd4Z23ghi2zpZG6kkT5KVg
+	ae5/e7z4negYRf3NOdOPMYvcsNoD2yV0zyA8ltH7jiOHKtdzKsv3yNmX8gjJ6mfhKyTlyXfupOL
+	PynY=
+X-Received: by 2002:a05:6102:855a:10b0:747:560c:e7e0 with SMTP id
+ ada2fe7eead31-7652017a8e8mr760293137.1.1786296813739; Sun, 09 Aug 2026
+ 10:33:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260809-ceph-put-page-vector-v1-1-57ab2a08ec90@columbia.edu>
-X-B4-Tracking: v=1; b=H4sIAOCWeGoC/yWMQQ6DMAwEv4J8xlIKFFK+gjgkqVPMAaIEEBLK3
- 3Hb42h35oJEkSlBX1wQ6eDE6yLwKAtwk1k+hPwWhkpVrdLqhY7ChGHfMBgZD3LbGrF5amtrY3T
- nWxA1RPJ8/rLD+Oe021nO3xbkfAOwTU6zeAAAAA==
-X-Change-ID: 20260809-ceph-put-page-vector-458bb3aa87f6
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
-        Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Tal Zussman <tz2294@columbia.edu>
-X-Mailer: b4 0.14.3-dev-d7477
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1786287846; l=2359;
- i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
- bh=SQubqO9s+SFQ+/u9mawBkGl4SqexqjyU9fvp4DUIUc0=;
- b=mmUDFWJpkw7shOltkrqGihujdrIK1G2QxItb8lvwMc0+pv5sCid9hWVTOLN9NEqA/t8wKEDUZ
- s3eKjyGB1glB2DiEWkiyZVCJ2avLwRyWhsS6R3V/uVCtfvjy46lhE27
-X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
- pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
-X-Proofpoint-ORIG-GUID: D8JsIEDyCCboj9yMpV-Qo9Q8-B9mI-LM
-X-Proofpoint-GUID: D8JsIEDyCCboj9yMpV-Qo9Q8-B9mI-LM
-X-Authority-Analysis: v=2.4 cv=Ec/4hvmC c=1 sm=1 tr=0 ts=6a7896e9 cx=c_pps
- a=mPf7EqFMSY9/WdsSgAYMbA==:117 a=JbOfF7l4Ow3Rg3+6t581KQ==:17
- a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10 a=x7bEGLp0ZPQA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=JR4YdQiviy7OQf72WyZ1:22
- a=8TkoBnpJMLDG3-7EqBQA:9 a=QEXdDO2ut3YA:10 a=dawVfQjAaf238kedN5IG:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODA5MDEzNCBTYWx0ZWRfX0trNjz1kbKAI
- 9GmsG1nCTNqXhUWh7BEwNFzLMWzGQVA9zZSU+pwVnbCCvIATQbggKKIcppX+DMvNhvyA0aw7XVG
- Q3KqG2lVGnxO0dj7QVEw27Nc/Rb0pSKCG3YvqvqDzOu1/Yn/buQeeZD8ItZFCRQtOlj0FpY0Dfb
- z11JW/QUeiU5v9c03NRJ+HXxn3qrZo5xvGGXw+skqMpou899i7EQDlf/i63Qf4Fx5X6Pa6wTNqK
- JsqyT1y/ske9oxcJTrmejaelHVvU7tmJytt/Lc9tTyIBwF6jeGhDOParcfo10ZG5/bdOz+5ZcEI
- bZhqhuR/YfVi/Y/clLD9jgYzo3/nM8h28nRIPxCISblzh3Fj5IXDL56UZ5sBujw3u5vQ4gsVlTl
- jRBx2+Pq1VVVvm3TMSb44w6tsDOPcSfRTrrsCPpgHR6ZDQMDLjCZdqSxmD1rYeOVNfvb2n+ptrN
- oR1whrI/CpQZF6LvLuA==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwODA5MDEzNCBTYWx0ZWRfX2YzozVrPnBhW
- odkpjBDTQNsQuVoNHuEFqBfb14L+LkusHZ9ENPL7t7ux7q50uEf+pC/0LPXrUgPMVbCSkxleBze
- 4CTvW+GAm6k79JVlHAiYq+R6mZeIQNJWD/6Y6+xriYQCYz8/LgRe
-X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11869
- signatures=596817
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 suspectscore=0 adultscore=0 impostorscore=10
- lowpriorityscore=10 malwarescore=0 phishscore=0 bulkscore=10
- priorityscore=1501 spamscore=0 classifier=typeunknown authscore=0 authtc=
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.22.0-2606150000 definitions=main-2608090134
+References: <20260727014745.1304657-1-zhanxusheng1024@gmail.com>
+ <CAOi1vP-Ba2=Gd3_wtH0g9yfqB6xJVstjarsmUhXj7WGXedqGBQ@mail.gmail.com> <CAKPOu+8Y35cfhz5gqus18-HPLoVMiSWF7cVXVbyn6GmdJA3Z6g@mail.gmail.com>
+In-Reply-To: <CAKPOu+8Y35cfhz5gqus18-HPLoVMiSWF7cVXVbyn6GmdJA3Z6g@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Sun, 9 Aug 2026 19:33:20 +0200
+X-Gm-Features: AUfX_mwnwy3r9fgavh_y4tM6O72D9MJwvIgSBEzeWm66BW3l5prqagQEgEI0_Kw
+Message-ID: <CAOi1vP_oJC73d48w_qJaxtxrX-mVMYip3-rg-iYoHwHn6Tz-FQ@mail.gmail.com>
+Subject: Re: [PATCH] ceph: use the mount idmap for the owner checks in the
+ SET_LAYOUT ioctls
+To: Xiubo Li <xiubo.li@clyso.com>
+Cc: Max Kellermann <max.kellermann@ionos.com>, Zhan Xusheng <zhanxusheng1024@gmail.com>, 
+	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Zhan Xusheng <zhanxusheng@xiaomi.com>, 
+	stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-The only caller of ceph_put_page_vector() passes dirty = false, so the
-branch is dead code. Remove it along with the parameter. This removes a
-call to the deprecated set_page_dirty_lock().
+On Sat, Aug 8, 2026 at 8:31=E2=80=AFAM Max Kellermann <max.kellermann@ionos=
+.com> wrote:
+>
+> On Tue, Jul 28, 2026 at 1:31=E2=80=AFPM Ilya Dryomov <idryomov@gmail.com>=
+ wrote:
+> > Was there any specific reason you used nop_mnt_idmap for these checks?
+>
+> No, I copied that check from another filesystem, probably ext2. I had
+> no idea what this parameter means (and I have never used idmappings).
+> I guess the amended parameter in this patch is correct.
 
-Signed-off-by: Tal Zussman <tz2294@columbia.edu>
----
- fs/ceph/addr.c               | 2 +-
- include/linux/ceph/libceph.h | 3 +--
- net/ceph/pagevec.c           | 7 ++-----
- 3 files changed, 4 insertions(+), 8 deletions(-)
+Hi Xiubo,
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index e2da3ab9f808..83752f3688fa 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -257,7 +257,7 @@ static void finish_netfs_read(struct ceph_osd_request *req)
- 	if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
- 		ceph_put_page_vector(osd_data->pages,
- 				     calc_pages_for(osd_data->alignment,
--					osd_data->length), false);
-+					osd_data->length));
- 	}
- 	if (err > 0) {
- 		ceph_subvolume_metrics_record_io(fsc->mdsc, ceph_inode(inode),
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 63e0e2aa1ce9..3098306e6173 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -313,8 +313,7 @@ int ceph_wait_for_latest_osdmap(struct ceph_client *client,
- 
- /* pagevec.c */
- extern void ceph_release_page_vector(struct page **pages, int num_pages);
--extern void ceph_put_page_vector(struct page **pages, int num_pages,
--				 bool dirty);
-+void ceph_put_page_vector(struct page **pages, int num_pages);
- extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
- extern void ceph_copy_from_page_vector(struct page **pages,
- 				    void *data,
-diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
-index 858359873c4d..828b003aa2fc 100644
---- a/net/ceph/pagevec.c
-+++ b/net/ceph/pagevec.c
-@@ -10,15 +10,12 @@
- 
- #include <linux/ceph/libceph.h>
- 
--void ceph_put_page_vector(struct page **pages, int num_pages, bool dirty)
-+void ceph_put_page_vector(struct page **pages, int num_pages)
- {
- 	int i;
- 
--	for (i = 0; i < num_pages; i++) {
--		if (dirty)
--			set_page_dirty_lock(pages[i]);
-+	for (i = 0; i < num_pages; i++)
- 		put_page(pages[i]);
--	}
- 	kvfree(pages);
- }
- EXPORT_SYMBOL(ceph_put_page_vector);
+You reviewed Max's "ceph: add owner/capability checks for
+CEPH_IOC_SET_LAYOUT*" patch.  Would you be able to review this fixup as
+well?
 
----
-base-commit: 30c0913a2b44a66dc17283a88489b3f3e12f4327
-change-id: 20260809-ceph-put-page-vector-458bb3aa87f6
+Thanks,
 
-Best regards,
--- 
-Tal Zussman <tz2294@columbia.edu>
-
+                Ilya
