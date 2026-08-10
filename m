@@ -1,74 +1,74 @@
-Received: from mx0a-00364e01.pphosted.com (mx0a-00364e01.pphosted.com [148.163.135.74])
+Received: from mx0b-00364e01.pphosted.com (mx0b-00364e01.pphosted.com [148.163.139.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A863B3F58DC
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 14:21:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.135.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C560D3F99F3
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 14:21:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.139.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786371713; cv=none; b=ElW1m4pPQD6rGi5jNZ5WQc6EozgGOKPorGAvjlZUmhidb5+2zRiJ9cwOJ0yu3Irdecd30Lz/HG3FYnwWNt6yqq90LHvsewN3irsj/Y52EZPYKDYYV+1vED59UQZ/eTV/7R+5eAJVaFob8a/6e/ePAOW+u+5bQKmQihPSmo44xzQ=
+	t=1786371723; cv=none; b=qQ2uZT5q8vSIM4fxf29t2wcMtSr6iZsEmx5nKH7c2YAu8DidQKsH9vCMt0H+4w+pRI05yPiIas1fBYi1iaKF6oSt94G5FFx/VlmrVTz3RUt6Va8lX4DZUeRQ8pTLU4pyHHuFurEHcebWVXm/NA+t4jtjbR2AaYUZaRvU59Sq41Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786371713; c=relaxed/simple;
-	bh=eEBEQRS44uRWq+68HnHuSJkJWcepL1mJ0SSpfrhNU80=;
+	s=arc-20240116; t=1786371723; c=relaxed/simple;
+	bh=H+WPEAg6fNk21OMcWq4m8PpfVy6prUL5jC+rlshnioU=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=dqOh9hqvlRFCYIEGbJ0re7Ji21EOkyyNuKFiU8HTygwdpkCT2/Gmd8i/JZj4K0riuVCPTYYNxL3iZn0tqQm+Zh6CDiPdYZ6txDgcp62zeyjCL/2kEDZ8NswFvMt2yQ7L+awaOUx8ew2/TC8uzERj7l/KXGVswAVZqm+iT4gRPeA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=qjq+35LT; arc=none smtp.client-ip=148.163.135.74
+	 In-Reply-To:To:Cc; b=spVebz+xUeDSKjoKqFSphYorChemeeSJhR3VUXAxsTIggDiMzK/TFG2Lkjs7AlRvRX1jlkimSXadj5Xs7EzY+vz1pi5UQm2PW5WEbSKwgdfUCNkWbKoiScZ8LlycLZUUEYx8V/GkKKTH/qi7uUFOvmS9jWIWfkQLHUYj71qMy2w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=bojn0z/I; arc=none smtp.client-ip=148.163.139.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="qjq+35LT"
-Received: from pps.filterd (m0167068.ppops.net [127.0.0.1])
-	by mx0a-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67ACaIaT3194470
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 10:21:35 -0400
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="bojn0z/I"
+Received: from pps.filterd (m0167074.ppops.net [127.0.0.1])
+	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67ACa99P2990304
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 10:21:38 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pps01; bh=aLyb
-	lFTyCRkRNvHlbjBlieXQYnfG93Mvps8LThXIpPg=; b=qjq+35LTpjf9J2w6F2hB
-	vecXljYKiBnAzD5aenYJHzWhsNXgP9xHEliMM9O37gGKVD1vf/Se7su7wn2XbkLZ
-	rD2Jym0BqslG5QgoaHVZ61V0B0C8zhmW1wU+QrjXQYIDVxiVIqKgSDWpi/1WUXHy
-	ywTqc3FxNJY4ahiAjXPHYZJOy9kupo/J0IxL1BEaXBInVqdm6ONnvUYHFuTpUBSM
-	bfA8k5gOrjl2wE7RFonKnU2MENdTTsZEevpboN2Rq7OQug4eKv7jl7Smq6U+kCzG
-	b8RYvB92ovczaQwSBwLkIJDnlZxH21dFvqcBi4PRdU3TYYLfd7kGAt4/+bWKd9of
-	HQ==
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
-	by mx0a-00364e01.pphosted.com (PPS) with ESMTPS id 4fy29132fn-1
+	:message-id:mime-version:references:subject:to; s=pps01; bh=HS4+
+	+7SfsgCqjVhck++B6W9XvkcEaVeM763sEjq4goQ=; b=bojn0z/IAr5WNLmoq+w7
+	vS/X8WLw0/NTfqXqTGcamUIQWo4g/1L1wzi+AIV++Dhbx53xF/eodzujqjggv/dp
+	Wjl0FEdLtxLDhDIo31SXiluw+6npK4Acz30nLDsWhvE/jjhT7xs4fRSt1DLPX34s
+	a0p8FYeF/EvPTQo9DDd0DA1sr543nK5+qGslCJcvF4AH9g+k4Zqi5OnxofRnM0cf
+	dC/eTYsHibBWFmdQWofYkVJ1z30MDCp6hzDaDdibLrbeqEbrlElFkVTP9CieoFIX
+	yR9YAZg9zzfGmOkedQz15nZ1R/gVgQxhGlD8I0nopJIAskQHX9nrh1vLNO2JGaZv
+	yQ==
+Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com [209.85.160.199])
+	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4fxykwujjy-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 10:21:35 -0400 (EDT)
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-52cd0374265so38076931cf.1
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 07:21:35 -0700 (PDT)
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 10:21:38 -0400 (EDT)
+Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-52d33c89a29so17997921cf.1
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 07:21:38 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786371694; x=1786976494;
+        d=1e100.net; s=20251104; t=1786371697; x=1786976497;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :content-type:mime-version:subject:date:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=aLyblFTyCRkRNvHlbjBlieXQYnfG93Mvps8LThXIpPg=;
-        b=PV5f/Wj/gs0mCV316b01ha2nQL7Z1r3hfbvU53BCo0g3SONRPZmxDmQ2xXM9lpEtBL
-         Xlf9QXcem92RN+lxHYt483vu8F6q0EuyUjow+fDs4x3YmikgpNHBst6RUDCj7pJV5bpq
-         4PCmh9o5UceD2zyfIB2jww/p/gu6besIgfbBZNnrRsH+Sa8dw3/sGu3O4aW4v/hQ038K
-         scjwY/ko2yIAi/pEO0JsyJnvPAV5kZ5twybk/6hTiosRTsdPNkDrwDS2ETfuFQywzDWZ
-         FxoUqnXoM21hrVHNVaREUGekmgeQxy8Y2ODICNRiF81ENOLKRNAhRaRveDcoHvNXwq4F
-         6xeA==
-X-Gm-Message-State: AOJu0YxKZHO6YYtf97e961sumHk0+38VlqOCNoVJrmaUQogWnA0hlLZX
-	zdyaz/RMLquZLDnbfyxLlb6v1vQ96ArYhl9D9sFS/+9eLIN2jH5HO9zhE3LakUqIjnvnB79G/KG
-	hS7PcT0BHEXkThkEYa425VokEeNNw3Q3rldXS2sCxnF5JR6jWzFlTNji2eVs=
-X-Gm-Gg: AR+sD13H8wP3OP907gn7UT0zEbjOQmkHK0jwwcyBwAADOVCfVNgojsF+IguJ6mtubky
-	16uivHwPKgbpU/EIv2ARWQ406he6Wk7osGDCIYFg7NVYBYmMm2N923mcIWFAAaDg6iRbwzRIi9F
-	xi9bfzGXtCHkJ9G5bazNgTyGZMJMzTwjMxsKSlXiGTRXp+XwMaHbbSNo40HegWjqBQGl/xSQI5W
-	ex/nhB89RC1BRdqTrYAYjgLsgvgtzhxXHyM2vPCF4de5sVxd+tNPqc2YHnQo/B7cvtqnPDCq4/t
-	Cxn+ZwSgsgrtBo6ey1CHhVqSyIaHGagGanZl4lNbAuuv8MnwZiskXtzQJxWF9msPN4BliZHGb3U
-	C18rQOHvy
-X-Received: by 2002:ac8:6f0f:0:b0:528:3ae6:14d6 with SMTP id d75a77b69052e-52d20a50232mr221693301cf.36.1786371694398;
-        Mon, 10 Aug 2026 07:21:34 -0700 (PDT)
-X-Received: by 2002:ac8:6f0f:0:b0:528:3ae6:14d6 with SMTP id d75a77b69052e-52d20a50232mr221692471cf.36.1786371693979;
-        Mon, 10 Aug 2026 07:21:33 -0700 (PDT)
+        bh=HS4++7SfsgCqjVhck++B6W9XvkcEaVeM763sEjq4goQ=;
+        b=nhB5K5dkRqFtJYUPS440KY9y4TERjv1nFBKCdxUMcZXJbGvN80WWAw10mAL3Sc2YID
+         bsPJ5h64nzPYdvWKipRD20E05RMk82plz+qqISGm1BtfZpS0uNhXhRqkFD96z8iA/XlO
+         qlpOKvpU72syv5FcEItaNSnpXkTxYdrC0wb6OPBjKJVulAbuaQz1C/5gZIjjxQC3aS60
+         NglMPjsjDl/z4T8/Ocka3Lufp1Y+R1A6N91Pi0BmKzkxD/qt7eRumPs3lkFMdi6/odNh
+         AAaKVgfknd+zhEk9QTVmAEC/gf+N2MwjD8ta3mmsx755iQStspyiTOCHySa5a+y6b0pe
+         YhjA==
+X-Gm-Message-State: AOJu0YxpozBC+O3Disl4YqFemWSEHl6PrcRknIGrfE+U5WwWhXf61yFW
+	6dq7tQrYv5NWAS4CVRWmg+avq3D7P5xeR2pOwmHI3ze4bf7ap7eBqx+wStNpk8AS/hYGZMUpwFh
+	Z8aoXSofHbg8+PUotf/7kqbjlMN5LuYPeeEvCIbwR4q9p4XqukXMpzb2hfVk=
+X-Gm-Gg: AR+sD10hTq9dQuppXXcpA1xatK56cEGAsPlCgQQV6mk9z+XEwdfZZQ14ntC8MptCtyg
+	FIi7pwESdA/Om7ASusplaa2pdlinDuq3/hMpHVw3rzn5kUnIizjXtnSMMCDJxk5PPtU+DZHmPKp
+	Oqkmn4SVv0dmN/Beox6y/JXv+koRoi6VML7gzqUMRr68yyCB/TRQ09/w+q9NjkmCog6olynxFma
+	QsclGTRy5AKT/soLps+V8O2OAeXEx5laJjJza2d39fl05Byyty52SXHVLfvYxT/ToGC9Mxuxl5J
+	F028UdxD6rxs2oV5zPxlnbfEyZgU96pyyXweqFw0QosQ2eZO1H7ri8bqyScj9yRRc/GirhMU2iE
+	NOB9meSxe
+X-Received: by 2002:a05:622a:4811:b0:516:d60f:6438 with SMTP id d75a77b69052e-52ce5e01448mr479946451cf.0.1786371697310;
+        Mon, 10 Aug 2026 07:21:37 -0700 (PDT)
+X-Received: by 2002:a05:622a:4811:b0:516:d60f:6438 with SMTP id d75a77b69052e-52ce5e01448mr479945641cf.0.1786371696835;
+        Mon, 10 Aug 2026 07:21:36 -0700 (PDT)
 Received: from [127.0.1.1] ([77.137.77.155])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48002145589sm37383983f8f.1.2026.08.10.07.21.31
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48002145589sm37383983f8f.1.2026.08.10.07.21.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Aug 2026 07:21:33 -0700 (PDT)
+        Mon, 10 Aug 2026 07:21:36 -0700 (PDT)
 From: Tal Zussman <tz2294@columbia.edu>
-Date: Mon, 10 Aug 2026 10:20:22 -0400
-Subject: [PATCH v3 11/12] ceph: remove ceph_fscrypt_pagecache_page() and
- ceph_fscrypt_page_offset()
+Date: Mon, 10 Aug 2026 10:20:23 -0400
+Subject: [PATCH v3 12/12] ceph: rename ceph_check_page_before_write() to
+ ceph_check_folio_before_write()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -77,7 +77,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260810-remove-wait-on-page-writeback-v3-11-dd7531704f26@columbia.edu>
+Message-Id: <20260810-remove-wait-on-page-writeback-v3-12-dd7531704f26@columbia.edu>
 References: <20260810-remove-wait-on-page-writeback-v3-0-dd7531704f26@columbia.edu>
 In-Reply-To: <20260810-remove-wait-on-page-writeback-v3-0-dd7531704f26@columbia.edu>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
@@ -94,86 +94,77 @@ Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
         Tal Zussman <tz2294@columbia.edu>
 X-Mailer: b4 0.14.3-dev-d7477
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1786371655; l=1581;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1786371655; l=1302;
  i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
- bh=eEBEQRS44uRWq+68HnHuSJkJWcepL1mJ0SSpfrhNU80=;
- b=igitKHwKICJe64WLGnQtJ7juQTX89Q1kNusDsmkgFURVamzkBrRPYcM6WFXlcOnjVGCWu9jAc
- HjyznGVPVaGAnp/iTFafK7Se035x+xGTYGst6RxsqK2bKINK75nE3GU
+ bh=H+WPEAg6fNk21OMcWq4m8PpfVy6prUL5jC+rlshnioU=;
+ b=Wb7zxOOE2mdK7NryczQ1B0RD/gwzEja+WEduJUoRi/Dwu2V70eerTkzJiLplKw68Da/YSBGCZ
+ nq/6m0GxSXwBAU0HM+984/XsYO0YrPj3RTxev/kZTfV8Wr3VvludnS1
 X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
  pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
-X-Proofpoint-ORIG-GUID: hhI-CnmGp70fSg0ci9to0a5YQXD8u6C2
-X-Authority-Analysis: v=2.4 cv=aMTAb79m c=1 sm=1 tr=0 ts=6a79de6f cx=c_pps
- a=EVbN6Ke/fEF3bsl7X48z0g==:117 a=zHmcO6jMd5r4EZ4U0P0LQg==:17
+X-Proofpoint-ORIG-GUID: m7p3elOB5ADKOPX8i5AkI5cX7aUjiLOf
+X-Authority-Analysis: v=2.4 cv=S43pBosP c=1 sm=1 tr=0 ts=6a79de72 cx=c_pps
+ a=WeENfcodrlLV9YRTxbY/uA==:117 a=zHmcO6jMd5r4EZ4U0P0LQg==:17
  a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10 a=x7bEGLp0ZPQA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=usPcmh10W0ubT8QP8_c3:22
- a=jfg2DRd2ap2c96lsYj8A:9 a=QEXdDO2ut3YA:10 a=a_PwQJl-kcHnX1M80qC6:22
-X-Proofpoint-GUID: hhI-CnmGp70fSg0ci9to0a5YQXD8u6C2
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODEwMDEyMyBTYWx0ZWRfX5CKEn8gGnlUQ
- 6JUHDnU+Pgi2SdlwqHiQEh4DJ4yfJcaDXR4Mh1D5NrmiTyZBzMlHXRerQULefDMCrnDuzcP/Cnj
- r9Sw5JuTTBMIQl73XVSAZXkHS5GVxKdWQODeyxNVUiS6p/zkWq5VGSrb7GAhh8ZY9XXZ4P6Ul8V
- LRAMf3aidxKjfDd1zB/2TvqYeeGFpz0lmnmFHWOJwkETwiRCkr9SQcQ2wIWvUOtaGkboEGXeutc
- 5fKKGDGmsPkC+cbJ1gFMqBvyzkhofshvphNwqG4vZbcRjvIhrLsgUR7qhPX2ic8pY/gtShhGkix
- m3pPij9QN0zcaKtm1P0fjhJ1tMxbU53IfghVt0e6Q8zYkbhG0tBpOS3+erBwx3AQdzO4h5/caSR
- aOdYlyr0c0Bmlu8SfHtSN3rDtbnxVskN4YR2kQi869HYh6BMwm8pDPHwvJyZVT3EdQgOrs0DWBx
- Xb0o0MpJmV41dHTVdIQ==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwODEwMDEyMyBTYWx0ZWRfX/X6QQvCDOOjj
- GobId5ATkjG15ya133cL3c0T8J4hd00Yi7im6TBF9LPqP9Eh2GmjG/Dw7zyAWRvkNCFX7z4mOM2
- VBAti+QfBdJDb3RkwmVKbf97qmVa0QqYeCNhjnQfalGPwP8l3zbu
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=azVShVRs0zEubeQ0wG0L:22
+ a=V3EFW1AtJEMGhprvICUA:9 a=QEXdDO2ut3YA:10 a=kacYvNCVWA4VmyqE58fU:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODEwMDEyMyBTYWx0ZWRfXxgOlt7TbDPHu
+ w33B+y6GXvlYOTAIqd/pxJP4NsrIglbULc3LYIPzBRLnGC2Wug+jt2902lVPmrYRl+gPKrKj+Sm
+ 4r6Ay2z36hWPuuwkCYib+pI/rh1cx3EFk6PAiajZ2Os5Faeqce7F8FaqnpP/UdaLlQBFXZJB2Ml
+ aHX3eBsSRPkMaD4v4cHm/tHdR4XDXbgUVBvvoWHAVzT6qPfhAODzqBbpOI5liTd9kF3SAKF7JqZ
+ 31BDznGJyzKN8OROBwkn6M/Tg7Iv0w3yQTEHpqbcl2haj38vlnLe10eHH4+7UELNDJT5oI1ydZh
+ P9UJX4TIBQc4/R8cZuTtqqlskQr/QGMYuB9oHj3si/2BzlZcQ8XZivJmSg3lOk0fWObvvbSmQ6t
+ sF4dF8sPPwQeak9pEzLhVeE34fQhmpvtr15MXqLzd23WKPPsOkuQrP8x5RGRc5tckGqdUlL0evF
+ LAjDBi2pePMBrA1Sw/Q==
+X-Proofpoint-GUID: m7p3elOB5ADKOPX8i5AkI5cX7aUjiLOf
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODEwMDEyMyBTYWx0ZWRfX/FMu66pj/tLA
+ WTXZmjDuocAnKGaVHklw2dbMCXWeClkpJ/o0VQgK+b9QdygvI7vk2cN9cs7WD2zcHjQrndcLKHL
+ lfpZbr1uTU8MA7Q5+iHmtU10zpkQC48s/Jz4X4oqPHCniy4RthQW
 X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11870
  signatures=596817
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 malwarescore=0 spamscore=0 priorityscore=1501 bulkscore=10
- adultscore=0 phishscore=0 lowpriorityscore=10 suspectscore=0 impostorscore=10
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608100123
+ priorityscore=1501 clxscore=1015 adultscore=0 bulkscore=10 spamscore=0
+ malwarescore=0 suspectscore=0 phishscore=0 lowpriorityscore=10
+ impostorscore=10 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2608100123
 
-All callers have been converted to the folio equivalents, so remove
-these unused helpers. This also removes a use of page_offset().
+This function only operates on folios, so rename it accordingly.
 
 Signed-off-by: Tal Zussman <tz2294@columbia.edu>
 ---
- fs/ceph/crypto.h | 15 ---------------
- 1 file changed, 15 deletions(-)
+ fs/ceph/addr.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/crypto.h b/fs/ceph/crypto.h
-index 948c8b5dca06..d199dc8410fe 100644
---- a/fs/ceph/crypto.h
-+++ b/fs/ceph/crypto.h
-@@ -157,11 +157,6 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
- int ceph_fscrypt_encrypt_pages(struct inode *inode, struct page **page, u64 off,
- 			       int len);
- 
--static inline struct page *ceph_fscrypt_pagecache_page(struct page *page)
--{
--	return fscrypt_is_bounce_page(page) ? fscrypt_pagecache_page(page) : page;
--}
--
- static inline struct folio *ceph_fscrypt_pagecache_folio(struct folio *folio)
- {
- 	return fscrypt_is_bounce_folio(folio) ? fscrypt_pagecache_folio(folio) : folio;
-@@ -263,22 +258,12 @@ static inline int ceph_fscrypt_encrypt_pages(struct inode *inode,
- 	return 0;
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 708343a8bf35..68018fc097c4 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1164,10 +1164,10 @@ bool can_next_page_be_processed(struct ceph_writeback_ctl *ceph_wbc,
  }
  
--static inline struct page *ceph_fscrypt_pagecache_page(struct page *page)
--{
--	return page;
--}
--
- static inline struct folio *ceph_fscrypt_pagecache_folio(struct folio *folio)
+ static
+-int ceph_check_page_before_write(struct address_space *mapping,
+-				 struct writeback_control *wbc,
+-				 struct ceph_writeback_ctl *ceph_wbc,
+-				 struct folio *folio)
++int ceph_check_folio_before_write(struct address_space *mapping,
++				  struct writeback_control *wbc,
++				  struct ceph_writeback_ctl *ceph_wbc,
++				  struct folio *folio)
  {
- 	return folio;
- }
- #endif /* CONFIG_FS_ENCRYPTION */
+ 	struct inode *inode = mapping->host;
+ 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+@@ -1351,8 +1351,8 @@ void ceph_process_folio_batch(struct address_space *mapping,
+ 		else if (!folio_trylock(folio))
+ 			break;
  
--static inline loff_t ceph_fscrypt_page_offset(struct page *page)
--{
--	return page_offset(ceph_fscrypt_pagecache_page(page));
--}
--
- static inline loff_t ceph_fscrypt_folio_offset(struct folio *folio)
- {
- 	return folio_pos(ceph_fscrypt_pagecache_folio(folio));
+-		rc = ceph_check_page_before_write(mapping, wbc,
+-						  ceph_wbc, folio);
++		rc = ceph_check_folio_before_write(mapping, wbc,
++						   ceph_wbc, folio);
+ 		if (rc == -ENODATA) {
+ 			folio_unlock(folio);
+ 			folio_put(folio);
 
 -- 
 2.39.5
