@@ -1,153 +1,155 @@
-Received: from mail-qk1-f175.google.com (mail-qk1-f175.google.com [209.85.222.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D1EC3C3F41
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 11:49:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.175
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786362599; cv=pass; b=ubyv6xTcPAPkll4/egKb2ewGOQSMQoasLo0LHEPTewV5BtoiHk4JPK8YDCupzLHe4myGsMHmgj2pwZQC4aWF7phX70aVBwMgz6agLYsWV098/nlJem52tObxFUQ+iLdIZQRzqsw1w3P+TGy+tSxs1qi2jqd3P7iyn608afbxKL0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786362599; c=relaxed/simple;
-	bh=bqxhj80OHCfs2l0pmZXo9T6EE/Q+XSI4ASVci9J8bsI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=tO3UepaxqZEOeYnRYuuyqeN80k6sMzxhMZg5lDExvhgJF+imRAaXSbv2H9QOEaW7efiNOnFe9mNWkv4rqydw3YCseubduDczJW1VQWkYPc+fUEPsY49KVUXE6O/WEYKLNWsnEd1ZQ1GP4CIsy9GO+/HL4xUM2jE6gefIN4kTj/I=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu; spf=pass smtp.mailfrom=szeredi.hu; dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b=JbIlTHjY; arc=pass smtp.client-ip=209.85.222.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=szeredi.hu
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52A5D3DA7D7
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 12:28:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786364922; cv=none; b=Aov9HqrFty+PhoGPiViTO775MpS97mAPg7PWTBXabUW6MnH5ScUH53Ppd4tJYcmGGQ2cUhO5zcAhf21sMUMmbDZQMUIjSf+6l0qlI+JPN58O6kNb7x+fYkyj9Rc9I94QCQXyQ/uwq5FThNdKDDlxBIO0Oi6hOB3gCnO5nm3Vjvs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786364922; c=relaxed/simple;
+	bh=xB/SG+nkoVeBZn29ex9klFEeocmanwbNit2zBGT8Vpo=;
+	h=Message-ID:Date:MIME-Version:Subject:References:To:Cc:From:
+	 In-Reply-To:Content-Type; b=CsVIJqUH0MBeVcXypTT2GCDyx3X/qBIfgpPtruzV2M4GEy17vd1pmBvcZwaTP3Ek3qtpbWBUoaebG1lahLitvmCsy1Cx5JcZlN8a6SolU7abs9zUK0c9pD1Ns+knukihSe8c0B0KR+88Z4Jyv/+WilyzexbszJrhiJN+aPc11DY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=zsbZBbAB; arc=none smtp.client-ip=141.24.179.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b="JbIlTHjY"
-Received: by mail-qk1-f175.google.com with SMTP id af79cd13be357-92f03daaa97so81763885a.2
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 04:49:56 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786362595; cv=none;
-        d=google.com; s=arc-20260327;
-        b=l8gpAq/+sAKQJ6bMlLhf6DDdv2D4DjXtT20//WPA9uBS937oGM9YinU0dFngzt73XD
-         GPzk4B97Yr+k2m51AwiHKiscxmvflJivPqTD22sR6/y6csVZNz8NO9nMV36qaRUW9guf
-         yATmJjLFJ696As0FX40uKtontQqvkIDnCPOCG7cys9xT+QEPmwHJQ8R5HlQb9N8VF8P8
-         wVivAktxKHK+f1FB/wfGJO3Px0E4RLj3GJeVagE1/OkGr78iBOgJZoRiZeLNfZ1jTVaa
-         3XWxrZ7vuDDKbEMsyoZcsaTxN86lUfGXo1mTKS9d5kF5yWyYpdDywmkBfyonv1rtETSo
-         cmrg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=MYtVOAa94uBjVa65PDPUOymqzi6A36MmnRIRMhhmNoM=;
-        fh=+Y6tgETjFFEYAzeaF5b43uNys4fgsfibys4Py1br3A8=;
-        b=pbiX+1mf+P5c9auI8ePYnzIqC1oSqIRwBgwcrh0H718JZBOMXuikRmi6DRzmHXjZyi
-         bCa7qGCAVhACWLITtj+74/eAFpPmXuzJ4fBANqOSxTJhIU6vQbRu9Dfl+KuadEFB0GnQ
-         TyWMz7wqt79uk1ZrCQg+gfU4BtEGURblwfwAShSyjuYulNUH0dkErHaqK2A+Z5HBsWiM
-         AZ7QPFIMnT1LPLBvChJyEh6sohbR4yC1NKybZnEk4mQh5Wzre7CrJO6Nj1Uy4daUf4s/
-         5a1QjNZC45sluAJJQrlf18cjNRoL08o1xBBEBvc2mjaobJlYF488At0o/dGt7bMlUXPB
-         IMxQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=szeredi.hu; s=google; t=1786362595; x=1786967395; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=MYtVOAa94uBjVa65PDPUOymqzi6A36MmnRIRMhhmNoM=;
-        b=JbIlTHjYRbq+ZIsCxsszUYyLNHxgDCPjN9Ma1WEhKH7MRmWe7joIBbYWWomP9gcZOk
-         LFfIYMBfmj2D+xlKmRu9u/RX7WEdZqwmK+o11C1r04InwcwfFNVdcqh2Sg5WKYqi1/Rt
-         KFQGIwIBoE4APpF/F9Jcwrx5z06thfkeft49Q=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786362595; x=1786967395;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=MYtVOAa94uBjVa65PDPUOymqzi6A36MmnRIRMhhmNoM=;
-        b=aUuvt6y/iHwuKo6MEpfsEGPz91U3U6f85muaZOY8JV77mGjA/r1UGo3a7oDGx9bKgB
-         L71dyP36g+ypfxbPm1QcyNBgti3hIn/5RTSkfeZf7aECgBvZ6lhNM+KUJXTneEFf+ect
-         hhbSyOsG3y4xmGNy3IwOnAh7vZKd9d3Hf6dkEKaFNC5upVBXpg292vpjMjw2fIFZ+Ubz
-         1XeAm2KVIjxR0ieHcFThFPA7hMgB7QuDJRa9CLCBVPHhzpY381oJDFu2lflOm8WFBizq
-         UhWRd+ZrPBG4m6I70VNj5YHcPICKfXlFt4D5n6927EoIQ8+QH+JZe89jHsGBntmu5V77
-         xJ/A==
-X-Forwarded-Encrypted: i=1; AHgh+RqT22N2z09ngNQVAf/eHdB1kN5qCIbDHp7H46iOVlFv7b4G3f3HqO0DtA1Ij4SqIBvmFiS6aXmymq15@vger.kernel.org
-X-Gm-Message-State: AOJu0YzlC692TrPh2Jr2sTUKBWlwTDlpHACkzCbbmCO7HaPBaVPaqYEn
-	4bgduLsp2gIw5vpFca3AVN4mTirIiifGVW8MvsL0ncidp3tBu3w2VNZW/53ADGQypTcpSE9jiM2
-	PJ+zNCdsohKC9xdBYxGaawgwSIMjbvDjka2RANJhdKA==
-X-Gm-Gg: AR+sD10y24TnhhpA4RYNJZvsZdz15O2SXKG1ST/nlHCWk6A/Pi8Of5IyH4UQjUtkNS3
-	ECTn8e2/rArrcBMwe9j32YpFSvPNm8XuEG17hgzXklBuH+SMmBMcpm7xM2hoCrBUk/WCExCTnkh
-	d2vKYo94Pyift5dGPZLhcaCqZJUkg1d5SCQyxCbEVkhITXlgUsGxnREV8Paqp0Q4r5eMt1xuBfj
-	0eWS4T+JWCOr6uQTs44UocfBMtp+Q7kWshBTZvGq87suYm/RrmgTzhz7fY8daFGiAfiwfNCJMGN
-	YcsIIg2OWDwGzZrArjk1LUtK3dplZI7aF8VBCMDzK6QUBPWFCCLC0nhnKJD1o5U/bFL9RSTILKM
-	=
-X-Received: by 2002:a05:620a:818d:b0:914:bf8a:ba81 with SMTP id
- af79cd13be357-9369d1ba3femr59440385a.27.1786362595054; Mon, 10 Aug 2026
- 04:49:55 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="zsbZBbAB"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1786364909; h=message-id
+ : date : mime-version : subject : references : to : cc : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=xB/SG+nkoVeBZn29ex9klFEeocmanwbNit2zBGT8Vpo=;
+ b=zsbZBbABoLaeKLXZRZ3aA5kZE/Ak1KxZ7NG5H760DnndB4EK4rGLE8mASgs0mOcQDd0Pv
+ BIm3XNDlS8ocaHI00dV6/B6uIRmvinnqbeSDZch8UTNZ1AOAEz2nXU3L0OQ6HoqfKlemoBf
+ hTUG8K4kzPW/2KrR1IOR41/Ezj60INtB27+nuZqA1xp+zbiBNnDwQZghuxutiiR0oDOibrj
+ Owt1PcLkfokrxvwQw7KFs8chpGble3XgHDjUGQFR1eff0/XB80QqqLav3P8h37FPkiJEsXh
+ eH1e7SiWj3CJN0qSTSDs2S6zFGeACW//lPhamm00Xv6qLrU+LIlUcjBjqLdQ==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id BD55C5FB4B;
+	Mon, 10 Aug 2026 14:28:29 +0200 (CEST)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 973E25FB4B;
+	Mon, 10 Aug 2026 14:28:29 +0200 (CEST)
+Message-ID: <d1dc7faa-2373-4c96-ba0e-0e6d3e3b8457@tu-ilmenau.de>
+Date: Mon, 10 Aug 2026 14:28:29 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260803012648.2195405-1-neilb@ownmail.net> <20260803012648.2195405-2-neilb@ownmail.net>
-In-Reply-To: <20260803012648.2195405-2-neilb@ownmail.net>
-From: Miklos Szeredi <miklos@szeredi.hu>
-Date: Mon, 10 Aug 2026 13:49:42 +0200
-X-Gm-Features: AUfX_mzmgezsTeEsc_HIV9oG5qNwHpchZPEJUwGx53Ztx5haBzb4JhKil_bknQc
-Message-ID: <CAJfpegt1wHngLs9uR943gT6zxV67D53k3n4GiFKowsAb3C6LJw@mail.gmail.com>
-Subject: Re: [PATCH v1 01/12] VFS: don't count references through ->d_parent
-To: NeilBrown <neil@brown.name>
-Cc: Ian Kent <raven@themaw.net>, Chuck Lever <cel@kernel.org>, Jake Edge <jake@lwn.net>, 
-	Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Viacheslav Dubeyko <slava@dubeyko.com>, Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
-	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
-	Amir Goldstein <amir73il@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, 
-	Miklos Szeredi <mszeredi@redhat.com>, autofs@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	ceph-devel@vger.kernel.org, codalist@coda.cs.cmu.edu, 
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org
-Content-Type: multipart/mixed; boundary="000000000000eb44720658aff3f2"
+User-Agent: Mozilla Thunderbird
+Subject: [bug report] libceph: ceph_pg_is_split() may get stuck in infinite
+ loop
+Content-Language: en-US
+References: <5c6c41a0-a25a-4a0e-90ea-426eed554fb9@tu-ilmenau.de>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
+ 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
+In-Reply-To: <5c6c41a0-a25a-4a0e-90ea-426eed554fb9@tu-ilmenau.de>
+X-Forwarded-Message-Id: <5c6c41a0-a25a-4a0e-90ea-426eed554fb9@tu-ilmenau.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
---000000000000eb44720658aff3f2
-Content-Type: text/plain; charset="UTF-8"
+Hi,
+I noticed some problems in ceph_pg_is_split() (net/ceph/osdmap.c) that
+may result in an infinite loop for certain values of old_pg_num and
+new_pg_num.
+The issue arises if old_pg_num and new_pg_num have values greater than
+or equal to 2^31. In this case, calc_bits_of(old_pg_num) calculates 32
+and assigns this value to old_bits. The next statement:
+	int old_mask = (1 << old_bits) - 1;
+results in a left shift operation of 32 bits, which is undefined
+behavior when performed in 32-bit width. This should be avoided in any
+case. If only the last 5 bits of the shift count are evaluated (as done
+on my machine), old_mask will be 0.
+Inside the for loop, next_bit is calculated as
+	int next_bit = n << (old_bits - 1);
+which results in either 2^31 or 0 depending on whether n is odd or even.
+In the next step, s is calculated as
+	u32 s = next_bit | pgid->seed;
+which results in either s = pgid->seed or s = pgid->seed + 2^31.
+If old_pg_num > pgid->seed | 2^31, the following if statement always
+evaluates to true and the loop continues with the next iteration.
+This causes the loop to never terminate.
+If old_pg_num <= pgid->seed | 2^31, the following if statement only
+evaluates to true in case of s = pgid->seed. With s = pgid->seed + 2^31,
+the remaining part of the loop's body will be executed. If new_pg_num is
+greater than pgid->seed + 2^31 the
+	if(s >= new_pg_num)
+		break;
+will never exit the loop.
+Subsequently,
+	s = ceph_stable_mod(s, old_pg_num, old_mask);
+will return s = 0, and the return statement is only executed for
+pgid->seed == 0. (In case the undefined shift operation evaluates the
+same way as seen on my machine.)
+If not, the loop never terminates.
 
-On Mon, 3 Aug 2026 at 03:37, NeilBrown <neilb@ownmail.net> wrote:
+This happens for all values that fulfill:
+(new_pg_num > old_pg_num >= 2^31) and (old_pg_num > pgid->seed | 2^31)
+|| ((new_pg_num > pgid->seed | 2^31) && pgid->seed > 0)
+An actual example for this is new_pg_num == 2^32-1, old_pg_num == 2^32-2
+and pgid->seed < 2^31-2.
 
-> When a DCACHE_CURSOR dentry is added to d_children, it is only ever
-> added "before" or "behind" an existing child, so it will never be the
-> first and so never needs to adjust the refcount on the parent.  If it
-> remains on the list until dput() it could be the last child to be
-> removed, in which case normal handling applies in dentry_unlist() (where
-> it has been moved from dentry_kill().
+Another case that results in a bit-shift being undefined behavior is
+old_pg_num == 0. In this case, old_bits is 0, and the first statement
+inside the for loop:
+	int next_bit = n << (old_bits - 1);
+results in n << -1, which is also undefined behavior.
 
-Not handling the parent refcount together with cursor removal can
-result in inconsistency, e.g:
+In the first case, a misbehaving Ceph daemon or an attacker that
+modifies messages can deliberately trigger infinite loops and thereby
+force resource depletion.
+This is the case because the values are read from the previous and
+current osdmap, which have been received over the network and can
+therefore contain arbitrary attacker-supplied data.
 
- - add cursor (seek between two positive dentries)
- - remove all real children (parent refcount not touched, since cursor
-is still on d_children)
- - remove cursor (seek to zero offset)
- - close directory (dentry_unlist() will skip parent refcount update
-since dentry->d_sib is no longer linked)
+To handle these issues, additional logic could be introduced to
+ceph_pg_is_split(). The infinite loop could be easily prevented by
+adding an upper bound to the for loop. However, another solution would
+be to not allow pg_num to take on such values directly when receiving an
+osdmap. I'm not sure if these values can be treated as invalid. More
+than 2^31 seems very unlikely to me, but 0 could possibly be a valid value.
 
-Repro attached, produces "BUG: Dentry ffff888107ef75d0{i=143e,n=dir}
-still in use (1) [unm
-ount of hugetlbfs hugetlbfs]".
+Do you have an opinion or guidance on how to handle this, resp. which
+possible solution to prefer? In this case, I can create a patch for it.
 
-Thanks,
-Milklos
+Best regards,
+Raphael
 
---000000000000eb44720658aff3f2
-Content-Type: text/x-csrc; charset="US-ASCII"; name="rmwhilereaddir.c"
-Content-Disposition: attachment; filename="rmwhilereaddir.c"
-Content-Transfer-Encoding: base64
-Content-ID: <f_msn63w320>
-X-Attachment-Id: f_msn63w320
-
-I2luY2x1ZGUgPGZjbnRsLmg+CiNpbmNsdWRlIDx1bmlzdGQuaD4KI2luY2x1ZGUgPGRpcmVudC5o
-PgojaW5jbHVkZSA8ZXJyLmg+CiNpbmNsdWRlIDxzeXMvc3RhdC5oPgoKI2RlZmluZSBDSEVDS19F
-UlIoX2V4cHIpIFwKCSh7IHR5cGVvZihfZXhwcikgX3JldCA9IChfZXhwcik7IGlmIChfcmV0ID09
-IC0xKSB7IGVycigxLCAjX2V4cHIpOyB9IF9yZXQ7IH0pCiNkZWZpbmUgQ0hFQ0tfTlVMTChfZXhw
-cikgXAoJKHsgdHlwZW9mKF9leHByKSBfcmV0ID0gKF9leHByKTsgaWYgKF9yZXQgPT0gTlVMTCkg
-eyBlcnJ4KDEsICNfZXhwciAiIHJldHVybmVkIE5VTEwiKTsgfSBfcmV0OyB9KQoKaW50IG1haW4o
-dm9pZCkKewoJaW50IGRmZDsKCURJUiAqZHA7CglzdHJ1Y3QgZGlyZW50ICpkZTsKCglDSEVDS19F
-UlIobWtkaXIoImRpciIsIDA3NzcpKTsKCUNIRUNLX0VSUihta25vZCgiZGlyL2ZvbyIsIDA2NjYs
-IDApKTsKCUNIRUNLX0VSUihta25vZCgiZGlyL2JhciIsIDA2NjYsIDApKTsKCWRmZCA9IENIRUNL
-X0VSUihvcGVuKCJkaXIiLCBPX1JET05MWSkpOwoJZHAgPSBDSEVDS19OVUxMKGZkb3BlbmRpcihk
-ZmQpKTsKCWRvIHsKCQlkZSA9IENIRUNLX05VTEwocmVhZGRpcihkcCkpOwoJfSB3aGlsZSAoZGUt
-PmRfbmFtZVswXSA9PSAnLicpOwoJQ0hFQ0tfRVJSKGxzZWVrKGRmZCwgZGUtPmRfb2ZmLCBTRUVL
-X1NFVCkpOyAvKiBsaW5rcyBjdXJzb3IgYmV0d2VlbiBmb28gYW5kIGJhciAqLwoJQ0hFQ0tfRVJS
-KHVubGluaygiZGlyL2ZvbyIpKTsKCUNIRUNLX0VSUih1bmxpbmsoImRpci9iYXIiKSk7CglDSEVD
-S19FUlIobHNlZWsoZGZkLCAwLCBTRUVLX1NFVCkpOyAvKiByZW1vdmVzIGN1cnNvciAqLwoJQ0hF
-Q0tfRVJSKGNsb3NlZGlyKGRwKSk7CglDSEVDS19FUlIocm1kaXIoImRpciIpKTsKfQo=
---000000000000eb44720658aff3f2--
