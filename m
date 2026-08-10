@@ -1,155 +1,144 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52A5D3DA7D7
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 12:28:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05ADA3C2775;
+	Mon, 10 Aug 2026 13:12:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786364922; cv=none; b=Aov9HqrFty+PhoGPiViTO775MpS97mAPg7PWTBXabUW6MnH5ScUH53Ppd4tJYcmGGQ2cUhO5zcAhf21sMUMmbDZQMUIjSf+6l0qlI+JPN58O6kNb7x+fYkyj9Rc9I94QCQXyQ/uwq5FThNdKDDlxBIO0Oi6hOB3gCnO5nm3Vjvs=
+	t=1786367555; cv=none; b=TBCiwlaWkdiE5NDckuag8ZSXj/84oPiOUTZ2jnwI6u0SYjf1ZWvdbQDiwqs2lsKAnkIJsuXm5/fdf8pXZcdpTPd6ijaZya5vkz5kk22BCnKtBcS3JRr3L4qucFeB+/WcSHKu8Yqdo7g4i3fyLgwRfPKwsGNxmwtWNIiSZfFzDMI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786364922; c=relaxed/simple;
-	bh=xB/SG+nkoVeBZn29ex9klFEeocmanwbNit2zBGT8Vpo=;
-	h=Message-ID:Date:MIME-Version:Subject:References:To:Cc:From:
-	 In-Reply-To:Content-Type; b=CsVIJqUH0MBeVcXypTT2GCDyx3X/qBIfgpPtruzV2M4GEy17vd1pmBvcZwaTP3Ek3qtpbWBUoaebG1lahLitvmCsy1Cx5JcZlN8a6SolU7abs9zUK0c9pD1Ns+knukihSe8c0B0KR+88Z4Jyv/+WilyzexbszJrhiJN+aPc11DY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=zsbZBbAB; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1786367555; c=relaxed/simple;
+	bh=H4bkzjyn5PYFF1fjCINLDBhQNmdAHkuGSmghaii28ks=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=GHHTYLnCjo3LXs2p6f3xXaDdmCjgY1/cTkPZjPm7YW69lhd6STRnEga5eGkXE21cCkTtHNm64VPohS1X70g/Esi6pu9IHF1yoZZvrCGgxBnpYmezW83VU0uXoeQicVaq/GZYYH8PLJdsJKooCwWgRo152BEurVUXDUu1ktuCJiE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gD7tKxwY; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="zsbZBbAB"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1786364909; h=message-id
- : date : mime-version : subject : references : to : cc : from :
- in-reply-to : content-type : content-transfer-encoding : from;
- bh=xB/SG+nkoVeBZn29ex9klFEeocmanwbNit2zBGT8Vpo=;
- b=zsbZBbABoLaeKLXZRZ3aA5kZE/Ak1KxZ7NG5H760DnndB4EK4rGLE8mASgs0mOcQDd0Pv
- BIm3XNDlS8ocaHI00dV6/B6uIRmvinnqbeSDZch8UTNZ1AOAEz2nXU3L0OQ6HoqfKlemoBf
- hTUG8K4kzPW/2KrR1IOR41/Ezj60INtB27+nuZqA1xp+zbiBNnDwQZghuxutiiR0oDOibrj
- Owt1PcLkfokrxvwQw7KFs8chpGble3XgHDjUGQFR1eff0/XB80QqqLav3P8h37FPkiJEsXh
- eH1e7SiWj3CJN0qSTSDs2S6zFGeACW//lPhamm00Xv6qLrU+LIlUcjBjqLdQ==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id BD55C5FB4B;
-	Mon, 10 Aug 2026 14:28:29 +0200 (CEST)
-Received: from [141.24.212.106] (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 973E25FB4B;
-	Mon, 10 Aug 2026 14:28:29 +0200 (CEST)
-Message-ID: <d1dc7faa-2373-4c96-ba0e-0e6d3e3b8457@tu-ilmenau.de>
-Date: Mon, 10 Aug 2026 14:28:29 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gD7tKxwY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4B801F000E9;
+	Mon, 10 Aug 2026 13:12:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1786367553;
+	bh=gzwFhtE0Ek2LlVIsTwETJaTv5SvMI/8Bx08qLe2Vxtc=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=gD7tKxwYhcI7DHlrAioW2qhKgIAABui+x7xOWM4yNge/+pxISG8Prmuy7Nw1PWEo8
+	 h0IXKke3j8f3JhEchHd2VYAiFknegfIvqbj3fZvne9Z4HdzC/03nUZtBJ3AOBDzi81
+	 hmRrKeUHFkWBTJtgJ0EWBy5jiJS6xIgAOu56flgrDCUqxAJJ5fc0PbJZSysDPVWS2s
+	 kMoQfcWZGyQuL/xvmYbiBn3teBRTbCUUa9+nLUu3qTZQke/zsjObGWHu7PyyAjg6TY
+	 XPEotAtFQm884B2uRvPVe+xj3Qo8xDW3CUdlrdupZzS2yqdcUNZodAqzXiW3qvf52C
+	 AbGgrCKjIgvcw==
+From: Christian Brauner <brauner@kernel.org>
+To: Matthew Wilcox <willy@infradead.org>,
+	Christoph Hellwig <hch@infradead.org>,
+	Christian Brauner <brauner@kernel.org>,
+	David Howells <dhowells@redhat.com>
+Cc: Paulo Alcantara <pc@manguebit.org>,
+	Jens Axboe <axboe@kernel.dk>,
+	Leon Romanovsky <leon@kernel.org>,
+	Steve French <sfrench@samba.org>,
+	ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Stefan Metzmacher <metze@samba.org>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-erofs@lists.ozlabs.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v8 00/25] netfs: Keep track of folios in a segmented bio_vec[] chain
+Date: Mon, 10 Aug 2026 15:12:23 +0200
+Message-ID: <20260810-luftdicht-popmusik-hypen-61dd8d9e3c06@brauner>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260804100224.2748935-1-dhowells@redhat.com>
+References: <20260804100224.2748935-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: [bug report] libceph: ceph_pg_is_split() may get stuck in infinite
- loop
-Content-Language: en-US
-References: <5c6c41a0-a25a-4a0e-90ea-426eed554fb9@tu-ilmenau.de>
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Autocrypt: addr=raphael.zimmer@tu-ilmenau.de; keydata=
- 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
-In-Reply-To: <5c6c41a0-a25a-4a0e-90ea-426eed554fb9@tu-ilmenau.de>
-X-Forwarded-Message-Id: <5c6c41a0-a25a-4a0e-90ea-426eed554fb9@tu-ilmenau.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3993; i=brauner@kernel.org; h=from:subject:message-id; bh=H4bkzjyn5PYFF1fjCINLDBhQNmdAHkuGSmghaii28ks=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWRVnrN4Erc35H3fhn/clms7GJ4uEZWeJhcuUrNrW+arA JGQ3SaJHaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABfhYPinGptzyGzilt/72nwE E3ab2vZrKqdG7hRYYeuScWP2gbQTjAwHlysWdRuZxNts5j2tfWFGkW/arCzbN+KvBaYoVvILruU DAA==
+X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 
-Hi,
-I noticed some problems in ceph_pg_is_split() (net/ceph/osdmap.c) that
-may result in an infinite loop for certain values of old_pg_num and
-new_pg_num.
-The issue arises if old_pg_num and new_pg_num have values greater than
-or equal to 2^31. In this case, calc_bits_of(old_pg_num) calculates 32
-and assigns this value to old_bits. The next statement:
-	int old_mask = (1 << old_bits) - 1;
-results in a left shift operation of 32 bits, which is undefined
-behavior when performed in 32-bit width. This should be avoided in any
-case. If only the last 5 bits of the shift count are evaluated (as done
-on my machine), old_mask will be 0.
-Inside the for loop, next_bit is calculated as
-	int next_bit = n << (old_bits - 1);
-which results in either 2^31 or 0 depending on whether n is odd or even.
-In the next step, s is calculated as
-	u32 s = next_bit | pgid->seed;
-which results in either s = pgid->seed or s = pgid->seed + 2^31.
-If old_pg_num > pgid->seed | 2^31, the following if statement always
-evaluates to true and the loop continues with the next iteration.
-This causes the loop to never terminate.
-If old_pg_num <= pgid->seed | 2^31, the following if statement only
-evaluates to true in case of s = pgid->seed. With s = pgid->seed + 2^31,
-the remaining part of the loop's body will be executed. If new_pg_num is
-greater than pgid->seed + 2^31 the
-	if(s >= new_pg_num)
-		break;
-will never exit the loop.
-Subsequently,
-	s = ceph_stable_mod(s, old_pg_num, old_mask);
-will return s = 0, and the return statement is only executed for
-pgid->seed == 0. (In case the undefined shift operation evaluates the
-same way as seen on my machine.)
-If not, the loop never terminates.
+On Tue, 04 Aug 2026 11:01:55 +0100, David Howells wrote:
+> Could you add these patches to the VFS tree for next?
+> 
+> The patches get rid of folio_queue, rolling_buffer and ITER_FOLIOQ,
+> replacing the folio queue construct used to manage buffers in netfslib with
+> one based around a segmented chain of bio_vec arrays instead.  There are
+> three main aims here:
+> 
+> [...]
 
-This happens for all values that fulfill:
-(new_pg_num > old_pg_num >= 2^31) and (old_pg_num > pgid->seed | 2^31)
-|| ((new_pg_num > pgid->seed | 2^31) && pgid->seed > 0)
-An actual example for this is new_pg_num == 2^32-1, old_pg_num == 2^32-2
-and pgid->seed < 2^31-2.
+Applied to the vfs-7.3.netfs branch of the vfs/vfs.git tree.
+Patches in the vfs-7.3.netfs branch should appear in linux-next soon.
 
-Another case that results in a bit-shift being undefined behavior is
-old_pg_num == 0. In this case, old_bits is 0, and the first statement
-inside the for loop:
-	int next_bit = n << (old_bits - 1);
-results in n << -1, which is also undefined behavior.
+Please report any outstanding bugs that were missed during review in a
+new review to the original patch series allowing us to drop it.
 
-In the first case, a misbehaving Ceph daemon or an attacker that
-modifies messages can deliberately trigger infinite loops and thereby
-force resource depletion.
-This is the case because the values are read from the previous and
-current osdmap, which have been received over the network and can
-therefore contain arbitrary attacker-supplied data.
+It's encouraged to provide Acked-bys and Reviewed-bys even though the
+patch has now been applied. If possible patch trailers will be updated.
 
-To handle these issues, additional logic could be introduced to
-ceph_pg_is_split(). The infinite loop could be easily prevented by
-adding an upper bound to the for loop. However, another solution would
-be to not allow pg_num to take on such values directly when receiving an
-osdmap. I'm not sure if these values can be treated as invalid. More
-than 2^31 seems very unlikely to me, but 0 could possibly be a valid value.
+Note that commit hashes shown below are subject to change due to rebase,
+trailer updates or similar. If in doubt, please check the listed branch.
 
-Do you have an opinion or guidance on how to handle this, resp. which
-possible solution to prefer? In this case, I can create a patch for it.
+tree:   https://git.kernel.org/pub/scm/linux/kernel/git/vfs/vfs.git
+branch: vfs-7.3.netfs
 
-Best regards,
-Raphael
-
+[01/25] mm: Make readahead store folio count in readahead_control
+        https://git.kernel.org/vfs/vfs/c/bb16bd52f872
+[02/25] netfs: Bulk load the readahead-provided folios up front
+        https://git.kernel.org/vfs/vfs/c/49fe2955409b
+[03/25] Add a function to kmap one page of a multipage bio_vec
+        https://git.kernel.org/vfs/vfs/c/71947db0b6b2
+[04/25] iov_iter: Make iov_iter_get_pages*() wrap iov_iter_extract_pages()
+        https://git.kernel.org/vfs/vfs/c/fc0f8aa28cb0
+[05/25] iov_iter: Add a segmented queue of bio_vec[]
+        https://git.kernel.org/vfs/vfs/c/b7eab1a852c3
+[06/25] netfs: Add some tools for managing bvecq chains
+        https://git.kernel.org/vfs/vfs/c/a8e973126d3f
+[07/25] netfs: Make mempool available for bvecq
+        https://git.kernel.org/vfs/vfs/c/c95787e047bf
+[08/25] netfs: Add a function to extract from an iter into a bvecq
+        https://git.kernel.org/vfs/vfs/c/8854b625d977
+[09/25] afs: Use a bvecq to hold dir content rather than folioq
+        https://git.kernel.org/vfs/vfs/c/acb8eed74013
+[10/25] cifs: Use a bvecq for buffering instead of a folioq
+        https://git.kernel.org/vfs/vfs/c/b0d72aea6001
+[11/25] smbdirect: Support ITER_BVECQ in smbdirect_map_sges_from_iter()
+        https://git.kernel.org/vfs/vfs/c/27a6832d7b93
+[12/25] netfs: Remove the writethrough code
+        https://git.kernel.org/vfs/vfs/c/de4a0d855ae3
+[13/25] cachefiles,netfs: sunset ondemand mode
+        https://git.kernel.org/vfs/vfs/c/3b09163b7bed
+[14/25] cachefiles: Don't rely on backing fs storage map for most use cases
+        https://git.kernel.org/vfs/vfs/c/f3ac229c89a0
+[15/25] netfs: Add the cache object ID to netfs_read/write tracepoints
+        https://git.kernel.org/vfs/vfs/c/592472ff5a77
+[16/25] netfs: Switch to using bvecq rather than folio_queue and rolling_buffer
+        https://git.kernel.org/vfs/vfs/c/4c9ea0ae64f9
+[17/25] smbdirect: Remove support for ITER_FOLIOQ from smbdirect_map_sges_from_iter()
+        https://git.kernel.org/vfs/vfs/c/c9529300bd22
+[18/25] netfs: Remove netfs_alloc/free_folioq_buffer()
+        https://git.kernel.org/vfs/vfs/c/bc89b7f32adb
+[19/25] netfs: Remove netfs_extract_user_iter()
+        https://git.kernel.org/vfs/vfs/c/e533d0d598c4
+[20/25] iov_iter: Remove ITER_FOLIOQ
+        https://git.kernel.org/vfs/vfs/c/ca929d6a6044
+[21/25] netfs: Remove folio_queue and rolling_buffer
+        https://git.kernel.org/vfs/vfs/c/6440cb5fd08b
+[22/25] netfs: Check for too much data being read
+        https://git.kernel.org/vfs/vfs/c/353f336ead13
+[23/25] netfs: Limit the minimum trigger for progress reporting
+        https://git.kernel.org/vfs/vfs/c/0150b23b0a63
+[24/25] netfs: Combine prepare and issue ops and grab the buffers on request
+        https://git.kernel.org/vfs/vfs/c/473527604b71
+[25/25] cachefiles: Preset the state xattr when creating a new file
+        https://git.kernel.org/vfs/vfs/c/9476c221814c
