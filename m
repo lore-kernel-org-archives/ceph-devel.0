@@ -1,84 +1,100 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ADB3306776;
-	Tue, 11 Aug 2026 07:27:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8732A43C7B7;
+	Tue, 11 Aug 2026 10:38:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786433227; cv=none; b=GK4ADPMF+aXYIFVTG2TZOFycC2pZI7O0z66AQOtpT/WjV32Zrpvxuyxv/C6beG775tidR0vksfmAA0yM4lyzSoVGcULJIB9hus+jvhZKYZO9Bkqvxf/RI+CjAUZrtBRe01108htADRivZ3il/pBn454Ey9c/HNq79LuHhZo5MPM=
+	t=1786444743; cv=none; b=q4OWfVKgN8ihsGblG2aK+e5GfrgwyKGmwI10lce+H/QNLGnO7spgg9iEGIK6bkCqQmH6L3T/+35+fKiWEIg3mfW3etrgWI8DSSg5ERGHM2hsXA0VyPbGli02+HJp7yCGbvZ9zEd8+jPewSVGlr16LneML1nhnK+22//iXC0jaK8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786433227; c=relaxed/simple;
-	bh=SbLo78Cr2HW2DkoM+Zu8uqrpTL6/jkg7YGLG/5Ws134=;
-	h=MIME-Version:Content-Type:Subject:From:To:Cc:In-Reply-To:
-	 References:Date:Message-Id; b=fQraOK32pApFCkl3sNbHYCw47sSuOGjFK5h6iQZqoUdB5BY+YxsyMy3k2psrs1le/s3jHdpqN/MfkOs0k6UKGszHLjfG+fFdlJxYrWr6gqZRs/5NaOXg6reW11Ia7sne7D2SXetxEavbA6whnbbluqCQ6cxANrEXvq++STT3J4E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jyhX1YFr; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1786444743; c=relaxed/simple;
+	bh=jwO17BvW0LE4M6CAaZo40/sLE1sy6tyERlG4pIzYVg8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aLJ03dJRd+B8rLOLV321FwIyA57Xt8s2fyvxsYO+WHUBjcjFKX8WRvNmPhyCk2o4J0vAhd3u1RjI1b9HZYJ6MCDsQeQAbVDzTYvChgidvZFB2t5uo1xqbuGQTLee5ZoxDMbWl0wJdncYLBxMtVUQxwEOTA+A1ffSmqztdXgvh1Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WDlKw3Ag; arc=none smtp.client-ip=192.198.163.17
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jyhX1YFr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 881E11F000E9;
-	Tue, 11 Aug 2026 07:27:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1786433226;
-	bh=K66bNXWEf3y6O/2oqZ+5XO0lv/SJwQqJyQa/tQNc0AA=;
-	h=Subject:From:To:Cc:In-Reply-To:References:Date;
-	b=jyhX1YFrrnq1wTxRvMX2adEyfpPN3v/LJ7/qtkjf+TYdWFsYYIcugMNXAPa+bsGb/
-	 K/t7nFn3T7LYAgj/TynmyrcK3PZxbWxXlwHLiiQ/Y4kFCPNuv5IEcYsHUfdEiW+Pxp
-	 2RhUyax+NkA0059s4IyvBX9JhRD7NVUe85TJCyjg2CMsC5MBqQh8WBd5CwGBSBdCdn
-	 GQxT+li/hISZxCSp6HCFTAYrjNCgXdi7JRHv3tHOS34+Nlo8+p2FgK40/y3WWGPwhg
-	 Nkpi9xSZrGb1Uc0q5QOmLvYqQAzyBiUYoHN0fp5YJ46Or6u9LTuAuZTuOub0fsdPN0
-	 xQoweGsA1+/VA==
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WDlKw3Ag"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1786444740; x=1817980740;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=jwO17BvW0LE4M6CAaZo40/sLE1sy6tyERlG4pIzYVg8=;
+  b=WDlKw3AgAAHoJFF93oGJzXM0XS0Wmj24DHt01Xtie8nH9ZmyjxGchFxq
+   4F7WeBjb1Q7/2c7UGpwvaqFeADwdyYgA2M4fpaXd6fGvtdE7PN5iMd1Jy
+   UQ6cLNVEqRlbX4Y8YiOlKCBn7OKcqS/vp+Yl8EQNoXT2QBUtXnkT/oQLS
+   9dZLev5tKMVltEov3BYPj8XYmTntCInb1u3adym9PGSCzg7QBE2rSV6Md
+   EAduLJRfOCBZteMstJgKCl1J63660c0IcAVYpLZebwUFnVi+CTtJb4Fy/
+   094zElZg+YuHtaesIdqhduypYN3GkULN1xY6hGOcmJWFYHNOFDRE1r+6F
+   g==;
+X-CSE-ConnectionGUID: Rhr1d80LTpiZeZglxOWjOA==
+X-CSE-MsgGUID: aA48XytNSC6PDXKO/12d0A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11871"; a="86850229"
+X-IronPort-AV: E=Sophos;i="6.25,217,1779174000"; 
+   d="scan'208";a="86850229"
+Received: from fmviesa007.fm.intel.com ([10.60.135.147])
+  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Aug 2026 03:38:59 -0700
+X-CSE-ConnectionGUID: /l9KYuN+RKK/liUirRpbfA==
+X-CSE-MsgGUID: 1EGawnJ3RH+qxrYaz4gqww==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.25,217,1779174000"; 
+   d="scan'208";a="259994522"
+Received: from lkp-server01.sh.intel.com (HELO 6eda058d650d) ([10.239.97.150])
+  by fmviesa007.fm.intel.com with ESMTP; 11 Aug 2026 03:38:57 -0700
+Received: from kbuild by 6eda058d650d with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1wtjsk-00000000OZS-1iZR;
+	Tue, 11 Aug 2026 10:38:54 +0000
+Date: Tue, 11 Aug 2026 18:37:54 +0800
+From: kernel test robot <lkp@intel.com>
+To: Max Kellermann <max.kellermann@ionos.com>, idryomov@gmail.com,
+	amarkuze@redhat.com, ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: oe-kbuild-all@lists.linux.dev,
+	Max Kellermann <max.kellermann@ionos.com>
+Subject: Re: [PATCH] fs/ceph/dir: __{dir,dentry}_lease_check() returns an enum
+Message-ID: <202608112020.5nTx1rdC-lkp@intel.com>
+References: <20260709104121.884183-1-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v9 00/26] netfs: Keep track of folios in a segmented
- bio_vec[] chain
-From: Christian Brauner <brauner@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: David Howells <dhowells@redhat.com>, 
- Christian Brauner <christian@brauner.io>, 
- Matthew Wilcox <willy@infradead.org>, Paulo Alcantara <pc@manguebit.org>, 
- Jens Axboe <axboe@kernel.dk>, Leon Romanovsky <leon@kernel.org>, 
- Steve French <sfrench@samba.org>, 
- ChenXiaoSong <chenxiaosong@chenxiaosong.com>, 
- Marc Dionne <marc.dionne@auristor.com>, Stefan Metzmacher <metze@samba.org>, 
- Eric Van Hensbergen <ericvh@kernel.org>, 
- Dominique Martinet <asmadeus@codewreck.org>, 
- Ilya Dryomov <idryomov@gmail.com>, netfs@lists.linux.dev, 
- linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org, 
- linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org, v9fs@lists.linux.dev, 
- linux-erofs@lists.ozlabs.org, linux-fsdevel@vger.kernel.org, 
- linux-kernel@vger.kernel.org
-In-Reply-To: <annlWwsCPjNgcKa-@infradead.org>
-References: <20260810144746.574036-1-dhowells@redhat.com>
- <annlWwsCPjNgcKa-@infradead.org>
-Date: Tue, 11 Aug 2026 09:26:58 +0200
-Message-Id: <20260811-wegkommen-unfehlbar-selektiert-547aaf3c775b@brauner>
-X-Mailer: b4 0.17-dev-362b8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=600; i=brauner@kernel.org;
- h=from:subject:message-id; bh=SbLo78Cr2HW2DkoM+Zu8uqrpTL6/jkg7YGLG/5Ws134=;
- b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWRVnTv6756TAWNwzpYbp6uPrDGo4imQ/fbk+jW7DUsuL
- b71cnIze0cpC4MYF4OsmCKLQ7tJuNxynorNRpkaMHNYmUCGMHBxCsBEFv5n+KftNFM8KmD21nd8
- 72qdX0/+//vls7jriRGWqee6nD1evXJi+Kef+vzIchGNyFqW00a/fZW2Xk22O79bdrrI22h3iYi
- zz9gA
-X-Developer-Key: i=brauner@kernel.org; a=openpgp;
- fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260709104121.884183-1-max.kellermann@ionos.com>
 
-> this is a bad idea.  This is a giant series that also touches core code
-> with no review whatsoever.  And I repeatedly asked for:
+Hi Max,
 
-Since it's post the cut off point the series does not make the coming
-merge window. It's also not in -next on purpose. The series was just
-pulled for testing.
+kernel test robot noticed the following build warnings:
 
-> 
->  1) the core changes to be split out
->  2) come up with users for this very core primitive in the hot path
->     (iov_iter) that are not just for your rather niche use case
-> 
-> There's been absolutely no follow on to this, and we should not treat
-> the absolute core I/O path like this.
+[auto build test WARNING on ceph-client/testing]
+[also build test WARNING on ceph-client/for-linus linus/master v7.2-rc6 next-20260807]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
+url:    https://github.com/intel-lab-lkp/linux/commits/Max-Kellermann/fs-ceph-dir-__-dir-dentry-_lease_check-returns-an-enum/20260811-130303
+base:   https://github.com/ceph/ceph-client.git testing
+patch link:    https://lore.kernel.org/r/20260709104121.884183-1-max.kellermann%40ionos.com
+patch subject: [PATCH] fs/ceph/dir: __{dir,dentry}_lease_check() returns an enum
+config: alpha-allmodconfig (https://download.01.org/0day-ci/archive/20260811/202608112020.5nTx1rdC-lkp@intel.com/config)
+compiler: alpha-linux-gcc (GCC) 16.1.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260811/202608112020.5nTx1rdC-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202608112020.5nTx1rdC-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+>> Warning: fs/ceph/dir.c:1634 This comment starts with '/**', but isn't a kernel-doc comment. Refer to Documentation/doc-guide/kernel-doc.rst
+    * Result of __dir_lease_check() and __dentry_lease_check().
+
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
