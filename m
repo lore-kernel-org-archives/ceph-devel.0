@@ -1,100 +1,119 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f179.google.com (mail-qt1-f179.google.com [209.85.160.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8732A43C7B7;
-	Tue, 11 Aug 2026 10:38:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786444743; cv=none; b=q4OWfVKgN8ihsGblG2aK+e5GfrgwyKGmwI10lce+H/QNLGnO7spgg9iEGIK6bkCqQmH6L3T/+35+fKiWEIg3mfW3etrgWI8DSSg5ERGHM2hsXA0VyPbGli02+HJp7yCGbvZ9zEd8+jPewSVGlr16LneML1nhnK+22//iXC0jaK8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786444743; c=relaxed/simple;
-	bh=jwO17BvW0LE4M6CAaZo40/sLE1sy6tyERlG4pIzYVg8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=aLJ03dJRd+B8rLOLV321FwIyA57Xt8s2fyvxsYO+WHUBjcjFKX8WRvNmPhyCk2o4J0vAhd3u1RjI1b9HZYJ6MCDsQeQAbVDzTYvChgidvZFB2t5uo1xqbuGQTLee5ZoxDMbWl0wJdncYLBxMtVUQxwEOTA+A1ffSmqztdXgvh1Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WDlKw3Ag; arc=none smtp.client-ip=192.198.163.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E583442371
+	for <ceph-devel@vger.kernel.org>; Tue, 11 Aug 2026 12:14:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.179
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786450475; cv=pass; b=uGaeEUqi42c6Aqi+5qN8vXjUW+q5MTYow6wgSl+y7U3v/D9g+s2KKjJnqtyjdt0i0GiiD8MPNxUDd6VDu48425pdbYcfbNitt4Ldx4b7J7FNVgVh6MTWutcd0+fqiANwaG4JgHwBE3xz3wrbFIBudz240YBGDfu1VqlS+WxBG4Y=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786450475; c=relaxed/simple;
+	bh=uKswzyf3oANr0x5zb0bJBPrPAkNK77rK/33VzGVtg1I=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=brcUE5KViM4byGbx8j2H3phL225Xm/6v2CUExGUET5qzKSUbyaqK5wM/3VeC9YfY453lqBry+cmy72hxkLIsUVmUHcAzrf3v5S9Oi0k4xpMGnZa69aXDdzX/Q1LKF4AbthpTilNaxD6cO62L69lM8mQHcSdi98yevVORmmUh7fo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu; spf=pass smtp.mailfrom=szeredi.hu; dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b=LYhhybqo; arc=pass smtp.client-ip=209.85.160.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=szeredi.hu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WDlKw3Ag"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1786444740; x=1817980740;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=jwO17BvW0LE4M6CAaZo40/sLE1sy6tyERlG4pIzYVg8=;
-  b=WDlKw3AgAAHoJFF93oGJzXM0XS0Wmj24DHt01Xtie8nH9ZmyjxGchFxq
-   4F7WeBjb1Q7/2c7UGpwvaqFeADwdyYgA2M4fpaXd6fGvtdE7PN5iMd1Jy
-   UQ6cLNVEqRlbX4Y8YiOlKCBn7OKcqS/vp+Yl8EQNoXT2QBUtXnkT/oQLS
-   9dZLev5tKMVltEov3BYPj8XYmTntCInb1u3adym9PGSCzg7QBE2rSV6Md
-   EAduLJRfOCBZteMstJgKCl1J63660c0IcAVYpLZebwUFnVi+CTtJb4Fy/
-   094zElZg+YuHtaesIdqhduypYN3GkULN1xY6hGOcmJWFYHNOFDRE1r+6F
-   g==;
-X-CSE-ConnectionGUID: Rhr1d80LTpiZeZglxOWjOA==
-X-CSE-MsgGUID: aA48XytNSC6PDXKO/12d0A==
-X-IronPort-AV: E=McAfee;i="6800,10657,11871"; a="86850229"
-X-IronPort-AV: E=Sophos;i="6.25,217,1779174000"; 
-   d="scan'208";a="86850229"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Aug 2026 03:38:59 -0700
-X-CSE-ConnectionGUID: /l9KYuN+RKK/liUirRpbfA==
-X-CSE-MsgGUID: 1EGawnJ3RH+qxrYaz4gqww==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,217,1779174000"; 
-   d="scan'208";a="259994522"
-Received: from lkp-server01.sh.intel.com (HELO 6eda058d650d) ([10.239.97.150])
-  by fmviesa007.fm.intel.com with ESMTP; 11 Aug 2026 03:38:57 -0700
-Received: from kbuild by 6eda058d650d with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1wtjsk-00000000OZS-1iZR;
-	Tue, 11 Aug 2026 10:38:54 +0000
-Date: Tue, 11 Aug 2026 18:37:54 +0800
-From: kernel test robot <lkp@intel.com>
-To: Max Kellermann <max.kellermann@ionos.com>, idryomov@gmail.com,
-	amarkuze@redhat.com, ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: oe-kbuild-all@lists.linux.dev,
-	Max Kellermann <max.kellermann@ionos.com>
-Subject: Re: [PATCH] fs/ceph/dir: __{dir,dentry}_lease_check() returns an enum
-Message-ID: <202608112020.5nTx1rdC-lkp@intel.com>
-References: <20260709104121.884183-1-max.kellermann@ionos.com>
+	dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b="LYhhybqo"
+Received: by mail-qt1-f179.google.com with SMTP id d75a77b69052e-52d37b65926so3286681cf.2
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Aug 2026 05:14:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786450473; cv=none;
+        d=google.com; s=arc-20260327;
+        b=dWIn1TQ8Hg8fIk+3i7MBE0A1z5ja9u3Ljy8N4xFM2Gyvp+nZUR7aHI8LnHN8ffsmze
+         SVUFPMDzDf5KtHZozFcgPtK1x+ST2sPEhEHMMEc0AtNDmMl+h/vjmSr8bLYBu7j7JDmF
+         acqHFw/lWLnCrH0PIwvDrAuKI+WD0cT6/j7PcerWlQ/Z21pC4NTzdTG1u7P6a3SOOIa6
+         SY31XqkNJqPezFqdtg5rfNM/bbepZ59Mrj7oQx0J4bWv1t2y6pj5UPkCVTrns/wQZn6T
+         fFhGebvr1AeqdfDuBRXyq36U/HyFYZu+5/jvV/hb/AM09FFA0xReBXYus9eh3erYd+h8
+         RcZA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=NrfMxAmOI1dOmAoAUYNtBxs6J6vBQ4QSPSkOCCv87C8=;
+        fh=aTuCE2sV4qcNPgQpXu+LnrEnfsNwN4QyPfnwKXVyQVY=;
+        b=dAgMBVv1mjUo2txVZmeF+5O6O76EfxGxfN1MkpX4P8T2etJrIpOBNsKVm7NbfzYIPj
+         gEoZ9lGZKw1QcfgRKTN5S6gsbJng88FXNO9wTSLdTRce805lm8NSf++XAEGZuhaKukGs
+         Qwxel6VytzDSOVeXaWIY1SowjrOPrDYh4jJfkM0XXHN3ngyvs+lvhCM8rGMu/KhOPwGp
+         i4oyjFTd6s64PB04fRkS4NZ3kOTKrViIu9u4MH/aFrzl1g5Tu7tRANnj7xyxn/snGKiL
+         6lhmpVqB8gfOHJB+b5y8meUSLL+R4PEpPf/jDcMB9rnJKc/6GoL0KkS7Q+V7NDb3yPra
+         mq5A==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=szeredi.hu; s=google; t=1786450473; x=1787055273; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=NrfMxAmOI1dOmAoAUYNtBxs6J6vBQ4QSPSkOCCv87C8=;
+        b=LYhhybqowWX6ZR+Nf5Xxsft7xXDxdFX3reI2VxNHFPBCKIsh8yC66ANIAQgBMBikIZ
+         99mOfXZFzwE+fla4yJjoCv1zBbfR1iPecQ7opVFYRx2aUa01sY/qYo/E7B2JCkdw3MWb
+         feyvqbpjBXul4yjwwI3Ksk3aN7ddKGi7W+kCQ=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786450473; x=1787055273;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=NrfMxAmOI1dOmAoAUYNtBxs6J6vBQ4QSPSkOCCv87C8=;
+        b=ZWqW/kfUYbwu5//6TRm6GqH9uyxYveWXBop2huJLexzwok1p9GBAabhUKrlhHIvRgu
+         Bg890Z1TJlGyGSMRbDSnsNes10C2kaPfXaYM3rCp+3DKYe+q0j/eBLWPNWIxgCkCodjr
+         iTj+gjlBCqW0dVRLYHs4UW1DXKLZUv4b4wAVRkRTmNlYiT2eIM0yo64YCJrmp6S8Cvgr
+         QmV7hmyJvhjTYZRFCKEpFNk/9mj31UNNRqyTYj9Ey7jKogSEdwDXgJi74pJAY1jZfo7Y
+         NuE52MlapJitAIwIPsvxrjrrND93rknk52rNWSFSXItos1p16Iifj56Bf9Vj/a7XPrGE
+         n/Hw==
+X-Forwarded-Encrypted: i=1; AHgh+RoZ9esD5f+KXvOHBI2Hp5yqiXknxNRWjSQIt2TFDU1XgIo7kqQA51LTVYUAXEwkHh4eO4G7vqKY5VpI@vger.kernel.org
+X-Gm-Message-State: AOJu0YzMChCsh1Gmp0Csfh2C/GtPzAZWZXcf+YE+eraRiL0Ey7ptv8sa
+	eKqSPZ7lm5bYzmBPwGR75FropD/nsJ6FaXSjW1tKGkNtX5MDEXJcGPOgjvKVX+jJdFv5oivQ15I
+	gQ51wheeHElOeHkljJLW7sR+VwlM+9Q5J/FYPtm1OTQ==
+X-Gm-Gg: AR+sD13TkCcghXdprUr9bfqJbtKIF+xhIS5/geDP1mRoot5P0EeMMqxTcMGeqIm1Ohk
+	FZ86cTdLHefT3O49un5zhz4s9clcEZpAoroPwgrW/9k4q4IkHBP1MDa6gUBDYjDxig2mLLVOU54
+	hDoJ8aZNhxywXot4BwamCNxjLah6jlFNYccLqV96DiFHcdXCdGe1yVRzQqc2aS0fbyt38ncrzpa
+	jwvosjrAWd70nfs/jMihEcQZeq24YTHDLpJy51uWmEfZJ2w97HSp4wEjeXS/Kz13W1mJdAnDLGZ
+	zpJQxwrmhQ7Gz1F1+YLjtNdbUt5gwIJDF8OW68yW4+r34XDZPnpGSOHljiMSd+/MshcbpFZoHBO
+	4hw==
+X-Received: by 2002:a05:622a:1389:b0:517:906b:c043 with SMTP id
+ d75a77b69052e-52d5869769dmr20988111cf.36.1786450473109; Tue, 11 Aug 2026
+ 05:14:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260709104121.884183-1-max.kellermann@ionos.com>
+References: <20260803012648.2195405-1-neilb@ownmail.net> <20260803012648.2195405-2-neilb@ownmail.net>
+ <CAJfpegt1wHngLs9uR943gT6zxV67D53k3n4GiFKowsAb3C6LJw@mail.gmail.com> <178641431036.2852630.14175693646176331672@noble.neil.brown.name>
+In-Reply-To: <178641431036.2852630.14175693646176331672@noble.neil.brown.name>
+From: Miklos Szeredi <miklos@szeredi.hu>
+Date: Tue, 11 Aug 2026 14:14:13 +0200
+X-Gm-Features: AUfX_mx5_QZpyNyj5Ni2I_IHkZVhUDCHgR5x1MospzmB8YaToZll8PeS64_iAm0
+Message-ID: <CAJfpeguZh6Bo7hxVW5f-OvKJ3UazJTn26Wkba8+rXY-LC-QNWA@mail.gmail.com>
+Subject: Re: [PATCH v1 01/12] VFS: don't count references through ->d_parent
+To: NeilBrown <neil@brown.name>
+Cc: Ian Kent <raven@themaw.net>, Chuck Lever <cel@kernel.org>, Jake Edge <jake@lwn.net>, 
+	Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	Viacheslav Dubeyko <slava@dubeyko.com>, Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu, 
+	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
+	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
+	Amir Goldstein <amir73il@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, 
+	Miklos Szeredi <mszeredi@redhat.com>, autofs@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	ceph-devel@vger.kernel.org, codalist@coda.cs.cmu.edu, 
+	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Max,
+On Tue, 11 Aug 2026 at 04:12, NeilBrown <neilb@ownmail.net> wrote:
 
-kernel test robot noticed the following build warnings:
+> --- a/fs/libfs.c
+> +++ b/fs/libfs.c
+> @@ -169,6 +169,8 @@ loff_t dcache_dir_lseek(struct file *file, loff_t offset, int whence)
+>                 hlist_del_init(&cursor->d_sib);
+>                 if (to)
+>                         hlist_add_behind(&cursor->d_sib, &to->d_sib);
+> +               else if (hlist_empty(&dentry->d_children)
+> +                       dput_dlock(dentry);
 
-[auto build test WARNING on ceph-client/testing]
-[also build test WARNING on ceph-client/for-linus linus/master v7.2-rc6 next-20260807]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+you mean dput_dlock(cursor)?
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Max-Kellermann/fs-ceph-dir-__-dir-dentry-_lease_check-returns-an-enum/20260811-130303
-base:   https://github.com/ceph/ceph-client.git testing
-patch link:    https://lore.kernel.org/r/20260709104121.884183-1-max.kellermann%40ionos.com
-patch subject: [PATCH] fs/ceph/dir: __{dir,dentry}_lease_check() returns an enum
-config: alpha-allmodconfig (https://download.01.org/0day-ci/archive/20260811/202608112020.5nTx1rdC-lkp@intel.com/config)
-compiler: alpha-linux-gcc (GCC) 16.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260811/202608112020.5nTx1rdC-lkp@intel.com/reproduce)
+But that's no good, since the directory could be repopulated and the
+cursor needed again.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202608112020.5nTx1rdC-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
->> Warning: fs/ceph/dir.c:1634 This comment starts with '/**', but isn't a kernel-doc comment. Refer to Documentation/doc-guide/kernel-doc.rst
-    * Result of __dir_lease_check() and __dentry_lease_check().
-
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Thanks,
+Miklos
