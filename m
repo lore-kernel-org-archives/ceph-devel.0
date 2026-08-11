@@ -1,94 +1,147 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E618A442399
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 20:31:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786393888; cv=none; b=HWevag3mLPgfACL99PIzcu0zadz+AiFZNjqh/5Ro4N6GfiwWsNAO13VL30+nOTBi6ScFY9ek8Dw0Sq+38UucKhJUj+wvcR2O7XJgHT1XbgSR3ZtPyi+F5RU5DXXg9DCdkQ0OQlPf++1/iBVTysaR903VTZaiVqHDv/dBWGhi4fE=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786393888; c=relaxed/simple;
-	bh=SqaRd//dvVr9mB50I7wn+QndPUln3nLYJ57OMJu5Bos=;
-	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
-	 Content-Type:Date:Message-ID; b=jqYRnAR/At0DRu3KKNYqWg71+ix2AyFDVx5r5ve5k/ARhFSsIqFqV0bQe6AsuGyAnMEpdGLGxxUvgxiWOTaZGplrAuz3VYxW4NexpR7EXY035tYdSzjE3tUOR/QSoLg4A3EVlx2lcIeg9uybmaphm/r7PuSuw1Q+IYOWL+xi4hw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=USc0yzG1; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD3FB2F7EF3
+	for <ceph-devel@vger.kernel.org>; Tue, 11 Aug 2026 01:58:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.43
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786413500; cv=pass; b=iWb00q4PXl3P8PhURs+h5f0R/2qc8Ubw2jVfz+9Rn5f7/vW5zLQLF0PVhBcualB5yxaCAxhthGbxPxknG3t/VI6mwc3ADKRwmjL3y0snRhD+NojLBBib3HfZ3t3KfrZkTZCU1xeAqCtXrzcxpe0tFUJv7058rVNRiT4yGj9YzsM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786413500; c=relaxed/simple;
+	bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=k4o8xokHZL+61dZLMLOyGMvLNs61U3qGLsDmQYAjAfETpvBTnOeGHz/ABdyRUS30uXrcd7X4OWla1VNuWVSMJDmV2TqkrMSZafER83OQrhJTt1F/cmSJ9h+104iTBFWJWqpbxALZEhpGzlMfUgrz5Dr5qWCj8svEBDHU8neUYBw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=IpaNRhRw; arc=pass smtp.client-ip=209.85.208.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="USc0yzG1"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1786393886;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=N+nHIX4qndv3AfBXSobDAVXCw7W2PVPh2/yZZQrRWZU=;
-	b=USc0yzG1rpbm8GjUYUOby0h/msaGoqe3onHu93k8mytiI5jN21s8FfbhQngdDe6AOd/ocZ
-	qvDZYcHT6ElLn6o3trAhUoTqmA47hwBbgLEpfMGKUTggBAztgmhjS3/4Z0abHeFbFRn9+/
-	xjrZ4eez3Y7gXmIN/rX0G7qWIKZA7Yc=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-278-8366SUk-OtWzAoVznGm_-g-1; Mon,
- 10 Aug 2026 16:31:19 -0400
-X-MC-Unique: 8366SUk-OtWzAoVznGm_-g-1
-X-Mimecast-MFC-AGG-ID: 8366SUk-OtWzAoVznGm_-g_1786393877
-Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 03F33195608A;
-	Mon, 10 Aug 2026 20:31:15 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.44.32.44])
-	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 2A89D1800346;
-	Mon, 10 Aug 2026 20:31:04 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-	Kingdom.
-	Registered in England and Wales under Company Registration No. 3798903
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <anooK9-UCNTmoSAq@casper.infradead.org>
-References: <anooK9-UCNTmoSAq@casper.infradead.org> <20260810144746.574036-1-dhowells@redhat.com> <20260810144746.574036-5-dhowells@redhat.com>
-To: Matthew Wilcox <willy@infradead.org>
-Cc: dhowells@redhat.com, Christian Brauner <christian@brauner.io>,
-    Christoph Hellwig <hch@infradead.org>,
-    Paulo Alcantara <pc@manguebit.org>, Jens Axboe <axboe@kernel.dk>,
-    Leon Romanovsky <leon@kernel.org>, Steve French <sfrench@samba.org>,
-    ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
-    Marc Dionne <marc.dionne@auristor.com>,
-    Stefan Metzmacher <metze@samba.org>,
-    Eric Van Hensbergen <ericvh@kernel.org>,
-    Dominique Martinet <asmadeus@codewreck.org>,
-    Ilya Dryomov <idryomov@gmail.com>, netfs@lists.linux.dev,
-    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
-    linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-    v9fs@lists.linux.dev, linux-erofs@lists.ozlabs.org,
-    linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
-    linux-block@vger.kernel.org
-Subject: Re: [PATCH v9 04/26] Add a function to kmap one page of a multipage bio_vec
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="IpaNRhRw"
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-6a051904222so467703a12.2
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 18:58:17 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786413496; cv=none;
+        d=google.com; s=arc-20260327;
+        b=reYdN21PtQG5t4vKYGlFzLQhFTSkNrZ6oFkvBAhDmPHc+wKrUxBiLpIKo+lHn8QuzV
+         brQcJS9iPYCyYk26Xmct9ilVE01/REdHPY/cyVobpH91dNBVriKB75BIIGrJFmURbhHp
+         SycglPDf3bzGOzts+TVxntfXtjp2lpUOkNzW+mfRlSJIMbSKgh8mxESO1JM8Xt2Uj8OT
+         NrPs4jfJZr03Yh4o3GvO8BuzAHdPT9liYCbsJUH+8V5q800k4+FDj5EXshDf8f1uk4iE
+         su/XfKp+hgylT8WhFvqKoFxyo5Av+ZnQ5xHRbjjpFINYJkFKgTlLyTqPgPMzfek964VO
+         CQFg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
+        fh=lIj2fP9TLY8J0+u4Z5gxpYmcsDjYZerPZxdPGefRbRM=;
+        b=aS9CPww776IBkH8YzcCFzUdJDUwLve16gARMuK5xuIwepqyFmxcmScUUOgvdwiXa9L
+         qqP6fbhT8DcUVMfjfJwg1FLFk4Wa2uZQhNP4W/Mv+GhPIac/8+jJo/yXkprbzf04LObN
+         /VVbVAlxFM6qWEUef6sOi7aK2D7ckg9Ls134pidJg43NAaHhoo6iwvPHo+Pr7Kjaduyo
+         IZYDKia/OdLZ7SAcpKrqYUZof7fgk/ZiW9hivKNiLkvNcOZZ/JnIj6YXFGk59kKCZiyz
+         Qy+dIfPBOGr/zi3kSIyTPRk4EXm//MdP70/wd+HDVXxxGY1p+ReluPngGKbIldBbeP50
+         BVKg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=clyso.com; s=google; t=1786413496; x=1787018296; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
+        b=IpaNRhRwevTJmBEhbJcLU5bxTl1Fz9ukG/4jXj8mK4Fu7z3Mmojk/hf+/AYGx6JngP
+         t0AaTpYUWNTNr9YEzuMOL9vxsoamJnIXV2+ch8sgE+eq42yMWA9PYPrEb59n6QToVsvp
+         I6/e7klMxJZrUO9a1TQDpK0wC9MsHYxjZl+GarHHmGRwGeokeCTJpRXKMAgvqS1IH/ms
+         csrfxyBd8kFC2Sodk0SHw+6jDOjoauaVshkKrpTABF3D15KeQfiMDaSqPwP9fWdqbaNH
+         mPq2eNDnnLbM64gtzX8mt71MpSaJajCMH/RXaUkK49KK7UvjRX+7d1FnlPu0o6cA4Mrd
+         dQVA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786413496; x=1787018296;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
+        b=iTsnPdQkZKHdxo6QQzRTDwKEceiZnbM7vSEa0h/Sl6YLADuyYXVQEfmzhbDZtk5C8g
+         YI0Q4n7gA26JbCBRkr/nRw0C6iNxPySP+X4/vTLwpvnyP+ZjWIFY6ZwmIGy4Dvqs1dOr
+         mqNlSZYGrq64w7PfJTDk9ouvtXUmRHjPkqIvYStzDFjtw6WWrH4icr3QXSdx0O6BHN7G
+         pVtvtTxoTiKJmV8xSEp0Wuq8I0SQ+HxSHlK+Qrp8agy180bYFq70Uz1AeTKCA4tm1siA
+         lhhdjyWMY+hWeOSjNiyigwJEzNH1YHxrybtYNNg0j6OdnJdkTtOr5bFON/DeXNPmLVRW
+         /4OA==
+X-Gm-Message-State: AOJu0Yx1cx+mkcTKCtpDxAsu6sFFcJ0aHtouAN72RwplLY/SM2xwAFpF
+	Ad+E5TRX+wQoPjUkt6iEv2q7tpf7Z2C9cwGZQAqALzFOb3xVHPYywO5fn1o2ke9ICr7yqM5Pw7c
+	Pg4F64qI9AlB/eYBaOG6UHNVpnbcqqyne0Wl8wXkXqA==
+X-Gm-Gg: AR+sD10t+OhlQFwGNkBOTnZQTOe0H4uI/PssolR2F7KMo5T5jLOLyeq15e+yP4oIeJi
+	OQuKb7tF0hKKlo79++cpe/Jd60Rpg6sEIAPJUDXwYcbYwUcwKv+uKuwqOvPdYKLSmdgBQAl0zlz
+	AFMtL5g6bnf3QpMZKoqse3nppFGtTcWt63HF05vxzIbOWZll35ka5ZWNFugz1TSSTjzhqQuOTD4
+	DOM62Tr9b2bHMkKst9EGM01mW5jpfotyesLTXrQX7qW7nA8YB8fnwsGQ7Ysg6Jb9Ce5+2dMIOZl
+	zwibl1uvpIw5O/Bij2LzTv0XA+1cDXj5rSdK+caJ39ydbnMh6Z2M0ZaS6Q==
+X-Received: by 2002:a17:907:ea8b:b0:c16:126b:98b4 with SMTP id
+ a640c23a62f3a-c2039c03283mr2338161966b.3.1786413495759; Mon, 10 Aug 2026
+ 18:58:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <586047.1786393863.1@warthog.procyon.org.uk>
-Date: Mon, 10 Aug 2026 21:31:03 +0100
-Message-ID: <586048.1786393863@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
+References: <CAOJNxR+9tBWfnQ3-wyBdYeJ-ipVM+0oyULtUGk15C5-xnXHqcg@mail.gmail.com>
+In-Reply-To: <CAOJNxR+9tBWfnQ3-wyBdYeJ-ipVM+0oyULtUGk15C5-xnXHqcg@mail.gmail.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Tue, 11 Aug 2026 09:58:04 +0800
+X-Gm-Features: AUfX_myD6jBq2H_PKGnq5y8ycO-8JTaqXFBlOO1F8ByH7mAYawanFCsS4G9oiOg
+Message-ID: <CAOJNxR+XiUxR1GNUgd8T18x2KH8kstWtpxwL-mwwE0i_qospJA@mail.gmail.com>
+Subject: Re: Survey: Is anyone using 32-bit builds of the CephFS kernel client?
+To: ceph-users@ceph.io
+Cc: ceph-devel@vger.kernel.org, dev@ceph.io
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Matthew Wilcox <willy@infradead.org> wrote:
+Hi everyone,
 
-> On Mon, Aug 10, 2026 at 03:47:21PM +0100, David Howells wrote:
-> > Add a function to kmap one page of a multipage bio_vec by offset (which is
-> > added to the offset in the bio_vec internally).  The caller is responsible
-> > for calculating how much of the page is then available.
-> 
-> I think this should be kmap_local_bvec().  Living in bvec.h makes sense,
-> but keeping it in the kmap_local_ namespace is better than putting it in
-> the bvec_ namespace.
+Thanks for the feedback.
 
-Christoph disagrees with you:-/
+So far, I have received several replies regarding the 32-bit CephFS
+kernel client usage. Based on the responses, there do not appear to be
+any active users of 32-bit builds, and I have not received any
+objections to moving forward with a 64-bit-only implementation.
 
-David
+Therefore, I will continue working on the patch to remove 32-bit
+support and proceed with the 64-bit-only approach.
 
+I will make sure the change is properly documented, including the
+deprecation/removal of 32-bit support in the relevant release notes.
+
+Thanks again for the feedback and discussion.
+
+Best regards,
+Xiubo
+
+On Thu, 16 Jul 2026 at 16:53, Xiubo Li <xiubo.li@clyso.com> wrote:
+>
+> Hi everyone,
+>
+> We are considering a performance improvement for the CephFS kernel
+> client (kclient) that would be significantly simpler and cleaner to
+> implement as 64-bit-only. Supporting 32-bit in this case adds
+> non-trivial complexity and ongoing maintenance burden, so we'd like to
+> understand whether continuing 32-bit support is still necessary.
+>
+> Before making any decision, we want to hear from the community:
+>
+> - Are you currently using, or planning to use, 32-bit (arm/armhf,
+> i386/i686) builds of the CephFS kernel client?
+> - If yes, is this for production workloads? Or legacy/testing purposes?
+> - What is your platform (distribution, kernel version, architecture)?
+>
+> If there are no active 32-bit users, we would proceed with a
+> 64-bit-only implementation and clearly document the deprecation in the
+> release notes with appropriate warnings.
+>
+> If 32-bit support is still needed, we will explore alternative
+> approaches =E2=80=94 for example, keeping the current code path for 32-bi=
+t
+> while the new fast path is 64-bit-only, or finding a way to cleanly
+> abstract the difference.
+>
+> Please reply by August 6, 2026 so we can factor your feedback into the pl=
+an.
+>
+> Thanks!
+> Xiubo Li
