@@ -1,147 +1,164 @@
-Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from flow-a4-smtp.messagingengine.com (flow-a4-smtp.messagingengine.com [103.168.172.139])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD3FB2F7EF3
-	for <ceph-devel@vger.kernel.org>; Tue, 11 Aug 2026 01:58:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.43
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786413500; cv=pass; b=iWb00q4PXl3P8PhURs+h5f0R/2qc8Ubw2jVfz+9Rn5f7/vW5zLQLF0PVhBcualB5yxaCAxhthGbxPxknG3t/VI6mwc3ADKRwmjL3y0snRhD+NojLBBib3HfZ3t3KfrZkTZCU1xeAqCtXrzcxpe0tFUJv7058rVNRiT4yGj9YzsM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786413500; c=relaxed/simple;
-	bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=k4o8xokHZL+61dZLMLOyGMvLNs61U3qGLsDmQYAjAfETpvBTnOeGHz/ABdyRUS30uXrcd7X4OWla1VNuWVSMJDmV2TqkrMSZafER83OQrhJTt1F/cmSJ9h+104iTBFWJWqpbxALZEhpGzlMfUgrz5Dr5qWCj8svEBDHU8neUYBw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=IpaNRhRw; arc=pass smtp.client-ip=209.85.208.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84A664B04B7;
+	Tue, 11 Aug 2026 02:12:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.139
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786414324; cv=none; b=a4pYKy1AfpKunKdpvjGjwVR916i3FNWmwwFYvN0Y6GETWI2e94LTUq8yOIBK1PmTlEZqyCkPInpMGacCE83zGFlJqsHh6apdgqN0K5reawD5LVxhcJqFOkfh5W1GesRhKBiJq5xP2KtYNqHS6meXTyegAs7cWYv1FEqERIG1UMc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786414324; c=relaxed/simple;
+	bh=KwaRZdlc7REB2zDbfklX0C4zMUsVEiT3D81VVqMcX+4=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=RAUp/Sk/E49YXXN81a9Lese58NqzXHmkXoLwmvTDxVbSw1y5Gjt3Cu9m4Z7H2i4zT0lwQCWarnMrvgS3EMeBtWzGUB19cJhBS8OgybdW0nFPIQ/XlVq5TwDCBKlC8dNsFamduMtkLff03nO1ASOT1OG6J8JDAA2HGxpQVY5N0cI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=ev/Z7da9; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=BeRe5VzN; arc=none smtp.client-ip=103.168.172.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="IpaNRhRw"
-Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-6a051904222so467703a12.2
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Aug 2026 18:58:17 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786413496; cv=none;
-        d=google.com; s=arc-20260327;
-        b=reYdN21PtQG5t4vKYGlFzLQhFTSkNrZ6oFkvBAhDmPHc+wKrUxBiLpIKo+lHn8QuzV
-         brQcJS9iPYCyYk26Xmct9ilVE01/REdHPY/cyVobpH91dNBVriKB75BIIGrJFmURbhHp
-         SycglPDf3bzGOzts+TVxntfXtjp2lpUOkNzW+mfRlSJIMbSKgh8mxESO1JM8Xt2Uj8OT
-         NrPs4jfJZr03Yh4o3GvO8BuzAHdPT9liYCbsJUH+8V5q800k4+FDj5EXshDf8f1uk4iE
-         su/XfKp+hgylT8WhFvqKoFxyo5Av+ZnQ5xHRbjjpFINYJkFKgTlLyTqPgPMzfek964VO
-         CQFg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
-        fh=lIj2fP9TLY8J0+u4Z5gxpYmcsDjYZerPZxdPGefRbRM=;
-        b=aS9CPww776IBkH8YzcCFzUdJDUwLve16gARMuK5xuIwepqyFmxcmScUUOgvdwiXa9L
-         qqP6fbhT8DcUVMfjfJwg1FLFk4Wa2uZQhNP4W/Mv+GhPIac/8+jJo/yXkprbzf04LObN
-         /VVbVAlxFM6qWEUef6sOi7aK2D7ckg9Ls134pidJg43NAaHhoo6iwvPHo+Pr7Kjaduyo
-         IZYDKia/OdLZ7SAcpKrqYUZof7fgk/ZiW9hivKNiLkvNcOZZ/JnIj6YXFGk59kKCZiyz
-         Qy+dIfPBOGr/zi3kSIyTPRk4EXm//MdP70/wd+HDVXxxGY1p+ReluPngGKbIldBbeP50
-         BVKg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1786413496; x=1787018296; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
-        b=IpaNRhRwevTJmBEhbJcLU5bxTl1Fz9ukG/4jXj8mK4Fu7z3Mmojk/hf+/AYGx6JngP
-         t0AaTpYUWNTNr9YEzuMOL9vxsoamJnIXV2+ch8sgE+eq42yMWA9PYPrEb59n6QToVsvp
-         I6/e7klMxJZrUO9a1TQDpK0wC9MsHYxjZl+GarHHmGRwGeokeCTJpRXKMAgvqS1IH/ms
-         csrfxyBd8kFC2Sodk0SHw+6jDOjoauaVshkKrpTABF3D15KeQfiMDaSqPwP9fWdqbaNH
-         mPq2eNDnnLbM64gtzX8mt71MpSaJajCMH/RXaUkK49KK7UvjRX+7d1FnlPu0o6cA4Mrd
-         dQVA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786413496; x=1787018296;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=/Nc0L85uX8CiU0Hst8uyFALvjoyELNKfyeTTS3WxcD8=;
-        b=iTsnPdQkZKHdxo6QQzRTDwKEceiZnbM7vSEa0h/Sl6YLADuyYXVQEfmzhbDZtk5C8g
-         YI0Q4n7gA26JbCBRkr/nRw0C6iNxPySP+X4/vTLwpvnyP+ZjWIFY6ZwmIGy4Dvqs1dOr
-         mqNlSZYGrq64w7PfJTDk9ouvtXUmRHjPkqIvYStzDFjtw6WWrH4icr3QXSdx0O6BHN7G
-         pVtvtTxoTiKJmV8xSEp0Wuq8I0SQ+HxSHlK+Qrp8agy180bYFq70Uz1AeTKCA4tm1siA
-         lhhdjyWMY+hWeOSjNiyigwJEzNH1YHxrybtYNNg0j6OdnJdkTtOr5bFON/DeXNPmLVRW
-         /4OA==
-X-Gm-Message-State: AOJu0Yx1cx+mkcTKCtpDxAsu6sFFcJ0aHtouAN72RwplLY/SM2xwAFpF
-	Ad+E5TRX+wQoPjUkt6iEv2q7tpf7Z2C9cwGZQAqALzFOb3xVHPYywO5fn1o2ke9ICr7yqM5Pw7c
-	Pg4F64qI9AlB/eYBaOG6UHNVpnbcqqyne0Wl8wXkXqA==
-X-Gm-Gg: AR+sD10t+OhlQFwGNkBOTnZQTOe0H4uI/PssolR2F7KMo5T5jLOLyeq15e+yP4oIeJi
-	OQuKb7tF0hKKlo79++cpe/Jd60Rpg6sEIAPJUDXwYcbYwUcwKv+uKuwqOvPdYKLSmdgBQAl0zlz
-	AFMtL5g6bnf3QpMZKoqse3nppFGtTcWt63HF05vxzIbOWZll35ka5ZWNFugz1TSSTjzhqQuOTD4
-	DOM62Tr9b2bHMkKst9EGM01mW5jpfotyesLTXrQX7qW7nA8YB8fnwsGQ7Ysg6Jb9Ce5+2dMIOZl
-	zwibl1uvpIw5O/Bij2LzTv0XA+1cDXj5rSdK+caJ39ydbnMh6Z2M0ZaS6Q==
-X-Received: by 2002:a17:907:ea8b:b0:c16:126b:98b4 with SMTP id
- a640c23a62f3a-c2039c03283mr2338161966b.3.1786413495759; Mon, 10 Aug 2026
- 18:58:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="ev/Z7da9";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="BeRe5VzN"
+Received: from phl-compute-11.internal (phl-compute-11.internal [10.202.2.51])
+	by mailflow.phl.internal (Postfix) with ESMTP id 8B8DB13800E9;
+	Mon, 10 Aug 2026 22:12:01 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-11.internal (MEProxy); Mon, 10 Aug 2026 22:12:01 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm3; t=
+	1786414321; x=1786421521; bh=z59H84mGp5chtaSVDA9MWaRAa7fU4ciWmVM
+	LKTtAoYg=; b=ev/Z7da9p8cwQcaNeHVWhphBQkNLxbkRm7S0l36OJ+d8S+Q9qpb
+	uvJOjgeeRpjUEJ7vH9Hzu1hp8K9wMiH4myBGCqCvLwUNr/+4HLkcSfYzDJfHM1Ba
+	sVPa1Bp460YU8A6TEn9xJtSpeCr6hmLdZ6IF1TBbVB74B23WJWet3Trz/Wl3pj8E
+	Me83adV8XvpvoMPF6JPHYLs9g74+D4cwXDv8ttU06KE5hvSCe5LMjFlMfo03r3nn
+	hJ4qn3ILZgZXwdvYlXaQ/YaFPRkU6GhA76dnZYNL7R8yvSiZ3gb6jZcMCJ9muNB7
+	CkwLzC0gHO5OY+b8adPpq+45ish4ZgqX69g==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1786414321; x=
+	1786421521; bh=z59H84mGp5chtaSVDA9MWaRAa7fU4ciWmVMLKTtAoYg=; b=B
+	eRe5VzNt+LlY+tHSbVayqPRJjuRndPXKsRDh2jvrEkojis7w41tucjBajRhLI/kA
+	e94Rt+BmEIGyNanp0UHl5YWgSGA2kC11ZG7JpgpUkF0folXSIfRh/2oHT/lzZvCL
+	RPs2J6nXbVqmYk7/T3awEz4F/N+J5rFU14GK7sknHOTI0fwcn6jjXGLzpIQlVlrX
+	y52lb91ii9cvBG9AZ216p/gYo7VONmxgtcXLbQuKT4hfvrYdYpzFG1eNoTinMpsc
+	sEp0QN511yAtN7bMDua8b59atPmGHL8awiKHWj1dp7kcPoVzM7fkFoknuvtYVuR7
+	yhWITatRJj4Efjl6w9CUA==
+X-ME-Sender: <xms:8IR6arCyA7tyPch4iET4Mq2YTh60wDVI7XdLMOFPY1yaD0e7c4fHJg>
+    <xme:8IR6ajPQueAIyi5ky1_QHldQ7gIArqfmoPo0FfQ2rjti7jiigoXe9-1654kC3Ufuf
+    L_mRprFvOSckEhXffPQzDanAuwJIJIIw-7iW4D74BScFxmqr9A>
+X-ME-Received: <xmr:8IR6aqAoLsYqYihWGkohZ22EauJJQnelGTKqwIhODNaIhrzWrx7ICl2NXF9MswSpDboaKxgxViyXoo3oCnO8eLIgrXJKbwA>
+X-ME-Proxy-Cause: dmFkZTGiFhqbMavz1GnHNgGnrM7aRU5foa/cHmUyoXxGd+EScvvMJzvJekNH/ltV7v2YtA
+    KKbMVreFRkOyPn5sqVW2TgecBr3u2xPZOvs//haZKfCkUETFc9Dc+20w7B10YcIOqo4B3E
+    TabCpIpl6/tH0XT0IGvOLprJTGWis8gKtNk1Rjm9VB88Tx3PzlLryvVLrq5lxuhVtQseO1
+    1etPysa+a2nh8j/Ut8fnJ9KZdaeKaUwp61VZN57Xdd9LTnyPmhtnDkEuLIj5n3pyqWyG6x
+    cZSa+pOJNSOie1q67PHP7DSVBVmOr1Pm3I4UkDSGGBMfN3tV9DodOiU8cpEWqDKzTuRcGz
+    m6rPQvpdVdnLZODlanSGCKc6LKgwo2VUHapaar4Te0Y37NMl9dwAL4JfTjddJwQafGWl6H
+    K0n0cgZrmq72mitnu6Z5gPbxIp6sNJXZvSVIgD8TVZkO/Tu9euem23e4SgO4b3BOT4Yo7L
+    Q6CUJDi+O4BbUTVXw+dOPqEJCip/vPCwlW2GkmsViDuJnwRkkKVq2H3NSvmVQgHRteloxi
+    WvTqS9HIEr+yVHLyrtHaEhwFcR1r7Zxz61HH3QO1RsmRtXfZQoqFnQzHrAnlZ5RduTyQaN
+    NzNXd4Mswgswb4fo1mWdAIKNF3RdkBypQw8KE6kvXkHMEzF1cigCX6iUJd4w
+X-ME-Proxy: <xmx:8IR6atkBFmfF5mlzsOM77rPYCO3p0-Y4ysejWCirCPvTVrTkTiR8Gg>
+    <xmx:8IR6amocgJDydj6SrAkFnif_fEF5D5D2xwf8EcFtD-1B8bDhr74GdQ>
+    <xmx:8IR6akjUrd7A9aBU37mBBRx5sulvzXqcBEHY9XR2gC7r4tMFmYYjdw>
+    <xmx:8IR6aogZ9HXVMHvePRPh4E20z1v7OEizhENFM97ib_U6rbT-AWR8cQ>
+    <xmx:8YR6an_MxMSzzg6Gcknh3_Ntgu1j2vBeMa0aMQyuwwdOJgwGNVTYpik6>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 10 Aug 2026 22:11:54 -0400 (EDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAOJNxR+9tBWfnQ3-wyBdYeJ-ipVM+0oyULtUGk15C5-xnXHqcg@mail.gmail.com>
-In-Reply-To: <CAOJNxR+9tBWfnQ3-wyBdYeJ-ipVM+0oyULtUGk15C5-xnXHqcg@mail.gmail.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Tue, 11 Aug 2026 09:58:04 +0800
-X-Gm-Features: AUfX_myD6jBq2H_PKGnq5y8ycO-8JTaqXFBlOO1F8ByH7mAYawanFCsS4G9oiOg
-Message-ID: <CAOJNxR+XiUxR1GNUgd8T18x2KH8kstWtpxwL-mwwE0i_qospJA@mail.gmail.com>
-Subject: Re: Survey: Is anyone using 32-bit builds of the CephFS kernel client?
-To: ceph-users@ceph.io
-Cc: ceph-devel@vger.kernel.org, dev@ceph.io
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+From: NeilBrown <neilb@ownmail.net>
+To: "Miklos Szeredi" <miklos@szeredi.hu>
+Cc: "Ian Kent" <raven@themaw.net>, "Chuck Lever" <cel@kernel.org>,
+ "Jake Edge" <jake@lwn.net>, "Ilya Dryomov" <idryomov@gmail.com>,
+ "Alex Markuze" <amarkuze@redhat.com>,
+ "Viacheslav Dubeyko" <slava@dubeyko.com>, "Jan Harkes" <jaharkes@cs.cmu.edu>,
+ coda@cs.cmu.edu, "Alexander Viro" <viro@zeniv.linux.org.uk>,
+ "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
+ "Trond Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
+ "Amir Goldstein" <amir73il@gmail.com>,
+ "Andrew Morton" <akpm@linux-foundation.org>,
+ "Miklos Szeredi" <mszeredi@redhat.com>, autofs@vger.kernel.org,
+ linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org,
+ codalist@coda.cs.cmu.edu, linux-fsdevel@vger.kernel.org,
+ linux-nfs@vger.kernel.org
+Subject: Re: [PATCH v1 01/12] VFS: don't count references through ->d_parent
+In-reply-to:
+ <CAJfpegt1wHngLs9uR943gT6zxV67D53k3n4GiFKowsAb3C6LJw@mail.gmail.com>
+References: <20260803012648.2195405-1-neilb@ownmail.net>
+  <20260803012648.2195405-2-neilb@ownmail.net>
+  <CAJfpegt1wHngLs9uR943gT6zxV67D53k3n4GiFKowsAb3C6LJw@mail.gmail.com>
+Date: Tue, 11 Aug 2026 12:11:50 +1000
+Message-id: <178641431036.2852630.14175693646176331672@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
-Hi everyone,
+On Mon, 10 Aug 2026, Miklos Szeredi wrote:
+> On Mon, 3 Aug 2026 at 03:37, NeilBrown <neilb@ownmail.net> wrote:
+>=20
+> > When a DCACHE_CURSOR dentry is added to d_children, it is only ever
+> > added "before" or "behind" an existing child, so it will never be the
+> > first and so never needs to adjust the refcount on the parent.  If it
+> > remains on the list until dput() it could be the last child to be
+> > removed, in which case normal handling applies in dentry_unlist() (where
+> > it has been moved from dentry_kill().
+>=20
+> Not handling the parent refcount together with cursor removal can
+> result in inconsistency, e.g:
+>=20
+>  - add cursor (seek between two positive dentries)
+>  - remove all real children (parent refcount not touched, since cursor
+> is still on d_children)
+>  - remove cursor (seek to zero offset)
+>  - close directory (dentry_unlist() will skip parent refcount update
+> since dentry->d_sib is no longer linked)
+>=20
+> Repro attached, produces "BUG: Dentry ffff888107ef75d0{i=3D143e,n=3Ddir}
+> still in use (1) [unm
+> ount of hugetlbfs hugetlbfs]".
+>=20
+> Thanks,
+> Milklos
+>=20
 
-Thanks for the feedback.
+Thanks for the review.  I realised that when I was doing patch 11 which
+changes d_for_each_positive_child() to use a cursor, but I didn't think
+the apply that understand back at this patch.
 
-So far, I have received several replies regarding the 32-bit CephFS
-kernel client usage. Based on the responses, there do not appear to be
-any active users of 32-bit builds, and I have not received any
-objections to moving forward with a 64-bit-only implementation.
+There is only on user of cursors so it can be easily fixed as follows.
 
-Therefore, I will continue working on the patch to remove 32-bit
-support and proceed with the 64-bit-only approach.
+Thanks,
+NeilBrown
 
-I will make sure the change is properly documented, including the
-deprecation/removal of 32-bit support in the relevant release notes.
+index 5a0d276379d1..91f535192ee2 100644
+--- a/fs/libfs.c
++++ b/fs/libfs.c
+@@ -169,6 +169,8 @@ loff_t dcache_dir_lseek(struct file *file, loff_t offset,=
+ int whence)
+ 		hlist_del_init(&cursor->d_sib);
+ 		if (to)
+ 			hlist_add_behind(&cursor->d_sib, &to->d_sib);
++		else if (hlist_empty(&dentry->d_children)
++			dput_dlock(dentry);
+ 		spin_unlock(&dentry->d_lock);
+ 		dput(to);
+=20
+@@ -213,6 +215,8 @@ int dcache_readdir(struct file *file, struct dir_context =
+*ctx)
+ 	hlist_del_init(&cursor->d_sib);
+ 	if (next)
+ 		hlist_add_before(&cursor->d_sib, &next->d_sib);
++	else if (hlist_empty(&dentry->d_children))
++		dput_dlock(dentry);
+ 	spin_unlock(&dentry->d_lock);
+ 	dput(next);
+=20
 
-Thanks again for the feedback and discussion.
-
-Best regards,
-Xiubo
-
-On Thu, 16 Jul 2026 at 16:53, Xiubo Li <xiubo.li@clyso.com> wrote:
->
-> Hi everyone,
->
-> We are considering a performance improvement for the CephFS kernel
-> client (kclient) that would be significantly simpler and cleaner to
-> implement as 64-bit-only. Supporting 32-bit in this case adds
-> non-trivial complexity and ongoing maintenance burden, so we'd like to
-> understand whether continuing 32-bit support is still necessary.
->
-> Before making any decision, we want to hear from the community:
->
-> - Are you currently using, or planning to use, 32-bit (arm/armhf,
-> i386/i686) builds of the CephFS kernel client?
-> - If yes, is this for production workloads? Or legacy/testing purposes?
-> - What is your platform (distribution, kernel version, architecture)?
->
-> If there are no active 32-bit users, we would proceed with a
-> 64-bit-only implementation and clearly document the deprecation in the
-> release notes with appropriate warnings.
->
-> If 32-bit support is still needed, we will explore alternative
-> approaches =E2=80=94 for example, keeping the current code path for 32-bi=
-t
-> while the new fast path is 64-bit-only, or finding a way to cleanly
-> abstract the difference.
->
-> Please reply by August 6, 2026 so we can factor your feedback into the pl=
-an.
->
-> Thanks!
-> Xiubo Li
