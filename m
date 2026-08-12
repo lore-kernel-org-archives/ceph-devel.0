@@ -1,131 +1,116 @@
-Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
+Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F60F317145
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 05:58:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 948FF2E03F1
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 05:58:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.45
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786514318; cv=pass; b=ieJdwUj1t/YoX4V4ZSnMLUDrN/2abeq1nODjezo5wB93DPGSgujafGEUPQ3kHsbMFHeNXzMKJkFdfAtx/Ji0dO8AyaRuZVjFOzKY31m+54uOvxfHm6L4uwtzSpH+Z0OjgIiszTRPAtk+xKGrNhjWTHH83b3flD8c0YyW7Nm5D4g=
+	t=1786514340; cv=pass; b=SHMfm48t4Ttsq/mVktpnmT5LcIyQsKuqpjPfxQdgv/45TZWApGPSwzHJ/ZcnH3aZqk+rARuuvFox1a1qbLtAxgk1+RlB97BQZVdb6kgtPwqj+uEW/u1oVNlWq7sNJMvcUQov636HWz5pFWBb74dW8G7JlQTvomMoL/8dPRyHMHU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786514318; c=relaxed/simple;
-	bh=psvVkcdFxHmT6g/J1OUO92i0N0siWrRzqlOMeSiNRrY=;
+	s=arc-20240116; t=1786514340; c=relaxed/simple;
+	bh=vVFkqrZtbm/FO0DBf+QPYOYp0TMDPq/+weEhU0+K+FA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=At3t+L7NtzemROCUSogeREiYr8bU2EmP4J79p+FyVTmDX9YtZj3DnOcqToT3bshYaaBEwUbzR5e42eQzbjbVw+mRF6Gwj/p6h/XwefVFO23bAOYMid3MY+AkzHkpRYaRlxQQT7XHOxlOmxqV9j7n+MxFzYxZMWK1Q+gNICwDJyg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=Cxxuy/al; arc=pass smtp.client-ip=209.85.218.54
+	 To:Cc:Content-Type; b=JIopiCVc3igfFaiXS7dXFDe+ncnIrzBloMszXCnGQ4Jifo9zOzLxMP/h1IgJr3hlN1126utPmsIXcEEHhAhgr2/QFyayXFOa4edoWWZpDqKEFuVzioGbvLU1QxeKHY4nQEUNB9Ns/SItAAMjESMPrIbdEnuIu29gjDW9OSi3EL8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=i4QqwCcI; arc=pass smtp.client-ip=209.85.218.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="Cxxuy/al"
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-c2055f5a993so59544466b.2
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Aug 2026 22:58:34 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786514312; cv=none;
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="i4QqwCcI"
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c207cb16cf5so84294266b.1
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Aug 2026 22:58:58 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786514336; cv=none;
         d=google.com; s=arc-20260327;
-        b=MJ//Zf2u128vb+IPqXue8QNCWH1DF4ZhEMivfiL/KNvy1PFmplvVGP0kqG+yhXdEon
-         qxcTeGi7M9M95bIMkDV94K1UT5j8uAGzgPrfMGqpV/kVTn6tzGEecAs01+7j0JL8ZZi1
-         HS175r48WzMd0N2RafQsurzKr39NnqFEDf4EudaLHAOPltzJ1vqiTV0j+LtaIYD8Kd9v
-         Vh8i4itTzn/5Bfb6uWCIFobBsEpctyxNiXughFzGkYzxNFMGvSn3I/I2aBg6EPnnSbfi
-         WLRvojZ/KS3CBkKm8OdFn2XlW9sIoEeBw04Znnjhf+PhnGml37pfZk7Sw3WQ7EnXBSdN
-         1b2A==
+        b=hB93daPfn41PYFYqV0vBi9K1VfuYUTO0/OBo3tCjFnBAmg1ZxLBgPzb68PWa2wfcUy
+         4VDtvggrg9pMW8fDyyF52lemVHnqEFtdizR2dS6/J3P9Ww18zEJvvtCpJPGRCS27RTX1
+         OVzhxoGHEXSrPa30MP+UKtFwAV35GsfUecH+xRDBt/Pqtg9R2oyiqjxR+DR9ZEjxLdL3
+         Nf90aE42Xi+IzfEEITpyPicfpjBPAJ5mtZFzulTJk8TQVWrkFdYSgfGn9zhNHzKzhDUf
+         pSFZVrGCtBoh1y+YwIKKj9iRy56z7m+PJKcUGFVwUfivw6x9MbgSSDeJit6hkB2nhoms
+         v4Gg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=6ESe6ru+Imc1pBvhPRyXrkB8S1KKItKctErUabr12Ck=;
+        bh=vVFkqrZtbm/FO0DBf+QPYOYp0TMDPq/+weEhU0+K+FA=;
         fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
-        b=brJ1kuSRuPCBCMZdAo9mr7w+ItQ22VoErRJ0v1j3AZWKa8hIoYaby+ABDkGRdJ937P
-         gMRkNXTmWgECSIyRJ9f3BNu2wCyrYcdcMW74eFPaFv/XERTnUHWzEHe7HjYAlPC10epX
-         OITtWLkqEj476PPNi+cPEr/+6lrmMw/kApZJ7Id/mukVj042RuW34MA08HL0N1Yr0CKp
-         5GblZHk5fjRLntTl6kBzLwpC7pENstnl2H7zBFuxSu10olWP1m1N+5DHUqg+ldQJPXFT
-         vhaKPn9Ih8I/mDqislTHM+fraIPKXuvk2cgJACp6kFZTqp9xvIZyV4oMp78K2ovnz9Sl
-         LdGA==;
+        b=JE9vwA/U0MLA5a246Gw29CDKBGefLN2YeDo7nLbgRc8+zTrtpvv94gk022624E1Ja5
+         j77oIktNIARp9RttPtrgxEymtzdCLY6hVS5nVdO14sGnx5rcZJDbGhYXcDb+yIqX22gb
+         XyKwwP0xuIzlTk/JoMrqqANv3vEBB+NzoaCSDE4Bu+Hv9TqKKY2Hbg697Sa4Irn+6NkW
+         bCmY3tstovAM496fOx5nHRhZAKU1xfwitej9gA+6e+x5IBAo6BhYZdZsDFO4fFb9Abo6
+         zxAs0+bYCC9dPBO5LKILVtMl0SKoBf0fSvEYROAWxmI6x7NyC3cTSkIiLIHIXmBqwXan
+         CtCQ==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1786514312; x=1787119112; darn=vger.kernel.org;
+        d=clyso.com; s=google; t=1786514336; x=1787119136; darn=vger.kernel.org;
         h=content-type:cc:to:subject:message-id:date:from:in-reply-to
          :references:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=6ESe6ru+Imc1pBvhPRyXrkB8S1KKItKctErUabr12Ck=;
-        b=Cxxuy/al1G3RCszNFx2UiYEQQBgKNqN7LW3e0EWi/wfoBhmOSYipAorxYzClr0vnmY
-         z786NZ7QyXk7EAxEu7jf+/J7D5YZ/gKvzDoizOEvzL6nt3iQc8upPrqq6aITT5VkhJTC
-         of4aOdv0sNmM8JCNwzYQTihHCpDLS0Cn4e3+Yiu9LvUJZVWUiLsUGpp2SwlV31TY2v2Z
-         580TxGU4CSpL1h7siAK9hijZepb8vD2CYOxvJgDjKSMawl8nrDFj4xCzpZnusAnSDtvi
-         9RFkjgiE9z28gxC3bzeekXGXNpJh2iLw/R3rr1MbC167dLKcxm0W0iQCAbDlq4CC+TOp
-         Oypw==
+        bh=vVFkqrZtbm/FO0DBf+QPYOYp0TMDPq/+weEhU0+K+FA=;
+        b=i4QqwCcIx0OFaNy3M8nrdbo1kOuU1C+k9El09dxr1hYmL7gHM3le9ant8ZNY1WNU4u
+         M39l5jWghDNDnQoevJVDMO5PHqcsPlAI72uNQpmIg5ED1yyQDzDRnMc9Nw/tYJw4+Y5V
+         +RlkpKChxKX1qgHxhAABv0yA8hIaVLjQkMKmuyZWtiXgHRTSRNjNlmB4TJZXu3KRQBLF
+         bL/mwN/UNywSs0v+2hydrqz4ShOFOvZgqx2PqMV/XMLw3KpQzCeJHx1LshjH5MnbNfY9
+         hUSQ2ArEUc46fGDfO+eklAuoGcVRLt/RC2QopqqHe/67GU0BUp9EvHopaQiSoz+oHCKS
+         vYKg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786514312; x=1787119112;
+        d=1e100.net; s=20251104; t=1786514336; x=1787119136;
         h=content-type:cc:to:subject:message-id:date:from:in-reply-to
          :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to:content-type;
-        bh=6ESe6ru+Imc1pBvhPRyXrkB8S1KKItKctErUabr12Ck=;
-        b=lQEoVbceh8bF7fPEC89FMhcObrfI8Yqtqb6bE9YHjtAmqJJtizlnNk6ub9+ZrOlyIs
-         /exlgg5EaYeO/7lhDUTKFKBUOg3gk7CxQtzplHvPcbItW/WtjJggmrJ5LrgU2MawMEfv
-         myUiFY+dX08uzd4DjH1Mv+XFa3BtFHTLFqmf7+YQZPYfZtQc9WQodWiubTBVWo8vbhw2
-         6pL2FSVjXks1IPNmGCTfYOYvXK2tqwusMzSHdhD/y07Vco6VwfE39hx45P4CF/VLz1Ja
-         zk8HPFoY+UJDQSKi3ESYv+IB1agdiHRMYaYxAS1sTsZU2FWdDMqax3umKXxbHwmdhV6Q
-         7Wgg==
-X-Gm-Message-State: AOJu0Yx8kVk/qia8n+JU87QVPzlyH8Y+6FvcQniYuCl889vCgUmxhEf6
-	MSWsCM6d4g87FX9tFBhJrggh4488SFbarnJA1D7wlN3+OodX7fVdsTCvrrKYZQoTUksJNjLYAs1
-	uetcvxKnNHTCJuOf0AdxsFryXC/4Ubh2DN/WoLv1DWg==
-X-Gm-Gg: AR+sD11VKbvVekI1HKKkn3cWV4Mok72AmPHwnFbjR9yiMpjPzpQCAcqYQ1ePnvP+74u
-	IbOl+JTBldaon90h42RVQm1eLzrArLXCYtC3nKkOvBtUOH0gtcPeo62YrMZeMAMsArprPDgLcUa
-	eurfod2BhjCa9nFJ3zNh2BfRb21tuv6L9lgV4tw++KLbeXSUk23xLycuGoc0QXTVoqSubhVrs1p
-	qqS99rUjmqOvyLp02BPtRv5F538jBhBQ8eoIWxFr3FigsQGQJAvKX5hdbagjNFWSa1Zk1PEqL0p
-	jgJ6Fm83+smCZNnvumGk4+ixrLo2gGEB6thsOpmK+D1dDQ==
-X-Received: by 2002:a17:907:c386:b0:c16:8adf:f183 with SMTP id
- a640c23a62f3a-c20f2f0a7a6mr111488866b.14.1786514312592; Tue, 11 Aug 2026
- 22:58:32 -0700 (PDT)
+        bh=vVFkqrZtbm/FO0DBf+QPYOYp0TMDPq/+weEhU0+K+FA=;
+        b=m+nS7PLETPq94ArYbCREHu+D1tzG3F9j+1fc+rFAjVeRvc/9u8FHezOjhiALgOhSNf
+         TiL7DW4/WXhxeZ8RGWAWD+nfO2/3reYtI2/cmZdbfU3O2VO8hKIspLMgEt1FDnX2tqNp
+         Qt2ItCmUsrjPUjVLSuoo5whhcym+b3whpQuKE/jL+5UHEWGlhKj916uOiiNLjcyHu8w0
+         QVK5hi3YcqgMLtUhZh796rzXg93eioA4KizTMOQw15wIxOeObFqCS2p6KGT8XDSzaH4b
+         jb6NFsHyBVLo0qO7ZnoovzULdqGW20lmdbu+oYV4wB340DantfykvM0nl6I/Fn+avjZG
+         gexw==
+X-Gm-Message-State: AOJu0YxfQEeUnbYNP1GdJLG6ia+DJSdBx9IO5O9A+26l2+D7sY/mqUU8
+	YStO2LxyCbjwP0Y7+pVp4tXrzORsTYm6z2NVlS+J0JqB0MgPF6xOKA75qRMFawgt+wGHbc9X0O1
+	bC3pviZyEGv3tie6YbhpqyaOnzoj0rwR9nZ5JWyWYCQ==
+X-Gm-Gg: AR+sD13aEX/OKacv+/CWARDmI6G7i/kFKXqNCDSkaMMIwmJWCgYP5cLYBULCsIB1Dd2
+	iwXdJJktDmT/CqGHs1cXGFquScl0BUSu6z5xHd140mpTHLYdSbCb6sizZVeWCh2t4uPLiJtn8OC
+	xabzDdTByptuN1dPL+AAzzk+1d2gD8Ef8v2FI+4kzQz9talHVhx+yWZ/FY+zBXikNAjCkI1UfIK
+	OiPkholly8GlL9hFrSuQ9VNGzBN1wZn2TeAQ1UBQnuC7CsG75ENYJbhpsTSDYY35NiWlGA6jv7Y
+	v6UTUwWeDAK0F1x8qIt1hYf8KJNVqdvyeEK1W5koAXOzwQ==
+X-Received: by 2002:a17:907:987:b0:c12:8cbe:b897 with SMTP id
+ a640c23a62f3a-c20f302644emr126326866b.15.1786514336321; Tue, 11 Aug 2026
+ 22:58:56 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260811-ceph-mdsc-mutex-optimization-v3-4-d031114419f4@clyso.com>
- <20260811134309.2689490-1-amarkuze@redhat.com>
-In-Reply-To: <20260811134309.2689490-1-amarkuze@redhat.com>
+References: <20260811-ceph-mdsc-mutex-optimization-v3-2-d031114419f4@clyso.com>
+ <20260811134101.2689120-1-amarkuze@redhat.com>
+In-Reply-To: <20260811134101.2689120-1-amarkuze@redhat.com>
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Wed, 12 Aug 2026 13:58:21 +0800
-X-Gm-Features: AUfX_mwA2VKU4vO2K8-MUNj7aC-BnpZP3824kU5zYqS2duNL-Yj2ubhhk-BXHZc
-Message-ID: <CAOJNxRJkJoSi-8FfV-o69ccCxMP+s=+ZwA42W_LX696CUZAK5Q@mail.gmail.com>
-Subject: Re: [PATCH v3 4/5] ceph: move mdsc->mutex into __do_request()
+Date: Wed, 12 Aug 2026 13:58:44 +0800
+X-Gm-Features: AUfX_mxvULXzwZfun0OWOkE93Fco4SjmfcDaa8Du3Rs8UqqAExsYwAdtK7ojuBU
+Message-ID: <CAOJNxRJWOqGTGEb0hsm5OQB_jbQE_0zWrFp3-E_FP5eecZ+O0Q@mail.gmail.com>
+Subject: Re: [PATCH v3 2/5] ceph: replace the request_tree rbtree with an
+ xarray keyed by r_tid
 To: Alex Markuze <amarkuze@redhat.com>
 Cc: ceph-devel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
 Hi Alex,
 
-Thanks for pointing this out. Yeah you are right. Let me fix it.
+Good catch. Let me fix it. Thanks
 
 - Xiubo Li
 
-On Tue, 11 Aug 2026 at 06:43, Alex Markuze <amarkuze@redhat.com> wrote:
+On Tue, 11 Aug 2026 at 06:41, Alex Markuze <amarkuze@redhat.com> wrote:
 >
 > Hi Xiubo,
 >
-> Two issues with this patch:
+> In __register_request(), ceph_mdsc_get_request(req) bumps the refcount
+> before xa_store(). If xa_store() fails, the function sets r_err = -ENOMEM
+> and returns without dropping the extra reference. Since the request never
+> enters the xarray, __unregister_request() is never called to balance
+> the get, so the ref leaks permanently.
 >
-> 1) kick_requests() list corruption
->
->    Requests are collected onto a local kick_list via r_wait, then
->    __do_request() is called for each entry. If __do_request() puts the
->    request back on waiting_for_map or s_waiting (no mdsmap, session not
->    open yet), it does list_add(&req->r_wait, ...) while r_wait is still
->    linked on kick_list. The subsequent list_del_init(&req->r_wait) in the
->    kick loop then removes from the wait list instead of kick_list,
->    corrupting the wait list and orphaning the request.
->
->    Moving the list_del_init(&req->r_wait) before the __do_request() call
->    should fix it.
->
-> 2) Double dispatch window via r_attempts
->
->    __do_request() publishes r_session and drops the mutex before
->    __prepare_send_request() increments r_attempts (which happens inside
->    __send_request). A concurrent kick_requests() can see r_attempts == 0
->    during that window and collect the same request for a second dispatch.
->
->    Bumping r_attempts or setting a dispatch-in-progress flag under the
->    mutex before entering the unlocked send path would close this.
+> Adding ceph_mdsc_put_request(req) in the xa_store error path should
+> fix it.
 >
 > --
 > Alex Markuze
