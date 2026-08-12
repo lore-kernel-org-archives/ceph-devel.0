@@ -1,155 +1,195 @@
-Received: from mail-ua1-f49.google.com (mail-ua1-f49.google.com [209.85.222.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from SN4PR0501CU005.outbound.protection.outlook.com (mail-southcentralusazon11011018.outbound.protection.outlook.com [40.93.194.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67DD438C412
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 19:57:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2AF3E36E48B;
+	Wed, 12 Aug 2026 19:58:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.194.18
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786564653; cv=pass; b=ThsiGJ674FVCqOSvsmmc3YMUzdClrpxEwaD06tfqXX1ExVleEasGjk2bSiUnjmtsTVmy4k61riWPQ9tXYqn396JCE/5KCRYWZ7Jf3Fp7+Qik4cdSu74A5rpBna/mEI3gM4L4YmQL7Trj8E95YqBw7vgX8RulhUyfvuQbmvFyfsA=
+	t=1786564739; cv=fail; b=OSYJPkPcLAbnMg72lX1fsrH0AHQJmEW4hIo9lzgypC6P9RH031AjjqnF0j6UNp6na6yFl3XUtUBwWuKN74IoZkwhxIW5+Mz9CDVXeHCjkd0xnkMeAp4WtdJJE60vuYsTuYSaZGSuU0uT/yAsAWww7Fgr0i+XB1U3BLJmAepniDY=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786564653; c=relaxed/simple;
-	bh=InB0UYCM2KDM4g4PRBtwGR91Ve9yekZrRHjDpPJaqF0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VjplFJa6yhz8JeOjtnHVXdjKvceAT79M3U6QIf6yWaciQ1IZdGp69SXRqnApNKvQwXuwwxfpBcWv98yRjJxCoKOSLtvX+AQs3t9QABK8DRJAhFFk1RaX/ky5ZmOwpilVrvENgxDAGJQdrIofI/Px3zizC7hzxF10cYseYB7VGJY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EXP6a69T; arc=pass smtp.client-ip=209.85.222.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1786564739; c=relaxed/simple;
+	bh=oF52jy3RJn2uTWRIYAjq4oXnhvpaJMSgq38jABBS9Pc=;
+	h=Content-Type:Date:Message-Id:Subject:Cc:To:From:References:
+	 In-Reply-To:MIME-Version; b=XhQEJogiPOYui/V23gEyaIfhA+H2KQuKfqGRI6qO51qtO+5km3pIQe3/OS/uJVqCWh9vI95aFJ3CJ+zQtsHkg6pEKx1oKHmKUtU4O3lWDxO66MAvXaItJ23/FG4BrBZe3oewEffEGk5ys6zE4wJ9FobPgOxHTUD+ihx+twYBp3c=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=g3qJQXou; arc=fail smtp.client-ip=40.93.194.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EXP6a69T"
-Received: by mail-ua1-f49.google.com with SMTP id a1e0cc1a2514c-977258a75d9so20905241.3
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 12:57:31 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786564650; cv=none;
-        d=google.com; s=arc-20260327;
-        b=sxUVY+B+q0PEvBVhjnChIM7eCjaxxd9JFMv6apJiLnnz3BQaphQ/fuhE/Zu9r1YZt3
-         YS+vaKjvV5gy88Kmca4uhhO6IPP/AAHgwGT4k+34BCnhvFNGnhRWdO7PGMXbgmeKbqKP
-         ZFRmIqPX5JtLZGiUykamp0iSMjGsKsUT4COmLUODhxwZ1nl9qSdWjf/SlEvK7Da0KMUK
-         uxeI7HrKaws/UWswG3kJ4/0o3jI8C3G0BAAIi8XcaZgIx/KciFt2Bl0FRHZaH6F9cHjQ
-         4sykaZa95smxGUZQuUSXn9oPWLNUBEPfrVaYQyopq1iV1kMoIRRprKWQWP+2+MJTD4ni
-         ubQw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=Qd1nK7r6I3PGybOeP4cxvy0VcaUriRACVPreKIcrr7g=;
-        fh=8B762EOmNvfpLPF4gYmUTrhSVCmcHIirAuOFMnNr0Cs=;
-        b=c6ndhGiUUIQbvNvQoRnNVpA+8eAJu/5jsta9LkPYnKzCzHzsAoSnsNw7YGtI/r/M/2
-         NkbhNv8Y5U9x/f5zAQbAoK/D8ypbFzIIRkgsbJSnp6gfgsDYqp9Z1FzSlv/btwJzsWvV
-         +dDFYcPA5XRI7B8ABk11zB1qpCSdg9SrkbxizhWPuwh++CcPmbLgUkmF9rVPAQlMDKuP
-         9O3w6U3bkcImc7vX6KOGvUSS/1rYthF3SePlQebdRZEBa0G05i2YJc+UpcMsQVVvbmAM
-         eXKx+0lqHLr+oSnuKyPrFd4aQyuGWxM3Sq+SqwVXhePimbrNyc3oLRJOTO2YDPYdXB0p
-         79SQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786564650; x=1787169450; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=Qd1nK7r6I3PGybOeP4cxvy0VcaUriRACVPreKIcrr7g=;
-        b=EXP6a69TtJDolOgiRrubUDGucwFHO/nu7qttvGCXhPYwLBs9vk4ssI0ByedQosfbGp
-         UvROVEyFr9MxiRTTTz24EFVXAPQMqzAmNbkbBcsUpEQNjLa6bfcJaMLmnIIZPUA2qvz/
-         0EpOKp5x6TJXkyekDATqpslFtbZYV0uJRVBV8xzoct6UfT68ZjtwGv4UXXcp6Mcw6s3n
-         OL2pnTBgMlw0w/t2WCh3Irb1p8Q18ZsAx1ROXH6irVR+1CX0x5wbOxKG5EAw9AYlzlzP
-         PJYbNd1TvxKLg6TV+Mw1OTCSWoMv9JUat5PBqPTSZepeB1GeO/E7XeG6QQFR+8ntBnto
-         UD8w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786564650; x=1787169450;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Qd1nK7r6I3PGybOeP4cxvy0VcaUriRACVPreKIcrr7g=;
-        b=s58DsaVHp1xalQVkNJZGmcuKEY/zh+7uIqLZXNxhEA43pX+BY83DW56HLBFsbqvAjh
-         7qvjVJeUpZEHUEM7q0VY8dhfMa6XTMIj4vC//noP68nkgjkCJZdcEh8dgMvmvb1I0yB7
-         IMFdreET+WA24xzLRMDEwnLjq/qQlEx0qThFf/jQBuQu8c22/crllA7FZEy0dAPo3RL2
-         lf03Naiuz6Hg9kyDqB80iW4t6DD/oYuBHYvSACZH/+hjUafaIAK9Haf90IvAX948xJoG
-         w1x/WXPytmMqaD3mMcYvBr6K4uNW3ueYgxNJ7b8Zc6Na2sLrQatFCVFD+i4U9LdtMrXb
-         8eyQ==
-X-Forwarded-Encrypted: i=1; AHgh+Rohn3kZPW66b4NXAccH42EuuMMMgzG2lT2hdleOg+bkUKjz9X8fJY4ySQGZN3cI6btJzK6Posrj5DtQ@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy2mX/3/MBF1nF7reFwzMDUowAd3iYjfLkO1ZPgzdv6alXpWqub
-	HTGKrCdJcqiAK3M9oOieGSuSrYSvDenLCc6elZyDBsrm65J9VkwpmrPGNLyeVLZiuThTQRxrk4k
-	KOi0c/VXTHBriF7JgNp67rzICwgq/FdE=
-X-Gm-Gg: AR+sD10PByiGvfbU9v2+dA0EBICF7hoQdt68XikuwYF104dCgDy7JUk9rcwuzQRf72B
-	31Jv5IL5xTSGCZhYSowk6Wh//CgsB9Ru8H4oEbhb1nh+UL33EkoQ+rN4XJaXc+kjcF1Wb31sM+z
-	ZYh7ABHMP0hRS7EwySiqFjgzggPAwK3AHTXKNeNPo0z2E46nscoLigcTEEEjUQT29tN7cFGB5br
-	KEtgZPZiC1p8bGzlUIwH3SsGG2+mHy5isFY/M00dnpGMKi+8fl5afTgk9Xs8ShOyOApqJyUyTuV
-	DR3dV2Kc0iheRCdTvqZz7QGbsRqVHaKj5u0RIWVWHm280E//O+n25qOEH5a/D+UVRmJyYeF/UEC
-	uEw==
-X-Received: by 2002:a05:6102:2b89:b0:745:1c72:cf72 with SMTP id
- ada2fe7eead31-76db7e94346mr273467137.13.1786564650214; Wed, 12 Aug 2026
- 12:57:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="g3qJQXou"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Nj6iqxz49GfzxzLdyLMbbfl77Jg+n2OFlhal0mNEXOJ4oGYWBBJkgBeuOpkAyfjOx5T5zVwUYuL4bBD5s6CLHWtPjd/Ww7SXHtdQ5+6XRt0ADjRQPezgeLSrHgtKP3enR0MEZA8KB1jf9RFSPb78DoVMFVhLJ1SpqXNgw+XCszvmVYST5doycF6ugC+a5wQy27s3CZm9xFduVQml14KMDGrTyg0Y0fScjrG44Ui/3sI/zPzY5nL250M53WZWByDBaqT8wXnTObD0nA/fPQE3o91gudbrLdvYQ96DiHtpB3wMuMjYHsRjE/1VwpF1jErWh8K5MobxLP2SUZNL3E+1JQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=oNy2RlgN+93tij2pItmSE+mEg9Su1aKTCJppfcTAfps=;
+ b=wJHpI5zF+cUKWp33b4qiIXC4LLlzyCa/ezP59wQmWeb8BpkflYAev1DgcUZEar65z6GmypFr6LOCWYybwbGLfiSKZ0QeSA4kj+RMKSSGSFc+fQpWwWt0mNFliWnv0eBxK1jEifC/nal+SvfqpKg+53KBU8MQbCA0hfPr5fOvKlgoTYpR7O4f6fH+9+67qgWoIYkehbiIbq5axSmDBBtWOT/YrAl8Q7sNYQ+Lxi3LVPa+H19yHIMW9hbC2m/7ZdJjK84DTUR8+5WAuiOWTjcIzvEDXQVd6fkka8psVgQdHVxXGlqbVA7vrtfccYBbd2G8bd+vIvMQpv5irEH3sGkr4A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=oNy2RlgN+93tij2pItmSE+mEg9Su1aKTCJppfcTAfps=;
+ b=g3qJQXoucKN4LiEgQ9UU3YOV/1AcEAuDuLSVgL9WCgW2zVjxoT4+PrvgtbHBDSqDFUkYsuSyPdh3oTVOYsfsnMLDz3hqeOj4JOfCEUeQ98NvHG1nE2ZWwn73mCXY2xbH2N/9AnUUl/dtpYOZqeYBlmn7H3W7n0/trjmWaeoir41gSeLcJxTBWSwQHpemoYeejLdB/wwjUTSeA9QO9xU4VxibbTaazzg3E2thq4cq3HHnRfxI7UZNtAuhAGF5dfaAr7Uov9VY4CJQ41ntrluidEN/7uPwsyahtY9PEs4QsHULTFH6xrWkVQ1F5kVcPWUnvThQZk+Q/c8Uwi9XjSn1qA==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nvidia.com;
+Received: from IA0PR12MB8374.namprd12.prod.outlook.com (2603:10b6:208:40e::7)
+ by SJ2PR12MB8135.namprd12.prod.outlook.com (2603:10b6:a03:4f3::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.315.14; Wed, 12 Aug
+ 2026 19:58:53 +0000
+Received: from IA0PR12MB8374.namprd12.prod.outlook.com
+ ([fe80::d85f:4c87:ae84:3f16]) by IA0PR12MB8374.namprd12.prod.outlook.com
+ ([fe80::d85f:4c87:ae84:3f16%5]) with mapi id 15.21.0315.014; Wed, 12 Aug 2026
+ 19:58:53 +0000
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Date: Wed, 12 Aug 2026 15:58:50 -0400
+Message-Id: <DKN8CAY6257F.6TB3KM9OX4AV@nvidia.com>
+Subject: Re: [PATCH RFC 13/14] treewide: adjust comments on PagePrivate and
+ PG_private
+Cc: <linux-mm@kvack.org>, <linux-kernel@vger.kernel.org>, "Zi Yan"
+ <ziy@nvidia.com>, "Ilya Dryomov" <idryomov@gmail.com>, "Alex Markuze"
+ <amarkuze@redhat.com>, "Viacheslav Dubeyko" <slava@dubeyko.com>, "Trond
+ Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
+ "Richard Weinberger" <richard@nod.at>, "Zhihao Cheng"
+ <chengzhihao1@huawei.com>, <ceph-devel@vger.kernel.org>,
+ <linux-nfs@vger.kernel.org>, <linux-mtd@lists.infradead.org>
+To: "David Hildenbrand" <david@kernel.org>, "Matthew Wilcox (Oracle)"
+ <willy@infradead.org>, "Andrew Morton" <akpm@linux-foundation.org>, "Muchun
+ Song" <muchun.song@linux.dev>, "Lorenzo Stoakes" <ljs@kernel.org>, "Liam R.
+ Howlett" <liam@infradead.org>, "Vlastimil Babka" <vbabka@kernel.org>, "Mike
+ Rapoport" <rppt@kernel.org>, "Suren Baghdasaryan" <surenb@google.com>,
+ "Michal Hocko" <mhocko@suse.com>, "Baolin Wang"
+ <baolin.wang@linux.alibaba.com>, "Nico Pache" <nico.pache@linux.dev>, "Ryan
+ Roberts" <ryan.roberts@arm.com>, "Dev Jain" <dev.jain@arm.com>, "Barry
+ Song" <baohua@kernel.org>, "Lance Yang" <lance.yang@linux.dev>, "Usama
+ Arif" <usama.arif@linux.dev>, "Gregory Price" <gourry@gourry.net>, "Ying
+ Huang" <ying.huang@linux.alibaba.com>, "Alistair Popple"
+ <apopple@nvidia.com>, "Johannes Weiner" <hannes@cmpxchg.org>, "Qi Zheng"
+ <qi.zheng@linux.dev>, "Shakeel Butt" <shakeel.butt@linux.dev>, "Kairui
+ Song" <kasong@tencent.com>
+From: "Zi Yan" <ziy@nvidia.com>
+X-Mailer: aerc 0.21.0
+References: <20260731-remove-pg_private-v1-0-142c97ba3562@nvidia.com>
+ <20260731-remove-pg_private-v1-13-142c97ba3562@nvidia.com>
+In-Reply-To: <20260731-remove-pg_private-v1-13-142c97ba3562@nvidia.com>
+X-ClientProxiedBy: YQBPR0101CA0188.CANPRD01.PROD.OUTLOOK.COM
+ (2603:10b6:c01:f::31) To IA0PR12MB8374.namprd12.prod.outlook.com
+ (2603:10b6:208:40e::7)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260727014745.1304657-1-zhanxusheng1024@gmail.com>
- <CAOi1vP-Ba2=Gd3_wtH0g9yfqB6xJVstjarsmUhXj7WGXedqGBQ@mail.gmail.com>
- <CAKPOu+8Y35cfhz5gqus18-HPLoVMiSWF7cVXVbyn6GmdJA3Z6g@mail.gmail.com>
- <CAOi1vP_oJC73d48w_qJaxtxrX-mVMYip3-rg-iYoHwHn6Tz-FQ@mail.gmail.com> <CAOJNxRK7F5vij-tw32+UjPztbzLX3zdhhD+Br9voD5wwQSANdQ@mail.gmail.com>
-In-Reply-To: <CAOJNxRK7F5vij-tw32+UjPztbzLX3zdhhD+Br9voD5wwQSANdQ@mail.gmail.com>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Wed, 12 Aug 2026 21:57:17 +0200
-X-Gm-Features: AUfX_mz78KT2Pxu-FZVbg-W3PDMj5g_4TwUllzYisPa0Uv1biboX1e1ncUZkZx8
-Message-ID: <CAOi1vP-xdpg8KFiW93bhwtP6+8f5DB961afu42bebii5SQ3cNQ@mail.gmail.com>
-Subject: Re: [PATCH] ceph: use the mount idmap for the owner checks in the
- SET_LAYOUT ioctls
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: Max Kellermann <max.kellermann@ionos.com>, Zhan Xusheng <zhanxusheng1024@gmail.com>, 
-	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Zhan Xusheng <zhanxusheng@xiaomi.com>, 
-	stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: IA0PR12MB8374:EE_|SJ2PR12MB8135:EE_
+X-MS-Office365-Filtering-Correlation-Id: b08462ee-0485-4256-f9d6-08def8ac22be
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|23010399003|1800799024|376014|7416014|366016|4143699003|11063799006|56012099006|10067099003|22082099003|18002099003|921020;
+X-Microsoft-Antispam-Message-Info:
+	O3k5fabA0ZwgSZA7eGIl1YsQm/52dhAiwJFGse/HtG5BRVOyq4IS4jhvnBL18BJH501aCBbGpZUkzuHmffwsLCBTcuxY7u27odzg47HYCB20t8+3dDwWy8mQ8RzmOSm9Q4FmFwvqNI0a/HZQk7KN2/EQ7Gdiqf6yEV+28hX1yCqVgybtm/lw2vjfbgRo8sVSrhaJPrzNhJcOPw1xAnxWeBrM9uNC51eQTgrzlORX/jmrRqFwhxV+ZMDAewvl+xJQdlB4WiK9lCR1nb2R5hxWMW4Yot4hfuPA2bOzaMX9fMTXbGscqw3W0C0SoxZueVjq1QqH44zBBZXDWUemdXTiuy8hIp6W0plLIiNd2it2Sfxho4vRt2UpKR4Abs2gkr+vZ4PfedXwqUdcyNX71H64+S3lerASHTGveHe77AzLmafHnziS5J2y3xZgeOZvAXmW9cl8G6uF2ukMuCoaZpmEUdoff8JWDJXVUeny74CXkRjb56h7FY60HuaBKC+X3hKi15MIMGlZSpK6eoXwL1Ck8gkB+CbwW7RVRUo+IbUfLVSdNoV7XAFWcX7Bl/0dIYLnTz4MN++xyuf3pyOTOzDr0J6xUCHEBkD93CxyUXpM+BIeIRER/F1j3YWfS9eXPdgeVDgYhxeqmSkky9a1ewdnIMghgUz6Nrk7DHsweoJ1QkplcvW1pNy5uoqcCLFJDHLrXLDdE+fl/Pmytw1BYY1oPg==
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA0PR12MB8374.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(1800799024)(376014)(7416014)(366016)(4143699003)(11063799006)(56012099006)(10067099003)(22082099003)(18002099003)(921020);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?Q1ptVml0enZ2QnRQTnNZVHRaYU0zeko2ell6OXYzV3RFV3pRSnN0RHZFcS9S?=
+ =?utf-8?B?cldHWXFWVnpiWUJmNWlNbnRXVTkyV05QN05TYllRem9BSXpYSUR3QlFFMjRk?=
+ =?utf-8?B?SlhUdjJlNWxMMTdGRHZnTnJTd01pWUtvZ3hCVDdoVUFIRXB1dlIzMGpPekkz?=
+ =?utf-8?B?bVpZRDlmanRKSzA0S1ZNbjQ4U2FRV3lvZkVJMW9wY2lNY0FoMjBENDlraGdY?=
+ =?utf-8?B?U2IrMHNHdXV5Y3NuUjd3eDR4ck5ueC9TSVo4dVlXM0xIRE9nWHhOQi9EdEJr?=
+ =?utf-8?B?QUFwekd6WVo3dkNPQlRTc1RYdUVwRFpjTkhsT2IzK0NFZktHdDVPZUtKSjVj?=
+ =?utf-8?B?NHVNY042c1UycjVWdXJka2N2dkRoS3d4RVQ2b3NSWnRDSUdmZmZndmVmeHl4?=
+ =?utf-8?B?NTFXRTJlRWRsczMybnMwT1RBQlRKS3pHM1VLYkZETVk2OUFmcDljaFByYkJZ?=
+ =?utf-8?B?azRrK3VDbndKL2lJbHl5Z05xQ2h3bWNET1N5OWJ2WjJTTnIxa2tZb1hGSXBH?=
+ =?utf-8?B?SkZ0bUxLWVo1eTZUb3QzTkVVTlJ3Z2ZvVVdTeU1OVWhXY0s5cnQ2OTlqcVA3?=
+ =?utf-8?B?eGhMUDRJWTBPeFV5NVE5cDFlZjNaM0ZVVlZBalZvZXUvTmRGNmlRdFhZOEF5?=
+ =?utf-8?B?c1JkVmxtdTkrWCttLytRS1cxTktKRDN6ejZUZ1hkNzlqTFpWVXlHaFEwVEFo?=
+ =?utf-8?B?L2RVNzBFOFN2Y3R2S1M5b0JnOTlFRVJZUzJZYnhpNnczTGY1NWRWQ1ZPYjEv?=
+ =?utf-8?B?YXF4Wll2UkNsYjV4K0FRQmhjZVk0aTc1enpMM1NoNmRyVzZxRWpOTVdtQ0tW?=
+ =?utf-8?B?T1ZUWDZORzdUdGI4V05VVnYwUlNHbkU3SVZmQ1JsVzRsVHBkMWRZSGNhbGJO?=
+ =?utf-8?B?dU43c2ZSTnFDS0Fyd3NBRHJReEMwYko2WGs3NFlJUGZrVWpiVjdMSHF0T3Rp?=
+ =?utf-8?B?TVU4MS9RWUp6UHQyeEhuQUVjb3ZxVkZDOFZZZittanlFY24vTjExdXF1MTJ6?=
+ =?utf-8?B?Ung0cXVtTVpvMDBxNHJaZVpHZ1ljU05WZjEvajNEa1lTeEJ0bmZnSmo2TGpY?=
+ =?utf-8?B?VkJzalFnTUZhK3VPa2F4ZnFTYXJVYThXYklCOURZVm9XczdTY0wwQm04UXZq?=
+ =?utf-8?B?V0JVY25EZW5WRmx0c3ZMcUhFT1BucTJqcCtWQnEyemhOeDV2Ykxwc3BBWm55?=
+ =?utf-8?B?QUNLOFBOdkZ0YzAveTFEcURLYTJqdWRXWjdHVlh2a2VvSDEvZmhLV2RpMHcx?=
+ =?utf-8?B?NWxrSXNuK0J1TDMyUEVHejVvSXhaR1ZRd3VHYWlka3A2YkdlNG9FeEM0VDE3?=
+ =?utf-8?B?bk1Yc244d29jbzFDMXo1dnJVQ2ViUUtVNjl3U090eHp1V3JNcXRFREoycFBR?=
+ =?utf-8?B?bkt1MGp2emdacldMQzQzQkxJTlNtWEdRRGo0QUZCTm5pVGVOYWlmNW9yaGlS?=
+ =?utf-8?B?QUxCMXB0NlFBRE9WQ0MwUnFQWExpTnczem9EeG1WbjQxWnZhMXptU1RMUE1Z?=
+ =?utf-8?B?UGppMUJzbHNEU29sUFp2eURxWXVPN25Mc1htU1pLa1BXbW9PYndnd3lHaGhF?=
+ =?utf-8?B?d21IOW4zeEV3Q0RCNHc1cXlvNldMVUNuNDhadGtHSGUydit0ZWxiWXV6NFor?=
+ =?utf-8?B?UDROWG1KYTVoM1dtMVBhQlNudlczUTVyK1IzQksrVVlRVWxHc2xHcmM2SlFw?=
+ =?utf-8?B?S2p1a1BBME13YnRxVnJKc3FkU2ZDNzMza0pSS0FPdFo5L0d6dmtXem1uMTNN?=
+ =?utf-8?B?MzRhb3FrQ1dTdUNGS2w4NU5iQW4xTU9nVXpRcVRxR1d5R0VsSFpXUEFxa1ow?=
+ =?utf-8?B?bTBNUy9TT2Z5bGI2cDRwT3g0ZHJvU1Q1TUpQalBPbGRVMjZmZUs0WkJrMldE?=
+ =?utf-8?B?eVJkOWdhOU1qTUoyV1FiWEw4b0RYeHJSRlByNlM2U25xdFlDL1k0TkV5M0dQ?=
+ =?utf-8?B?UVJTNlZMNXFLMDA2ZlNZVVVuMmVRbFNxTWN3Zjk5UFJ6TWlJa3d6b09wRngz?=
+ =?utf-8?B?d244ZkkwWnhReHh4TzJLUnhVcUZwWk9jK09zWmdMMVA0eVQ4ZUhnMERyczhZ?=
+ =?utf-8?B?cHpiNVpwdFRKOW9zVE9yV1Jrbnl6UWFjaFFDRGk3a3JXQWdSSmNRdWREdzRj?=
+ =?utf-8?B?ZDRhcXJvZDRSOGZZM2pmRUExSU92VlRNcHdvSjFRc1dEKzZiWnYwcytuSjNt?=
+ =?utf-8?B?OFpDVkhGN1RZZnd6dHFOT3N1WkRmQnJNcmRaZjBucUFmQ2Nqa1A4TkUyVHFi?=
+ =?utf-8?B?SG5DckYxK2ZVbjVrdEZEMFUva0pINUkveTBUN1hERUVHVHJwS1BjSDdhczZs?=
+ =?utf-8?Q?jAyPRolBpbHKn1g3B5?=
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b08462ee-0485-4256-f9d6-08def8ac22be
+X-MS-Exchange-CrossTenant-AuthSource: IA0PR12MB8374.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Aug 2026 19:58:53.5945
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: y/TFg1csI58uyq/xgiwRdSzyd07LLBUfTmwVbyvGI713Du7jncc2KnxKFxE2CEMg
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ2PR12MB8135
 
-On Wed, Aug 12, 2026 at 1:32=E2=80=AFPM Xiubo Li <xiubo.li@clyso.com> wrote=
-:
+On Fri Jul 31, 2026 at 10:13 PM EDT, Zi Yan wrote:
+> PG_private is going to be deleted. Adjust related comments to refer to
+> page/folio->private instead.
 >
-> Hi Ilya,
+> Assisted-by: Claude:claude-opus-4-8
+> Assisted-by: Codex:gpt-5
+> Signed-off-by: Zi Yan <ziy@nvidia.com>
+> To: Ilya Dryomov <idryomov@gmail.com>
+> To: Alex Markuze <amarkuze@redhat.com>
+> To: Viacheslav Dubeyko <slava@dubeyko.com>
+> To: Trond Myklebust <trondmy@kernel.org>
+> To: Anna Schumaker <anna@kernel.org>
+> To: Richard Weinberger <richard@nod.at>
+> To: Andrew Morton <akpm@linux-foundation.org>
+> To: David Hildenbrand <david@kernel.org>
+> Cc: Zhihao Cheng <chengzhihao1@huawei.com>
+> Cc: Lorenzo Stoakes <ljs@kernel.org>
+> Cc: "Liam R. Howlett" <liam@infradead.org>
+> Cc: Vlastimil Babka <vbabka@kernel.org>
+> Cc: Mike Rapoport <rppt@kernel.org>
+> Cc: Suren Baghdasaryan <surenb@google.com>
+> Cc: Michal Hocko <mhocko@suse.com>
+> Cc: ceph-devel@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org
+> Cc: linux-nfs@vger.kernel.org
+> Cc: linux-mtd@lists.infradead.org
+> Cc: linux-mm@kvack.org
+> ---
+>  fs/ceph/addr.c           | 4 ++--
+>  fs/nfs/file.c            | 4 ++--
+>  fs/ubifs/file.c          | 6 +++---
+>  include/linux/mm.h       | 6 +++---
+>  include/linux/mm_types.h | 4 ++--
+>  5 files changed, 12 insertions(+), 12 deletions(-)
 >
-> I'm not sure why I couldn't find the original email of this. I checked
-> the changes on lore.kernel.org.
->
-> The fix looks correct to me.
->
-> On an idmapped mount, using &nop_mnt_idmap compares the caller's fsuid
-> against the unmapped on-disk uid directly, which would wrongly deny
-> the actual mapped owner and potentially allow an unrelated caller.
-> Both functions already have the struct file, so switching to
-> file_mnt_idmap(file) is the right thing to do.
->
-> Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
 
-Applied.
+I will fix the issues pointed out by Sashiko in the comments from
+include/linux/mm.h, fs/ceph/addr.c, and fs/ubifs/file.c[1].
 
-Thanks,
+[1] https://sashiko.dev/#/patchset/20260731-remove-pg_private-v1-9-142c97ba=
+3562%40nvidia.com?part=3D13
 
-                Ilya
+--=20
+Best Regards,
+Yan, Zi
 
->
-> Thanks
-> Xiubo Li
->
-> On Sun, 9 Aug 2026 at 10:33, Ilya Dryomov <idryomov@gmail.com> wrote:
-> >
-> > On Sat, Aug 8, 2026 at 8:31=E2=80=AFAM Max Kellermann <max.kellermann@i=
-onos.com> wrote:
-> > >
-> > > On Tue, Jul 28, 2026 at 1:31=E2=80=AFPM Ilya Dryomov <idryomov@gmail.=
-com> wrote:
-> > > > Was there any specific reason you used nop_mnt_idmap for these chec=
-ks?
-> > >
-> > > No, I copied that check from another filesystem, probably ext2. I had
-> > > no idea what this parameter means (and I have never used idmappings).
-> > > I guess the amended parameter in this patch is correct.
-> >
-> > Hi Xiubo,
-> >
-> > You reviewed Max's "ceph: add owner/capability checks for
-> > CEPH_IOC_SET_LAYOUT*" patch.  Would you be able to review this fixup as
-> > well?
-> >
-> > Thanks,
-> >
-> >                 Ilya
