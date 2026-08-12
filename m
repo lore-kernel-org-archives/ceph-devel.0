@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31E7F34D929;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33DFF352F86;
 	Wed, 12 Aug 2026 07:37:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786520231; cv=none; b=jFtpe+jm31CESvbUHG9s/pq6l2DAh13mZOcd6pwXv+A1esICc8uVvCBkHOjqK1GdYX6N3zaelRgear4l0XQOnO3zNxWVp27nMMJmHOq7XkRZAEwsC84IRgdaFcqYmropSNMPhh/SLIqDyXGI6Ufo1AJ7AV5yVwPHOkdibBwNahM=
+	t=1786520231; cv=none; b=nx+Ym7hjUU3Os4RKo0AK5Jhw5xbBDNxwJs8x55qmDffzpntX84pkJ5iQcgHdrQh99GPlA2d5bLRLQEZPdUWWagBmVnlktfF4kgPDEYLDiWe8R2GIuNQPK6c5nEcQNKQXccxJnVqN/ndd63864T8XtIOrfE3Psj+XRhZoHnF+Z+0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1786520231; c=relaxed/simple;
-	bh=YBIwIpnaDgUbjzux7FN1A/184Gl+eeadciai1SEc6so=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Xm9HfiQ5Am8yV+vZbKi71YnEyFiXlUEEicpY7wdobxXf0ZHs3yjmKFBuOTlcEwquYS/6a5pLxlv0fdhMHh8ddcnf8FZVNTihnLhLQ1IgIw8VrtqJXtsQBjrqSiokkqBj6CYKxjm0Ro5L2OvUgOqUWUtAVELj3UZp4ecuUan1C1g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XNchVvsX; arc=none smtp.client-ip=10.30.226.201
+	bh=lPd1dyt44kJS9TYiygd/17Cai4nHFrY1bP/DIL7DSBw=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=lrI2KHOoSaMtYBZFUwKbXzdp6AVnznisUq1K4su1qKjRphb5jG1yZc6D/dBSnM9kmIYFYm5ZcuamRXxCooLqv2Yz0TRAOWBeLws5jYhJsUeVVuOCWqGBKLDBMrLy0BGAO7Dsk6i2xZ+e2GQsa2tKG2rRweRoPymHTzYdMhNIygA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RLGfIpg3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XNchVvsX"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id B9C19C2BCF4;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RLGfIpg3"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id A132DC2BCB9;
 	Wed, 12 Aug 2026 07:37:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1786520230;
-	bh=YBIwIpnaDgUbjzux7FN1A/184Gl+eeadciai1SEc6so=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=XNchVvsXvsnNfYTV6OyIZ2Cw/B3FTj69aSY0udbU5vKWPTp23Pj/ouKS2m3z0IlQs
-	 HgM1YT+5VvHTnLUeK3JhP9Q5VJoZkfby1p052vLyB/afmkr5ybYTxlNZExhGnO/+MO
-	 DVgLZpxHIaQrwh/EhZa42yPhzCbhkbLpj9BtpFnrcYteW2e0rTnFFGKZtD1rZXZLWv
-	 GWCdgjGPfpFtsqbT9U+LcRDtS20MZUEGd2LzlY+K88tZwUTKuECvvYZOrP9uqqcdqO
-	 uLMJFeQbuPtlnFIsgeHhNtb/aSu8GIkImbrY7MACmUnzX/zGXvsTLB1R0uSCy81x2E
-	 lvOxuHUoVIgGw==
+	bh=lPd1dyt44kJS9TYiygd/17Cai4nHFrY1bP/DIL7DSBw=;
+	h=From:Subject:Date:To:Cc:Reply-To:From;
+	b=RLGfIpg34hTsqIoNpJkfr69GV8y5i3LaLgVjwg0cTHOXljkGTRUy6c0s2pJthoTDX
+	 LISX5INA+539f+eEH1IDWPT4NlTtGVzOmeIKq34CSI/vqq5B+U5BBEaou7R1pDUmKs
+	 dZvlZnD74cVuVSY0vlv0GznGdhQBFuiNBw3yMnIisYTUbOIlMOlyNUujImNDISGBk4
+	 CLPYKlyLT7c2da47EiRcxwd7+4WiGK4+5htXCE7GV2Fy1UckWZnbF1fFG9h2HjbipR
+	 aTa4a08W2P+Aqm0pxnY+Y5k+0waTjurXqF+g0TAqydhH2nJqaEjxZBJL2RlwxApY2Z
+	 Cnx4BO6Yd3O3Q==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D7D1C5CFDB;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 802B1C5AD5A;
 	Wed, 12 Aug 2026 07:37:10 +0000 (UTC)
 From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Wed, 12 Aug 2026 00:36:26 -0700
-Subject: [PATCH v2 2/2] ceph: use GFP_KERNEL consistently in
- __ceph_pool_perm_get()
+Subject: [PATCH v2 0/2] ceph: GFP_NOFS fix for cap flush writeback
+ recursion
+Date: Wed, 12 Aug 2026 00:36:24 -0700
+Message-Id: <20260812-b4-gfp_nofs-v2-0-9574af8a417d@clyso.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -41,19 +41,21 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260812-b4-gfp_nofs-v2-2-9574af8a417d@clyso.com>
-References: <20260812-b4-gfp_nofs-v2-0-9574af8a417d@clyso.com>
-In-Reply-To: <20260812-b4-gfp_nofs-v2-0-9574af8a417d@clyso.com>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/22NwQ6CMBAFf4Xs2Zq2lBI98R+GGFq2UKMt6SKRE
+ P5dwKvHSebNW4AweSS4ZgsknDz5GDaQpwxs34QOmW83Bsml5qXMmVGsc8M9REcMG90KIRtZlBy
+ 2xZDQ+c9Ru9U/prd5oB33xG70nsaY5uNuErv3vzwJxpnl2iieFwrtpbLPmeLZxhfU67p+AXSMA
+ 6+4AAAA
+X-Change-ID: 20260723-b4-gfp_nofs-ea6d112a2570
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
  Viacheslav Dubeyko <slava@dubeyko.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Xiubo Li <xiubo.li@clyso.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1786520227; l=2293;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1786520227; l=1503;
  i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=t65MUA8RDPniD/z/fS7QaPun27tPX+DNMHXeSlQgYew=;
- b=MNc89SwKGOeJZneDMP4ikd4abzX8rANwDsg58TXjLXj2FXwnN3SnJPwGYp9+GRQ8+HIPvh/cA
- Cmc+LG3tc5qBrGAuURhdsaQE7LtEpyU8x3KPu6oMdB/NKR+KpeyR7mo
+ bh=lPd1dyt44kJS9TYiygd/17Cai4nHFrY1bP/DIL7DSBw=;
+ b=LfxAsEhteWCI0ZT6I2rtSWc2kqYuzyfQW7MgpZAoOLvEDuBPsINPJOQx4yN/iuWaTNIOHsoVw
+ xZETUmIzb1tBUKSmY+HdJ6x9dSp3UB755vq8GGn/ByiSC6LwntAvNKt
 X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
  pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
 X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
@@ -61,71 +63,42 @@ X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
 X-Original-From: Xiubo Li <xiubo.li@clyso.com>
 Reply-To: xiubo.li@clyso.com
 
-From: Xiubo Li <xiubo.li@clyso.com>
+These two patches fix GFP flag issues in the filesystem I/O paths
+discovered while reviewing Max Kellermann's "ceph: avoid fs reclaim
+while using current->journal_info" fix.
 
-__ceph_pool_perm_get() has six allocations for building OSD STAT
-requests, five of which used GFP_NOFS and one (the page vector
-allocation) used GFP_KERNEL, making them inconsistent.
+The first patch is a real fix: ceph_alloc_cap_flush() is called from
+ceph_writepages_start() inside the writeback layer, but uses GFP_KERNEL.
+Direct reclaim triggered by this allocation can re-enter the writeback
+path via the shrinker, causing recursive writeback and potential stack
+overflow.  Fix it to use GFP_NOFS, consistent with other allocations in
+the same writepages path.
 
-The function is only called from ceph_try_get_caps() and
-__ceph_get_caps(), both of which are in the user I/O path (read,
-write, fallocate, mmap fault), not in the writeback path.  There is
-no risk of recursive writeback, so GFP_NOFS is unnecessarily
-restrictive.  Use GFP_KERNEL consistently for all six allocations.
+The second patch is a cleanup: __ceph_pool_perm_get() had five
+allocations using GFP_NOFS and one using GFP_KERNEL, despite the
+function only being called from user I/O paths where GFP_NOFS is
+unnecessary.  Use GFP_KERNEL consistently.
 
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
+Changes in v2:
+- Convert the last two GFP_NOFS allocations (rd_req and perm) to GFP_KERNEL, covering all six call sites.
+- Correct commit message count: s/four/six/.
+- Link to v1: https://patch.msgid.link/20260723-b4-gfp_nofs-v1-0-c06b40354ec9@clyso.com
+
+---
+Xiubo Li (2):
+      ceph: use GFP_NOFS for cap flush allocation in writeback path
+      ceph: use GFP_KERNEL consistently in __ceph_pool_perm_get()
+
  fs/ceph/addr.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ fs/ceph/caps.c |  2 +-
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+---
+base-commit: 0b79edbeed72d6c75987b5b402edeafceb4d080d
+change-id: 20260723-b4-gfp_nofs-ea6d112a2570
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index e2da3ab9f808..9ea6be704820 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -2466,7 +2466,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 	}
- 
- 	rd_req = ceph_osdc_alloc_request(&fsc->client->osdc, NULL,
--					 1, false, GFP_NOFS);
-+					 1, false, GFP_KERNEL);
- 	if (!rd_req) {
- 		err = -ENOMEM;
- 		goto out_unlock;
-@@ -2479,12 +2479,12 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 		rd_req->r_base_oloc.pool_ns = ceph_get_string(pool_ns);
- 	ceph_oid_printf(&rd_req->r_base_oid, "%llx.00000000", ci->i_vino.ino);
- 
--	err = ceph_osdc_alloc_messages(rd_req, GFP_NOFS);
-+	err = ceph_osdc_alloc_messages(rd_req, GFP_KERNEL);
- 	if (err)
- 		goto out_unlock;
- 
- 	wr_req = ceph_osdc_alloc_request(&fsc->client->osdc, NULL,
--					 1, false, GFP_NOFS);
-+					 1, false, GFP_KERNEL);
- 	if (!wr_req) {
- 		err = -ENOMEM;
- 		goto out_unlock;
-@@ -2495,7 +2495,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 	ceph_oloc_copy(&wr_req->r_base_oloc, &rd_req->r_base_oloc);
- 	ceph_oid_copy(&wr_req->r_base_oid, &rd_req->r_base_oid);
- 
--	err = ceph_osdc_alloc_messages(wr_req, GFP_NOFS);
-+	err = ceph_osdc_alloc_messages(wr_req, GFP_KERNEL);
- 	if (err)
- 		goto out_unlock;
- 
-@@ -2534,7 +2534,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 	}
- 
- 	pool_ns_len = pool_ns ? pool_ns->len : 0;
--	perm = kmalloc_flex(*perm, pool_ns, pool_ns_len + 1, GFP_NOFS);
-+	perm = kmalloc_flex(*perm, pool_ns, pool_ns_len + 1, GFP_KERNEL);
- 	if (!perm) {
- 		err = -ENOMEM;
- 		goto out_unlock;
-
--- 
-2.53.0
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
 
 
