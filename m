@@ -1,215 +1,143 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9322E3A1684
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 07:45:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786520721; cv=none; b=fs0SLbgX+9mDTwgyV3xz86W7WDFZEp7Dr+if5SCGd6FIQ+1QxRryB02rfkFjttYqq8rTGx0Bh49bfBmOOkenSrH4t3wgQXyp/XkZgfngb6IgsHOT6VlcLBKdIs2jqQQ1xYJcqrn/BjtruhEkwhHCuQF10nWAh2+h/Bgyrj1Hmmw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786520721; c=relaxed/simple;
-	bh=0s6ElZ0ADmhw+cj0QguvAi55vrfhHcqnEQ0pSDQeh8Q=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3651C43552B
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 11:32:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.49
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786534341; cv=pass; b=YgMDZHfPZY8KpYFjI39E61e7mbXXKIyiU0rCE7e0Sm3Zw1vAjNHHNiU3mIV/JOJqk4r9sxsdfYSpCvbFdwWBsOrXtOLIM7qQwv5J765dOHUxm/n1zl0xwVEh3wTCUpgPdoQ3JVPiYs/DA8hRKbHt8hn/qf3OSlAqNwxh9BNlH+c=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786534341; c=relaxed/simple;
+	bh=i3fasR6deTxIk0Zf3pmhJBq+WV2nwYJeBvt7+ya3+JI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ZM86vW516+bFMJ59yk4qjPPXjdtYeO3vKnUAfNReFAi7q6pVvD3vQXlOnTgjJxjm8Ei034fZB9AN+U+Ke/U4/zMx9Brd2EkzkGGYIj438CyEREXqBpzdx6YxM2H22suj1igg7WjUkC9xJfIvY7PB5mb1P5Sm7aMHof97FQtVFW8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UqBX2mJM; arc=none smtp.client-ip=100.103.45.18
+	 To:Cc:Content-Type; b=DOQal3Wou6xk0+hfZHJ+D/sl1/gq7dYV2X81KZ8BuAtS/i4JTuvTDvWgbW53vks8eredMpd/3mzDmlhE4lS2knUpoi8Zrz33Vo1SR8X6Ssd/ugSp9rgG0dz8weiz2cI5sRT5ndRnZuYZme2MvMcqQdjb3tMNVIKNqpHG8XeI/yI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=YLJS4dul; arc=pass smtp.client-ip=209.85.218.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UqBX2mJM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41A601F00A3F
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 07:45:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1786520719;
-	bh=rX7Q4WvGDV5OJJu1UE+ZXUg8PLOCz7ttRV0A5aPdUbs=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=UqBX2mJMbuVnvIZJlpMqifH9W5SVb/eTyznRCZfZIkFg9tKDSwHkYrTgFRctwWkpT
-	 SXSVYVQND6cdB9Hy2edKlY0fjUA5fBpyz9pGuPCX6vV9nPWUAwxY85F9AaRJ9HlJOQ
-	 Itaoj7vaz9cM7KbwOm/mSQ2btFVnvYcOs7KWseWsXB2XxIzcMxIIEyyXvxkBTbXAum
-	 bMR2jIRGibHYfExr73Gt1kNt+CW63W1y9vYDcNf390nxYzaViuK+BVPoOVxsFhsr9B
-	 AH9heJaRPuwUXfPHFcSWNOT9Anf78qOIAkTGWvzt/Rc4arVRGuKSuLByOu5sZfluz2
-	 9Xe03bBKZ7tQg==
-Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-3a0faa764beso4183851fa.2
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 00:45:19 -0700 (PDT)
-X-Gm-Message-State: AOJu0Yx0jpQ4hmnurDuvP5L7C145jQU/+qbPtzCETN+aVpvBX6H0VD20
-	zoCym7GoDoqtNOP6NfETeqyr2KtezWg+xJmlV8qXaVB7231LYYzB72RgqsouBYDgjDHiutVufe5
-	Pa/A1ebO46sDQlPQY44r2sBakPgGh0zQ=
-X-Received: by 2002:a05:6512:1053:b0:5b2:a339:b422 with SMTP id
- 2adb3069b0e04-5b44e2e2690mr507974e87.14.1786520717974; Wed, 12 Aug 2026
- 00:45:17 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="YLJS4dul"
+Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-c15ca7a7ca9so80778666b.0
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 04:32:17 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786534336; cv=none;
+        d=google.com; s=arc-20260327;
+        b=M41nvwn0L/8U6xae899xJq2qZ626ABUpXNdOlDs6Y8byr+Q7izwou5BGgzetTtzPOA
+         avCzZHYs8Q22xs6h+UpYCVLhj1OnaojS/r87tgz4RenXQiQKX1OOckrEMiN1axEtUs+B
+         pZQXt5R7HpItCIHk+MGH8Enp7POVwVksximh0vdg15++uV00MrHevF/z0qoVfG2VZd96
+         or4suBMpMQraaxu2kL6JkJQtouyMKimdDx4zCG6RymzGZVllyi7bk8GfnKq1PGzTJT9g
+         cq9tsIaD7gN9MuAsCA8scMxdL6wc/cYScfr/v8uXwpV/J+9WrlkqsiSlD0EA4oWEbk6t
+         6fCg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=BVXAUVrsaloJXqEm9a0tpYBwBB/k0h2yk4WhWvUDEBU=;
+        fh=n1XbS4FDNyRE+DQF5mW9LZE1FLmX0m1oLTii8Lyei4I=;
+        b=lWAc47E0KxZ50XCLWdo5UzebMCpChMQBjCO2z0hYix34i9z8O9s7N/kotq9xAnaVW5
+         Ie7qLsHEk0IHIyXqZqjlEHegON6Trcqp3ka/xhikHmDdC5GudPMy+4t81vWjGRes6gkN
+         nrpzvPMYezQOkjIMrEKVdUh3EsWVMiWYB7jMdJw+yB9CGb8Y7nlrBiOP28y/3xW2dRba
+         G25J9kavzIiL3DmTxZekp9/ntAxDXKPt1dS0Dv9/J4b+oNiRsFdgLpsklwb9Wfb/eALp
+         YPOBZlUsYL+I00A7fyvC8leQpgMuZlF4rmUjJeuDWvS5M0XL/wloZfgTpe+K5SXICokF
+         zQHg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=clyso.com; s=google; t=1786534336; x=1787139136; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=BVXAUVrsaloJXqEm9a0tpYBwBB/k0h2yk4WhWvUDEBU=;
+        b=YLJS4dulordBSF0gf9/fNwTd3c4K2YmqfqWXCkXc4FD5+NEkWffnfVg+iphTngBV/3
+         AqHQmG0g5gPLQ5ZPtqazBa3ipPCuGUkwqUD7fiqSAwG4aVeQrq5Y9hABF2W10d2MsH3a
+         Q7VnmaV2WkjUwLQilJ9PomsBYWgY8QBcrxMbB1xmwNMC9SuTaCXGXftwvsPmsd0M5jym
+         C1tfJFwxKh0is3ic6LWvVBEIYYYrCrbP6XuOL2llO9znREytd1MX7xugqDKhO45fu0rD
+         j9xVVeUJxQqmNMghZUmDq6nKf/CWFAe+D2qT08H9xgUTO/xRi1PKTTmCU7Z9SIUWe3Su
+         VofA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786534336; x=1787139136;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=BVXAUVrsaloJXqEm9a0tpYBwBB/k0h2yk4WhWvUDEBU=;
+        b=YhW1EPYdOTSgYKuEWG8Pt3U7Qm3FxLYeV7OtXhuIoi4Xkg0MEKvsDR+Za8tuJz+SXr
+         BajWYX3pmFqyap2j86dvJfyzspaj8O3ZrEQhZwwqCwvTyrcxiHimBA+I0SmUi9fOaE1p
+         uOgSxrtDn7tiLzstQ05Y98Atp1t6Jai1a/Tu2cEPIDIdD+g64KkE26FDFUq0lDlaF/i0
+         zyomZ8uyyZk2g4+NOwcRpe/d09dE7woIH1CU4S2HV47Ybn+7PyEPmnemOB+RgNAuRc+F
+         VU2po2gh5i+hBuTPNFBYbtiPggkLRxsMAbKVoN4RzEgXkO9FpV07sHdSFgFN24J7Ps0z
+         I9iw==
+X-Forwarded-Encrypted: i=1; AHgh+RrQnCLmhTpLISN9r4TXJrv5Xuhjh6Ooxu10173SP5F72lt4yk0UwOj1V4gXUQMm6g8RmIX9MmqXUZ8b@vger.kernel.org
+X-Gm-Message-State: AOJu0YzS+DQ1uX0T/4YuIywZH3PvDM1Js0/Ic4tNhWJPHB6WZYde+bSw
+	HUdHeYBJCZSK8OhITA1lfg3REizLcN8LsUIpOT3H2YHIpXnbXTeVXTHm/G/A1yHqEyEq6BlxT0P
+	5+wneu0VnPOVVBvJ4bYZxyqgxr7exS3DvPpVKlBmT6A==
+X-Gm-Gg: AR+sD11vOtZi3gwifJgpjgOSACwOAnUoaV7AaUyerjPaakEoWXWjHLmKNvlU1pWVmtE
+	D8U6tVEAL3baAgBJ42jkpEMha3ZNbWuDLrKKpnlBw2zxzzEQOwakT3YDacTP2J9n3h5EjB/CO0K
+	ezsRjS70ES7rV571g4FpNRkk9utMtDWt2MYIql3P6Av9x5MzJhTjkOXbrRPrpJxJvI9+HmGHiNn
+	u5ZFzLRVZdPksFg13l8khAuHLHeOX5AjTr/UTGLqmaBBkvFdannALOWuXifK376ePHn/9zN5/fY
+	6XBYgHjkiTRhUVUxYJoJuN6oDmVL7PYyCzw+MSj3ecZ3zA==
+X-Received: by 2002:a17:907:1b21:b0:c15:deea:a178 with SMTP id
+ a640c23a62f3a-c20f300fd34mr193811466b.25.1786534336286; Wed, 12 Aug 2026
+ 04:32:16 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260706140309.1907928-1-amarkuze@redhat.com>
-In-Reply-To: <20260706140309.1907928-1-amarkuze@redhat.com>
-From: Xiubo Li <xiubli@kernel.org>
-Date: Wed, 12 Aug 2026 15:45:06 +0800
-X-Gmail-Original-Message-ID: <CAOuZWzxM3PBvKxDz+e7EpWaPOetpEzeSXVDNfsPcb6Fy778V_w@mail.gmail.com>
-X-Gm-Features: AUfX_myoLTRjlwGfRD9_1bmtTe4oQgOYWVjd-XBROCa2YZ4UjzjdKMZ_q4PGTeo
-Message-ID: <CAOuZWzxM3PBvKxDz+e7EpWaPOetpEzeSXVDNfsPcb6Fy778V_w@mail.gmail.com>
-Subject: Re: [PATCH] ceph: make nearfull sync writes opt-in
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org, idryomov@gmail.com, xiubli@redhat.com, 
-	jlayton@kernel.org
+References: <20260727014745.1304657-1-zhanxusheng1024@gmail.com>
+ <CAOi1vP-Ba2=Gd3_wtH0g9yfqB6xJVstjarsmUhXj7WGXedqGBQ@mail.gmail.com>
+ <CAKPOu+8Y35cfhz5gqus18-HPLoVMiSWF7cVXVbyn6GmdJA3Z6g@mail.gmail.com> <CAOi1vP_oJC73d48w_qJaxtxrX-mVMYip3-rg-iYoHwHn6Tz-FQ@mail.gmail.com>
+In-Reply-To: <CAOi1vP_oJC73d48w_qJaxtxrX-mVMYip3-rg-iYoHwHn6Tz-FQ@mail.gmail.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Wed, 12 Aug 2026 19:32:04 +0800
+X-Gm-Features: AUfX_mxsl7ht9RvBRitjRFRj3rwaJuBRtFsXu0-en7gJ-F1HP6iU4Xprt3t2AE4
+Message-ID: <CAOJNxRK7F5vij-tw32+UjPztbzLX3zdhhD+Br9voD5wwQSANdQ@mail.gmail.com>
+Subject: Re: [PATCH] ceph: use the mount idmap for the owner checks in the
+ SET_LAYOUT ioctls
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Max Kellermann <max.kellermann@ionos.com>, Zhan Xusheng <zhanxusheng1024@gmail.com>, 
+	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Zhan Xusheng <zhanxusheng@xiaomi.com>, 
+	stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-LGTM.
+Hi Ilya,
+
+I'm not sure why I couldn't find the original email of this. I checked
+the changes on lore.kernel.org.
+
+The fix looks correct to me.
+
+On an idmapped mount, using &nop_mnt_idmap compares the caller's fsuid
+against the unmapped on-disk uid directly, which would wrongly deny
+the actual mapped owner and potentially allow an unrelated caller.
+Both functions already have the struct file, so switching to
+file_mnt_idmap(file) is the right thing to do.
 
 Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
 
-Alex Markuze <amarkuze@redhat.com> =E4=BA=8E2026=E5=B9=B47=E6=9C=886=E6=97=
-=A5=E5=91=A8=E4=B8=80 07:03=E5=86=99=E9=81=93=EF=BC=9A
+Thanks
+Xiubo Li
+
+On Sun, 9 Aug 2026 at 10:33, Ilya Dryomov <idryomov@gmail.com> wrote:
 >
-> The kernel CephFS client has historically treated a cluster or pool
-> NEARFULL condition as a request to force successful writes through
-> generic_write_sync().  That effectively turns otherwise buffered writes
-> into synchronous writes and can cause a severe throughput drop as soon
-> as a single OSD or the file data pool crosses the nearfull threshold.
+> On Sat, Aug 8, 2026 at 8:31=E2=80=AFAM Max Kellermann <max.kellermann@ion=
+os.com> wrote:
+> >
+> > On Tue, Jul 28, 2026 at 1:31=E2=80=AFPM Ilya Dryomov <idryomov@gmail.co=
+m> wrote:
+> > > Was there any specific reason you used nop_mnt_idmap for these checks=
+?
+> >
+> > No, I copied that check from another filesystem, probably ext2. I had
+> > no idea what this parameter means (and I have never used idmappings).
+> > I guess the amended parameter in this patch is correct.
 >
-> On modern large clusters, NEARFULL is primarily an operator health
-> signal rather than an immediate client-side capacity failure.  Operators
-> can still have substantial usable capacity while a cluster is
-> rebalancing, splitting PGs, or expanding onto new devices.  RBD, RGW and
-> the userspace CephFS client do not impose this extra client-side
-> sync-write throttle, so the kernel client behavior is surprising and
-> operationally painful.
+> Hi Xiubo,
 >
-> Change the default behavior so NEARFULL no longer changes normal
-> write-sync semantics.  FULL and pool FULL still fail with -ENOSPC, and
-> explicitly synchronous writes continue to be synced by
-> generic_write_sync().
+> You reviewed Max's "ceph: add owner/capability checks for
+> CEPH_IOC_SET_LAYOUT*" patch.  Would you be able to review this fixup as
+> well?
 >
-> Add a nearfull_sync mount option for deployments that want the legacy
-> backpressure behavior.  When this option is set, successful writes are
-> promoted to IOCB_DSYNC if the cluster or file data pool is marked
-> NEARFULL, preserving the old behavior for conservative deployments.
+> Thanks,
 >
-> Link: https://tracker.ceph.com/issues/74849
-> Signed-off-by: Alex Markuze <amarkuze@redhat.com>
-> ---
->  Documentation/filesystems/ceph.rst |  6 ++++++
->  fs/ceph/file.c                     |  8 +++++---
->  fs/ceph/super.c                    | 10 ++++++++++
->  fs/ceph/super.h                    |  1 +
->  4 files changed, 22 insertions(+), 3 deletions(-)
->
-> diff --git a/Documentation/filesystems/ceph.rst b/Documentation/filesyste=
-ms/ceph.rst
-> index 6d2276a87a5a..ee2ca0c0c654 100644
-> --- a/Documentation/filesystems/ceph.rst
-> +++ b/Documentation/filesystems/ceph.rst
-> @@ -194,6 +194,12 @@ Mount Options
->          copies.  Currently, it's only used in copy_file_range, which wil=
-l revert
->          to the default VFS implementation if this option is used.
->
-> +  nearfull_sync
-> +       Force written data to stable storage when the cluster or file dat=
-a pool is
-> +       marked NEARFULL. This restores the legacy client-side backpressur=
-e
-> +       behavior. By default, CephFS writes are not forced synchronous so=
-lely
-> +       because of NEARFULL.
-> +
->    recover_session=3D<no|clean>
->         Set auto reconnect mode in the case where the client is blocklist=
-ed. The
->         available modes are "no" and "clean". The default is "no".
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 3823671ab95a..0ae9f09aa233 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -2400,7 +2400,8 @@ static ssize_t ceph_splice_read(struct file *in, lo=
-ff_t *ppos,
->   * dropping our cap refs and allowing the pending snap to logically
->   * complete _before_ this write occurs.
->   *
-> - * If we are near ENOSPC, write synchronously.
-> + * If requested, nearfull writes are synced to preserve the legacy
-> + * client-side backpressure behavior.
->   */
->  static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from=
-)
->  {
-> @@ -2568,8 +2569,9 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, =
-struct iov_iter *from)
->         }
->
->         if (written >=3D 0) {
-> -               if ((map_flags & CEPH_OSDMAP_NEARFULL) ||
-> -                   (pool_flags & CEPH_POOL_FLAG_NEARFULL))
-> +               if (ceph_test_mount_opt(fsc, NEARFULL_SYNC) &&
-> +                   ((map_flags & CEPH_OSDMAP_NEARFULL) ||
-> +                    (pool_flags & CEPH_POOL_FLAG_NEARFULL)))
->                         iocb->ki_flags |=3D IOCB_DSYNC;
->                 written =3D generic_write_sync(iocb, written);
->         }
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 0bbd38933f0e..4d129483e345 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -178,6 +178,7 @@ enum {
->         Opt_pagecache,
->         Opt_sparseread,
->         Opt_lazyio,
-> +       Opt_nearfull_sync,
->  };
->
->  enum ceph_recover_session_mode {
-> @@ -207,6 +208,7 @@ static const struct fs_parameter_spec ceph_mount_para=
-meters[] =3D {
->         fsparam_flag_no ("lazyio",                      Opt_lazyio),
->         fsparam_string  ("mds_namespace",               Opt_mds_namespace=
-),
->         fsparam_string  ("mon_addr",                    Opt_mon_addr),
-> +       fsparam_flag_no ("nearfull_sync",               Opt_nearfull_sync=
-),
->         fsparam_flag_no ("poolperm",                    Opt_poolperm),
->         fsparam_flag_no ("quotadf",                     Opt_quotadf),
->         fsparam_u32     ("rasize",                      Opt_rasize),
-> @@ -601,6 +603,12 @@ static int ceph_parse_mount_param(struct fs_context =
-*fc,
->                 else
->                         fsopt->flags |=3D CEPH_MOUNT_OPT_LAZYIO;
->                 break;
-> +       case Opt_nearfull_sync:
-> +               if (result.negated)
-> +                       fsopt->flags &=3D ~CEPH_MOUNT_OPT_NEARFULL_SYNC;
-> +               else
-> +                       fsopt->flags |=3D CEPH_MOUNT_OPT_NEARFULL_SYNC;
-> +               break;
->         case Opt_test_dummy_encryption:
->  #ifdef CONFIG_FS_ENCRYPTION
->                 fscrypt_free_dummy_policy(&fsopt->dummy_enc_policy);
-> @@ -759,6 +767,8 @@ static int ceph_show_options(struct seq_file *m, stru=
-ct dentry *root)
->                 seq_puts(m, ",sparseread");
->         if (fsopt->flags & CEPH_MOUNT_OPT_LAZYIO)
->                 seq_puts(m, ",lazyio");
-> +       if (fsopt->flags & CEPH_MOUNT_OPT_NEARFULL_SYNC)
-> +               seq_puts(m, ",nearfull_sync");
->
->         fscrypt_show_test_dummy_encryption(m, ',', root->d_sb);
->
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 3737ea7ed88b..632ffb1b401e 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -46,6 +46,7 @@
->  #define CEPH_MOUNT_OPT_NOPAGECACHE     (1<<16) /* bypass pagecache altog=
-ether */
->  #define CEPH_MOUNT_OPT_SPARSEREAD      (1<<17) /* always do sparse reads=
- */
->  #define CEPH_MOUNT_OPT_LAZYIO          (1<<18) /* force lazyio for all f=
-ile opens */
-> +#define CEPH_MOUNT_OPT_NEARFULL_SYNC   (1<<19) /* sync writes when nearf=
-ull */
->
->  #define CEPH_MOUNT_OPT_DEFAULT                 \
->         (CEPH_MOUNT_OPT_DCACHE |                \
-> --
-> 2.34.1
->
->
+>                 Ilya
