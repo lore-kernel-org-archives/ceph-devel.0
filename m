@@ -1,278 +1,221 @@
-Received: from mail-vs1-f53.google.com (mail-vs1-f53.google.com [209.85.217.53])
+Received: from mail-ua1-f51.google.com (mail-ua1-f51.google.com [209.85.222.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C624E37883C
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 19:53:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.217.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05B593793AC
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 19:55:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.51
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786564435; cv=pass; b=WSt/9YIsCR8CslxVbI97PW8xdPLr18ZtwOfCEatsIwiuyU2ebOmfreP8WfiEHg5zHTNUv4v4ej4BCpoqanambDw0qiv9rf72ekjt50SCO7wdHTF+M8AFSwnLrAJ6+twJxWmtY08/qtd0zO4KsJ8gWeI3OddttrQT0E+yLJaS36o=
+	t=1786564522; cv=pass; b=uD3G/jgnvQvntI8rJ67HAOZ362O+lIE2Z1FzpNHydHBDom6ebDPniHuspWd/ztF0EzTflNsOkeEGyBEvU2YXmF42WUR3IXRq2GMle7GRINx2c2ETuapR1xK4XLfWt1PtljAT2YsJYyHjLDEq4yaM4PlQ5titG/U67K8VYe3lsSg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786564435; c=relaxed/simple;
-	bh=Txboohc0dPKT1VBjRn+5jmfSyGJPi9It5KVsjVxJr5Y=;
+	s=arc-20240116; t=1786564522; c=relaxed/simple;
+	bh=aVHP6aOrXDQiPayu7rSfj+AIL/ngK9HNzzA4FQjdLwY=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=n7MgFN6XvP5T2M82rLyte3DSdw68NWTFoJRq6eGrDB0GZKKnMshsq2ZT8CAPKWhk2FspYTtJhLn2E8pP+zVcg425KwjCJ80aS99R/Gv/szq98cBbqlGRCcUPGPsF1AG1l4UAH21laCe/YXWmvooRM1WJU/uOi4fXWSbssFRX4VY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=S9/FLFhl; arc=pass smtp.client-ip=209.85.217.53
+	 To:Cc:Content-Type; b=FSQVtD37EDLrijW9dbSx9N1Ab3ww72pxoQtybH62ictivDs/8a1v8u2Zq+g7ehxxKZWkSCNAvF7+Xi/boDQrbMllAahVvCS61AW5COa6JWpyrGe8j1S64jpZgcc1Wa+jkW5XXjqZxlJkTj26PLSFt+5Z/JPMIwSpQmahzPWwuTQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hINF1b9A; arc=pass smtp.client-ip=209.85.222.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="S9/FLFhl"
-Received: by mail-vs1-f53.google.com with SMTP id ada2fe7eead31-754acc61e10so564403137.2
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 12:53:53 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786564433; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hINF1b9A"
+Received: by mail-ua1-f51.google.com with SMTP id a1e0cc1a2514c-967327a0c7dso378780241.1
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 12:55:20 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786564520; cv=none;
         d=google.com; s=arc-20260327;
-        b=hgPZpoH1YMwOgiJ9pAuCWD6UBImIZBfZz/tT92kdP+JKBYUpjeLNnVjASI+aV/X5UY
-         j1PgQ4b15RARhyfiauPn29thkrFadAya+LQiedcVY7VP9qNI4DxOWbsFVBpq3nK01ZKu
-         lxHJ5mo/ls7YJ4YIpyoCu4uMsV6M+mrFRA/nVT5jC9e/139Jy6fY6qE4+HK/R4SYzEjr
-         CHRpO5KJNFF56Or6p3I8kHqCQPHnFANenftnX8oF9TBiSsEfIZ74rjul6SfTM4aG04Tt
-         fGnqTJq1zdD999z556hryQdVb807bz4ud2ARz0cVyEzM6zXlFYaMeorrg9UyJdu4V1ge
-         pvdQ==
+        b=kd1zK68qJ4EKb46yuGqz/0KTN3lYw5w82P1ZoAkexb/yOJS5aZP2n59G3YW4cyDfUC
+         dIYU/ciZePXq7n0T3yoY3qfMK8I3pco/VlysLEoi5xbKs/g4OvMErw7zMAfRuE/5h/Ll
+         Bf0tb3tFv7UF1zqal8rLJWi6CfRJEfA7Ic/s7er4pCLWrDZfLwJFDUJVxJ0r3Jbn06PO
+         rnsB3F9QhzYFuF5wMitFsOdEdhmibyWYNklEW8T91QbknQVfl/JlMR0e5zrOi82GdyKv
+         0NFpKCf8t/gmdtfgBdUUNP1uyap2g/aeR+p4cbqR5pfLEXuzfaNy5J9Eq4cRTL6DeDuz
+         WEBg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=v6T6aaun8GIHJZud9admgmvERHFVhpv+KqPGxhLuR/I=;
-        fh=q8ycdyoadFKoRgOoNPaaLQ0wXKDeFonqJDGYu78ABt0=;
-        b=I5C3UMh68AsXAIxt50En5/iItol5x2+dJ7eaRf7tJmtwqGQyX9VynzYVkRxEWfrd+3
-         chd9xIeYt3gJqF0keJ2iTZjIVIrB4MdpgJG1NFJtmAHDahzI1L04pbJG340hUJuymz5Q
-         2+hbhKS7DZ9l1DPEHYLbR3kojV4rxCUMRK3tYZO+8tx+y8ihZV2uIr+JNAAft4ktW2HW
-         n7tW2g+oXFybFL1vqIQvIQHDgB8U63A9WJmoT+4BRBa/P3ZXBG6Hqy1zvz1VoRduTec6
-         piPdbs/9bxikc/f0WHEf8K6RKpQfxDSusEXwscpHhXFyYPoCufcdBwxcucSfbwUvBW2J
-         +Fsw==;
+        bh=ZZFWm2XK5v11eaF0/gNKBVs8omlTqaxmWHtBXtEHdpg=;
+        fh=Dred71HeP9ajSjCTRMEgFaRA1SfJIoRRWKyXpg9mfM0=;
+        b=XG0Xi6+R9hxtA1//ts2G1+odXODjs35ApE6CSHI1dQ26nowUelMQEOLetL14aNk7ei
+         Z3Eks++l2BoTfxbQwArL1FH5BWgDpgiUCBaGWpX9JCDbxBrEG8mYHireBi0PROSlTT/9
+         10ne6LOfKCNKZqtPCQXNb5f35d1FvU3T6AzYzwfCFX0mRqSAXx8sXc4QvjEpJOsBREDK
+         z35BcBAKlrUgZlyTV6HiiTpfMeIZIvER96S0nBHMs3osnxKidvV9bJknnujowgAqJrSt
+         M0lEUwRopKBXjJLequDUazMmiD86Seeto2d9QWBVF9Y2DXOQO/vxiELRPq6lhVT0/lqs
+         obBA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786564433; x=1787169233; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1786564520; x=1787169320; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=v6T6aaun8GIHJZud9admgmvERHFVhpv+KqPGxhLuR/I=;
-        b=S9/FLFhl/fAQljHcb4/ra0LojtWSBWJ4Ro2C4eAVACrx9FQMU3or8n0OkYeEbT4w8E
-         hTPS6H+3x3nWpIpexdbFodyjM/OEf27PKzReV2lncNiotbB15uTVagiCLuc4E/aJ/ZNI
-         2vTMFNqlj5066PGihZTlWQxXOcibCAxD43VwH/BPNSNMel1R9pdr6ebgK2/RzsMhP/s9
-         kLu5eFW5MDH2k+in/1uwv/AtkCgB6St1t7QfqjzJwxbNmrApWHjRwbyfN1cqKb8hrG7z
-         v3E7Wp86CCBDjNzin+UYUORAepyJDo/1L2JNlMRuIHGo6s1r+CPkypordNMrLZjRk+pB
-         73bQ==
+        bh=ZZFWm2XK5v11eaF0/gNKBVs8omlTqaxmWHtBXtEHdpg=;
+        b=hINF1b9A/ajp2mUM6O8F/fcjTeQXVcatvxiPFE7qzOQ/l9t5IalThPXg7fVHIb2su1
+         dxrfVnfEXKkTLEa+81L6hO0OAPr17RBWbizwpx3vqn+tFonHhjrHlzo7csBPYx4OWnKi
+         hk5mt0iPFxl9nUaOI9RavPgLEAHutJwfoV5qunFoz7HER8vQgpJo76BLvYjkTrnOfrnq
+         fTts9cWmqj9SziUSH0pU3Nr0uB9sfUwVsOdyhEmOAFdEM2EtOgxlMJr/ebxlT3ynDQk+
+         JFTXtmDM2yV5zMhotcTEfnTnEXG95Shdk3Uw8EjI7WiJ2kgZXN45NWbQcXUEiSlLTFHU
+         QGaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786564433; x=1787169233;
+        d=1e100.net; s=20251104; t=1786564520; x=1787169320;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=v6T6aaun8GIHJZud9admgmvERHFVhpv+KqPGxhLuR/I=;
-        b=s0j/mzSKUwo/KfJLbtnKdHuXILTgB4/vkFBdrb3pwr7zBs/mWtj93livw+8+mFkLbD
-         ZoKtaNBY3xGoXObwjSuD0sK1rRXMdILa8FRkoxx3ZQo9kA85kRxAqdnFjEXxBXKxO5Z2
-         r12/tKKMO4nddTyZY7gWvcFP7zc+/5EBbtvwy5tUKrRh5DnanQc4odjrdHCN9Dc7Pmck
-         Dj1HYe8Upq8TifQNqRvFvLx/TUB1Jr469c30BoHMXiVKy6tXB029Uo83GUqBPdTPyknu
-         4e8VJ7y4lq2+UdRSNO2ncpuRDN6VmLtEMMEzjB3Fu49La3n1f25rR/Bftan8OKyJexld
-         XFPA==
-X-Forwarded-Encrypted: i=1; AHgh+Ro1vEGf3EngDzTbpABN/6nmszPxFQ5fPuCvvXpRxVuRukckz4VXbAJ1n4ELYtdwCbQOg+wxuBTqqwYd@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxr4t6Hjw97sNQI4VQugz8tN/4GWLQOo2r8NaT7bVd2Mk3rBj8X
-	vwljtDw/hZA5umxg1GcflZDCRtHbK1NFwOKfZ+wInn0V+TUogAYzxaNRJJ2bsQGJSZYy1TmgFso
-	FCN7iJZH3l6pzB9ATTWwZ30auUcoLFXsS7O8L
-X-Gm-Gg: AR+sD13b11S1Frf/ettJFrpWGOAEfUBplaBoAC522/QqZRm4aXwbKzMSKMLUjFnbKsM
-	j1hZC9RrFG0mUwuj3da7HzlSekqsTgsMaK3u6ml1KVSx34RJKD+8HiGUsIzy8Qn0xIU1HwSAQ71
-	hdNzda36uX85aBoTE+ngeE44ch708FIgMbdJuoa31+yEN2D5opOIhMAqK0PUQbNdDG8Fjem7ubX
-	n/4W94IVEoM8bakrueC4h3bi26PMueA+YV4ut7o7QZL5CM02cDHe9gQZ2+JCzBXrSBvRu9cArVo
-	LiCQhZd6yDdjiA5SRUTrc/6DdMdKVi7rfRbMjxANN2dB/zIUBCbYlp1asINQ9iwI9sq5WFEYZa0
-	v8Q==
-X-Received: by 2002:a05:6102:5710:b0:74c:11b2:a944 with SMTP id
- ada2fe7eead31-76db887588cmr296208137.14.1786564432588; Wed, 12 Aug 2026
- 12:53:52 -0700 (PDT)
+        bh=ZZFWm2XK5v11eaF0/gNKBVs8omlTqaxmWHtBXtEHdpg=;
+        b=D0b9zazk2FsfB2WZepAPoP5q4Noozc48P3EO9QRsDWeIo/oFwWujRae09td+VJyo6s
+         SS3eokNCVFuRoL7b/kv0uEzGENtXJiYGVHbIufMrbPAEJpT9ztIgYFkuJQj/aUKEkKHx
+         PtmoGWPqi6hxjmV3SCxmArQyikU4tE6+suM5jiE4cF6IZkjFj1QcZbEpSt/gd62SC7Yh
+         eao4TtnjDT5n9+o4p6BtedCwPpUgRCxuTvnqCYhFl6Az9hc79m1k2hOiqpCl7oxT3IeL
+         4AgQvib0l7hT6o7OIfg1HZrJqR4svfOfhWOitJtau/GII1oli/3IDqFYdGzwSgGd4zaO
+         GenQ==
+X-Forwarded-Encrypted: i=1; AHgh+RphYyNI1PKic3n8tdFl0sMTry0KspE/87I+O7FOI4YKKBCc9HADxp8DmBZ/5l4zVFM8zBVSI1X6wYul@vger.kernel.org
+X-Gm-Message-State: AOJu0YwjXU+zY3JqLriQRP5MOwy3xrXL0lpTN6szQggqkXwQ0AoXh7Ws
+	97esSqbyrz0OSpE0w/44RgeIAMb9vRB1JPqN51EHlmtOiI2RGOku6NimW96sxnmgLHXCuQcjref
+	84WVHfwRbyGBGCLMweaEkONlSlfNqN9s=
+X-Gm-Gg: AR+sD13evofUVoPdm1uQncEijkp1NTpste7tWflu8R6hioKVt22JEk+hOrK8e+Gup11
+	QXVMrZKZ3dagsHqTCWF2SHhHsjMWh8GKMwAb4LrpCQgnSToMFTcmAjwxBgrM42WxVN4KupXEGp/
+	vRqfKSckEtLU78BUvtFT2dJ9BvSmaZ/tn88ombThyFlCHDR3tX54d8xlsbYz3MuW/ZmH4G7n2EH
+	6lKMQpfJ9KGcRIhnycgT3cSdWZfCAJSxmAczJHA6dVDzXGLL5BZObTLyMI10stH1dfwkAnH7Rcj
+	FGnDn30ZF3vIlTs5u62VyscDVS/YLBgQl6fOLQwaGkSnLu9vyE+W7HBVyq/v3FBAVhVJeweHUEg
+	i1LdvfP5Um2Hg
+X-Received: by 2002:a05:6102:2b85:b0:74a:b1ee:e034 with SMTP id
+ ada2fe7eead31-76db6884b10mr227289137.8.1786564519957; Wed, 12 Aug 2026
+ 12:55:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <581a303fac01d2854bc32cf2afff928990026aa0.camel@ibm.com>
- <20260602050219.1043295-1-jhapavitra98@gmail.com> <CALFbBicS9nhcGbJDbiiwExxaTXPMVUq4OVgd1Md2xu3azO68DA@mail.gmail.com>
-In-Reply-To: <CALFbBicS9nhcGbJDbiiwExxaTXPMVUq4OVgd1Md2xu3azO68DA@mail.gmail.com>
+References: <20260702114034.917507-12-amarkuze@redhat.com> <20260708053941.90316-1-jhapavitra98@gmail.com>
+In-Reply-To: <20260708053941.90316-1-jhapavitra98@gmail.com>
 From: Ilya Dryomov <idryomov@gmail.com>
-Date: Wed, 12 Aug 2026 21:53:40 +0200
-X-Gm-Features: AUfX_mzvUMHPCEecas1eXo38odx26JmTVRgozyq00E4iJXJ4uRlURPqLza5wv9U
-Message-ID: <CAOi1vP9fRZUyS5rkThq0ChszVHJx6B3xWXhESULuj8WX3ECExA@mail.gmail.com>
-Subject: Re: [PATCH v3] ceph: fix multiple unsafe decodes in decode_locker()
+Date: Wed, 12 Aug 2026 21:55:07 +0200
+X-Gm-Features: AUfX_myzt3DZxzwoVJieGS3PuCqaD99jyI5Z3-nuBvhafXSZMGJzvxBTER8UqCI
+Message-ID: <CAOi1vP-14HiHikaQuiKPjaMd35ujMu+dE0+V__7Km1o=JHvcDg@mail.gmail.com>
+Subject: Re: [PATCH v4] ceph: fix OOB read in decode_watchers() via missing
+ bounds check
 To: Pavitra Jha <jhapavitra98@gmail.com>
-Cc: Slava.Dubeyko@ibm.com, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: amarkuze@redhat.com, slava@dubeyko.com, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org, 
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Aug 7, 2026 at 5:15=E2=80=AFPM Pavitra Jha <jhapavitra98@gmail.com>=
+On Wed, Jul 8, 2026 at 7:40=E2=80=AFAM Pavitra Jha <jhapavitra98@gmail.com>=
  wrote:
 >
-> Ilya,
+> ceph_start_decoding() validates that struct_len bytes remain in the
+> buffer after the encoding header, but accepts struct_len=3D0 as valid:
+> ceph_decode_need(p, end, 0, bad) always passes. When a malicious or
+> compromised OSD sends an obj_list_watch_response_t reply with
+> struct_len=3D0, ceph_start_decoding() returns success with p =3D=3D end,
+> leaving zero bytes guaranteed for subsequent reads.
 >
-> This has been Reviewed-by'd by Slava since Jun 2 (v3), no outstanding
-> comments or NACKs on this one. It's been quiet for two months now.
-> Any blocker to applying, or should I rebase and resend?
+> The immediately following ceph_decode_32(p) in decode_watchers() has
+> no preceding bounds check. With p =3D=3D end this is a 4-byte read past
+> the validated buffer boundary. The garbage value is then passed
+> directly to kzalloc_objs() as the watcher count.
+>
+> The sibling function decode_watcher() already uses the safe variants
+> (ceph_decode_copy_safe, ceph_decode_64_safe, ceph_decode_skip_32)
+> after its own ceph_start_decoding() call. decode_watchers() is the
+> only site that uses the bare variant, confirming an oversight.
+>
+> Fix by replacing ceph_decode_32(p) with ceph_decode_32_safe(p, end,
+> *num_watchers, bad), consistent with the established pattern.
+>
+> KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
+>
+>   [   72.047085] ceph_oob_poc: buf=3Dffff8880085936c8 end=3Dffff888008593=
+6ce
+>   [   72.048685] ceph_oob_poc: ceph_start_decoding OK: struct_v=3D1
+>   struct_len=3D0 p=3D=3Dend: 1
+>   [   72.049477] ceph_oob_poc: triggering OOB read past slab boundary...
+>   [   72.050699] =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D
+>   [   72.051427] BUG: KASAN: slab-out-of-bounds in
+>   ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
+>   [   72.051427] Read of size 4 at addr ffff8880085936ce by task insmod/6=
+1
+>   [   72.051427] CPU: 0 UID: 0 PID: 61 Comm: insmod Tainted: G O
+>   [   72.051427]  7.0.0-rc7-g9c2abf69da83-dirty #14 PREEMPT(lazy)
+>   [   72.051427] Call Trace:
+>   [   72.051427]  dump_stack_lvl+0x4d/0x70
+>   [   72.051427]  print_report+0x170/0x4f3
+>   [   72.051427]  kasan_report+0xda/0x110
+>   [   72.051427]  kasan_check_range+0x125/0x200
+>   [   72.051427]  ceph_oob_init+0x128/0xff0 [ceph_oob_poc]
+>   [   72.051427]  do_one_initcall+0x9a/0x310
+>   [   72.051427]  do_init_module+0x186/0x410
+>   [   72.051427]  load_module+0x2ba7/0x2e50
+>   [   72.051427]  init_module_from_file+0x15c/0x180
+>   [   72.051427]  idempotent_init_module+0x19f/0x430
+>   [   72.051427]  __x64_sys_finit_module+0x78/0xc0
+>   [   72.051427]  do_syscall_64+0xe2/0x570
+>   [   72.051427]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
+>   [   72.051427] The buggy address belongs to the object at ffff888008593=
+6c8
+>   [   72.051427]  which belongs to the cache kmalloc-8 of size 8
+>   [   72.051427] The buggy address is located 0 bytes to the right of
+>   [   72.051427]  allocated 6-byte region [ffff8880085936c8, ffff88800859=
+36ce)
+>   [   72.051427] Memory state around the buggy address:
+>   [   72.051427] >ffff888008593680: fc fc fc fc fc fc fc fc fc 06 fc fc f=
+c fc fc fc
+>   [   72.051427]                                               ^
+>   [   72.051427] =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D
+>   [   72.129720] ceph_oob_poc: num_watchers=3D3435973836 (OOB garbage)
+>
+> 0xCCCCCCCC (3435973836) is KASAN redzone poison, confirming the read
+> landed in the slab redzone immediately past the 6-byte allocation.
+>
+> Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
+> deployment (e.g. cloud) can trigger this against any kernel client
+> that calls CEPH_OSD_OP_LIST_WATCHERS, without any further privileges
+> beyond OSD session establishment.
+>
+> Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
+> Cc: stable@vger.kernel.org
+> Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+> Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
+> ---
+> v4: Rebase against current linux/master and ceph-testing/testing.
+>     No functional changes from Slava's reviewed v3.
+> v3: Rename error label e_inval -> bad per Slava Dubeyko's review.
+> v2: Correct commit message; retracted overstated impact claims,
+>     verified with follow-up KASAN harness.
+> ---
+>  net/ceph/osd_client.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 2ff00070c..2cdac81a6 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -5030,7 +5030,7 @@ static int decode_watchers(void **p, void *end,
+>         if (ret)
+>                 return ret;
+>
+> -       *num_watchers =3D ceph_decode_32(p);
+> +       ceph_decode_32_safe(p, end, *num_watchers, bad);
+>         *watchers =3D kzalloc_objs(**watchers, *num_watchers, GFP_NOIO);
+>         if (!*watchers)
+>                 return -ENOMEM;
+> @@ -5044,6 +5044,8 @@ static int decode_watchers(void **p, void *end,
+>         }
+>
+>         return 0;
+> +bad:
+> +       return -EINVAL;
+>  }
+>
+>  /*
+> --
+> 2.53.0
+>
 
-Hi Pavitra,
-
-On a second look, I didn't see an actual Reviewed-by tag from Slava
-on any of the revisions, so formally this patch was still unreviewed.
-I went ahead and reviewed it myself, it's now applied with a small
-modification to use ceph_decode_skip_string() helper instead of two
-separate calls to ceph_decode_32_safe() and ceph_decode_skip_n():
-
-https://github.com/ceph/ceph-client/commit/437b6551cfcc235eea1d735a874f9d42=
-1f555e17
+Applied.
 
 Thanks,
 
                 Ilya
-
->
-> thanks,
-> Pavitra
->
-> On Tue, 2 Jun 2026 at 10:32, Pavitra Jha <jhapavitra98@gmail.com> wrote:
-> >
-> > decode_locker() in cls_lock_client.c contains three unsafe decode
-> > operations that allow a malicious or compromised OSD to trigger
-> > slab-out-of-bounds reads:
-> >
-> > 1. ceph_decode_copy() at the locker_id_t name field has no preceding
-> >    bounds check. With p =3D=3D end after ceph_start_decoding() accepts
-> >    struct_len=3D0, this reads sizeof(ceph_entity_name) =3D 9 bytes past
-> >    the validated buffer boundary.
-> >
-> > 2. *p +=3D sizeof(struct ceph_timespec) after the locker_info_t header
-> >    is an unchecked pointer advance. A malicious OSD can position p
-> >    past end, causing all subsequent _safe checks to pass against a
-> >    bogus boundary.
-> >
-> > 3. len =3D ceph_decode_32(p) has no preceding bounds check, and the
-> >    immediately following *p +=3D len is uncapped. A malicious OSD can
-> >    send len=3D0xffffffff, advancing p gigabytes past end and escaping
-> >    the decode window entirely.
-> >
-> > Fix all three by replacing bare operations with their safe variants:
-> >   ceph_decode_copy   -> ceph_decode_copy_safe
-> >   *p +=3D sizeof(...)  -> ceph_decode_skip_n
-> >   ceph_decode_32(p)  -> ceph_decode_32_safe
-> >   *p +=3D len          -> ceph_decode_skip_n
-> >
-> > A new out_bad: label is added to return -EINVAL on any bounds
-> > violation. -EINVAL is appropriate here: the data received from the OSD
-> > is structurally malformed, which is an invalid argument to the decode
-> > contract regardless of whether the caller or the wire is at fault.
-> >
-> > KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
-> >
-> >   [   26.183969] ceph_oob4_poc: buf=3Dffff888009e31000 end=3Dffff888009=
-e31fa0
-> >   [   26.186087] ceph_oob4_poc: struct_v=3D1 struct_len=3D0 p=3D=3Dend:=
- 1
-> >   [   26.186738] ceph_oob4_poc: triggering bare ceph_decode_32 past sla=
-b boundary...
-> >   [   26.187679] =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >   [   26.188236] BUG: KASAN: slab-out-of-bounds in ceph_oob4_init+0x22b=
-/0xff0 [ceph_oob4_poc]
-> >   [   26.188236] Read of size 4 at addr ffff888009e31fa0 by task insmod=
-/59
-> >   [   26.188236] CPU: 0 UID: 0 PID: 59 Comm: insmod Tainted: G         =
-  O        7.0.0-rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
-> >   [   26.188236] Tainted: [O]=3DOOT_MODULE
-> >   [   26.188236] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996),=
- BIOS 1.17.0-debian-1.17.0-1 04/01/2014
-> >   [   26.188236] Call Trace:
-> >   [   26.188236]  <TASK>
-> >   [   26.188236]  dump_stack_lvl+0x4d/0x70
-> >   [   26.188236]  print_report+0x170/0x4f3
-> >   [   26.188236]  kasan_report+0xda/0x110
-> >   [   26.188236]  ceph_oob4_init+0x22b/0xff0 [ceph_oob4_poc]
-> >   [   26.188236]  do_one_initcall+0x9a/0x3a0
-> >   [   26.188236]  do_init_module+0x27c/0x790
-> >   [   26.188236]  load_module+0x4a9a/0x6350
-> >   [   26.188236]  init_module_from_file+0x15c/0x180
-> >   [   26.188236]  idempotent_init_module+0x21f/0x750
-> >   [   26.188236]  __x64_sys_finit_module+0xba/0x120
-> >   [   26.188236]  do_syscall_64+0xe2/0x570
-> >   [   26.188236]  entry_SYSCALL_64_after_hwframe+0x77/0x7f
-> >   [   26.188236]  </TASK>
-> >   [   26.188236] The buggy address belongs to the object at ffff888009e=
-31000
-> >   [   26.188236]  which belongs to the cache kmalloc-4k of size 4096
-> >   [   26.188236] The buggy address is located 0 bytes to the right of
-> >   [   26.188236]  allocated 4000-byte region [ffff888009e31000, ffff888=
-009e31fa0)
-> >   [   26.188236]  ffff888009e31f80: 00 00 00 00 fc fc fc fc fc fc fc fc=
- fc fc fc fc
-> >   [   26.188236]                                ^
-> >   [   26.188236]  ffff888009e32000: fc fc fc fc fc fc fc fc fc fc fc fc=
- fc fc fc fc
-> >   [   26.188236] =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> >   [   26.255513] ceph_oob4_poc: len=3D0xcccccccc (OOB garbage from KASA=
-N redzone)
-> >
-> >   0xCCCCCCCC is KASAN redzone poison, confirming the read landed in
-> >   the slab redzone immediately past the 4000-byte allocation.
-> >
-> > Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
-> > deployment can trigger this against any kernel client that issues the
-> > lock.get_info class method (e.g. during RBD exclusive lock acquisition)
-> > without any further privileges beyond OSD session establishment.
-> >
-> > Fixes: d4ed4a530562 ("libceph: support for lock.lock_info")
-> > Cc: stable@vger.kernel.org
-> > Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
-> > ---
-> > v3: Split ceph_decode_copy_safe call to fit 80-column limit,
-> >     per Viacheslav Dubeyko's review of v2.
-> > v2: Move inline comments above ceph_decode_skip_n calls, rename
-> >     label bad -> out_bad, per Viacheslav Dubeyko's review.
-> > ---
-> >  net/ceph/cls_lock_client.c | 13 +++++++++----
-> >  1 file changed, 9 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/net/ceph/cls_lock_client.c b/net/ceph/cls_lock_client.c
-> > index 4e6a6d3e4..79a449897 100644
-> > --- a/net/ceph/cls_lock_client.c
-> > +++ b/net/ceph/cls_lock_client.c
-> > @@ -259,7 +259,8 @@ static int decode_locker(void **p, void *end, struc=
-t ceph_locker *locker)
-> >         if (ret)
-> >                 return ret;
-> >
-> > -       ceph_decode_copy(p, &locker->id.name, sizeof(locker->id.name));
-> > +       ceph_decode_copy_safe(p, end, &locker->id.name,
-> > +                             sizeof(locker->id.name), out_bad);
-> >         s =3D ceph_extract_encoded_string(p, end, NULL, GFP_NOIO);
-> >         if (IS_ERR(s))
-> >                 return PTR_ERR(s);
-> > @@ -270,19 +271,23 @@ static int decode_locker(void **p, void *end, str=
-uct ceph_locker *locker)
-> >         if (ret)
-> >                 return ret;
-> >
-> > -       *p +=3D sizeof(struct ceph_timespec); /* skip expiration */
-> > +       /* skip expiration */
-> > +       ceph_decode_skip_n(p, end, sizeof(struct ceph_timespec), out_ba=
-d);
-> >
-> >         ret =3D ceph_decode_entity_addr(p, end, &locker->info.addr);
-> >         if (ret)
-> >                 return ret;
-> >
-> > -       len =3D ceph_decode_32(p);
-> > -       *p +=3D len; /* skip description */
-> > +       ceph_decode_32_safe(p, end, len, out_bad);
-> > +       /* skip description */
-> > +       ceph_decode_skip_n(p, end, len, out_bad);
-> >
-> >         dout("%s %s%llu cookie %s addr %s\n", __func__,
-> >              ENTITY_NAME(locker->id.name), locker->id.cookie,
-> >              ceph_pr_addr(&locker->info.addr));
-> >         return 0;
-> > +out_bad:
-> > +       return -EINVAL;
-> >  }
-> >
-> >  static int decode_lockers(void **p, void *end, u8 *type, char **tag,
-> > --
-> > 2.53.0
-> >
