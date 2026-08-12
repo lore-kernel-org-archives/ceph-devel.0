@@ -1,157 +1,269 @@
-Received: from mail-wr2-f2.google.com (mail-wr2-f2.google.com [74.125.225.66])
+Received: from mail-vk1-f172.google.com (mail-vk1-f172.google.com [209.85.221.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1DBA44C64B
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 17:13:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.66
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786554809; cv=none; b=sathB5Ae2OmWXaQx6J9ORfM+UMYJ/L7ub6yyYlGdiKihF8AcYzH7N51VcubhJNO6QaNkgmTI7JvBNI9vAtOJMr8rXH1QGcXUdumkVatpDd5iQDP/LdCSKRvcVZ5HCyKeQleOonp3bRe94MEahenkI1Opih10BOebIocTD9GMnxQ=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786554809; c=relaxed/simple;
-	bh=yDhiJkw3eRE4JPpFtRCOfhC9gFnls38B6dUHSTIEVEI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=HcbBHurvPc5qgbAvuZiI9aGnV/3iFll9FrPuyEy7E4t6othYlUJrbsUcIg0if71m/dbBtpIZ9IiGKwrwxNn8fGtW3xCP6iOsbaftk8UwiSc541W0kp923kVYP2oY5DKWfn5J1ZovYWHBWYtY7xhAtp4u5C3g8kh2XHJSI0LV3No=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bargrove.com; spf=pass smtp.mailfrom=bargrove.com; dkim=pass (1024-bit key) header.d=bargrove.com header.i=@bargrove.com header.b=OVIybrRh; arc=none smtp.client-ip=74.125.225.66
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bargrove.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bargrove.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06D95366049
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 19:17:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.172
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786562248; cv=pass; b=lHQs/DTHgpH9/ccC3xGHzY8VkdO0wjYe6d5I/wx1l6M6s81HfaRrAdjMUzRGxfhBd9J77qA/w4m2p+qKcIbAWFY5fPsrhQ1YK87srmu9datABmJHB4rRDTHdmPIQNI6eliLkuDpZ0uoYvH224APdmPL6xy6Oq2Zjg+cEePL/QSU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786562248; c=relaxed/simple;
+	bh=GE+pZVBaGeA2Aorau2SIuuGm8ldgpj+3sqb2tUwmmP0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=WzMBJIww/pLl4us7wErWdZ53UeI2pMmEt0HY2ArT3aVIgzy4TNe8qGASl75lloQpgELU2dn+OBLsUf6ZoUPghqeKqqMkr2pOak/EsOAp/zNwvjC8HPNRX6VjdHNmCVedKJd8TQMw8kBsaySs8jQLyxwZz/+41Tpr1tktVH18mU8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FY1el8St; arc=pass smtp.client-ip=209.85.221.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=bargrove.com header.i=@bargrove.com header.b="OVIybrRh"
-Received: by mail-wr2-f2.google.com with SMTP id ffacd0b85a97d-4730b8edae6so400390f8f.0
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 10:13:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FY1el8St"
+Received: by mail-vk1-f172.google.com with SMTP id 71dfb90a1353d-5c2c0df0b45so481545e0c.1
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 12:17:26 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786562246; cv=none;
+        d=google.com; s=arc-20260327;
+        b=pmAVtc+l/hQ643dkI6r7Tq/TtJqkF7Pmr3XUlM3cHPk79gNxF4K+vv5VBKMvdCJbm6
+         ab6kdEiS5fWBs5mpN70E1DbVHMGGde5JgRHVam0w5SpOjq3s4Q2UWIZ+B1upjSOmmhYj
+         Brn/XVj3ad25Cb2k2cd1xtk8ZTh/l7MnWHp71800F2BwtcYWMfKrS+joc9UkGdMlkVNZ
+         vAdcuRKfMj+Z7NBIAsI8BbtyZEA1QWGCryjnoC3olln8iuxzxAyyuPxbhpIWSQ+j/+i2
+         ou0YlZJJROUyHXOTmdMFPRrSzWWHl3eaUpPhC4cwVjLLK8d1ucmi6Sbi/P3uRjzMM33Y
+         RcBg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=9IJgfP06pkKdnYvRNbHSDnTVvYPGVcSokXdpWpUNLMc=;
+        fh=fv+ftjQqQOp/GObRcVlcIq2xdP+8Z/JhDyHKzWPx7H8=;
+        b=jqs6f8D5XDIWIVEw42EBsmBjhvywNATsx6qrZSBAABLjOkLCW37hBoB3IPC5FlclWH
+         DJ+C55zePrq3dNhY49pvGMqZ5/dJAIwJ+ZTzOWv11zPKy32N5Vy5akGHEiF0EZOBTYQF
+         v/1YzZ+iksNLrgEQjZ8XEdl9geCOXGXraFaHrmP8oayIcRaxdIvG9a8g0ipgDvBmxRQZ
+         LYddlX6U94IKLy7O5g5a1R8bDzXbdbZVHKbFPra+POm23hsS/86wVDcgBrnq/LSSJgK0
+         msVbwZaHXVHybjD0bg8pCb0H8u5uRVbohlXhlEdtwBpTzDkz1wPkRk+S2GHe6T2sTuGl
+         mTgw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bargrove.com; s=google; t=1786554806; x=1787159606; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=fg28073ie96TIqcLlG1mXyLAvQpsNfOkYwCQmQbpdmg=;
-        b=OVIybrRhPEVBoBQjP3qiV1GKF3XUyN4ZIfyvzqs35P/Y67Jw6CITltvOU6NGC01XTz
-         nOul2kl2tybPcgCKg+kYIrYeNGnyBV92MQsoo9O7OErInKpLqJzZiZtZ57y/L75ARBEX
-         pG57RDAY+aH7SZbjBr7DTTXJxl3+FpgvF+7uk=
+        d=gmail.com; s=20251104; t=1786562246; x=1787167046; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=9IJgfP06pkKdnYvRNbHSDnTVvYPGVcSokXdpWpUNLMc=;
+        b=FY1el8StIGShvIFR7JVS+vyw/Ir9EPEry43lAk34ivelNoMiXMGJYrXluS/kicly1G
+         dwegHLwc1rlVTfSOzE+oTkq1eWz2qvWFBi15FKZWJIAcMH5qsFpSv9ilty8Bk5sAje/y
+         KkpXkCPRC9dcEOJpW4m6USfKtrL16lVWKcWckc9o5Xrp5/f7InoARAclV/yAbOFX9MN3
+         WvaMBcvUxf3mhsYmaItUXifSIdYrfvacVjJeTSQTW6V4/jEDIO/vSgPi4Qu7IXcUHipc
+         ylUjADPmxC5yMnYJPYmhM5dgogLGcx3iAMns6bUE+GAFQfCs1u6RBaiAoDJooH4A6nJq
+         VVog==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786554806; x=1787159606;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=fg28073ie96TIqcLlG1mXyLAvQpsNfOkYwCQmQbpdmg=;
-        b=sYwwrcnHI5SVZv1B7vLtHBzCn/5D46W8lpBh6LlCzEhL//BI3ZxCfE0sn2FjkVKqF+
-         Y8uJp7UTIuebchxFG5y8fYFvrwiQp/i3Yf7+S5YcqEx7BgOcryBGklH9aNVblWEFTFQq
-         tOHJZBM8xXZlfyh87diN7blot0jYGZuabOZUBuH8932P/BId36EsaMoSRU1U5AL4ZL02
-         W3fCuh9ZJTj029kodilQPTcFG71YjXh+zCN2lbPCsfgyqW/x39bj2j0NPZ4oq7aMwM5H
-         rIMtKIGmh6u9WRnoLr4eNr49TlNvGxFhmecsO/MvpkomDNZ15DFvtL4hsimyqBVvQSyl
-         OY4A==
-X-Forwarded-Encrypted: i=1; AHgh+RpGcc38wPy52G2kL8NblZXFH1q9X0X2OizjNdsSpICRLMWcC7+/vwlrcql91kPLcoSXlsJHsulx6Hqo@vger.kernel.org
-X-Gm-Message-State: AOJu0YyM5ti2HGeEnijZ8s8iFnaBsfE7CVjyqqdY2GN5yo5prY3Cr4H2
-	Z+l4lYmFNbWWH6JAfhoBBObkthKZdUPYnpY+5ubngrzmPOeG0jnntg/JI2DjVVcvp5g=
-X-Gm-Gg: AR+sD13ANiewQaqCwst5IU/o7DDEQlRQwxtD6famcNkCV0Goj4zt2nOuu8MOwKDtvb8
-	gh38ZcWjb/RLuMhp4WUxBf15rnexADulGU+CI5DhpwTR7dSfzp6245dS9WgPULNA2GXIUTjUkBS
-	Ocyka06Ojd1WNXNW1U2RIwZUDZDzU5YFLWjbkPSfSiw1qBu4nL00DrEEMhWwwcd2ALDNXqX7A9+
-	sq88HPRNxZCe/69/2/muMcuhHEVtOXDsXjBWAqefiU7o+X6/dGKyWx4+/NTXLjcIY4SkSWNUr0/
-	n8Eqpj4Dk3FOPzd5pNM/VCGawBNWmssLS+xujs8/Y06ZyF7ULYhOlLsDv9SU7iPkIEcdJ/Bugs9
-	FaxLXJgq5qIN7wGq6xkIgeNElY010/OKBY+Sa1457BAkz5tCBLao6w4BU2KnToRIxjqmYVXbbzu
-	mwG5zxhLqeNFs0nMzIEwVEk/yFk2445DYsWJtPKVCoTctTsn4pveK61I2RbLUVDm+1W+0GqAH9f
-	EJZvyWkQQXpp/o2heKooipXzY0gU5civ7VDlxIrnT/IF3YLqxzO1jPVBQzr+wY/thE=
-X-Received: by 2002:a05:600c:8b13:b0:496:b3a0:1cfe with SMTP id 5b1f17b1804b1-4997c116e06mr99217415e9.12.1786554805747;
-        Wed, 12 Aug 2026 10:13:25 -0700 (PDT)
-Received: from roberto-5.lan (host-78-145-240-242.as13285.net. [78.145.240.242])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49981b3ca6bsm3309685e9.12.2026.08.12.10.13.24
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Wed, 12 Aug 2026 10:13:25 -0700 (PDT)
-From: Matthew Brown <matthew@bargrove.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>,
-	Xiubo Li <xiubo.li@clyso.com>,
-	Ilya Dryomov <idryomov@gmail.com>
-Cc: Alex Markuze <amarkuze@redhat.com>,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Matthew Brown <matthew@bargrove.com>
-Subject: [PATCH v2] ceph: fix leaked inode reference on writeback abort at umount
-Date: Wed, 12 Aug 2026 18:13:21 +0100
-Message-ID: <20260812171321.13112-1-matthew@bargrove.com>
-X-Mailer: git-send-email 2.44.0
+        d=1e100.net; s=20251104; t=1786562246; x=1787167046;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=9IJgfP06pkKdnYvRNbHSDnTVvYPGVcSokXdpWpUNLMc=;
+        b=P8ukmPzO+OBPVMsZUQQ+QDcwegBI6L7VU8PQADXXQBbgAWU3R6W7ze7cbn1vIoD27o
+         9ip00KEaviS05Yr86HPIaKDiwa8hXYiL/OFZy/meceQvIG/knqUO3GS1BpQG1xz1q/mS
+         F00bwruJvqVRJ0x/tftY2dJCYZ3yCHy4BVXMLB10nSj/dXD+a5yqwZsYZU/fBJtYyg+g
+         0LuvQcY4hfs+cTzXlhFDVCM7sK4+ztoRy1PAYMjxCHxkThn/VWcGX51NqGVqptei9PxC
+         7F4Q/CfBYqfIx05CQXqWg9UlFc++ivlRGCbuX9FiAQvGkQOrLfs93Ui6BJnaRElkXIky
+         Qk2w==
+X-Forwarded-Encrypted: i=1; AHgh+RrI1DOkeBKEWtU5V58sdWAa/OqTG565RErRxxf/KAtveXBwiKvZ2Dx/uBuP8nUpoxOXsRN8NQzYqTCM@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz/h4nb4Fj/M4uSyxuOkHStqutdWrEd/ZMc+l9PA/txK6RNabPg
+	GJteSl3x2syYEGTItZIvDDBDRlVzB220u8vLy5uaCNBby1aJuYx9lQ8v1Z60DvjXCPvhAHxm6bX
+	x7uwi8tqMxy3nPe3tmFLKD8hBZ0j03x28RMsI
+X-Gm-Gg: AR+sD13CrIYeTjS3uRqJG+eCwqYUufuB5corY4F/UI/6YQWlEaOgKMrTu+hzOKT2JEl
+	cjPfH0nFoURa+5rzYaascfp2E/fQ88C02OQg8gVctrziXthPLFLwSJnJ22R3UupuFr1YVS7f0+K
+	/rXGTE7lP+YKGZWDTbQZ75FkYb+wQ42p99mMUnELrWd2fjtP3GlnTve6nutb9OhtiRXgzGboNTZ
+	3rRM3v9Jt6ysS/OvMB3vcbSZbcRx0bz7XBui5O1f50uOfNBH6L2SiII9d31aaGmsk4GHOfBCHdA
+	V8vfBfI8V/EFbhJG5ME5CqDNwHuefGRdRWL/T2HTe6W0V9b4aAyZPSJN0Ea+C71yaUsVdWQ1A+j
+	VNm1WoXiQ3YaP
+X-Received: by 2002:a05:6122:3309:b0:573:a779:62cf with SMTP id
+ 71dfb90a1353d-5c579a7dc17mr95903e0c.7.1786562245673; Wed, 12 Aug 2026
+ 12:17:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260702114034.917507-13-amarkuze@redhat.com> <20260707105727.43352-1-jhapavitra98@gmail.com>
+In-Reply-To: <20260707105727.43352-1-jhapavitra98@gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Wed, 12 Aug 2026 21:17:11 +0200
+X-Gm-Features: AUfX_mygzHGTKZ0Z1inB3vDeL-aCreazIlygazBl_5d8j5_NrRSdzXCnIz-H7tE
+Message-ID: <CAOi1vP-UKO91iPY-3uNspJ5W7bYowqCdg5_GiJnOLWo8f3Q0eQ@mail.gmail.com>
+Subject: Re: [PATCH v4] ceph: fix OOB read in ceph_osdc_list_watchers via
+ uncapped outdata_len
+To: Pavitra Jha <jhapavitra98@gmail.com>
+Cc: amarkuze@redhat.com, slava@dubeyko.com, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-ceph_dirty_folio() takes a wrbuffer claim on each newly dirtied folio: it
-bumps i_wrbuffer_ref (taking an ihold() on the 0->1 transition) and
-attaches the snap_context to folio->private.  That claim is released only
-by ceph_put_wrbuffer_cap_refs(), which for a submitted write runs from
-writepages_finish().
+On Tue, Jul 7, 2026 at 12:58=E2=80=AFPM Pavitra Jha <jhapavitra98@gmail.com=
+> wrote:
+>
+> The OSD reply header field op->payload_len is wire-controlled and is
+> copied directly into m->outdata_len[i] without any bounds check:
+>
+>   m->outdata_len[i] =3D le32_to_cpu(op->payload_len);
+>
+> This value propagates unchecked to req->r_ops[0].outdata_len and is
 
-In ceph_submit_write(), if ceph_inc_osd_stopping_blocker() fails -- which
-happens during umount -- the request is aborted before submission: the
-already-collected folios are only redirtied and unlocked, so
-writepages_finish() never runs and the claim is leaked.
-redirty_page_for_writepage() -> folio_redirty_for_writepage() ->
-filemap_dirty_folio() sets PG_dirty directly and does not go through
-->dirty_folio, so ceph_dirty_folio() is not re-entered to rebalance it.
-Because every subsequent writeback also fails the osd_stopping_blocker,
-i_wrbuffer_ref never returns to 0, the ihold() is never dropped, and the
-inode cannot be evicted:
+Hi Pavitra,
 
-  VFS: Busy inodes after unmount of ceph
-  kernel BUG at fs/super.c:650!
+IIRC it's not completely unchecked: if the sum of m.outdata_len values
+for all OSD ops in the request doesn't match msg->hdr.data_len,
+handle_reply() should fail and hence ceph_osdc_wait_request() in
+ceph_osdc_list_watchers() too.
 
-Release the orphaned claim in the abort path before redirtying, via
-ceph_undo_wrbuffer_claim(): detach the snap_context, drop the wrbuffer
-reference (letting i_wrbuffer_ref reach 0 and iput() the inode), and drop
-the snap_context reference -- i.e. do what writepages_finish() would have
-done for these never-submitted folios.
+> then used to set the decode boundary in ceph_osdc_list_watchers():
+>
+>   void *const end =3D p + req->r_ops[0].outdata_len;
+>
+> The actual data allocation is always exactly one page:
+>   ceph_alloc_page_vector(1, GFP_NOIO)
+>   ceph_osd_data_pages_init(..., PAGE_SIZE, ...)
+>
+> The messenger caps the copy to PAGE_SIZE bytes, but the decode window
+> end is set from the uncapped wire value. A malicious OSD can send
 
-Only the locked_pages entries are undone; folios still in the fbatch were
-never dirty-cleared by this call (folio_clear_dirty_for_io() is the
-ownership-transfer point, and a successful move NULLs the fbatch slot), so
-they hold no claim this call owns.
+I don't think the messenger ever silently caps anything (or at least it
+shouldn't).  The messenger wants to read exactly msg->hdr.data_len bytes
+off the wire and if the underlying buffers aren't big enough the message
+gets discarded.
 
-Fixes: fd7449d937e7 ("ceph: fix generic/421 test failure")
-Signed-off-by: Matthew Brown <matthew@bargrove.com>
----
+> outdata_len=3D0x10000, causing _safe decoder boundary checks to pass
+> while the physical reads cross the slab allocation boundary.
+> KASAN report (kernel 7.0.0-rc7, QEMU/x86_64, KASLR disabled):
 
-v2:
- - Reword the commit message: the leak is an orphaned wrbuffer claim on an
-   unsubmitted write (writepages_finish() never runs), not
-   redirty_page_for_writepage() re-entering ceph_dirty_folio().  Thanks to
-   Alex Markuze for the correction.
- - Convert ceph_undo_wrbuffer_claim() to the folio API
-   (struct folio * / folio_detach_private()), per Alex Markuze.
- - Spell out the locked_pages/fbatch ownership split in the message, per
-   Xiubo Li's comment.
+Could you please elaborate on what fields were set to what values and
+what payload was injected and fed to decode_watchers() because it for
+sure wasn't just outdata_len set to 0x10000.
 
-v1: https://lore.kernel.org/all/20260808101425.49616-1-matthew@bargrove.com/
- fs/ceph/addr.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+Thanks,
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index ecf33b6..e9f561b 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1426,6 +1426,16 @@ void ceph_shift_unused_folios_left(struct folio_batch *fbatch)
- 	fbatch->nr = n;
- }
- 
-+static void ceph_undo_wrbuffer_claim(struct inode *inode, struct folio *folio)
-+{
-+	struct ceph_snap_context *snapc = folio_detach_private(folio);
-+
-+	if (!snapc)
-+		return;
-+	ceph_put_wrbuffer_cap_refs(ceph_inode(inode), 1, snapc);
-+	ceph_put_snap_context(snapc);
-+}
-+
- static
- int ceph_submit_write(struct address_space *mapping,
- 			struct writeback_control *wbc,
-@@ -1489,6 +1499,7 @@ int ceph_submit_write(struct address_space *mapping,
- 			if (!page)
- 				continue;
- 
-+			ceph_undo_wrbuffer_claim(inode, page_folio(page));
- 			redirty_page_for_writepage(wbc, page);
- 			unlock_page(page);
- 		}
--- 
-2.44.0
+                Ilya
 
+>
+>   =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>   BUG: KASAN: slab-out-of-bounds in ceph_oob2_init+0x23d/0xff0 [ceph_oob2=
+_poc]
+>   Read of size 4 at addr ffff88800a229f9e by task insmod/57
+>
+>   CPU: 0 UID: 0 PID: 57 Comm: insmod Tainted: G           O        7.0.0-=
+rc7-g9c2abf69da83-dirty #15 PREEMPT(lazy)
+>   Tainted: [O]=3DOOT_MODULE
+>   Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.17.0-debi=
+an-1.17.0-1 04/01/2014
+>   Call Trace:
+>    <TASK>
+>    dump_stack_lvl+0x4d/0x70
+>    print_report+0x170/0x4f3
+>    kasan_report+0xda/0x110
+>    ceph_oob2_init+0x23d/0xff0 [ceph_oob2_poc]
+>    do_one_initcall+0x9a/0x3a0
+>    do_init_module+0x27c/0x790
+>    load_module+0x4a9a/0x6350
+>    init_module_from_file+0x15c/0x180
+>    idempotent_init_module+0x21f/0x750
+>    __x64_sys_finit_module+0xba/0x120
+>    do_syscall_64+0xe2/0x570
+>    entry_SYSCALL_64_after_hwframe+0x77/0x7f
+>
+>   Allocated by task 57:
+>    kasan_save_stack+0x30/0x50
+>    kasan_save_track+0x14/0x30
+>    __kasan_kmalloc+0x7f/0x90
+>    ceph_oob2_init+0x44/0xff0 [ceph_oob2_poc]
+>    do_one_initcall+0x9a/0x3a0
+>    do_init_module+0x27c/0x790
+>    load_module+0x4a9a/0x6350
+>    init_module_from_file+0x15c/0x180
+>    idempotent_init_module+0x21f/0x750
+>    __x64_sys_finit_module+0xba/0x120
+>    do_syscall_64+0xe2/0x570
+>    entry_SYSCALL_64_after_hwframe+0x77/0x7f
+>
+>   The buggy address belongs to the object at ffff88800a229000
+>    which belongs to the cache kmalloc-4k of size 4096
+>   The buggy address is located 3998 bytes inside of
+>    allocated 4000-byte region [ffff88800a229000, ffff88800a229fa0)
+>
+>   Memory state around the buggy address:
+>    ffff88800a229e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>    ffff88800a229f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>   >ffff88800a229f80: 00 00 00 00 fc fc fc fc fc fc fc fc fc fc fc fc
+>                                  ^
+>    ffff88800a22a000: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+>    ffff88800a22a080: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+>   =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>
+>   val=3D0xccccaaaa (OOB garbage from KASAN redzone)
+>
+> Fix by introducing buf_len to hold the allocation size, using it in
+> both ceph_osd_data_pages_init() and the min_t() decode boundary cap,
+> so the two are guaranteed to stay in sync if the buffer size changes.
+> buf_len is declared as u32 to match the type of outdata_len used in
+> the min_t() expression.
+>
+> Attacker model: a malicious or compromised OSD in a multi-tenant
+> Ceph deployment can trigger this against any client issuing
+> CEPH_OSD_OP_LIST_WATCHERS without further privileges beyond OSD
+> session establishment.
+>
+> Fixes: a4ed38d7a180 ("libceph: support for CEPH_OSD_OP_LIST_WATCHERS")
+> Cc: stable@vger.kernel.org
+> Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
+> Signed-off-by: Pavitra Jha <jhapavitra98@gmail.com>
+> ---
+> v4: Rebase against current linux/master and ceph-testing/testing,
+>     confirmed clean git am -3 apply against both. No functional
+>     changes from Slava's reviewed v3.
+> v3: Change buf_len type from size_t to u32 to match outdata_len type
+>     in min_t(), per Viacheslav Dubeyko's review.
+> v2: Introduce buf_len variable instead of hardcoding PAGE_SIZE
+>     independently in ceph_osd_data_pages_init() and the min_t() cap,
+>     per Viacheslav Dubeyko's review.
+> ---
+>  net/ceph/osd_client.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+>
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 2ff00070c..62bec6ad8 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -5060,6 +5060,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client =
+*osdc,
+>         struct ceph_osd_request *req;
+>         struct page **pages;
+>         int ret;
+> +       const u32 buf_len =3D PAGE_SIZE;
+>
+>         req =3D ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_NOIO);
+>         if (!req)
+> @@ -5078,7 +5079,7 @@ int ceph_osdc_list_watchers(struct ceph_osd_client =
+*osdc,
+>         osd_req_op_init(req, 0, CEPH_OSD_OP_LIST_WATCHERS, 0);
+>         ceph_osd_data_pages_init(osd_req_op_data(req, 0, list_watchers,
+>                                                  response_data),
+> -                                pages, PAGE_SIZE, 0, false, true);
+> +                                pages, buf_len, 0, false, true);
+>
+>         ret =3D ceph_osdc_alloc_messages(req, GFP_NOIO);
+>         if (ret)
+> @@ -5088,7 +5089,8 @@ int ceph_osdc_list_watchers(struct ceph_osd_client =
+*osdc,
+>         ret =3D ceph_osdc_wait_request(osdc, req);
+>         if (ret >=3D 0) {
+>                 void *p =3D page_address(pages[0]);
+> -               void *const end =3D p + req->r_ops[0].outdata_len;
+> +               void *const end =3D p +
+> +                       min_t(u32, req->r_ops[0].outdata_len, buf_len);
+>
+>                 ret =3D decode_watchers(&p, end, watchers, num_watchers);
+>         }
+> --
+> 2.53.0
+>
