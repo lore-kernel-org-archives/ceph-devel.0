@@ -1,230 +1,122 @@
-Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C07C34E74B
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 20:19:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786565979; cv=none; b=BplcTCtVHplDeOSwAwCbJnRpBuSNDLUWh/Wmu+GOY0d99cCsRmFwSLEHhpqWeEW4+PhbWqyWx4HoRKxAilwTpVPB1p0PI08gt2UYPrB4fA71YTnn6q8U+6JEsVx5XpXSTJS51fLGN7+eKtHgd8K9hm2DFoZmwxhxCtUNHRmJkog=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786565979; c=relaxed/simple;
-	bh=nmSMDrqTZ8h/iwCzyTsRyyD43KuC7bQC+O7Vt+e0pBA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=KTxiBjgrtB1Gbxh8gjUOLtAbnRRwf94RtpcBxZjFq+l65nlup5QoSYpttzDFEEX1qzP4wU8KkcznsqFx/uDS3jneBdWX6MyU5FUX+Bn5u3aEWu0rVoBR+JPRtSOTkt1roI/zStB5pD957hjmhvLIfZY1xUHsFAs8l3Sw8hg13lA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=J/WD9yNj; arc=none smtp.client-ip=209.85.128.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 612C12D7386
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 20:25:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.48
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786566331; cv=pass; b=F0DAxKsHIUVge3smOBAOZhHa7LlGCLWly7xgM8+H44FawQ52kSvLYvm3kFOf/p3AS2PpnpQ0qZ9JvgVY0TIFAwQFc5DfHYMyczBZtYd+Lt2Ia/mUZ9T7V2UIzjU6FcI6qJ6ddtyN0lKBgf60fzh7p7z8z5IZCGM3XJoi/qwvECY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786566331; c=relaxed/simple;
+	bh=se4EsqaoWCTuGDoOyDSp60WyC62rTuFHN4jzbuRskr0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=GG28pWqz4CQePpW/SG0+9Fq1rC2A06q4N7K26MDxXSkQZX5q5ZCQtf94BTGZJFxit6PQlYWkvIrjwBxa+VydhhZGc/q1qXSoKifi1YCN6+0nAQiilJ8HWE6W0tVaHS3hbMTEDyksfBLT3pbO2C2UPlkDH21OfQpa1kSMMLIazHE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=NYSDGkyO; arc=pass smtp.client-ip=209.85.218.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="J/WD9yNj"
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-493b966dd74so8899985e9.3
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 13:19:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="NYSDGkyO"
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-c2074710751so6346166b.1
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 13:25:28 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786566327; cv=none;
+        d=google.com; s=arc-20260327;
+        b=ElYJfk45vKEkNgIr97ArfhFnsAPr9NOz4oLA8HVa5itQK5dQtnGSXuNah1jacihj+6
+         YKKNgjwOVND8Nb7Wk6EyzKG1JRouf0EIesnSBumyh5vlm1NyKgW76tzRE/XasOEDgf3f
+         CTHFExur9HuUBUmEaP3B4TllHRHnvjxKszYZ67NRsGtDDud9J5BbHKeNMg3WMeERCwW2
+         9uBhHoFw9B0RgreEAO649+IsAge/x0Ja5M0YnvqhQAlSi701YNxmfXNYF3Wf/NWftxOl
+         A89YMdDh/fhY2+xIyHpmd97VD7W8tBcy1rY7g9WDvtQLA6XBxCn2Zm9iJ50KjA+/VYm4
+         9ptw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=se4EsqaoWCTuGDoOyDSp60WyC62rTuFHN4jzbuRskr0=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=N3zGhzDTjBBGEep+5l8qg58Jd8vn4KMyW89ZDxXtUHWx1QUGTYBQm1iTs7a5ZeA9Sv
+         rHws9By+WetNUMVJFrFUeS9eg9RUL4g7MYwpjZcVIYcN6cK30yR6I/VOrPhdti8SPimQ
+         4Rp/1SMFxyA8oFtEOeKUTlM1ugCXFzsP7yxiaMlDeEGFKYgSBGqLIkMUEFr0bX5LJXc2
+         nWdGPnghwcTspnMqM58rJ332fqfqyeqUcGU7tdjZza2u8wicucWWy241Qg3oazLr5/Qq
+         VadSK3dLsuLx3NjPG56sCeHXL/fGWQtArRjANxVHLDPW2gZ2Y66oFAqgyvcJ5GNTDly4
+         U2yQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1786565974; x=1787170774; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=b/Y8gQ06TpeNkeikg3ga6WNbQ4HRSdTBd5g53ymy4CA=;
-        b=J/WD9yNjN+nli/FKEtcKxASxmgZD/htIdx/hDl9uMh8A3EKH6srp4IRkvnu85SBo0n
-         aGwsPF66ShlkehVOF5fuhwW+JIgthyKAdJbdPiA60PC+0mE6+6GuhjhYpgHcEPYSM5j9
-         pXBbFMMtyXy9hDCSljHQQs1GKCbzeGxiLEZKo7Sw5yFdq8sNQxviWW7rGIT/hmNrCSNP
-         dL5++mUeEX9qSvleABL5O7WdGhfozxabzlLWdvC0bd+iQ8aPJyL5ufQfWA6POyhfCdCs
-         KngQRdNaEW+vK7MxH0jqksDPKAbEoR5hVj+YWkNz0o0I/zE5IV+lOKlml/qOjy020QFO
-         1U7w==
+        d=ionos.com; s=google; t=1786566327; x=1787171127; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=se4EsqaoWCTuGDoOyDSp60WyC62rTuFHN4jzbuRskr0=;
+        b=NYSDGkyO0SdjQKcIW+3T8uAX+ET5gVb9Pl4Ci7z/jQRToBZIelvWXZBW+9xYsi9ekr
+         ijdSpx4zPhKhOOQ/nCraag5+w1b5N0VcOgWmUxri95co2Q33oC2x5BnpjrDu0whZs+Bz
+         hd/BTOhbSbjOOXtXeLS9gWzx7AAx8vTXx1tP6eUbGme8k0ICfx9hC6/K57oPS062jSUB
+         9hrICewAK0hzm6y7u30fU3vcTE6wbvrQtCXDROX7lcmbyFZ7yBGkzpRSiMVx3i6rG/nM
+         BzwsaMbDEm+jy6vnDXKVhLRH8bUAANy/s83zWTx2SBQv/GNTM81HD+5joF/KUALuEbWV
+         gyVA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786565974; x=1787170774;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=b/Y8gQ06TpeNkeikg3ga6WNbQ4HRSdTBd5g53ymy4CA=;
-        b=iX9IkOo0hN6JMjrStyFv+/63KFxCXeLNUo3zfZzkbHauZaOTNZxxCLuzZ/RZauFdPv
-         Y+ijZgQVbKlMBrDkxQh0eVwovN89rj8ZZalIgv8foDahY601+aYq0hrVv79p5ADd2FSx
-         EUrxP2ZH3eff2qoHBqiNb8LDvqiTtI3OpppJ2VglvchXuYa+f4RdgDuRdr0qEHA/QvEf
-         tb3/M2Gl/e6FL87+2ypaiKg43huL6fF33hNe3GGpOrgO9FvMqtLqZXI64EG8ed7vh1xm
-         tYQcUlYON+iGXaw7oOsF6cGUN1nV3xPQcDsU4O6IapBHyW+KbyLM1LhgBXh0ygYG5K2V
-         gP7Q==
-X-Forwarded-Encrypted: i=1; AHgh+Rp5lQkQQXibDDPe23LGxD0M3/zY0KhQEyu0epHU8oRaD/41LuM910f2yKWgAKpcIQaNdkweXf4e999b@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxhzy6CJLZGe/tL2XQXAWgbMFchiA28sFaINOjW6kV4aJVbHwjo
-	Rwxp+Mj0+8mVQbARAaGoZ+8qDcJ4Jd18GWfjM+P9CTxWDQM03HwHr5bQYBADlkdXKPOvit/utr2
-	snfrqxEc=
-X-Gm-Gg: AR+sD13BXdbate+7X+KaDOCu2H7p/8RGDx9DB4XgukzJRoHZjFh64YfL9eaYBhB7PXD
-	apyVxuIRL7rIcpGxvb4VWusmappJZWP0g/jFClulyKWhLJt3j7JfEa4qJoKVRKUBQOqmYnd0uJH
-	EXHD2CqoIDdTbTBOcgvobqdyMTH1YcfelHQIubEOkibPiHha7iTm1wJQkC2m7K3OyyPSLYP7cXa
-	A/mjZzefAM0Zv9pbYzpK8sF66uS2eZeBe8XQ/2xbfeeRMKwkXMA3V+hRCcM5HnT5UEfBe4jNdaE
-	Q52mM/A3wr4ga/fhupMJtotHdTMIJNvXgrHAuxzkAtWK2EEaYtiyEmNkEA5YlKsvAc6uSkWzKaT
-	Dan6uqADjnkEBI0/soSmPeYX1Y+UA8HeBGku+/oMxQcncpkWNPtpiG/N/lKqXqtzkEPUp5ZkG+O
-	FczI/aLkwcFtTrM6wRJvriPWfWaOfQhLHn4DQ4VD31lWpudKDUZXen9gVS4Ole/mDiZrtA9/fMc
-	36ba+KL5E2nxtGJFQcEQ00KSR5aJMmQp9c8qpY3g49vFqwvXMBS2X6O6utHlYTz
-X-Received: by 2002:a05:600c:37cc:b0:490:e5c1:b8bf with SMTP id 5b1f17b1804b1-499821f9047mr2328825e9.13.1786565973814;
-        Wed, 12 Aug 2026 13:19:33 -0700 (PDT)
-Received: from raven.intern.cm-ag (p200300dc6f02b200023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f02:b200:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4815a5c2308sm190856f8f.33.2026.08.12.13.19.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Aug 2026 13:19:33 -0700 (PDT)
-From: Max Kellermann <max.kellermann@ionos.com>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	xiubo.li@clyso.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>,
-	stable@vger.kernel.org
-Subject: [PATCH v2] ceph: force a cap message when a deferred revoke can't be acked immediately
-Date: Wed, 12 Aug 2026 22:19:15 +0200
-Message-ID: <20260812201915.1783578-1-max.kellermann@ionos.com>
-X-Mailer: git-send-email 2.47.3
+        d=1e100.net; s=20251104; t=1786566327; x=1787171127;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=se4EsqaoWCTuGDoOyDSp60WyC62rTuFHN4jzbuRskr0=;
+        b=By+615Lk0k9Ye8zzs5wxOXb2SCa+vpS/iQMzYb56YCZzJJxtlnLUgluVBAntugF2BF
+         IwyTaA2hdnp038eNrTy5eFvEPJ0C8z55u29z6rZVua6pt1PY6+dtdYeU7nCzRXjy7ZNV
+         P6tzuEgm+v0gC9aCWk5u9MqosUUP8YhEUYp05KkinPjiyZQ2bYV8+/kYMsE6UZPopmOw
+         Ov1A8Es5grC+JSnvuYCCuhsHXdrXHCm6XTZTxy6gmxafyygfoYbzibA6p4U0YhrcfpWF
+         eB+/8Ht0uVTJ0SsvZbz6cFaHsKXQsxiWBzdyXqrBNXz55KpEKZ31ayjxxdvOPKVKesRt
+         XQiA==
+X-Gm-Message-State: AOJu0Yzn36rno8Q7f/CqoelZRxcgd+XmfCxiCZ8L3FbLl4mbeP5pIG2H
+	vEyA4iRn1BC6oEZvFpXEXM1tMT2N5OT+GxH91j0u6QHoiEAH3rVSW4MEc3FogkFdrA4yeQg6gBH
+	X7DQqdL1jOQ1cqs0GuUBOILWoBY6SWhwPIDNXIDZZZnrG/Mf+rht6Y/o=
+X-Gm-Gg: AR+sD10t4IVZyzGSwA92pl5nVfbXie9RIEWsP87c0vSYo7Zjx2+LfIJLgrFnjlccm6q
+	Vi+2PtjviGk0ONSzHZTqP2q7uOzkHS09yp3d60tp6vO9pZlpJwlz9W7NbfaoJdniPRYcF5P4aIo
+	hxQxNqAAzn1iIzkp+4RV4Pq+8UW9LScsaz/QaGhtoi6kpiA8u7o3TRPmwcGJ49xMbuzh6YBG5uv
+	t5Q7tF7Mu/+yHiKyVr4R03s+/6i+cjow9RPpfAp+vE8MBaucLrgxt8j9TMoEpNCRdkTz0ZNlKhd
+	RUk8qzRHCO8W10WP/3nhgSyxHHEmjd2g2pPsyoh0yDvcHGcjLay0jwLxWRTxe880rfUO11Sjn0r
+	D5f73l1CA
+X-Received: by 2002:a17:907:1c08:b0:c20:31d1:a89f with SMTP id
+ a640c23a62f3a-c21090d8ae3mr37658966b.24.1786566327388; Wed, 12 Aug 2026
+ 13:25:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260707213659.8939-1-max.kellermann@ionos.com> <20260811142302.2700578-1-amarkuze@redhat.com>
+In-Reply-To: <20260811142302.2700578-1-amarkuze@redhat.com>
+From: Max Kellermann <max.kellermann@ionos.com>
+Date: Wed, 12 Aug 2026 22:25:15 +0200
+X-Gm-Features: AUfX_mw1zWVUQmUAJj2_9R1xuyMAeG8LRcs0lYpHXDYmew081LTPdaZA4l4bZOA
+Message-ID: <CAKPOu+_PE76JKOR_GMa3YaAjyg7d6iDmesbXOL4CUbGSL0Dotg@mail.gmail.com>
+Subject: Re: [PATCH] ceph: force a cap message when a deferred revoke can't be
+ acked immediately
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-When the MDS revokes capabilities, handle_cap_grant() normally
-guarantees a response by setting `CHECK_CAPS_FLUSH_FORCE` (see
-commit 31634d7597d8 ("ceph: force sending a cap update msg back to MDS
-for revoke op")), so ceph_check_caps() sends a cap message even if the
-client would otherwise decide it has nothing to do.  That guarantee is
-skipped whenever the revoke has to be deferred (via revoke_wait):
-revoking Fb while dirty data is still buffered (writeback is queued
-first) or revoking Fc while pages are cached (async invalidation is
-queued first).
+On Tue, Aug 11, 2026 at 4:23=E2=80=AFPM Alex Markuze <amarkuze@redhat.com> =
+wrote:
+> There's a bug in the new clear_bit() call in ceph_check_caps() =E2=80=94
+> clear_bit(CEPH_I_FLUSH_FORCE, &ci->i_ceph_flags) passes the mask
+> (1 << 15 =3D 32768) as the bit number instead of the bit index.
 
-In those cases, the ack is left to the deferred completion
-(ceph_put_wrbuffer_cap_refs() after writeback, or the invalidate
-worker after invalidation); both of which call ceph_check_caps(ci,0)
-i.e.  without `CHECK_CAPS_FLUSH_FORCE`.  Nothing gets sent under one
-of the following conditions:
+Aye, thanks for catching this bug. This went wrong when I
+forward-ported this from the 6.18 LTS branch we're using; 6.18 doesn't
+use bit ops.
 
-- the inode is retaining caps because the file was used recently
-  (file_wanted != 0; retain |= CEPH_CAP_ANY)
+You refactored this to use bit ops in e120e2b666851 ("ceph: convert
+inode flags to named bit positions and atomic bitops"), but I didn't
+understand why. It seemed like i_ceph_flags was already protected by
+i_ceph_lock. (Unfortunately, locking in Ceph is mostly undocumented,
+so I can't be sure.)
 
-- the revoked cap is still used because the page was re-cached (e.g. a
-  file being re-read)
+--=20
+Max Kellermann
+Principal Architect
+Hosting Technology
 
-- the MDS has meanwhile re-granted, so `issued==implemented` and the
-  client sees nothing being revoked
-
-The client then never emits the cap message which the MDS is waiting
-for.  The MDS blocks on the revoke indefinitely and logs, for minutes
-or hours:
-
-  client.NNN isn't responding to mclientcaps(revoke), ino 0x... pending
-  pAsxLsXsxFsxcrwb issued pAsxLsXsxFsxcrwb, sent 964.899182 seconds ago
-
-The client-side state at that point shows the full cap set still
-issued, nothing in the revoking/flushing sets.  Thus nothing gets
-sent.
-
-This patch fixes it by remembering that a forced response is expected.
-When a revoke is deferred, set `CEPH_I_FLUSH_FORCE` on the inode.
-ceph_check_caps() replays it as `CHECK_CAPS_FLUSH_FORCE`, so whichever
-path re-checks the inode next (the writeback/invalidate completion,
-the delayed worker, or any other caller) is guaranteed to send a cap
-message to the MDS.  __prep_cap() clears the flag once a message is
-actually built.
-
-This is the deferred-path counterpart of the existing
-`CHECK_CAPS_FLUSH_FORCE` handling; a normal (non-deferred) revoke
-still forces the response inline as before.
-
-Cc: stable@vger.kernel.org
-Fixes: 31634d7597d8 ("ceph: force sending a cap update msg back to MDS for revoke op")
-Fixes: 257e6172ab36 ("ceph: don't let check_caps skip sending responses for revoke msgs")
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
----
-v1->v2: fix CEPH_I_FLUSH_FORCE/CEPH_I_FLUSH_FORCE_BIT mixup
----
- fs/ceph/caps.c  | 40 +++++++++++++++++++++++++++++++++-------
- fs/ceph/super.h |  5 +++++
- 2 files changed, 38 insertions(+), 7 deletions(-)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d7283fb54cec..8ad17787b172 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1410,6 +1410,7 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 	BUG_ON((retain & CEPH_CAP_PIN) == 0);
- 
- 	clear_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
-+	clear_bit(CEPH_I_FLUSH_FORCE_BIT, &ci->i_ceph_flags);
- 
- 	cap->issued &= retain;  /* drop bits we don't want */
- 	/*
-@@ -2038,6 +2039,14 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
- 
- 	if (ci->i_ceph_flags & CEPH_I_FLUSH)
- 		flags |= CHECK_CAPS_FLUSH;
-+	/*
-+	 * A revoke whose response was deferred (see handle_cap_grant()) must
-+	 * still be acknowledged.  Replay the forced flush here so that even a
-+	 * check triggered by writeback/invalidation completion sends a cap
-+	 * message to the MDS.
-+	 */
-+	if (ci->i_ceph_flags & CEPH_I_FLUSH_FORCE)
-+		flags |= CHECK_CAPS_FLUSH_FORCE;
- retry:
- 	/* Caps wanted by virtue of active open files. */
- 	file_wanted = __ceph_caps_file_wanted(ci);
-@@ -3757,13 +3766,30 @@ static void handle_cap_grant(struct inode *inode,
- 	BUG_ON(cap->issued & ~cap->implemented);
- 
- 	/* don't let check_caps skip sending a response to MDS for revoke msgs */
--	if (!revoke_wait && le32_to_cpu(grant->op) == CEPH_CAP_OP_REVOKE) {
--		cap->mds_wanted = 0;
--		flags |= CHECK_CAPS_FLUSH_FORCE;
--		if (cap == ci->i_auth_cap)
--			check_caps = 1; /* check auth cap only */
--		else
--			check_caps = 2; /* check all caps */
-+	if (le32_to_cpu(grant->op) == CEPH_CAP_OP_REVOKE) {
-+		if (revoke_wait) {
-+			/*
-+			 * We can't ack the revoke yet: the response is deferred
-+			 * until the writeback or cache invalidation queued above
-+			 * completes.  Set the CEPH_I_FLUSH_FORCE flag to remember
-+			 * that a forced cap message is owed so that deferred
-+			 * completion (ceph_put_wrbuffer_cap_refs() or the
-+			 * invalidate worker, both of which call ceph_check_caps())
-+			 * actually sends one, even if by then the revoked caps look
-+			 * unused, the inode is retaining caps, or the MDS has
-+			 * re-granted them.  Without this, the cap message is never
-+			 * sent and the MDS hangs ("isn't responding to
-+			 * mclientcaps(revoke)").
-+			 */
-+			ci->i_ceph_flags |= CEPH_I_FLUSH_FORCE;
-+		} else {
-+			cap->mds_wanted = 0;
-+			flags |= CHECK_CAPS_FLUSH_FORCE;
-+			if (cap == ci->i_auth_cap)
-+				check_caps = 1; /* check auth cap only */
-+			else
-+				check_caps = 2; /* check all caps */
-+		}
- 	}
- 
- 	if (extra_info->inline_version > 0 &&
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 1d6aab060780..878440a2eb3b 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -687,6 +687,10 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- #define CEPH_I_ASYNC_CREATE_BIT		(12) /* async create in flight for this */
- #define CEPH_I_SHUTDOWN_BIT		(13) /* inode is no longer usable */
- #define CEPH_I_ASYNC_CHECK_CAPS_BIT	(14) /* check caps after async creating finishes */
-+#define CEPH_I_FLUSH_FORCE_BIT		(15) /* a revoke's response was deferred;
-+					      * force a cap message to the MDS once
-+					      * the deferred work completes
-+					      */
- 
- #define CEPH_I_DIR_ORDERED		(1 << CEPH_I_DIR_ORDERED_BIT)
- #define CEPH_I_FLUSH			(1 << CEPH_I_FLUSH_BIT)
-@@ -699,6 +703,7 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- #define CEPH_I_ODIRECT			(1 << CEPH_I_ODIRECT_BIT)
- #define CEPH_I_ASYNC_CREATE		(1 << CEPH_I_ASYNC_CREATE_BIT)
- #define CEPH_I_SHUTDOWN			(1 << CEPH_I_SHUTDOWN_BIT)
-+#define CEPH_I_FLUSH_FORCE		(1 << CEPH_I_FLUSH_FORCE_BIT)
- 
- /*
-  * Masks of ceph inode work.
--- 
-2.47.3
-
+cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
+General information about the company can be found here:
+https://www.cm4all.com/impressum
+A member of the IONOS Group
