@@ -1,62 +1,62 @@
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+Received: from mail-wr1-f43.google.com (mail-wr1-f43.google.com [209.85.221.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA0EA399377
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 20:30:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51E7539D6FA
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 20:30:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786566610; cv=none; b=cO4W4+k78v6yR2bWzOb7ynbP/2jtVkhdkFm6I5il7Gzfw061BBmduXCh0ISPmNA9hEfDRikNq/ZXsGm1d2oWYGL64v3cwhrpMRII26cKPBWw1GQ3J4uXcsoUxcTkfvW3u0IVBAxOwYXPDzwj1LGC0ifOd1O9q8/MuJSygi+zIGg=
+	t=1786566610; cv=none; b=faUM/Wvz1ZMZZllJ8ZjIqzkOQr2cdlkHX/5ETVylhAxReBpBkmw3M99WdvZCCiy17mLeCXKAlkX7SsPgi2Q0g3Vgp301rVCb+LuPHu4O2m0jNCDI+uXjvUQgdO4cjJFuLduILU7m++4FzZkvLXGMo+SXEK9h8GivIixib8V+hvY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1786566610; c=relaxed/simple;
-	bh=yU1VW+v7+vbT6B3wN45UIfC/BjVP2vAYyGNWNhw+BHw=;
+	bh=ItMu+kPTmFZnDgkl0OWkN0vhR8c+L6Q5g3sYeFtqIxA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=F0gfc4Ezin4APNIk33l6NmXgRHRN185EkevVF+f06PtodZVXTQToMelinNSZStYLvTBXw0oZzN3MQEhZB5IKBDBw9oCiYmAspECrqDlp6r136GSCs6fFti+RAXQcIi3DlsX6l41OCmSrFPXPetBunhDwbAmZfJzJVVEFlxrFjSI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=CLyjPbVz; arc=none smtp.client-ip=209.85.128.47
+	 MIME-Version; b=BGWe8XBBdUHAGJ0z5T3xa8VYym4e+ufFrUDRpVk1lnfsVRmyC00J8ip0NyM8WIa85QmwLcLU2BuBa4tu/JctUZQIwxF9o+gkn9kmY6ZiwSLTZ9mjyq98v+AuM42/bWqjk02s7yzKJF3ljKgqpDlCltzPNBO6AcrL8SO/5iC+96Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=HuJfhdlN; arc=none smtp.client-ip=209.85.221.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="CLyjPbVz"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4921eed3fa2so12735655e9.0
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 13:30:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="HuJfhdlN"
+Received: by mail-wr1-f43.google.com with SMTP id ffacd0b85a97d-47fd66a094eso524595f8f.3
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 13:30:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1786566603; x=1787171403; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1786566604; x=1787171404; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=Q0GwsUU62a4nufC1hoAjEItpwFESwLtkTjaWIBNIOxQ=;
-        b=CLyjPbVzAIvUNpUyyEy2ndZ+mF7puKJGrgTd1D93PjrWF+S+JgrGu7sV2mzozaueTf
-         2+BKoj4A8J5RFDt3pflw+fa8vQMQjtnuFGUVk023FPVEF+YaYx05vDpbyt1qmzmOaP2h
-         qySCxJUryBKGlm1GctMvf7hIl5su4hhHrVgW6sGSk8gTaIYyucHz6ZVV9WxpiwyVj5q1
-         4A0emzpQdE1hkH7dm81RF9kGzYuasUr61c1gmINUROGmGu6UoCKICFd5SpsEGu1kv307
-         yacMhEj4ScgMkdXqjDZL7xU8LDCu/erhX8DRLB2zs58k4dfY29WbtmEAWGhyeiGnn89y
-         u29A==
+        bh=XrwzJCwKgkiHPJrVYexM5E0v3kPPNtTc3vEMJzL4u4Y=;
+        b=HuJfhdlNWY7CjLaDwOXPfYnvjTtv2XA8b3Gbo/4zuxvre84d6aiwPbZYBL3HR33SI3
+         euAbxXFwuzjmGmIZh7hfd6exzzWtkwqsoyOF7VBE5UJTiRkcHC6J581P4Dj1EhGoPh7R
+         YVQY08nQ3zu1bHwM6tXVUZky7aeIuN29/Swi8DukFAwVn9r/xGu0XS6ecxCRezenRyrH
+         nSWZ9YN1W9OzZ0yMGYuHu3WPtRsJBZtCj6SPbgf1W7aHKyz1emlBZpwz30nSIKdPpxwx
+         UfgMbdzX0Ry81OSipzGtssYucSQmMhEk5JzgVv2mlyJgiQNL3n5OScIAuFijg+QFuw/P
+         CYjg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786566603; x=1787171403;
+        d=1e100.net; s=20251104; t=1786566604; x=1787171404;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Q0GwsUU62a4nufC1hoAjEItpwFESwLtkTjaWIBNIOxQ=;
-        b=gWvnl66ZupmhQMKGSZgP8dA8HWeImlc323Hj5Id88Eekq991qGpEj5hYY+yhzOrKrC
-         5zkT2cByZpMAoFuIbNeGb1GbHVy/QdIqdQemQmvb8MYfBG61u2X/D/XXQUXkXqovNdg3
-         PA2Jxs3ttEg2VORqgFpNoHSC6qRFWOboc/0+Gqfh0UirXUexG48N8MeXUSe80xKj3T23
-         vJLaRpWSbqELVaKYnHCKbgGI/1U7iMepE2f4PUwda4z5BlLxa1jTsio8dY4qerPm3lAO
-         O0LsiNbmhxkt4s4pxGisY1eMdbot11+EfhKOiHv4Lny8We0hhnKFXqv6WDTQ3Qzy/54o
-         RyNw==
-X-Forwarded-Encrypted: i=1; AHgh+Ro2Kd03eGfE6SHcz28BpbVJNrtTakh07azZ39UtRqddUgdU4jnYzmrFX67dvmOEsV99y89PhFu6HslV@vger.kernel.org
-X-Gm-Message-State: AOJu0YwyMjN/BlBhx6IfFln1D9Pmpj6taEMoTxAFMaXiJdJn2bqixyrY
-	NOV4XEbAaiYVoeZE3ioVPKQC2T7dvvrhSQQD9yzbHMJvlNH0qdexWSsk84JqPWAxmyc=
-X-Gm-Gg: AR+sD10nzs9aqYFdflnbThG8AHTbc7Ttu8X2K8KhPHFPsevV2KSgsbayljGmmvvIW0H
-	2JF+GhKiyzpBHd+42KgVmA02TtjLFGVZzRfLpnlEt/NabGE2Qg9lyanSdUH2FncHRxaYl5Eb6Uw
-	4nfPA61T1vPlK+8ENOuCjfj8VmAeYYptgCtZNAmKTCDni29Oa/dvZE3/SDu3UV1y+Nh3dZ8j7Ul
-	kVPeNFKdzcjMr9X4JXhOrIqQO/DiXc35FV5INNbp8P3J0lo+FpqrCx7Ji5OPujH/ISFIPGEPK3W
-	/NO8TRpopGfk+Sh6QwFjVb9rkSJxKOt9xaAbtp8yqHenGtM0HJARU3fMNDywLMrzeN+MFZYYjLc
-	IwA11N2HBI0opYWn1hHDGpSn0qqzu89KvrTJkXt8rIbn+LPAMyrMWFMQYZlMIAYE6FhHUr3nhTv
-	kpvrk/urS6waq78b8MUC1fAiEu1nXRDAuvzmI+33TvfxsMVCeGJiaAyG9hsKikLXeybhgbdKkCc
-	Q47m43DcNWiX75GmYv6d2LLA1np68K6RdS8dmW19oaoPLOuOUKoYzVFkCH2ZjL+
-X-Received: by 2002:a05:600c:6309:b0:493:cc25:9c0e with SMTP id 5b1f17b1804b1-499821cf32emr3273845e9.14.1786566603335;
+        bh=XrwzJCwKgkiHPJrVYexM5E0v3kPPNtTc3vEMJzL4u4Y=;
+        b=sqJVt/+rsMhd02WKm66vCsqZCoYa5nUs2oo/yLm5gwq8Qc4wcOTrqbat1GhquzmDEO
+         B98XI9LKyaJuvH/2KToRYrUsm/e84GfeQKBjfhbvh9YsUgTbyv5Vnd86FAxswiVIQqhg
+         hynqSP+x6BoyPMjpyfq5HwXl0ap/6wbAs9LDs6Eb5XFLe6oXgVAys53vUOyuRDnGatuM
+         mBFcgshQVl2Ch7jEsazu6HbWaaw6Sqaxx8Gq42sPYSWAvlnu9SZ3mDKjTS/PzXNuG0Rv
+         DhhXocTKgnQvSlHpG4ax3y8whpbx2B4UFbLWj/fhY7eIlInzv2K3iFuyzQBJhzPUU54B
+         a+YA==
+X-Forwarded-Encrypted: i=1; AHgh+Rq1G8KIYwofyB4UwiZuiQIg11yzRDhQowSpFJWLtcDyk7ah/ZOkc7XSz+Ib0ZK2drgy3ZlCgduOtoyL@vger.kernel.org
+X-Gm-Message-State: AOJu0YzEK+iYGdt1WdTNbundJPSr3z8aJdnDuYLiKeRVqVY9swScFIR4
+	m0FoKq9PD/oAcVIcPRX7xG2lE3xsB9De7kc2HCEb53kEwWb0MZbKM13tYCS8ucAipxY=
+X-Gm-Gg: AR+sD10Ad5sFcT01jgrvn/GmO/FEKFdaAQrVdDnOjJ+F9r/oVfody+oo6J6vy3imQym
+	kLGKG6etA96DxAD5UgmvbRZ5zu32NsICJyUXCP9ppQr2ieNBEtXwH0pqPfAYN6NWks21ceBSCFb
+	7PG6RRvFykDqWa/xg5A4/lrSwXpXKSETyvVf7QcR6yfAkPIZeic9Ne+tYA3nHGQpau2Rhk/Skqt
+	4G2vZj9bOEQItGnkBIgSQ3fXvjZpCEC6dln7Pa4Y3cKXz5auFzUYCbpzxnxmYrB0I5QVIdhkC4y
+	ungl7wLBUcLxY0KPZOBnRf5RZoJ+CRQe5DGJxKS02bwTufqniJensw2hddANs+VzFpOifChFR8r
+	k+YBj0QaYSwF2WFeix6OaQ0miTvodxc0Hw//Xn5o4s6h8rOONYHgNdj6FLsQdoHlK/IB/AzJPWW
+	C/7yRczVVfmNpC4wZqpKNGg7Ru4XUDI288VdqGU6DxcWjUiapA4VxO9hl8BnrI6gnIABJpqfG4q
+	K4QupjmDwIzzxVlCZsljOITHw32Z77rMllXCpty9MZwvVngfU65gr1hmlFCOD/8
+X-Received: by 2002:a5d:5589:0:b0:47d:fc23:abe8 with SMTP id ffacd0b85a97d-4815a00e64bmr720119f8f.28.1786566603971;
         Wed, 12 Aug 2026 13:30:03 -0700 (PDT)
 Received: from raven.intern.cm-ag (p200300dc6f02b200023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f02:b200:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4815a569ab3sm328979f8f.11.2026.08.12.13.30.02
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4815a569ab3sm328979f8f.11.2026.08.12.13.30.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Wed, 12 Aug 2026 13:30:03 -0700 (PDT)
 From: Max Kellermann <max.kellermann@ionos.com>
@@ -66,9 +66,9 @@ To: idryomov@gmail.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH v3 11/12] fs/ceph: use ceph_vino() etc. instead of accessing i_vino directly
-Date: Wed, 12 Aug 2026 22:29:48 +0200
-Message-ID: <20260812202950.1800340-12-max.kellermann@ionos.com>
+Subject: [PATCH v3 12/12] fs/ceph: remove redundant inode number from ceph_inode_info
+Date: Wed, 12 Aug 2026 22:29:49 +0200
+Message-ID: <20260812202950.1800340-13-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260812202950.1800340-1-max.kellermann@ionos.com>
 References: <20260812202950.1800340-1-max.kellermann@ionos.com>
@@ -80,223 +80,121 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Prepare to remove (optimize) `i_vino`.
+On 64 bit systems, ceph_vino_to_ino_t() is a no-op, and inode.i_ino is
+the same as ceph_vino.ino.
+
+This reduces the size of `struct ceph_inode_info` by 8 bytes.
 
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/addr.c       |  5 ++---
- fs/ceph/caps.c       |  4 ++--
- fs/ceph/file.c       | 14 +++++++-------
- fs/ceph/mds_client.c |  2 +-
- fs/ceph/quota.c      |  2 +-
- fs/ceph/snap.c       |  4 ++--
- fs/ceph/super.h      |  7 +++----
- fs/ceph/xattr.c      |  4 ++--
- 8 files changed, 20 insertions(+), 22 deletions(-)
+ fs/ceph/cache.c |  4 +++-
+ fs/ceph/inode.c |  7 +++++++
+ fs/ceph/super.h | 23 +++++++++++++++++++++++
+ 3 files changed, 33 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index ecfd0fed3471..7beb1b4d1cd9 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -282,7 +282,6 @@ static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
- 	struct ceph_mds_reply_info_in *iinfo;
- 	struct ceph_mds_request *req;
+diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
+index f678bab189d8..289615e58196 100644
+--- a/fs/ceph/cache.c
++++ b/fs/ceph/cache.c
+@@ -16,6 +16,7 @@ void ceph_fscache_register_inode_cookie(struct inode *inode)
+ {
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
++	struct ceph_vino vino;
+ 
+ 	/* No caching for filesystem? */
+ 	if (!fsc->fscache)
+@@ -31,9 +32,10 @@ void ceph_fscache_register_inode_cookie(struct inode *inode)
+ 
+ 	WARN_ON_ONCE(ci->netfs.cache);
+ 
++	vino = ceph_vino(inode);
+ 	ci->netfs.cache =
+ 		fscache_acquire_cookie(fsc->fscache, 0,
+-				       &ci->i_vino, sizeof(ci->i_vino),
++				       &vino, sizeof(vino),
+ 				       &ci->i_version, sizeof(ci->i_version),
+ 				       i_size_read(inode));
+ 	if (ci->netfs.cache)
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index aba98975a8a3..e82877782601 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -44,11 +44,18 @@ static void ceph_inode_work(struct work_struct *work);
+  */
+ static int ceph_set_ino_cb(struct inode *inode, void *data)
+ {
++	const struct ceph_vino *vino = data;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
  	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
--	struct ceph_inode_info *ci = ceph_inode(inode);
- 	ssize_t err = 0;
- 	size_t len;
- 	int mode;
-@@ -302,7 +301,7 @@ static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
- 		err = PTR_ERR(req);
- 		goto out;
- 	}
--	req->r_ino1 = ci->i_vino;
-+	req->r_ino1 = ceph_vino(inode);
- 	req->r_args.getattr.mask = cpu_to_le32(CEPH_STAT_CAP_INLINE_DATA);
- 	req->r_num_caps = 2;
  
-@@ -2475,7 +2474,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 	rd_req->r_base_oloc.pool = pool;
- 	if (pool_ns)
- 		rd_req->r_base_oloc.pool_ns = ceph_get_string(pool_ns);
--	ceph_oid_printf(&rd_req->r_base_oid, "%llx.00000000", ci->i_vino.ino);
-+	ceph_oid_printf(&rd_req->r_base_oid, "%llx.00000000", ceph_ino(&ci->netfs.inode));
++#if BITS_PER_LONG >= 64
++	inode->i_ino = vino->ino;
++	ci->i_snap = vino->snap;
++#else
+ 	ci->i_vino = *(struct ceph_vino *)data;
+ 	inode->i_ino = ceph_vino_to_ino_t(ci->i_vino);
++#endif
++
+ 	inode_set_iversion_raw(inode, 0);
+ 	percpu_counter_inc(&mdsc->metric.total_inodes);
  
- 	err = ceph_osdc_alloc_messages(rd_req, GFP_NOFS);
- 	if (err)
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 51ed5aee193f..49213c320d7f 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -730,7 +730,7 @@ void ceph_add_cap(struct inode *inode,
- 			ceph_change_snap_realm(inode, realm);
- 		else
- 			WARN(1, "%s: couldn't find snap realm 0x%llx (ino 0x%llx oldrealm 0x%llx)\n",
--			     __func__, realmino, ci->i_vino.ino,
-+			     __func__, realmino, ceph_ino(inode),
- 			     ci->i_snap_realm ? ci->i_snap_realm->ino : 0);
- 	}
- 
-@@ -1176,7 +1176,7 @@ void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
- 	} else {
- 		cap->queue_release = 0;
- 	}
--	cap->cap_ino = ci->i_vino.ino;
-+	cap->cap_ino = ceph_ino(inode);
- 
- 	spin_unlock(&session->s_cap_lock);
- 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index e79c18aee78d..bf4e888905a5 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1119,7 +1119,7 @@ ssize_t __ceph_sync_read(struct inode *inode, loff_t *ki_pos,
- 		      read_off, read_len);
- 
- 		req = ceph_osdc_new_request(osdc, &ci->i_layout,
--					ci->i_vino, read_off, &read_len, 0, 1,
-+					ceph_vino(inode), read_off, &read_len, 0, 1,
- 					sparse ? CEPH_OSD_OP_SPARSE_READ :
- 						 CEPH_OSD_OP_READ,
- 					CEPH_OSD_FLAG_READ,
-@@ -1825,7 +1825,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 		rmw = first || last;
- 
- 		doutc(cl, "ino %llx %lld~%llu adjusted %lld~%llu -- %srmw\n",
--		      ci->i_vino.ino, pos, len, write_pos, write_len,
-+		      ceph_ino(inode), pos, len, write_pos, write_len,
- 		      rmw ? "" : "no ");
- 
- 		/*
-@@ -1858,7 +1858,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 			 * depending on how the request was aligned.
- 			 */
- 			req = ceph_osdc_new_request(osdc, &ci->i_layout,
--					ci->i_vino, first ? first_pos : last_pos,
-+					ceph_vino(inode), first ? first_pos : last_pos,
- 					&read_len, 0, (first && last) ? 2 : 1,
- 					CEPH_OSD_OP_SPARSE_READ, CEPH_OSD_FLAG_READ,
- 					NULL, ci->i_truncate_seq,
-@@ -2056,7 +2056,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 		}
- 
- 		req = ceph_osdc_new_request(osdc, &ci->i_layout,
--					    ci->i_vino, write_pos, &write_len,
-+					    ceph_vino(inode), write_pos, &write_len,
- 					    rmw ? 1 : 0, rmw ? 2 : 1,
- 					    CEPH_OSD_OP_WRITE,
- 					    CEPH_OSD_FLAG_WRITE,
-@@ -2981,12 +2981,12 @@ static ssize_t ceph_do_objects_copy(struct ceph_inode_info *src_ci, u64 *src_off
- 					      &dst_objoff, &dst_objlen);
- 		ceph_oid_init(&src_oid);
- 		ceph_oid_printf(&src_oid, "%llx.%08llx",
--				src_ci->i_vino.ino, src_objnum);
-+				ceph_ino(&src_ci->netfs.inode), src_objnum);
- 		ceph_oid_init(&dst_oid);
- 		ceph_oid_printf(&dst_oid, "%llx.%08llx",
--				dst_ci->i_vino.ino, dst_objnum);
-+				ceph_ino(&dst_ci->netfs.inode), dst_objnum);
- 		/* Do an object remote copy */
--		req = ceph_alloc_copyfrom_request(osdc, src_ci->i_vino.snap,
-+		req = ceph_alloc_copyfrom_request(osdc, ceph_snap(&src_ci->netfs.inode),
- 						  &src_oid, &src_oloc,
- 						  &dst_oid, &dst_oloc,
- 						  dst_ci->i_truncate_seq,
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 30f8430b2825..e5fb39913a4b 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1989,7 +1989,7 @@ static void remove_session_caps(struct ceph_mds_session *session)
- 			if (cap == prev)
- 				break;
- 			prev = cap;
--			vino = cap->ci->i_vino;
-+			vino = ceph_vino(&cap->ci->netfs.inode);
- 			spin_unlock(&session->s_cap_lock);
- 
- 			inode = ceph_find_inode(sb, vino);
-diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-index 08641d578a0b..02d7a3062f2d 100644
---- a/fs/ceph/quota.c
-+++ b/fs/ceph/quota.c
-@@ -31,7 +31,7 @@ static inline bool ceph_has_realms_with_quotas(struct inode *inode)
- 	if (root && ceph_ino(root) == CEPH_INO_ROOT)
- 		return false;
- 	/* MDS stray dirs have no quota realms */
--	if (ceph_vino_is_reserved(ceph_inode(inode)->i_vino))
-+	if (ceph_vino_is_reserved(ceph_vino(inode)))
- 		return false;
- 	/* otherwise, we can't know for sure */
- 	return true;
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 94964e0952bd..f064b5ad3bf4 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -985,7 +985,7 @@ void ceph_change_snap_realm(struct inode *inode, struct ceph_snap_realm *realm)
- 	if (oldrealm) {
- 		spin_lock(&oldrealm->inodes_with_caps_lock);
- 		list_del_init(&ci->i_snap_realm_item);
--		if (oldrealm->ino == ci->i_vino.ino)
-+		if (oldrealm->ino == ceph_ino(inode))
- 			oldrealm->inode = NULL;
- 		spin_unlock(&oldrealm->inodes_with_caps_lock);
- 		ceph_put_snap_realm(mdsc, oldrealm);
-@@ -996,7 +996,7 @@ void ceph_change_snap_realm(struct inode *inode, struct ceph_snap_realm *realm)
- 	if (realm) {
- 		spin_lock(&realm->inodes_with_caps_lock);
- 		list_add(&ci->i_snap_realm_item, &realm->inodes_with_caps);
--		if (realm->ino == ci->i_vino.ino)
-+		if (realm->ino == ceph_ino(inode))
- 			realm->inode = inode;
- 		spin_unlock(&realm->inodes_with_caps_lock);
- 	}
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index b0b8d04b594f..660125d94f8e 100644
+index 660125d94f8e..e5ab1b83a84d 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -596,7 +596,7 @@ static inline ino_t ceph_vino_to_ino_t(const struct ceph_vino vino)
+@@ -378,7 +378,15 @@ struct ceph_inode_xattrs_info {
+  */
+ struct ceph_inode_info {
+ 	struct netfs_inode netfs; /* Netfslib context and vfs inode */
++
++#if BITS_PER_LONG >= 64
++	/* on 64 bit systems, the full Ceph inode number is stored in
++	 * netfs.inode.i_ino
++	 */
++	u64 i_snap;
++#else
+ 	struct ceph_vino i_vino;   /* ceph ino + snap */
++#endif
+ 
+ 	spinlock_t i_ceph_lock;
+ 
+@@ -570,7 +578,14 @@ ceph_inode_to_client(const struct inode *inode)
+ static inline struct ceph_vino
+ ceph_vino(const struct inode *inode)
+ {
++#if BITS_PER_LONG >= 64
++	return (struct ceph_vino){
++		.ino = inode->i_ino,
++		.snap = ceph_inode(inode)->i_snap,
++	};
++#else
+ 	return ceph_inode(inode)->i_vino;
++#endif
  }
  
- /* for printf-style formatting */
--#define ceph_vinop(i) ceph_inode(i)->i_vino.ino, ceph_inode(i)->i_vino.snap
-+#define ceph_vinop(i) ceph_ino(i), ceph_snap(i)
+ static inline u32 ceph_ino_to_ino32(u64 vino)
+@@ -600,12 +615,20 @@ static inline ino_t ceph_vino_to_ino_t(const struct ceph_vino vino)
  
  static inline u64 ceph_ino(const struct inode *inode)
  {
-@@ -641,9 +641,8 @@ static inline u64 ceph_present_inode(struct inode *inode)
- static inline int ceph_ino_compare(struct inode *inode, void *data)
- {
- 	struct ceph_vino *pvino = (struct ceph_vino *)data;
--	struct ceph_inode_info *ci = ceph_inode(inode);
--	return ci->i_vino.ino == pvino->ino &&
--		ci->i_vino.snap == pvino->snap;
-+	return ceph_ino(inode) == pvino->ino &&
-+		ceph_snap(inode) == pvino->snap;
++#if BITS_PER_LONG >= 64
++	return inode->i_ino;
++#else
+ 	return ceph_inode(inode)->i_vino.ino;
++#endif
  }
  
- /*
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index af54480d9254..b8416afd4901 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -272,7 +272,7 @@ static bool ceph_vxattrcb_quota_exists(struct ceph_inode_info *ci)
- 	if ((ci->i_max_files || ci->i_max_bytes) &&
- 	    !ceph_in_snap(&ci->netfs.inode) &&
- 	    ci->i_snap_realm &&
--	    ci->i_snap_realm->ino == ci->i_vino.ino)
-+	    ci->i_snap_realm->ino == ceph_ino(&ci->netfs.inode))
- 		ret = true;
- 	spin_unlock(&ci->i_ceph_lock);
- 	return ret;
-@@ -1328,7 +1328,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 			spin_lock(&ci->i_ceph_lock);
- 			if ((ci->i_max_files || ci->i_max_bytes) &&
- 			    !(ci->i_snap_realm &&
--			      ci->i_snap_realm->ino == ci->i_vino.ino))
-+			      ci->i_snap_realm->ino == ceph_ino(&ci->netfs.inode)))
- 				err = -EOPNOTSUPP;
- 			spin_unlock(&ci->i_ceph_lock);
- 		}
+ static inline u64 ceph_snap(const struct inode *inode)
+ {
++#if BITS_PER_LONG >= 64
++	return ceph_inode(inode)->i_snap;
++#else
+ 	return ceph_inode(inode)->i_vino.snap;
++#endif
+ }
+ 
+ /**
 -- 
 2.47.3
 
