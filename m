@@ -1,241 +1,128 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC484370D7B
-	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 20:49:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786567768; cv=none; b=dex/sKRvhjg9P/0HovJgLZO8OGPDY5KPAQ378ftxLxQstsq6/ZAhmCVJ/RKokh3B9k0AHALS52jnpu55c+G2WGpgTq5rc7yr7RNgHylPvX9wSov+PjXwWf/7FD58TUOdyNtLJ/IgUDjzQI4BJ7YFmTQ03ZAKc7Fg4wuNjgUOfk8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786567768; c=relaxed/simple;
-	bh=S2/IKQBe3BZ2BJZDm8nE1WDqx5CW6h0/h3hRPhM6Tnw=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aeyOPVJkjR43Ts1Ctj/stg9j3VMBIXMb0U4rfjp/b4Kvj7J44I1D/GYcVFwnEhildj56DITr1Y4jBQBE0KiDXhZHJ/MubwovkzHGmb8JCfQWDB+qlRasnNZEaQeg0s1PpeW4+YhBVNptdmc+S8T0PpuFfLuMsw8psMK4kn8+V4A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=ZI9KpFbj; arc=none smtp.client-ip=209.85.128.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DC243264F9
+	for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 20:53:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.47
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786568024; cv=pass; b=F90ZI1vdXvzk0nLvnK3ZXAILzQwTpL7WB2gLfMR2U8FHdpTX+jTPhfK2NuvEoHWw87kYwTjSVKplTs2nkxKjvI0p6tmUM/s5XJ6bHfowy9Q0Uu5iDylXJi0aKPV7X5+c2gGlMAwDeSAuvbHLYl11GmACCd5JSRMqz8yZ1Ip9K38=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786568024; c=relaxed/simple;
+	bh=W0CyOq1EP4N0f2VqRPqdRlNMZWp938OopvqfIwR1luw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=BB4rfGdze0tlL8G4G5cRHzsB6WcRnuJ3KxuqCpOM9ASNGCZQE2B8jpCT2Duo0n1D2fSkfQ7DWClVSHjckXf59Ai0NmFm6FaX9BMqtzWxflmNXtExuiztF2XQcQUnY7xm+wDO2fqLeNuQjdSFtL7Baaip9EBw31KqW2/O6AwhzUw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=PSHAwJ5X; arc=pass smtp.client-ip=209.85.218.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="ZI9KpFbj"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4956242332dso12634055e9.2
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 13:49:25 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="PSHAwJ5X"
+Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-c15ca7a7ca9so138251766b.0
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Aug 2026 13:53:42 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786568021; cv=none;
+        d=google.com; s=arc-20260327;
+        b=qEHZmJl2LE/p4td2Fm9/JQTaEZYGpR3QzeOHIJaqLi2x7bQ52X3q5ifaIVuY7VMXU+
+         JJ2R9uoZB0Cbux1p5p8qD9gKL608S/Nxhbs6mGm/SGoYfz0eHqcZ5GNWMkxWoOQGLnH8
+         vZvIpcoxUAlYtOFcrSj6t3JthcFtkP0BJhydS80tphMTNmSLuCT4LBVFVtfQikOpApdY
+         /y0ffHVEi7WnJt+05egQyrbF1jI681fpCGX+XO/VdhNkB7UqpZx4b68FbQU8iCNclwIm
+         suXiiaiZG0n1eKMBChZcw1+4LHSXtElEI9I9mXtGISqB6X4Ujk0r0qoh4nCFxtwRA/ec
+         f6dw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=wJV9Vn2rjJynndyx66nALvQFHG6+wL2j2Qp1pTECLWk=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=eoYZJPzPltSEg6fOWPFUmbklGbGoS3uZ76iqyLOHNwIe8ajeFOPfoyUaG9uPjLNlw6
+         0EHyzB8Yvyq7bzrGCsbjcJZf62b1vj5hXNRjRTpThUAl34qrgPakqNI0mslSj4xHuwov
+         RhAOHtkc/RxSDR8vSa/8kF79wlp1Wau8djISopwNqjSrx5d7VOp9AIfDysobx4U6Xt2v
+         kCXJa8cc75rh8gqc9MVMZaL98FZGNO2jea6z74Q9aeYMRuM13IB2TeAJ5OMw1kyqcs3O
+         QZzqbpkJBpTZE9ogwDGpcqfKkkvm2+zZmpCS1sT/rceo//OnsOCH490PVcMNVg2qHusp
+         bE6A==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1786567764; x=1787172564; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=5Bl0riAnOz4MDPzNl0/YTiH6hc1BXf4s2D9tpakXXVs=;
-        b=ZI9KpFbjd54rjBp4TDVw1bS55FJhsjNLS/4OHPzDswqT/uW4/knmamWFB4OfyXqRIw
-         hrhzqWNKdDScgW7SG6Sm2Cx+FGRGk7oM/+zoU8fCwrYqR/g+kMt4cE/skME9rQ+mhDxl
-         tiiN+7AFffqUcBFsjQ5Xa935vIx4NgUC/sfEI7iNMdSOM84XaNRP4x+BEV7uHIm3pIwo
-         D7aLZpklT1g8XNs8Oq2TwshfBFbal2k5VDpMqPwagrvXMwTyVd9JGfU7hT3h6tCN6OyM
-         ekEfVvTeOpeLA7sq3kY7bNqOrfM4UCQjdpoj+WCLScSND4Whf8X/+DxdVuyfWdlfWTJ5
-         geCA==
+        d=ionos.com; s=google; t=1786568021; x=1787172821; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=wJV9Vn2rjJynndyx66nALvQFHG6+wL2j2Qp1pTECLWk=;
+        b=PSHAwJ5XGrxk0MwvyKab61rOYr0pzmXFlse35l+o1M2wrm+8AtbfLOpHrhPRDc/uSQ
+         5GpK9JPMmAOhOSX8p1xIczoozIT7dAlZpbXl0t+8MOiY63vwmrxCIvuNcLFPM0Od6C3o
+         cfb/ofz9lTWEr1eW/1Pnv2t/JhGdrX7rRTvepdU3bKmyyFWFgy5pJCh9/AYidWuly3Qm
+         tF4qiGDYiffnn4Lt04rwkM1SSHJuE5xnRDjmkCakxWmMPkdTJXqtYMHXmWnestlwHwmG
+         8iTP4ZlQFQpUqGIvDQsOcw3B8ReHA2HhX94fwLFSXAEW5f/qkW0dqSkNDpzszSFsWwQ9
+         Nf1A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786567764; x=1787172564;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=5Bl0riAnOz4MDPzNl0/YTiH6hc1BXf4s2D9tpakXXVs=;
-        b=aGX0kaDcCEQzpGrA5uICGa/q8pFhLED4VKdxHkLEhe1RQVs73m3oSB/2Gm6YTtZ9je
-         3gy7rX/lRI8MRUZsUeXPYYU9GOYIJ+QzNgWGlpJt/gdx3tJ+lpqQZT+5lF1r581wtm0a
-         VfZOj+9dvMtcNcFsJly6eTq1+Ao9Dt1NltxmIx3hcpGTYT7bBKKUt7miPSnp+W4oViIC
-         RmfM9jOQaGu6c1dukmRZB7mDMFlXWre4Cv3kLweVBLjWFyN04aHSedoYZkqnKiN681Gv
-         eRSuQKoYm7xLvlhTjhEkWr4GX2vU8y2I91rvwwJUm2eY2o9oIBWZmdcnBL78tWW/woMk
-         qlXg==
-X-Forwarded-Encrypted: i=1; AHgh+RoqXPlx0fhRV2mukg3HkRD5iBP7Kzzdkt644oLs1jzAyJxgcNm92auPPIq2BU0rdkbIf2FFc0OX2wBv@vger.kernel.org
-X-Gm-Message-State: AOJu0YzlXcsREUdLoKOze7BAVn9CMWJHRxn+DthQecmnG62LFjcN+NgT
-	d1at2E2jw8uk3kefCXDjvmrCFKqPWbbFroVaKgt69Li/ekeAKL/AHR8pvi7d5m/IU9w=
-X-Gm-Gg: AR+sD113fRpd3QFNMc8hmT2m6nZASQzCHmRHDjQLg2QaQbWzn2YsRifm9YFdfpEOOVa
-	iL8SAJS4DwhDNpsV6cGbWGNjAgY72SyC+Ge9naYXte8lL9AToUYYghIJfMi8HaU8W4/OOxQejvL
-	yxqXSD2xzzD0OwjOf8LMv2XjrpsWcK6/B2GDi5ZVzdu4+v88lOSM0uO8XmsJXo9mWg6Cm5Gbb3f
-	amOBPsulgTTz6+EgcydMge+J9Msby6nJhOSwqSrAQPjATsvq9jtOc03Si2UNTpGnzH+JeHvzJap
-	3yKeUtddguOaTRoVy87bdSo8QvKTWLjsgpl8+4mmMGEGDCmEf7lSRks4m8GCHd/vHETB2a1fCol
-	RrSF9k1JdMWYspcbdyEMkYhkMvkgDc1VYzsuAnckwqcXvOYMWYV1ogbaR606sKnJ4hz5bm+hNMd
-	cIeVjqkCz57ojBYw1FdtXEitS0j1mpQQcnxNQwx65bIEE6vxJ0MkiFzyepx91/ARGoIt5eek5cL
-	KpqWNNraLCwzh2lb1mz7zIAIgf3QnUYoNRyeJLx9EicCnZhO+nPnGsBVOfelfmtnSFGwcl3rfs=
-X-Received: by 2002:a05:600c:8010:b0:495:4749:16a7 with SMTP id 5b1f17b1804b1-499821d2047mr3066305e9.14.1786567763997;
-        Wed, 12 Aug 2026 13:49:23 -0700 (PDT)
-Received: from raven.intern.cm-ag (p200300dc6f02b200023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f02:b200:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49981d85953sm7766555e9.0.2026.08.12.13.49.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Aug 2026 13:49:23 -0700 (PDT)
-From: Max Kellermann <max.kellermann@ionos.com>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	xiubo.li@clyso.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH v2] fs/ceph/super: document struct ceph_dentry_info and its flags
-Date: Wed, 12 Aug 2026 22:49:20 +0200
-Message-ID: <20260812204920.1805545-1-max.kellermann@ionos.com>
-X-Mailer: git-send-email 2.47.3
+        d=1e100.net; s=20251104; t=1786568021; x=1787172821;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=wJV9Vn2rjJynndyx66nALvQFHG6+wL2j2Qp1pTECLWk=;
+        b=HjsTYRayrdTFLoHMMzCsgQnymPoaoAZFVjtzpLDT0dshO1Q23GPE4iqarDFY8+jPNB
+         G4w3cJ6nXql4z2Ctlr+bMjo4MChS9CHQCVRt+MGRypF+tUyN7+nk1VavfFZVMrDNgPeO
+         221MMPFre1OYjVELtIn5JlrptHW8uqHxDQ541e7LR0IzfvmBZD6OBAUp9QgwhhOqKA+s
+         e4/2qw1wVhuOvb3ZQhHFUasMEqQ2g6xFP9u0blo1/A2SfG6Csz34pkbRoNnKEad7yvLq
+         e0I79iUBefvzMnU38o9jpjZTzYCQjjTdxuKlXoQk9gwDUq8a9cHMDkfDmAa5q90WCec5
+         GFvA==
+X-Gm-Message-State: AOJu0YxGMMOvIqb7TaEJtCNR3B7vsYDd0ZGYVRFC45GRXJGHvnSpgiLh
+	MqkoUgQUN1xKtutJpW/lFns4Kj4tz1vawc14V9EoIib/YiaCLPjDFQoxkB6vjH5Vh61dBOYjF0j
+	AfM4d9NjzjcKESdUsqB7X9Rt+9vmWqiSu/310+fRSs2i4BVqhoHlVj0g=
+X-Gm-Gg: AR+sD13LQlS6nK3iod/+5q/ne4gk/J02pTAUR/b9MOil91CT8/5/IoZhItovNM6AEdA
+	9utbbp8Cn1YJc5iIfqOPaJWVULJV/TCoywPaUfE0qJn3j/pbSwuKfgsvOt9oIohakZ+hQDa26A8
+	PYONslCqayVv4c3ENtmNkKNFLrKDaf8tvfDr2meV3jRlPy0HgKrRLOfmfwuSbX2wCwl5mQWCFyu
+	jTfJSajV5mkpwUOkRn1IfeI38xDxOKTBHTd9BtnjREfUGtpGQLLN3wdPIrof4CPfauadR5/VTZZ
+	Oov6lrEWhiO2wsiG8ozX7c3qqmxHcDoT4nKQqSjztunnAnDtBGgc+a5H7WXmf/oejXvu8UJqhA=
+	=
+X-Received: by 2002:a17:907:18c4:b0:c16:26c7:6ba8 with SMTP id
+ a640c23a62f3a-c2108dc360emr54749866b.6.1786568020774; Wed, 12 Aug 2026
+ 13:53:40 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260708083455.78487-1-max.kellermann@ionos.com> <20260811142538.2701033-1-amarkuze@redhat.com>
+In-Reply-To: <20260811142538.2701033-1-amarkuze@redhat.com>
+From: Max Kellermann <max.kellermann@ionos.com>
+Date: Wed, 12 Aug 2026 22:53:29 +0200
+X-Gm-Features: AUfX_mytSqSyOyIBvq3eRJbE17uZSxCff13qpN2pt0pggFKUpw4VGC6UBunnCR0
+Message-ID: <CAKPOu+946t8E6b6U0UtyqddoU869-tNg96BkytCa2MOsB6QsuA@mail.gmail.com>
+Subject: Re: fs/ceph/super: document struct ceph_dentry_info and its flags
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
----
-v1->v2: two corrections
----
- fs/ceph/super.h | 122 ++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 119 insertions(+), 3 deletions(-)
+On Tue, Aug 11, 2026 at 4:25=E2=80=AFPM Alex Markuze <amarkuze@redhat.com> =
+wrote:
+>   1. [minor] fs/ceph/super.h:440: CEPH_DENTRY_REFERENCED comment is too n=
+arrow
+[...]
+>   2. [minor] fs/ceph/super.h:422: time field comment says last touched bu=
+t is insertion/requeue timestamp
 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 1d6aab060780..169a440e984f 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -326,29 +326,145 @@ struct ceph_inode_xattr {
- 	int should_free_val;
- };
- 
--/*
-- * Ceph dentry state
-+/**
-+ * Ceph-specific dentry data (for `dentry.d_fsdata`).  Call
-+ * ceph_dentry() to obtain the #ceph_dentry_info pointer from a
-+ * #dentry.
-  */
- struct ceph_dentry_info {
-+	/**
-+	 * A pointer back to the #dentry owning this object.
-+	 */
- 	struct dentry *dentry;
-+
-+	/**
-+	 * The #ceph_mds_session that issued the lease; holds a
-+	 * reference that must be freed with ceph_put_mds_session().
-+	 * May be NULL.
-+	 */
- 	struct ceph_mds_session *lease_session;
-+
-+	/**
-+	 * List hook; depending on the flags, it may be in
-+	 * ceph_mds_client.dentry_leases,
-+	 * ceph_mds_client.dentry_dir_leases or in
-+	 * __dentry_leases_walk().dispose (or in no list at all if
-+	 * this #list_head is empty).
-+	 */
- 	struct list_head lease_list;
-+
-+	/**
-+	 * Hook for `ceph_fs_client.async_unlink_conflict`, protected
-+	 * by `ceph_fs_client.async_unlink_conflict_lock`.
-+	 */
- 	struct hlist_node hnode;
-+
-+	/**
-+	 * Bit mask of CEPH_DENTRY_*
-+	 */
- 	unsigned long flags;
-+
-+	/**
-+	 * Snapshot of the parent directory's
-+	 * `ceph_inode_info.i_shared_gen` taken when this dentry was
-+	 * last validated against the directory lease.  When the
-+	 * directory's `i_shared_gen` moves on, all cached dentries
-+	 * below it (including this one's #offset) are stale.
-+	 */
- 	int lease_shared_gen;
-+
-+	/**
-+	 * Snapshot of the issuing `ceph_mds_session.s_cap_gen` taken
-+	 * when the (single-dentry) lease was granted.  The lease is
-+	 * only valid while this matches the session's current
-+	 * generation; a session reconnect bumps `s_cap_gen` and thus
-+	 * invalidates all of its leases.  Zero means "no valid
-+	 * lease".
-+	 */
- 	u32 lease_gen;
-+
-+	/**
-+	 * The lease sequence number as received from the MDS
-+	 * (`ceph_mds_reply_lease.seq`).  It is echoed back to the MDS
-+	 * in lease RENEW/REVOKE_ACK messages.
-+	 */
- 	u32 lease_seq;
--	unsigned long lease_renew_after, lease_renew_from;
-+
-+	/**
-+	 * Jiffies timestamp: the earliest time at which a proactive
-+	 * lease renewal should be initiated (roughly half the lease
-+	 * TTL).  Zero while a renewal is already in flight (see
-+	 * #lease_renew_from).
-+	 */
-+	unsigned long lease_renew_after;
-+
-+	/**
-+	 * Jiffies timestamp recorded when a lease renewal request was
-+	 * sent; the new TTL and #lease_renew_after are computed
-+	 * relative to it once the reply arrives.  Zero when no
-+	 * renewal is pending.
-+	 */
-+	unsigned long lease_renew_from;
-+
-+	/**
-+	 * Jiffies timestamp whose meaning depends on which lease this
-+	 * dentry holds: for a single-dentry lease it is the expiry
-+	 * time (TTL); for a directory lease it is when the dir lease
-+	 * was last touched (compared against
-+	 * `ceph_lease_walk_control.dir_lease_ttl`).
-+	 */
- 	unsigned long time;
-+
-+	/**
-+	 * This dentry's position (an encoded file position; see
-+	 * ceph_make_fpos()) within its parent directory's readdir
-+	 * stream, used to preserve readdir ordering when serving
-+	 * entries from cached dentries.  Zero if unknown/invalid.
-+	 */
- 	u64 offset;
- };
- 
-+/**
-+ * Second-chance ("referenced") bit for the dentry-lease shrinker: set
-+ * when an already-listed dentry is touched again, so the walker
-+ * spares it for another round instead of disposing of it (a
-+ * clock/LRU-style approximation).
-+ */
- #define CEPH_DENTRY_REFERENCED		(1 << 0)
-+
-+/**
-+ * `ceph_dentry_info.lease_list` is on the
-+ * `ceph_mds_client.dentry_leases` list.
-+ */
- #define CEPH_DENTRY_LEASE_LIST		(1 << 1)
-+
-+/**
-+ * `ceph_dentry_info.lease_list` is on the
-+ * __dentry_leases_walk().dispose list.
-+ */
- #define CEPH_DENTRY_SHRINK_LIST		(1 << 2)
-+
-+/**
-+ * This dentry is the primary link to its inode (as opposed to a
-+ * remote/hard link).  Reflected from #CEPH_LEASE_PRIMARY_LINK in the
-+ * MDS lease mask.
-+ */
- #define CEPH_DENTRY_PRIMARY_LINK	(1 << 3)
-+
-+/**
-+ * An asynchronous unlink is in flight for this dentry.  While set,
-+ * the dentry is on the `ceph_fs_client.async_unlink_conflict` hash
-+ * (via `ceph_dentry_info.hnode`); other operations on a conflicting
-+ * name must wait for the bit to clear
-+ * (ceph_wait_on_conflict_unlink()).
-+ */
- #define CEPH_DENTRY_ASYNC_UNLINK_BIT	(4)
- #define CEPH_DENTRY_ASYNC_UNLINK	(1 << CEPH_DENTRY_ASYNC_UNLINK_BIT)
-+
-+/**
-+ * An asynchronous create is in flight for this dentry; waiters block
-+ * on the bit until the create completes.
-+ */
- #define CEPH_DENTRY_ASYNC_CREATE_BIT	(5)
- #define CEPH_DENTRY_ASYNC_CREATE	(1 << CEPH_DENTRY_ASYNC_CREATE_BIT)
- 
--- 
-2.47.3
+I don't understand, please explain. The "time" field is only ever updated h=
+ere:
 
+- ceph_d_init(): initialization after object is created
+- __dentry_dir_lease_touch(): I documented this as "last touched"
+- ceph_invalidate_dentry_lease(): preparing for destruction
+
+None of these insert or requeue the object anywhere, do they? What
+does "insertion"/"requeue" even mean here?
+
+>   3. [nit] fs/ceph/super.h:399: lease_seq comment says REVOKE but client =
+sends REVOKE_ACK
+
+I have fixed 1. and 3. in patch v2.
+
+--=20
+Max Kellermann
+Principal Architect
+Hosting Technology
+
+cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
+General information about the company can be found here:
+https://www.cm4all.com/impressum
+A member of the IONOS Group
