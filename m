@@ -1,221 +1,99 @@
-Received: from mail-ua1-f53.google.com (mail-ua1-f53.google.com [209.85.222.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55A2438B7BC
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2026 13:15:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.53
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786626934; cv=pass; b=oVsEUqnlZkLMku76bfTW8mBi3o32NAmtmOoMjMUXT+4j2XwD2ID7pNeIOO74FhjNgBqzcNBYgRzgOFKocs0GvSQggJXqpoSjGoYPtglBhEnIZpJySHJ/St7klkvwZKvco6FIW8Sfq5OFHhdMPV1v1bDHCbc9yWcqdgOunYvT6+Q=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786626934; c=relaxed/simple;
-	bh=EihUpB4TtEUj7X7xavOJXj/nFV+kCe8gL0N7+cAPYJ8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DlKTdBY/0Od6fZScFeRlpMLt8TQ9Zbz1Wg3XKzJcDFqk4h6oJc38+c9/FEATeIEeDj26npn5IiAdWrNPpCq4qZ3IkcG39ri6z2YkRuzm+G2JFRcdH1ByjfxEVbiBMhhBtJzdCorpnEyIokd0R5W2tE53zeM91HZODpyqXy7aQXg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WVVdGX0a; arc=pass smtp.client-ip=209.85.222.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC8C2474278
+	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2026 13:45:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786628748; cv=none; b=XA3PmAOLNHFhoPG8JKmnqKFS9fQD+gisXEgD4x10N7fog116blZ3RhSFUzic4a5N0cDtbIyfiE5flMv0MAi9+bnZyBCQC52AuON2F4UPUoJPbaKOUqQMElacld3/piYO9t9vMErD8fkPX9VV5QpOTqDD4yFa4LdazeCqHDVWCBM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786628748; c=relaxed/simple;
+	bh=0wHkEqHRypv5tkP9LlfNdRWNsV3WKRx0iw3qb2GlJpw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=tnpHRS3/qnGVP5cZ3pjz8K75vTCAkUo9ZSP0452B+k1l7vlGyQn8mt1IPPvuSxRM59+PtuvF7ZdzUqDoeLzZfjY1/HgSDAAn0wxXh+xGuVIJClv18TfnVxLkq5KtxQhLG5m3wHygxleao36Ly0Y5Uutp9ORk5+BlS+E8+EAbOCw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HYJiD1sL; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WVVdGX0a"
-Received: by mail-ua1-f53.google.com with SMTP id a1e0cc1a2514c-977258a75d9so439694241.3
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2026 06:15:33 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786626932; cv=none;
-        d=google.com; s=arc-20260327;
-        b=lBrtWRlqAzayQO9WsEtCV32udxyzyCFR9qm5TLGuujXOjpVQ30Nmy/0SbobdEjPa2D
-         WGwOE78KJULvBxzQCn2PDEsFvki0RY7y1bc6j9oeoi2LcfWI8jU6t9bS3y835cyHIqYu
-         uALDtrptvEJys+YhsmJUc21SMH3z8ZXenzdKM4naE452QafpY1UG5n/tFjMpfDGB6KUe
-         EFf6UdWJ7RXu+Zu0/Fj7Dvo0CPZaj5egwKqyhcVLH2r3wah+E1/07ltvULYOj86lSquO
-         GbEnTijypZ11ITSlHNgEk5BVIvabcwSCqMbZMQUkfBXVqy0ch3lBVxxveqAXAMVhvOI1
-         FpWQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=7P0xTCuuVplsIk8xDbfG+QsTWp0sxfboqg8Ac8B3fVU=;
-        fh=IgbK1CPwzVpvx22WrPRgHM5+UYNLt/7Fq1aIpKBdjZ4=;
-        b=T2aV7qG7mI55zsWIPhP92SH3d7n8N3DsMRgDNLTXGyo23UuLDFTwaHI5VBZWr0Jnxe
-         3QtK/mgQLroDvbGbmzKP6XNrmi5z8Oi4tO0wr74MQDh8QVCOYQuqQXD93oQznaLqW6HI
-         iiwnd2H2FDwO9ja9oT0Zrbt8TxkBDSuAOXfhYK/9JaFeUEAEFlZHNHoHevKc/Xd1Krqr
-         tLeTT3vs34+ikn/XIGm2PSj647SucmjPQkOj/YRjrzxWWsxkh1lp7KJtAMxxtjEaxESg
-         lVlmbUePGKNHPh/9FRSsNtYOEZJqJlZoGRCDjAlKaPQ3AAsSMuGBG12Dg9MEqc7ohF3+
-         f94A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786626932; x=1787231732; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=7P0xTCuuVplsIk8xDbfG+QsTWp0sxfboqg8Ac8B3fVU=;
-        b=WVVdGX0a7UruYNvlAAckBOuUu3Nz3YY9O7EdayWTrDdACwIbHWDeYK++iscMmTSOXT
-         rOB13hX3aZZoMaM3ZWMY/XtaMsSGL5ABi3mHkd7RprXUXE1S1w1lgICJgNYOWsUwXO20
-         ziTOFJGvG8W6V1eS+FOG0C966uYB70u5BxyYpX/vstIteKVidEC8MYG8+Mb/ierG/Xm+
-         uUjzACK+ydbN4cY6qylh2Ht8hWy2drDCT/6bzvGu1ttB0r6Pb+1PIHRD3OD+G+xeN0uO
-         WErs4/ZFzM6hGu6Od8TyBZZ3W5XpQJ7epGeSss1JHrhGhUT5+P+EBMVKVYXDEFyaz+3p
-         b+0g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786626932; x=1787231732;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=7P0xTCuuVplsIk8xDbfG+QsTWp0sxfboqg8Ac8B3fVU=;
-        b=TEvVZYv4O82gDWGFAth85ZlgBn/diFASq3bAffeyR/nZfhrJCxOym9nYT6QALrNgu7
-         p6eN/qmjL7IS8CXCdJHgC88FM+L8viaSKyoNxkmrvHA0MmfVuOFmKSrZxwmH8nOkw1r9
-         YPBCrfkkeVFNu9hDwMsHGn5XjqCspntE/b5R9kU4uT57t3ZLhc2rrZ9hnx5zXdLezmd8
-         6b8H4GQ4QldpCjcceNfMcWY67XZ/NgEv0b0lGSENZsx1dqigaMpt38T37u2pTv6bRqW6
-         MCii5v/1A2PsURzVV3sSxQDOPuDK3fpU4dsUO1QIw+mEIlGKBR3fwXFE64qzQ7xRqOeq
-         kAIQ==
-X-Forwarded-Encrypted: i=1; AHgh+RrZropqB+c20IRXv5CHrPE8OGRMSVLDS0KAhuBLOaQuNlhOFic6+82GuDkIAQs8YGe4BQ7F8dhMT6JE@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy8yLsSArJid3ccVxfqCnqraLV+O4KtldVZYJrxZ0OkPsF8FlNl
-	FVjaJYvHNqWn3coyRvuweHe7MkKEfmsk2Qnv3gbrgMDeFmV24ny6Ta05hAmYBGBlSUlIJGJAq6G
-	YkM5CsxcLVb+kjltEnFGKH0P8uDd9Zy4=
-X-Gm-Gg: AR+sD10UuAQ/Ael6UQ3zZphPB06IEyteub9DZvBNN84c9O2/irsMvMkyzDPYTx8oW8A
-	z7KsAJJx0WiSbPkUgm5FJc36E++L/CNCjkzc5q9GvH5Lie9zynmivFuvqgkxPISqC22HDyfV8tY
-	2KRwIpt9/qAhmcShvAyrVZZS7rRZ7QgaD0klgdRNEP/iIUUkILMo7pXyFcUOxTS/0OyL2aucqGz
-	B08xZdr676KiX4hr/mu+AT/bS58iWY0qZjAj01t51G6NFjivGksuW/UItJQ+8sKYv+6eKSebtTs
-	S7CFeW7d8gvnRAoD8daJ0zH4xQ+z+ivBx8IsLPSlVBCATLGV3cbYvXbgzm9Kg/Hd7sYD/rOTJpC
-	fH/g=
-X-Received: by 2002:a05:6102:4495:b0:74d:cef6:af78 with SMTP id
- ada2fe7eead31-76db6082df7mr1582491137.7.1786626931769; Thu, 13 Aug 2026
- 06:15:31 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HYJiD1sL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1786628745;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=qxcNqxDJHo6P7G7Xe79Ps0EZY26r/2eNZf8D3pRE4FQ=;
+	b=HYJiD1sL7QoGEQPxwJavgkPf8mkqOaicUWx9xIz392nR1xSDb4FV0fRIGiYShYFLLmnHce
+	Bi9tSkLp//cu9Pcfmq6lLDkPgWAjB2OQGvZ82/QkjlFIrbymRaNB+zMVtiYYwXekToNMuc
+	k0QW3VL0bUJtOtRtEuoQBBp1ANS0zKU=
+Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-610-mswweZnAMKSRFLaag0XENw-1; Thu,
+ 13 Aug 2026 09:45:41 -0400
+X-MC-Unique: mswweZnAMKSRFLaag0XENw-1
+X-Mimecast-MFC-AGG-ID: mswweZnAMKSRFLaag0XENw_1786628740
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 8B76818002C8;
+	Thu, 13 Aug 2026 13:45:39 +0000 (UTC)
+Received: from warthog.procyon.org.com (unknown [10.44.32.44])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 90DB31977033;
+	Thu, 13 Aug 2026 13:45:36 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 0/2] netfs: Miscellaneous fixes
+Date: Thu, 13 Aug 2026 14:45:30 +0100
+Message-ID: <20260813134533.1174132-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260809-ceph-put-page-vector-v1-1-57ab2a08ec90@columbia.edu>
- <CAOi1vP9j72RiKGiwPo6oRe_sA1VjjORUPDvEYAsraLnH55pcwA@mail.gmail.com> <636c10c2-298a-4d39-8628-938accf56ff7@columbia.edu>
-In-Reply-To: <636c10c2-298a-4d39-8628-938accf56ff7@columbia.edu>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Thu, 13 Aug 2026 15:15:17 +0200
-X-Gm-Features: AUfX_mxq2d2mNAfWqKJ8-5knqiYKPv8CZscQ8MNf0kNROrTGe5wFr58jNmlDFaQ
-Message-ID: <CAOi1vP9La9h+UwPvtp1yEVcdLYgvE43Gz_4LF1ArugbhDNS-qw@mail.gmail.com>
-Subject: Re: [PATCH] libceph: remove the dead dirty path in ceph_put_page_vector()
-To: Tal Zussman <tz2294@columbia.edu>
-Cc: Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-On Thu, Aug 13, 2026 at 1:41=E2=80=AFPM Tal Zussman <tz2294@columbia.edu> w=
-rote:
->
-> On 8/13/26 4:11 AM, Ilya Dryomov wrote:
-> > On Sun, Aug 9, 2026 at 5:04=E2=80=AFPM Tal Zussman <tz2294@columbia.edu=
-> wrote:
-> >>
-> >> The only caller of ceph_put_page_vector() passes dirty =3D false, so t=
-he
-> >> branch is dead code. Remove it along with the parameter. This removes =
-a
-> >> call to the deprecated set_page_dirty_lock().
-> >>
-> >> Signed-off-by: Tal Zussman <tz2294@columbia.edu>
-> >> ---
-> >>  fs/ceph/addr.c               | 2 +-
-> >>  include/linux/ceph/libceph.h | 3 +--
-> >>  net/ceph/pagevec.c           | 7 ++-----
-> >>  3 files changed, 4 insertions(+), 8 deletions(-)
-> >>
-> >> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> >> index e2da3ab9f808..83752f3688fa 100644
-> >> --- a/fs/ceph/addr.c
-> >> +++ b/fs/ceph/addr.c
-> >> @@ -257,7 +257,7 @@ static void finish_netfs_read(struct ceph_osd_requ=
-est *req)
-> >>         if (osd_data->type =3D=3D CEPH_OSD_DATA_TYPE_PAGES) {
-> >>                 ceph_put_page_vector(osd_data->pages,
-> >>                                      calc_pages_for(osd_data->alignmen=
-t,
-> >> -                                       osd_data->length), false);
-> >> +                                       osd_data->length));
-> >>         }
-> >>         if (err > 0) {
-> >>                 ceph_subvolume_metrics_record_io(fsc->mdsc, ceph_inode=
-(inode),
-> >> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph=
-.h
-> >> index 63e0e2aa1ce9..3098306e6173 100644
-> >> --- a/include/linux/ceph/libceph.h
-> >> +++ b/include/linux/ceph/libceph.h
-> >> @@ -313,8 +313,7 @@ int ceph_wait_for_latest_osdmap(struct ceph_client=
- *client,
-> >>
-> >>  /* pagevec.c */
-> >>  extern void ceph_release_page_vector(struct page **pages, int num_pag=
-es);
-> >> -extern void ceph_put_page_vector(struct page **pages, int num_pages,
-> >> -                                bool dirty);
-> >> +void ceph_put_page_vector(struct page **pages, int num_pages);
-> >>  extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flag=
-s);
-> >>  extern void ceph_copy_from_page_vector(struct page **pages,
-> >>                                     void *data,
-> >> diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
-> >> index 858359873c4d..828b003aa2fc 100644
-> >> --- a/net/ceph/pagevec.c
-> >> +++ b/net/ceph/pagevec.c
-> >> @@ -10,15 +10,12 @@
-> >>
-> >>  #include <linux/ceph/libceph.h>
-> >>
-> >> -void ceph_put_page_vector(struct page **pages, int num_pages, bool di=
-rty)
-> >> +void ceph_put_page_vector(struct page **pages, int num_pages)
-> >>  {
-> >>         int i;
-> >>
-> >> -       for (i =3D 0; i < num_pages; i++) {
-> >> -               if (dirty)
-> >> -                       set_page_dirty_lock(pages[i]);
-> >> +       for (i =3D 0; i < num_pages; i++)
-> >>                 put_page(pages[i]);
-> >> -       }
-> >>         kvfree(pages);
-> >>  }
-> >>  EXPORT_SYMBOL(ceph_put_page_vector);
-> >>
-> >> ---
-> >> base-commit: 30c0913a2b44a66dc17283a88489b3f3e12f4327
-> >> change-id: 20260809-ceph-put-page-vector-458bb3aa87f6
-> >>
-> >> Best regards,
-> >> --
-> >> Tal Zussman <tz2294@columbia.edu>
-> >>
-> >
-> > Hi Tal,
-> >
-> > I'd suggest getting rid of ceph_put_page_vector() altogether -- it's
-> > pretty confusing to use it to put something that wasn't allocated with
-> > some ceph_*_page_vector() helper.  It looks like ceph_put_page_vector()
-> > was paired with ceph_get_direct_page_vector() which is long gone.  The
-> > put_page() loop and kvfree() could be done in that single caller.
-> >
-> > As I was looking into this, I think I spotted a related memory leak in
-> > ceph_netfs_issue_read().  On the fscrypt path, the "page vector" coming
-> > from iov_iter_get_pages_alloc2() isn't put in case of EIO caused by
-> > ceph_inc_osd_stopping_blocker().  Alex, please take note.
-> >
-> > Thanks,
-> >
-> >                  Ilya
-> >
->
-> Hi Ilya,
->
-> Thanks for the review!
->
-> I'm happy to fix the ceph_netfs_issue_read() issue as well in a separate
-> patch by using ceph_put_page_vector() there (for backporting purposes) an=
-d
-> then inlining ceph_put_page_vector() in the (now two) callers. Does that
-> sound reasonable to you?
+Hi Christian,
 
-I'd rather see if the ceph_netfs_issue_read() issue can be taken care of
-by moving ceph_inc_osd_stopping_blocker() call.  If so, there would only
-be one place where the "page vector" needs to be put.
+Here are a couple of miscellaneous fixes for netfslib.
+
+ (1) Fix an uninitialised return value from netfs_unbuffered_write().
+
+ (2) Fix read progress reporting to avoid 64-bit tearing on a 32-bit
+     machine.  This has been modified from the previous submission as part
+     of a different series to take account of a sashiko reported issue[1].
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-fixes
 
 Thanks,
+David
 
-                Ilya
+[1] https://sashiko.dev/#/patchset/20260810144746.574036-1-dhowells%40redhat.com
+
+David Howells (1):
+  netfs: Fix read progress reporting
+
+Karl Mehltretter (1):
+  netfs: Fix uninitialized return value in netfs_unbuffered_write()
+
+ fs/netfs/buffered_read.c     |  4 +++
+ fs/netfs/direct_write.c      |  2 +-
+ fs/netfs/internal.h          |  1 +
+ fs/netfs/objects.c           | 32 ++++++++++++--------
+ fs/netfs/read_collect.c      | 58 +++++++++++++++++++++++++++---------
+ fs/netfs/read_single.c       |  2 ++
+ include/linux/netfs.h        |  2 +-
+ include/trace/events/netfs.h | 21 +++++++++++++
+ 8 files changed, 94 insertions(+), 28 deletions(-)
+
