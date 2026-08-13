@@ -1,192 +1,115 @@
-Received: from mail-ua1-f42.google.com (mail-ua1-f42.google.com [209.85.222.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9685B43F4D6
-	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2026 08:12:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786608734; cv=pass; b=PbzUliDq9KWV7c4QYyUmvdQP8nTZq7ckZnr8UNA2yV5cOc+O/3fl1MfELfgRYud7y0mBFrULPOGqfWgzmGK92lIMw4FVyoE/pYt5lPMWiVw8S3LT3tgzdCFqfFzI86GB6zJKd0InuciRUJ3xqPpwmitRIPcIXYw+/QsDm4+TBVs=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786608734; c=relaxed/simple;
-	bh=Ka7orBL80bSdVxmjeIp8Xw+VKeAYaow2X0E0mfZXe8g=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=lXk96SkzDXl7NYl7bGc7XTqlMlqLz24WFwCruL5yX7DsM8knTtucXqTVTMCqrjeuFImrWEG193APOQdlkPz+jZLpPrJl7OSf6pKl1I59Ud76FhiDw+Tg9VFDok901j+VBkGQ0AF/zPRElRwUpmes8RC+jUaixTGseQFh2ILs5oE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nvhvPpKL; arc=pass smtp.client-ip=209.85.222.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87A1437F314
+	for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2026 11:20:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786620038; cv=none; b=Gt8KHSSvpBPH/z7hcY9hHarrNDiFNB0cUpznapCENRxjjv3QkrMKnZMMr5Vh5guYai4bukxGhgqNhJIcacYo/ggvv3eQJV/uqQrKVxnX5nlS998CMIe9cLr53iO+boY73+0S9geP163M11wc3014s8E52JFEBBvA+pg9qimjmTQ=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786620038; c=relaxed/simple;
+	bh=gaAj9Jwx0O6CUGuqMrbrOJthM2w2AwAnw8Q0fuUttCE=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=jDL9ZJ+iR3BVjWMXXekd05+h44NBXD28r89Bi+sJ1cFcUXxDGa2G52Fzkc7Y5nQOH6OqiO8l3sQq2NcpxtYfDYVxgZG6APWzxrGKL6VNKotkDm4PgOG6ESQQUO1z+ZET/N9teWhc+hzu5nBawaq/2TYItV8YqmHKINER52E3Ohs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=BgIe6glX; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=kDyOu19a; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nvhvPpKL"
-Received: by mail-ua1-f42.google.com with SMTP id a1e0cc1a2514c-9696319e14dso688315241.3
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2026 01:12:06 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786608723; cv=none;
-        d=google.com; s=arc-20260327;
-        b=BXL9tuyrYIIlAzPEfTWpNMkjl/DRvhg6Ub3LORGu+rX/Ph9MIyucsoEed14yLUyXtW
-         F769uDv8hAd4rTKEPlZlZJdfTqbNNhTpluTz2Emb/g/iP4ydB5nZmWuDEkU57t38XFLY
-         23dy20xygbtJh0oiZK2EApLYNlE92DSwDn/ADNuEzql+djpeK0q2MRR6FXfjfzBpteuy
-         6ejKsaV4YAy4AigQ+tgOaUErGpAdxQ74yEY7+nT9RDXZG0WloYTFoxaMxHCcMwElj2ki
-         718Qk4toBZF1I6QNu+K/jvDns43DaKCiQWg2yYIiRimc+aQa0Sj7pZkLB1VQmop/JpII
-         Nigw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=RSCqvfARtlW+QloV3fjBOpPqIk1Lrl+l550+kErTodU=;
-        fh=RYBFyj8BoPcr7uAep6RFyOPdLQcGIXbV5dYbEHiCQnw=;
-        b=eQzZUoYTivECHbhv2oD7YkjDonkTVXgL3l9mO3UxA0OupXVGmUdBNDg5iY8GKpik/U
-         Aixa1UIm+hOCIDN2caex+kz+o7CiwG99H/oEW/fJmH1EvyLCjJTKJiv4aFKDtDHejlMr
-         zmkJEz6pC89dOIwhZhGSPsaawz9bEQle2W5XAaAKR5uPgMzDCt9beyJ0BTJGlHX7rcVI
-         pn3COBFQsopvHmbYonQUKNnQ7P+KqhwOh7bppDkCh9YI7dqfSoa6/8uBa/hf1POmEHa7
-         FP1iqxbS7zUsOO/LqKlE98v+Fe2bhoXhNPyULpLR5Npr6pgbUpScDYSC52WkuKYYqC7X
-         96Dw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BgIe6glX";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="kDyOu19a"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1786620033;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=gaAj9Jwx0O6CUGuqMrbrOJthM2w2AwAnw8Q0fuUttCE=;
+	b=BgIe6glX3btNBy2NltN4RepZnVVcCjhkmehujSWAPvPFrcMs/ag3uuQ74X6jMB3NsZWZyk
+	Am8D/1KdpVl86rXrN5D532XOxZtIh+t8cNMqLDgMKw5B49IkguL8k+183YQfmTpxtRMIxR
+	tnomZtKy1MsL+n/bxAK6Q6Fk7biGZcw=
+Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
+ [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-456-mUPh9_CpOnG2UFZpvyMD5g-1; Thu, 13 Aug 2026 07:20:32 -0400
+X-MC-Unique: mUPh9_CpOnG2UFZpvyMD5g-1
+X-Mimecast-MFC-AGG-ID: mUPh9_CpOnG2UFZpvyMD5g_1786620031
+Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-6a18f14a076so2389301a12.0
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Aug 2026 04:20:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786608723; x=1787213523; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+        d=redhat.com; s=google; t=1786620031; x=1787224831; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=RSCqvfARtlW+QloV3fjBOpPqIk1Lrl+l550+kErTodU=;
-        b=nvhvPpKLE9O3avrTZ0NF+z0yRrgmFnf5qi/Sopnjx4evfQ2MIWdBciFXHlqvM7+Dht
-         54NcrAqzeCE9p9F89g3h7Y+LY+/slWLxw/d8n8CO0ZgBDLdprKZSvLicBmeemAEj3Lvy
-         KXzPXqTLV1WKf/8eQm+DhAS0v35QSM8H5TOf0jxQEqIN6ofC8VfFE5kIP2tlRfmd/4BJ
-         yth8UGqtTGwA6zgBflVBdOqpBLCdIqclQOZ4YaF+GtDUx47rlS7N7zfKhDOIdpwSNZ40
-         3Kdvk53BLNgSb4UagGAXm8OUuaaQxGwk5xx360jCS7Zu79ptalrj8UGYY4Akc3gZpsgq
-         9bwg==
+        bh=gaAj9Jwx0O6CUGuqMrbrOJthM2w2AwAnw8Q0fuUttCE=;
+        b=kDyOu19aWE8r4pds9+RHR7qEZh4a6vCM5vFLx1zhc4qeP9qV2NQac0EXbmlfkr/pG1
+         tYrhoJYSrp8e+kzttHSKZGGTm7o8P6LNnSyd1ROVngzRqR5Atz1OnsUB9xrtXyMb2rLF
+         Wg+dRjc678JzNVpmFXtwqLxml2maivrrzXfXKS0XzRxt60Oo9TXTXEKIc9Te0KUwsi7L
+         1seaWEd/Srd3xeAHyzKtQXx1UmWedXBsdINNv/2zJ0DYfy7BIlMaTdz3MrZq312lgohE
+         pNXxl/Uo+i9SV3wtEeQp6kYCVKdH4wRNEfr9nHaKl1Eb0f6lj58Pu0lDVxjOCwoRiSmY
+         OHUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786608723; x=1787213523;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
+        d=1e100.net; s=20251104; t=1786620031; x=1787224831;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=RSCqvfARtlW+QloV3fjBOpPqIk1Lrl+l550+kErTodU=;
-        b=g2MFO7rKvpqGfWW0M30+j29/5AC2svnd8lWGdrd4h9BVpLfCVpDy87UdyR9V0tkVh9
-         hyLuXLSAKQtuOtOnYBvZkDe2mWiNZHZf8XRJnHTHgWAt52VUx97CnLeQvSLxpFtcnh3O
-         inOmUY8YJdF4YRwcbam/ev4J5TPXeb+RIttgi+O9wVQMxzh5kTUuvyENe4HcOWu+sIDL
-         mLemoVNJFopC85QeHtDVa+dPPeqXql1hKpPTLiovfFy05ugVJpS/51cbM1twAD+v+Yn+
-         KXizi0RRx1gWzScqAL0QTFYrv60haDAJlhCbWREEwjeY2NUis26OvJgfTwtBkJFIFlpa
-         jkIA==
-X-Forwarded-Encrypted: i=1; AHgh+Rr8gmnBft9kzE+Zx/tw5PqlXCzF3WJptfc1W921trX2CfrxnVxDNQpj3XMo5YtaFrd4/MLRei7BaIpb@vger.kernel.org
-X-Gm-Message-State: AOJu0YwKeQNiya2JH0EksHZvXDWQHtVQ9vz6n0uqmxesds38UIu4I7Z5
-	eRq4IeT/BNQNYvg7fi40dvpHHJFIE/66/zSQqsJRU5vFoRFJ+TfpNrWyYnFJb2gIIs4cFGQ55w3
-	g3hnDabw+NlDA1+BPUUeC+l4vNAmhtVw=
-X-Gm-Gg: AR+sD11gSaPMGi3wENGb+RkJ6lsmHqO5YjuIq2L6G3NcmzR80QzMZRYyEeVIkpi9e+7
-	p0IYBAfLhbJtJuwDSzRGbqyGlrDqXdsUn76dHoH6RF8vve8Hw4CWtgnafuIXAV2PoJzJN/qDmdt
-	87okY1bxO+kCofuXb5BxD+NBl6lIIU2pKeY/iCDHBgBDRgB/gfVOQA+BFPcnXeMntsRTVn1q9Kj
-	7KzhlEmUetTp3LXZrQmoRvtxXH6B21nlpRMNXcnx9RYuW6LFZU2zONB6MNGMunbKFfEds3XqbEZ
-	yjNJ2Odxcg6NBXCEFcijzsa354pTA9sb2Uv5dC36ZJ+9v90K+KvVnDehicMke6DONzZznKg1W0J
-	MbVvHfrL0MaYOTQ==
-X-Received: by 2002:a05:6102:801c:b0:73a:128b:ea07 with SMTP id
- ada2fe7eead31-76db866455emr991115137.14.1786608723524; Thu, 13 Aug 2026
- 01:12:03 -0700 (PDT)
+        bh=gaAj9Jwx0O6CUGuqMrbrOJthM2w2AwAnw8Q0fuUttCE=;
+        b=ISg9L3+xKk36XyzHspQ05pF8BMaUqh6SucpYN7pcAgjlMcVvOO9xCQ9o1/hNmHm52s
+         AsQ7oBEu0iF8LqjwDXm0VbSSQZMCXn6zYS7JvYL0FSBIdmjymTuggByKGkNDsUgbiOTR
+         Yk4aNXdCRoYXekD/DswDSaXR2CXporkVZzBOwPMUFRgW0wIrr22X1AtSXjFZwHpwDmkK
+         55DZs2LaUl/rSL9D9EMNOYtIXoODdpX2XZT51ZAAwzooBP8JSd49Lb2oi6gXvwVxbt86
+         AqK/Cd9UTW60rMlG0iY3LwZ8XTitWBzZ6tjV4XnWfWnwYJAWsdZZoaJ0tKVK35riEJo7
+         8WlQ==
+X-Forwarded-Encrypted: i=1; AHgh+RphRft3sbDnW3joahyMs7P5tL/3GpVbnrR+Daat7kfqlERnRG5ndVgeXgS4cwlmQGJi2X22heJ9apUX@vger.kernel.org
+X-Gm-Message-State: AOJu0YyxXSekVwmLOm17xrm/wMvVY7fFERznLtyAECA4PPfLbPHBy+wI
+	YTvzkXJSByOfi12/gsMfTTbiKMenb41ZrExRDxW4wcgzkaGwPPlVj6wzIWcFih0M+FHxWGngOvm
+	9f7AGdZTruDKX1g1hS9BSqOYDNP3mSAY9+Rlr6RyYhQiOVKjnjSeoYVNk+YqJUVo=
+X-Gm-Gg: AR+sD10c6jyteAgEdlryMXIudAkUnxDRKjdnqyF1FewYDECtxVAjB0QQuzCj8d4HZE2
+	hrf3B3nJPq0fifWb5Sg7mjI7li+C3IqbwKaMJK1mxSjdJlXJn5MGiaP2/tJTJsS/lkgsTO5LSKJ
+	VPPHprqK8yrfeAYZYvGTRGqBuXRm3TqaWRsMWpNSC6FF9r1tFYJo5/Olp78or5CGsDrXG7n2QVE
+	6QhQPFOvZ86ZJOQWGK4cE1oBxoTQ6FFJyOXlInjTIAIrr9r/yorO/HQ5h7WVGFF1MGz8qVAGyuo
+	ExW/2FNGBr1NQm+SQpNJYukReInUqeiYXuqYUroF8t+kT8EtprsCvvrG9mcU1XTENdw3LFO6PP1
+	lVhyuuozlr/MPIWAR6kQrMbL0faHTCfIl3g==
+X-Received: by 2002:a17:907:9614:b0:c21:180c:d82d with SMTP id a640c23a62f3a-c21180cd916mr43129466b.20.1786620030912;
+        Thu, 13 Aug 2026 04:20:30 -0700 (PDT)
+X-Received: by 2002:a17:907:9614:b0:c21:180c:d82d with SMTP id a640c23a62f3a-c21180cd916mr43127166b.20.1786620030515;
+        Thu, 13 Aug 2026 04:20:30 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c211aa04446sm3249166b.26.2026.08.13.04.20.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Aug 2026 04:20:30 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: tz2294@columbia.edu
+Cc: idryomov@gmail.com,
+	ceph-devel@vger.kernel.org
+Subject: Re: [PATCH v3 00/12] ceph: convert writeback path to folios
+Date: Thu, 13 Aug 2026 11:20:28 +0000
+Message-Id: <20260813112028.3989422-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260810-remove-wait-on-page-writeback-v3-1-dd7531704f26@columbia.edu>
+References: <20260810-remove-wait-on-page-writeback-v3-1-dd7531704f26@columbia.edu>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260809-ceph-put-page-vector-v1-1-57ab2a08ec90@columbia.edu>
-In-Reply-To: <20260809-ceph-put-page-vector-v1-1-57ab2a08ec90@columbia.edu>
-From: Ilya Dryomov <idryomov@gmail.com>
-Date: Thu, 13 Aug 2026 10:11:51 +0200
-X-Gm-Features: AUfX_mw2wKiFaq3KlhNPqnKc6tEfkHU7TezpZsF4GZrbHAU8jcVTJrcW9mdbOOI
-Message-ID: <CAOi1vP9j72RiKGiwPo6oRe_sA1VjjORUPDvEYAsraLnH55pcwA@mail.gmail.com>
-Subject: Re: [PATCH] libceph: remove the dead dirty path in ceph_put_page_vector()
-To: Tal Zussman <tz2294@columbia.edu>, Alex Markuze <amarkuze@redhat.com>
-Cc: Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-On Sun, Aug 9, 2026 at 5:04=E2=80=AFPM Tal Zussman <tz2294@columbia.edu> wr=
-ote:
->
-> The only caller of ceph_put_page_vector() passes dirty =3D false, so the
-> branch is dead code. Remove it along with the parameter. This removes a
-> call to the deprecated set_page_dirty_lock().
->
-> Signed-off-by: Tal Zussman <tz2294@columbia.edu>
-> ---
->  fs/ceph/addr.c               | 2 +-
->  include/linux/ceph/libceph.h | 3 +--
->  net/ceph/pagevec.c           | 7 ++-----
->  3 files changed, 4 insertions(+), 8 deletions(-)
->
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index e2da3ab9f808..83752f3688fa 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -257,7 +257,7 @@ static void finish_netfs_read(struct ceph_osd_request=
- *req)
->         if (osd_data->type =3D=3D CEPH_OSD_DATA_TYPE_PAGES) {
->                 ceph_put_page_vector(osd_data->pages,
->                                      calc_pages_for(osd_data->alignment,
-> -                                       osd_data->length), false);
-> +                                       osd_data->length));
->         }
->         if (err > 0) {
->                 ceph_subvolume_metrics_record_io(fsc->mdsc, ceph_inode(in=
-ode),
-> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> index 63e0e2aa1ce9..3098306e6173 100644
-> --- a/include/linux/ceph/libceph.h
-> +++ b/include/linux/ceph/libceph.h
-> @@ -313,8 +313,7 @@ int ceph_wait_for_latest_osdmap(struct ceph_client *c=
-lient,
->
->  /* pagevec.c */
->  extern void ceph_release_page_vector(struct page **pages, int num_pages)=
-;
-> -extern void ceph_put_page_vector(struct page **pages, int num_pages,
-> -                                bool dirty);
-> +void ceph_put_page_vector(struct page **pages, int num_pages);
->  extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
->  extern void ceph_copy_from_page_vector(struct page **pages,
->                                     void *data,
-> diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
-> index 858359873c4d..828b003aa2fc 100644
-> --- a/net/ceph/pagevec.c
-> +++ b/net/ceph/pagevec.c
-> @@ -10,15 +10,12 @@
->
->  #include <linux/ceph/libceph.h>
->
-> -void ceph_put_page_vector(struct page **pages, int num_pages, bool dirty=
-)
-> +void ceph_put_page_vector(struct page **pages, int num_pages)
->  {
->         int i;
->
-> -       for (i =3D 0; i < num_pages; i++) {
-> -               if (dirty)
-> -                       set_page_dirty_lock(pages[i]);
-> +       for (i =3D 0; i < num_pages; i++)
->                 put_page(pages[i]);
-> -       }
->         kvfree(pages);
->  }
->  EXPORT_SYMBOL(ceph_put_page_vector);
->
-> ---
-> base-commit: 30c0913a2b44a66dc17283a88489b3f3e12f4327
-> change-id: 20260809-ceph-put-page-vector-458bb3aa87f6
->
-> Best regards,
-> --
-> Tal Zussman <tz2294@columbia.edu>
->
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 Hi Tal,
 
-I'd suggest getting rid of ceph_put_page_vector() altogether -- it's
-pretty confusing to use it to put something that wasn't allocated with
-some ceph_*_page_vector() helper.  It looks like ceph_put_page_vector()
-was paired with ceph_get_direct_page_vector() which is long gone.  The
-put_page() loop and kvfree() could be done in that single caller.
+Patches 5 and 8 remove wait_on_page_writeback(), thp_size() and
+thp_order() from mm/, but those helpers are still used by f2fs,
+mm/filemap.c, and mm/folio-compat.c — removing them would break those
+users.
 
-As I was looking into this, I think I spotted a related memory leak in
-ceph_netfs_issue_read().  On the fscrypt path, the "page vector" coming
-from iov_iter_get_pages_alloc2() isn't put in case of EIO caused by
-ceph_inc_osd_stopping_blocker().  Alex, please take note.
+Could you split this into two series? The ceph-only conversion (patches
+1-4, 6-7, 9-12) can go through the ceph tree once we drop those two
+patches. The mm/ helper removal is a separate effort that needs to
+coordinate with f2fs and the mm maintainers after all other users are
+converted.
 
-Thanks,
+--
+Alex Markuze
 
-                Ilya
