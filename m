@@ -1,104 +1,124 @@
-Received: from oss.cyber.gouv.fr (oss.cyber.gouv.fr [51.159.188.251])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oa1-f48.google.com (mail-oa1-f48.google.com [209.85.160.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 322E11AAE17;
-	Sat, 15 Aug 2026 21:47:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=51.159.188.251
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 615D54B049B
+	for <ceph-devel@vger.kernel.org>; Sun, 16 Aug 2026 00:01:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786830455; cv=none; b=VURpacc1E4TwTQfTtPbLKQ4A2a0u6J8xFbUXt4VYSLxPOUOjz6Me2n6zR+ayoc2aMKUtsIWSdnWOl55sRoHBcLpWKRyqZK1aD3iuytHs4Y2Uf79EGxRFywxEPw7JK3At4dI47BeDf6vXR4MLbVUQjcOAB8dTpMqpVn8XqADgpag=
+	t=1786838499; cv=none; b=Fqj744cMiZDxbbe9FWEIv7CkTub2T6pDuz0ZQmOxcUbO+d/hqmSspa2WtWxjSMJ7F7n/3uTYRditDf90emmLqH/kHCTEPxDWqSuPRWQZZdrU/Ssg8TVn/X3r/2YvukfwgXayVsvmuPN5d77iZVe+z+jn131+gTHJAPh4II3ohXg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786830455; c=relaxed/simple;
-	bh=HouKsMFIJ8sRiLHwkAQ0SwErECri/VP48EHO7lHubZY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=dPbW34RKkRIVHZ0LDEBpiOAOddO4zxayR6ddMnfM4ucYWc3RXQfc9cVSuvH32A4M0JlP9PvLtvdxoFPrAmHnHYPfMsM7rliQ48SuCE+rj2534tF2uyfJpcG/locvy66x5Z5zLVPlL7Upp0p6p6ITr7mzvgp7tQPkLC0rOkSg/Tk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.cyber.gouv.fr; spf=pass smtp.mailfrom=oss.cyber.gouv.fr; dkim=pass (2048-bit key) header.d=oss.cyber.gouv.fr header.i=@oss.cyber.gouv.fr header.b=DaWwG4nL; arc=none smtp.client-ip=51.159.188.251
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.cyber.gouv.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.cyber.gouv.fr
+	s=arc-20240116; t=1786838499; c=relaxed/simple;
+	bh=GLv7MLH1JWc+5XrUg1Z1RvY7w8aG92a4ZA0fo54R1DI=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=KUBJYTuHl5G0fswrJrZFwhR8GAsssWbishK0Ug9VUKLyagtMzX/WqUl2y/SShghLu9q57ibrfNcKXss2SoJYAWvpvDiWQ33+QvF1p2eCU3tpj1xs5zWtgcDQBnbNFfj5eBdA4EPSrsBuE1ONK9MxtCUHZy1SP/n1FbzVbcsKRi4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20251104.gappssmtp.com header.i=@kernel-dk.20251104.gappssmtp.com header.b=qDO2y/Ef; arc=none smtp.client-ip=209.85.160.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oss.cyber.gouv.fr header.i=@oss.cyber.gouv.fr header.b="DaWwG4nL"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=oss.cyber.gouv.fr; s=default; h=Content-Transfer-Encoding:Content-Type:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-	List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=MJ82pnxCBak2LEmofTlMja6zrnfJnVH/u1eSuMJvJv0=; b=DaWwG4nLs1GWvre5Zwkewy39B7
-	PLtPX/3qQS+hydTcyvYzkl3D9q53yAJ3Ei5+QTg2rES2Gigi00gwz+fw34gPR1XI8ntFt/NN3j/F6
-	JZVVXzT5/wsdZmukM9ky6Ql0J+DNUqrOPMpBpsp9SL1mtxr8INW9ADnjWnKNqPTzLgfe3Dwzi4KgK
-	HNjcrS2V61nt3RIviyVwAdQM+l32+IIXcnMt/91mk8NwhJqzVwccCsPTFwNEGqhSUwXkv2yx7uH3a
-	R7TkRHIjYSq/mzVIbyU8pRIIjrOvA/jm4dN/9uUbAD70aeOsh6SIaONTMkZHVX4V9o0tvjeN5ScfN
-	9GywxSmw==;
-Received: from [151.115.150.205] (port=52920 helo=gepetto..)
-	by pf-012.whm.fr-par.scw.cloud with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.99.5)
-	(envelope-from <Jeremy.Jean@oss.cyber.gouv.fr>)
-	id 1wvME4-00000006LiR-0Z33;
-	Sat, 15 Aug 2026 23:47:31 +0200
-From: =?UTF-8?q?J=C3=A9r=C3=A9my=20Jean?= <Jeremy.Jean@oss.cyber.gouv.fr>
-To: idryomov@gmail.com
-Cc: amarkuze@redhat.com,
-	slava@dubeyko.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	=?UTF-8?q?J=C3=A9r=C3=A9my=20Jean?= <Jeremy.Jean@oss.cyber.gouv.fr>
-Subject: [PATCH] libceph: reject buckets with mismatched CRUSH ids
-Date: Sat, 15 Aug 2026 21:46:37 +0000
-Message-ID: <20260815214636.269617-2-Jeremy.Jean@oss.cyber.gouv.fr>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (2048-bit key) header.d=kernel-dk.20251104.gappssmtp.com header.i=@kernel-dk.20251104.gappssmtp.com header.b="qDO2y/Ef"
+Received: by mail-oa1-f48.google.com with SMTP id 586e51a60fabf-4472500e25fso1356463fac.1
+        for <ceph-devel@vger.kernel.org>; Sat, 15 Aug 2026 17:01:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20251104.gappssmtp.com; s=20251104; t=1786838496; x=1787443296; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:date:message-id
+         :subject:references:in-reply-to:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=ZPPcb+6L1tSSLsANqwKI7loeM1EwHu96h0gKbDhNEvI=;
+        b=qDO2y/EfO1t3CC7NC3XoESwjR8/JgFZ75ERzn4KAiUkKS4Oq4LyMLiMaVem3HyPUzC
+         aiNiTPv18jaYEhX6LQAYyQDYxeVvX13XDEd7o06Ae1cG82j1gRfcc5nKchSIyjf/xPO/
+         BDRjJknqIe9XGJl1u9HX3s/6rqC6VjQ8vJpAeZWMllAOjnAM9EW082zCSHUFnbzqI5Gv
+         dNPjKNg/FBcOzL4s92Bh5XGc8MBeo7x4edRS9J9uOaROxmsszLVgYjfDmT2Wm0m4URBz
+         cFeCpY3XBU/f0+RUjPeaUofSMUmLfA5JewUZ8Bkh3heeQ1qmygZORMw4+uvO42ImRYcJ
+         wJGA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786838496; x=1787443296;
+        h=content-transfer-encoding:content-type:mime-version:date:message-id
+         :subject:references:in-reply-to:cc:to:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ZPPcb+6L1tSSLsANqwKI7loeM1EwHu96h0gKbDhNEvI=;
+        b=iUQhqAW932aizzAtzGoP2qytW2Kd3X5OLGVw23pRNAm8Dkm/NEIBkM+C6jn/O2fb0C
+         3JJJUVOtF3N3EfqUZLn7/QD+FVwyhEJ2tNgWeadX9kQz9XVvNMmEXHZpC574VUalMO9z
+         EvLhuNPnKvIex/Hib4CYO8X5VGcpoCRJcOCPw6cVyL45e9sNj7haAJLbCpScKqy4XfjE
+         Eyn6t243OxdF8aJ3Uo3nVUrwh1YFi6WXstL67VNYk0pLPk7t2/MBz3bRZzE5KfiSmlhq
+         kOU8Isy8DY2yRmhyiL9JZc9A08/RERMECoHUxe/SqsuedpMcF7Q0GNxXliUQPMzFI8r7
+         C82A==
+X-Forwarded-Encrypted: i=1; AHgh+RrCXjd5vQ2cWtxQQbAfE7QXwpIvmw5kt5nheq2R8UCADfGM021FvustHLQIYD1DKFo0W6ZK8rfGqm5n@vger.kernel.org
+X-Gm-Message-State: AOJu0YyvwyfPo8XOS+/L7lnZEuchjb+LY3m9OPoIr9ufsNjhoQMs/LIt
+	xQYbpHyUasNvJbu0Gr7C0GdnIgijHNigejKPD4rOnoxUAf98pMf3HbtfVNXWx2a5Gco=
+X-Gm-Gg: AR+sD10APQhmZ0bG6nJXuIOtAvBFjnxlrKvSz0VP9MdIgxTkZhlGhCkBnJsxD936mvS
+	/BKuea1+R85URYw9dVfRP5FBz5Jek+T2P9gtOw7eMLfL0pFdcc7aWqo0fj4zU1soNF27gNKnNMK
+	RUM1/S4OYfUSLvJUpe7fdpBPDvdYewMmDXtiOjrw6USmIs5NpL4L4b/9ExjhgZKLzbkZDgUBezQ
+	AgiNnJOlzXDdVa3dvKJnZZ5NVeuFkj4kLP82IGXnPvJikKF+Gc/kUP3tsQOzknPC2q3iMSDDT7c
+	1G1zTXefztFFph4t70wTFS90hpa6WIwqTep9zj7M//TOdRqZzN8Zgd+BvAqNSHImvPqA+NYiwI3
+	0Ccf+8DYbgvgw7C8T49ZPYVRb+nVM5/Gm4iL9bKG4RX4vniwGr3W1QIGiI4lv6fmdYoX0WTu7jZ
+	td6/9Gct69WHyaUDhAWy6w7JV3d2tzmx4ckYP54lJjviBrNooYmXoXiYMcx4S3fkRP8Qzb0OrCG
+	nnthlLxHMeOaGEOKxILKUyCVV76z7Dt+6ge+PuLUg==
+X-Received: by 2002:a05:6808:23d4:b0:4a4:ddde:5207 with SMTP id 5614622812f47-4b24198f27dmr12801839b6e.8.1786838496365;
+        Sat, 15 Aug 2026 17:01:36 -0700 (PDT)
+Received: from [127.0.0.1] ([198.8.77.157])
+        by smtp.gmail.com with ESMTPSA id 5614622812f47-4b24d92462dsm4347729b6e.5.2026.08.15.17.01.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 15 Aug 2026 17:01:17 -0700 (PDT)
+From: Jens Axboe <axboe@kernel.dk>
+To: Keith Busch <kbusch@kernel.org>, Christoph Hellwig <hch@lst.de>, 
+ Sagi Grimberg <sagi@grimberg.me>, linux-block@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, linux-nvme@lists.infradead.org, 
+ linux-fsdevel@vger.kernel.org, io-uring@vger.kernel.org, 
+ linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, 
+ linaro-mm-sig@lists.linaro.org, Pavel Begunkov <asml.silence@gmail.com>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, 
+ Christian Brauner <brauner@kernel.org>, 
+ Andrew Morton <akpm@linux-foundation.org>, 
+ Sumit Semwal <sumit.semwal@linaro.org>, 
+ =?utf-8?q?Christian_K=C3=B6nig?= <christian.koenig@amd.com>, 
+ Nitesh Shetty <nj.shetty@samsung.com>, Kanchan Joshi <joshi.k@samsung.com>, 
+ Anuj Gupta <anuj20.g@samsung.com>, Tushar Gohad <tushar.gohad@intel.com>, 
+ William Power <william.power@intel.com>, 
+ Phil Cayton <phil.cayton@intel.com>, Damien Le Moal <dlemoal@kernel.org>, 
+ Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>, 
+ Mikulas Patocka <mpatocka@redhat.com>, 
+ Benjamin Marzinski <bmarzins@redhat.com>, 
+ Vishal Verma <vishal.l.verma@intel.com>, David Sterba <dsterba@suse.com>, 
+ Ilya Dryomov <idryomov@gmail.com>, dm-devel@lists.linux.dev, 
+ nvdimm@lists.linux.dev, linux-btrfs@vger.kernel.org, 
+ ceph-devel@vger.kernel.org, Jason Gunthorpe <jgg@ziepe.ca>
+In-Reply-To: <cover.1785596451.git.asml.silence@gmail.com>
+References: <cover.1785596451.git.asml.silence@gmail.com>
+Subject: Re: (subset) [PATCH v5 00/16] Add dmabuf read/write via io_uring
+Message-Id: <178683847578.1984298.10059277109543676478.b4-ty@b4>
+Date: Sat, 15 Aug 2026 18:01:15 -0600
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - pf-012.whm.fr-par.scw.cloud
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - oss.cyber.gouv.fr
-X-Get-Message-Sender-Via: pf-012.whm.fr-par.scw.cloud: authenticated_id: jeremy.jean@oss.cyber.gouv.fr
-X-Authenticated-Sender: pf-012.whm.fr-par.scw.cloud: jeremy.jean@oss.cyber.gouv.fr
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.15.2
 
-crush_decode() stores bucket data by array slot, and the mapper later
-derives the per-bucket workspace index from the decoded bucket id. A
-malformed map can therefore make one bucket reuse another bucket's
-workspace by encoding an id different from -1 - slot.
 
-For uniform buckets, the second replica selection expands the source
-bucket's permutation into that aliased workspace buffer. If the source
-bucket is larger than the aliased bucket, the write runs past the smaller
-permutation array and can escape the kvmalloc'd CRUSH workspace. KASAN
-reports a slab OOB write of 4 bytes in bucket_perm_choose().
+On Sat, 01 Aug 2026 16:46:12 +0100, Pavel Begunkov wrote:
+> The patch set allows to register a dmabuf to an io_uring instance for
+> a specified file and use it with io_uring read / write requests. The
+> infrastructure is not tied to io_uring and there could be more users
+> in the future. A similar idea was attempted some years ago by Keith [1]
+> (from where I borrowed a good number of changes). Later it was brough
+> back up to life by Tushar and Vishal.
+> 
+> [...]
 
-Reject buckets whose encoded id does not match their array slot. Valid
-CRUSH maps already use the canonical negative id corresponding to the
-bucket slot, so this restores the invariant expected by
-work->work[-1 - in->id] without changing valid map behavior.
+Applied, thanks!
 
-Fixes: 66a0e2d579db ("crush: remove mutable part of CRUSH map")
-Assisted-by: Codex:gpt-5
-Signed-off-by: Jérémy Jean <Jeremy.Jean@oss.cyber.gouv.fr>
----
- net/ceph/osdmap.c | 2 ++
- 1 file changed, 2 insertions(+)
+[05/16] block: move bvec init into __bio_clone
+        commit: e228404b05c8293f6a1286856e49ba3e55da1933
+[06/16] block: introduce bio_iov_iter_set()
+        commit: 8b8755e00847da1027fe6624277e43d289e2300e
 
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index a4b0dd8672ec..9c89f6602dff 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -517,6 +517,8 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 
- 		ceph_decode_need(p, end, 4*sizeof(u32), bad);
- 		b->id = ceph_decode_32(p);
-+		if (b->id != -1 - i)
-+			goto bad;
- 		b->type = ceph_decode_16(p);
- 		if (b->type == 0)
- 			goto bad;
+Best regards,
 -- 
-2.47.3
+Jens Axboe
+
+
 
