@@ -1,220 +1,223 @@
-Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-00364e01.pphosted.com (mx0b-00364e01.pphosted.com [148.163.139.74])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B323429CEE
-	for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2026 13:27:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.41
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786973264; cv=pass; b=iVzJzqD/6I9DzdkXmGz6v+qYVBWGfbLVJ4RJ8K29tQZtW2OdFjIxU2A9WACKXOgAy+pSSacszCt0owJd2pmoLLyS9lgNKURtTyQHvdI2rEj70n36zHX55Cg8rjiLctGDe5yKId/QQdrxxCPbDy9ekIBPkh1QhcpqTTh8+oyWPis=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786973264; c=relaxed/simple;
-	bh=1DlLwTW104OszDT/1II5RPaSBCaItMuBX3O6KwNsB5w=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=sBRKMng+UGTzLoPLlkTuo4TgtkGoQu27ynQaEMEyGva/gQwsUy3W17lFB1qw0uxEvs5sLd2OD6erIoWbtim/p3ErIQiTnjkTZrvmIVUt9xnXYz1/SGKhtMXrodERuf2Op+ULFg+85m82uYC5+Hu6377KvhD4nK8lu6zNvaHLN5M=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aFjYFU1t; arc=pass smtp.client-ip=209.85.208.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E62412FB084
+	for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2026 19:15:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.139.74
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786994125; cv=none; b=pyO6xsjIKOGeFkjFAEdqXdb8sDTN+j4E+cf6n1V+q1QOABxl18ffrO6/12vRScdt/8LnIKqNJ7EonlBnMd5AJu0h77txAycpVNIaQu4OIrDsGaUnzwOvx3C+dpIn2EAE2/25pZCkOrNh+QYWrkIQTcf/LFsCkXa1QT3VcSiGIgc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786994125; c=relaxed/simple;
+	bh=qVTLNDcbt+fJaFQvv2N1X2GXRE68u458QdYuIn9iM4c=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=Xa1WS0Zm+ef8oF0422FEnNwnbIjvwVdNx+HLi65m8bzfsFg035odcyFsmMbX67pcy0NSnFoElMo1CJ671cozMvYzLbnrQRl2X1r3qE2y+lkRSSXMmlVL+Y06r2HwuyR/fT3MasyCJGyUzjVdUMAjryqC3APE1QxWzmszrP8nmUs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=cgEgAngC; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=aRf9KesZ; arc=none smtp.client-ip=148.163.139.74
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aFjYFU1t"
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-6a18840e2abso5305282a12.0
-        for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2026 06:27:41 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786973260; cv=none;
-        d=google.com; s=arc-20260327;
-        b=Oy9WCRhuPFJGg/jvyGralbKf4ls+nqnALYsywFfS+ZYbrsaXp9ZRKOmv5IPLciqOcb
-         TLIuDDus+eygRuRAyoPGH5IxkqxsNljNvHoJwfHEm53KE16XIvjzfuoBta3Q7emtUrZA
-         183WnljpYFCVc/PaMAtAeQiFv87GHQNeXPR/a9xouw02ctx5DxnWnuY1YkyEtItygA8o
-         1xk14s1UtxYFdKAzg56eQZkIMg2Yyexvb4cIty5Y2vY89hECasVyEMMyeRqP5C7DSD66
-         xAjkGuGLM4YViRMzgWhsGknibHKewdm6nXLSjk2ahUZd0iSO4Fop2pO7UhsjVaOeHo9p
-         pvHQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=5PImzGjw1as2Qy3XGkcxUdLAPTNoN5hAmeBUTq6U/L8=;
-        fh=FqoUDrjl/5akdOOKBUx+sqlcmJKf07RbT9iVh6j2dlE=;
-        b=mekO0JElRE6KsOJB5AE/Uh56GyraO1HdCA7SUZnkOKojFCwiSv3n4ZqwY77N7dhb6O
-         v8bkF6qApWZpEaBljTSz/wjhHLQWSpifqYTfQGE+e2bfUWEbEVV0Jmt4chl8oBIjSBsX
-         ZFUqsqd7pv2GCd5VrbNxo9VZfLh6+EJmDMJDAuRJotMc9PELEQxMYEfOvCKUoYKtuUaA
-         b+VJwzM4FFVarwmsg4PWQRHEGmb2NOaJb4bYAPokc2ggrVceRqQWL9Mrde9bLz+qJfM4
-         sTdE+X0YMDucrTX9hOqphb9dFg7FWyNeAl5AsijZM7uoUh3CsCvrrRR0+AhFA7kJMNlD
-         PD7Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="cgEgAngC";
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="aRf9KesZ"
+Received: from pps.filterd (m0167074.ppops.net [127.0.0.1])
+	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67HIYh9G3664059
+	for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2026 15:15:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=pps01; bh=uByW3kj0cNB59zzwcHQzAIcpQ5
+	hlDdKKnX/d3JEUaiU=; b=cgEgAngC1RHM+L8E6tBdYeQb9iqkzadtLVuGO7mbO9
+	dilB7H3YOGvtt2vHYykmsGIODc1BHasv+wdsMlwcbS0ndqFt5g0i2bsISQifFRRO
+	AvN5cQ74rdLiu2fUcZqjlirXZLEcST2aP7hNlyPjUxI9sAE/rQM/NZydkpRTzuXk
+	1jYW23Pd3Sd2P7p4MUCh6iVRpXjkrAp4rMSHJTvMC07sc4g6b/gGt2i9EXmc5L9h
+	+K2uDiT4VkY82cIdvKXvmBdCBcxvXs7vX1HkdMf11l9sqOKM2Z6sVt1zK8gQ1Ygc
+	uJOo8waAMjVBMOMjpZVQOu2B0ZgOoM8YBnqxD74rd1IQ==
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
+	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4g3mkfnqeg-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2026 15:15:16 -0400 (EDT)
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-934979ee9f1so481337685a.2
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2026 12:15:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786973260; x=1787578060; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=5PImzGjw1as2Qy3XGkcxUdLAPTNoN5hAmeBUTq6U/L8=;
-        b=aFjYFU1tlLPMRER4pipHl3ANVxgkOpp+ndm/NLf7Pq83xOKblowW91NietJHufVnaU
-         mG6fHdWFmqeqE7Za+MQqPL6w4geucj6kn1XHrsbXH9fB5A51lgvvXUgpWIP+3Pf/Kr/6
-         E3yOuOXV2xWiDnVOHp+WQEOghMjyssS26hPeiD6oTng8zPUYOFghMQwJWe0lRL0POps+
-         SuzQa+NquXQZJGM9fqIgYAOg6FkJKEnN6kYmTkEj7Mdz7+EuQF2GKfaT1P53L8FxYxdF
-         9+WaDR8hgyKro9QERMbIB8mymp8IjIl17/FmueYmhk4/X5idZLePC/Umu/42+ULghIi/
-         1Zjg==
+        d=columbia.edu; s=lionmail; t=1786994116; x=1787598916; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=uByW3kj0cNB59zzwcHQzAIcpQ5hlDdKKnX/d3JEUaiU=;
+        b=aRf9KesZKrTIkcsG2kYcy2zQmy52MUCu6NITaGtTRgfjMEqaJcHqUEyvRx7GCIrv/3
+         M914Qwdyg6xJqv4Q0oyUnbu+jo3q2JZkIYZSti1/5WspSssyv3Xd35rWX1+Xe2AcGJlQ
+         CB4i3n1KLUcw3XMfH6Ewb99t4avsex3r8i4vv7bgsZhSXGJJw71LX38IX+/IjiWWOo7Z
+         2eamk9Obqw8PLxtRMXjqwGH67V0/Wr1f3jw6kMY5pLiEoklfQ0EZm8V3whmgqTwq8vSP
+         WE9hYfU3NL8WnBNDus2BKIPXECT+q5bfZk2N4PEjLsov1GmkWfesS6Ok5PImnF0A7RQY
+         wnFA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786973260; x=1787578060;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=5PImzGjw1as2Qy3XGkcxUdLAPTNoN5hAmeBUTq6U/L8=;
-        b=Y0oIsb1OfEk6iLLKBmJo4vhnRnCChwm2aIJFBA5z3BHOY7dWoSG5KkgBsTOvttrUR7
-         baWJWevPubwyZFUSMQJlxzYeqgFfL7xjqthv6ekeyiRT3U/zClITkVJzYWRsSenquHSa
-         sIdfdewPyeLuN1zQ6zEB3+xKRIW2c28QozQDMNu20BAHZipBVokDDQh2qvmEMf7nl7/S
-         GxNaV+9N/c54A4lCIxOVDVTGZPyfchC8eETjjWQHlYOT9qyF3IcczimIO+dE1PlMfJzT
-         byLhNsD0wV1QN1YP56jMpWHiYdFn522/A+yhI0lDHFCfNOo2QXaEKFmeS9OSJ3UzeBNf
-         TkgQ==
-X-Forwarded-Encrypted: i=1; AHgh+Rp0fy6fQ+FHYoSwSy5sTyJZ+02KUJAW+fM7jpW/UYCBAoP3jJA0mGOArp7EqmxSN9Oxd8wUkUG6Easj@vger.kernel.org
-X-Gm-Message-State: AOJu0YyeGZX2HOk7DoLai8Tjm2nzbGWwjVzlI8hDhbIMrzxWnFIrhXg4
-	xrrJGKW4U+wkCViLLBuAFITFiCHGSakDmc/bvR200eQ8MtaklBdYlS5RFvNny8dqzpoK2MyTZC3
-	PxOZn39ssBxLC50CSeb5jR9GaVcXq2bM=
-X-Gm-Gg: AR+sD119f8bwJ1wrfbUvtOMFs1unv2nfXqlegpm8ZWpE3QNgNsw5X8V+dszhtNJXVFl
-	bPoboivl1LYEJrrg+YAw8nH6kwADyWUv9vGi+wFgksU2TB6Jt77qfGaqENtF60Q60r5c+rrdQYY
-	LTjs16nPwzzfB7jbhr14cri3hjLenZ819TMy6ywPx5WwsRo89QJ/701XwV8LjNcDCsXyTPRXsYW
-	dfzBriyLiPfykMDaAsrNcJI0p6bkDM/92szE5d67oQp+g1oIcnfQ6TDfPTujIIaz3OdnSzdT8k+
-	cXprnRA2Q97J55JNOduo/vxU/f3CYqV2nZ8R8pB8YbsfzA==
-X-Received: by 2002:a17:907:5c2:b0:c16:1227:e3d8 with SMTP id
- a640c23a62f3a-c2129c1bd00mr1250866166b.13.1786973259962; Mon, 17 Aug 2026
- 06:27:39 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1786994116; x=1787598916;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=uByW3kj0cNB59zzwcHQzAIcpQ5hlDdKKnX/d3JEUaiU=;
+        b=owHCuGGZZsgy9tmID8U7lfwlOvg70aN5sPtWqC3MYEg03f4GbQiN2hmHJk29FkO5b4
+         //lcZ4gaOQx+HMR5gTOnDs4LX8+mlYLaNPkUMFLHYLu3iGwbYBZ4eLjrpgjSgh/JWAED
+         DykOeXh85SiKLXJ/JFqjv5PRUWiI/5/4vssXeJ8XqsjDRgrYIqiJ2xBsBxKciH0Y9aei
+         0vxJH0WWYs9nwsvMDjrt3Soz/JalMrv4c0C7IY+b7ImrBH6k11tqmZCT6uvN+MvdvRyD
+         XJoTJEkpVd6RNzs5bCgSZfrX5mK3vauugcR/HD/mACw6D7yC5LZatCCdKPHxn740Betq
+         dFHw==
+X-Gm-Message-State: AOJu0YykOBXWGIwV6meGq57fYuV9xjIewuIPPE2jgGHofUBxcT4lOPuG
+	iAjTI5Jm0m8HtjrZSHYd6X8uTsPotVoByb4NtbaasnTfPG1Or5/xW/dxcLjKWJ9hQq+x0vgOAk0
+	z91h18iRiLnubyez2GXLdMifU4u7dg3TMP7RbveygdkwvU+fxYRVlwoDSU6U=
+X-Gm-Gg: AR+sD10tYn9up3XWyN+aUyAiPYjmd5W7Vu78vFFUUOgzixZE7/pk873Be5jZ5fpEPRc
+	N5TMg8i9fGyguiuJoZcvyKNPHhxfWja1XOLOvgZJvRv3rF3FdeAH6WufEQS9F72CUcq5SYmIMzr
+	efpA80sSu2MfXzM4NXFv2jVpVNYhjKuxKM4Zl6GvliyFAvgEFzqeCTdRMpjSFKj/ApTZrmpewH5
+	eVOkfu5UMT3R92+AxF/4MQjGmdNd6LURRxwxZ638s9nHia3GBb8WA204uABOYS3M20m8FsAtCGh
+	gQBCiwEqfSjK2AOhzSvJnlrXCrC+M2Wmc9B9S6D8KB+t/LlPre4c8fsYkjrJOH25W0/vJAJ63Kr
+	7E4suA7dI
+X-Received: by 2002:a05:620a:aa08:b0:92e:db1f:185c with SMTP id af79cd13be357-936d2355b08mr2578316785a.43.1786994115627;
+        Mon, 17 Aug 2026 12:15:15 -0700 (PDT)
+X-Received: by 2002:a05:620a:aa08:b0:92e:db1f:185c with SMTP id af79cd13be357-936d2355b08mr2578304685a.43.1786994114838;
+        Mon, 17 Aug 2026 12:15:14 -0700 (PDT)
+Received: from [127.0.1.1] ([77.137.67.107])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-499961098cdsm194692085e9.6.2026.08.17.12.15.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 17 Aug 2026 12:15:13 -0700 (PDT)
+From: Tal Zussman <tz2294@columbia.edu>
+Subject: [PATCH v4 00/10] ceph: convert writeback path to folios
+Date: Mon, 17 Aug 2026 14:55:16 -0400
+Message-Id: <20260817-remove-wait-on-page-writeback-v4-0-0e5e53d47eb0@columbia.edu>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260803012648.2195405-1-neilb@ownmail.net> <20260803012648.2195405-4-neilb@ownmail.net>
- <CAJfpegs-k3skRGiwZvQLzD7OrAK4KL8zwmpmJKyjRHSQ-rqX+Q@mail.gmail.com>
- <178642552869.2852630.11443303758249822243@noble.neil.brown.name>
- <178675372176.2852630.1305553887009521382@noble.neil.brown.name> <oh2lg2agqxwqopecacq6sfdnky5faxidwsybkvbwbq24r6tw6o@4swfog5ocwwb>
-In-Reply-To: <oh2lg2agqxwqopecacq6sfdnky5faxidwsybkvbwbq24r6tw6o@4swfog5ocwwb>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 17 Aug 2026 15:27:28 +0200
-X-Gm-Features: AcwNN1XGT7C9D5visKW_eW7eV24-4iD41ayTDyPPniVL030x1LtgVNaa9P7WcV8
-Message-ID: <CAOQ4uxgtKvKmPaK8rPAZDSwu0Hr9JAmqJi0a1VX_Rg7jDo8HrQ@mail.gmail.com>
-Subject: Re: [PATCH v1 03/12] fsnotify: don't hold a spin_lock across
- fsnotify_recalc_mask() calls.
-To: Jan Kara <jack@suse.cz>
-Cc: NeilBrown <neil@brown.name>, Miklos Szeredi <miklos@szeredi.hu>, Ian Kent <raven@themaw.net>, 
-	Chuck Lever <cel@kernel.org>, Jake Edge <jake@lwn.net>, Ilya Dryomov <idryomov@gmail.com>, 
-	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
-	Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, 
-	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
-	Andrew Morton <akpm@linux-foundation.org>, Miklos Szeredi <mszeredi@redhat.com>, autofs@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, 
-	codalist@coda.cs.cmu.edu, linux-fsdevel@vger.kernel.org, 
-	linux-nfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIABRZg2oC/43Oy27CMBQE0F9BXuPq+hEnYsV/IBZ+3MAtECM7M
+ a1Q/r0O3aAKiS5HGp2ZO8uYCDPbrO4sYaFMcahBr1fMH+1wQE6hZiZBGuhA8oSXWJDfLI08Dvx
+ qa+WWaERn/Yl3CN61xgTtW1aNa8Kevh7+bv+b8+Q+0Y8LujSOlMeYvh8Hilh6/90qggM3XjXBO
+ GWDMlsfz9PFkf3AMLFlrshnUL8DZQU70YN1YBrZ6RegegIFvANVBUNoGyVa0L38+3Ce5x9vt6w
+ kgQEAAA==
+X-Change-ID: 20260802-remove-wait-on-page-writeback-8e0cb766d4c7
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
+        Viacheslav Dubeyko <slava@dubeyko.com>,
+        "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        Jan Kara <jack@suse.cz>, Andrew Morton <akpm@linux-foundation.org>,
+        David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
+        "Liam R. Howlett" <liam@infradead.org>,
+        Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>,
+        Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>,
+        Zi Yan <ziy@nvidia.com>, Christian Brauner <brauner@kernel.org>,
+        David Howells <dhowells@redhat.com>, Jeff Layton <jlayton@kernel.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+        Tal Zussman <tz2294@columbia.edu>, Sashiko <sashiko-bot@kernel.org>
+X-Mailer: b4 0.14.3-dev-d7477
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1786992937; l=3475;
+ i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
+ bh=qVTLNDcbt+fJaFQvv2N1X2GXRE68u458QdYuIn9iM4c=;
+ b=YF0CAtusldpvdNFh8yT893tshJfP33e71vJS/zp9Vyv5PiufZBdZxAi16AvQVuq0GUUWC20VS
+ /B4v9H2a8PNB9uBQuLwzJLJsesUtNCcC4r5QOysYJvEWLuOWP5opkIY
+X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
+ pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODE3MDE0NyBTYWx0ZWRfXzoyh4rR4Ex/p
+ cBgz6hNBYue+FmhGyA9xHj9nGCZPMAclD+AGzaG9uTG7tqvBKbkwVj098Hvxefafhny7QnaSzy1
+ jkDbMRlQEuvg/7c/LBmfZgqoeeG3RJ60VMt9Mx+7b4QhoxhjpGH/
+X-Proofpoint-ORIG-GUID: l1ZhQD3buP0OFx7cdn2R0WIA93UB7Bxx
+X-Proofpoint-GUID: l1ZhQD3buP0OFx7cdn2R0WIA93UB7Bxx
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODE3MDE0NyBTYWx0ZWRfX+WaoYdLZkkqh
+ qxEMbN788g8he2hkgW6N1UGwQ1KfD37SK54dQMIxRGEpbDCvcwC6OCQaz/6LStQv8NTqIqC3V48
+ 9ua9gePCeBpEQ8yWURLy2x7gUI+q/TCrX4+7QZjxVnMpnoMeJn8skZ7Mp6ZxqCTfXXqw9ioYQvY
+ HREWu0CWNZ13FW59D+qH9ODulDo/WfxNY6VeHRx31wipVs1+SHL5btAChwN2dQhjq1i2cZCcIOv
+ VoRRr1hXeRpor0FMTbwIaOu69gDpDIX4fFolxKIoQyV9EXxZ9RDAN9Emocd6v2Mf9eDfjf+eFpg
+ 7xeYj5JMNJw8f1ZPTCllQTqqbNYN3WgMJQVOs+Nzv6jTdnTedpbbuqEz5nnwEhWj8UcK+6dt0j3
+ atxAz8DCSrRkVBhstV3pyE9JHCakkKNzLTrWJqF+170IKfEWoNENms5psQ+ScK6vr3v4Kj2r1eh
+ nkumEDUqHxImKLUCHyA==
+X-Authority-Analysis: v=2.4 cv=C+vZDwP+ c=1 sm=1 tr=0 ts=6a835dc4 cx=c_pps
+ a=HLyN3IcIa5EE8TELMZ618Q==:117 a=+gpNN1aRt999K7yrv1sWlQ==:17
+ a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10 a=x7bEGLp0ZPQA:10 a=A0y_DWxS2BwA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=azVShVRs0zEubeQ0wG0L:22
+ a=NEAV23lmAAAA:8 a=VwQbUJbxAAAA:8 a=K5e0w50Y35hYhEYsqgEA:9 a=QEXdDO2ut3YA:10
+ a=bTQJ7kPSJx9SKPbeHEYW:22
+X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11878
+ signatures=596817
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 malwarescore=0 lowpriorityscore=10 impostorscore=10
+ priorityscore=1501 phishscore=0 bulkscore=10 clxscore=1015 adultscore=0
+ spamscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
+ adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2608170147
 
-On Mon, Aug 17, 2026 at 1:03=E2=80=AFPM Jan Kara <jack@suse.cz> wrote:
->
-> On Sat 15-08-26 10:28:41, NeilBrown wrote:
-> > On Tue, 11 Aug 2026, NeilBrown wrote:
-> > > On Tue, 11 Aug 2026, Miklos Szeredi wrote:
-> > > > On Mon, 3 Aug 2026 at 03:39, NeilBrown <neilb@ownmail.net> wrote:
-> > > >
-> > > > > @@ -116,11 +117,15 @@ static int dnotify_handle_event(struct fsno=
-tify_mark *inode_mark, u32 mask,
-> > > > >                 else {
-> > > > >                         *prev =3D dn->dn_next;
-> > > > >                         kmem_cache_free(dnotify_struct_cache, dn)=
-;
-> > > > > -                       dnotify_recalc_inode_mask(inode_mark);
-> > > > > +                       need_recalc =3D true;
-> > > > >                 }
-> > > > >         }
-> > > > >
-> > > > > +       if (need_recalc)
-> > > > > +               need_recalc =3D dnotify_recalc_inode_mask(inode_m=
-ark);
-> > > > >         spin_unlock(&inode_mark->lock);
-> > > > > +       if (need_recalc)
-> > > > > +               fsnotify_recalc_mask(inode_mark->connector);
-> > > >
-> > > > Is the fsnotify_group_lock() held in this case?   I don't see it.
-> > >
-> > > It isn't held.  Doesn't it need to be...
-> > > It seems to protect marks, so maybe it does.
-> > >
-> > > srcu seems to be used to protect this section, so maybe we can rely o=
-n
-> > > that.
-> >
-> > I dug into this some more, and we do rely on srcu, but don't need the
-> > extra code below.
-> > inode_mark->lock doesn't protect inode_mark->connector, so moving the
-> > dereference out of the lock has no effect.
-> > srcu_read_lock is taken before we get the ref to the mark, so the mark
-> > and the connector cannot disappear underneath us.
-> > A race could result in inode_mark->connector reading as NULL, but
-> > fsnotify_recalc_mask() checks for NULL, so there is no risk for harm.
-> >
-> > Thanks for encouraging me to dig into this.
->
-> Sorry for not replying earlier but I was on vacation. The lifetime rules
-> around marks & connectors are subtle so we have to be really careful and
-> dnotify with its single shot marks is peculiar which makes things even
-> harder. fsnotify_recalc_mask() has a comment about locking in front of it=
-:
->
-> /*
->  * Calculate mask of events for a list of marks. The caller must make sur=
-e
->  * connector and connector->obj cannot disappear under us.  Callers achie=
-ve
->  * this by holding a mark->lock or mark->group->mark_mutex for a mark on =
-this
->  * list.
->  */
->
-> and you very obviously start violating these rules with your changes. Now=
- I
-> admit I've forgotten all the details why I did it like this so let me
-> reconstruct it :).
->
-> Connector stays alive as long as there's any mark in its list. Both marks
-> and connectors are protected by the srcu. Mark also has
-> FSNOTIFY_MARK_FLAG_ATTACHED flag which is set iff the connector->obj is
-> pointing to valid inode/mount/... FSNOTIFY_MARK_FLAG_ATTACHED changes onl=
-y
-> under mark_mutex so that's why mark_mutex is stabilizing the connector (a=
-nd
-> also connector->obj). This is what is used by most places calling
-> fsnotify_recalc_mask(). But dnotify needs to mess with notification mark
-> mask from event handling and there we cannot take mark_mutex due to lock
-> ordering constraints. That's where the mark->lock rule comes into play
-> because mark->lock also needs to be acquired to clear
-> FSNOTIFY_MARK_FLAG_ATTACHED. That being said this dnotify use of
-> fsnotify_recalc_mask() still looks somewhat racy because
-> dnotify_handle_event() can get called after FSNOTIFY_MARK_FLAG_ATTACHED i=
-s
-> cleared.
->
-> Anyway if you move fsnotify_recalc_mask() call outside of mark->lock, you
-> seem to make the race with dnotify clearing the mark from
-> fcntl_dirnotify() easier to hit. Now in the notification path the inode
-> itself is guaranteed to stay alive and the rest is protected by the SRCU =
-so
-> there's no direct UAF. But fsnotify_recalc_mask() simply isn't prepared f=
-or
-> the connector changing under it due to object getting detached and so we
-> could end up doing weird things like NULL ptr derefs or similar stuff.
->
-> So this call to fsnotify_recalc_mask() from dnotify needs a more careful
-> handling. Which is sad because I doubt anybody still uses dnotify...
+Convert ceph's writeback path to work on folios. These conversions
+eliminate the last callers of three mm compatibility APIs:
+wait_on_page_writeback(), thp_size(), and thp_order(). Their removals
+will be sent separately once the conversions land, per Ceph maintainer
+request.
 
-Maybe this is the way out.
+This also fixes a couple pre-existing issues discovered by Sashiko
+along the way.
 
-dnotify_recalc_inode_mask() can only remove bits from i_fsnotify_mask,
-so it is an optimization.
+Some page <-> folio boundaries are deliberately left in place where
+ceph borders on some gnarlier page-based APIs:
 
-If we just remove fsnotify_recalc_mask() call from
-dnotify_recalc_inode_mask(), then i_fsnotify_mask will be updated when
-dnotify_mask gets removed eventually.
+- libceph's OSD data plane is page-array based, so ceph_writeback_ctl's
+  pages[] and osd_data->pages[] remain struct page arrays. Folios are
+  converted at the array/libceph boundary.
 
-If nobody uses dnotify, noone is likely to notice the loss of the optimizat=
-ion.
+- fscrypt's bounce page API remains page-based for some functions
+  (fscrypt_encrypt_pagecache_blocks(), fscrypt_finalize_bounce_page()).
+  Possibly-bounce array entries are unwrapped to their pagecache folios
+  via fscrypt_pagecache_folio().
 
-Thanks,
-Amir.
+This series is based on the ceph-client testing branch [1].
+
+[1] https://github.com/ceph/ceph-client/tree/testing
+
+Signed-off-by: Tal Zussman <tz2294@columbia.edu>
+---
+Changes in v4:
+- Rebase onto the current ceph-client testing branch
+- Drop the two mm patches removing wait_on_page_writeback(), thp_size(),
+  and thp_order(), per Alex
+- Patch 2: wait for the pending fscache write before bumping the
+  writeback congestion count and allocating the OSD request, per
+  Sashiko
+- Link to v3: https://lore.kernel.org/r/20260810-remove-wait-on-page-writeback-v3-0-dd7531704f26@columbia.edu
+
+Changes in v3:
+- Add patches 1 and 2, fixing a couple pre-existing bugs found by Sashiko
+- Patch 7 (was patch 5): Rework the ceph_submit_write() error path
+  conversion on top of patch 1
+- Patch 10 (was patch 8): Remove the BUG_ON(), per Sashiko and Matthew
+- Link to v2: https://lore.kernel.org/r/20260804-remove-wait-on-page-writeback-v2-0-81f0ab065284@columbia.edu
+
+Changes in v2:
+- Propagate tags (thanks David and Matthew!)
+- Rebase onto ceph-client.git testing
+- Rename the series to "ceph: convert writeback path to folios"
+- Patch 1: Drop the folio_test_private() check in
+  ceph_folio_snap_context(), per Matthew and Zi.
+- Patch 4: Introduce ceph_fscrypt folio helpers and use them in
+  get_writepages_data_length(), per Matthew.
+- Patches 5-10: new
+- Link to v1: https://lore.kernel.org/r/20260802-remove-wait-on-page-writeback-v1-0-6c35d6b3ad36@columbia.edu
+
+---
+Tal Zussman (10):
+      ceph: fix error handling when the OSD client is stopping in ceph_submit_write()
+      ceph: wait for pending fscache write in write_folio_nounlock()
+      ceph: add ceph_folio_snap_context()
+      ceph: convert ceph_wait_until_current_writes_complete() to folios
+      ceph: convert get_writepages_data_length() to folios
+      ceph: convert ceph_submit_write() to folios
+      ceph: remove page remnants from write_folio_nounlock()
+      ceph: convert page cleanup loop in writepages_finish() to folios
+      ceph: remove ceph_fscrypt_pagecache_page() and ceph_fscrypt_page_offset()
+      ceph: rename ceph_check_page_before_write() to ceph_check_folio_before_write()
+
+ fs/ceph/addr.c   | 156 ++++++++++++++++++++++++++++++-------------------------
+ fs/ceph/crypto.h |  12 ++---
+ 2 files changed, 91 insertions(+), 77 deletions(-)
+---
+base-commit: fce4f3da41f1145cfa400002ce3a66e4a89a1902
+change-id: 20260802-remove-wait-on-page-writeback-8e0cb766d4c7
+
+Best regards,
+-- 
+Tal Zussman <tz2294@columbia.edu>
+
