@@ -1,133 +1,221 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B2342405EB
-	for <ceph-devel@vger.kernel.org>; Mon, 17 Aug 2026 02:26:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.45
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786933605; cv=pass; b=uewxBYyh0DWwfA+DDW7FTfguGnxs8ZSt12Pz2EGgUpUWoRI0CXBD3w4EU+EHas1lJo+yk4/HKwib5hoqR+iFUYDAUzoL7VQRSDB8QqpI9d2wKrQomRqRz+JpfModPmOpUHQ7IxeoatUX+NzmnD+TRGI0rRHtMi/E/z5ZaGn+nQg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786933605; c=relaxed/simple;
-	bh=GsTjto3M9TDUjL0GYUMtZDAzX3U6QWNQNCQQC0hE+iA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OvpCHqnHVdmGLgbHJcPHY0Rnrd7A+fqn3/281E+5eviGxMOfruIQRQjN4UT9x6D62VEDpaDvy+8TESRkZ49+Y7xfrfJSsijHdR5Woj+drSYnrzlz+A1Lqy2QL+4KQfRjqcBpxPnEaN5pKRh7ujrByAtzJiy3c8v230jcPJqs0SQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=TPHHl4C5; arc=pass smtp.client-ip=209.85.218.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DED403F926B;
+	Mon, 17 Aug 2026 11:03:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786964615; cv=none; b=UEODOiTXY14LrqTbRstT+7K0qGBsvqkniisEgkNzD0o6eJNjbvinOBGNzW8DBRmsSk0G7Dpsdm5MX/lQpBHgMnEitWXONKLxyKzW5cXYtmBC+SmfiMmVTLfFojeMyVUmGsraZ/YZRdVqSgGA6w0JgPN+Y+ABciD8Kci2L6eey6U=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786964615; c=relaxed/simple;
+	bh=UC01y+N70K2YYwuhiD63941gnut7CPgk2/EOWTUjvrY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fPg2OkM/B9bKMSGbNqqP7Md58bClgL7M4v+iFJzVefH+LdpafLzGFEQNhS0tc2C371YjgrPnrMV+dBaziV1rHqnwXZ7DOR7ZaH3mHED53piEfXHLZLBcwB+SNk2a/6x5wptWQVsLSW2QP44AsihILy/Dp1C6RU4V5d9x2jhsXV4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=tLT3QW9b; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=8X8znelA; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=zLM3nScL; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=GgaExUB1; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="TPHHl4C5"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c1671ec8692so394699866b.0
-        for <ceph-devel@vger.kernel.org>; Sun, 16 Aug 2026 19:26:41 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786933600; cv=none;
-        d=google.com; s=arc-20260327;
-        b=KMS1uhuFbAaqf5F5pqeN1llWgj9G3h8wSvgn83c4UHcmvBw9PvazsrZekUPaeoB7ly
-         A5s5M1DdR4ErybcIVts56WKro0SzWGQlRMr7rvJnv7EAuDeKipJv7A8I0u7oe9PHYlFk
-         7g5ITBGRBs7F4MxARi/pG8fIybj+qFH/GLsJtzqeGt8/2ytybUGldcJd9WqL2kOsQ/BA
-         EjXCDBw+79aYDm0/cl7kIg+2XOeISjL2Y1wlZBxGCJtln4YxvZ18khqrsTY1hfHfBAv0
-         grasflR7RirfbUtj0FKsqtfnQJpz8iz0ZimC6ytpTHy6wcdgLKVsu+PHPrRXKazZ9gg5
-         xyPw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=GsTjto3M9TDUjL0GYUMtZDAzX3U6QWNQNCQQC0hE+iA=;
-        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
-        b=WFfvF1mODlyfYHKJ3kV5rZRvSPFEuE8p9EK4+4M/fU4NRIRtxHMR4/NaaKhfIv0+YQ
-         Zs2amHi3JAt+9dPCHjAWGe1ZHTWXiJqbr9BtBCPegczJRFiui48DbXSES1W+WhLY32LC
-         gXfzp0VS2RhWAzuKcm2tpUE7OXcoOKGJk05mubPIrxXmPiqCRazj1U6bWl0YiTM47PfW
-         3IpEQk0RXuW/t9E2CREaehvnI4BOt6ivBJ+F8IvIMRgeN++j8EZG3yutllKRz67Sv1Ze
-         Y6T9VBOv7y8r3AHTemXZE4BiTAPICsmR37sLdQKnFEglibK8Xyxlfs9d6H7bi/345BVr
-         5E9w==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1786933600; x=1787538400; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=GsTjto3M9TDUjL0GYUMtZDAzX3U6QWNQNCQQC0hE+iA=;
-        b=TPHHl4C5wIim8UmZX5a5J2Psr1uKeeTsWKYN+hMY0APlJFNaZ40nl2MChlkY5wlxPW
-         ZBjokN20k3xuWscx0+z6dwPKEI/uAFcxRvvmJf/R7lXTlXRPciLNqBs/tyVjaNJ9Dbg+
-         GeagDGUGt0ztg8tDZVNFcNg30YRRpkBXAHyE0Y5Jqxpx5FQ8r4IhvLVFKHYd/LPXE3gg
-         Q8nmGbej3vDA+5BwuDPOlBagDW+gH2IMf+7SkuY3X6lupoV/zlOJJDvU6Tueu79eBTj+
-         Iu8z7BXsULL3AbOYABOxaHEEW1CfYKSaKE2QqxqpoVz1pwClekHkTO8eBMF0l1MCZOSM
-         x6Gw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786933600; x=1787538400;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=GsTjto3M9TDUjL0GYUMtZDAzX3U6QWNQNCQQC0hE+iA=;
-        b=oced/Auijfv/To6I3GdcPOO9OmWzsaBf0VOK0jNgywygikMzMFkNa+ya9adlmtCaBF
-         6s1mm8D7+zAmDGb9kx+VeaoDmQIwA4sR1Eazby3NuaeDIemV6k4VgbUjFbGEzp40fh7X
-         8e4+mKCcp3jpS187hG5h/xNMC1SilQD3TkAZP1THEd5xl+Q5G21ri9c/dVZnqtKI6mDe
-         CCA6FFDmN0SzpjJM/N8E3cuKtTa32/tzCT1G5UCUXfmc4q3daEAu8thltZmuJobAqz/d
-         M279qZfn45TJBf0Np4qJ6yEupJcY4PUtm+U99PpURJFqA/mS4rJwCd7rktF8pl/odyu1
-         DXgw==
-X-Gm-Message-State: AOJu0YzRWts9mf2Yd7JMb5bUrN/Zj55/pvkPXBkAuwmH6t7H5n+2iU7K
-	9X0RdnCrIKjsUxAjsiFQcB7RfoTgUvi9bRXQhYGNmhxCG7+JepJJ2NaE3IWPHRvS9aZlUPXPEDJ
-	C5A2c0lenYL2yEWaoTjsikot5mk7TlUQOoXCXaox6rA==
-X-Gm-Gg: AR+sD12ftDhzwpcTUuJ8caK5Clf/AcwkjN5DIwqo7ULB/OJb7wCJBYRElSr+Mbeatq1
-	OjtHhHjpj4CDY25glyIsH6VHfHhl7jTjKH/Tj5EhdghceV+uhqMU0gGVhqMEkB6+cfeJtm8N6/+
-	PGtkx4Pvpm+LR3o6716dlHT2P0CMyX0lMtRUp1z2IIfLRE/XAIEtRxabOq8774bUMTybiq9LTOc
-	hwTmhb0SdQNv8gfurTxnD/5LdhVYRUIc9/fHQUyVD4t+/xj09AUBtGD4JHpyhimoj89jSzalq5S
-	TDBwCg9UFoKJ3GwWka0t0LhnjS9iMwKZPhAVqvF/8V4uWj/2EFevUD3e
-X-Received: by 2002:a17:906:6207:b0:c12:83c9:d41 with SMTP id
- a640c23a62f3a-c2129be130dmr1070312166b.12.1786933600065; Sun, 16 Aug 2026
- 19:26:40 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="tLT3QW9b";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="8X8znelA";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="zLM3nScL";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="GgaExUB1"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id AA4AA83F70;
+	Mon, 17 Aug 2026 11:03:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1786964607; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=7iC/4+DbNi/oVt0tkupTCs6iE9SsTBaX7RuvRMSdNNA=;
+	b=tLT3QW9b6/xDV9Ixy4zoLm+Sym5e8UrpRnGsWoBcLJhjPkST6lMELTRxUJUQGpZF0lx6cZ
+	CrQzaPfddU0JJoItEfD5PdYMA2htwZJU679KcKyN462F3b1zhN1ApxrzzGiqLBP4jGET9N
+	Cns17l2zKnZ4DDxsGjPi8d14DXwFnPY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1786964607;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=7iC/4+DbNi/oVt0tkupTCs6iE9SsTBaX7RuvRMSdNNA=;
+	b=8X8znelAvCLGvHFOr74Pet9Ho88Mm/5toK4DxVXyvYUa9ubhq21sXaTOiQtiIi7tW55O0W
+	q6XlLziszMheBACQ==
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=zLM3nScL;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=GgaExUB1
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1786964603; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=7iC/4+DbNi/oVt0tkupTCs6iE9SsTBaX7RuvRMSdNNA=;
+	b=zLM3nScLqmXi359QoWe5LBqf2TSEnkVLmycbkb0qVY3mOjBS//cftPffZe7QxbNmKBXHjk
+	PL1/leHGjigoWbJZurYzuZGXlmSL14eEDbPz6Jf3KkUg9nE33E+sV86nBZzSDN2h7wFzWi
+	FItMyjngdoagwlKBs+/cNuTpme73IPg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1786964603;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=7iC/4+DbNi/oVt0tkupTCs6iE9SsTBaX7RuvRMSdNNA=;
+	b=GgaExUB129+gqMFavDlXWKVcOKduNpBj1fW8CrvokjGE7BdpSzA4FvYOIcQ0/0rb7Xzw1p
+	3eifOk+FRaFWRLCw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 9FD407941C;
+	Mon, 17 Aug 2026 11:03:23 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id VSoAJ3vqgmpoIgAAD6G6ig
+	(envelope-from <jack@suse.cz>); Mon, 17 Aug 2026 11:03:23 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 3EE52A13B5; Mon, 17 Aug 2026 13:03:19 +0200 (CEST)
+Date: Mon, 17 Aug 2026 13:03:19 +0200
+From: Jan Kara <jack@suse.cz>
+To: NeilBrown <neil@brown.name>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Ian Kent <raven@themaw.net>, 
+	Chuck Lever <cel@kernel.org>, Jake Edge <jake@lwn.net>, Ilya Dryomov <idryomov@gmail.com>, 
+	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
+	Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu, Alexander Viro <viro@zeniv.linux.org.uk>, 
+	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Trond Myklebust <trondmy@kernel.org>, 
+	Anna Schumaker <anna@kernel.org>, Amir Goldstein <amir73il@gmail.com>, 
+	Andrew Morton <akpm@linux-foundation.org>, Miklos Szeredi <mszeredi@redhat.com>, autofs@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, codalist@coda.cs.cmu.edu, 
+	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org
+Subject: Re: [PATCH v1 03/12] fsnotify: don't hold a spin_lock across
+ fsnotify_recalc_mask() calls.
+Message-ID: <oh2lg2agqxwqopecacq6sfdnky5faxidwsybkvbwbq24r6tw6o@4swfog5ocwwb>
+References: <20260803012648.2195405-1-neilb@ownmail.net>
+ <20260803012648.2195405-4-neilb@ownmail.net>
+ <CAJfpegs-k3skRGiwZvQLzD7OrAK4KL8zwmpmJKyjRHSQ-rqX+Q@mail.gmail.com>
+ <178642552869.2852630.11443303758249822243@noble.neil.brown.name>
+ <178675372176.2852630.1305553887009521382@noble.neil.brown.name>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260720-b4-ceph-copyfrom-v1-1-9a4c229df6e2@clyso.com> <20260813120910.4001650-1-amarkuze@redhat.com>
-In-Reply-To: <20260813120910.4001650-1-amarkuze@redhat.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Sun, 16 Aug 2026 19:26:28 -0700
-X-Gm-Features: AcwNN1Uuf3AdXvbIz60XUCglHLW2D2urtpUQUylZWaX85koPfLGzPGCRRVsp6X4
-Message-ID: <CAOJNxRLRGqUnE+TpecHMr-pc3i2iZq=tqG20Zqjapkmn2h8xeQ@mail.gmail.com>
-Subject: Re: [PATCH] ceph: parallelize object copy in ceph_do_objects_copy()
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <178675372176.2852630.1305553887009521382@noble.neil.brown.name>
+X-Spam-Score: -4.01
+X-Spam-Level: 
+X-Rspamd-Action: no action
+X-Rspamd-Queue-Id: AA4AA83F70
+X-Spamd-Result: default: False [-4.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	MISSING_XM_UA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCPT_COUNT_TWELVE(0.00)[24];
+	MIME_TRACE(0.00)[0:+];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	TO_DN_SOME(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	FREEMAIL_CC(0.00)[szeredi.hu,themaw.net,kernel.org,lwn.net,gmail.com,redhat.com,dubeyko.com,cs.cmu.edu,zeniv.linux.org.uk,suse.cz,linux-foundation.org,vger.kernel.org,coda.cs.cmu.edu];
+	RCVD_COUNT_THREE(0.00)[3];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:dkim,ownmail.net:email,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
+	RCVD_TLS_LAST(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	DKIM_TRACE(0.00)[suse.cz:+]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Spam-Flag: NO
 
-Hi Alex,
+On Sat 15-08-26 10:28:41, NeilBrown wrote:
+> On Tue, 11 Aug 2026, NeilBrown wrote:
+> > On Tue, 11 Aug 2026, Miklos Szeredi wrote:
+> > > On Mon, 3 Aug 2026 at 03:39, NeilBrown <neilb@ownmail.net> wrote:
+> > > 
+> > > > @@ -116,11 +117,15 @@ static int dnotify_handle_event(struct fsnotify_mark *inode_mark, u32 mask,
+> > > >                 else {
+> > > >                         *prev = dn->dn_next;
+> > > >                         kmem_cache_free(dnotify_struct_cache, dn);
+> > > > -                       dnotify_recalc_inode_mask(inode_mark);
+> > > > +                       need_recalc = true;
+> > > >                 }
+> > > >         }
+> > > >
+> > > > +       if (need_recalc)
+> > > > +               need_recalc = dnotify_recalc_inode_mask(inode_mark);
+> > > >         spin_unlock(&inode_mark->lock);
+> > > > +       if (need_recalc)
+> > > > +               fsnotify_recalc_mask(inode_mark->connector);
+> > > 
+> > > Is the fsnotify_group_lock() held in this case?   I don't see it.
+> > 
+> > It isn't held.  Doesn't it need to be...
+> > It seems to protect marks, so maybe it does.
+> > 
+> > srcu seems to be used to protect this section, so maybe we can rely on
+> > that.
+> 
+> I dug into this some more, and we do rely on srcu, but don't need the
+> extra code below.
+> inode_mark->lock doesn't protect inode_mark->connector, so moving the
+> dereference out of the lock has no effect.
+> srcu_read_lock is taken before we get the ref to the mark, so the mark
+> and the connector cannot disappear underneath us.
+> A race could result in inode_mark->connector reading as NULL, but
+> fsnotify_recalc_mask() checks for NULL, so there is no risk for harm.
+> 
+> Thanks for encouraging me to dig into this.
 
-Thanks for the feedback. You are right, those are good points.
+Sorry for not replying earlier but I was on vacation. The lifetime rules
+around marks & connectors are subtle so we have to be really careful and
+dnotify with its single shot marks is peculiar which makes things even
+harder. fsnotify_recalc_mask() has a comment about locking in front of it:
 
-Let me fix them and send the V2.
+/*
+ * Calculate mask of events for a list of marks. The caller must make sure
+ * connector and connector->obj cannot disappear under us.  Callers achieve
+ * this by holding a mark->lock or mark->group->mark_mutex for a mark on this
+ * list.
+ */
 
-Thanks
-- Xiubo
+and you very obviously start violating these rules with your changes. Now I
+admit I've forgotten all the details why I did it like this so let me
+reconstruct it :).
 
-On Thu, 13 Aug 2026 at 05:09, Alex Markuze <amarkuze@redhat.com> wrote:
->
-> Hi Xiubo,
->
-> Thanks for the patch, the idea is sound but there are a few correctness
-> issues that need fixing:
->
-> The drain loop walks past the valid window on error =E2=80=94 it derefere=
-nces
-> request pointers beyond the tail of the in-flight window, which are
-> either freed or uninitialized depending on where the failure occurred.
->
-> The window size is read from copyfrom_max_inflight on every iteration.
-> A concurrent sysfs write can change it mid-flight, causing the loop
-> bounds to shift while requests are already in-flight.
->
-> If a request allocation fails partway through, the error return masks
-> any I/O errors that were already recorded for earlier in-flight
-> requests.
->
-> There's also a design issue for mid-file copies: parallel writes can
-> modify the destination beyond the position implied by a short source
-> count before the short is detected.
->
-> Could you respin with these fixed?
->
-> --
-> Alex Markuze
->
+Connector stays alive as long as there's any mark in its list. Both marks
+and connectors are protected by the srcu. Mark also has
+FSNOTIFY_MARK_FLAG_ATTACHED flag which is set iff the connector->obj is
+pointing to valid inode/mount/... FSNOTIFY_MARK_FLAG_ATTACHED changes only
+under mark_mutex so that's why mark_mutex is stabilizing the connector (and
+also connector->obj). This is what is used by most places calling
+fsnotify_recalc_mask(). But dnotify needs to mess with notification mark
+mask from event handling and there we cannot take mark_mutex due to lock
+ordering constraints. That's where the mark->lock rule comes into play
+because mark->lock also needs to be acquired to clear
+FSNOTIFY_MARK_FLAG_ATTACHED. That being said this dnotify use of
+fsnotify_recalc_mask() still looks somewhat racy because
+dnotify_handle_event() can get called after FSNOTIFY_MARK_FLAG_ATTACHED is
+cleared.
+
+Anyway if you move fsnotify_recalc_mask() call outside of mark->lock, you
+seem to make the race with dnotify clearing the mark from 
+fcntl_dirnotify() easier to hit. Now in the notification path the inode
+itself is guaranteed to stay alive and the rest is protected by the SRCU so
+there's no direct UAF. But fsnotify_recalc_mask() simply isn't prepared for
+the connector changing under it due to object getting detached and so we
+could end up doing weird things like NULL ptr derefs or similar stuff.
+
+So this call to fsnotify_recalc_mask() from dnotify needs a more careful
+handling. Which is sad because I doubt anybody still uses dnotify...
+
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
