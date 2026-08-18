@@ -1,65 +1,65 @@
-Received: from mail-wr1-f50.google.com (mail-wr1-f50.google.com [209.85.221.50])
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACF484854ED
-	for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2026 18:11:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39B4E439F89
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2026 18:11:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787076721; cv=none; b=JtGb96ByQCG7b5T8kZAoeBYiHA9rJJZyX1cqTITGWGcsOYWK3/I52WUI5olraFc9jsPZd5z+RJ+bLmysXLdqAHDyE4UPtaBdEQjYYQKnkOJw5lzcz13gdij3dRVGbduIfVyaNMt4P3lpS40mYh2igpZ3GHBcibh1XJNZpXsdexI=
+	t=1787076724; cv=none; b=ehViItoQdKKcqq+0JP9hGGJETtsvdmZhBM+pS/JKjgo16cxMft+UgKVUJ+lYEHUijLoYtQHXrocDpJLryCh7SLhCEy0OFnRPAWrR9bP2ZSmWAaWx8M14ONzUi9lA2j+wAl2912QmNdS7+hCh1co7H4T+zoaD8T2XAcx3N27sNtM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787076721; c=relaxed/simple;
-	bh=PNsEuMwh6x9U7wnGeQD0+2aN3K+WtwxzV9yJyPU6bqU=;
+	s=arc-20240116; t=1787076724; c=relaxed/simple;
+	bh=rWcD9UAVTx1Qu4X1tQhXaEYVpYkM9g/KFb6msHCmSJk=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=V+QrwPIi/bK4/idYpCGGwzITaLzgth3fFA7H4MZIpW5XSxvAf4K3JcOvleOJLFIoVFExe1zqyCKVp2gDPHJlFPI+tU487fVXak3rbwuNWPI3ogRNANI2QQJtH8NTQShfbs1De6n9Y/z/O/ZN5f/vzBbQiNusRnfoUndtlcaiQUU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=Yw+OHGsF; arc=none smtp.client-ip=209.85.221.50
+	 MIME-Version; b=bmwYyyjhVOVDPFmjtaR7yzeLPihrCJHXm3rfLPCX5yWuNfVc7xuuaSEfafueWGwH7GEB/7hN47xVrcIFWe7t4eH7YfJd3+pu3urYRGVFsmzvFNshnPc7yoyKn6YlD2aNxAGLPLeyR/EgFpvUj8vEMahmkkHOZUZoaSFrCsRRJ78=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=QbPlUWcN; arc=none smtp.client-ip=209.85.221.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="Yw+OHGsF"
-Received: by mail-wr1-f50.google.com with SMTP id ffacd0b85a97d-47fde295992so35837f8f.0
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2026 11:11:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="QbPlUWcN"
+Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-47fd4531020so46621f8f.3
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2026 11:11:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1787076712; x=1787681512; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1787076713; x=1787681513; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=7Pp8eRbtdJC1ybFAuB0ihbgIaBXGaMzvJfeMNRLq26k=;
-        b=Yw+OHGsFS4MvYl1/p1u3omxg+RbvGNb1w5baHbaX/BrXNTh+AAx3D4JAOD/aQEzuBN
-         mueKn/CvOXg8h7HWi9xK7NwQRgIyRNtAmJM98HVeZa+3bW2LCqJjpDQE77QAiPf7Qznd
-         DYWFBq/D313yIEDVKAdH9ZaM+tXg6qX4JRfe7Z8udrGCZdQ0qiYcHB7Z50rei5Hke/cl
-         KrazgXfa2qwaw7DXAUD4ipXe45dvnfLyt1kmXwJ4NZvvLROke1bFbB+oXWGneaNKDgAi
-         daTqu1NQNDzN0KjK+WWV3m8kKrN9gm9h8eHvzoupZtMNC7TcjpleRlh8yMnNy31f4ZQy
-         lDVw==
+        bh=iaBPZv5XdoOUADi4qlmlEchxRuZesTRRDOJ68FGWcG0=;
+        b=QbPlUWcNGUEJLGUoJSEPAMiBLpv/2oWlKA8B1JPOW3ipAXHtM2tYVJodMtHDWWpuEj
+         +f2eokrqvSy/boGusHLxQ53BVMiwdPYxrLpBjNwvnCdYn9vS120wIiv1RS6nldM0nez5
+         oMXWubtlp3MJaY7IKP/SmGpRFgpURT029S9eHfoP26Euv8QYsDvPz7xR4xCuM2KsC2VG
+         j9xpsbsy+nmFECPipy+kgKyhVDPdKJ/ag6z2wrBc6+vTMiOq8LMXByjZCqDsxQZOe4z5
+         elRWFJ5CnhN7QrYZgCIvsCOm9jLqJVUW7v9LPjl5jr1MMjtjMgrx4iOlQvL2CFT/5qtv
+         c9oA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787076712; x=1787681512;
+        d=1e100.net; s=20251104; t=1787076713; x=1787681513;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=7Pp8eRbtdJC1ybFAuB0ihbgIaBXGaMzvJfeMNRLq26k=;
-        b=qQIExkG+eFVXvafOcnd6CADlvQMFM0gBevz31ep361fHuHqd2l1Z1N0zUqpnyom3q0
-         V3ulrT4pNQvuZh9DwT4+zjha2U8mPpkrrxUdiyHOswmdK3/xFSyttPmAjTc4EC/zgA0/
-         aHcrn/vxomJRIB5ubtjM+/EErvU1RGLZuVvclFskL5Q6HzFdo4m1AO3kIbfQ8pPXBhsS
-         +2wttfsFA8HMhOI3qfgCJRpFV1VnWrsbLUb/uwnRA9jdXjfKt5Fmvard6D7fxyf2ffoh
-         XVOBQf5PuH7qJDCpPMwQkSJdz7WJYtq9R5drtTmG6n1qwUgGvqDFPS7iCXvmXJ/hGhF/
-         Uxeg==
-X-Forwarded-Encrypted: i=1; AHgh+Rr/JtVkp3nEReyePmc2Dk0pF7g2MnYjxaRGWVMyDsfetUxZl7YkAaOoFlMj9iPtxCZfjpef7PqeuBk8@vger.kernel.org
-X-Gm-Message-State: AOJu0YzvY9g8KVPi7lVRcOSvYsLBt9LFTq2rzyTPH/IEkMtTAD4rTUqO
-	tPZwO1HwzNcKQNaaB8Kz2NUCy8TzZAgKOxZAjwP8uSGeRhvLqGvSYiPIVE/jnViRh3CsJreSiHS
-	rLmaRPvc=
-X-Gm-Gg: AR+sD12SdA15i7E12C1Y4BZY3GTPjgFxdCMkuV7NwJlOwk141hyjAZuuqiGZsS8lrEo
-	MiDXSw2j+6CzfpHtLQl9z+lABEihvxIYirhS+yXb+jlU6hbVNsJY0r76jF5PxghILJ1XHlj2FLT
-	gBu6qRhXx2tqdeEO3BKH0WrhX+ifaDEpRRnlYi97JpNGiXuxFb4+B6qvKO5VXmMitm49sVV9OCt
-	5up4U7Yn/cK76OekF82g2ZmIj288ZStJFNg10CzvOr0OXOK5sqxhIgmPTNCJFCf5KVX3LQBSREV
-	S2YtvjVTLPUmaBULNqf3VV8MfnYw+YEBDe27g6E7vI4M9LrVcOKr5o2nug3UKRisEV8RYwpP/qq
-	2B+c8y+lFQoiIwbwjKip3E/Lx3OGtKPSppMVDOfpdQszmpa70exfq2cg+vS0ic2qYwMkJnyNcWY
-	spsG+Fv2D4LF8ircSep8edPo3K5CHLnktg4vwcPNb2BNUJ9BFWroW3zwfrUUUkvctw7AjplbgJw
-	bwMwoYXenN2o/vrJZ88ry6IjrYixrCxT45YzA7V+IujOCW8rCG07B8gkkoR9n+I
-X-Received: by 2002:a05:6000:3ce:b0:480:b3:aaf4 with SMTP id ffacd0b85a97d-482b06cc8d9mr343481f8f.4.1787076711965;
-        Tue, 18 Aug 2026 11:11:51 -0700 (PDT)
+        bh=iaBPZv5XdoOUADi4qlmlEchxRuZesTRRDOJ68FGWcG0=;
+        b=FIP2CSOeLbRrRGOo8k7AGyGPBzXogftO8MOyNH5yvCMhd+IGRI6EH42cXdoq5YMZQG
+         CbMzOziWql3/Ti/SiRtbep33QtScOGQtsI7UJR04ErFYN8qYXDYJgAx+3AJOkpApTCe3
+         XBWgM5q7ddbTwNhxBUOSRj7a0VGODfaXgRuA4Iqhmv5Xjbyj3xCaw9mBNe/5tHr1QkKY
+         suPZ9W7/7J6aKrJsj1jFK1q2KpePqfplQq1dZy4RyrZhBh/16yzIrE1v1wzD9ZVAFBbm
+         FEM9DhDuH+ZMD+Ob1EDvH+5q4xudLFfmP6xGhxlr3YEKFtG/cBtkm+YJ7bqF4wvRq0nk
+         wxsA==
+X-Forwarded-Encrypted: i=1; AHgh+RprLwSQdrznRfcJWCIys4ecLkOE3uQH+LN67dXcyt7fXEoYUPRJ34f1bj7f4R5R9vdq+x/GdLoMPJtk@vger.kernel.org
+X-Gm-Message-State: AOJu0YwVxddvfiv6dNUsQuNYxI8dx9uMGJ2dldq64pYiLH3+XkSINwib
+	4K1btRbv80a8UW80ojz/weygGYU/2E7In54qakwZaLUcvyEmQQIOzNVLtwRsgHrI4a4s6U6fnNA
+	GU3sVYQE=
+X-Gm-Gg: AR+sD13stVEk3zxyHmI5yYGN6lkoyUBwiOrkfXkE9JgXnDSKFKOW0mhLjUmBN6vKf1f
+	eeTEh8WHfg7MqVAWGt0vF9MFTI4rgveGwlUFje38Mq0Ep9tnHAJ1tLyeLvysG0ecijgAxnMW8xM
+	/QnsLdHEoIUi4SAccSD91oT9PgCvpFuEIfsZG7h7mxIodtBSoLdr06E9N+9MJu2qqUMNOZghpID
+	t8u0y6OxZzSm6zvooU0AzHgvqeZdGDhB698GphkC3/plhWj/uEKsW7TXa+g9Ztn4/mwRY6NfW5C
+	B5cxxu4N2k4OwR8SYA19CeoBU/x4cR6iIkbLIwvgFe+7zPDxBahg2Nc5qqzrODrTK9+GzJ/HSQZ
+	EaLyZIjuGOWu/5tmzxFjwkMSuO0uOE1ykZch6i7C1NrohEUrWEZLQrI5+AI7sZI8BRc3vJckqwD
+	UT9VLjFfylNyNdXXgyO0IBYjZG+kWQamCnn5kiy+WeRBVpcWl2cYGOkxtI/t73wzHnu1moXkv90
+	KenmxNCiHf4V2f4z5ck+3SqXd7LdR4fSNAom/d4RAqjqhCzaevSAjPhjQS20iDd
+X-Received: by 2002:a05:6000:2891:b0:482:a909:53d3 with SMTP id ffacd0b85a97d-482a90953f4mr16828977f8f.2.1787076713574;
+        Tue, 18 Aug 2026 11:11:53 -0700 (PDT)
 Received: from raven.intern.cm-ag (p200300dc6f02b200023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f02:b200:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-482a5a3b896sm14302641f8f.16.2026.08.18.11.11.51
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-482a5a3b896sm14302641f8f.16.2026.08.18.11.11.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Aug 2026 11:11:51 -0700 (PDT)
+        Tue, 18 Aug 2026 11:11:53 -0700 (PDT)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: idryomov@gmail.com,
 	amarkuze@redhat.com,
@@ -67,9 +67,9 @@ To: idryomov@gmail.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH v4 05/12] fs/ceph/super.h: convert ceph_cap_snap.writing fields to `bool`
-Date: Tue, 18 Aug 2026 20:11:37 +0200
-Message-ID: <20260818181144.3541770-6-max.kellermann@ionos.com>
+Subject: [PATCH v4 07/12] fs/ceph/super: reorder fields to eliminate padding holes
+Date: Tue, 18 Aug 2026 20:11:39 +0200
+Message-ID: <20260818181144.3541770-8-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260818181144.3541770-1-max.kellermann@ionos.com>
 References: <20260818181144.3541770-1-max.kellermann@ionos.com>
@@ -81,63 +81,108 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This will allow better struct packing.
+This reduces the size of `struct ceph_inode_info` by 32 bytes.
 
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/caps.c  | 2 +-
- fs/ceph/snap.c  | 4 ++--
- fs/ceph/super.h | 2 +-
- 3 files changed, 4 insertions(+), 4 deletions(-)
+ fs/ceph/super.h | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 1b904089b56f..51ed5aee193f 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3304,7 +3304,7 @@ static void __ceph_put_cap_refs(struct ceph_inode_info *ci, int had,
- 					struct ceph_cap_snap,
- 					ci_item);
- 
--		capsnap->writing = 0;
-+		capsnap->writing = false;
- 		if (ceph_try_drop_cap_snap(ci, capsnap))
- 			/* put the ref held by ceph_queue_cap_snap() */
- 			put++;
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 9b79a5eaca93..94964e0952bd 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -521,7 +521,7 @@ static bool has_new_snaps(struct ceph_snap_context *o,
-  * However, if a (sync) write is currently in-progress when we apply
-  * the snapshot, we have to wait until the write succeeds or fails
-  * (and a final size/mtime is known).  In this case the
-- * cap_snap->writing = 1, and is said to be "pending."  When the write
-+ * cap_snap->writing = true, and is said to be "pending."  When the write
-  * finishes, we __ceph_finish_cap_snap().
-  *
-  * Caller must hold snap_rwsem for read (i.e., the realm topology won't
-@@ -627,7 +627,7 @@ static void ceph_queue_cap_snap(struct ceph_inode_info *ci,
- 		doutc(cl, "%p %llx.%llx cap_snap %p snapc %p seq %llu used WR,"
- 		      " now pending\n", inode, ceph_vinop(inode), capsnap,
- 		      old_snapc, old_snapc->seq);
--		capsnap->writing = 1;
-+		capsnap->writing = true;
- 	} else {
- 		/* note mtime, size NOW. */
- 		__ceph_finish_cap_snap(ci, capsnap);
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index a3dae2c0bbee..0d3363b0a33b 100644
+index 67411a5d8b91..05452bc7eac1 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -271,7 +271,7 @@ struct ceph_cap_snap {
- 	u64 time_warp_seq;
+@@ -250,6 +250,9 @@ struct ceph_cap_flush {
+  */
+ struct ceph_cap_snap {
+ 	refcount_t nref;
++
++	umode_t mode;
++
+ 	struct list_head ci_item;
+ 
+ 	struct ceph_cap_flush cap_flush;
+@@ -258,7 +261,6 @@ struct ceph_cap_snap {
+ 	int issued, dirty;
+ 	struct ceph_snap_context *context;
+ 
+-	umode_t mode;
+ 	kuid_t uid;
+ 	kgid_t gid;
+ 
+@@ -268,11 +270,12 @@ struct ceph_cap_snap {
+ 	u64 size;
+ 	u64 change_attr;
+ 	struct timespec64 mtime, atime, ctime, btime;
+-	u32 time_warp_seq;
  	u64 truncate_size;
  	u32 truncate_seq;
--	int writing;   /* a sync write is still in progress */
-+	bool writing;   /* a sync write is still in progress */
+-	bool writing;   /* a sync write is still in progress */
++	u32 time_warp_seq;
  	int dirty_pages;     /* dirty pages awaiting writeback */
++
++	bool writing;   /* a sync write is still in progress */
  	bool inline_data;
  	bool need_flush;
+ };
+@@ -317,8 +320,8 @@ struct ceph_inode_xattr {
+ 	struct rb_node node;
+ 
+ 	const char *name;
+-	int name_len;
+ 	const char *val;
++	int name_len;
+ 	int val_len;
+ 	bool dirty;
+ 
+@@ -379,9 +382,9 @@ struct ceph_inode_info {
+ 
+ 	spinlock_t i_ceph_lock;
+ 
++	u32 i_time_warp_seq;
+ 	u64 i_version;
+ 	u64 i_inline_version;
+-	u32 i_time_warp_seq;
+ 
+ 	unsigned long i_ceph_flags;
+ 	atomic64_t i_release_count;
+@@ -412,8 +415,8 @@ struct ceph_inode_info {
+ 
+ 	s32 i_dir_pin;
+ 
+-	struct rb_root i_fragtree;
+ 	int i_fragtree_nsplits;
++	struct rb_root i_fragtree;
+ 	struct mutex i_fragtree_mutex;
+ 
+ 	struct ceph_inode_xattrs_info i_xattrs;
+@@ -453,7 +456,6 @@ struct ceph_inode_info {
+ 	struct list_head i_cap_snaps;   /* snapped state pending flush to mds */
+ 	struct ceph_snap_context *i_head_snapc;  /* set if wr_buffer_head > 0 or
+ 						    dirty|flushing caps */
+-	unsigned i_snap_caps;           /* cap bits for snapped files */
+ 	/*
+ 	 * Written under i_ceph_lock, read via READ_ONCE()
+ 	 * from diagnostic paths.
+@@ -465,8 +467,8 @@ struct ceph_inode_info {
+ 	int i_nr_by_mode[CEPH_FILE_MODE_BITS];  /* open file counts */
+ 
+ 	struct mutex i_truncate_mutex;
+-	u32 i_truncate_seq;        /* last truncate to smaller size */
+ 	u64 i_truncate_size;       /*  and the size we last truncated down to */
++	u32 i_truncate_seq;        /* last truncate to smaller size */
+ 	int i_truncate_pending;    /*  still need to call vmtruncate */
+ 
+ #ifdef CONFIG_FS_ENCRYPTION
+@@ -495,6 +497,8 @@ struct ceph_inode_info {
+ 	struct list_head i_unsafe_iops;   /* uncommitted mds inode ops */
+ 	spinlock_t i_unsafe_lock;
+ 
++	unsigned int i_snap_caps;           /* cap bits for snapped files */
++
+ 	union {
+ 		struct ceph_snap_realm *i_snap_realm; /* snap realm (if caps) */
+ 		struct ceph_snapid_map *i_snapid_map; /* snapid -> dev_t */
 -- 
 2.47.3
 
