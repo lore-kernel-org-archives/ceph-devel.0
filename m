@@ -1,160 +1,116 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEABD45FFA8;
-	Tue, 18 Aug 2026 10:58:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787050696; cv=none; b=bcTtyDew7GTlewMeIRsWBr/1Ga1hZUjo1RJUzqOnTK6L0gXjhIA3ZSrDLEoIVzZan4SsGMcdqNH4HicHOgPcGt+xmg7VfY7T+yo53M2QGC/2uTv2xZWHnNwnU3h6KQKebhiL3jT7pQ7DTqfAHSwskwQUkTNqFqb3oMmPYFFUiBA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787050696; c=relaxed/simple;
-	bh=uxrr4D4UTD+yPK/coKgYzAaRfF5/Af5Jj+fyB0NqcNI=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=DjMZXBb+nQu+B1oWhqC8IN8rGLxwGMusvdn7udK7TLorsVQojW3i58bndn0A1pAwxffkGurDdjYlKRuYJeNZdrdYR68vEV4iFKyfWdSoR1/aF0ubJt3rDTs6ERlwpzVY1QQn5WpQ2j27Pomc1oiizlTTZvM2fL3aoA1Ngy8DJz8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UUDdDpRm; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4632A3CF1FD
+	for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2026 15:58:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.52
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787068699; cv=pass; b=C/pxTwI+UcJqRMOcT2PY3rlOm6E6CnLCu2HBqR6diNjzYe6gbeb0Do1ekq3Umqw2m0gTCW27I/jlUR/V2zHU0Sy6n0/PYNZF9hk7ssV/NVk494JZpls9wGrs7ph5Lh6xfpzLCCs4F860z7AfTgL6oVjFgeJqRKVBB2bLZIfWwuk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787068699; c=relaxed/simple;
+	bh=8a6/sKr2iZ1HGXhy3Tv4v5AMtO/q/IJTFom+UiXb4ds=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=rfRUUW3gljAqzplsGs5ejZSDlIZ6Qo1RHXILLS2YjF7Y6UQCnpkiClPavEpFpyLa9WqaBeMjEwHcINdoIFY+Imq3fnZLCfSU8+AKaVpcHWkoM8jlV/duRIv9SayIjj3AAUK41BUDajMKJL6wJiTpCg5fDCww+rtRA8OGsQQgFoo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com; spf=pass smtp.mailfrom=cloudflare.com; dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b=dYbfyh90; arc=pass smtp.client-ip=209.85.221.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cloudflare.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloudflare.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UUDdDpRm"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 6AA60C2BCFD;
-	Tue, 18 Aug 2026 10:58:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1787050696;
-	bh=uxrr4D4UTD+yPK/coKgYzAaRfF5/Af5Jj+fyB0NqcNI=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=UUDdDpRm6UXiqMRXoaP78Sf+uJ3z0qkPLcqtybomuRd4+bbCSyuRzJCWEXTOqu7KK
-	 REOCvEtWxM3KahIqOO/ymYGE+V0PwbO53yk7W6/ceH9UAr8mMrzLQ1zQUhDdLhdubM
-	 /lmOOGCndFD8wLrnlu9Kn5C0x2KRuSRQdQWUULTfU4mPvkISDnxfwyrY+qOqu0XRSx
-	 8MHH4NAKdidcHy3niQEgtLT17AOkjZ7JOaQbPAFE4AtWdMpUZNFYcyQ2f2FvyPwb5E
-	 mf+mlrGLost/+g8dVkj2IDRrej9NcpHKDdw7PdAfGrFMxDIMKv6PJoNbDMHniVh23p
-	 X2Xa2NdwCIlHg==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57F55C5DF7D;
-	Tue, 18 Aug 2026 10:58:16 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Tue, 18 Aug 2026 03:58:12 -0700
-Subject: [PATCH v5 5/5] ceph: narrow mdsc->mutex scope in
- replay_unsafe_requests
+	dkim=pass (2048-bit key) header.d=cloudflare.com header.i=@cloudflare.com header.b="dYbfyh90"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-47f703a9e5dso2248635f8f.0
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Aug 2026 08:58:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787068696; cv=none;
+        d=google.com; s=arc-20260327;
+        b=nCycYicuGG2WEa8kTxF5F/FPLQO2Aw56tLO36LTyYsHaTogOWCIy0o0pZCjZJPsB4i
+         t4HELUl2Sn2BlGSzndzOClD4dXnYe/2Ww48TMRtSotGsHdT8U3TjRBvPOBCw7mniwNsh
+         0NG8pn4YOi3/SXd8keQkBx2vrBJhcZasQGXXVqVzovC0JaMZ2fSRVNRczDFNSXonA3Dj
+         WL3ffRK6yqQi/I2uSeWtIFpNfYAYnViVxORscUU7CWvgbOl8alaUcT8xuVnISaOQ8pww
+         MSnGUHBV5sb/tdhvN3IRWUKxg8YnhQYU59lb+7O1vh3olxq1igo9kWk701axJ5RQKnG2
+         HwTw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=8a6/sKr2iZ1HGXhy3Tv4v5AMtO/q/IJTFom+UiXb4ds=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=XNOO4GhzTFQmqsSJWd9uG1SXQSUaltZP0XgBN3UTT9aG1s1wZUtyuqeEM03/8fYBAd
+         M5MK3JE/szZ8DmGAeu4rWdtsmR/kNb8jV0ngtZbPVXP/0DenjkC9NFVFvrOETNMofNQI
+         Sci0hIrASpowPwVVtZnQ0L1KVkakev+S0MsJUxpC/PFy0vTyDUILNc2PVuIm9nG0Vmk8
+         bkaPbdoc81qY4O1PpnlVjM4Eyh0wmvYxAtUgrx62AVcW/lww0k7n0lL/f7gL8EYkJuqw
+         Qpu/AfCX3WXteChyjPib6rhZGEimy/RWxhMIqu/3jcUq3Wo51UbWUVuaZkgrSiMXAADz
+         n0Kw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=cloudflare.com; s=google09082023; t=1787068696; x=1787673496; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=8a6/sKr2iZ1HGXhy3Tv4v5AMtO/q/IJTFom+UiXb4ds=;
+        b=dYbfyh90ITtoY0q2WvEiLmbj5aqeHB9VkfCT4U/cIVIo/T9Y8mYlOfRWLb4Oud0Go0
+         S6wXRfT0Hp/rfSY7a1k7YJpt4WbyB5lt/CdnVovzWmpSiTR3J+AZt98L+qciBmxIGp5l
+         dppT53QWhRKiTv90Dc9ngxQoT5UlUBuOp5WSv8U05/AGTOCUsE1QdatZ1GzY6c985KMW
+         IIocLFfl6q2hXzpcyb4GVHYe42VbJxmcShiZXfxyVN25+7AkGHcTicHfYIOHkLgCA0XY
+         V8T5sFDzTCZJ0pNL/+sJtg+PDvN00wCo84tP+BzBkwNiMnRkXg9StN4oL0C7lZb7atV3
+         REMQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787068696; x=1787673496;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=8a6/sKr2iZ1HGXhy3Tv4v5AMtO/q/IJTFom+UiXb4ds=;
+        b=RYGo9m80fCsTZQM6iLoWi5zOJ+Xq2uYievPhEsd1d9psk5nZqi4W9JRxAeIrGLGZks
+         JoxOETU7aWsLxn2WtCGCBzprbhLYoNG72TpoPPkqwyIYmEObI5fHdNbUvH7LoKBk0jHo
+         2HfWlwatIv2sB6VgDGVpZdBdwFZXXakEFqgnBL3Vc0a9CUuSTXETDv1OedpWizu3d8vj
+         bZkT8huQhZ+XWGBgd25/WczTs+FSF+BEdqxiYnjLc0/MSWTZQNZX1RHP4MqRSjc6oQQ3
+         DTesneY/lL4sjEJq8icSzxwguwAlRKHjkd7w+OLDkFIF2hywjSODyK/upz5AaSQDcnGn
+         RQXQ==
+X-Gm-Message-State: AOJu0Ywdx9+oO6nDpM5jvJTEFt+kL8KzCZm27TY+/aI00wht6RjtDdVh
+	ih+iNQkvH7tIEgR2ZQdrq2DRWiuRMnl3wxozDyDZj3fkf1Dkukn+TiJ0mWIyNGiR6+NmlnG4alC
+	g/wOg7kHgIksfuWFkksLi66ZE7/vG7Q86UzuMYDnL/Bl3mWeZsmRP2ds=
+X-Gm-Gg: AR+sD10S5rh2/5gEPhtNfVBx9RRsqIok6F6vBS8k+v6pHs9WQ01gk5wtAC9qUe7C/aZ
+	uZ7H1wvzoH5kLh2oGFWOHtNLgVF6crvR5JXgiQqPtHGJkTvgTJIqFyhqaun8J4v0uwnbUHrYl7U
+	8tgoKGdenraI9zFF1xVR6cuXUPdwzSTtre0b6sTSIFju1594XFEpwozrccAdyn1dS6/Ysr+AuD+
+	Ssw4BOc0hdZ5s2S/1ne9XBkWxJvRQ5td+Ji3tqbfHNy95j8BRRRs5+DJ7BgV7t0VJa0Ml3uNBuL
+	WYckOXPIhXaygthNDRvNNf/aITNb4lZ5pILKQnBVcbmnh5YkfPG8Xzwt769Cinc=
+X-Received: by 2002:a05:6000:40da:b0:481:5003:c654 with SMTP id
+ ffacd0b85a97d-482a8ff6003mr16076662f8f.7.1787068696463; Tue, 18 Aug 2026
+ 08:58:16 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260818-ceph-mdsc-mutex-optimization-v5-5-7d335a3a1d0b@clyso.com>
-References: <20260818-ceph-mdsc-mutex-optimization-v5-0-7d335a3a1d0b@clyso.com>
-In-Reply-To: <20260818-ceph-mdsc-mutex-optimization-v5-0-7d335a3a1d0b@clyso.com>
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1787050693; l=3299;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=009BuODFeGOWGowR2RIFqNz08B1zIvCBUcUg2e3fczI=;
- b=AkP0sUdKpopnSZb06tylp8FhPUG8APSbnzUbaOI6jBqdKO0+qUZUcXXEagY5QcVq2cu/T+Ps4
- ff5lUMYPfQ6AQ8wNRjfU3GPlUUsrS+Uau2v10a+OxuPTXOFvuAc/gFM
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
+References: <20260720-fix-rbd-keepalives-v3-1-c344fbad63a4@cloudflare.com> <20260818095654.955417-1-amarkuze@redhat.com>
+In-Reply-To: <20260818095654.955417-1-amarkuze@redhat.com>
+From: Chris Arges <carges@cloudflare.com>
+Date: Tue, 18 Aug 2026 10:58:04 -0500
+X-Gm-Features: AcwNN1VRPD8WM4AvL67wAYRLjuZ0jmXmiSrqsyQkHnIa-DVbGtV0OWAi549UCGk
+Message-ID: <CAFzkdvgUdzb_eR0Ljsk9ByKoms8Aiu8gQwKQwt2bSx0bz83Xuw@mail.gmail.com>
+Subject: Re: [PATCH v3] libceph: reset OSD session when keepalive2 acks stop arriving
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Xiubo Li <xiubo.li@clyso.com>
+Alex,
+Thanks for clarifying!
+--chris
 
-Currently replay_unsafe_requests() holds mdsc->mutex across the
-entire function, including the __send_request() calls.  Since
-__send_request() is lockless and the async cap-release helper
-schedules deferred work, neither needs the mutex.
-
-Collect the unsafe-list entries and the matching old xarray
-entries into local lists under mdsc->mutex, taking a reference on
-each, then replay them outside the mutex.  Taking a reference
-ensures a concurrent reply handler can complete and unregister a
-request without invalidating the local list or the iterator.
-
-Unsafe requests remain on session->s_unsafe; r_aux_item serves
-only as a walk-list link.  This keeps them tracked as unsafe
-until the MDS replies, so a later reconnect can replay them again
-and cleanup_session_requests() can still abort them on session
-teardown.
-
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
- fs/ceph/mds_client.c | 42 +++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 37 insertions(+), 5 deletions(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index c624f80aa5fd..5310bb27b353 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -4732,13 +4732,30 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
- {
- 	struct ceph_mds_request *req, *nreq;
- 	unsigned long idx;
-+	LIST_HEAD(unsafe_list);
-+	LIST_HEAD(old_list);
- 
- 	doutc(mdsc->fsc->client, "mds%d\n", session->s_mds);
- 
-+	/*
-+	 * Collect unsafe and old requests under mdsc->mutex, then
-+	 * replay them without it: __send_request() is lockless and
-+	 * ceph_mdsc_release_dir_caps_async() schedules work.
-+	 */
- 	mutex_lock(&mdsc->mutex);
--	list_for_each_entry_safe(req, nreq, &session->s_unsafe, r_unsafe_item)
-+	list_for_each_entry_safe(req, nreq, &session->s_unsafe,
-+				 r_unsafe_item) {
-+		ceph_mdsc_get_request(req);
- 		req->r_attempts++;
--		__send_request(session, req, true);
-+		/*
-+		 * Keep the request on s_unsafe: r_aux_item is only a
-+		 * walk list.  The request must stay tracked as unsafe
-+		 * until the MDS replies, so that a later reconnect can
-+		 * replay it again and cleanup_session_requests() can
-+		 * still abort it on session teardown.
-+		 */
-+		list_add_tail(&req->r_aux_item, &unsafe_list);
-+	}
- 
- 	/*
- 	 * also re-send old requests when MDS enters reconnect stage. So that MDS
-@@ -4755,12 +4772,27 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
- 		if (req->r_session->s_mds != session->s_mds)
- 			continue;
- 
--		ceph_mdsc_release_dir_caps_async(req);
--
-+		ceph_mdsc_get_request(req);
- 		req->r_attempts++;
--		__send_request(session, req, true);
-+		list_add_tail(&req->r_aux_item, &old_list);
- 	}
-+
- 	mutex_unlock(&mdsc->mutex);
-+
-+	/* replay unsafe requests */
-+	list_for_each_entry_safe(req, nreq, &unsafe_list, r_aux_item) {
-+		list_del_init(&req->r_aux_item);
-+		__send_request(session, req, true);
-+		ceph_mdsc_put_request(req);
-+	}
-+
-+	/* replay old requests */
-+	list_for_each_entry_safe(req, nreq, &old_list, r_aux_item) {
-+		list_del_init(&req->r_aux_item);
-+		ceph_mdsc_release_dir_caps_async(req);
-+		__send_request(session, req, true);
-+		ceph_mdsc_put_request(req);
-+	}
- }
- 
- static int send_reconnect_partial(struct ceph_reconnect_state *recon_state)
-
--- 
-2.53.0
-
-
+On Tue, Aug 18, 2026 at 4:57=E2=80=AFAM Alex Markuze <amarkuze@redhat.com> =
+wrote:
+>
+> Hi Chris,
+>
+> Your patch is already in ceph-client/testing as 4a74ac97c553 with Slava's
+> Reviewed-by included. You don't need to worry about chasing tags =E2=80=
+=94 once a
+> patch is picked up it goes through as-is. We'll take care of the rest fro=
+m
+> here.
+>
+> Thanks for the fix, it addresses a real problem.
+>
+> --
+> Alex Markuze
+>
