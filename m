@@ -1,436 +1,120 @@
-Received: from mail-ed1-f49.google.com (mail-ed1-f49.google.com [209.85.208.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44E9141836B
-	for <ceph-devel@vger.kernel.org>; Wed, 19 Aug 2026 09:09:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.49
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787130564; cv=pass; b=gmONjvLxExFbVcJ/wqa8LCC30F4PENzAzMmtUCh9BwXpMyG4ePU/NLgDcQkHnaGh1o7pGTJroRm/KmmXDi4uJYVYz/LUTmal7U+LdQ/OZ31es+zo0p/S4IKWIYthYJUBfmOHaEQ3KzIiUT0ETNC0jWBt1dib+MwpE909A5we1g8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787130564; c=relaxed/simple;
-	bh=VxLcxGFnv3Wh0dZXLmW4jadAYRYlp87Z88fRFCOtk5Y=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ZhHpwhKkJhHlVx8c4VZ5SqsuvkG4I4B1KCcOSFS0Iaamg/KL167VmHAiwjcQSjRIYtm/la6a5v+tq1i+N9bNpRYcrr4dmi/4GMYysk3WuK8fIR4TR9eW1qyQn03klNGZ2L3eyTGWF9EEqJXQoxdsBlsoJhaYe+SD2dJpextL5rI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gtVWTOmL; arc=pass smtp.client-ip=209.85.208.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12A7936A02F
+	for <ceph-devel@vger.kernel.org>; Wed, 19 Aug 2026 10:13:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787134389; cv=none; b=oF3WAGuIVgZ2v66YBkjHYBbh3rVJX6QUghADqEogQDW8TLPftbPeUI3+68VTK7PoTpC2Iz/Y1GjBdtm3u7K+kZUPg+3c61dkK+YGFRjI3jw/dKWrZ9pIOKBN7L9iargfEuR+qkAE8j/7fafErDNWb1SlpvXBkq9bgvas4DPb04I=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787134389; c=relaxed/simple;
+	bh=WUIYUULjpCxnvWiinwm799rxT6V2Gvfqwu+v9EnI9wM=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=lDGGYqaCpOd9XChIoWZoSFfCxv7RMyZcy5n2gduYDChvc5Hze/u7we7EUmbizKHR2+RtiTLcTLGP5gPgpEfkgNHU4+ZzJ9SXtGGYN1xpUBxnbUvv+aiaBXxiqNLDm9uC6VUU4Dpz7AT8pTuMOvSq8e9DXmiaHHU37NzIgMuvW18=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dUXKIiVJ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=f7mU+Pzl; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gtVWTOmL"
-Received: by mail-ed1-f49.google.com with SMTP id 4fb4d7f45d1cf-69c600f76ccso1237151a12.0
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Aug 2026 02:09:22 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1787130560; cv=none;
-        d=google.com; s=arc-20260327;
-        b=UjltlGwLfLHZU0sRx6ZRmwVrz/UlPUtXt+o5bv7r0bIC9ZsPhXFxsHdmLPBF9oW+3v
-         KiXkOHH+YDKFSMsLbLZbNqT0OaQ2y7tkulXvnOeCwPGHA9lnnUtYkUrdaixwVpq4VDBF
-         XKG7BdkLCgyd3iMPhn9SDpd6YdD3GjTv7G+vQszCuhY0dGweNIt7FdA1+OOpOzv4tOwf
-         pVyBZSxG4+9/fy/M1O1uI43nVwis/gwZsuhGHjW60lgDpCGJprsCkbX+AlEFWVO1+CIV
-         GunJ4vCTI1izLCGj9cg2LYbi8FxT7JnHu+5ohGQ9wm+E3DNkZNBqQBKjspczy2cretCB
-         Ccfw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=Z/UsJEaKgDYrOY++OeFAHhZg4Up52swLtR2aOkPIYIA=;
-        fh=1iEDv+1f1P5tYH44+y9D9G9bkoRysr+kX53/5O9GXdo=;
-        b=Qn2+xwuQBEtcKjqMGC8aURURi+BouZrcNvOrtohtiDA1jYcezLHqnm3DJDUhuM/rI+
-         pTfc3NmxleYM+3haDpc/UZYFDp0WJ8804g6frV7+LvqqOz3EI8IF6grsIjCMzdvc/ahU
-         tG0d9nxi+lbMiWObifR1ojOPfRgTMZZQJjSH1/FThUH0w/fX6LdvmtBY5B3iuvLKfxyE
-         2zoo+xZ8AeHViHF9Vt6x4skD5mmg4FGg4LZCk4ycgfHTDFR/fe72Ixxf/PLlurbOfXAO
-         h2SQ8tyb4hBnUzjFL6UxCTDR1BE0MuUWdHCDu9hQDBGrYjy6tfysUE+mMvMOo6L998C/
-         GzXQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dUXKIiVJ";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="f7mU+Pzl"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1787134386;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WUIYUULjpCxnvWiinwm799rxT6V2Gvfqwu+v9EnI9wM=;
+	b=dUXKIiVJDZi5tUr51+97utHfTC+XR+3KktYmDWOpwnp4IN8uAzvDlDvrZj5NGLiP1k2Alw
+	ekyEM2Hp9zCJZL+IjDmXCh4TgftzxWDk19dm+zaEwYsU9HGQrM/MBLXzwhOAPpgFjEfczc
+	LXhff4Xr8J2U9n82mcoYBD9yzgu4DKU=
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
+ [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-134-9JQAC2XdPa2mVDaLiHtEhA-1; Wed, 19 Aug 2026 06:13:04 -0400
+X-MC-Unique: 9JQAC2XdPa2mVDaLiHtEhA-1
+X-Mimecast-MFC-AGG-ID: 9JQAC2XdPa2mVDaLiHtEhA_1787134383
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c15f4732dfaso68076266b.3
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Aug 2026 03:13:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1787130560; x=1787735360; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Z/UsJEaKgDYrOY++OeFAHhZg4Up52swLtR2aOkPIYIA=;
-        b=gtVWTOmL788KLv4NfTwmw/VAmIfd1pHqdPi3Rr3XtN5wYHrDRW59QKo1c4Fj9sU9jE
-         kV5CVAt8Y7w9oWKG9+I0t12HAF7rod5dP6mowRiB882ls08rn8fBR/S+mgolFK4B9JwK
-         KPIMYjryCFvEMgCQCQhrfL/jSkDPw9+BPcwrYuiIKGpdC0KXL4krCWRJRCUPD9wLmI/I
-         6FDn9mqwsUKs4rL0+NFlHC8oOb1FYZjDYFXHqXNv9kvgroxQR9MiKMhjVjchnKoWen4O
-         5t7Yl71UFhNnevaI7DQVM0f5YL88dDeGKpc3hs9w2hTozvrc38wSW13KJzT5PPYPPoCo
-         ycnA==
+        d=redhat.com; s=google; t=1787134383; x=1787739183; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=WUIYUULjpCxnvWiinwm799rxT6V2Gvfqwu+v9EnI9wM=;
+        b=f7mU+PzlTnQEi244bBdkXruHr9i5x2ltrIeknWz9cgvwBGgiDNT5HekZ12hzXHUGlm
+         3R0fD5NwxK9MBU9wsLhYQbJapLwroPBs5Gy1vSxJDHOoLZ6CbVHK0igZcej2QXQlY9HU
+         ADDUTZX4BUgmwYYNKusZddv6wwTcfKmCkkuCxl/vgjWt5dCj+E+YFzdueAElULp8KN1b
+         kmxnhONvIP3jHs1CiCna/0eSAkB2/iE53b7fEOTTd2CdJ1DRu4ek44hYgv8FvFv22Mg7
+         yia6S7GfOSFk3/NhEYKpPmu8AuGCov9xRuqG/9vKoL9XTgAxC6JeiQmNRlBga6uaTBDN
+         j8MA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787130560; x=1787735360;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=Z/UsJEaKgDYrOY++OeFAHhZg4Up52swLtR2aOkPIYIA=;
-        b=CDwBz8AZ0mIZ8aolVF/OmYnk+IcbjKX5dgZEOpWjrOMiHVoH0w06s5PuRPvKgV0mwV
-         O7nvQVHmVyFz181rEkDJ7dQUsLPOub00l0KFtY/HC4C56SQH9pqYcNAF+QuD4mfQXE7O
-         x1zURLSWkxevV79Cb151UKXUnIHsRrv9pUn+j8lWvUk3NB8me4XdEgz2JS4/6d7dam09
-         2JAnvIw3+6spyxpuypfGdql0KnI1ca2/c8N6PvKKNf/gpeUFHnY0Xn4AmZhhMOI7tl/W
-         yuJqMyH86jLJrSeJZ1x8+E/l2fCBMBmla1n91oGbLpt5rO0CsqtYob6I7jQUUd2VA099
-         AYrw==
-X-Forwarded-Encrypted: i=1; AHgh+RpD4BhM+bBqvxVGoCIL2ysB/12AaICAe9ybVken2lKX5B0s+XxNETF1zARPOnN63DFXVpQUMv/Jvwe6@vger.kernel.org
-X-Gm-Message-State: AOJu0YwD8P5jPn9MMauBSoNiMVBjaRnvN3NBEfgcGlZA8jTnh3eqthV8
-	mp1NlxHCSdflunwgZK8HfLhhLi/c0ZVwhctDBp/QbGBB9FXafLeBz/U/jhGrHPtvCNKGAKXePqs
-	63oId5D+NS5rwIqPLOHxPPTnOumyhvEw=
-X-Gm-Gg: AR+sD10xqy0haFg7vrmEVEo2c7bOL8Nr2u//mMSWArxR7agT57wBXi8QEB51tPMhdEk
-	C1UM5ZrmuBmRNCtxgf8Wxecnl2axCM061JE/UpPJ6DIBlDWS7ImvKnbGln5vHWdwlCa6r6alhFQ
-	myAsh8iXisbCgt0OWRbQFQ2fe2GSVypoj/ynxMcmwyEU/ZJYycTptbtN2cWEpUl3bJtCSy3CWqE
-	lZTFT9KReI9Zovhn8urbXUR+U9R3ZvbbSGov+jb1tyZ/jf9r8zaSHclo/YJfvFjC3jSTJSIxvH6
-	Hxt7gSeN5nw6VkTQe0NzOcjeVDUipsIEQXfBKTpdvkU3IA==
-X-Received: by 2002:a05:6402:c4f:b0:6a1:4458:7f2d with SMTP id
- 4fb4d7f45d1cf-6a4032a67ddmr1633322a12.5.1787130560235; Wed, 19 Aug 2026
- 02:09:20 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1787134383; x=1787739183;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=WUIYUULjpCxnvWiinwm799rxT6V2Gvfqwu+v9EnI9wM=;
+        b=NMeaixtpoRKLkar82utgvJasbT8xeNJEpxvOADXralSmQuRldo4exx0rC0Guz+2EoN
+         +YgNuhS5DIoc6t1CVLymfqnwEQ2qGyKgc2Fhb6j+/lRFWLUBctl+lJBHYNQDQ9aHkCik
+         xrStGQEoKEEGPMo6Ms4ROC0NFESD+pW8+bbVbr1z3UCDtqexjOE8MxiaFxjJxoIdl5+o
+         5n4VPGQOA5N5WWG4MjQX9Wy4yI8tgQFDHmbFKopohZTDYUv75VwzzvLmi5G1Ao0FMNVd
+         U7vImXrIq70DI+pcJxip6v64NTlgaz+5Eeb20MkDB0pxa/FuX+FvJABd5OA9uytduTTu
+         ICEA==
+X-Forwarded-Encrypted: i=1; AHgh+Roz+tNHk83waHrqeHcCufBqideVN47961uE3aA8wFpD5o2W7NvNWk5Y8wmIzf8Dt9jdWZjR7eJ4sFN6@vger.kernel.org
+X-Gm-Message-State: AOJu0YyBp7os/1Koo/eVL079Ikl7DnR0r2l14jlyazzQKCX//kwbgr83
+	6o1R8g7KQTZHFvEZEZcjwMahORk3RAX7KMkMmmdSNS2YHg7PxsCfV841cdnvKdJJ7s0Ad3qoiaF
+	5QIexuCqxQiWgS2UfYApIR4+RCAIOWSnRA0RlTGI1MP31J2GR+tUR5baAqubL3eY=
+X-Gm-Gg: AR+sD13RWB7gLasfgQNGZZ2+Skz4pVQgCyS21N5NF4TygWedbesqcpljrXBWt2zI6f0
+	QE5Ch7TpyE4Fu+dmSddMPrV87pCi4E/dmckQKAO4Muegjlx4YHRUCaHGz3QJF2TSFspbOtZ+Tkb
+	WJjHwv6nBy9DD2AqU3sP7witIJ0l111wI5ansKkBAlAY2ce4cw+Pcfx771b9asbwOLHLzahty1y
+	8TZAJJ4B0oHV0px3rjdLrdnDZeQVyNH/Pigl5HkrP5O/nnUKgQdesPEoezEQnD8pckPiUfOFPOk
+	lkGCJkJElfbzmUrN3UJ/ZwFxlkxotwajLcTUXFHUrUT0dd+yOZ2oEmtPtLPx5Y0whsA4qXo3Uac
+	U7/mYwO7AWgtL5/8mHAqsG6pi2secaZNYcg==
+X-Received: by 2002:a17:907:3c84:b0:c20:899:b8bc with SMTP id a640c23a62f3a-c23f9354356mr210749766b.6.1787134383228;
+        Wed, 19 Aug 2026 03:13:03 -0700 (PDT)
+X-Received: by 2002:a17:907:3c84:b0:c20:899:b8bc with SMTP id a640c23a62f3a-c23f9354356mr210748366b.6.1787134382841;
+        Wed, 19 Aug 2026 03:13:02 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c243c5a0796sm53221666b.35.2026.08.19.03.13.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 19 Aug 2026 03:13:02 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: max.kellermann@ionos.com
+Cc: idryomov@gmail.com,
+	ceph-devel@vger.kernel.org
+Subject: Re: [PATCH v4] net/ceph/messenger: support IPv6 Link-Local with scope identifier
+Date: Wed, 19 Aug 2026 10:13:00 +0000
+Message-Id: <20260819101300.1266123-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260812213657.1821175-1-max.kellermann@ionos.com>
+References: <20260812213657.1821175-1-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260803012648.2195405-1-neilb@ownmail.net> <20260803012648.2195405-4-neilb@ownmail.net>
- <CAJfpegs-k3skRGiwZvQLzD7OrAK4KL8zwmpmJKyjRHSQ-rqX+Q@mail.gmail.com>
- <178642552869.2852630.11443303758249822243@noble.neil.brown.name>
- <178675372176.2852630.1305553887009521382@noble.neil.brown.name>
- <oh2lg2agqxwqopecacq6sfdnky5faxidwsybkvbwbq24r6tw6o@4swfog5ocwwb>
- <CAOQ4uxgtKvKmPaK8rPAZDSwu0Hr9JAmqJi0a1VX_Rg7jDo8HrQ@mail.gmail.com> <178709583480.2852630.4575326968116183366@noble.neil.brown.name>
-In-Reply-To: <178709583480.2852630.4575326968116183366@noble.neil.brown.name>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 19 Aug 2026 11:09:08 +0200
-X-Gm-Features: AcwNN1UFDFH9Q8rKf4JEYrfWaPzn8I4k7H_DXxMVUtNUKHAd4oHCJiy2cVmJC48
-Message-ID: <CAOQ4uxj6O8Ukbn-vWU-o+zOAYyofokCTAGnSifSDh9-PACCTdg@mail.gmail.com>
-Subject: Re: [PATCH v1 03/12] fsnotify: don't hold a spin_lock across
- fsnotify_recalc_mask() calls.
-To: NeilBrown <neil@brown.name>
-Cc: Jan Kara <jack@suse.cz>, Miklos Szeredi <miklos@szeredi.hu>, Ian Kent <raven@themaw.net>, 
-	Chuck Lever <cel@kernel.org>, Jake Edge <jake@lwn.net>, Ilya Dryomov <idryomov@gmail.com>, 
-	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
-	Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, 
-	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
-	Andrew Morton <akpm@linux-foundation.org>, Miklos Szeredi <mszeredi@redhat.com>, autofs@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, 
-	codalist@coda.cs.cmu.edu, linux-fsdevel@vger.kernel.org, 
-	linux-nfs@vger.kernel.org
-Content-Type: multipart/mixed; boundary="00000000000035f8d4065962c2b9"
+Content-Transfer-Encoding: 8bit
 
---00000000000035f8d4065962c2b9
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Hi Max,
 
-On Wed, Aug 19, 2026 at 1:30=E2=80=AFAM NeilBrown <neilb@ownmail.net> wrote=
-:
->
-> On Mon, 17 Aug 2026, Amir Goldstein wrote:
-> > On Mon, Aug 17, 2026 at 1:03=E2=80=AFPM Jan Kara <jack@suse.cz> wrote:
-> > >
-> > > On Sat 15-08-26 10:28:41, NeilBrown wrote:
-> > > > On Tue, 11 Aug 2026, NeilBrown wrote:
-> > > > > On Tue, 11 Aug 2026, Miklos Szeredi wrote:
-> > > > > > On Mon, 3 Aug 2026 at 03:39, NeilBrown <neilb@ownmail.net> wrot=
-e:
-> > > > > >
-> > > > > > > @@ -116,11 +117,15 @@ static int dnotify_handle_event(struct =
-fsnotify_mark *inode_mark, u32 mask,
-> > > > > > >                 else {
-> > > > > > >                         *prev =3D dn->dn_next;
-> > > > > > >                         kmem_cache_free(dnotify_struct_cache,=
- dn);
-> > > > > > > -                       dnotify_recalc_inode_mask(inode_mark)=
-;
-> > > > > > > +                       need_recalc =3D true;
-> > > > > > >                 }
-> > > > > > >         }
-> > > > > > >
-> > > > > > > +       if (need_recalc)
-> > > > > > > +               need_recalc =3D dnotify_recalc_inode_mask(ino=
-de_mark);
-> > > > > > >         spin_unlock(&inode_mark->lock);
-> > > > > > > +       if (need_recalc)
-> > > > > > > +               fsnotify_recalc_mask(inode_mark->connector);
-> > > > > >
-> > > > > > Is the fsnotify_group_lock() held in this case?   I don't see i=
-t.
-> > > > >
-> > > > > It isn't held.  Doesn't it need to be...
-> > > > > It seems to protect marks, so maybe it does.
-> > > > >
-> > > > > srcu seems to be used to protect this section, so maybe we can re=
-ly on
-> > > > > that.
-> > > >
-> > > > I dug into this some more, and we do rely on srcu, but don't need t=
-he
-> > > > extra code below.
-> > > > inode_mark->lock doesn't protect inode_mark->connector, so moving t=
-he
-> > > > dereference out of the lock has no effect.
-> > > > srcu_read_lock is taken before we get the ref to the mark, so the m=
-ark
-> > > > and the connector cannot disappear underneath us.
-> > > > A race could result in inode_mark->connector reading as NULL, but
-> > > > fsnotify_recalc_mask() checks for NULL, so there is no risk for har=
-m.
-> > > >
-> > > > Thanks for encouraging me to dig into this.
-> > >
-> > > Sorry for not replying earlier but I was on vacation. The lifetime ru=
-les
-> > > around marks & connectors are subtle so we have to be really careful =
-and
-> > > dnotify with its single shot marks is peculiar which makes things eve=
-n
-> > > harder. fsnotify_recalc_mask() has a comment about locking in front o=
-f it:
-> > >
-> > > /*
-> > >  * Calculate mask of events for a list of marks. The caller must make=
- sure
-> > >  * connector and connector->obj cannot disappear under us.  Callers a=
-chieve
-> > >  * this by holding a mark->lock or mark->group->mark_mutex for a mark=
- on this
-> > >  * list.
-> > >  */
-> > >
-> > > and you very obviously start violating these rules with your changes.=
- Now I
-> > > admit I've forgotten all the details why I did it like this so let me
-> > > reconstruct it :).
-> > >
-> > > Connector stays alive as long as there's any mark in its list. Both m=
-arks
-> > > and connectors are protected by the srcu. Mark also has
-> > > FSNOTIFY_MARK_FLAG_ATTACHED flag which is set iff the connector->obj =
-is
-> > > pointing to valid inode/mount/... FSNOTIFY_MARK_FLAG_ATTACHED changes=
- only
-> > > under mark_mutex so that's why mark_mutex is stabilizing the connecto=
-r (and
-> > > also connector->obj). This is what is used by most places calling
-> > > fsnotify_recalc_mask(). But dnotify needs to mess with notification m=
-ark
-> > > mask from event handling and there we cannot take mark_mutex due to l=
-ock
-> > > ordering constraints. That's where the mark->lock rule comes into pla=
-y
-> > > because mark->lock also needs to be acquired to clear
-> > > FSNOTIFY_MARK_FLAG_ATTACHED. That being said this dnotify use of
-> > > fsnotify_recalc_mask() still looks somewhat racy because
-> > > dnotify_handle_event() can get called after FSNOTIFY_MARK_FLAG_ATTACH=
-ED is
-> > > cleared.
-> > >
-> > > Anyway if you move fsnotify_recalc_mask() call outside of mark->lock,=
- you
-> > > seem to make the race with dnotify clearing the mark from
-> > > fcntl_dirnotify() easier to hit. Now in the notification path the ino=
-de
-> > > itself is guaranteed to stay alive and the rest is protected by the S=
-RCU so
-> > > there's no direct UAF. But fsnotify_recalc_mask() simply isn't prepar=
-ed for
-> > > the connector changing under it due to object getting detached and so=
- we
-> > > could end up doing weird things like NULL ptr derefs or similar stuff=
-.
-> > >
-> > > So this call to fsnotify_recalc_mask() from dnotify needs a more care=
-ful
-> > > handling. Which is sad because I doubt anybody still uses dnotify...
-> >
-> > Maybe this is the way out.
-> >
-> > dnotify_recalc_inode_mask() can only remove bits from i_fsnotify_mask,
-> > so it is an optimization.
-> >
-> > If we just remove fsnotify_recalc_mask() call from
-> > dnotify_recalc_inode_mask(), then i_fsnotify_mask will be updated when
-> > dnotify_mask gets removed eventually.
->
-> I had thought something along these lines too.  I don't think we need to
-> drop all of fsnotify_recalc_mask(), only the
-> fsnotify_conn_set_children_dentry_flags() part that walks the d_children
-> list.  And that only happens when we add to the mask, not when bits are
-> cleared.  So maybe the fsnotify_conn_set_children_dentry_flags() simply
-> never happens in this context so it doesn't need fixing.
->
-> I would prefer to make that clear from the code with a patch like the
-> following.
->
-> Note that I'm not (yet) convinced by the locking argument, but maybe we
-> don't need to pursue it.
->
-> Thanks,
-> NeilBrown
->
-> diff --git a/fs/notify/dnotify/dnotify.c b/fs/notify/dnotify/dnotify.c
-> index 9fb73bafd41d..be66d4142563 100644
-> --- a/fs/notify/dnotify/dnotify.c
-> +++ b/fs/notify/dnotify/dnotify.c
-> @@ -75,7 +75,7 @@ static void dnotify_recalc_inode_mask(struct fsnotify_m=
-ark *fsn_mark)
->                 return;
->         fsn_mark->mask =3D new_mask;
->
-> -       fsnotify_recalc_mask(fsn_mark->connector);
-> +       fsnotify_recalc_mask_inatomic(fsn_mark->connector);
+The core issue from v3 is still present: sin6_scope_id is a local
+ifindex and must not go on the wire. v4 adds ceph_addr_equal_no_scope()
+for banner comparisons, but peer_addr still carries the scope from
+inet_pton_with_scope() and gets encoded into the msgr2 HELLO and
+client-ident. A peer with scope 0 or a different ifindex will still fail
+identity checks.
 
-I don't think skipping update_children is correct when called
-from fcntl_dirnotify().
+v4 also introduces new issues: the monmap update path drops scope when
+installing decoded addresses, so reconnect to link-local monitors breaks
+after the first map; ceph_addr_equal_no_type() still memcmps full
+addresses including scope, breaking monmap lookup; and
+ceph_addr_clear_scope() does an unaligned write through a cast on a
+const-qualified pointer.
 
->  }
->
->  /*
-> diff --git a/fs/notify/mark.c b/fs/notify/mark.c
-> index b2640d836a71..7ba79828b07d 100644
-> --- a/fs/notify/mark.c
-> +++ b/fs/notify/mark.c
-> @@ -322,7 +322,8 @@ static void fsnotify_conn_set_children_dentry_flags(
->   * this by holding a mark->lock or mark->group->mark_mutex for a mark on=
- this
->   * list.
->   */
-> -void fsnotify_recalc_mask(struct fsnotify_mark_connector *conn)
-> +static void do_fsnotify_recalc_mask(struct fsnotify_mark_connector *conn=
-,
-> +                                   bool in_atomic)
->  {
->         bool update_children;
->
-> @@ -339,10 +340,20 @@ void fsnotify_recalc_mask(struct fsnotify_mark_conn=
-ector *conn)
->          * When parent stops watching, we clear false positive PARENT_WAT=
-CHED
->          * flags lazily in __fsnotify_parent().
->          */
-> -       if (update_children)
-> +       if (update_children && !WARN_ON(in_atomic))
->                 fsnotify_conn_set_children_dentry_flags(conn);
->  }
->
+The fix needs a clean wire/local split: scope lives only in the sockaddr
+used for kernel_connect(), cleared in everything that touches wire
+identity.
 
-I think I prefer the straight forward semantics in the attached patch.
+--
+Alex Markuze
 
-Thanks,
-Amir.
-
---00000000000035f8d4065962c2b9
-Content-Type: text/x-patch; charset="US-ASCII"; 
-	name="0001-fsnotify-update-children-flags-only-when-adding-mask.patch"
-Content-Disposition: attachment; 
-	filename="0001-fsnotify-update-children-flags-only-when-adding-mask.patch"
-Content-Transfer-Encoding: base64
-Content-ID: <f_mszvb4y70>
-X-Attachment-Id: f_mszvb4y70
-
-RnJvbSA3M2JiZmNkMWIyMWEwZmM3MjM5OTlhZWUzNmFmNjYyZjM2YmE0ZGQyIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBBbWlyIEdvbGRzdGVpbiA8YW1pcjczaWxAZ21haWwuY29tPgpE
-YXRlOiBXZWQsIDE5IEF1ZyAyMDI2IDEwOjU2OjQwICswMjAwClN1YmplY3Q6IFtQQVRDSF0gZnNu
-b3RpZnk6IHVwZGF0ZSBjaGlsZHJlbiBmbGFncyBvbmx5IHdoZW4gYWRkaW5nIG1hc2sgYml0cwoK
-U2luY2Ugd2Ugb25seSBldmVyIHNldCB0aGUgUEFSRU5UX1dBVENIRUQgZmxhZyBmcm9tCmZzbm90
-aWZ5X3JlY2FsY19tYXNrKCksIHRoZXJlIGlzIG5ldmVyIGEgbmVlZCB0byB1cGRhdGUgY2hpbGRy
-ZW4gZmxhZ3MKd2hlbiByZW1vdmluZyBtYXJrIG1hc2sgYml0cyBvbmx5IHdoZW4gYWRkaW5nIHRo
-ZW0uCgpGaXhlczogMTcyZTQyMmZmZWEyMCAoImZzbm90aWZ5OiBjbGVhciBQQVJFTlRfV0FUQ0hF
-RCBmbGFncyBsYXppbHkiKQpTaWduZWQtb2ZmLWJ5OiBBbWlyIEdvbGRzdGVpbiA8YW1pcjczaWxA
-Z21haWwuY29tPgotLS0KIGZzL25vdGlmeS9kbm90aWZ5L2Rub3RpZnkuYyAgICAgICAgfCAxMCAr
-KysrKy0tLS0tCiBmcy9ub3RpZnkvZmFub3RpZnkvZmFub3RpZnlfdXNlci5jIHwgIDQgKystLQog
-ZnMvbm90aWZ5L2lub3RpZnkvaW5vdGlmeV91c2VyLmMgICB8ICAyICstCiBmcy9ub3RpZnkvbWFy
-ay5jICAgICAgICAgICAgICAgICAgIHwgMTkgKysrKysrKysrKy0tLS0tLS0tLQogaW5jbHVkZS9s
-aW51eC9mc25vdGlmeV9iYWNrZW5kLmggICB8ICA4ICsrKysrKy0tCiA1IGZpbGVzIGNoYW5nZWQs
-IDI0IGluc2VydGlvbnMoKyksIDE5IGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2ZzL25vdGlm
-eS9kbm90aWZ5L2Rub3RpZnkuYyBiL2ZzL25vdGlmeS9kbm90aWZ5L2Rub3RpZnkuYwppbmRleCA5
-ZmI3M2JhZmQ0MWQyLi4wNjBlYTlhNDU1MzIyIDEwMDY0NAotLS0gYS9mcy9ub3RpZnkvZG5vdGlm
-eS9kbm90aWZ5LmMKKysrIGIvZnMvbm90aWZ5L2Rub3RpZnkvZG5vdGlmeS5jCkBAIC01OSw3ICs1
-OSw3IEBAIHN0cnVjdCBkbm90aWZ5X21hcmsgewogICogaXQgY2FsbHMgdGhlIGZzbm90aWZ5IGZ1
-bmN0aW9uIHNvIGl0IGNhbiB1cGRhdGUgdGhlIHNldCBvZiBhbGwgZXZlbnRzIHJlbGV2YW50CiAg
-KiB0byB0aGlzIGlub2RlLgogICovCi1zdGF0aWMgdm9pZCBkbm90aWZ5X3JlY2FsY19pbm9kZV9t
-YXNrKHN0cnVjdCBmc25vdGlmeV9tYXJrICpmc25fbWFyaykKK3N0YXRpYyB2b2lkIGRub3RpZnlf
-cmVjYWxjX2lub2RlX21hc2soc3RydWN0IGZzbm90aWZ5X21hcmsgKmZzbl9tYXJrLCBib29sIGFk
-ZCkKIHsKIAlfX3UzMiBuZXdfbWFzayA9IDA7CiAJc3RydWN0IGRub3RpZnlfc3RydWN0ICpkbjsK
-QEAgLTc1LDcgKzc1LDcgQEAgc3RhdGljIHZvaWQgZG5vdGlmeV9yZWNhbGNfaW5vZGVfbWFzayhz
-dHJ1Y3QgZnNub3RpZnlfbWFyayAqZnNuX21hcmspCiAJCXJldHVybjsKIAlmc25fbWFyay0+bWFz
-ayA9IG5ld19tYXNrOwogCi0JZnNub3RpZnlfcmVjYWxjX21hc2soZnNuX21hcmstPmNvbm5lY3Rv
-cik7CisJZnNub3RpZnlfcmVjYWxjX21hc2soZnNuX21hcmstPmNvbm5lY3RvciwgYWRkKTsKIH0K
-IAogLyoKQEAgLTExNiw3ICsxMTYsNyBAQCBzdGF0aWMgaW50IGRub3RpZnlfaGFuZGxlX2V2ZW50
-KHN0cnVjdCBmc25vdGlmeV9tYXJrICppbm9kZV9tYXJrLCB1MzIgbWFzaywKIAkJZWxzZSB7CiAJ
-CQkqcHJldiA9IGRuLT5kbl9uZXh0OwogCQkJa21lbV9jYWNoZV9mcmVlKGRub3RpZnlfc3RydWN0
-X2NhY2hlLCBkbik7Ci0JCQlkbm90aWZ5X3JlY2FsY19pbm9kZV9tYXNrKGlub2RlX21hcmspOwor
-CQkJZG5vdGlmeV9yZWNhbGNfaW5vZGVfbWFzayhpbm9kZV9tYXJrLCBmYWxzZSk7CiAJCX0KIAl9
-CiAKQEAgLTE3NCw3ICsxNzQsNyBAQCB2b2lkIGRub3RpZnlfZmx1c2goc3RydWN0IGZpbGUgKmZp
-bHAsIGZsX293bmVyX3QgaWQpCiAJCWlmICgoZG4tPmRuX293bmVyID09IGlkKSAmJiAoZG4tPmRu
-X2ZpbHAgPT0gZmlscCkpIHsKIAkJCSpwcmV2ID0gZG4tPmRuX25leHQ7CiAJCQlrbWVtX2NhY2hl
-X2ZyZWUoZG5vdGlmeV9zdHJ1Y3RfY2FjaGUsIGRuKTsKLQkJCWRub3RpZnlfcmVjYWxjX2lub2Rl
-X21hc2soZnNuX21hcmspOworCQkJZG5vdGlmeV9yZWNhbGNfaW5vZGVfbWFzayhmc25fbWFyaywg
-ZmFsc2UpOwogCQkJYnJlYWs7CiAJCX0KIAkJcHJldiA9ICZkbi0+ZG5fbmV4dDsKQEAgLTM3Nyw3
-ICszNzcsNyBAQCBpbnQgZmNudGxfZGlybm90aWZ5KGludCBmZCwgc3RydWN0IGZpbGUgKmZpbHAs
-IHVuc2lnbmVkIGludCBhcmcpCiAJZWxzZSBpZiAoZXJyb3IgPT0gLUVFWElTVCkKIAkJZXJyb3Ig
-PSAwOwogCi0JZG5vdGlmeV9yZWNhbGNfaW5vZGVfbWFzayhmc25fbWFyayk7CisJZG5vdGlmeV9y
-ZWNhbGNfaW5vZGVfbWFzayhmc25fbWFyaywgdHJ1ZSk7CiBvdXQ6CiAJc3Bpbl91bmxvY2soJmZz
-bl9tYXJrLT5sb2NrKTsKIApkaWZmIC0tZ2l0IGEvZnMvbm90aWZ5L2Zhbm90aWZ5L2Zhbm90aWZ5
-X3VzZXIuYyBiL2ZzL25vdGlmeS9mYW5vdGlmeS9mYW5vdGlmeV91c2VyLmMKaW5kZXggYTMyYzY2
-MzRkNTkyNy4uNzAwZTM1M2M0MjVhNiAxMDA2NDQKLS0tIGEvZnMvbm90aWZ5L2Zhbm90aWZ5L2Zh
-bm90aWZ5X3VzZXIuYworKysgYi9mcy9ub3RpZnkvZmFub3RpZnkvZmFub3RpZnlfdXNlci5jCkBA
-IC0xMjY0LDcgKzEyNjQsNyBAQCBzdGF0aWMgaW50IGZhbm90aWZ5X3JlbW92ZV9tYXJrKHN0cnVj
-dCBmc25vdGlmeV9ncm91cCAqZ3JvdXAsCiAJcmVtb3ZlZCA9IGZhbm90aWZ5X21hcmtfcmVtb3Zl
-X2Zyb21fbWFzayhmc25fbWFyaywgbWFzaywgZmxhZ3MsCiAJCQkJCQkgdW1hc2ssICZkZXN0cm95
-X21hcmspOwogCWlmIChyZW1vdmVkICYgZnNub3RpZnlfY29ubl9tYXNrKGZzbl9tYXJrLT5jb25u
-ZWN0b3IpKQotCQlmc25vdGlmeV9yZWNhbGNfbWFzayhmc25fbWFyay0+Y29ubmVjdG9yKTsKKwkJ
-ZnNub3RpZnlfcmVjYWxjX21hc2soZnNuX21hcmstPmNvbm5lY3RvciwgZmFsc2UpOwogCWlmIChk
-ZXN0cm95X21hcmspCiAJCWZzbm90aWZ5X2RldGFjaF9tYXJrKGZzbl9tYXJrKTsKIAlmc25vdGlm
-eV9ncm91cF91bmxvY2soZ3JvdXApOwpAQCAtMTUzOCw3ICsxNTM4LDcgQEAgc3RhdGljIGludCBm
-YW5vdGlmeV9hZGRfbWFyayhzdHJ1Y3QgZnNub3RpZnlfZ3JvdXAgKmdyb3VwLAogCiAJcmVjYWxj
-ID0gZmFub3RpZnlfbWFya19hZGRfdG9fbWFzayhmc25fbWFyaywgbWFzaywgZmFuX2ZsYWdzKTsK
-IAlpZiAocmVjYWxjKQotCQlmc25vdGlmeV9yZWNhbGNfbWFzayhmc25fbWFyay0+Y29ubmVjdG9y
-KTsKKwkJZnNub3RpZnlfcmVjYWxjX21hc2soZnNuX21hcmstPmNvbm5lY3RvciwgdHJ1ZSk7CiAK
-IG91dDoKIAlmc25vdGlmeV9ncm91cF91bmxvY2soZ3JvdXApOwpkaWZmIC0tZ2l0IGEvZnMvbm90
-aWZ5L2lub3RpZnkvaW5vdGlmeV91c2VyLmMgYi9mcy9ub3RpZnkvaW5vdGlmeS9pbm90aWZ5X3Vz
-ZXIuYwppbmRleCA1ZjE5YzI0ZWMxODdmLi42ZDg0YzUxMTY3NDlkIDEwMDY0NAotLS0gYS9mcy9u
-b3RpZnkvaW5vdGlmeS9pbm90aWZ5X3VzZXIuYworKysgYi9mcy9ub3RpZnkvaW5vdGlmeS9pbm90
-aWZ5X3VzZXIuYwpAQCAtNTYyLDcgKzU2Miw3IEBAIHN0YXRpYyBpbnQgaW5vdGlmeV91cGRhdGVf
-ZXhpc3Rpbmdfd2F0Y2goc3RydWN0IGZzbm90aWZ5X2dyb3VwICpncm91cCwKIAlmc25fbWFyay0+
-ZmxhZ3MgfD0gaW5vdGlmeV9hcmdfdG9fZmxhZ3MoYXJnKTsKIAlzcGluX3VubG9jaygmZnNuX21h
-cmstPmxvY2spOwogCi0JZnNub3RpZnlfcmVjYWxjX21hc2soZnNuX21hcmstPmNvbm5lY3Rvcik7
-CisJZnNub3RpZnlfcmVjYWxjX21hc2soZnNuX21hcmstPmNvbm5lY3RvciwgdHJ1ZSk7CiAKIAkv
-KiByZXR1cm4gdGhlIHdkICovCiAJcmV0ID0gaV9tYXJrLT53ZDsKZGlmZiAtLWdpdCBhL2ZzL25v
-dGlmeS9tYXJrLmMgYi9mcy9ub3RpZnkvbWFyay5jCmluZGV4IGIyNjQwZDgzNmE3MTIuLjczMWU0
-MzBmMmYzYzYgMTAwNjQ0Ci0tLSBhL2ZzL25vdGlmeS9tYXJrLmMKKysrIGIvZnMvbm90aWZ5L21h
-cmsuYwpAQCAtMzE3LDIwICszMTcsMjEgQEAgc3RhdGljIHZvaWQgZnNub3RpZnlfY29ubl9zZXRf
-Y2hpbGRyZW5fZGVudHJ5X2ZsYWdzKAogfQogCiAvKgotICogQ2FsY3VsYXRlIG1hc2sgb2YgZXZl
-bnRzIGZvciBhIGxpc3Qgb2YgbWFya3MuIFRoZSBjYWxsZXIgbXVzdCBtYWtlIHN1cmUKLSAqIGNv
-bm5lY3RvciBhbmQgY29ubmVjdG9yLT5vYmogY2Fubm90IGRpc2FwcGVhciB1bmRlciB1cy4gIENh
-bGxlcnMgYWNoaWV2ZQotICogdGhpcyBieSBob2xkaW5nIGEgbWFyay0+bG9jayBvciBtYXJrLT5n
-cm91cC0+bWFya19tdXRleCBmb3IgYSBtYXJrIG9uIHRoaXMKLSAqIGxpc3QuCisgKiBDYWxjdWxh
-dGUgbWFzayBvZiBldmVudHMgZm9yIGEgbGlzdCBvZiBtYXJrcy4KKyAqIElmIEB1cGRhdGVfY2hp
-bGRyZW4gaXMgdHJ1ZSwgdXBkYXRlIGNoaWxkcmVuIGRlbnRyeSBmbGFncyBpZiBuZWVkZWQuCisg
-KiBUaGUgY2FsbGVyIG11c3QgbWFrZSBzdXJlIGNvbm5lY3RvciBhbmQgY29ubmVjdG9yLT5vYmog
-Y2Fubm90IGRpc2FwcGVhciB1bmRlcgorICogdXMuICBDYWxsZXJzIGFjaGlldmUgdGhpcyBieSBo
-b2xkaW5nIGEgbWFyay0+bG9jayBvciBtYXJrLT5ncm91cC0+bWFya19tdXRleAorICogZm9yIGEg
-bWFyayBvbiB0aGlzIGxpc3QuCiAgKi8KLXZvaWQgZnNub3RpZnlfcmVjYWxjX21hc2soc3RydWN0
-IGZzbm90aWZ5X21hcmtfY29ubmVjdG9yICpjb25uKQordm9pZCBmc25vdGlmeV9yZWNhbGNfbWFz
-ayhzdHJ1Y3QgZnNub3RpZnlfbWFya19jb25uZWN0b3IgKmNvbm4sCisJCQkgIGJvb2wgdXBkYXRl
-X2NoaWxkcmVuKQogewotCWJvb2wgdXBkYXRlX2NoaWxkcmVuOwogCiAJaWYgKCFjb25uKQogCQly
-ZXR1cm47CiAKIAlzcGluX2xvY2soJmNvbm4tPmxvY2spOwotCXVwZGF0ZV9jaGlsZHJlbiA9ICFm
-c25vdGlmeV9jb25uX3dhdGNoZXNfY2hpbGRyZW4oY29ubik7CisJdXBkYXRlX2NoaWxkcmVuICY9
-ICFmc25vdGlmeV9jb25uX3dhdGNoZXNfY2hpbGRyZW4oY29ubik7CiAJZnNub3RpZnlfcmVjYWxj
-X21hc2tfc2V0X2lyZWYoY29ubik7CiAJdXBkYXRlX2NoaWxkcmVuICY9IGZzbm90aWZ5X2Nvbm5f
-d2F0Y2hlc19jaGlsZHJlbihjb25uKTsKIAlzcGluX3VubG9jaygmY29ubi0+bG9jayk7CkBAIC0z
-NjgsNyArMzY5LDcgQEAgdm9pZCBmc25vdGlmeV9tb2RpZnlfbWFya19tYXNrKHN0cnVjdCBmc25v
-dGlmeV9tYXJrICptYXJrLCB1MzIgc2V0LCB1MzIgY2xlYXIpCiAJc3Bpbl91bmxvY2soJm1hcmst
-PmxvY2spOwogCiAJaWYgKHJlY2FsYykKLQkJZnNub3RpZnlfcmVjYWxjX21hc2sobWFyay0+Y29u
-bmVjdG9yKTsKKwkJZnNub3RpZnlfcmVjYWxjX21hc2sobWFyay0+Y29ubmVjdG9yLCAhIXNldCk7
-CiB9CiBFWFBPUlRfU1lNQk9MX0dQTChmc25vdGlmeV9tb2RpZnlfbWFya19tYXNrKTsKIApAQCAt
-OTk4LDcgKzk5OSw3IEBAIGludCBmc25vdGlmeV9hZGRfbWFya19sb2NrZWQoc3RydWN0IGZzbm90
-aWZ5X21hcmsgKm1hcmssCiAJaWYgKHJldCkKIAkJZ290byBlcnI7CiAKLQlmc25vdGlmeV9yZWNh
-bGNfbWFzayhtYXJrLT5jb25uZWN0b3IpOworCWZzbm90aWZ5X3JlY2FsY19tYXNrKG1hcmstPmNv
-bm5lY3RvciwgdHJ1ZSk7CiAKIAlyZXR1cm4gcmV0OwogZXJyOgpkaWZmIC0tZ2l0IGEvaW5jbHVk
-ZS9saW51eC9mc25vdGlmeV9iYWNrZW5kLmggYi9pbmNsdWRlL2xpbnV4L2Zzbm90aWZ5X2JhY2tl
-bmQuaAppbmRleCA2MThlZWQ0ZDZkNzI0Li44MjYzMjg3ZTE2MmJmIDEwMDY0NAotLS0gYS9pbmNs
-dWRlL2xpbnV4L2Zzbm90aWZ5X2JhY2tlbmQuaAorKysgYi9pbmNsdWRlL2xpbnV4L2Zzbm90aWZ5
-X2JhY2tlbmQuaApAQCAtODg1LDggKzg4NSwxMiBAQCBzdGF0aWMgaW5saW5lIF9fdTMyIGZzbm90
-aWZ5X2NhbGNfbWFzayhzdHJ1Y3QgZnNub3RpZnlfbWFyayAqbWFyaykKIAogLyogR2V0IG1hc2sg
-b2YgZXZlbnRzIGZvciBhIGxpc3Qgb2YgbWFya3MgKi8KIGV4dGVybiBfX3UzMiBmc25vdGlmeV9j
-b25uX21hc2soc3RydWN0IGZzbm90aWZ5X21hcmtfY29ubmVjdG9yICpjb25uKTsKLS8qIENhbGN1
-bGF0ZSBtYXNrIG9mIGV2ZW50cyBmb3IgYSBsaXN0IG9mIG1hcmtzICovCi1leHRlcm4gdm9pZCBm
-c25vdGlmeV9yZWNhbGNfbWFzayhzdHJ1Y3QgZnNub3RpZnlfbWFya19jb25uZWN0b3IgKmNvbm4p
-OworLyoKKyAqIENhbGN1bGF0ZSBtYXNrIG9mIGV2ZW50cyBmb3IgYSBsaXN0IG9mIG1hcmtzIGFu
-ZCB1cGRhdGUgY2hpbGRyZW4gZGVudHJ5CisgKiBmbGFnIGlzIG5lZWRlZC4KKyAqLworZXh0ZXJu
-IHZvaWQgZnNub3RpZnlfcmVjYWxjX21hc2soc3RydWN0IGZzbm90aWZ5X21hcmtfY29ubmVjdG9y
-ICpjb25uLAorCQkJCSBib29sIHVwZGF0ZV9jaGlsZHJlbik7CiBleHRlcm4gdm9pZCBmc25vdGlm
-eV9pbml0X21hcmsoc3RydWN0IGZzbm90aWZ5X21hcmsgKm1hcmssCiAJCQkgICAgICAgc3RydWN0
-IGZzbm90aWZ5X2dyb3VwICpncm91cCk7CiAvKiBGaW5kIG1hcmsgYmVsb25naW5nIHRvIGdpdmVu
-IGdyb3VwIGluIHRoZSBsaXN0IG9mIG1hcmtzICovCi0tIAoyLjU1LjAKCg==
---00000000000035f8d4065962c2b9--
