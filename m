@@ -1,104 +1,115 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 429ED331EC0
-	for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 07:20:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F87E3AF662
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 07:23:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787210413; cv=none; b=O5GpXK0fM4QhCAx7WYQM3P+5fUQwUzP6euRnqWrdFmHDjCH2xC3qjW8zlS4XwnbbxCNmo5MXyuq55cfuEb0EaNV7kmPWgZxFe1e+Wxr8BO5n4HrGJbHwGfUdnQPZQGe07BKwggWKLNyjvCsBBLKJq1Pj6vguu4WuAdoGfNf+XpE=
+	t=1787210614; cv=none; b=iRdlTIU/xaFUlfYB0H3MPYitmzSERtAJCaunjcMxhxuE1OG+BImdlnhSwNlQgrCYbSMuhBJt/UY0c1bztusMc8Ipz7rxHASlypCWxmW79TLS+ngN25a3prJcTVBiCNWTJI23bZ2W/u4Drit1AMHNd1WOxo7HOZoDNtxNWp3nd7s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787210413; c=relaxed/simple;
-	bh=HO695xsih5k79IxbYxVx3imQYVeN1xxHcqE1PB57vGE=;
+	s=arc-20240116; t=1787210614; c=relaxed/simple;
+	bh=Xh/93Th6M6YozRdf/QTIg9oZ20Uf2iCJxIUALyHoBnY=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=m743SRAhS38qYGrXWNlEpwKaHYUmM07U0IHrwYKAutnyD8CJ32fVUhFqmfa/lb4IsFjCh5+TiDEryyA9BMm9KOB4FqIUPsjMxvXCGz1+hXEHzSVl6IKcHkXmVLPoTyWmD7/UtuTqZZk898zj6YT+2O2+LBUTWIc2NnbFeWtoeXo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ptvg42pm; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZSA03+XG; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version:Content-Type; b=JXrgiVKEfjCQBt8ODTo4MPAKa/zyDX0CPeCIJhbBHfr+wZZxAc0+dTXZrg6EAUh6B+ICVFaao7jhL2l2Eso9bJm/i0o5xwH9su8hWJdaN5mKIzCiX3F5YBPHssqUi4NwoZ4bVao31eR4pPB2amwIbDeuwPxcKYRA919lOFJnleA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PGLO8/zB; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=RHExQyTY; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ptvg42pm";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZSA03+XG"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PGLO8/zB";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="RHExQyTY"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787210411;
+	s=mimecast20190719; t=1787210607;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=HO695xsih5k79IxbYxVx3imQYVeN1xxHcqE1PB57vGE=;
-	b=Ptvg42pmRC580G0GDHBL4idC7wQpmY1A5Ve0tJBdsghUXIATqUJn+2bpF1IVUEpQ+LwmLP
-	Hwo1jzsW4DOQWl3T6198ahxShTxUh9/g04MO8ZlX9W6U1XTPplr+RMHxo5/rY99NtuEgi+
-	v7Pbm0pJ+uFFi+pZvBC579igM/NoBAQ=
-Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
- [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=Xh/93Th6M6YozRdf/QTIg9oZ20Uf2iCJxIUALyHoBnY=;
+	b=PGLO8/zBLsKazJZ4CP0ezor9wV4FTUfCHe7npmrkHciK8BSeMmfQ345syCI9hVZfzQ0aY1
+	JnCIaR6qHeqkF8+PkjlrcXm7vobM6acfHB8e3jn8PyQTkH4vo0Atv2zZm8lNwoC/D/mHTo
+	BKq3v1+JrVycn1SCCEnphVqbbpaffLo=
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
+ [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-27-3Aa_d_OdNV-W-Hv5F7sbHA-1; Thu, 20 Aug 2026 03:20:00 -0400
-X-MC-Unique: 3Aa_d_OdNV-W-Hv5F7sbHA-1
-X-Mimecast-MFC-AGG-ID: 3Aa_d_OdNV-W-Hv5F7sbHA_1787210399
-Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-698b899b53cso1644181a12.3
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 00:19:59 -0700 (PDT)
+ us-mta-433-C4s8ZDjGPPupSekl27RvXQ-1; Thu, 20 Aug 2026 03:23:26 -0400
+X-MC-Unique: C4s8ZDjGPPupSekl27RvXQ-1
+X-Mimecast-MFC-AGG-ID: C4s8ZDjGPPupSekl27RvXQ_1787210605
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-c16740eb587so146590666b.1
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 00:23:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1787210399; x=1787815199; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=HO695xsih5k79IxbYxVx3imQYVeN1xxHcqE1PB57vGE=;
-        b=ZSA03+XGFlPGZi33TiQIKpeLEo/15dzCjeW7+/4aiIFdeKfKwiStNbOjC0Ujd6MWDa
-         6cZk47dHqpglk/ICFwt6BGfecvVAInwVpLwGq5JRpTfCHadXooIWR1SVatvQeVTcuce8
-         4trmNUWo+Ee89zJw6TNV2ilLQs12JU2d+GiMLk9VqSwllb8NYtV70btrct4tv3HUD2Qj
-         NrbPhm08To9DWQFpg+3sVBZ1OMXFa+wdpG+MlJoQfVCy0gsYODSHYQBGBLeVBvK486RS
-         8zeCIQH0TxCR7EqHXZWwnQNYuhmQHmj1U8W+/8DYwY38OrXpqT9bbllyW9RMhFldj29b
-         dDUg==
+        d=redhat.com; s=google; t=1787210605; x=1787815405; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=Xh/93Th6M6YozRdf/QTIg9oZ20Uf2iCJxIUALyHoBnY=;
+        b=RHExQyTYNzq5NQSR8tQLY3nnsgw1Xw1MOv6AogxwBXS1efP8qoPsNFDZCqDE7RL+dI
+         Z9jpTgVSforikTyv2x7RTVA4q3WITt4ZfY1WyL3EbUxo56Un2SatOPi65Xg2u1gyMWul
+         LefviVXKaAYbaHEf+8kG9UqcqgHGP+CsfVJL8UFNAt1eyLCXttGgeiQVvZD6mjSyGqFS
+         OS4Z45G1rt+8oXRH5xwsv4KhGYmw8y2fPhoFhf7B6EOVS+TBXdAaMvtHwPzIICbmU1Gz
+         UClcik7rqYBuQ78cQYWc+kula9GytyP8x57bQXzobNhUrwjigiUyvbnIRe0K2O3hQZ6S
+         hpfg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787210399; x=1787815199;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=HO695xsih5k79IxbYxVx3imQYVeN1xxHcqE1PB57vGE=;
-        b=ooy19X77c03XvHNtZxX4PfjHf8WfwYf+kP+Km2c4gL66C86FXgdgAweGt5U0sr0zTV
-         ej7owB5j+jQ5M+NIqEPkPQKryXPdXkB6Nn+V3LknaYHw1KM4oahjYzTbHQikhtcJCC4p
-         5eSlElrlX0ZkEYTWvPrmS/uNnmZQrbQXYChXZFEmLFeRjcrjKQVSjf6oBBmAquPSRiyq
-         Fi+1NvErYaDsY1WYNDU8hPbRx0vAZInMtBj1vEQHf16TrOOb8BTu7IPreYwbMRbF7B7Z
-         GThbxEjwKmgqxsgIwUZNOb9+V9YdAKdtVs/7o3m6RKAKx6BPp10AIc8YAYS6Sido4ofJ
-         UraQ==
-X-Gm-Message-State: AFuF++knzPPPoFUomqPB/+2adbdoR6VcSWCKsIsJkjK+kLcEOAgoa9CJ
-	/K2ZR2dC08U4bJf4EK2JZKDNo4ZYPB6vrmHSdEZNx0w+Yr5A17opxRgmYCURTMZmVADGrPz5Q3Z
-	BKBnBNVwWcKCD34CdWAM92UFqXv7P0LT8fWroBOq4C2BeIJHrW7zMl+3WBy5R6GmXUB3eWYFE0Q
+        d=1e100.net; s=20251104; t=1787210605; x=1787815405;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=Xh/93Th6M6YozRdf/QTIg9oZ20Uf2iCJxIUALyHoBnY=;
+        b=kwjQt/TEvDU24LapgSlzpUL+GruUZl3VNrJDbshfB16gQH80qVpbzJptbcKpbeWsuO
+         3AQ65sx8AmV0KAGJ9TWWEuElJkFWbWjPxHtNhw3Gxcx3EiYSd6si67Fm00to9LR3N4IL
+         JcMLkRLUMFEk/OwREEzrAotbP52vTrcHWM3PTQroUQ1jZG6ocgz1YwU2xJYGDirv7HlR
+         pjzZVbGNxv6E0KFVmavrkhnCmGwxrbkPomJHtuOlRGTrh9wW14cKUGcK+vd2sTcGHBR9
+         xrosUvMOhUHB7j/Iv8IR7oTCl79YIRcT6E3dgYBM1NrXToHI/sPWsarzH32dKqu0sL+3
+         lhxw==
+X-Gm-Message-State: AOJu0YzFu6vZqTOhtwoZwMl9c7U0hpH613xwdZqPVgVoSS2ky5CljJCG
+	lC2ekB07pZ74dbxPq2la8D4pUDVzgJzPZLKVTHTxccRvB91+8Q295cZGB7syZRXm24rEZgxrZG7
+	y4NipGua+5z3qaUPzcgv5jqWedkFPyeyTbZ+tZGyR+2DB6DgL+sPKcpRZeAw+gsP4EVPwEvG6sA
 	==
-X-Gm-Gg: AR+sD10RC8zH8mg5iRTGt2yyEIcaoPJCFvxLFxS4BcDu8FfQt+P15hKH0s+XM5ffYWr
-	r9xFqygifIHv6RzZrn6OMzp4U7oaulW46H4iAZofenWXwvxGCTwQMDEN7IhIylRyU+1XUO8s3km
-	Hk2ejbJ2C7Pl1d1kglLvr3QbIsekRSyIU/DGhDkP01r+MSjcn8okx97SQLFvwdrPNdmKizyhZuJ
-	NKydOkcS28zCHrWL/HbE1qNujTZn4BvMcTmz1VWMdQjOvW7dggjuSRx5piF6G/CneiyUMVS2FH1
-	fmYZSObTuICXXFd8QuuHMIuyUsIbIuvPFEnc/uH4QNXQvH7oS4mUkeaw0p3yNruhB8nmQ1D2W19
-	U/FbK+zYgDnTsoN8h/O33+RSASMwMDGtjmQ==
-X-Received: by 2002:a05:6402:254e:b0:6a0:9468:a025 with SMTP id 4fb4d7f45d1cf-6a4032fcc9amr6866150a12.15.1787210398806;
-        Thu, 20 Aug 2026 00:19:58 -0700 (PDT)
-X-Received: by 2002:a05:6402:254e:b0:6a0:9468:a025 with SMTP id 4fb4d7f45d1cf-6a4032fcc9amr6866119a12.15.1787210398391;
-        Thu, 20 Aug 2026 00:19:58 -0700 (PDT)
+X-Gm-Gg: AR+sD12qe+JSSKleCX2UH/9SfrCC/K6q9etBFXa6w+BEvgxvX2nFtiYOquOpNOkYXk2
+	8kCmW/lJ6NfRdfPf82TSGYErqWYKgPvhDc0rTMD4tSlVPDEFwHSov8Esh9PdvBfGISsHJjo43dA
+	7+4BUh8tnHN8QJRzQIYX6qv2dPRtixIlEUwlNYOFw0JUSY0FLJnW2+yiWvWw62Bp3VoSUfncJas
+	2KbJUrvhMURsFGqyVzAWPeBgt6ZUbK9KgpF2iDqNDMVVVKbteYUeqnoqrlqg8eHT9XBnKkkWKfb
+	GGSLj0S3e1uRzyQ6gbz68zw1+NDzoE6q602pnDEfpX+qzsR2Vxq7m/VmXIZOLAh5uXw66uIKOYS
+	tdd1V8sgdyDY7W8E8SY0VifiDDjgJIm/QIQ==
+X-Received: by 2002:a17:906:fe42:b0:c21:9cf4:e1b0 with SMTP id a640c23a62f3a-c23f929e249mr698338166b.3.1787210605067;
+        Thu, 20 Aug 2026 00:23:25 -0700 (PDT)
+X-Received: by 2002:a17:906:fe42:b0:c21:9cf4:e1b0 with SMTP id a640c23a62f3a-c23f929e249mr698325766b.3.1787210604588;
+        Thu, 20 Aug 2026 00:23:24 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6a3feec9d52sm2018728a12.2.2026.08.20.00.19.57
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c2459223b9esm34523066b.62.2026.08.20.00.23.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Aug 2026 00:19:57 -0700 (PDT)
+        Thu, 20 Aug 2026 00:23:24 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
-To: xiubo.li@clyso.com
+To: max.kellermann@ionos.com
 Cc: ceph-devel@vger.kernel.org
-Subject: Re: [v2] ceph: parallelize object copy in ceph_do_objects_copy()
-Date: Thu, 20 Aug 2026 07:19:56 +0000
-Message-Id: <20260820071956.2176369-1-amarkuze@redhat.com>
+Subject: Re: ceph: don't unregister an MDS session before removing its caps
+Date: Thu, 20 Aug 2026 07:23:23 +0000
+Message-Id: <20260820072323.2180183-1-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260817-b4-ceph-copyfrom-v2-1-08029d1ad42a@clyso.com>
-References: <20260817-b4-ceph-copyfrom-v2-1-08029d1ad42a@clyso.com>
+In-Reply-To: <20260818165053.3514195-1-max.kellermann@ionos.com>
+References: <20260818165053.3514195-1-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hi Xiubo,
+Hi Max,
 
-Thanks for the respin. Looks good.
+Deferring unregister until after remove_session_caps() is the right fix
+for the BUG_ON. One gap though: check_new_map() wasn't updated for the
+new invariant. A CLOSED session now stays in mdsc->sessions[], but that
+loop still treats a registered session as live — on a rank failover it
+can overwrite CLOSED with RESTARTING and call send_mds_reconnect() on a
+dying object, or in the export-target path treat the occupied slot as
+"no session" and fail to open a replacement.
 
-Reviewed-by: Alex Markuze <amarkuze@redhat.com>
+The fix: in check_new_map(), skip CLOSED sessions the same way you skip
+NULL slots.
+
+Could you respin?
 
 --
 Alex Markuze
