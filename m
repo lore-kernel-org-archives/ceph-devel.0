@@ -1,204 +1,122 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76A43470458;
-	Thu, 20 Aug 2026 13:39:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E25F9395AD3
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 18:43:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787233163; cv=none; b=Mzvx3i7dwYTSCoa1cnUP2g1npxR59U6q6PUvS+icFypwFQTn0U+iihFzmnNaWGDCRMX6geoTDXeJa2HFpjLOMidoZtfPnxna8Ko0cOx8BA7PqzheK6IrFMySbqajhP13HQiTrOJHlB9GTHnJYBsPketuBCnnF5q8SLTInFAQJps=
+	t=1787251424; cv=none; b=C2/VUqXBqHi7k7jVTcj8E/76Vo9x0NGzIeaLsjDw5te9ayjlVOd+6MTZShWXhc9fRlvePR8c6D9p1WuUKTThN1MRblufXJTfIUCn81mMAYMaIOSHIJtVhJh1h7lVqfco7j9qRghPlPtirqgrflGcCcG5pQeCsOkdQ/FCj3qFPX0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787233163; c=relaxed/simple;
-	bh=c2aZTXsKotnTEQLxiQQU3f7OVBAi/23fQ8T+VGgh1Ls=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=kjozd13YQtolE5Fnkv5oRk0U+ab12yu638+rgqrr0RhDg4I/vhVLPHWR9mCd/RSSJUUu6T8yAAtHUW6eZo8rTPEq89c5Jzhvy4ZXYXtZacBVC3z/HxIw8Av8vpjIu0UH7AUR9GhIHm37LTcZ4Zlh5ImJmzPdjJdNOaJX6DYPVPo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Sici3JbO; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787251424; c=relaxed/simple;
+	bh=ehZHxmxFBchsjh6pqd/BorISaLa1vR6mWdb0dyhaAds=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=uEdeeQDq5iTUACS6k/79ku7CpmNevi/xW5+FiC1pZnBkxw5gvnx+FdPlJDuZ11M5RTs0IEKhEUYrLi8DM7RtqW/ygbK0uRrkEQn7h2a7rHpzSclbcUBhn3T2qEbPIXlwC9SKsbOTg9Q1Q8bxg/9B1n3ozqncY7uZrbGa3Nyhl4c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XQXWZhdz; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=k15tvUB4; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Sici3JbO"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0D721F00A3A;
-	Thu, 20 Aug 2026 13:39:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787233162;
-	bh=L2i2SfrrQ2kr3E4fUn58Y4XhMywnculujc8OIEZrVB8=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=Sici3JbOQizYFlIXggBwe7MgZeCN6TNjNk0ERw31GVUQmuZPEzQ01gpGnSWD1sMpn
-	 zQFwDnofgLU864atP6/tqDBtmujiZ5idyZKRyln3sZOW43Toj6YclyZbgS+cQf4FsQ
-	 0wnXzpg1K2jxJkxe3iBTUDJt5ptkFJWJ0rRUnb/KHE4tyRdxXYN7mo3PaUX7SrnqPK
-	 cse1ATo/8tWIduiy2izhC/2selzKFxLdKh6OItup/8+2yZ0y8E6QOQtMzxHraaA7E8
-	 I0D0kVKxwKYgSW2N3ZkA+64P85VTpqTaYA6GNTYmlZnJnLYTAWoJaPdUs07bk+zjRQ
-	 sUofwGU1LGYKQ==
-Received: from phl-compute-10.internal (phl-compute-10.internal [10.202.2.50])
-	by mailfauth.phl.internal (Postfix) with ESMTP id 0FE5BF40066;
-	Thu, 20 Aug 2026 09:39:21 -0400 (EDT)
-Received: from phl-imap-15 ([10.202.2.104])
-  by phl-compute-10.internal (MEProxy); Thu, 20 Aug 2026 09:39:21 -0400
-X-ME-Sender: <xms:iAOHalyG6G0dQLLCNtTw403Opb8WXevL_Isrb5Vfi7eSAFYybKdvgw>
-    <xme:iAOHagGxFjWfeEJPiCYOKBZtdmy1B8Y3f9glIYMBacwEAgcahh6tJtlyYARWLvAoh
-    baIweg3_NUd_JsMZHLisLaLfH--ibLgl2FP6Uc7fYlLCvWihluCtghg>
-X-ME-Proxy-Cause: dmFkZTFP4FeOKf5BWVYB8+8unwx4eT974UKuXMkwt0vKrk9dVZD4SogVp7fKs1rghfP3wk
-    dTtR/326e0hSsOaIRqwENRgZwqbVUQzksrt4doe6qD/sGy9sBJgTrBfl1DlOkB2ZUb6ugE
-    wUFcNBWtSqdk5qvptpFMIpNInTOxSbG8voiRmZMkw6zRyvfUaEV2LTwFfLtuO7BY6h2o3T
-    lERQMRhQZZ9ycKzOx0oIDSmaQWoLP71hMaeAmTYgmpifXOs7MkkeoSoFKkUnfytCjxuCl7
-    AeZB28U5c9ucyN+PjpCM69GE/OP/6kaY4S3vfbxVua2kaVQBjo+NnrPPc9KkPdzQn2xNTL
-    K8xD+UW9lzKTQUfyzgOsFf8lTQsQvzHN2wf7HMGLweqJs2iryTO1rOurRZpgdqO4oDBEBg
-    P7YrTu0JVQRyL53bo7nBH2EWH0VQbS3587m+DvMFVPLVIxRopXennsYfT62Czo5tx9641r
-    OPdfppR/DLW5BiEd1CgG8X6cqpFVxJmZxCgk7aBt24/CQQaiJPdmbL7WhF4v98JmQuBPco
-    RBgyGtd6G9b/NtEebf9jCfo5svJSy5bGxuau2FPm8SdElLKSfPwsErd4i3fajfbaM0Q6zZ
-    +mX8WIp7QpoteuD0ni6Pu8P99mwc0flZiPYqwqejPUhcAiKEVIRNL5pyNxSA
-X-ME-Proxy: <xmx:iAOHau7aBlFVUUUFvHPjiKktd9jQGkOYF86yb59gHtHMQzgB5LMGCQ>
-    <xmx:iQOHajUdTt8T2eeBjpk4vco6uHHGGpftn3-Fx3LtkIZwNrdxL4SA2Q>
-    <xmx:iQOHasIzTXXVSxfH9cV0onv3Ide0BxbFi8t9HkrKylfidCuBA8eK0w>
-    <xmx:iQOHaoSE2ZkeAsN-2NtBnwLdhZpYlPNgXP69jorYO39HBeQDd59bVA>
-    <xmx:iQOHaohQprhurksJT9XbgRMD6m5Bqf6ebxq-dZ2KJ_XX8eDXzaVIA5nP>
-Feedback-ID: ifa6e4810:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id CFF8C7811F0; Thu, 20 Aug 2026 09:39:20 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XQXWZhdz";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="k15tvUB4"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1787251421;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ehZHxmxFBchsjh6pqd/BorISaLa1vR6mWdb0dyhaAds=;
+	b=XQXWZhdz99/Z0NHhxU/nlzBOfCTJGlZJ7c+xylE83G/SxG4tkkUBXLJeIOiDB+gH5hybS+
+	jGPrUeJ4aRR5hyANjdWtLH6WNf6ETEK+pmBJdkSjbhizv+NiF6XVLzE9EFXw0rCnIMwl9x
+	Rh6SvP5F9h/1oVLmALUcKJuiFNaFrvw=
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
+ [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-447-KqO-IvG2PgiNgABbn3cx2Q-1; Thu, 20 Aug 2026 14:43:40 -0400
+X-MC-Unique: KqO-IvG2PgiNgABbn3cx2Q-1
+X-Mimecast-MFC-AGG-ID: KqO-IvG2PgiNgABbn3cx2Q_1787251419
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-c15d4224f9dso7203366b.3
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 11:43:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1787251419; x=1787856219; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=ehZHxmxFBchsjh6pqd/BorISaLa1vR6mWdb0dyhaAds=;
+        b=k15tvUB46i6cXyczNfQBHigNybIHZqIssNxB8nuNOB516J7YuQzzNVR530yk0aK6ot
+         BOYlbfqvBOt/sxrmJ7KWpzBw7bFPQnCMh5eQOx4ituULCE03dHQIYy5MgPAwLAt7FMVi
+         WEGXugoIdY03dgrnBvH8vWBEiwh1B+xL0g42Gnqw9Kuo/jFh7NTtGhDkEjE1KTMr++gF
+         Oxrq308IGcTitMSSPU25vUvqE4bjqZbZ9ezfUuHNOlW2B4rVUyZPA4LjeZeia/gxfWgg
+         PPl9lMqaVHTA8lY7BOVYy0PHTjAFss2/RC2OlzkHrXrzD2ncmzSbq7Qr9ZxQQaWBJk8P
+         ogDQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787251419; x=1787856219;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ehZHxmxFBchsjh6pqd/BorISaLa1vR6mWdb0dyhaAds=;
+        b=gZFe0HWHpCOnE9KQVogP65YPsON/Sv/nlgidcMFsw4L+2ju63GiBXQSEvvq5xlIPbh
+         /n0ybroXI0c2oViQpHBfJNw20I65wulQmdqr+l6Zc1gbqNm9jrvlq4tPtd5VWw1JllQu
+         FqUdP3PtaIBk1YQqOwYVK6Aa6jb/J0IhuhSLC1yC4mYa8uNG5Fl0HUiyWpGV4oCDhvTN
+         P6z31xV2Hjwxg7vs6pwwmQf8ELP5gtuAPCENnxs1/0OWRKqsF6n93joJ2N/GjCX5+WEl
+         GwlLzd5QJxJoAGPSNRP5c/RsttJIT7T7oHN0I3ZwsUANFmkvz9kqbLs7dnfzYNsTC9ha
+         r4iw==
+X-Forwarded-Encrypted: i=1; AHgh+RoWj4IA1ypd8yXvpwPLcQqA7oM3L9Pai7J13XZH45BARpehhbUfQuCqbHuAXhVgbK7lhF3Uqle+VBys@vger.kernel.org
+X-Gm-Message-State: AOJu0YwEA0c2DoGsIyMdYQS4IvO+hNmhTjqbNHwmIijfIezNflx5XEwT
+	D2PucCy9vFJMDMfL74P0fjI+8SSrjfiftgbDBpBCiT4VO5qmLeaZigZULh6UAvPudRkeEFnMEN7
+	IR8yQk9NM5z7EvEwAOGZU/J1JXRTpz1RamGsJfLDri6TM23caOOnegKzk6ey0Kew=
+X-Gm-Gg: AR+sD12VbKLt6koGHjx4KE7CG23T/qStZihkvpwe3N9gUt8uSbOuaE46RJjQhnN3QjI
+	A6lk2nyhKTE/SG3HAVNC2QwtNsNzwBMyi3nhA7XzC7oMgZD90etJWD71GKFnLXjYuyHGbIofsoj
+	inZGADML/6QMo5BNLHvV+AcPiOt/GnLr8IiWKZiWn91sPXmXsqMQA/B7d39DLTSUUSmzlPUEWdh
+	DMZAtmfXzWmW0edqyPI47zw3+ABM+eSIE3efXts1DEB4NI+QgWaQeaPFKOV+XsgaH29aFfSDZjI
+	r9Z61tTI9w9Zs55jpyp/D+X9t+jAPmYBx+BaTTLWkWgKQquBG6TXvDY9MiafKsni02pVO6+imcg
+	RYvQvUNZewEiCt35fYCd8xPKreLOn2sX8+w==
+X-Received: by 2002:a17:907:1b08:b0:c20:23fb:bb05 with SMTP id a640c23a62f3a-c246a6b4dfdmr42074666b.15.1787251419197;
+        Thu, 20 Aug 2026 11:43:39 -0700 (PDT)
+X-Received: by 2002:a17:907:1b08:b0:c20:23fb:bb05 with SMTP id a640c23a62f3a-c246a6b4dfdmr42071766b.15.1787251418831;
+        Thu, 20 Aug 2026 11:43:38 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c24591df2acsm104609966b.44.2026.08.20.11.43.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Aug 2026 11:43:38 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: xiubo.li@clyso.com
+Cc: idryomov@gmail.com,
+	ceph-devel@vger.kernel.org
+Subject: Re: [v3] ceph: add 'lazyio' mount option to kclient
+Date: Thu, 20 Aug 2026 18:43:37 +0000
+Message-Id: <20260820184337.2284093-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260819-lazyio-v3-1-21110d37c4be@clyso.com>
+References: <20260819-lazyio-v3-1-21110d37c4be@clyso.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: AvwrKSmIynuB
-Date: Thu, 20 Aug 2026 09:39:00 -0400
-From: "Chuck Lever" <cel@kernel.org>
-To: NeilBrown <neil@brown.name>, "Ian Kent" <raven@themaw.net>,
- "Jake Edge" <jake@lwn.net>, "Ilya Dryomov" <idryomov@gmail.com>,
- "Alex Markuze" <amarkuze@redhat.com>,
- "Viacheslav Dubeyko" <slava@dubeyko.com>, "Jan Harkes" <jaharkes@cs.cmu.edu>,
- coda@cs.cmu.edu, "Alexander Viro" <viro@zeniv.linux.org.uk>,
- "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
- "Trond Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
- "Amir Goldstein" <amir73il@gmail.com>,
- "Andrew Morton" <akpm@linux-foundation.org>,
- "Miklos Szeredi" <mszeredi@redhat.com>
-Cc: autofs@vger.kernel.org, linux-kernel@vger.kernel.org,
- ceph-devel@vger.kernel.org, codalist@coda.cs.cmu.edu,
- linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org
-Message-Id: <c3cc4175-1ca3-467d-849b-22462a7514fc@app.fastmail.com>
-In-Reply-To: <20260815042707.2535717-14-neilb@ownmail.net>
-References: <20260815042707.2535717-1-neilb@ownmail.net>
- <20260815042707.2535717-14-neilb@ownmail.net>
-Subject: Re: [PATCH v2 13/18] VFS: don't move dentries in d_sib list when they have the
- same parent
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+Hi Xiubo,
 
+One issue in caps.c:1014: ceph_adjust_caps_used_for_lazyio() maps
+CACHE/BUFFER onto LAZYIO only while LAZYIO is in issued. The grant path
+in handle_cap_grant() is fine — the writeback/invalidate wait fires
+there. But after the revoke, ceph_check_caps() sees used as BUFFER/CACHE
+with revoking as LAZYIO, (revoking & cap_used)==0, and ACKs immediately.
+The MDS can then hand the cap to another client while dirty or stale
+pages are still present.
 
-On Sat, Aug 15, 2026, at 12:21 AM, NeilBrown wrote:
-> From: NeilBrown <neil@brown.name>
->
-> When __d_move() moves or exchanges dentries it currently always moves
-> both dentries to the head of the ->d_children list of the respective
-> parents.
->
-> When they have the same parent, this simply moves them from where they
-> are to the start in the same list.  So it achieves nothing useful.
->
-> A future patch will allow d_for_each_positive_child() to drop and retake
-> the parent's d_lock during the iteration.  With the current __d_move
-> behaviour this would allow a dentry to be moved to the front and so
-> missed, even though it is still in the same directory.  This might be
-> unexpected.
->
-> With this change the only dentries that d_for_each_positive_child()
-> might miss are those moved out of the directory, or those moved in after
-> the iteration started.  These are unavoidable and should not be
-> unexpected.
->
-> Signed-off-by: NeilBrown <neil@brown.name>
-> ---
->  fs/dcache.c | 20 ++++++++++++++------
->  1 file changed, 14 insertions(+), 6 deletions(-)
->
-> diff --git a/fs/dcache.c b/fs/dcache.c
-> index ae726f3ff0cb..50fbbcceca01 100644
-> --- a/fs/dcache.c
-> +++ b/fs/dcache.c
-> @@ -3052,6 +3052,9 @@ static void copy_name(struct dentry *dentry, 
-> struct dentry *target)
->   * entries should not be moved in this way. Caller must hold 
-> rename_lock, the
->   * i_rwsem of the source and target directories (exclusively), and the 
-> sb->
->   * s_vfs_rename_mutex if they differ. See lock_rename().
-> + *
-> + * If @dentry and @target have the same parent, then neither is
-> + * moved in the d_sib list.
->   */
->  static void __d_move(struct dentry *dentry, struct dentry *target,
->  		     bool exchange)
-> @@ -3119,15 +3122,20 @@ static void __d_move(struct dentry *dentry, 
-> struct dentry *target,
->  	} else {
->  		target->d_parent = old_parent;
->  		swap_names(dentry, target);
-> -		if (!hlist_unhashed(&target->d_sib))
-> -			__hlist_del(&target->d_sib);
-> -		hlist_add_head(&target->d_sib, &target->d_parent->d_children);
-> +		if (target->d_parent != dentry->d_parent) {
-> +			if (!hlist_unhashed(&target->d_sib))
-> +				__hlist_del(&target->d_sib);
-> +			hlist_add_head(&target->d_sib,
-> +				       &target->d_parent->d_children);
-> +		}
->  		__d_rehash(target);
->  		fsnotify_update_flags(target);
->  	}
-> -	if (!hlist_unhashed(&dentry->d_sib))
-> -		__hlist_del(&dentry->d_sib);
-> -	hlist_add_head(&dentry->d_sib, &dentry->d_parent->d_children);
-> +	if (dentry->d_parent != old_parent) {
-> +		if (!hlist_unhashed(&dentry->d_sib))
-> +			__hlist_del(&dentry->d_sib);
-> +		hlist_add_head(&dentry->d_sib, &dentry->d_parent->d_children);
-> +	}
-> 
->  	/*
->  	 * Adjust parent refcounts if either d_children ended up empty.
-> -- 
-> 2.50.0.107.gf914562f5916.dirty
+Fix: extend the mapping to cover implemented, not just issued, so the
+LAZYIO-revoking case holds until writeback and invalidation actually
+complete. Also worth queuing writeback when revoking LAZYIO with
+i_wrbuffer_ref set, matching the existing BUFFER path.
 
-Both new guards are correct. In the exchange branch target->d_parent has
-already been set to old_parent, so testing it against dentry->d_parent
-asks whether the two dentries started in the same directory. In the
-common branch dentry->d_parent has been set to target's parent, so
-testing it against old_parent asks the same question. IS_ROOT()
-still takes the move, which it needs to because a root dentry has an
-unhashed d_sib, and the BUG_ON(p) above guarantees target->d_parent
-is not dentry.
+Minor: the commit message still says CEPH_FILE_MODE_LAZY is set in
+ceph_init_file_info(); since v2 it's set in ceph_open()/ceph_atomic_open().
 
-The opening sentence needs a qualifier. For an ordinary move only
-dentry->d_sib is relocated. target->d_sib is touched only on the
-exchange path, so "both dentries" describes just that case.
+Could you respin?
 
-This patch also does more for libfs than the patch description claims.
-I would like the description to say so, because it makes the patch
-worth applying on its own.
+--
+Alex Markuze
 
-offset_readdir() resolves a stale cookie with mas_find_rev() and then
-walks d_children from the dentry it lands on. That is correct only
-while offset order is the reverse of d_children order. d_alloc()
-inserts at the head and mtree_alloc_cyclic() hands out increasing
-offsets, so the two agree in a directory that is only created into.
-
-A rename within one directory breaks the agreement today.
-simple_offset_rename() gives the surviving dentry the offset of the
-entry it replaced, and d_move() then sends that dentry to the head of
-d_children. Create a, b and c in that order and the offsets are 3, 4
-and 5, with d_children holding c, b, a. After rename("a", "b") the
-dentry for a carries offset 4 and sits at the head, so d_children
-holds a, c while offset order still says c, a. Stop a readdir with a
-reported and c pending, remove c, and the next call resolves the
-cookie to a and reports a a second time.
-
-With this patch a stays where it is, d_children holds c, a, and the
-two orders agree again. Thus this is a fix for tmpfs readdir, not
-just preparation for 14/18.
-
-Reviewed-by: Chuck Lever <cel@kernel.org>
-
-
--- 
-Chuck Lever
