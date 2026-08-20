@@ -1,236 +1,534 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 968B334404B;
-	Wed, 19 Aug 2026 16:22:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3CCEF2E282B;
+	Thu, 20 Aug 2026 03:36:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787156525; cv=none; b=OhmyYbT8xHRIbRxQ27bF7NjUns/SVIYfvhEywYO2wfBaBLE+bwA9KfSL2TsQTtoAKpc/9YpK7dyDC5PgxKX4IqnMS8Q/xoqH8fXtptdGfXyo7VVSjCQSEDTmCWsxbdApG4kKErROCThmgmICoHuBchAmR1CxCdFX3au29RjY9fw=
+	t=1787196961; cv=none; b=h3pTAceUO24SMDfWgMEjcnrH7RVC1Mq5oIdNpdvjRF9w6nO3im9BTtV7Lvlj3ymprEEa1fXgVanAnPdusrAVPmyT/SLL8YGTL0Ym9SIpex47khxmI8PL/huqWIWiWExJrJzglusbykFuGXpduqwfiwxa/o1C+lhXGs91Zc0FVUU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787156525; c=relaxed/simple;
-	bh=e4te6h1xyKimsYHS9NrVH8StXNN6311Dja1qqzHnV9M=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VhlUl7k4PHLSVwDHIBPl+JTEtDJ/L39OraqP+IDRiz7yKW3+xB0ZWyA5z3h2sTulDRqFH3kSR2+1zyu2lnLyl5d0VbvQKXSThGTF6HsbkW+PI8fUKSNn4fQ8SS4vFfbObeeY6PPXgKeunxZKOWOuGo//QswIjhdR0d59yiz2vw8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=j8q6mCXI; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=hyYcSR4a; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=bxIAAPKL; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=reXrUwm5; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1787196961; c=relaxed/simple;
+	bh=AFdjxA0mWg5LNhzpio4f9LR4X6hSq+i9efBTEDzO0Ys=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=qUpmWC4d0OEhYPl5M9412TZDcdtn61FhWxMn0OcikuCE8F2zxMjLrBqNmosEc7h1A3k9mZ4DUvbqfm5+nUDZKJp2ae1Mx/WUwsZubmCLFX97dHgfRgieTwiK6FUxKaMD/majUA0uNCH8L42kAMG0ELoljqj2r0pnBowhMKd+1Dw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jXgDHcbO; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="j8q6mCXI";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="hyYcSR4a";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="bxIAAPKL";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="reXrUwm5"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 350AE84BC1;
-	Wed, 19 Aug 2026 16:21:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1787156517; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=T1evlEEbS2b/TA3EU/6Mj1NCP1qai81FxW/EFcSpZ9U=;
-	b=j8q6mCXI1nw7iDKfKA/IBKRJ/gj4fXnnuVCIkMeMWnzEH5k54fLSIF0tQcycugnnlHMZM0
-	eYdk56mFKiywdkhGnJ0p5f8SOoNGj8VDyGC9A3elNJ5GGKtkEmeJeRj1lGDPIOPjaZUZOm
-	4nmHAgqteSrofLb0glhacsEY0y473z4=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1787156517;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=T1evlEEbS2b/TA3EU/6Mj1NCP1qai81FxW/EFcSpZ9U=;
-	b=hyYcSR4afNGPf3HKVBOIcs+J+QO6ompXlbapH3BrnKpqlviPl5lv+vrd/lrlpJdxXQoAFs
-	JXT8j4yTmJxRM+Bg==
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1787156513; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=T1evlEEbS2b/TA3EU/6Mj1NCP1qai81FxW/EFcSpZ9U=;
-	b=bxIAAPKLjAO3HiF65kO7N3cSjcXBTrTYtyCERUZgif8ix0UttXbflT+HBDYwSqU8OCUlpB
-	Abwx7To8ooeox9p/C7mwIlBI73TUESbPLiLl3Dr6cAr3XgEykzsIZARgFU3N7LIy5M4YHX
-	BFtTcypgwaeKp3cftxvLXwyjQblBe4k=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1787156513;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=T1evlEEbS2b/TA3EU/6Mj1NCP1qai81FxW/EFcSpZ9U=;
-	b=reXrUwm5pR4toueCWGOOymu2pbgpYfUJzOtU4fy4Z1lxmXJxiTm5AmVl+Nwms4oW4NkKph
-	n3RMD4dgNdXqJ0DQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0ECCB2F81;
-	Wed, 19 Aug 2026 16:21:53 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id fnkwAyHYhWq3eAAAD6G6ig
-	(envelope-from <jack@suse.cz>); Wed, 19 Aug 2026 16:21:53 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id 9805AA13B2; Wed, 19 Aug 2026 18:21:48 +0200 (CEST)
-Date: Wed, 19 Aug 2026 18:21:48 +0200
-From: Jan Kara <jack@suse.cz>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: NeilBrown <neil@brown.name>, Jan Kara <jack@suse.cz>, 
-	Miklos Szeredi <miklos@szeredi.hu>, Ian Kent <raven@themaw.net>, Chuck Lever <cel@kernel.org>, 
-	Jake Edge <jake@lwn.net>, Ilya Dryomov <idryomov@gmail.com>, 
-	Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
-	Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu, Alexander Viro <viro@zeniv.linux.org.uk>, 
-	Christian Brauner <brauner@kernel.org>, Trond Myklebust <trondmy@kernel.org>, 
-	Anna Schumaker <anna@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, 
-	Miklos Szeredi <mszeredi@redhat.com>, autofs@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	ceph-devel@vger.kernel.org, codalist@coda.cs.cmu.edu, linux-fsdevel@vger.kernel.org, 
-	linux-nfs@vger.kernel.org
-Subject: Re: [PATCH v1 03/12] fsnotify: don't hold a spin_lock across
- fsnotify_recalc_mask() calls.
-Message-ID: <zos6dvjft7djeb7rox7zbeowaawfy3vl2ddp6o2iwnkfjnrjah@eu2lil7wihue>
-References: <20260803012648.2195405-1-neilb@ownmail.net>
- <20260803012648.2195405-4-neilb@ownmail.net>
- <CAJfpegs-k3skRGiwZvQLzD7OrAK4KL8zwmpmJKyjRHSQ-rqX+Q@mail.gmail.com>
- <178642552869.2852630.11443303758249822243@noble.neil.brown.name>
- <178675372176.2852630.1305553887009521382@noble.neil.brown.name>
- <oh2lg2agqxwqopecacq6sfdnky5faxidwsybkvbwbq24r6tw6o@4swfog5ocwwb>
- <CAOQ4uxgtKvKmPaK8rPAZDSwu0Hr9JAmqJi0a1VX_Rg7jDo8HrQ@mail.gmail.com>
- <178709583480.2852630.4575326968116183366@noble.neil.brown.name>
- <CAOQ4uxj6O8Ukbn-vWU-o+zOAYyofokCTAGnSifSDh9-PACCTdg@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jXgDHcbO"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id C812BC2BCF4;
+	Thu, 20 Aug 2026 03:36:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1787196960;
+	bh=AFdjxA0mWg5LNhzpio4f9LR4X6hSq+i9efBTEDzO0Ys=;
+	h=From:Date:Subject:To:Cc:Reply-To:From;
+	b=jXgDHcbOhjtPZRy4S71lCFta7gqs5mFRdL9v7mKaWyQe0FJGWNCyEWTcRXrTHdg7E
+	 B91HCts6eDAnT1l/5lvnp4V45C8cw9f6kLWPbwdA/Z4XSXV4MAVNZJKUMLpBxWnm8D
+	 9ubo2q+vTHwJF5mGjAcSa9SruFCiDZoMlj0Gr5VCu65nE0dEQo+I/d6C8y0fLIoqzu
+	 jbkTqD4Jt2bfaXsSOSu09J00nVql3LcaFKzHXx00Jpik3hYSFeAA69rL5Na/U1Jch9
+	 ctRPz/wnlFNVWlzCnKf+XONBG3cV4VNlCzmMEWP64g3EsJ9dSuPvl6AJHpW7vcti+y
+	 i1KnV10dpA/ug==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FFE3C5DF81;
+	Thu, 20 Aug 2026 03:36:00 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Wed, 19 Aug 2026 20:35:53 -0700
+Subject: [PATCH v3] ceph: add 'lazyio' mount option to kclient
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAOQ4uxj6O8Ukbn-vWU-o+zOAYyofokCTAGnSifSDh9-PACCTdg@mail.gmail.com>
-X-Spam-Score: -3.80
-X-Spam-Level: 
-X-Spam-Flag: NO
-X-Spamd-Result: default: False [-3.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	MISSING_XM_UA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FREEMAIL_TO(0.00)[gmail.com];
-	RCPT_COUNT_TWELVE(0.00)[24];
-	RCVD_COUNT_THREE(0.00)[3];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FROM_HAS_DN(0.00)[];
-	FREEMAIL_CC(0.00)[brown.name,suse.cz,szeredi.hu,themaw.net,kernel.org,lwn.net,gmail.com,redhat.com,dubeyko.com,cs.cmu.edu,zeniv.linux.org.uk,linux-foundation.org,vger.kernel.org,coda.cs.cmu.edu];
-	TO_DN_SOME(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_TLS_LAST(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email]
+Message-Id: <20260819-lazyio-v3-1-21110d37c4be@clyso.com>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/2WN0Q6CIBhGX8VxHQ0w+LGr3qN1oYBJM2lgLHO+e
+ 2BbtXV5tu+cb0bBeGsC2hcz8ibaYN2QoNwUSHX1cDbY6sSIESaIYBz39XOyDotKQgul4hxalMY
+ 3b1r7WEPH05vDvbkYNWY7LzobRuen9SnSvPuLRoop1g0tCUiQldYH1U/BbZW7ohyN7KsBoR+NJ
+ a1SQoAUO0l486sty/ICQvTbCOUAAAA=
+X-Change-ID: 20260625-lazyio-6987f73c557f
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1787196957; l=18383;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=GsJ5PDZ5+TZxa9oeCA1lW0uuL//A9k7/aqzXiLOaWdE=;
+ b=qFe2zLrxYLuIEmIqZ1ZLdsELWxvPdktXJMYSlqFYUQwsnQZbpXI5WmMEvER9eCmZyOMlmb2O+
+ 1MN3fYX9GSIAH9AUJYoBRkHT6UkorIIXUVzzrh1OJ5XRMS0L2sEPqes
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-On Wed 19-08-26 11:09:08, Amir Goldstein wrote:
-> On Wed, Aug 19, 2026 at 1:30 AM NeilBrown <neilb@ownmail.net> wrote:
-> > On Mon, 17 Aug 2026, Amir Goldstein wrote:
-> > > Maybe this is the way out.
-> > >
-> > > dnotify_recalc_inode_mask() can only remove bits from i_fsnotify_mask,
-> > > so it is an optimization.
-> > >
-> > > If we just remove fsnotify_recalc_mask() call from
-> > > dnotify_recalc_inode_mask(), then i_fsnotify_mask will be updated when
-> > > dnotify_mask gets removed eventually.
-> >
-> > I had thought something along these lines too.  I don't think we need to
-> > drop all of fsnotify_recalc_mask(), only the
-> > fsnotify_conn_set_children_dentry_flags() part that walks the d_children
-> > list.  And that only happens when we add to the mask, not when bits are
-> > cleared.  So maybe the fsnotify_conn_set_children_dentry_flags() simply
-> > never happens in this context so it doesn't need fixing.
+From: Xiubo Li <xiubo.li@clyso.com>
 
-I agree with the "fsnotify_conn_set_children_dentry_flags() never happens
-from this path" part. I'm not sure I follow the "it doesn't need fixing"
-part - do you mean you will just not touch where dnotify calls
-fsnotify_recalc_mask()? In that case I agree.
+Add a 'lazyio' mount option to the kernel Ceph client that enables
+LazyIO globally for all regular file opens on a mount. This is the
+kclient equivalent of the 'client_force_lazyio=true' config option
+in the ceph-fuse userspace client.
 
-> > I would prefer to make that clear from the code with a patch like the
-> > following.
+When 'lazyio' is specified, CEPH_FILE_MODE_LAZY is automatically
+added to every regular file's fmode at open time in
+ceph_init_file_info(), causing the I/O paths to request
+CEPH_CAP_FILE_LAZYIO from the MDS. This permits buffered I/O via
+the page cache even when multiple clients have the file open for
+write — beneficial for HPC workloads that can tolerate relaxed
+cache coherency.
 
-Definitely.
+The mount option is exposed as 'lazyio' / 'nolazyio' via the VFS
+fsparam_flag_no mechanism and supports remount.
 
-> > Note that I'm not (yet) convinced by the locking argument, but maybe we
-> > don't need to pursue it.
+Link: https://tracker.ceph.com/issues/77594
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+Add a 'lazyio' mount option that enables LazyIO globally for all regular
+file opens on a CephFS mount. This is the kclient equivalent of the
+'client_force_lazyio=true' config option in ceph-fuse.
 
-Not sure what you mean here...
+When 'lazyio' is specified, CEPH_FILE_MODE_LAZY is automatically set on
+every regular file's fmode at open time. The I/O paths then request
+CEPH_CAP_FILE_LAZYIO from the MDS, which permits buffered I/O via the
+page cache even with concurrent writers — beneficial for HPC workloads
+that can tolerate relaxed cache coherency.
 
-> > diff --git a/fs/notify/dnotify/dnotify.c b/fs/notify/dnotify/dnotify.c
-> > index 9fb73bafd41d..be66d4142563 100644
-> > --- a/fs/notify/dnotify/dnotify.c
-> > +++ b/fs/notify/dnotify/dnotify.c
-> > @@ -75,7 +75,7 @@ static void dnotify_recalc_inode_mask(struct fsnotify_mark *fsn_mark)
-> >                 return;
-> >         fsn_mark->mask = new_mask;
-> >
-> > -       fsnotify_recalc_mask(fsn_mark->connector);
-> > +       fsnotify_recalc_mask_inatomic(fsn_mark->connector);
-> 
-> I don't think skipping update_children is correct when called
-> from fcntl_dirnotify().
+The mount option supports 'lazyio' / 'nolazyio' via fsparam_flag_no
+and can be changed at remount.
 
-Yes, it is not. Dnotify places mark on directory and sets FS_EVENT_ON_CHILD
-so it depends on dentry flags to be updated from fcntl_dirnotify().
+The following is a test report:
 
-> From 73bbfcd1b21a0fc723999aee36af662f36ba4dd2 Mon Sep 17 00:00:00 2001
-> From: Amir Goldstein <amir73il@gmail.com>
-> Date: Wed, 19 Aug 2026 10:56:40 +0200
-> Subject: [PATCH] fsnotify: update children flags only when adding mask bits
-> 
-> Since we only ever set the PARENT_WATCHED flag from
-> fsnotify_recalc_mask(), there is never a need to update children flags
-> when removing mark mask bits only when adding them.
-> 
-> Fixes: 172e422ffea20 ("fsnotify: clear PARENT_WATCHED flags lazily")
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+=== LazyIO Multi-Client Read Test ===
+(B writes → MDS revokes CACHE from A; lazyio keeps LAZYIO → buffered reads)
 
-Looks good to me, Neil will you pick this into your series or should I pick
-the patch into my tree rightaway?
+  nolazyio: 200 MB in 0.63s -> 319.8 MB/s
+  lazyio  : 200 MB in 0.24s -> 840.3 MB/s
 
-> diff --git a/fs/notify/mark.c b/fs/notify/mark.c
-> index b2640d836a712..731e430f2f3c6 100644
-> --- a/fs/notify/mark.c
-> +++ b/fs/notify/mark.c
-> @@ -317,20 +317,21 @@ static void fsnotify_conn_set_children_dentry_flags(
->  }
->  
->  /*
-> - * Calculate mask of events for a list of marks. The caller must make sure
-> - * connector and connector->obj cannot disappear under us.  Callers achieve
-> - * this by holding a mark->lock or mark->group->mark_mutex for a mark on this
-> - * list.
-> + * Calculate mask of events for a list of marks.
-> + * If @update_children is true, update children dentry flags if needed.
-> + * The caller must make sure connector and connector->obj cannot disappear under
-> + * us.  Callers achieve this by holding a mark->lock or mark->group->mark_mutex
-> + * for a mark on this list.
->   */
-> -void fsnotify_recalc_mask(struct fsnotify_mark_connector *conn)
-> +void fsnotify_recalc_mask(struct fsnotify_mark_connector *conn,
-> +			  bool update_children)
->  {
-> -	bool update_children;
+=== IO500 tool ior test: ===
+        nolazyio        lazyio
+Write:  54.27 MB/s  ->  89.1 MB/s
+Read:   165.48 MB/s ->  166.25
 
-As a side note once Neil allows the dentry iteration to sleep, we should
-document in the comment above that mark->lock can be used only for
-!update_children case and perhaps assert it in the function as well.
+The ior closes the file between its write and read phases. After the write fd
+closes, the client's wanted caps drop to LAZYIO only (no fds open; the clean
+page cache's used caps are reported as LAZYIO), and the MDS treats LAZYIO wants
+as non-notable — the lazy client is invisible to loner selection. The holder,
+writing every 100 ms, then becomes the only notable client, so the MDS hands it
+EXCL and revokes all caps from the lazy client (EXCL grants nothing to non-loners,
+including LAZYIO). With neither CACHE nor LAZYIO, the client invalidates its
+entire 4 GiB page cache. When the read phase reopens the file, the lock returns
+to MIX and the caps work correctly, but the cache is gone — every 1 MiB read
+goes to the OSD (~200 MiB/s instead of ~4 GiB/s page-cache hits).
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+In short: lazyio's read benefit depends on the page cache surviving; the close
+window between phases lets the writer take EXCL for free, which invalidates the
+cache.
+---
+Changes in v3:
+- Rework try_get_cap_refs() so a missing LAZYIO never makes a want
+  unsatisfiable and silently drops CACHE/BUFFER refs (degrading to sync I/O).
+- Add ceph_adjust_caps_used_for_lazyio() and report LAZYIO in used caps to
+  the MDS when it stands in for CACHE/BUFFER.
+- In handle_cap_grant(), flush dirty data before acking an LAZYIO revoke,
+  and invalidate when either CACHE or LAZYIO is revoked and neither remains.
+- Define CEPH_O_LAZY as 00020000 (matching src/include/ceph_fs.h) and send
+  it in the open request flags.
+- Link to v2: https://patch.msgid.link/20260701-lazyio-v2-1-9c667864805b@clyso.com
+
+Changes in v2:
+- Move LAZYIO fmode addition from ceph_init_file_info() to ceph_open() before
+  ceph_caps_for_mode(), so the MDS sees LAZYIO in the wanted caps at open time.
+  Also cover ceph_atomic_open() for the writer path.
+- Add ceph_adjust_caps_used_for_lazyio() to substitute LAZYIO for CACHE/BUFFER
+  in used caps reported to MDS when those caps are not issued.
+- Gate try_get_cap_refs() LAZYIO substitution on want & CEPH_CAP_FILE_LAZYIO
+  so a non-lazy fd cannot have its consistency guarantees weakened by a lazy fd
+  on the same inode.
+- Separate revocation handling in handle_cap_grant(): BUFFER revocation always
+  triggers writeback; LAZYIO revocation triggers writeback only when dirty data
+  is held (i_wrbuffer_ref/i_wb_ref); clean cached pages fall through to the
+  existing invalidation path.
+- Add LAZYIO to ceph_init_request() so readahead works for lazy fds.
+- Fix fmode propagation: use fmode instead of req->r_fmode in ceph_open() MDS
+  path, and set req->r_fmode |= CEPH_FILE_MODE_LAZY for both ceph_open() and
+  ceph_atomic_open().
+- Remove dead #ifdef O_LAZY blocks in ceph_flags_to_mode() and ceph_renew_caps().
+- Link to v1: https://patch.msgid.link/20260625-lazyio-v1-1-db13078789dd@clyso.com
+
+To: Ilya Dryomov <idryomov@gmail.com>
+To: Alex Markuze <amarkuze@redhat.com>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+---
+ fs/ceph/addr.c               |   4 ++
+ fs/ceph/caps.c               | 105 +++++++++++++++++++++++++++++++++++++++----
+ fs/ceph/file.c               |  33 +++++++++++---
+ fs/ceph/super.c              |  15 +++++++
+ fs/ceph/super.h              |   1 +
+ fs/ceph/util.c               |   4 --
+ include/linux/ceph/ceph_fs.h |   1 +
+ 7 files changed, 145 insertions(+), 18 deletions(-)
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 0a86f672cc09..d22deb05b38a 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -491,6 +491,10 @@ static int ceph_init_request(struct netfs_io_request *rreq, struct file *file)
+ 			rreq->netfs_priv = priv;
+ 			return 0;
+ 		}
++
++		/* If this is a lazy fd, also try to get LAZYIO caps */
++		if (fi->fmode & CEPH_FILE_MODE_LAZY)
++			want |= CEPH_CAP_FILE_LAZYIO;
+ 	}
+ 
+ 	/*
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index d51454e995a8..2e238ca2367b 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -999,6 +999,31 @@ int __ceph_caps_used(struct ceph_inode_info *ci)
+ 	return used;
+ }
+ 
++/*
++ * Substitute LAZYIO for CACHE/BUFFER when they are not issued.
++ * If we have LAZYIO but not CACHE/BUFFER, report LAZYIO as used instead
++ * so the MDS knows we're fine with the weaker consistency guarantee.
++ */
++static inline int ceph_adjust_caps_used_for_lazyio(int used, int issued,
++					int implemented)
++{
++	if (!(used & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_BUFFER)))
++		return used;
++	if (!(implemented & CEPH_CAP_FILE_LAZYIO))
++		return used;
++	if (issued & CEPH_CAP_FILE_LAZYIO) {
++		if (!(issued & CEPH_CAP_FILE_CACHE)) {
++			used &= ~CEPH_CAP_FILE_CACHE;
++			used |= CEPH_CAP_FILE_LAZYIO;
++		}
++		if (!(issued & CEPH_CAP_FILE_BUFFER)) {
++			used &= ~CEPH_CAP_FILE_BUFFER;
++			used |= CEPH_CAP_FILE_LAZYIO;
++		}
++	}
++	return used;
++}
++
+ #define FMODE_WAIT_BIAS 1000
+ 
+ /*
+@@ -2049,6 +2074,10 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 	 * usually because they have outstanding references).
+ 	 */
+ 	issued = __ceph_caps_issued(ci, &implemented);
++
++	/* substitute LAZYIO for CACHE/BUFFER when they are not issued */
++	used = ceph_adjust_caps_used_for_lazyio(used, issued, implemented);
++
+ 	revoking = implemented & ~issued;
+ 
+ 	want = file_wanted;
+@@ -2905,9 +2934,46 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 				}
+ 				snap_rwsem_locked = true;
+ 			}
+-			if ((have & want) == want)
++			/*
++			 * Allow LAZYIO to act as a substitute for
++			 * CACHE or BUFFER when those caps are not
++			 * issued, but only for callers that
++			 * explicitly requested LAZYIO.  This
++			 * prevents a non-lazy fd from having its
++			 * CACHE/BUFFER wants satisfied by LAZYIO
++			 * on an inode where a different fd is lazy.
++			 *
++			 * A missing LAZYIO cap, however, must never
++			 * cost us the CACHE/BUFFER refs that are
++			 * actually issued: the MDS only grants
++			 * LAZYIO for files opened with CEPH_O_LAZY
++			 * and it can be revoked at any time.  If we
++			 * made the whole want unsatisfiable without
++			 * it, the I/O paths would silently drop
++			 * CACHE/BUFFER (e.g. take no wrbuffer refs)
++			 * and degrade to synchronous writes.
++			 */
++			if ((have & (want & ~CEPH_CAP_FILE_LAZYIO)) ==
++			    (want & ~CEPH_CAP_FILE_LAZYIO)) {
++				*got = need | (want & ~exclude &
++					       ~CEPH_CAP_FILE_LAZYIO);
++				if ((want & CEPH_CAP_FILE_LAZYIO) &&
++				    (have & CEPH_CAP_FILE_LAZYIO) &&
++				    !(exclude & CEPH_CAP_FILE_LAZYIO))
++					*got |= CEPH_CAP_FILE_LAZYIO;
++			} else if ((want & CEPH_CAP_FILE_LAZYIO) &&
++				   (have & CEPH_CAP_FILE_LAZYIO) &&
++				   !(exclude & CEPH_CAP_FILE_LAZYIO) &&
++				   ((have & want) ==
++				    (want & ~(CEPH_CAP_FILE_CACHE |
++					      CEPH_CAP_FILE_BUFFER)))) {
++				/* LAZYIO substitutes for missing CACHE/BUFFER */
+ 				*got = need | (want & ~exclude);
+-			else
++				if ((*got & CEPH_CAP_FILE_CACHE) &&
++				    !(have & CEPH_CAP_FILE_CACHE) &&
++				    (have & CEPH_CAP_FILE_LAZYIO))
++					*got |= CEPH_CAP_FILE_LAZYIO;
++			} else
+ 				*got = need;
+ 			ceph_take_cap_refs(ci, *got, true);
+ 			ret = 1;
+@@ -3525,13 +3591,20 @@ static void handle_cap_grant(struct inode *inode,
+ 
+ 
+ 	/*
+-	 * If CACHE is being revoked, and we have no dirty buffers,
+-	 * try to invalidate (once).  (If there are dirty buffers, we
+-	 * will invalidate _after_ writeback.)
++	 * Check the revocation of *both* CACHE and LAZYIO, because
++	 * CACHE may have been revoked earlier and cap->issued no
++	 * longer contains it -- at that point only LAZYIO was
++	 * covering us.  If LAZYIO is now also being revoked and no
++	 * cache cap remains, we must invalidate the page cache.
++	 * Without this, a CACHE-revoked-then-LAZYIO-revoked sequence
++	 * leaves stale pages in memory until the next periodic
++	 * check_caps (up to 60s).  Also invalidate when we have no
++	 * dirty buffers (if dirty, invalidate after writeback).
+ 	 */
+ 	if (S_ISREG(inode->i_mode) && /* don't invalidate readdir cache */
+-	    ((cap->issued & ~newcaps) & CEPH_CAP_FILE_CACHE) &&
+-	    (newcaps & CEPH_CAP_FILE_LAZYIO) == 0 &&
++	    ((cap->issued & ~newcaps) &
++	     (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) &&
++	    !(newcaps & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) &&
+ 	    !(ci->i_wrbuffer_ref || ci->i_wb_ref)) {
+ 		if (try_nonblocking_invalidate(inode)) {
+ 			/* there were locked pages.. invalidate later
+@@ -3675,6 +3748,7 @@ static void handle_cap_grant(struct inode *inode,
+ 	/* check cap bits */
+ 	wanted = __ceph_caps_wanted(ci);
+ 	used = __ceph_caps_used(ci);
++	used = ceph_adjust_caps_used_for_lazyio(used, cap->issued, cap->implemented);
+ 	dirty = __ceph_caps_dirty(ci);
+ 	doutc(cl, " my wanted = %s, used = %s, dirty %s\n",
+ 	      ceph_cap_string(wanted), ceph_cap_string(used),
+@@ -3702,13 +3776,26 @@ static void handle_cap_grant(struct inode *inode,
+ 		doutc(cl, "revocation: %s -> %s (revoking %s)\n",
+ 		      ceph_cap_string(cap->issued), ceph_cap_string(newcaps),
+ 		      ceph_cap_string(revoking));
++		/*
++		 * If BUFFER is being revoked and we have dirty data,
++		 * trigger writeback before acking.  When LAZYIO was
++		 * covering for BUFFER (BUFFER not issued, dirty refs
++		 * held), also trigger writeback.  Clean cached pages
++		 * under LAZYIO are handled by queue_invalidate below.
++		 */
+ 		if (S_ISREG(inode->i_mode) &&
+ 		    (revoking & used & CEPH_CAP_FILE_BUFFER)) {
+ 			writeback = true;  /* initiate writeback; will delay ack */
+ 			revoke_wait = true;
++		} else if (S_ISREG(inode->i_mode) &&
++			   (revoking & used & CEPH_CAP_FILE_LAZYIO) &&
++			   (ci->i_wrbuffer_ref || ci->i_wb_ref)) {
++			/* LAZYIO was covering for dirty data — flush first */
++			writeback = true;
++			revoke_wait = true;
+ 		} else if (queue_invalidate &&
+-			 revoking == CEPH_CAP_FILE_CACHE &&
+-			 (newcaps & CEPH_CAP_FILE_LAZYIO) == 0) {
++			 (revoking & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO)) &&
++			 !(newcaps & (CEPH_CAP_FILE_CACHE | CEPH_CAP_FILE_LAZYIO))) {
+ 			revoke_wait = true; /* do nothing yet, invalidation will be queued */
+ 		} else if (cap == ci->i_auth_cap) {
+ 			check_caps = 1; /* check auth cap only */
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index d54d71669176..4d5afd1e0277 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -346,10 +346,6 @@ int ceph_renew_caps(struct inode *inode, int fmode)
+ 		flags = O_RDONLY;
+ 	else if (wanted & CEPH_CAP_FILE_WR)
+ 		flags = O_WRONLY;
+-#ifdef O_LAZY
+-	if (wanted & CEPH_CAP_FILE_LAZYIO)
+-		flags |= O_LAZY;
+-#endif
+ 
+ 	req = prepare_open_request(inode->i_sb, flags, 0);
+ 	if (IS_ERR(req)) {
+@@ -357,6 +353,10 @@ int ceph_renew_caps(struct inode *inode, int fmode)
+ 		goto out;
+ 	}
+ 
++	if (wanted & CEPH_CAP_FILE_LAZYIO) {
++		req->r_fmode |= CEPH_FILE_MODE_LAZY;
++		req->r_args.open.flags |= cpu_to_le32(CEPH_O_LAZY);
++	}
+ 	req->r_inode = inode;
+ 	ihold(inode);
+ 	req->r_num_caps = 1;
+@@ -408,6 +408,19 @@ int ceph_open(struct inode *inode, struct file *file)
+ 	doutc(cl, "%p %llx.%llx file %p flags %d (%d)\n", inode,
+ 	      ceph_vinop(inode), file, flags, file->f_flags);
+ 	fmode = ceph_flags_to_mode(flags);
++
++	/*
++	 * If lazyio mount option is set, enable lazyio for all regular
++	 * files.  Skip snapped files: snap caps never include LAZYIO,
++	 * so including it in wanted would force an unnecessary MDS
++	 * round-trip for every open of a snapped file.
++	 */
++	if (S_ISREG(inode->i_mode) &&
++	    ceph_snap(inode) == CEPH_NOSNAP &&
++	    (fsc->mount_options->flags & CEPH_MOUNT_OPT_LAZYIO)) {
++		fmode |= CEPH_FILE_MODE_LAZY;
++	}
++
+ 	wanted = ceph_caps_for_mode(fmode);
+ 
+ 	if (fmode & CEPH_FILE_MODE_WR)
+@@ -484,13 +497,16 @@ int ceph_open(struct inode *inode, struct file *file)
+ 		err = PTR_ERR(req);
+ 		goto out;
+ 	}
++	req->r_fmode |= fmode & CEPH_FILE_MODE_LAZY;
++	if (fmode & CEPH_FILE_MODE_LAZY)
++		req->r_args.open.flags |= cpu_to_le32(CEPH_O_LAZY);
+ 	req->r_inode = inode;
+ 	ihold(inode);
+ 
+ 	req->r_num_caps = 1;
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
+ 	if (!err)
+-		err = ceph_init_file(inode, file, req->r_fmode);
++		err = ceph_init_file(inode, file, fmode);
+ 	ceph_mdsc_put_request(req);
+ 	doutc(cl, "open result=%d on %llx.%llx\n", err, ceph_vinop(inode));
+ out:
+@@ -834,6 +850,9 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		} else {
+ 			int fmode = ceph_flags_to_mode(flags);
+ 
++			if (fsc->mount_options->flags & CEPH_MOUNT_OPT_LAZYIO)
++				fmode |= CEPH_FILE_MODE_LAZY;
++
+ 			mask = MAY_READ;
+ 			if (fmode & CEPH_FILE_MODE_WR)
+ 				mask |= MAY_WRITE;
+@@ -876,6 +895,10 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		err = PTR_ERR(req);
+ 		goto out_ctx;
+ 	}
++	if (fsc->mount_options->flags & CEPH_MOUNT_OPT_LAZYIO) {
++		req->r_fmode |= CEPH_FILE_MODE_LAZY;
++		req->r_args.open.flags |= cpu_to_le32(CEPH_O_LAZY);
++	}
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+ 	mask = CEPH_STAT_CAP_INODE | CEPH_CAP_AUTH_SHARED;
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index c05fbd4237f8..0bbd38933f0e 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -177,6 +177,7 @@ enum {
+ 	Opt_wsync,
+ 	Opt_pagecache,
+ 	Opt_sparseread,
++	Opt_lazyio,
+ };
+ 
+ enum ceph_recover_session_mode {
+@@ -203,6 +204,7 @@ static const struct fs_parameter_spec ceph_mount_parameters[] = {
+ 	fsparam_flag_no	("fsc",				Opt_fscache), // fsc|nofsc
+ 	fsparam_string	("fsc",				Opt_fscache), // fsc=...
+ 	fsparam_flag_no ("ino32",			Opt_ino32),
++	fsparam_flag_no	("lazyio",			Opt_lazyio),
+ 	fsparam_string	("mds_namespace",		Opt_mds_namespace),
+ 	fsparam_string	("mon_addr",			Opt_mon_addr),
+ 	fsparam_flag_no ("poolperm",			Opt_poolperm),
+@@ -593,6 +595,12 @@ static int ceph_parse_mount_param(struct fs_context *fc,
+ 		else
+ 			fsopt->flags |= CEPH_MOUNT_OPT_SPARSEREAD;
+ 		break;
++	case Opt_lazyio:
++		if (result.negated)
++			fsopt->flags &= ~CEPH_MOUNT_OPT_LAZYIO;
++		else
++			fsopt->flags |= CEPH_MOUNT_OPT_LAZYIO;
++		break;
+ 	case Opt_test_dummy_encryption:
+ #ifdef CONFIG_FS_ENCRYPTION
+ 		fscrypt_free_dummy_policy(&fsopt->dummy_enc_policy);
+@@ -749,6 +757,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ 		seq_puts(m, ",nopagecache");
+ 	if (fsopt->flags & CEPH_MOUNT_OPT_SPARSEREAD)
+ 		seq_puts(m, ",sparseread");
++	if (fsopt->flags & CEPH_MOUNT_OPT_LAZYIO)
++		seq_puts(m, ",lazyio");
+ 
+ 	fscrypt_show_test_dummy_encryption(m, ',', root->d_sb);
+ 
+@@ -1410,6 +1420,11 @@ static int ceph_reconfigure_fc(struct fs_context *fc)
+ 	else
+ 		ceph_clear_mount_opt(fsc, SPARSEREAD);
+ 
++	if (fsopt->flags & CEPH_MOUNT_OPT_LAZYIO)
++		ceph_set_mount_opt(fsc, LAZYIO);
++	else
++		ceph_clear_mount_opt(fsc, LAZYIO);
++
+ 	if (strcmp_null(fsc->mount_options->mon_addr, fsopt->mon_addr)) {
+ 		kfree(fsc->mount_options->mon_addr);
+ 		fsc->mount_options->mon_addr = fsopt->mon_addr;
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index afc89ce91804..aec2eb4d0256 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -45,6 +45,7 @@
+ #define CEPH_MOUNT_OPT_ASYNC_DIROPS    (1<<15) /* allow async directory ops */
+ #define CEPH_MOUNT_OPT_NOPAGECACHE     (1<<16) /* bypass pagecache altogether */
+ #define CEPH_MOUNT_OPT_SPARSEREAD      (1<<17) /* always do sparse reads */
++#define CEPH_MOUNT_OPT_LAZYIO          (1<<18) /* force lazyio for all file opens */
+ 
+ #define CEPH_MOUNT_OPT_DEFAULT			\
+ 	(CEPH_MOUNT_OPT_DCACHE |		\
+diff --git a/fs/ceph/util.c b/fs/ceph/util.c
+index 2c34875675bf..be3db3f20344 100644
+--- a/fs/ceph/util.c
++++ b/fs/ceph/util.c
+@@ -73,10 +73,6 @@ int ceph_flags_to_mode(int flags)
+ 		mode = CEPH_FILE_MODE_RDWR;
+ 		break;
+ 	}
+-#ifdef O_LAZY
+-	if (flags & O_LAZY)
+-		mode |= CEPH_FILE_MODE_LAZY;
+-#endif
+ 
+ 	return mode;
+ }
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index 69ac3e55a3fe..01fd5f6647c8 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -414,6 +414,7 @@ extern const char *ceph_mds_op_name(int op);
+ #define CEPH_O_CREAT		00000100
+ #define CEPH_O_EXCL		00000200
+ #define CEPH_O_TRUNC		00001000
++#define CEPH_O_LAZY		00020000
+ #define CEPH_O_DIRECTORY	00200000
+ #define CEPH_O_NOFOLLOW		00400000
+ 
+
+---
+base-commit: 9fc75b71fdd38465c76c6f6a884cdd4ae3c72d90
+change-id: 20260625-lazyio-6987f73c557f
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
+
+
