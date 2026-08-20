@@ -1,87 +1,92 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4890E427F9E
-	for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 12:56:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E48F442FA2
+	for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 12:56:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787230591; cv=none; b=dh1XhY7Y/PSShAZzOwqwvrrMtrIWcFKshLD1mchHeCGbAaYAGpFMpXr1kSEsbmoexkLRmVHzV1zHdfdfwtZpGvWRR30FMuPk3ruHykQY2u0d0seM9s5Yqvv43r194J2J8ob8d6QP2O5owHSGOuhY8lewyMRs26bHIwCWy1wFXkk=
+	t=1787230596; cv=none; b=jAcY+cDfB4qiEA7pSTr6q5Mrx8bCjCz4VmV8Yf9rygqT1qj7+hiSOjCB+gNCCTbPtS0dtoNtaYgqB5ToptRgw5NUyz9Jz/7AqXcj374JRqCxswy2bgi/YQTUoIbos0DGqCln0nU5BN5f6I0Uc94C1F/5JY1dFmCTM+xA669n3Mc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787230591; c=relaxed/simple;
-	bh=xSYOnhLV86B3xeB5B5uWWx+8xN4fvllv2XvlzLmzLTs=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Xod6M/g1SB4W0u9/bRRnJT3ZjbjL0Rqc//vftabyNUFg2P/TX6LjnK7MvoMYOpApzj1nzWe+W0yMCdPV3bSWnQdU4PMwRPAVsApfyc8rSJHvZKizdnhE8LCEH4/j2LfRTBA/4E17+WAEuNm1d0SRmKS882hYS/EOvCMB3rYRypQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KPLy6PRE; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=O+xE4kon; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1787230596; c=relaxed/simple;
+	bh=p3tIgysxFJmViVV2AzzNGt+i6YlCJfXwyLGKQGkdJxE=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=ipo0LbstIPQdyliAU/O8Pc/PutBT4vmNQIsTTbE1VA4PnHQSE9/IiUlCdC5/nDHnLTB2VrMBrayHsdM3wDOFoGGgD6Zb7/EzIOCVbf/LdDZ2PBDmwzsn83qXeFSKlYRb3CIYTnPvTGkSUnAG93aQsBQgUG490M0hx0rHb0xg+Dw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RpwlP4cL; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=k40eW+W2; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KPLy6PRE";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="O+xE4kon"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RpwlP4cL";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="k40eW+W2"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787230588;
+	s=mimecast20190719; t=1787230592;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=Jc4OHz03ZuHvmgh2GoYpaNulqNfsFy6ArubCamzHzqY=;
-	b=KPLy6PREwgKFEmEdqAuXxtJxApE2sJ5q1IaFP0ktD4KaS1SuFPFISCAraQqb2+lsHysxw3
-	JQ5tzopeV0CFK1WOtHIiTgxmPcxPnQiCaEbZUTzOHFhIGQlb6hADPxs5O6J5jEXxb2zhZj
-	llkG/LsQpAVjgbVb4aJe++NalcoqmBo=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Fy+ZuDQJIzeLbYbgr5kiLpkquq0EWlhUoqxu6zu3ONI=;
+	b=RpwlP4cL1oeyohcIuetFRU0rG4BqAoGjmrj+h81X80qPZC7HNAw0DuKKMMKX69qCzzWtUy
+	KOiNHlxSDBwas3hvFrurXhoMh9LZbi2h0ZH+ZV9jp4G19Wv4b7XOaKniSKf3sf36jeRASN
+	HvFHfx2h5b/Fo+fDvyOzdy9hAGHFlxQ=
+Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
+ [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-336-8MYNX7NHNFyoUtIZ-XAZEw-1; Thu, 20 Aug 2026 08:56:21 -0400
-X-MC-Unique: 8MYNX7NHNFyoUtIZ-XAZEw-1
-X-Mimecast-MFC-AGG-ID: 8MYNX7NHNFyoUtIZ-XAZEw_1787230580
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c1670dd0f5dso190720266b.2
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 05:56:21 -0700 (PDT)
+ us-mta-325-oK57t2n6Nla68_zQjufBsA-1; Thu, 20 Aug 2026 08:56:25 -0400
+X-MC-Unique: oK57t2n6Nla68_zQjufBsA-1
+X-Mimecast-MFC-AGG-ID: oK57t2n6Nla68_zQjufBsA_1787230584
+Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-6a18e611c82so2491673a12.2
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Aug 2026 05:56:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1787230580; x=1787835380; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Jc4OHz03ZuHvmgh2GoYpaNulqNfsFy6ArubCamzHzqY=;
-        b=O+xE4konFrzdF84n7FjEJKLLVLHeaOEEZWjPGFmQzZg6xuCs1vYMUyXZqMeNjQlnAE
-         2Gh6FocQfaYAHgX/l4wic2DD6yV5abroIRhGrCq2PeVPQCcwT0MYvqbypQduUztDkwRY
-         sXnEcjYW8lHlrr+Q59AD/wLRTvT+XkgnNQLF1gqahBzmGfKObdAPX2GrDQW1BlcE0YW4
-         z30yUHSVNObUx2SY0o8FdbqgA0bTasUR6KIaV9XEWVFNd8DSvGtOvijG+lJDb/tAgaaS
-         lDtWr47yLi0YxgcbvpYti0rgIDnUPNID+Zde9nzEJOTv2X6SI+pL0B1GYVQXKewbbwRD
-         lw1w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787230580; x=1787835380;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=redhat.com; s=google; t=1787230584; x=1787835384; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=Jc4OHz03ZuHvmgh2GoYpaNulqNfsFy6ArubCamzHzqY=;
-        b=s/XZU3eW0EyO2Vt+mvmm9gobpr1DanfipdJ5JBAKaD1NfxbpGtSh3sxwEt2w4FxFEz
-         0LW7bxVlT7qOHsTQSpbIeGOTGoPkWh4KUcois3cxo3fMg1o8c/p88VxxO+OHnUr1MzQE
-         r6vlUP5zVcuvAaglCPCKh6FUoeIWDRmpnYAsHGVHldx7UPWDJUVDM4+wEJQDSp+p+s0w
-         TkbNW9QNgAeo+hoPmP2wRrSXFqYUT+oT89hD2jbkAEeIW21nKdpPtBLJR5yjGOVWgWCi
-         aPStjUxKBs98tSE507DDRJApEpyX/UXO2ev0MGOnkV/W61yhpHjQ2rsV4Yf88A0iKQUJ
-         ZYPg==
-X-Gm-Message-State: AOJu0YyQfCEWnXVRA+VevJXNVFDxwHvU9iyxDiUZrDtD7tHMWczedW5m
-	okdXkeirm5c4/0nyoBN19vAsOqzccbaDcys56ZnB90GMNPQnopp3iFJdjM8u5N7QlU78Wx8hCiC
-	3IjSkfm0ZRxTeOdYTnWmtfbkNpDWq2bT/vSooBVFD6/aKnU9H1JG0dxzfdJJbSyUIBelpRnRRQV
-	8yGNPfV/ic5oPhiT7rJ6gp6AFSAzbmUUbTN34JMspGzKO7Vz2eZQ==
-X-Gm-Gg: AR+sD133IeF+ffGifrJ/zfhc3lTaZ6KXtlfOMP+kB5lIMq5dlSLPgJC8jFTmoAWC6/t
-	a8HByq+U6OBBns0g3naTTsYp8bXLxDdqO+diAZGf8CN4NnbDDtYaQy8kiAXhguTNmP+yYrm2pLm
-	8oTcMvq0/rjIwjWdyvYZg60Gut0lQYcksU6N8MSXNYYI3ze5kbiwZwyU+R6A1iqHCpyCfu8TqUa
-	nO1+H4LHyU6fgvbUjEIhLWgMiWHCXVoyyYqD/0fwN7o0cUBAsRFz8h9U7vHhz1Ff0p5wl/LAEVu
-	h855XmvgMEbs0qJnq2VvDZX+P1LMseN655N10XY/tkeCm9geoSY2mhLj5Ax6K0LNdbbCouCyUA7
-	YeXd1/snGZC/BugR20Ztfwuq5gFvPQzBnRA==
-X-Received: by 2002:a17:906:9c82:b0:c16:4df6:176b with SMTP id a640c23a62f3a-c242e3e6948mr895045466b.20.1787230580222;
-        Thu, 20 Aug 2026 05:56:20 -0700 (PDT)
-X-Received: by 2002:a17:906:9c82:b0:c16:4df6:176b with SMTP id a640c23a62f3a-c242e3e6948mr895039866b.20.1787230579648;
-        Thu, 20 Aug 2026 05:56:19 -0700 (PDT)
+        bh=Fy+ZuDQJIzeLbYbgr5kiLpkquq0EWlhUoqxu6zu3ONI=;
+        b=k40eW+W2yZBTfYrykjLCMO+D90k5X/JOYDBSkf2coTC660hIcpii+iWWwVXBdg/TCJ
+         fV3at3+u3Q5YnT3yZ7hqHvbeq0qwxw+WOmRnEH+ViDyXZHvW1w/SxX5L2mpO6obDOgwR
+         jH+pzqzU54zpul613sdiA6H7V9L3P3Nwg+hlYrLmTHa0GVn7vk5gSse5u2cv8Bn8yCQG
+         O4dtT8WdCdURjwHbnIzB2y0/pkCIZzr7BMSiWpZMyNhF+Wxx+v11IXC8ppAF9P/j6SSc
+         Bbj35d4y8dtp9hh3QcbpJ+vlNNRTuDpylE0Or0HlzQsAXhLk4d0y48cQCPDeDLQ3UAEh
+         CcEQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787230584; x=1787835384;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=Fy+ZuDQJIzeLbYbgr5kiLpkquq0EWlhUoqxu6zu3ONI=;
+        b=QNK54eJqP+hY1tg8I67hQiXB6ZtM2aU75d5wYkQSmaQBug9blLy2tUylGkiwIeXOiz
+         5KuicdHCblEuvYa6LSFh5x9FG+U1RXAeNmVwnBax8CeP9AdYyhnpRE7IGjO9lQvtdyow
+         Nz/Lskmtw8ULJQnLSXWCK2VRy0Y2YNT6X1iI9egpLDpFJpTp+rWXFm7QOHIOAosQeKAZ
+         iJtAXUIwtHzn5v9L2XA0M7XLsV2141hwD95VyCJfSMM2NbSS7O/ZmwoLSc7I06v7iQ81
+         pLNcxK/MnvRHoB8E+crlo+KXuFZYUJ81fzQIVIFchNKhW0DcGHlD5pYvUsVQREkmPLgd
+         3Icg==
+X-Gm-Message-State: AFuF++mszHrChFSQ2kKtDPsI1tBxmhnp+t/F/Wp8OWIGxIxJEmwbkDZe
+	2IBd2tTyqxNCKpvq0rbDurmcE8HPgqqqn0okjDu8k31NvaeVMQdvMcAjsIka2piwDC8vEtWxdcw
+	laNeqc+77mqWMWosZONKzNKsd3tOkgHEbm7xRDSRqe+R4DkIKjXhrWo1X6L7CyRiudABbaq62eG
+	9KyWNOfJXM4wZnzSkDYNho6sY4cezpj/CAEaPOzgYvaaiUrniuNg==
+X-Gm-Gg: AR+sD11Dwh6g1prsGmtjon1eHLhqN1gpmV2Tfl3QT9EUJGvBV/fTUxlc3IeQ7mwGpIV
+	9UOm6LLzlWJep61bEuuftcjcydVbmdSt6yQF6VM29gduReCssXkoKvnKaUOuMJglhUNlnVWlk0J
+	LNXcUfSCqVhWNFtPSYj1m+crPDYvXcDSXIx1P/n/5e9B1BGfuc28NOZ6PEhWhx2wgTXhw3G+W7l
+	zKswdQk0DNOPjwqwhT7Mxdlc6r+llAI9w5cCG88dNboNyKlyoxdLxpMuv0JHdl4LWco5WiJ7f3t
+	aDhSy2dZ6j+Jr4rBeSAt24xVqKhBJVNDPYBrQilEx+fibj++VP5V5Uipe7WDMGGTxAN/YVpOeVr
+	b/+u715FY9VPESxlB1pSpJpW4XI5i3tVtxA==
+X-Received: by 2002:a05:6402:5010:b0:698:3469:fa99 with SMTP id 4fb4d7f45d1cf-6a4031e6834mr9454169a12.0.1787230583747;
+        Thu, 20 Aug 2026 05:56:23 -0700 (PDT)
+X-Received: by 2002:a05:6402:5010:b0:698:3469:fa99 with SMTP id 4fb4d7f45d1cf-6a4031e6834mr9454117a12.0.1787230583238;
+        Thu, 20 Aug 2026 05:56:23 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6a3feec9d46sm2129827a12.1.2026.08.20.05.56.18
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6a3feec9d46sm2129827a12.1.2026.08.20.05.56.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Aug 2026 05:56:19 -0700 (PDT)
+        Thu, 20 Aug 2026 05:56:22 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com,
 	xiubo.li@clyso.com
-Subject: [PATCH v3 00/14] ceph: add binary logging (BLOG) for CephFS
-Date: Thu, 20 Aug 2026 12:56:03 +0000
-Message-Id: <cover.1787229471.git.amarkuze@redhat.com>
+Subject: [PATCH v3 04/14] ceph: add BLOG magazine batch allocator
+Date: Thu, 20 Aug 2026 12:56:07 +0000
+Message-Id: <1e98829cd8925d4051a735ba37bc36f4dbdb7cf8.1787229471.git.amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <cover.1787229471.git.amarkuze@redhat.com>
+References: <cover.1787229471.git.amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -90,230 +95,329 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
+Add blog_batch.c: per-CPU magazine batching for TLS context recycling.
+Freed composites go to a local magazine; subsequent acquisitions reclaim
+from the magazine, making the common-case log path allocation-free.
 
-This series adds a binary logging subsystem for the CephFS kernel
-client.  On hot I/O paths every dout() call formats a printk-style
-string even when nobody is reading the log.  After a client hang or
-crash, operators often want the last slice of those messages without
-having attached ftrace in advance.  BLOG is an opt-in flight recorder
-for that corpus: it stores compact binary records keyed by a source-ID
-and decodes them through debugfs.
-
-It is not a replacement for Ceph tracepoints.  Tracepoints remain the
-right interface for stable, structured events consumed by ftrace, perf,
-and BPF.  Putting the dout corpus on tracepoints would mean a maintained
-event schema for every internal debug line, mount identity in every
-event, and a collector running before the failure.  BLOG keeps the
-printf-style call sites, is enabled per mount, and retains recent
-records for collection after the fact.
-
-All new code lives under fs/ceph/ and include/linux/ceph/.  There are
-no changes outside the Ceph subsystem.  BLOG objects are linked only
-when CONFIG_DEBUG_FS=y (the only UI).  There is no CONFIG_CEPH_BLOG.
-Runtime enablement is a per-mount debugfs knob and defaults to off.
-When the static key is down, boutc() is doutc() -- one unlikely branch,
-no formatting tax from BLOG.  When the key is up but this task has no
-enter, boutc() still falls back to doutc().
-
-Load-time module parameters blog_max_sources (default 4096) and
-blog_max_clients (default 256) size the ID tables.
-
-Design
-------
-
-Record format.  Each record is a small header (timestamp delta from
-the buffer base, source-ID, client-ID, payload length) plus serialized
-arguments.  The format string lives in the source table, not in every
-record.  Arguments are packed once; strings are length-delimited.
-Decoding walks the source table and reconstructs text, including the
-'#' flag for hex/octal.
-
-Allocation.  Each logging task owns a 4K live buffer.  A page-fragment
-allocator hands out slices without a global lock; freed buffers recycle
-through per-CPU magazine batches, so the warm path does not allocate.
-When the live buffer cannot fit the next record it is retired onto a
-reader-visible snapshot list (fresh monotonic ID) and a new live buffer
-is taken from the magazine or allocated.  On GFP_ATOMIC OOM the full
-window is kept and only the new record is dropped -- the live buffer is
-not wiped in place.  Wipe/reset happens on pool reuse or debugfs clear
-(clear generation).  Sleepable first-touch uses GFP_NOFS.  Folio-locked
-and other atomic callbacks (dirty_folio, invalidate_folio, write_end,
-OSD writeback completion) use GFP_ATOMIC: reuse an existing context or
-skip logging.  RCU-walk permission with MAY_NOT_BLOCK returns -ECHILD
-before enter.
-
-Source-ID caching.  Each (file, func, line, fmt) tuple is registered
-once per logger into an open-addressed table and assigned a u32
-source-ID.  A per-callsite cache avoids that lookup after the first
-hit.  The cache is a seqcount_spinlock_t associated with its spinlock
-so a PREEMPT_RT writer cannot livelock readers on an odd sequence.  A
-generation counter on the logger prevents stale hits across
-mount/unmount of the same callsite.
-
-Per-superblock ownership.  Every mounted CephFS instance, including
--o noshare, gets its own blog_module_context and logger.  Enable,
-buffers, source table, and debugfs are isolated per mount.  Client IDs
-map (fsid, global_id) so decoded output can name the Ceph client.
-
-Context propagation.  Binary records are only emitted while a task has
-a bound blog_tls_ctx (enter_depth > 0).  ceph_blog_enter() acquires or
-reuses that context from a task-keyed rhashtable and publishes it in a
-per-CPU cache {task, ctx}.  The cache hit requires current, enter_depth,
-and logger match; a miss refills from the map.  Plain enter does not
-write current->journal_info, so ordinary VFS callbacks do not expose a
-Ceph pointer to foreign filesystem reclaim and do not run the whole
-operation under GFP_NOFS.
-
-ceph_blog_enter_req() still installs a tagged ceph_journal_info for
-the MDS fill-trace window (handle_reply -> ceph_fill_trace) so xattr
-and security paths can see the in-flight mds_request.  That window is
-already covered by memalloc_nofs_save().  Nested enter under fill-trace
-may inherit mds_req; it still does not use journal_info as the BLOG
-carrier.
-
-Last module put never calls blog_module_free() in line (that path
-cancel_delayed_work_sync's).  Free is queued on ceph_blog_free;
-ceph_blog_fsc_cleanup and module exit flush the queue.  Dead-task GC
-only collects pointers during rhashtable_walk; retire/sleep happens
-after walk_stop.  Snapshot readers hold snapshot_mutex; a context is
-unlinked from the reader list before it can be freed.
-
-debugfs.  Per-client directory:
-
-  /sys/kernel/debug/ceph/<client>/blog/enabled   # 0/1, default 0
-  /sys/kernel/debug/ceph/<client>/blog/entries   # decoded records
-  /sys/kernel/debug/ceph/<client>/blog/stats
-  /sys/kernel/debug/ceph/<client>/blog/sources   # source-ID table
-  /sys/kernel/debug/ceph/<client>/blog/clients
-  /sys/kernel/debug/ceph/<client>/blog/clear     # write-only
-
-Logging macros.  boutc() / boutc_bounded() / boutc_formats() replace
-doutc() at CephFS call sites (fs/ceph/ only; they take fsc from
-client->private).  boutc_formats() splits binary vs text backends
-where %pd cannot be serialized.  Arguments are evaluated only after a
-cached ctx is present.
-
-Why BLOG
---------
-
-When enabled, boutc() packs arguments into a 4K per-task ring instead of
-running printk formatting on the hot path.  The format string lives in
-the source table, not in every record, so the retained window is compact
-enough to keep until after a hang.  Disabled, the static key is down and
-boutc() is doutc(): one unlikely branch, no extra work.  Enablement is
-per mount, so a debug session does not tax every CephFS superblock.
-
-Stable events still belong on tracepoints.  BLOG is only for the existing
-dout/doutc corpus: sites that churn with debug work, need a recent-record
-dump without a collector attached in advance, and are too numerous to
-promote one-for-one into TRACE_EVENT.
-
-Patch breakdown
----------------
-
-  01-06  BLOG infrastructure, one patch per compilation unit:
-         private headers, deserializer, pagefrag allocator,
-         magazine batcher, logger core, per-module context manager.
-
-  07     Ceph BLOG scaffolding -- ceph_blog.h, blog_client.c,
-         super.h / libceph.h additions, Makefile wiring
-         (ceph-$(CONFIG_DEBUG_FS)).
-
-  08     boutc macro definitions in ceph_debug.h.
-
-  09     MDS fill-trace plumbing -- ceph_blog_enter_req() /
-         ceph_blog_exit() around handle_reply's ceph_fill_trace().
-
-  10     debugfs interface -- blog_debugfs.c and lifecycle hooks.
-
-  11-14  Callsite conversions -- doutc -> boutc, grouped by
-         subsystem: inodes+dirs, data I/O, caps+snaps, helpers.
-
-Changes since v2
-----------------
-
-  - move private headers under fs/ceph/; only the shared CephFS
-    integration surface stays in include/linux/ceph/
-  - no CONFIG_CEPH_BLOG; compile with CONFIG_DEBUG_FS
-  - 4K buffers and rotate-on-full; snapshot inherits the live context
-    ID (live takes the next ID) so blog/entries stays chronological;
-    clear live before publishing; a failed log-batch put keeps the
-    live window rather than wiping it
-  - BLOG context is task-local (CPU cache on the hot path).
-    journal_info + NOFS are only used for MDS fill-trace
-  - GFP_ATOMIC enter on folio-locked a_ops; last module put defers
-    free to a workqueue, umount/rmmod flush it
-  - seqcount_spinlock_t for the source-id cache; GC does not sleep
-    in the RCU walk
-  - drop the kselftest patch from this posting
-  - annotate lockless client_map[] reads with data_race(); document
-    slot reuse rather than tearing; clear pending state on ENOSPC
-    commit
-
-
-Alex Markuze (14):
-  ceph: add BLOG private headers
-  ceph: add BLOG deserialization support
-  ceph: add BLOG page-fragment allocator
-  ceph: add BLOG magazine batch allocator
-  ceph: add BLOG logger core
-  ceph: add BLOG per-module context management
-  ceph: add Ceph BLOG scaffolding
-  ceph: add bout and boutc wrappers for BLOG
-  ceph: switch MDS request plumbing to struct ceph_journal_info
-  ceph: add BLOG debugfs interface
-  ceph: convert VFS inode and directory paths to bout
-  ceph: convert VFS data I/O paths to bout
-  ceph: convert capability and snapshot paths to bout
-  ceph: convert remaining helper paths to bout
-
- fs/ceph/Makefile                |   3 +
- fs/ceph/addr.c                  | 198 ++++---
- fs/ceph/blog.h                  | 223 +++++++
- fs/ceph/blog_batch.c            | 307 ++++++++++
- fs/ceph/blog_batch.h            |  44 ++
- fs/ceph/blog_client.c           | 678 ++++++++++++++++++++++
- fs/ceph/blog_core.c             | 279 +++++++++
- fs/ceph/blog_debugfs.c          | 713 +++++++++++++++++++++++
- fs/ceph/blog_des.c              | 343 +++++++++++
- fs/ceph/blog_des.h              |  16 +
- fs/ceph/blog_module.c           | 994 ++++++++++++++++++++++++++++++++
- fs/ceph/blog_module.h           |  46 ++
- fs/ceph/blog_pagefrag.c         |  84 +++
- fs/ceph/blog_pagefrag.h         |  27 +
- fs/ceph/blog_ser.h              | 234 ++++++++
- fs/ceph/caps.c                  | 112 ++--
- fs/ceph/crypto.c                |  14 +-
- fs/ceph/debugfs.c               |  11 +-
- fs/ceph/dir.c                   | 322 ++++++++---
- fs/ceph/export.c                |  83 ++-
- fs/ceph/file.c                  | 271 ++++++---
- fs/ceph/inode.c                 | 242 +++++---
- fs/ceph/locks.c                 |  66 ++-
- fs/ceph/mds_client.c            | 358 +++++++-----
- fs/ceph/snap.c                  |  17 +-
- fs/ceph/super.c                 |  58 +-
- fs/ceph/super.h                 |   7 +
- fs/ceph/xattr.c                 | 102 ++--
- include/linux/ceph/ceph_blog.h  | 292 ++++++++++
- include/linux/ceph/ceph_debug.h |  84 ++-
- include/linux/ceph/libceph.h    |   2 +
- 31 files changed, 5593 insertions(+), 637 deletions(-)
- create mode 100644 fs/ceph/blog.h
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+ fs/ceph/blog_batch.c | 307 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 307 insertions(+)
  create mode 100644 fs/ceph/blog_batch.c
- create mode 100644 fs/ceph/blog_batch.h
- create mode 100644 fs/ceph/blog_client.c
- create mode 100644 fs/ceph/blog_core.c
- create mode 100644 fs/ceph/blog_debugfs.c
- create mode 100644 fs/ceph/blog_des.c
- create mode 100644 fs/ceph/blog_des.h
- create mode 100644 fs/ceph/blog_module.c
- create mode 100644 fs/ceph/blog_module.h
- create mode 100644 fs/ceph/blog_pagefrag.c
- create mode 100644 fs/ceph/blog_pagefrag.h
- create mode 100644 fs/ceph/blog_ser.h
- create mode 100644 include/linux/ceph/ceph_blog.h
 
+diff --git a/fs/ceph/blog_batch.c b/fs/ceph/blog_batch.c
+new file mode 100644
+index 000000000000..a4407d144c17
+--- /dev/null
++++ b/fs/ceph/blog_batch.c
+@@ -0,0 +1,307 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Binary Logging Batch Management
++ *
++ * Magazine-based batching for efficient object recycling.
++ */
++
++#include <linux/slab.h>
++#include <linux/module.h>
++#include <linux/percpu.h>
++#include <linux/preempt.h>
++#include <linux/spinlock.h>
++#include <linux/list.h>
++#include <linux/vmalloc.h>
++#include "blog_batch.h"
++#include "blog.h"
++
++static struct blog_magazine *alloc_magazine(struct blog_batch *batch, gfp_t gfp)
++{
++	struct blog_magazine *mag;
++
++	/* Allocate magazine structure from cache */
++	mag = kmem_cache_zalloc(batch->magazine_cache, gfp);
++	if (!mag)
++		return NULL;
++
++	INIT_LIST_HEAD(&mag->list);
++	mag->count = 0;
++	return mag;
++}
++
++static void free_magazine(struct blog_batch *batch, struct blog_magazine *mag)
++{
++	int i;
++	struct blog_tls_pagefrag *composite;
++
++	/* Free all composites in this magazine before freeing magazine itself */
++	for (i = 0; i < mag->count; i++) {
++		composite = mag->elements[i];
++		if (composite)
++			kvfree_atomic(composite);
++	}
++
++	/* Free the magazine structure itself */
++	kmem_cache_free(batch->magazine_cache, mag);
++}
++
++/**
++ * blog_batch_init - Initialize the batching system
++ * @batch: Batch structure to initialize
++ * @mag_cache: Slab cache for magazine structs, or NULL to create one
++ * @nr_prealloc: Number of composites to preallocate (0 = none)
++ * @retain_limit: Max composites to retain on put; excess are freed (0 = unlimited)
++ *
++ * Allocates and initializes the per-CPU magazines and global pools.
++ * Composites are allocated via kvzalloc() in BLOG_MAGAZINE_SIZE
++ * batches.  Pass nr_prealloc = 0 for batches that start empty
++ * (e.g. the log_batch).
++ *
++ * Return: 0 on success, negative error code on failure
++ */
++int blog_batch_init(struct blog_batch *batch, struct kmem_cache *mag_cache,
++		    unsigned int nr_prealloc, unsigned int retain_limit)
++{
++	unsigned int nr_mags, i, j;
++	int cpu;
++	struct blog_cpu_magazine *cpu_mag;
++	struct blog_magazine *mag;
++	struct blog_tls_pagefrag *composite;
++
++	/* Initialize counters */
++	batch->nr_full = 0;
++	batch->nr_empty = 0;
++	batch->retain_limit = retain_limit;
++
++	/* Use caller-provided cache or create one */
++	if (mag_cache) {
++		batch->magazine_cache = mag_cache;
++		batch->external_cache = true;
++	} else {
++		batch->magazine_cache = kmem_cache_create("blog_magazine",
++						       sizeof(struct blog_magazine),
++						       0, SLAB_HWCACHE_ALIGN, NULL);
++		if (!batch->magazine_cache)
++			return -ENOMEM;
++		batch->external_cache = false;
++	}
++
++	/* Initialize global magazine lists */
++	INIT_LIST_HEAD(&batch->full_magazines);
++	INIT_LIST_HEAD(&batch->empty_magazines);
++	raw_spin_lock_init(&batch->full_lock);
++	raw_spin_lock_init(&batch->empty_lock);
++
++	/* Allocate per-CPU magazines */
++	batch->cpu_magazines = alloc_percpu(struct blog_cpu_magazine);
++	if (!batch->cpu_magazines)
++		goto cleanup_cache;
++
++	/* Initialize per-CPU magazines to NULL (magazines allocated on-demand) */
++	for_each_possible_cpu(cpu) {
++		cpu_mag = per_cpu_ptr(batch->cpu_magazines, cpu);
++		cpu_mag->mag = NULL;
++	}
++
++	/* Pre-populate magazines with composites */
++	nr_mags = DIV_ROUND_UP(nr_prealloc, BLOG_MAGAZINE_SIZE);
++	for (i = 0; i < nr_mags; i++) {
++		mag = alloc_magazine(batch, GFP_KERNEL);
++		if (!mag)
++			goto cleanup;
++
++		for (j = 0; j < BLOG_MAGAZINE_SIZE; j++) {
++			composite = kvzalloc(BLOG_TLS_PAGEFRAG_ALLOC_SIZE,
++					      GFP_KERNEL);
++			if (!composite) {
++				free_magazine(batch, mag);
++				goto cleanup;
++			}
++			mag->elements[j] = composite;
++			mag->count++;
++		}
++
++		raw_spin_lock(&batch->full_lock);
++		list_add(&mag->list, &batch->full_magazines);
++		batch->nr_full++;
++		raw_spin_unlock(&batch->full_lock);
++	}
++
++	return 0;
++
++cleanup:
++	blog_batch_cleanup(batch);
++	return -ENOMEM;
++
++cleanup_cache:
++	if (!batch->external_cache && batch->magazine_cache)
++		kmem_cache_destroy(batch->magazine_cache);
++	return -ENOMEM;
++}
++
++/**
++ * blog_batch_cleanup - Clean up the batching system
++ * @batch: Batch structure to clean up
++ *
++ * Frees all magazines and composites, and destroys the magazine cache.
++ */
++void blog_batch_cleanup(struct blog_batch *batch)
++{
++	int cpu;
++	struct blog_magazine *mag, *tmp;
++	struct blog_cpu_magazine *cpu_mag;
++
++	/* Free per-CPU magazines */
++	if (batch->cpu_magazines) {
++		for_each_possible_cpu(cpu) {
++			cpu_mag = per_cpu_ptr(batch->cpu_magazines, cpu);
++			if (cpu_mag->mag)
++				free_magazine(batch, cpu_mag->mag);
++		}
++		free_percpu(batch->cpu_magazines);
++	}
++
++	/* Free magazines in the full pool */
++	raw_spin_lock(&batch->full_lock);
++	list_for_each_entry_safe(mag, tmp, &batch->full_magazines, list) {
++		list_del(&mag->list);
++		batch->nr_full--;
++		free_magazine(batch, mag);
++	}
++	raw_spin_unlock(&batch->full_lock);
++
++	/* Free magazines in the empty pool */
++	raw_spin_lock(&batch->empty_lock);
++	list_for_each_entry_safe(mag, tmp, &batch->empty_magazines, list) {
++		list_del(&mag->list);
++		batch->nr_empty--;
++		free_magazine(batch, mag);
++	}
++	raw_spin_unlock(&batch->empty_lock);
++
++	/* Destroy magazine cache */
++	if (!batch->external_cache && batch->magazine_cache)
++		kmem_cache_destroy(batch->magazine_cache);
++
++	batch->magazine_cache = NULL;
++	batch->external_cache = false;
++}
++
++/**
++ * blog_batch_get - Get an element from the batch
++ * @batch: Batch to get element from
++ *
++ * Return: Element from the magazine, or NULL if none available
++ */
++void *blog_batch_get(struct blog_batch *batch)
++{
++	struct blog_cpu_magazine *cpu_mag;
++	struct blog_magazine *old_mag, *new_mag;
++	void *element = NULL;
++
++	preempt_disable();
++	cpu_mag = this_cpu_ptr(batch->cpu_magazines);
++
++	/* If we have a magazine and it has elements, use it */
++	if (cpu_mag->mag && cpu_mag->mag->count > 0) {
++		element = cpu_mag->mag->elements[--cpu_mag->mag->count];
++		goto out;
++	}
++
++	/* Current magazine is empty, try to get a full one */
++	old_mag = cpu_mag->mag;
++
++	/* Return old magazine to empty pool if we have one */
++	if (old_mag) {
++		raw_spin_lock(&batch->empty_lock);
++		list_add(&old_mag->list, &batch->empty_magazines);
++		batch->nr_empty++;
++		raw_spin_unlock(&batch->empty_lock);
++		cpu_mag->mag = NULL;
++	}
++
++	if (READ_ONCE(batch->nr_full) > 0) {
++		/* Try to get a full magazine */
++		raw_spin_lock(&batch->full_lock);
++		if (!list_empty(&batch->full_magazines)) {
++			new_mag = list_first_entry(&batch->full_magazines,
++						   struct blog_magazine, list);
++			list_del(&new_mag->list);
++			batch->nr_full--;
++			raw_spin_unlock(&batch->full_lock);
++
++			cpu_mag->mag = new_mag;
++			if (new_mag->count > 0)
++				element = new_mag->elements[--new_mag->count];
++		} else {
++			raw_spin_unlock(&batch->full_lock);
++		}
++	}
++out:
++	preempt_enable();
++	return element;
++}
++
++/**
++ * blog_batch_put - Put an element back into the batch
++ * @batch: Batch to put element into
++ * @element: Element to put back
++ *
++ * Return: true if the batch retained the element, false otherwise
++ */
++bool blog_batch_put(struct blog_batch *batch, void *element)
++{
++	struct blog_cpu_magazine *cpu_mag;
++	struct blog_magazine *mag;
++	bool stored = true;
++
++	/* Trim: if over retention limit, decline to store the element */
++	if (batch->retain_limit &&
++	    READ_ONCE(batch->nr_full) * BLOG_MAGAZINE_SIZE >= batch->retain_limit)
++		return false;
++
++	preempt_disable();
++	cpu_mag = this_cpu_ptr(batch->cpu_magazines);
++
++	/* Optimistically try to add to current magazine */
++	if (likely(cpu_mag->mag && cpu_mag->mag->count < BLOG_MAGAZINE_SIZE)) {
++		cpu_mag->mag->elements[cpu_mag->mag->count++] = element;
++		goto out;
++	}
++
++	/* If current magazine is full, move it to full pool */
++	if (likely(cpu_mag->mag && cpu_mag->mag->count >= BLOG_MAGAZINE_SIZE)) {
++		raw_spin_lock(&batch->full_lock);
++		list_add_tail(&cpu_mag->mag->list, &batch->full_magazines);
++		batch->nr_full++;
++		raw_spin_unlock(&batch->full_lock);
++		cpu_mag->mag = NULL;
++	}
++
++	/* Get new magazine if needed */
++	if (likely(!cpu_mag->mag)) {
++		/* Try to get from empty pool first */
++		raw_spin_lock(&batch->empty_lock);
++		if (!list_empty(&batch->empty_magazines)) {
++			mag = list_first_entry(&batch->empty_magazines,
++					       struct blog_magazine, list);
++			list_del(&mag->list);
++			batch->nr_empty--;
++			raw_spin_unlock(&batch->empty_lock);
++			cpu_mag->mag = mag;
++		} else {
++			raw_spin_unlock(&batch->empty_lock);
++			cpu_mag->mag = alloc_magazine(batch, GFP_ATOMIC);
++		}
++
++		if (unlikely(!cpu_mag->mag)) {
++			stored = false;
++			goto out;
++		}
++	}
++	/* Add element to magazine */
++	cpu_mag->mag->elements[cpu_mag->mag->count++] = element;
++out:
++	preempt_enable();
++	return stored;
++}
 -- 
 2.34.1
 
