@@ -1,91 +1,92 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9983A3E9C0E
-	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 06:48:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2EFE248F72
+	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 07:37:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787554125; cv=none; b=V+j+Kbat5GcJsg2qqeuqlJUcatwWwP6dQMNNLRv4I5wq+5RM48OJpQ6tUpUR6QvFpUeVBkAGwj/Jz7y9IG7bG+PcMMQOLQiMJVcY0FnyAWOh1O2NTBmouwGJ+10Gi28LfgN6NaIIv2Yj+z4j8DFkLduvzU69aN6IRw5Kq2xGqn0=
+	t=1787557068; cv=none; b=ntnGld4Trz4QuxPuSShtklgy3mYojDamdXIeSD+GVb26AzkaV9p+CFjuXcl4mp9xSlwP0t33sBHzJJsyThrKKl8dRCT1d8lSaS7hNhoMO7NEeOw9fZBq0QYqqjFDRjoWTgSXgf1CaeqR1AvX2PHdlIUqPLxJLTXTI25BBDobkOY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787554125; c=relaxed/simple;
-	bh=SeRSKX9qUQAICue+ts05HWTIeIEbe2do9nFpvfD3tfI=;
+	s=arc-20240116; t=1787557068; c=relaxed/simple;
+	bh=eH/CRn8pTriAv/xw+tni085AJUEM/S6XKpx6nMCDA+4=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=IniPJW+yQ/l3EU+uPn3GfvwogOXEH7sB1W9iOQ7F8E/JWYtZgNRPZd1OQr+vTjFYfM6w0m8mXQY6BmeN9LFPxOvnpby+GgGowDH5VXsuUW1GR69ZZ+wmCMCIcAVMpu6sFK7exIgxknJBKRBP+an9qGQTGmrTHToBrKm44Ha0HtA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Z3/VB2t8; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=sUmT262C; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version:Content-Type; b=tp6XU+Ia+o8KOd2VMAvCoWvcYSfnwGIUzlKCaCpFPZL5wRe+CBDQVS2WEU8V3tmVa8vhqVdS9cLIuB3B8WJQHiJEHNVyPP5i7o06J8W+82k54y5DrUz7iveDYLSu4KpEe7reh2lIiKJT3KXP3pRHRvcHZ6pwMrFtlGJ/IEDPz3c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Kn1cN2Lm; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=aBGhEOLC; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Z3/VB2t8";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="sUmT262C"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Kn1cN2Lm";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="aBGhEOLC"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787554120;
+	s=mimecast20190719; t=1787557065;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=PPGn2wKG/yEJLAmesYBIpLBSoVzTJ+frh6BH7s5dxT0=;
-	b=Z3/VB2t8c0mh8zHxXpsbhagamcX3sseoUPqgSq+K7QaDDyW6inDj5q54++OT5yNwr+5Gwz
-	r+WhpZSd9/5TVPvXzpbd/MuRpaVRByNjHumoQgksintEh3qgOwZ50/n86F7Gb2gZjXTgGj
-	QSli9Iaznfst8Dgp63iHb7wCFkpmnho=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=UFNot5fCY/DCnFogO52jCXzbABO9SDwb0K+zyyvI+CQ=;
+	b=Kn1cN2LmsQOCZk9snGWEvY8BVgTB0sd6M/TqFd/Pr0vDpYvO2VCKueFqct8NkDA6bN+sLK
+	1cBh+X3gaFxE7JtXkxh41T1mrBnmgMdESGlrBTkSLHOr9D2ARFIghBEYM6t9wWRvaGRq8U
+	EI9d5n8LjISwef/9bya4l1nOvMUJYpg=
+Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
+ [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-222-jczPbPRKP_et6CRXUIkaTA-1; Mon, 24 Aug 2026 02:48:38 -0400
-X-MC-Unique: jczPbPRKP_et6CRXUIkaTA-1
-X-Mimecast-MFC-AGG-ID: jczPbPRKP_et6CRXUIkaTA_1787554118
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-52ce3c7cb2eso59435401cf.3
-        for <ceph-devel@vger.kernel.org>; Sun, 23 Aug 2026 23:48:38 -0700 (PDT)
+ us-mta-465-wN3wVeWkOaWUahD8zY99Sg-1; Mon, 24 Aug 2026 03:37:44 -0400
+X-MC-Unique: wN3wVeWkOaWUahD8zY99Sg-1
+X-Mimecast-MFC-AGG-ID: wN3wVeWkOaWUahD8zY99Sg_1787557064
+Received: by mail-qk1-f197.google.com with SMTP id af79cd13be357-934956beec8so554132985a.0
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 00:37:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1787554118; x=1788158918; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1787557063; x=1788161863; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=PPGn2wKG/yEJLAmesYBIpLBSoVzTJ+frh6BH7s5dxT0=;
-        b=sUmT262Cixva5tpOC6oojHtaR2PdW6GS56zVFq9VTLkf+aSdBSEE8qsmMVu8hGGdxY
-         AQcvoRIB3tVR+/IQkpjYnTRvEDh6N1+cxjHSTlnM4eM08o5k0X9iL+6LKjMyZ+R32kHY
-         RfLY185XZST6SfCYZSWEmnTMUxd+ME4xnYYd0JOkmhvyHcTy9y3XdnnJXCi9XoBvJ+ZO
-         +GlA6AVDcle+Td23oPIwYfIz/s0gzr3QJJbgL5yC5ZQCRcsl/CI/rPA0JafVRiZXEPCv
-         qjJjGGiHNRzDZV0a0cdH7mQNJxF7gBB7gq+OIz3r1kWfFd9Bkb1DFqOfmldxzRiHgi8a
-         rUrA==
+        bh=UFNot5fCY/DCnFogO52jCXzbABO9SDwb0K+zyyvI+CQ=;
+        b=aBGhEOLCT+XnLb9bTzZhbwKLyzZaulS6hv2LaE7fDSX6n16BTuniIzykCrUGuhelq7
+         stYgjCPhUrzU1RyYfxYBS39yaPHkk54BZngkRRXJWE1PJdEFW2oqelar2IbLGl/BPkVv
+         DFfsM9msmUlJQLIgsntztl7knfYoNGGn20OG9hDW3ixr8s/cRzKvVMAu2YjgBa+7Y1Nv
+         pRlqibcrgtxMZ6xdCLc97vajIqzV3oCMRaepQ0A8X4vcRrDfwMW8baNAiK+HABfJTvWD
+         qUVaqGMOiIanmQZQ6TpyD/YWi01Ms3YP+srSzGsfVpUneoCL9MD2KSCvN51eaLIkP8kJ
+         VZNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787554118; x=1788158918;
+        d=1e100.net; s=20251104; t=1787557063; x=1788161863;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=PPGn2wKG/yEJLAmesYBIpLBSoVzTJ+frh6BH7s5dxT0=;
-        b=LAR94iyiIvW/rQH9IF7XkLcl5PmLcEuafc3GhgeCwzAMFsK+Oz5nv+frlbkAi//DQo
-         vhp1KMa+7B0MGet+/txVyD3V9nMLQl+UY332ZfeAo57f/42YFWRKmeRYymkQrAVne3dm
-         ZpQGM0g5jM3cUjIGt/E1YmPGZZlteg9FG8ms8683HcKmxCLPN4VSwIy8h7p5jY3ya/Fw
-         DdcNCuxD46QDfLkkGSQJ6gHI0p+WibCba/i/Sc7lOGIgBj256+zS+Ca/qElzbxe7exjP
-         3r3t97NubZJm5msHNTUHS91+yWr9AJvOiHpAQKaGSheXbOoe1vC3rbFV0O/GrFS+LEcx
-         vb1Q==
-X-Gm-Message-State: AFuF++nTb3bubRNlYiofz/bkcc1FMltacuBsxVxXwDD/orFZYFNp+kc8
-	xa4cMysMnN6gGJAHljiqB3iePY9RFDDUmXwliX18Mcevsbc6qgeoAL/qIwji+lTwfRnLr37eDqu
-	m+YPyCAMSSfPJpsJB4NdG4hqbhlncNbUZQC6s0mANWRUZsKGwC+Af+SydnUTCgEy/TrAgYhQ=
-X-Gm-Gg: AR+sD111IM9lfAwP08TkjsKPgN1Fs+q5TefxlQV6JJCl3fd4L37/oo3S2JV4kYWsAu4
-	hG2up6WzW9VevFoJJD30R7QwrOAkm7vFn3/8ypIAgdgocAWLgJmXl+Y/E399DlBOhSH73U1w2T/
-	S+5Dd6bjgXuF/+HPdQoo1C9R0+6xixXjiui3S839fXMLdnWHxNWV47waVowWVWMLm9PZMwEz4kJ
-	nAA/RwS4+zOzUQbwNnYdJRvZPro+kTjU13uviY00bC/kFLmGHf/696O5Keeg0IsqMPvCvzPuvh8
-	QaP6+mxMDWuvrqf7m/jmCX8M9dxymT7oe4MFArxf4zI1H5ogX+DVt+qsn2scFHzJlIibKG1Pikm
-	S0idZg9WAtXQ27q4f9c6FWtgXiAHEWu1kqw==
-X-Received: by 2002:a05:622a:1456:b0:516:d83c:edb6 with SMTP id d75a77b69052e-52df5692459mr226315261cf.12.1787554118135;
-        Sun, 23 Aug 2026 23:48:38 -0700 (PDT)
-X-Received: by 2002:a05:622a:1456:b0:516:d83c:edb6 with SMTP id d75a77b69052e-52df5692459mr226315021cf.12.1787554117611;
-        Sun, 23 Aug 2026 23:48:37 -0700 (PDT)
+        bh=UFNot5fCY/DCnFogO52jCXzbABO9SDwb0K+zyyvI+CQ=;
+        b=Z8fdaFbn5P8m7VnqdZP66X2fxfx1M9drqVJk3jkUrZx3Ie4YQC/CMum6+ADniQV4sJ
+         LdrD6mAZim4/RjWiUM7urg6Pcefl0MKcSNO+eA5UYzpZ0IVqCTWgzd92ym82gR+4Hry5
+         vhLlciPQWCB613w+eSr8RBMuXVgQhfen7ppIkwXfZzDLgAZfiDh5DtTcW8hp8AhHo6Oj
+         +VZbBwlksb5qUfikvNo+z5pUQ9gD8fcr7FZ6Vx5XFrxQ0zGKVfmRj4m49LTsrGpoPsv9
+         lUigNMfqsRwZQa8CXx9AvmdmlP0/0BeAb5mXx6fyJgM902pt7MMbUv+/FST2Qi52fjkN
+         eJxw==
+X-Gm-Message-State: AFuF++lpq+Na35JIYHH/I9mr9sehb4UeaKylsInqetsCNXe3190d7C9B
+	6q88SJhA2YPJ/q1lAX07WbRKrwihb4OrEzZ3MdWOtFXDNELbHHywHgS6qsJd7KsTjuViRejCDwB
+	G+toXBI0HUic/evphrmCmy7d+FhSiG2mhln0Asrnj/AZ1ykb71np2C1Yrqckqc/wUUyei+7WAow
+	==
+X-Gm-Gg: AR+sD12zEH7CWZahR7MtVHJnvUx7xl12X9k75Nq5wUMniN7uXNGT6jbE2ZAVQTEYG6I
+	A+BmTbsbmQ4Y0XdN1slbLVcE9tL+gyqTWjS692NsZAINLPaa6atS5HHobcoBwtPVkgTxVmckNjs
+	IINVDhvQ/3wYa7cnrzu2C8WTrjgeQFY/QheBUJ4znU0BnDMRkc8vTEkaEL72fd1Djg8NWY+1Fpp
+	+494ZipeLaRw4rVsTPL3rsET8SP89yfY6akXuNBfGfbWvv0Dyhi0df5afZ4g0I3NJlRz+xGzlR8
+	WBsdTpt4yjM2Uof5lj7F7rWk/i8seDPDybrEJ7UY7qzINmbRHfz3paZ5UPTWhgLEOfbX/nmJON3
+	Knq8R1oVJPJpxXYQZ+ziZpT9pkKOMm2bvyQ==
+X-Received: by 2002:a05:620a:4722:b0:936:583a:dd75 with SMTP id af79cd13be357-93739479b86mr2111555285a.17.1787557063593;
+        Mon, 24 Aug 2026 00:37:43 -0700 (PDT)
+X-Received: by 2002:a05:620a:4722:b0:936:583a:dd75 with SMTP id af79cd13be357-93739479b86mr2111553785a.17.1787557063092;
+        Mon, 24 Aug 2026 00:37:43 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-52e099c38c0sm41184451cf.13.2026.08.23.23.48.36
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-93749abe86esm443915585a.4.2026.08.24.00.37.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 23 Aug 2026 23:48:37 -0700 (PDT)
+        Mon, 24 Aug 2026 00:37:42 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: Xiubo Li <xiubo.li@clyso.com>
 Cc: ceph-devel@vger.kernel.org
-Subject: Re: [v4] ceph: add 'lazyio' mount option to kclient
-Date: Mon, 24 Aug 2026 06:48:34 +0000
-Message-Id: <20260824064834.2509055-1-amarkuze@redhat.com>
+Subject: Re: ceph: keep dentry in cache when inode still holds caps
+Date: Mon, 24 Aug 2026 07:37:40 +0000
+Message-Id: <20260824073740.2510594-1-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260820-lazyio-v4-1-601bee1ea2c8@clyso.com>
-References: <20260820-lazyio-v4-1-601bee1ea2c8@clyso.com>
+In-Reply-To: <20260821-b4-b4-ceph-dentry-caps-v1-1-ff9b77511c97@clyso.com>
+References: <20260821-b4-b4-ceph-dentry-caps-v1-1-ff9b77511c97@clyso.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -97,62 +98,56 @@ Content-Transfer-Encoding: 8bit
 
 Hi Xiubo,
 
-Thanks for the update and the extra testing.
+NACK for now. Thanks for the patch, but I have some concerns
+that need a v2:
 
-NACK for now — please send a v5 for:
+  1. fs/ceph/dir.c:2105: Expired names stay hashed and still feed MDS cap-auth
+     Xiubo, `ceph_d_delete()` used to unhash an unused dentry once the
+     dentry lease and dir lease were gone. That is what kept a dead name
+     from remaining a hashed alias. This patch keeps that dentry solely
+     because `i_caps` is non-empty, and the commit says that is safe
+     because `ceph_d_revalidate()` will check the name on the next
+     lookup. Lookup does; several other paths do not. `ceph_open()` and
+     `__ceph_setattr()` call `d_find_alias()` and pass that pathname to
+     `ceph_mds_check_access()` (`fs/ceph/file.c:427`,
+     `fs/ceph/inode.c:2593`). `d_find_alias()` returns an arbitrary
+     hashed alias and never revalidates. After a remote rename, the MDS
+     will not revoke a lease that already expired, so the retained alias
+     can still be the old name while the caller is operating through a
+     new valid path. `-EACCES` comes back immediately and the MDS never
+     sees the real path; the other way around, a stale still-allowed
+     path can let a local-cap open or setattr skip the MDS for a name
+     that path-restricted auth caps would have denied. The leftover
+     hashed name is also what `d_obtain_alias()` returns for NFS
+     filehandle conversion.
+     Suggested fix: Do not keep an unused dentry once its name is
+     untrusted. If the goal is to preserve the page cache, pin the inode
+     some other way (or stop using `inode_just_drop` while caps/pages
+     remain) so the stale name can still be unhashed. If the dentry is
+     kept, the cap-auth callers need to use the dentry from the
+     operation (`file->f_path.dentry`, the setattr dentry, etc.) rather
+     than `d_find_alias()`.
+  2. fs/ceph/caps.c:2131: Delayed release does not turn these into ordinary cached dentries
+     The commit says extra retention is bounded by
+     `caps_wanted_delay_max` (60s) via `ceph_check_delayed_caps()`,
+     after which the dentry is just an ordinary cached dentry. That is
+     not how this check works. `__ceph_is_any_real_caps()` is
+     `!RB_EMPTY_ROOT(&ci->i_caps)`. `ceph_check_caps()` never removes
+     that last cap from a still-cached inode; `retain` always includes
+     `CEPH_CAP_PIN` and, for a closed linked inode,
+     `CEPH_CAP_ANY_SHARED` plus `CEPH_CAP_FILE_CACHE` while
+     `i_data.nrpages` is non-zero. After the delay window, `i_caps` is
+     still non-empty and `ceph_d_delete()` still returns 0.
+     `ceph_trim_dentries()` then cannot drop these either, because it
+     goes through `dput` → `->d_delete()`. The dentry sticks until the
+     shrinker or MDS `d_prune_aliases()` trim, while still holding caps.
+     Suggested fix: Drop the 60s bound from the commit message, or
+     change the keep condition so it can actually become false after
+     delayed release. If the intent is "keep until reclaim/MDS trim",
+     say that — but then the hashed stale-name problem above still needs
+     a fix.
 
-  1. fs/ceph/caps.c:2354: FLUSH can ACK a LAZYIO revoke while pages are still cached
-     Xiubo, `ceph_adjust_caps_used_for_lazyio()` is applied in
-     `ceph_check_caps()` and `handle_cap_grant()`, but `__prep_cap()`
-     still does `cap->implemented &= cap->issued | used` with the raw
-     used set. `try_flush_caps()` and `__kick_flushing_caps()` pass
-     `__ceph_caps_used()` straight in, so used is CACHE/BUFFER from
-     `nrpages` / `i_wrbuffer_ref`, not LAZYIO. Once LAZYIO is gone from
-     `issued`, that drops it from `implemented` and the FLUSH/reconnect
-     message is an implicit revoke ACK. `ceph_fsync()` hits this easily:
-     `file_write_and_wait_range()` leaves clean cached pages, then
-     `try_flush_caps()` runs. After that ACK the MDS can hand CACHE to
-     another client while we still have the old pages. That is the hole
-     the v4 `implemented` comment is trying to close, and it still
-     exists on the FLUSH path.
-     Suggested fix: Run `used` through
-     `ceph_adjust_caps_used_for_lazyio()` in `try_flush_caps()` and
-     `__kick_flushing_caps()`, or once inside `__prep_cap()`. While
-     `implemented` still has LAZYIO and CACHE/BUFFER are not issued,
-     report LAZYIO as used so `implemented` keeps it until writeback and
-     invalidation finish.
-  2. fs/ceph/addr.c:1999: Non-lazy mmap can keep using stale page cache after a CACHE->LAZYIO transition
-     The new revoke path keeps the inode page cache when CACHE is
-     dropped but LAZYIO remains, and the used-cap rewrite then lets that
-     revoke be ACKed. That is only safe if every opener is lazy. After
-     `remount,lazyio`, `CEPH_IOC_LAZYIO` on one fd, or any mix of old
-     non-lazy and new lazy opens, a non-lazy mapping still faults
-     through `ceph_filemap_fault()` with `want = CACHE`, gets only RD,
-     then calls `filemap_fault()` anyway because
-     `!ceph_has_inline_data()`. Those retained pages were kept solely
-     for the lazy fd, so the non-lazy mmap can observe stale data.
-     `try_get_cap_refs()` correctly refuses to satisfy a non-lazy
-     CACHE/BUFFER want with LAZYIO for `read_iter`/`write_iter`; mmap
-     never got that gate.
-     Suggested fix: Only let LAZYIO cover retained page cache when every
-     opener on the inode is lazy, or skip/invalidate page-cache faults
-     for non-lazy fds once CACHE has been revoked.
-  3. fs/ceph/addr.c:2149: ceph_page_mkwrite() can sleep until killed if caps are gone
-     The new lazy-fd path drops its refs and waits in
-     `wait_event_killable(ci->i_cap_wq,
-     ceph_have_dirtyable_caps(inode))` when it got WR but neither BUFFER
-     nor LAZYIO. Session reset wakes `i_cap_wq` via cap purge, but
-     `ceph_have_dirtyable_caps()` stays false once the caps are gone, so
-     the waiter goes back to sleep. `ceph_inode_shutdown()` does not
-     make the condition true and does not wake the queue.
-     `try_get_cap_refs()` already fails with `-ESTALE` on shutdown; this
-     wait sits outside that path, so a writable fault in that window
-     wedges until SIGKILL.
-     Suggested fix: Include shutdown/session-loss in the wait condition,
-     and fail the fault once the inode can no longer regain BUFFER or
-     LAZYIO.
-
-FLUSH/reconnect still ACKs a LAZYIO revoke while pages remain; non-lazy mmap and mkwrite shutdown wait also need fixes.
+NEEDS_WORK: keeping expired names hashed breaks d_find_alias cap-auth, and the 60s delayed-release bound is not real.
 
 
 -- 
