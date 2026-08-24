@@ -1,47 +1,47 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2025C41A561
-	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 12:02:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFB743FADF1
+	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 12:03:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787572973; cv=none; b=brTF4hwahvsnJ0++o2aG8pm5/27y0hiXqQUJ90zSTZXsYXTqWNG4/Nz2fUbwptAvmRzDVWPC/svNwIsUZnAEbfyGBj8LoiZuwfutFbGmLNzoKsVDfavFaIWwvIirC2sXwt9Vcm6hpNJrUH4yZJ3PD5Qn6jGFcUG+RCZjSJ6yObw=
+	t=1787573032; cv=none; b=SuLwemqfcsKkgRUc8PaWLPTELjkRuQS+xDBXrMTKH7KJB9XduCg2+xNQqRIAwTaActKK9k3ks8XoZ00JW0vvrOTTVulXIrMa4scSxuTtyfxwALS/MKRvrtPAAjOmMGEb4HQkKDu0ho54VLv1kLJpZfIsxOhRT20tk5NIMy8bkzM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787572973; c=relaxed/simple;
-	bh=QrVxkC1qUai+LkpCyw0Tz6tntuP4Wpe1tMlKeqdSWwU=;
+	s=arc-20240116; t=1787573032; c=relaxed/simple;
+	bh=gZJj56dXZ3m5mpuWg5Y32mLuivOuA0n2jQSSKK4Lf/g=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rBvw7d1kmUgwM3GZ+EBSw3R1GeFlPa8OBbtuogD+2ALitnD554q/XwNRcKfp3ywIHcOfNX+bpFxfoDgLnT+BBSU6aiqTrVS3VCV6poNXci0A0DM0iF1VKp37pYYKFK4HftEa436O+AiKXk1ZUysH6YpNzZOZ7igfVErGrx1RQ7E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=En2dOkDy; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=TdkUkGM254drrGJqY4s7MyIh/9ByvjrkmZ1wS73Pi13PENxqMMI+EjmLiLG5EBbSUxwBng/3Qlg1O4GQLdQppuFlDUwjJO0cjRY1nUTYWg+HN1+XdaXEPKikTrbHbeeKgEanL8jfJ6NuI0QCwQbrt5pORDIcTHD1++gNTPCMTwI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=INEjJPQr; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="En2dOkDy"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="INEjJPQr"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787572971;
+	s=mimecast20190719; t=1787573029;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=hoJL241RSoxtycntHxJVxwYZyJBhwGJRmdZEHBFJJr0=;
-	b=En2dOkDyk7vkvvOUPc4perAv3NEh6qoXsFYb924Woc/ErWzJUKKhatmMZ9EZYZgyGqzzPY
-	X2VIzG+iOrKzM5OnV1lGASlt4ZUCc2Fx+HfaFN/7msal//EyN33FssMsZ47zJrLlWCDoNj
-	gaJR+aVjOYfeua0cBHXgZ+CHO2WMrn4=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+	bh=b4i/vAlF7TVRLwxgQcCoqCNsYOQic8KZ0Txwd6Khtt8=;
+	b=INEjJPQr15ZVQUdzPaTNm0WgT6xUaP+mkJWpt4np//yGZPCJQYBE4r11cFuucgxhblSMM/
+	cChWDZSV3jYzROsbFH/qaR2fPjZm1zTUKPVELafU+2pTXy8j01814kPHkxkqeZGpijCYu0
+	DR6AsckaO+AgDEUWMjl+3o8yqv50X24=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-634-PXsIUWAfMBqM0Rgk4A1ljw-1; Mon,
- 24 Aug 2026 08:02:46 -0400
-X-MC-Unique: PXsIUWAfMBqM0Rgk4A1ljw-1
-X-Mimecast-MFC-AGG-ID: PXsIUWAfMBqM0Rgk4A1ljw_1787572965
-Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-679-QKIZ5IQHPW2M0-MoD0otjw-1; Mon,
+ 24 Aug 2026 08:02:37 -0400
+X-MC-Unique: QKIZ5IQHPW2M0-MoD0otjw-1
+X-Mimecast-MFC-AGG-ID: QKIZ5IQHPW2M0-MoD0otjw_1787572956
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 1665C1977038;
-	Mon, 24 Aug 2026 12:02:45 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 2192A19540C5;
+	Mon, 24 Aug 2026 12:02:36 +0000 (UTC)
 Received: from warthog.com (unknown [10.44.32.15])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 3D7851955F07;
-	Mon, 24 Aug 2026 12:02:42 +0000 (UTC)
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 7F8A11800257;
+	Mon, 24 Aug 2026 12:02:32 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -51,10 +51,12 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-cifs@vger.kernel.org,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH 3/3] cachefiles: Fix potential UAF/KASAN warning
-Date: Mon, 24 Aug 2026 13:02:22 +0100
-Message-ID: <20260824120224.504575-4-dhowells@redhat.com>
+	linux-kernel@vger.kernel.org,
+	Karl Mehltretter <kmehltretter@gmail.com>,
+	stable@vger.kernel.org
+Subject: [PATCH 1/3] netfs: Fix uninitialized return value in netfs_unbuffered_write()
+Date: Mon, 24 Aug 2026 13:02:20 +0100
+Message-ID: <20260824120224.504575-2-dhowells@redhat.com>
 In-Reply-To: <20260824120224.504575-1-dhowells@redhat.com>
 References: <20260824120224.504575-1-dhowells@redhat.com>
 Precedence: bulk
@@ -64,143 +66,44 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
-Currently, trace_cachefiles_coherency() is being passed a pointer to a
-__be64 lain over the coherency data in struct cachefiles_xattr so that it
-can display the first 8 bytes.  However, the data is of variable length and
-could even be 0 bytes.  This could lead to a UAF or KASAN warning.
+From: Karl Mehltretter <kmehltretter@gmail.com>
 
-Fix this by making sure the buffer has room for at least 8 bytes and that
-those 8 bytes are pre-cleared.
+If preparation of the first subrequest fails,
+netfs_unbuffered_write() exits its loop before ret is initialized. The
+empty-iterator check can do the same.
 
-Further, those bytes are not 8-byte aligned, so fix the tracepoint to
-extract the data as four 2-byte words (they are 2-byte aligned) and
-reassemble the __be64.  The compiler will convert this into a single 8-byte
-load where the CPU supports it.
+For synchronous writes, netfs_unbuffered_write_iter_locked() may then
+return an unrelated error instead of wreq->error. This is reachable
+through CIFS if cifs_prepare_write() fails to reopen the file or obtain
+credits.
 
-Fixes: 229105e5cfd9 ("cachefiles: Add auxiliary data trace")
-Link: https://sashiko.dev/#/patchset/20260810144746.574036-1-dhowells%40redhat.com
+Initialize ret to 0 so the caller returns wreq->error if no data was
+written, or the number of bytes already written otherwise.
+
+Found with Clang's -Wconditional-uninitialized.
+
+Fixes: a0b4c7a49137e ("netfs: Fix unbuffered/DIO writes to dispatch subrequests in strict sequence")
+Cc: stable@vger.kernel.org
+Assisted-by: Claude:claude-fable-5
+Signed-off-by: Karl Mehltretter <kmehltretter@gmail.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Paulo Alcantara <pc@manguebit.org>
-cc: netfs@lists.linux.dev
-cc: linux-fsdevel@vger.kernel.org
 ---
- fs/cachefiles/xattr.c             | 16 ++++++++--------
- include/trace/events/cachefiles.h | 19 +++++++++++++++++--
- 2 files changed, 25 insertions(+), 10 deletions(-)
+ fs/netfs/direct_write.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/cachefiles/xattr.c b/fs/cachefiles/xattr.c
-index f8ae78b3f7b6..92990cfdcca7 100644
---- a/fs/cachefiles/xattr.c
-+++ b/fs/cachefiles/xattr.c
-@@ -13,6 +13,7 @@
- #include <linux/quotaops.h>
- #include <linux/xattr.h>
- #include <linux/slab.h>
-+#include <linux/unaligned.h>
- #include "internal.h"
+diff --git a/fs/netfs/direct_write.c b/fs/netfs/direct_write.c
+index c16fbad286a1..b04019097ab8 100644
+--- a/fs/netfs/direct_write.c
++++ b/fs/netfs/direct_write.c
+@@ -95,7 +95,7 @@ static int netfs_unbuffered_write(struct netfs_io_request *wreq)
+ {
+ 	struct netfs_io_subrequest *subreq = NULL;
+ 	struct netfs_io_stream *stream = &wreq->io_streams[0];
+-	int ret;
++	int ret = 0;
  
- #define CACHEFILES_COOKIE_TYPE_DATA 1
-@@ -50,7 +51,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
+ 	_enter("%llx", wreq->len);
  
- 	_enter("%x,#%d", object->debug_id, len);
- 
--	buf = kmalloc(sizeof(struct cachefiles_xattr) + len, GFP_KERNEL);
-+	buf = kmalloc(sizeof(struct cachefiles_xattr) + min(len, sizeof(__be64)), GFP_KERNEL);
- 	if (!buf)
- 		return -ENOMEM;
- 
-@@ -60,6 +61,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
- 	buf->content		= object->content_info;
- 	if (test_bit(FSCACHE_COOKIE_LOCAL_WRITE, &object->cookie->flags))
- 		buf->content	= CACHEFILES_CONTENT_DIRTY;
-+	put_unaligned_be64(0, (__be64 *)buf->data);
- 	if (len > 0)
- 		memcpy(buf->data, fscache_get_aux(object->cookie), len);
- 
-@@ -77,8 +79,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
- 		trace_cachefiles_vfs_error(object, file_inode(file), ret,
- 					   cachefiles_trace_setxattr_error);
- 		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
--					   be64_to_cpup((__be64 *)buf->data),
--					   buf->content,
-+					   buf->data, buf->content,
- 					   cachefiles_coherency_set_fail);
- 		if (ret != -ENOMEM)
- 			cachefiles_io_error_obj(
-@@ -86,8 +87,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
- 				"Failed to set xattr with error %d", ret);
- 	} else {
- 		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
--					   be64_to_cpup((__be64 *)buf->data),
--					   buf->content,
-+					   buf->data, buf->content,
- 					   cachefiles_coherency_set_ok);
- 	}
- 
-@@ -110,9 +110,10 @@ int cachefiles_check_auxdata(struct cachefiles_object *object, struct file *file
- 	int ret = -ESTALE;
- 
- 	tlen = sizeof(struct cachefiles_xattr) + len;
--	buf = kmalloc(tlen, GFP_KERNEL);
-+	buf = kmalloc(sizeof(struct cachefiles_xattr) + min(len, sizeof(__be64)), GFP_KERNEL);
- 	if (!buf)
- 		return -ENOMEM;
-+	put_unaligned_be64(0, (__be64 *)buf->data);
- 
- 	xlen = cachefiles_inject_read_error();
- 	if (xlen == 0)
-@@ -148,8 +149,7 @@ int cachefiles_check_auxdata(struct cachefiles_object *object, struct file *file
- 
- out:
- 	trace_cachefiles_coherency(object, file_inode(file)->i_ino,
--				   be64_to_cpup((__be64 *)buf->data),
--				   buf->content, why);
-+				   buf->data, buf->content, why);
- 	kfree(buf);
- 	return ret;
- }
-diff --git a/include/trace/events/cachefiles.h b/include/trace/events/cachefiles.h
-index 9259bc71049e..927338f8fe85 100644
---- a/include/trace/events/cachefiles.h
-+++ b/include/trace/events/cachefiles.h
-@@ -372,7 +372,7 @@ TRACE_EVENT(cachefiles_rename,
- TRACE_EVENT(cachefiles_coherency,
- 	    TP_PROTO(struct cachefiles_object *obj,
- 		     ino_t ino,
--		     u64 disk_aux,
-+		     const void *disk_aux,
- 		     enum cachefiles_content content,
- 		     enum cachefiles_coherency_trace why),
- 
-@@ -389,12 +389,27 @@ TRACE_EVENT(cachefiles_coherency,
- 			     ),
- 
- 	    TP_fast_assign(
-+		    union {
-+			    __be16 s[4];
-+			    __be64 ll;
-+		    } x;
-+
- 		    __entry->obj	= obj->debug_id;
- 		    __entry->why	= why;
- 		    __entry->content	= content;
- 		    __entry->ino	= ino;
- 		    __entry->aux	= be64_to_cpup((__be64 *)obj->cookie->inline_aux);
--		    __entry->disk_aux	= disk_aux;
-+
-+		    /* cachefiles_xattr::data is not 64-byte aligned. */
-+		    if (disk_aux) {
-+			    x.s[0] = ((__be16 *)disk_aux)[0];
-+			    x.s[1] = ((__be16 *)disk_aux)[1];
-+			    x.s[2] = ((__be16 *)disk_aux)[2];
-+			    x.s[3] = ((__be16 *)disk_aux)[3];
-+			    __entry->disk_aux = be64_to_cpu(x.ll);
-+		    } else {
-+			    __entry->disk_aux = 0;
-+		    }
- 			   ),
- 
- 	    TP_printk("o=%08x %s B=%llx c=%u aux=%llx dsk=%llx",
 
