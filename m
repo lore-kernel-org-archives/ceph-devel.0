@@ -1,103 +1,81 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 619D838331B
-	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 19:47:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6760238C2BF
+	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 19:50:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787600871; cv=none; b=cPd141AOJ1ajFLVXurldtFdWeAQC2GYfZwkS7WmuvnCcIDFsjP4EO/hVHEqDpAZ62xHEczL2OASME4snWhvdC1ykvYlHxtrGf1o34rqiQ0vXqsl2KXHLvmRSVHgITjvoAn9rj6QewkMDjQDQdyNv5+tMtF1fuxPVhPA0JhQd8+g=
+	t=1787601009; cv=none; b=gsk2UFqv6tAXFgm1Y8KrVlhBOpWXBzVjGHdnrJAU5/lqKl5eI01UMRaNowf9d3V+3h0+n+jgziRoYkqOb1RASwtwo8ZWC13qf9gYNhFLzW+/u8dcQErAsv2iI732zdF7LF0uk3Y8TeioBf/Yx07QOWJUUAMNMnxK9eQS6g1AuwI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787600871; c=relaxed/simple;
-	bh=ls9gAniDaxU60S488EwFx+HIbvW54OfMRM5lR9rJRqY=;
-	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
-	 Content-Type:Date:Message-ID; b=lLILCpSUBKhzqXjeA8aJ7KOuy0NowqaaQfm53xgrfBWhs115cYteYorjdKsLOh41yOtR/BdpzlOwbjO0ilO+f+MHEfL9gxHMjIUdv4Of+hZkmMt/Bo4NEgXdLXryeiqXOoCDBk1Dda5BYwwbHgFJ05sTMwnXYDLg5BJC6HPbhDw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=a5o4wDBO; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1787601009; c=relaxed/simple;
+	bh=UXxYWZFFShrRCFy3Z16bjG63cz1+TR1o+JshcDoj3sg=;
+	h=Date:From:To:Cc:Subject:Message-ID; b=mcLW7kl5swSxTtEram1GPtGuT8huIxet/0BVItOugN8x4CTS9/vgejnbHzO59lEfE3sxdkN3yJ8ZlwwkoigpXZedvCt+psSpCcPIizjaSTqDF8nAKPKPM7/YqLPZDzeKgiSnQJ5oM40jXBLV43A8vEyXvHgeaZIGayzzSZyCs1Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Nks1HJis; arc=none smtp.client-ip=192.198.163.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="a5o4wDBO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787600869;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=HWkfuD+RoHFHnIf8MPWKdp7sPrGB/v7hQ704zJ+2+Ds=;
-	b=a5o4wDBOBre11mftYqA5SxevqFlmM2occ7Dyr/uipd+d+D4MkTiLzLeywbAsnn0VktKGcI
-	qsnD93b8xJYdsHsH15tQPqe9KyD3O7iVAi6GXWR412j/ifD8On4kWHRFI6HLW6pTiEc3ds
-	NHvCUuCYkORpGBtxENgxbo2yWpJLMzI=
-Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-635-9XFVDZNVN-aHPcQHKQgWyA-1; Mon,
- 24 Aug 2026 15:47:45 -0400
-X-MC-Unique: 9XFVDZNVN-aHPcQHKQgWyA-1
-X-Mimecast-MFC-AGG-ID: 9XFVDZNVN-aHPcQHKQgWyA_1787600862
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 5D45F184B396;
-	Mon, 24 Aug 2026 19:47:40 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.44.32.15])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id C8E871944B2A;
-	Mon, 24 Aug 2026 19:47:31 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-	Kingdom.
-	Registered in England and Wales under Company Registration No. 3798903
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <CA+1jF5qPZUhCevwbu7zQDEVWss6gMdoDMhqKqH3k7v=WStRtEA@mail.gmail.com>
-References: <CA+1jF5qPZUhCevwbu7zQDEVWss6gMdoDMhqKqH3k7v=WStRtEA@mail.gmail.com> <20260824144130.759997-1-dhowells@redhat.com> <20260824144130.759997-31-dhowells@redhat.com>
-To: =?us-ascii?Q?=3D=3FUTF-8=3FQ=3FAur=3DC3=3DA9lien=5FCouderc=3F=3D?= <aurelien.couderc2002@gmail.com>
-Cc: dhowells@redhat.com, Paulo Alcantara <pc@manguebit.org>,
-    Christian Brauner <christian@brauner.io>,
-    Matthew Wilcox <willy@infradead.org>,
-    Christoph Hellwig <hch@infradead.org>, Jens Axboe <axboe@kernel.dk>,
-    Leon Romanovsky <leon@kernel.org>,
-    Namjae Jeon <linkinjeon@kernel.org>,
-    ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
-    Marc Dionne <marc.dionne@auristor.com>,
-    Stefan Metzmacher <metze@samba.org>,
-    Eric Van Hensbergen <ericvh@kernel.org>,
-    Dominique Martinet <asmadeus@codewreck.org>,
-    Ilya Dryomov <idryomov@gmail.com>, netfs@lists.linux.dev,
-    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
-    Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
-    ceph-devel@vger.kernel.org, v9fs@lists.linux.dev,
-    linux-erofs@lists.ozlabs.org, linux-fsdevel@vger.kernel.org,
-    linux-kernel@vger.kernel.org
-Subject: Re: READ_PLUS in NetFS? Re: [PATCH v10 30/35] netfs: Simplify read abandonment
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Nks1HJis"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1787601009; x=1819137009;
+  h=date:from:to:cc:subject:message-id;
+  bh=UXxYWZFFShrRCFy3Z16bjG63cz1+TR1o+JshcDoj3sg=;
+  b=Nks1HJisrU4oUC0r6JhG6+99ckLD6QVxfuCZ5n+72DChRKfSYLwhxo8e
+   ocPyRGpI4bUUQZlpEVSVCLc7Ie1dGwcW8N7qeNRVS/RNczEn+IjVfYpy3
+   Fsxs75gvpBfpHgfp1hcBMOTx6RQVczVWg/U7gb18kNFWB3mvGLiOb5E+G
+   Vbf229GYAM7HMKhe62f+CkYQae4cfYaKTmiI8fTxXzp09YcuUwlTtLPzD
+   CnD1YkLF4wVuADLvVgc9MPokXGIZS31RdD+Ahoc18kRYFXY2cGhBAlDsD
+   nV+ArDrooapbHfR3ym94ONz4d6yWgSLa/hmSk7vAodqGAj75JkO9gFZ37
+   Q==;
+X-CSE-ConnectionGUID: 9is6yGO6TGW5vavYmSrGbQ==
+X-CSE-MsgGUID: +tz7RnjeQzCGOTvqGeOxPw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11885"; a="98652730"
+X-IronPort-AV: E=Sophos;i="6.25,241,1779174000"; 
+   d="scan'208";a="98652730"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Aug 2026 12:50:08 -0700
+X-CSE-ConnectionGUID: qn9HjgheS3SwdwV5684QTQ==
+X-CSE-MsgGUID: 3MATyXT4Sti/nIGBN8LsCw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.25,241,1779174000"; 
+   d="scan'208";a="296997714"
+Received: from lkp-server01.sh.intel.com (HELO 3532383e6126) ([10.239.97.150])
+  by orviesa002.jf.intel.com with ESMTP; 24 Aug 2026 12:50:06 -0700
+Received: from kbuild by 3532383e6126 with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1wyagA-000000003wH-2o6U;
+	Mon, 24 Aug 2026 19:50:00 +0000
+Date: Tue, 25 Aug 2026 03:48:02 +0800
+From: kernel test robot <lkp@intel.com>
+To: Xiubo Li <xiubo.li@clyso.com>
+Cc: oe-kbuild-all@lists.linux.dev, ceph-devel@vger.kernel.org,
+ Alex Markuze <amarkuze@redhat.com>
+Subject: [ceph-client:testing 47/48] ERROR: modpost: "__umoddi3"
+ [fs/ceph/ceph.ko] undefined!
+Message-ID: <202608250336.p7NBvgnZ-lkp@intel.com>
+User-Agent: s-nail v14.9.25
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Mon, 24 Aug 2026 20:47:30 +0100
-Message-ID: <771538.1787600850@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-Aur=C3=A9lien Couderc <aurelien.couderc2002@gmail.com> wrote:
+tree:   https://github.com/ceph/ceph-client.git testing
+head:   86f405187248b7a5a2104eba07f941d27593893e
+commit: 68477e9bc0513dd9a887745f2af468f2f18526c0 [47/48] ceph: parallelize object copy in ceph_do_objects_copy()
+config: i386-allmodconfig (https://download.01.org/0day-ci/archive/20260825/202608250336.p7NBvgnZ-lkp@intel.com/config)
+compiler: gcc-14 (Debian 14.2.0-19) 14.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260825/202608250336.p7NBvgnZ-lkp@intel.com/reproduce)
 
-> What about READ_PLUS, i.e. sparse file reads? If you do this kind of
-> work of handling partial abandonment, can such a work also benefit
-> READ_PLUS?
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202608250336.p7NBvgnZ-lkp@intel.com/
 
-READ_PLUS is NFS, right?
+All errors (new ones prefixed by >>, old ones prefixed by <<):
 
-I'm not sure it would particularly help or hinder.
+>> ERROR: modpost: "__umoddi3" [fs/ceph/ceph.ko] undefined!
 
-The VFS/VM only asks to read contiguous regions and netfslib breaks that up
-into subrequests, but currently netfslib doesn't know anything about sparse
-reads.  What I'm looking at with Ceph, for example, is that Ceph knows where
-the gaps are and will clear them before terminating the subrequest.
-
-Partial abandonment is for when some sort of fatal error occurs and we cann=
-ot
-finish the request.
-
-David
-
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
