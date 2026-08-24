@@ -1,202 +1,103 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E30E38887E
-	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 18:42:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 619D838331B
+	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 19:47:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787596942; cv=none; b=RGJnIAMgdzNkQJ+ESzhoCwy2FS0ScSU4sLosfxY+Tc6dPveQljV8Lg2e3DElU4CstiB/FLEtY7QT9zOLOjw/gfqceAvTmR1N/isEnIpUTy1Sp5FaEoVhXjj/jIeVdYoIlI+iRnccXOCbFWGzb4JcvxIvbfC+NTzQtw0j+PZ3Lms=
+	t=1787600871; cv=none; b=cPd141AOJ1ajFLVXurldtFdWeAQC2GYfZwkS7WmuvnCcIDFsjP4EO/hVHEqDpAZ62xHEczL2OASME4snWhvdC1ykvYlHxtrGf1o34rqiQ0vXqsl2KXHLvmRSVHgITjvoAn9rj6QewkMDjQDQdyNv5+tMtF1fuxPVhPA0JhQd8+g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787596942; c=relaxed/simple;
-	bh=G2IH3CzS7Zd1/D5eiAydefKLOkU1ZCpbZx58dYM+kZ4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=kIG9U41jf/al0/iRHQb5mSURZrM6WEr/lN/u0nlD3jaEiUDSgPTnX8vpASkVAxU4zVBngz58uYqQCuxehJkFKbuCSa23I5lrJwrk7C2P4ltPrzpuhYsN9pspHIFCpqXkhTSkEmjkh8CxOGePdVL4G/Sq7nnm2adRCp1OBnP2eeE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=Vx/+MofS; arc=none smtp.client-ip=209.85.218.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
+	s=arc-20240116; t=1787600871; c=relaxed/simple;
+	bh=ls9gAniDaxU60S488EwFx+HIbvW54OfMRM5lR9rJRqY=;
+	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
+	 Content-Type:Date:Message-ID; b=lLILCpSUBKhzqXjeA8aJ7KOuy0NowqaaQfm53xgrfBWhs115cYteYorjdKsLOh41yOtR/BdpzlOwbjO0ilO+f+MHEfL9gxHMjIUdv4Of+hZkmMt/Bo4NEgXdLXryeiqXOoCDBk1Dda5BYwwbHgFJ05sTMwnXYDLg5BJC6HPbhDw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=a5o4wDBO; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="Vx/+MofS"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c2074710751so700058466b.1
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 11:42:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1787596937; x=1788201737; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=j8Pz0kJZhXOEmft7GuhfPd8qakMe4j7ZLaQkh5Hkdos=;
-        b=Vx/+MofSNncPZ14bAbKrS1I7DWAn98v19p/ZE6oVSd/0A4s0P+9dhUVdDmcofKbx07
-         g3kTDWFaYY1jY7tYM5QD1wlY131yfdZNN4Z+LXIMQ9TNFYAeMyhaMJVKDdUnFqkYRW40
-         vVqEDHAQxLRQaS8XNNexydTiVUledLVNTPR707xc/jbLcmsLDI7VUIO4PdxwXxlv+TNT
-         +ELt9Hh7TisOmizfr7cmMzxOnTurGwrwMLm8xWpHVeyF+kq4gU63mxHcIJlk7vW1LJpJ
-         8mrv844MUTfUGhazBPNMPfA7j/COb6tPI/W6chhu3TAULYn1Ntzfae8aQVnnsrnk5z7d
-         v1hg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787596937; x=1788201737;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=j8Pz0kJZhXOEmft7GuhfPd8qakMe4j7ZLaQkh5Hkdos=;
-        b=T0EAu9Fkc5cZpApMTUiGV95D0YsHz0SpQyVoBN2/fjO+/7VaxgOpX4EZUuhW5gBns4
-         nW2t2I7kOmtW2sM63d3tzVc/DkpdowceDwQbHf1LVkhe2ecFcjmAnvYMPMsobErpnc5v
-         rvVOrGTja5vWnMITWj7GSXkHauXupVc0/+AlM+2v4AZychIHsmwHU51xh4UiWgudP+rS
-         trxDTCABYBgxnr1/gOdsA2Z0m9YjoKh7v3JFJmAVofXIg5y0gKZ25U/ixRbRxCtIEii5
-         J5IECfDJvNrOgM+NiybDVifgqKrOgCeZHyTUhrCdp7KDrN5CreaiTAqpxondyNyLtnDa
-         dPfg==
-X-Forwarded-Encrypted: i=1; AHgh+RrLXNpZ2z4JhU2GckDWc1DHfISGrzCeo8A5yQJfzjI1dGR4EDdj9zK+CxT/G1bFVco7t2kaUGkF0WDx@vger.kernel.org
-X-Gm-Message-State: AFuF++kahlnRXyICZPzukjgaKh9RYZ4S1kTvKbokbuec4WZNO8P/ZhiV
-	dm1/GlevNfijoPH/ywI6ZgU5pWBGLNHqM1aNNEQ3KRJE0PHJdQrnHdxDEm41GJ0+F2k=
-X-Gm-Gg: AR+sD131weSvyzshrqnsMMH8F51zuV/qfg83EWwg5yoILqP5dSXvTxXDcipp2m6GXu7
-	jI5c7owsXCzIdGb74z7lHfkWbGdnGUFfVwNoTFhCxN73W6vP+V0k7rzOmbhud5JD9EQ6Y+0nCK+
-	v03jOa9U1l25MKpf2si7dvx+ERAmK9dSWkW1pvoAsO1i/0axrv/RA7QMT8bFwzNKpDFkpUeYOan
-	jueLfyeQZFATpIewpPOXtketBraE69iQD/YrRzQDCclUssSj8hrAZXwqNbYh/lHmrBpwUxbpovk
-	wqiTjC73pvV+erfeKhk0abu71mLrFPacnl45mEkB1+Ve9diS3EZkZhOjfyf3eDMhqSMWUCx4U9U
-	+RUDtb9V4Ax/Qm2eZRDVuER9ErRTxCoMy1YLuSDRUe6AJTaCKObONWaDBp6EyAQ+NmpVJ0NUqOk
-	U56ka3cqCcDQZX7qZ388/WWNXDxl6b7SpLBE4+FoGdMHU/nkBjzArz7zqxbp5y6EHWN9SoDpx+P
-	/BCeyLPeCE0N8rOYNixH1WlrPuDKpihDt/N8XsUOyEPkon0xDvurQOfc73jdwJJ
-X-Received: by 2002:a17:907:5c9:b0:c12:83c9:d41 with SMTP id a640c23a62f3a-c2491e83838mr1925053166b.12.1787596937373;
-        Mon, 24 Aug 2026 11:42:17 -0700 (PDT)
-Received: from raven.intern.cm-ag (p200300dc6f02b200023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f02:b200:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c249606a8fasm1533526066b.8.2026.08.24.11.42.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Aug 2026 11:42:17 -0700 (PDT)
-From: Max Kellermann <max.kellermann@ionos.com>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	xiubo.li@clyso.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH v5 11/11] fs/ceph: remove redundant inode number from ceph_inode_info
-Date: Mon, 24 Aug 2026 20:41:59 +0200
-Message-ID: <20260824184159.240821-12-max.kellermann@ionos.com>
-X-Mailer: git-send-email 2.47.3
-In-Reply-To: <20260824184159.240821-1-max.kellermann@ionos.com>
-References: <20260824184159.240821-1-max.kellermann@ionos.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="a5o4wDBO"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1787600869;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=HWkfuD+RoHFHnIf8MPWKdp7sPrGB/v7hQ704zJ+2+Ds=;
+	b=a5o4wDBOBre11mftYqA5SxevqFlmM2occ7Dyr/uipd+d+D4MkTiLzLeywbAsnn0VktKGcI
+	qsnD93b8xJYdsHsH15tQPqe9KyD3O7iVAi6GXWR412j/ifD8On4kWHRFI6HLW6pTiEc3ds
+	NHvCUuCYkORpGBtxENgxbo2yWpJLMzI=
+Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-635-9XFVDZNVN-aHPcQHKQgWyA-1; Mon,
+ 24 Aug 2026 15:47:45 -0400
+X-MC-Unique: 9XFVDZNVN-aHPcQHKQgWyA-1
+X-Mimecast-MFC-AGG-ID: 9XFVDZNVN-aHPcQHKQgWyA_1787600862
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 5D45F184B396;
+	Mon, 24 Aug 2026 19:47:40 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.44.32.15])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id C8E871944B2A;
+	Mon, 24 Aug 2026 19:47:31 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+	Kingdom.
+	Registered in England and Wales under Company Registration No. 3798903
+From: David Howells <dhowells@redhat.com>
+In-Reply-To: <CA+1jF5qPZUhCevwbu7zQDEVWss6gMdoDMhqKqH3k7v=WStRtEA@mail.gmail.com>
+References: <CA+1jF5qPZUhCevwbu7zQDEVWss6gMdoDMhqKqH3k7v=WStRtEA@mail.gmail.com> <20260824144130.759997-1-dhowells@redhat.com> <20260824144130.759997-31-dhowells@redhat.com>
+To: =?us-ascii?Q?=3D=3FUTF-8=3FQ=3FAur=3DC3=3DA9lien=5FCouderc=3F=3D?= <aurelien.couderc2002@gmail.com>
+Cc: dhowells@redhat.com, Paulo Alcantara <pc@manguebit.org>,
+    Christian Brauner <christian@brauner.io>,
+    Matthew Wilcox <willy@infradead.org>,
+    Christoph Hellwig <hch@infradead.org>, Jens Axboe <axboe@kernel.dk>,
+    Leon Romanovsky <leon@kernel.org>,
+    Namjae Jeon <linkinjeon@kernel.org>,
+    ChenXiaoSong <chenxiaosong@chenxiaosong.com>,
+    Marc Dionne <marc.dionne@auristor.com>,
+    Stefan Metzmacher <metze@samba.org>,
+    Eric Van Hensbergen <ericvh@kernel.org>,
+    Dominique Martinet <asmadeus@codewreck.org>,
+    Ilya Dryomov <idryomov@gmail.com>, netfs@lists.linux.dev,
+    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
+    Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
+    ceph-devel@vger.kernel.org, v9fs@lists.linux.dev,
+    linux-erofs@lists.ozlabs.org, linux-fsdevel@vger.kernel.org,
+    linux-kernel@vger.kernel.org
+Subject: Re: READ_PLUS in NetFS? Re: [PATCH v10 30/35] netfs: Simplify read abandonment
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Mon, 24 Aug 2026 20:47:30 +0100
+Message-ID: <771538.1787600850@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-On 64 bit systems, ceph_vino_to_ino_t() is a no-op, and inode.i_ino is
-the same as ceph_vino.ino.
+Aur=C3=A9lien Couderc <aurelien.couderc2002@gmail.com> wrote:
 
-This reduces the size of `struct ceph_inode_info` by 8 bytes.
+> What about READ_PLUS, i.e. sparse file reads? If you do this kind of
+> work of handling partial abandonment, can such a work also benefit
+> READ_PLUS?
 
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
----
- fs/ceph/cache.c |  4 +++-
- fs/ceph/inode.c |  9 +++++++++
- fs/ceph/super.h | 23 +++++++++++++++++++++++
- 3 files changed, 35 insertions(+), 1 deletion(-)
+READ_PLUS is NFS, right?
 
-diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-index f678bab189d8..289615e58196 100644
---- a/fs/ceph/cache.c
-+++ b/fs/ceph/cache.c
-@@ -16,6 +16,7 @@ void ceph_fscache_register_inode_cookie(struct inode *inode)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
-+	struct ceph_vino vino;
- 
- 	/* No caching for filesystem? */
- 	if (!fsc->fscache)
-@@ -31,9 +32,10 @@ void ceph_fscache_register_inode_cookie(struct inode *inode)
- 
- 	WARN_ON_ONCE(ci->netfs.cache);
- 
-+	vino = ceph_vino(inode);
- 	ci->netfs.cache =
- 		fscache_acquire_cookie(fsc->fscache, 0,
--				       &ci->i_vino, sizeof(ci->i_vino),
-+				       &vino, sizeof(vino),
- 				       &ci->i_version, sizeof(ci->i_version),
- 				       i_size_read(inode));
- 	if (ci->netfs.cache)
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 62399361821a..acc600e0024c 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -44,11 +44,20 @@ static void ceph_inode_work(struct work_struct *work);
-  */
- static int ceph_set_ino_cb(struct inode *inode, void *data)
- {
-+#if BITS_PER_LONG >= 64
-+	const struct ceph_vino *vino = data;
-+#endif
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
- 
-+#if BITS_PER_LONG >= 64
-+	inode->i_ino = vino->ino;
-+	ci->i_snap = vino->snap;
-+#else
- 	ci->i_vino = *(struct ceph_vino *)data;
- 	inode->i_ino = ceph_vino_to_ino_t(ci->i_vino);
-+#endif
-+
- 	inode_set_iversion_raw(inode, 0);
- 	percpu_counter_inc(&mdsc->metric.total_inodes);
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 15fa433c9485..79917adccda2 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -378,7 +378,15 @@ struct ceph_inode_xattrs_info {
-  */
- struct ceph_inode_info {
- 	struct netfs_inode netfs; /* Netfslib context and vfs inode */
-+
-+#if BITS_PER_LONG >= 64
-+	/* on 64 bit systems, the full Ceph inode number is stored in
-+	 * netfs.inode.i_ino
-+	 */
-+	u64 i_snap;
-+#else
- 	struct ceph_vino i_vino;   /* ceph ino + snap */
-+#endif
- 
- 	spinlock_t i_ceph_lock;
- 
-@@ -571,7 +579,14 @@ ceph_inode_to_client(const struct inode *inode)
- static inline struct ceph_vino
- ceph_vino(const struct inode *inode)
- {
-+#if BITS_PER_LONG >= 64
-+	return (struct ceph_vino){
-+		.ino = inode->i_ino,
-+		.snap = ceph_inode(inode)->i_snap,
-+	};
-+#else
- 	return ceph_inode(inode)->i_vino;
-+#endif
- }
- 
- static inline u32 ceph_ino_to_ino32(u64 vino)
-@@ -601,12 +616,20 @@ static inline ino_t ceph_vino_to_ino_t(const struct ceph_vino vino)
- 
- static inline u64 ceph_ino(const struct inode *inode)
- {
-+#if BITS_PER_LONG >= 64
-+	return inode->i_ino;
-+#else
- 	return ceph_inode(inode)->i_vino.ino;
-+#endif
- }
- 
- static inline u64 ceph_snap(const struct inode *inode)
- {
-+#if BITS_PER_LONG >= 64
-+	return ceph_inode(inode)->i_snap;
-+#else
- 	return ceph_inode(inode)->i_vino.snap;
-+#endif
- }
- 
- /**
--- 
-2.47.3
+I'm not sure it would particularly help or hinder.
+
+The VFS/VM only asks to read contiguous regions and netfslib breaks that up
+into subrequests, but currently netfslib doesn't know anything about sparse
+reads.  What I'm looking at with Ceph, for example, is that Ceph knows where
+the gaps are and will clear them before terminating the subrequest.
+
+Partial abandonment is for when some sort of fatal error occurs and we cann=
+ot
+finish the request.
+
+David
 
