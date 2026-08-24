@@ -1,147 +1,160 @@
-Received: from flow-b7-smtp.messagingengine.com (flow-b7-smtp.messagingengine.com [202.12.124.142])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 918792F9D85;
-	Sun, 23 Aug 2026 01:21:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.142
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9983A3E9C0E
+	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 06:48:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787448098; cv=none; b=LEhgxjZmRY2hOu+z2/9aih1TT5czDv2tNwFv6HXU4EnHOntvoET9XczA8ir/+vgTmG1ar0xhTS0Y6W7tnWtBKjtpmDrDMIW7YY8sOLAGh1uJKpbjf5NqObMnQq/2JaRZ92NpQL7c5IJWXDoPU/A/eIR9rUQKA8hiD/JzT89iluI=
+	t=1787554125; cv=none; b=V+j+Kbat5GcJsg2qqeuqlJUcatwWwP6dQMNNLRv4I5wq+5RM48OJpQ6tUpUR6QvFpUeVBkAGwj/Jz7y9IG7bG+PcMMQOLQiMJVcY0FnyAWOh1O2NTBmouwGJ+10Gi28LfgN6NaIIv2Yj+z4j8DFkLduvzU69aN6IRw5Kq2xGqn0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787448098; c=relaxed/simple;
-	bh=vNDsmTJS3b+TDa+FCuTOZT6UlErVgF6OPwGcWRSVXtU=;
-	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
-	 References:Date:Message-id; b=CFT0gE75eT/4eOCPcCn+6uLZ7cteF/t1GzQYrm69xuNBI/SfvQtfwWsdtIz1X6G5b/rzMb7XmRy1Z7Kx3E+PfV0zdpeZ2oJmXPeseRP7dYD8mIJ+T85BynXx8rUpF/Ckts3B3NCXVhkLsqOiL9Muhc+dx/v2plrt4nqunAGlfe4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=UkkHuzsR; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=NBQFZQpS; arc=none smtp.client-ip=202.12.124.142
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
+	s=arc-20240116; t=1787554125; c=relaxed/simple;
+	bh=SeRSKX9qUQAICue+ts05HWTIeIEbe2do9nFpvfD3tfI=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=IniPJW+yQ/l3EU+uPn3GfvwogOXEH7sB1W9iOQ7F8E/JWYtZgNRPZd1OQr+vTjFYfM6w0m8mXQY6BmeN9LFPxOvnpby+GgGowDH5VXsuUW1GR69ZZ+wmCMCIcAVMpu6sFK7exIgxknJBKRBP+an9qGQTGmrTHToBrKm44Ha0HtA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Z3/VB2t8; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=sUmT262C; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="UkkHuzsR";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="NBQFZQpS"
-Received: from phl-compute-03.internal (phl-compute-03.internal [10.202.2.43])
-	by mailflow.stl.internal (Postfix) with ESMTP id EF557130008D;
-	Sat, 22 Aug 2026 21:21:34 -0400 (EDT)
-Received: from phl-frontend-03 ([10.202.2.162])
-  by phl-compute-03.internal (MEProxy); Sat, 22 Aug 2026 21:21:35 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to; s=fm3; t=
-	1787448094; x=1787455294; bh=Cb3hPU9JgV1SMJwig5J+Lg9o0SACLjG3CRI
-	meMjyW7k=; b=UkkHuzsRr1fQWBIath5b/mbCN5jIAowX9SHNVR6MpqT2gx4feoX
-	jICMixIhbr01wGq9J7P1y4383Epbnxt92kZVx2qRmYTXRMv6tQKh3oNicpdHTkwy
-	ZZnJKcY/n8hXRyo2F9lGbsoVn06NqriDj3mv2+n+2duxHM7/S04qEeNeqOcEwLul
-	n664tnwT5Fe8rmT6kTjEMzisq+O0L8cG1ZVd0IkQl9DB/c02k6iHQU3921u5dB05
-	RLaUTr0p09cBP89xjTmogyubD/8Ha8B13gAGVeTlWnQnZ3EGuyQg6U7fSleJwgFK
-	wSB1jQSjCgYh49OcAGQeX7m6Useal9I6fKQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1787448094; x=
-	1787455294; bh=Cb3hPU9JgV1SMJwig5J+Lg9o0SACLjG3CRImeMjyW7k=; b=N
-	BQFZQpSHXjPMy7Zut8IxuT9yKy2E3WmQCkSpSycmW06uho7oi0JEnGqGRG9dWxRm
-	dn/jp5xoX5kV+fSBuxhi1/8mAgAGmChzMVCJWbB0iYmMYOKB17w/afXckOCkTH3p
-	nIivAPabbVtcucVmmFKrRoDpzUkqicJQnVhrfiiLWPJMHrzz8Bg9OEP4+R6B/a2W
-	catoQO238l44RZK4lrKv/rjkYwBEOvR7aCx75elOP2kb0Nnkq9L/Xo4MFcEzduIK
-	h7zfnCgjxXzXuU53XzsJYLT1Qa/oQ+GymmGLp6eT6K5MLYELKh/wobdnq78cVzgg
-	qwxGh2SjwZU15CGdbPN4Q==
-X-ME-Sender: <xms:HUuKahL1slkUMJQSuwEaTj2RLoPSZ8poxXl4N4ORbIq-wV-rWuFT_A>
-    <xme:HUuKau0fVRX_F3V2cPIuR4KNvdQRy34L-8g4C7w92d8RrCsQh3nKnxZVH9HyrX91y
-    n44uzolZ-q1EYyvtORjClgmMvurdTewjwqoJjyr-971KELBOQ>
-X-ME-Received: <xmr:HUuKatI2aIF3Kg4-diVjg6KrZVsBNjMMeprO9uMjtX7EZyEYWZa_AEjbTb868XRX5mXapUPuPoe9nNJK6AgxoIuSzxgcvDA>
-X-ME-Proxy-Cause: dmFkZTF28I7HEt3WBN6c6IzEpKsBN9AQLSnyMJtLuM3+uMUc3zO+tGnPoXT8ipzNMcGmpD
-    Nh/EQugbA8LMCcQc4rst0xaoqvW3m5KoxKY+S7+S2t2lFXv76tUZJtAWkvG13eRXWL66ge
-    L/YB4HSGqfsIbZdin/KVl2tu+7iQ5Z5mZ44UZXkZRfZ0b/Ux6b8HYB3uDDKLlUItXBM7wz
-    ybHDq9Ox6fpSUGhtUtIAqB7zBfKWbuvF++J39sA44KKBKyeJexGhCWVA2hf2FyxThWQHk5
-    PLdEQ+i8dSxgxUgESgr+9Eproy/1gvB1AJtRDtOn1BKOXhxDvSwn4yYIy4dHuI6P4IWYp5
-    FcpwvaOTN8qPk+8H0jf9ytdO/plO0vQsbXdotgsfOpq5qKOLRE9cqCgN3+bXIAf/xvwLl3
-    iqEbKZNXaLyi76lNdfCr641+Ef73L9NKF4wCJ0fHw2b3tcaiABea1z2+TZ/8Hp0HIEVNX9
-    92nqRejiVnmveSeHna0lAh7mN7HBln/z0r3QghIJOjDgzGHiL8a/b9CJufrlVZ2JScw7Qw
-    c61Bawx4Rk60YkE94sHAQASOL1f0WBrP1f/ro8Voj8dgqDNlZqHANoyxru4U40YQ2sa/CF
-    mwikD+ZQZFs7UFzgFkQEzc4zl3wHvkQ8xFqasOGSknOO+hlGD5uXLDUjvLdg
-X-ME-Proxy: <xmx:HUuKaiP5prlKmoaUvMz4ni0kEiVYLxAoWOfXwFr0AQm53XaHvh1HHA>
-    <xmx:HUuKauzinRrfvQ2pm_k8oQo3UKFUe3ElnMHojs5aDLNohNd1PKWpEg>
-    <xmx:HUuKaqIljCmqlsa_-R8Nsxx_955hQ3DOiTZgBfmznh6yoV8bzvoDvQ>
-    <xmx:HUuKatqYqx6nK9vm0JfErJblqkK1zlWHPyp1zbqvZrTwkRzQVFiuug>
-    <xmx:HkuKarHipHWOlhdO-MgJnmZ3QDCOCwFVrpUxLzirXt69eWpmJHgY3-9e>
-Feedback-ID: i9d664b8f:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Sat,
- 22 Aug 2026 21:21:27 -0400 (EDT)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Z3/VB2t8";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="sUmT262C"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1787554120;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=PPGn2wKG/yEJLAmesYBIpLBSoVzTJ+frh6BH7s5dxT0=;
+	b=Z3/VB2t8c0mh8zHxXpsbhagamcX3sseoUPqgSq+K7QaDDyW6inDj5q54++OT5yNwr+5Gwz
+	r+WhpZSd9/5TVPvXzpbd/MuRpaVRByNjHumoQgksintEh3qgOwZ50/n86F7Gb2gZjXTgGj
+	QSli9Iaznfst8Dgp63iHb7wCFkpmnho=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-222-jczPbPRKP_et6CRXUIkaTA-1; Mon, 24 Aug 2026 02:48:38 -0400
+X-MC-Unique: jczPbPRKP_et6CRXUIkaTA-1
+X-Mimecast-MFC-AGG-ID: jczPbPRKP_et6CRXUIkaTA_1787554118
+Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-52ce3c7cb2eso59435401cf.3
+        for <ceph-devel@vger.kernel.org>; Sun, 23 Aug 2026 23:48:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1787554118; x=1788158918; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=PPGn2wKG/yEJLAmesYBIpLBSoVzTJ+frh6BH7s5dxT0=;
+        b=sUmT262Cixva5tpOC6oojHtaR2PdW6GS56zVFq9VTLkf+aSdBSEE8qsmMVu8hGGdxY
+         AQcvoRIB3tVR+/IQkpjYnTRvEDh6N1+cxjHSTlnM4eM08o5k0X9iL+6LKjMyZ+R32kHY
+         RfLY185XZST6SfCYZSWEmnTMUxd+ME4xnYYd0JOkmhvyHcTy9y3XdnnJXCi9XoBvJ+ZO
+         +GlA6AVDcle+Td23oPIwYfIz/s0gzr3QJJbgL5yC5ZQCRcsl/CI/rPA0JafVRiZXEPCv
+         qjJjGGiHNRzDZV0a0cdH7mQNJxF7gBB7gq+OIz3r1kWfFd9Bkb1DFqOfmldxzRiHgi8a
+         rUrA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787554118; x=1788158918;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=PPGn2wKG/yEJLAmesYBIpLBSoVzTJ+frh6BH7s5dxT0=;
+        b=LAR94iyiIvW/rQH9IF7XkLcl5PmLcEuafc3GhgeCwzAMFsK+Oz5nv+frlbkAi//DQo
+         vhp1KMa+7B0MGet+/txVyD3V9nMLQl+UY332ZfeAo57f/42YFWRKmeRYymkQrAVne3dm
+         ZpQGM0g5jM3cUjIGt/E1YmPGZZlteg9FG8ms8683HcKmxCLPN4VSwIy8h7p5jY3ya/Fw
+         DdcNCuxD46QDfLkkGSQJ6gHI0p+WibCba/i/Sc7lOGIgBj256+zS+Ca/qElzbxe7exjP
+         3r3t97NubZJm5msHNTUHS91+yWr9AJvOiHpAQKaGSheXbOoe1vC3rbFV0O/GrFS+LEcx
+         vb1Q==
+X-Gm-Message-State: AFuF++nTb3bubRNlYiofz/bkcc1FMltacuBsxVxXwDD/orFZYFNp+kc8
+	xa4cMysMnN6gGJAHljiqB3iePY9RFDDUmXwliX18Mcevsbc6qgeoAL/qIwji+lTwfRnLr37eDqu
+	m+YPyCAMSSfPJpsJB4NdG4hqbhlncNbUZQC6s0mANWRUZsKGwC+Af+SydnUTCgEy/TrAgYhQ=
+X-Gm-Gg: AR+sD111IM9lfAwP08TkjsKPgN1Fs+q5TefxlQV6JJCl3fd4L37/oo3S2JV4kYWsAu4
+	hG2up6WzW9VevFoJJD30R7QwrOAkm7vFn3/8ypIAgdgocAWLgJmXl+Y/E399DlBOhSH73U1w2T/
+	S+5Dd6bjgXuF/+HPdQoo1C9R0+6xixXjiui3S839fXMLdnWHxNWV47waVowWVWMLm9PZMwEz4kJ
+	nAA/RwS4+zOzUQbwNnYdJRvZPro+kTjU13uviY00bC/kFLmGHf/696O5Keeg0IsqMPvCvzPuvh8
+	QaP6+mxMDWuvrqf7m/jmCX8M9dxymT7oe4MFArxf4zI1H5ogX+DVt+qsn2scFHzJlIibKG1Pikm
+	S0idZg9WAtXQ27q4f9c6FWtgXiAHEWu1kqw==
+X-Received: by 2002:a05:622a:1456:b0:516:d83c:edb6 with SMTP id d75a77b69052e-52df5692459mr226315261cf.12.1787554118135;
+        Sun, 23 Aug 2026 23:48:38 -0700 (PDT)
+X-Received: by 2002:a05:622a:1456:b0:516:d83c:edb6 with SMTP id d75a77b69052e-52df5692459mr226315021cf.12.1787554117611;
+        Sun, 23 Aug 2026 23:48:37 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-52e099c38c0sm41184451cf.13.2026.08.23.23.48.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 23 Aug 2026 23:48:37 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Xiubo Li <xiubo.li@clyso.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: [v4] ceph: add 'lazyio' mount option to kclient
+Date: Mon, 24 Aug 2026 06:48:34 +0000
+Message-Id: <20260824064834.2509055-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260820-lazyio-v4-1-601bee1ea2c8@clyso.com>
+References: <20260820-lazyio-v4-1-601bee1ea2c8@clyso.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: NeilBrown <neilb@ownmail.net>
-To: "Amir Goldstein" <amir73il@gmail.com>
-Cc: "Jan Kara" <jack@suse.cz>, "Miklos Szeredi" <miklos@szeredi.hu>,
- "Ian Kent" <raven@themaw.net>, "Chuck Lever" <cel@kernel.org>,
- "Jake Edge" <jake@lwn.net>, "Ilya Dryomov" <idryomov@gmail.com>,
- "Alex Markuze" <amarkuze@redhat.com>,
- "Viacheslav Dubeyko" <slava@dubeyko.com>, "Jan Harkes" <jaharkes@cs.cmu.edu>,
- coda@cs.cmu.edu, "Alexander Viro" <viro@zeniv.linux.org.uk>,
- "Christian Brauner" <brauner@kernel.org>,
- "Trond Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
- "Andrew Morton" <akpm@linux-foundation.org>,
- "Miklos Szeredi" <mszeredi@redhat.com>, autofs@vger.kernel.org,
- linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org,
- codalist@coda.cs.cmu.edu, linux-fsdevel@vger.kernel.org,
- linux-nfs@vger.kernel.org
-Subject: Re: [PATCH v1 03/12] fsnotify: don't hold a spin_lock across
- fsnotify_recalc_mask() calls.
-In-reply-to:
- <CAOQ4uxj6O8Ukbn-vWU-o+zOAYyofokCTAGnSifSDh9-PACCTdg@mail.gmail.com>
-References: <20260803012648.2195405-1-neilb@ownmail.net>
-  <20260803012648.2195405-4-neilb@ownmail.net>
-  <CAJfpegs-k3skRGiwZvQLzD7OrAK4KL8zwmpmJKyjRHSQ-rqX+Q@mail.gmail.com>
-  <178642552869.2852630.11443303758249822243@noble.neil.brown.name>
-  <178675372176.2852630.1305553887009521382@noble.neil.brown.name>
-  <oh2lg2agqxwqopecacq6sfdnky5faxidwsybkvbwbq24r6tw6o@4swfog5ocwwb>
-  <CAOQ4uxgtKvKmPaK8rPAZDSwu0Hr9JAmqJi0a1VX_Rg7jDo8HrQ@mail.gmail.com>
-  <178709583480.2852630.4575326968116183366@noble.neil.brown.name>
-  <CAOQ4uxj6O8Ukbn-vWU-o+zOAYyofokCTAGnSifSDh9-PACCTdg@mail.gmail.com>
-Date: Sun, 23 Aug 2026 11:21:23 +1000
-Message-id: <178744808383.3510150.4744569341920131567@noble.neil.brown.name>
-Reply-To: NeilBrown <neil@brown.name>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Wed, 19 Aug 2026, Amir Goldstein wrote:
-> On Wed, Aug 19, 2026 at 1:30=E2=80=AFAM NeilBrown <neilb@ownmail.net> wrote:
-> > --- a/fs/notify/dnotify/dnotify.c
-> > +++ b/fs/notify/dnotify/dnotify.c
-> > @@ -75,7 +75,7 @@ static void dnotify_recalc_inode_mask(struct fsnotify_m=
-ark *fsn_mark)
-> >                 return;
-> >         fsn_mark->mask =3D new_mask;
-> >
-> > -       fsnotify_recalc_mask(fsn_mark->connector);
-> > +       fsnotify_recalc_mask_inatomic(fsn_mark->connector);
->=20
-> I don't think skipping update_children is correct when called
-> from fcntl_dirnotify().
+Hi Xiubo,
 
-Thanks for catching that.
-I agree we shouldn't skip here, but also we mustn't call
-fsnotify_conn_set_children_dentry_flags() at this point because
-a spinlock is held.
-In fcntl_dirnotify() is it safe to delay that call until after the
-lock is dropped because fsnotify_group_lock() is still held.
+Thanks for the update and the extra testing.
 
-So I would like to keep that part of my patch - the part where
-fsnotify_recalc_mask() (and dnotify_recalc_inode_mask()) returns the
-"update_children" flag and the caller is responsible for calling
-fsnotify_conn_set_children_dentry_flags().
+NACK for now — please send a v5 for:
 
-Some callers call fsnotify_conn_set_children_dentry_flags() immediately,
-some wait until a spinlock is dropped, dnotify_handle_event() wouldn't
-call it at all.
+  1. fs/ceph/caps.c:2354: FLUSH can ACK a LAZYIO revoke while pages are still cached
+     Xiubo, `ceph_adjust_caps_used_for_lazyio()` is applied in
+     `ceph_check_caps()` and `handle_cap_grant()`, but `__prep_cap()`
+     still does `cap->implemented &= cap->issued | used` with the raw
+     used set. `try_flush_caps()` and `__kick_flushing_caps()` pass
+     `__ceph_caps_used()` straight in, so used is CACHE/BUFFER from
+     `nrpages` / `i_wrbuffer_ref`, not LAZYIO. Once LAZYIO is gone from
+     `issued`, that drops it from `implemented` and the FLUSH/reconnect
+     message is an implicit revoke ACK. `ceph_fsync()` hits this easily:
+     `file_write_and_wait_range()` leaves clean cached pages, then
+     `try_flush_caps()` runs. After that ACK the MDS can hand CACHE to
+     another client while we still have the old pages. That is the hole
+     the v4 `implemented` comment is trying to close, and it still
+     exists on the FLUSH path.
+     Suggested fix: Run `used` through
+     `ceph_adjust_caps_used_for_lazyio()` in `try_flush_caps()` and
+     `__kick_flushing_caps()`, or once inside `__prep_cap()`. While
+     `implemented` still has LAZYIO and CACHE/BUFFER are not issued,
+     report LAZYIO as used so `implemented` keeps it until writeback and
+     invalidation finish.
+  2. fs/ceph/addr.c:1999: Non-lazy mmap can keep using stale page cache after a CACHE->LAZYIO transition
+     The new revoke path keeps the inode page cache when CACHE is
+     dropped but LAZYIO remains, and the used-cap rewrite then lets that
+     revoke be ACKed. That is only safe if every opener is lazy. After
+     `remount,lazyio`, `CEPH_IOC_LAZYIO` on one fd, or any mix of old
+     non-lazy and new lazy opens, a non-lazy mapping still faults
+     through `ceph_filemap_fault()` with `want = CACHE`, gets only RD,
+     then calls `filemap_fault()` anyway because
+     `!ceph_has_inline_data()`. Those retained pages were kept solely
+     for the lazy fd, so the non-lazy mmap can observe stale data.
+     `try_get_cap_refs()` correctly refuses to satisfy a non-lazy
+     CACHE/BUFFER want with LAZYIO for `read_iter`/`write_iter`; mmap
+     never got that gate.
+     Suggested fix: Only let LAZYIO cover retained page cache when every
+     opener on the inode is lazy, or skip/invalidate page-cache faults
+     for non-lazy fds once CACHE has been revoked.
+  3. fs/ceph/addr.c:2149: ceph_page_mkwrite() can sleep until killed if caps are gone
+     The new lazy-fd path drops its refs and waits in
+     `wait_event_killable(ci->i_cap_wq,
+     ceph_have_dirtyable_caps(inode))` when it got WR but neither BUFFER
+     nor LAZYIO. Session reset wakes `i_cap_wq` via cap purge, but
+     `ceph_have_dirtyable_caps()` stays false once the caps are gone, so
+     the waiter goes back to sleep. `ceph_inode_shutdown()` does not
+     make the condition true and does not wake the queue.
+     `try_get_cap_refs()` already fails with `-ESTALE` on shutdown; this
+     wait sits outside that path, so a writable fault in that window
+     wedges until SIGKILL.
+     Suggested fix: Include shutdown/session-loss in the wait condition,
+     and fail the fault once the inode can no longer regain BUFFER or
+     LAZYIO.
 
-Your patch might be a good addition but it doesn't block the d_children
-walk in all cases where a spinlock is held, so it doesn't help my
-immediate need.
+FLUSH/reconnect still ACKs a LAZYIO revoke while pages remain; non-lazy mmap and mkwrite shutdown wait also need fixes.
 
-Thanks,
-NeilBrown
+
+-- 
+Alex Markuze
+
