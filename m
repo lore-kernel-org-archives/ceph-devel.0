@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F21B94756CE
-	for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 13:21:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CB16472F84
+	for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 13:21:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787664091; cv=none; b=tvFFVIicLM3jZ29DP56/wvN9XKDo5dJsB85nrQARJQLXjB5uqBzbR4gG+jQUTcO2EXBzES6xRbIjUDDmDQ0u+eIP0mHTeVSv1KLKvxZfxXa57DeaFjUUtfpmGPOj0dSYMIadz3/caSjldwTnvTl13N01qEmXbqkdVXEco9ykCO4=
+	t=1787664091; cv=none; b=adOVZVnizUm1bOp1ESJ+hDeIHJQg/GVFXO/JsBosQmFITop5MZc+EScB7j0ZXgxP77+e7e8EbRrjseAlqGkCfYMw14SPnIoo45VVJdaS9OuwhlqiGfvjspNjU4IoBV4tzlp7obYx+N/rF4XBWH/JddHdy/j8bqSXeVj7y6WDi1M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1787664091; c=relaxed/simple;
-	bh=TbyvXkUkP/iFkWLvIM6Uiy2D1Zai+6kwljmDrYii1Qs=;
+	bh=IizGxEfTjfhZJVkwhDscGC2P/a5HlqU4Kr8qrccX6z4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=H/hpX332kCKklY/bXWUEPwwx7PNZcjtld0GCgzFPuLdvmNgKbeUaIODbKYHS0ccPhI5bzkq5Fo5ayDtk9wepOMU3qxGqVY2/MES6QltSPik+0mNgNCRXKuAMPHcuiqYoRIGqTr6Z8UeEo7hNk1Syb9XrHqJF/cfoyiuaszkLhD0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cuVa7Ore; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=EEVMiWa2jpAEZqhtsmpgo6giC/wMmqhUnblbFViV1yOXxrD4EbxTw5tx9wLUOvjcHBsDH2uZwksoRFVgVkzu6Tr5B9r7NvfbqO1NQJXrc0Qzj/FVk/3PWbSe+dC3Jx47fJRigJ9Fp32L4pyTrWs9rN8yyjPHW1/nwZjxwpduzWk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gP5ivW8K; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cuVa7Ore"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gP5ivW8K"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787664080;
+	s=mimecast20190719; t=1787664076;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=r3vRJq2sMz9APK4rZhV/g2MBBVrXWqzKAsYSWHku/NM=;
-	b=cuVa7Orefmsngtx2VCyR5ks5lq6ZZK1Kbu7CYin4uXVN+zVC/7ZPQLd1hw2sw26/QdFF23
-	wKh5tnSERKxoy3CdNvfPwOCbWvjFwWnYEV/a3L7AQ5UuCa5SV+rWum2uRoYSp6p3m5BW9G
-	W9YwLr4zI5c4stKxm47WaCw7/INgdDQ=
-Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+	bh=bPPEzvtBLG/nC8I1Bmob/2jRQbbQ9nOnJ6K+0h7yLO8=;
+	b=gP5ivW8KM3fIDtJTndVWGf2i4ad4jd+kxGkh6EeJIWFG7/Fl63YsW3qVQHLLmwNgipRkCA
+	axkuLJswHh0aQ+69u1Noc77LKa/eT7qPt129mnuK4AY1By5Fi1UXLcITPNVt5wcs2J68W+
+	HV3ZhpFH1AbzuL4ysCAN/QcNwUpQjjw=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-379-COh1v_XLNEeuzg5VEg3wcQ-1; Tue,
- 25 Aug 2026 09:21:15 -0400
-X-MC-Unique: COh1v_XLNEeuzg5VEg3wcQ-1
-X-Mimecast-MFC-AGG-ID: COh1v_XLNEeuzg5VEg3wcQ_1787664072
-Received: from mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.95])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-280-_zNZWTFXOgqQRslZ6mI2LA-1; Tue,
+ 25 Aug 2026 09:21:10 -0400
+X-MC-Unique: _zNZWTFXOgqQRslZ6mI2LA-1
+X-Mimecast-MFC-AGG-ID: _zNZWTFXOgqQRslZ6mI2LA_1787664068
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 798B0189F070;
-	Tue, 25 Aug 2026 13:21:12 +0000 (UTC)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id E2BAA1955D4D;
+	Tue, 25 Aug 2026 13:21:07 +0000 (UTC)
 Received: from warthog.com (unknown [10.44.32.15])
-	by mx-prod-int-10.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 956517C5;
-	Tue, 25 Aug 2026 13:21:09 +0000 (UTC)
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 828501944EB6;
+	Tue, 25 Aug 2026 13:21:04 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -52,9 +52,9 @@ Cc: David Howells <dhowells@redhat.com>,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 4/9] netfs: Fix i_size update for partial transfer
-Date: Tue, 25 Aug 2026 14:20:38 +0100
-Message-ID: <20260825132045.1000787-5-dhowells@redhat.com>
+Subject: [PATCH v2 3/9] netfs: Fix error vs transferred passed to ->ki_complete()
+Date: Tue, 25 Aug 2026 14:20:37 +0100
+Message-ID: <20260825132045.1000787-4-dhowells@redhat.com>
 In-Reply-To: <20260825132045.1000787-1-dhowells@redhat.com>
 References: <20260825132045.1000787-1-dhowells@redhat.com>
 Precedence: bulk
@@ -64,15 +64,11 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.6 on 10.30.177.95
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
 Fix netfs_unbuffered_write_done() to pass the amount written to
-netfs_update_i_size() in the event of a partial transfer that ends in an
-error.
-
-That said, it might be better for the filesystem to mark the inode data as
-invalid and recheck it in case something like a network error occurred that
-prevented the reply from the server from being received.
+->ki_complete() rather than the error in the event of a partially complete
+transfer.
 
 Fixes: a0b4c7a49137e ("netfs: Fix unbuffered/DIO writes to dispatch subrequests in strict sequence")
 Link: https://sashiko.dev/#/patchset/20260824120224.504575-1-dhowells%40redhat.com
@@ -85,16 +81,16 @@ cc: linux-fsdevel@vger.kernel.org
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/fs/netfs/direct_write.c b/fs/netfs/direct_write.c
-index f7d7e1b54653..f33ccddaa826 100644
+index 544a4243fc59..f7d7e1b54653 100644
 --- a/fs/netfs/direct_write.c
 +++ b/fs/netfs/direct_write.c
-@@ -21,7 +21,7 @@ static void netfs_unbuffered_write_done(struct netfs_io_request *wreq)
- 	/* Okay, declare that all I/O is complete. */
- 	trace_netfs_rreq(wreq, netfs_rreq_trace_write_done);
- 
--	if (!wreq->error)
-+	if (wreq->transferred)
- 		netfs_update_i_size(ictx, &ictx->inode, wreq->start, wreq->transferred);
- 
- 	if (wreq->origin == NETFS_DIO_WRITE &&
+@@ -51,7 +51,7 @@ static void netfs_unbuffered_write_done(struct netfs_io_request *wreq)
+ 		wreq->iocb->ki_pos += written;
+ 		if (wreq->iocb->ki_complete) {
+ 			trace_netfs_rreq(wreq, netfs_rreq_trace_ki_complete);
+-			wreq->iocb->ki_complete(wreq->iocb, wreq->error ?: written);
++			wreq->iocb->ki_complete(wreq->iocb, written ?: wreq->error);
+ 		}
+ 		wreq->iocb = VFS_PTR_POISON;
+ 	}
 
