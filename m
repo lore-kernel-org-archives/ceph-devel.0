@@ -1,176 +1,102 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CAA139448F
-	for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 10:37:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.45
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787654269; cv=pass; b=BIsf5sOpyuPw+2Wr0ddgjhr7mgf0svhZWphMGmaGjD9Ds14bqCMKAFS0pHCD97HUL2uLLxjH+u+DQZ1X+gXuyEQ93x0LEgCLSPoeh3MQYng+ZrsGlHl29c+yaxGRM8MzONbsXYtR90qzh2uuBE0sjqs5JTPe0WWJD5hUodQ+RNQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787654269; c=relaxed/simple;
-	bh=/VyfSd4LJb1EwLCokMYjjdGYOYyFyVprn/518uoDAtI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DD+1c1VfKxvyaC99iw4X+unvQlOn7UZzAIit1SW2LEqP3YCS4BZImo8xelsgpufRBvDBDpcww8HD1ooLyuWIsJZEiDFoxQ7wnGeXrp6PkL51w+t6qhzXaeeX19BAJA3DYKOcv6oJij11JOe+CBKDZRlU8FRpYLxb2JOrYHsPaQc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=FESmHSVj; arc=pass smtp.client-ip=209.85.218.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03FA1401A08;
+	Tue, 25 Aug 2026 12:10:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787659840; cv=none; b=novckl6XWXXPBbAcXT+yeFS6yNAlGnGVIsWrqRsbAUvPCvv+yiQXiZ/X9L5ECvYjH5O7c+p79UmdLHwZjmgEVgvpMoiJ9+bDrXONs1F5NKsuPH7UBalbx8Wy9+e2XqUTe7Q8utXA1P/jiA4ITHAdFOc5+CjiuGD8kChlIKS/eP4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787659840; c=relaxed/simple;
+	bh=Eb1YwI3OfYkiSl8Z3/q+YavrTX8EnjCviQgwlr2Ksrc=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=OQyd5dWI8+3SAHhvx2GO2CdEdvo4z/7/KzBRw6y+/zenF8t7Df8AnoEvE51k7Z+Fv1jntQv3JQRzqEXXE4OmeJSNLf7h1n5vwUwZH602Ap130zie/T2CU+aWcKGpSZJFWSG48DXMRlGlbLvEmq08xGoTpnkS7zdIrlKDX0HM7gQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HZBq/7n1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="FESmHSVj"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c15d3cd51b2so698584066b.3
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 03:37:44 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1787654263; cv=none;
-        d=google.com; s=arc-20260327;
-        b=YWlOxNpwfdecRRlyfm2UD5sl00awIP1MUzlQzdHhp0YGkf1tAnSXIAmd76uEgC4Hw6
-         wyIm7tXKAbJoBpzxTR2DSBtbAxAB28jPEMR5VmZpE09Pbn7xw/nk+deaE8u18j9LwODB
-         42SXZf6xPNtrt3kYnx9jve9nhxyiu3W0qwQo9R1I+lAQ48yfjmMszYtP1La3K6Ni0Pdv
-         Yw/yha0KoZnPRGMT7efh8HzC3HVJcWMH41WbGjZ0KIa/mXRTfx3A+bm4FVWQArkOOOFq
-         JYSesceE59trpzKH5nKuUQmY0glZuh2O+sXbWg4jz7cN9qb6Ly8Nm/VHm+Y3dI9pQOde
-         8k/A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=4t3V1apk/Mgs53kB/C548zWS3Sp3PgbLwPMr1IWQZ1w=;
-        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
-        b=XbopzYk+q7oUn3l85ZHOjtVgOk3wBG+BIeTTgyC13vA/7LWXzwMmq9g61n+3Xb9wpk
-         ltpT3FrCGXY/ms+SVZZwLXg+fv8HS6AjMoJwF/4UybSqpUmNi/BhgIPy3+ojf5+1TJ9j
-         e6aIv+XRW/V6/q8BUJzhwvZD8gNKXCplH1iC/xqrChHzBZrEMCBwEcuf6Vbxlh5HXbu+
-         S8qjdTGYqWbaf5D0tCC1p3mkWOkcB93vR7yeIAT7i6ZcOFM4ueI6vi0Rh0Ae0nJtwIa5
-         A4TS+8szsK7B/cpbDD51BSM74cU9GOF3sK8ADslbyce8fEA04YHKix90gmDbhYBMiO4V
-         5Hrg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1787654263; x=1788259063; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=4t3V1apk/Mgs53kB/C548zWS3Sp3PgbLwPMr1IWQZ1w=;
-        b=FESmHSVj02FL8l5g2zMHhS0sPSVXWJz3v164XaNTbqBslg/Su6q1nkOJHz9nmtFVBF
-         A6SSb2zo0DpBJ5KhuhhKRDeuzXtuYmVXzupYatMXSqaJW8QaOsH+UcHo23Uq6X8P/QV7
-         VNtEKVAlDHib41Rd7R4fpidbK37sj6WH11IcbhGFfJHfPhkNVdUt1jYR/2P+bSWgOAO4
-         epHMCSajdT09CabtW5qiL8VqwNRS+badhoEFY1FOVDQJ9ZpBP3dYXcsaTQdvH9uzlFNJ
-         axmnEAr5+596pt0Xdvk4cC39yXXt8D9ukrLProHStj02EMYACWNxkVDDWL+J0pjlrdti
-         qHIw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787654263; x=1788259063;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=4t3V1apk/Mgs53kB/C548zWS3Sp3PgbLwPMr1IWQZ1w=;
-        b=dsiBEnaTN1eExQpo2ePBVdqQZDkF2spEVwAfQpo45xLX0lyOBuXEnbz/ePmyIRw1Mp
-         wD1l9xbP+nX1erZ1Den6diCMba1n3TaHMyLG9YQwri/Loo7ceoe2fWkP9viKlv4Dm49I
-         Qn+FV1Ae7eHKGE7gzoAMhKwCeD1X9f0MaIIx/9aQIPY3iPlngpsvnUmZ/cHdeJ33Jw2j
-         U4dk11aN91h8ZOCljLX2mOkb4VxjDwiwZ1SQjMho4kiXDwwiYF+Gl0MyTMhHOQEUrZjc
-         GR/dw5w+PLrtSEH1vG3JIkkmTctF+VQeKAGRJ6PTRZrP5h94Wi1/wEcIn6Ga29sipdyW
-         zxEw==
-X-Gm-Message-State: AFuF++l1gi9XV/FeQOv3RbZM7JmUw+8s+z3wjWZRQaHgiZcBB/OcuM/e
-	S7Pqmct2hcoRKqn/Dy826viHO/x/qdVdY/90h+tqHsIRRo41HfUoOa7PNGQYkUi9c++56bz8PMf
-	vAc7jSwul/KeRRMw22D17IiLRRzknC9X8ZK0W3MoAqQ6aPd4re0psPp0=
-X-Gm-Gg: AR+sD13+TPGfdyZA+PB1Nxbagm2V8jnlsnvql8n3qrbcnoU0fqCAY9CqjAAg9k8xRZP
-	yEELwyaqqZovAJ17ouh8q95H/7K4OFu5WVti2JJ+73nypI9E+bo0uxw4EXMpYXFEK+FQX6tvXYu
-	Yi70uuu2Qo/bnvwF4GgJGNagcHOXt87jJrAPcGiGgzvIjIjfDWvadSFQS5z5BsA+QQCsoH/c26Y
-	vd2iiOiAi1AKxlCy44+sADyGLz59snuR80meo7tAQRsHx93J+SHxMtfawgv6Agg+33x+6O8SvLX
-	wQCw9/TVfQal59t0ShQwkvzXzSG+Pt+aMEhZT82HEhsjKQ==
-X-Received: by 2002:a17:907:94d0:b0:c24:8a09:8195 with SMTP id
- a640c23a62f3a-c249238cd91mr2542620366b.3.1787654263123; Tue, 25 Aug 2026
- 03:37:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HZBq/7n1"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id A8E93C2BCFD;
+	Tue, 25 Aug 2026 12:10:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1787659839;
+	bh=Eb1YwI3OfYkiSl8Z3/q+YavrTX8EnjCviQgwlr2Ksrc=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=HZBq/7n19Hy7UhiV0qxsUlwbA+PiqHuYVuk0LArWtCKxhdvw1Djz7W9EibAv8vfTi
+	 UU1qjDSLKrvbpdYThMXx2j4hLk3Ik8ZqSHN8p25/UD9H79jloisiUFLnnFEvargm0l
+	 WqXk1x8hieVHcySYSQJJHAjW5eD92CKLTRyPvBs961nPi9jNSRRUrwZe9DUGSQsrmy
+	 GY1uiFCdYwMDFSgfi+WbBy/K8HBcKgiqlumooh4XrIln8XZTAgYaTDvExpSAUzkhdQ
+	 z5PmRQdMj+XEHFh4tkbW64Bg88Pmjm9zWICytjSX5pX5DS5ncQktm8x+dMkPC251Yo
+	 7KXPibFmKa0Cw==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B0A2C61DBD;
+	Tue, 25 Aug 2026 12:10:39 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Tue, 25 Aug 2026 05:10:36 -0700
+Subject: [PATCH v5 1/2] ceph: wake up i_cap_wq waiters on inode shutdown
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260820-lazyio-v4-1-601bee1ea2c8@clyso.com> <20260824064834.2509055-1-amarkuze@redhat.com>
-In-Reply-To: <20260824064834.2509055-1-amarkuze@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260825-lazyio-v5-1-65118679d6fa@clyso.com>
+References: <20260825-lazyio-v5-0-65118679d6fa@clyso.com>
+In-Reply-To: <20260825-lazyio-v5-0-65118679d6fa@clyso.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1787659836; l=1160;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=5L33KzxZPdVe8iS4lK2FsZ8bqIX6JVsV5w57Ob26vEk=;
+ b=6gnqzjqPzYrhq3KVzKRQI/pnSfTdwLVRNlOjLqmd8j/W9un0cSsD8mPSAfqZ81ajfJY5v7xkR
+ itQ2BpdZktvDGPyLVevk0vM0Xmw4XBKGtKz1tS3IE4fNQTmMrVYzwM2
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
+
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Tue, 25 Aug 2026 03:37:30 -0700
-X-Gm-Features: AcwNN1Vwm4Dl8chtycdT4EWqTRd6KNh3Qf7F28j2C-NvH-pyOWrWaPW9j3fBlPU
-Message-ID: <CAOJNxRJzAb=oHFMRsiO9fiXzcX3XcJVMDH+yj=j9j+fCxVPSJQ@mail.gmail.com>
-Subject: Re: [v4] ceph: add 'lazyio' mount option to kclient
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Hi Alex,
+ceph_inode_shutdown() purges every cap on the inode but never wakes
+i_cap_wq, unlike remove_session_caps_cb() which does so after the same
+kind of purge.  Anyone blocked in ceph_get_caps() is waiting on that
+queue for caps that are now gone for good, so the wait only ends when
+the task is killed.
 
-Thanks for the detailed review and for pointing out these issues. You
-are right, those are good catches.
+Wake the queue after purging so the waiters get a chance to notice the
+shutdown and bail out.
 
-This also fixes the read performance issue I hit before.
+Link: https://tracker.ceph.com/issues/77594
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+ fs/ceph/inode.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-Patches are ready and will respin as v5.
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 22c7da1ea61c..888df696397a 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -3250,6 +3250,13 @@ void ceph_inode_shutdown(struct inode *inode)
+ 	}
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
++	/*
++	 * The caps are gone now, so wake up anyone waiting for them -- they
++	 * are never coming back and the waiters need to notice the shutdown
++	 * instead.  remove_session_caps_cb() does the same after purging.
++	 */
++	wake_up_all(&ci->i_cap_wq);
++
+ 	if (invalidate)
+ 		ceph_queue_invalidate(inode);
+ 	while (iputs--)
 
-Thanks
-- Xiubo
+-- 
+2.53.0
 
-On Sun, 23 Aug 2026 at 23:48, Alex Markuze <amarkuze@redhat.com> wrote:
->
-> Hi Xiubo,
->
-> Thanks for the update and the extra testing.
->
-> NACK for now =E2=80=94 please send a v5 for:
->
->   1. fs/ceph/caps.c:2354: FLUSH can ACK a LAZYIO revoke while pages are s=
-till cached
->      Xiubo, `ceph_adjust_caps_used_for_lazyio()` is applied in
->      `ceph_check_caps()` and `handle_cap_grant()`, but `__prep_cap()`
->      still does `cap->implemented &=3D cap->issued | used` with the raw
->      used set. `try_flush_caps()` and `__kick_flushing_caps()` pass
->      `__ceph_caps_used()` straight in, so used is CACHE/BUFFER from
->      `nrpages` / `i_wrbuffer_ref`, not LAZYIO. Once LAZYIO is gone from
->      `issued`, that drops it from `implemented` and the FLUSH/reconnect
->      message is an implicit revoke ACK. `ceph_fsync()` hits this easily:
->      `file_write_and_wait_range()` leaves clean cached pages, then
->      `try_flush_caps()` runs. After that ACK the MDS can hand CACHE to
->      another client while we still have the old pages. That is the hole
->      the v4 `implemented` comment is trying to close, and it still
->      exists on the FLUSH path.
->      Suggested fix: Run `used` through
->      `ceph_adjust_caps_used_for_lazyio()` in `try_flush_caps()` and
->      `__kick_flushing_caps()`, or once inside `__prep_cap()`. While
->      `implemented` still has LAZYIO and CACHE/BUFFER are not issued,
->      report LAZYIO as used so `implemented` keeps it until writeback and
->      invalidation finish.
->   2. fs/ceph/addr.c:1999: Non-lazy mmap can keep using stale page cache a=
-fter a CACHE->LAZYIO transition
->      The new revoke path keeps the inode page cache when CACHE is
->      dropped but LAZYIO remains, and the used-cap rewrite then lets that
->      revoke be ACKed. That is only safe if every opener is lazy. After
->      `remount,lazyio`, `CEPH_IOC_LAZYIO` on one fd, or any mix of old
->      non-lazy and new lazy opens, a non-lazy mapping still faults
->      through `ceph_filemap_fault()` with `want =3D CACHE`, gets only RD,
->      then calls `filemap_fault()` anyway because
->      `!ceph_has_inline_data()`. Those retained pages were kept solely
->      for the lazy fd, so the non-lazy mmap can observe stale data.
->      `try_get_cap_refs()` correctly refuses to satisfy a non-lazy
->      CACHE/BUFFER want with LAZYIO for `read_iter`/`write_iter`; mmap
->      never got that gate.
->      Suggested fix: Only let LAZYIO cover retained page cache when every
->      opener on the inode is lazy, or skip/invalidate page-cache faults
->      for non-lazy fds once CACHE has been revoked.
->   3. fs/ceph/addr.c:2149: ceph_page_mkwrite() can sleep until killed if c=
-aps are gone
->      The new lazy-fd path drops its refs and waits in
->      `wait_event_killable(ci->i_cap_wq,
->      ceph_have_dirtyable_caps(inode))` when it got WR but neither BUFFER
->      nor LAZYIO. Session reset wakes `i_cap_wq` via cap purge, but
->      `ceph_have_dirtyable_caps()` stays false once the caps are gone, so
->      the waiter goes back to sleep. `ceph_inode_shutdown()` does not
->      make the condition true and does not wake the queue.
->      `try_get_cap_refs()` already fails with `-ESTALE` on shutdown; this
->      wait sits outside that path, so a writable fault in that window
->      wedges until SIGKILL.
->      Suggested fix: Include shutdown/session-loss in the wait condition,
->      and fail the fault once the inode can no longer regain BUFFER or
->      LAZYIO.
->
-> FLUSH/reconnect still ACKs a LAZYIO revoke while pages remain; non-lazy m=
-map and mkwrite shutdown wait also need fixes.
->
->
-> --
-> Alex Markuze
->
+
