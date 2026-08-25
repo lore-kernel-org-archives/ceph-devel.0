@@ -1,149 +1,135 @@
-Received: from flow-a7-smtp.messagingengine.com (flow-a7-smtp.messagingengine.com [103.168.172.142])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE50E2D9792;
-	Tue, 25 Aug 2026 04:09:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.142
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71AB03EFFC5
+	for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 09:23:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787631002; cv=none; b=luAgRr60uFsylVAHUbdQVNr+IemAa20Fn70ioSbFSwryI7uirD8bj621KJt8h9+iUpPqCUDhFV5ggJ1uVFrqudBTxpNjaG4LTn+bECAlvTG3O6FH7xaUFdtb3nicC6YDUY3VdvJIvxgYtHDtv/mVAMozSK1eh+LyjDUs7SOrPz8=
+	t=1787649814; cv=none; b=BksvUHqmUm0Fdcy/FYzragte7RlelRK1vkqU0vNUany6zcdcxAUOroGkOfXQUMMaM79oEmn8zMNx4ME+pamGBDRmpKo0EVwLWsO9qBrU7hME4OzM+xazVBvR82FnB5JUdtM5MyZuIgUQDo4C1rISpKWd+Lod17IlWSC40XyWNoE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787631002; c=relaxed/simple;
-	bh=GCKOeqvQQ4h3sLsNo4562hEc6cyczIzgczQh3GCPpv8=;
-	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
-	 References:Date:Message-id; b=fhix13fpzYgnPmYKeAxe0DvC+JRVZPgu05v2VSniVMKdQCLbWd0sla8JNCT5wc+yCfviO7r0srkrBillDOzu7vnEUTj0Npg+nk4UYP5ILA0cVxjvbouyHKKdZrvml//kUgtzYNp4rTxpjOR7AXbH6jyOnF+DF6ib2xzUlo2oRuo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=VmOJZsvu; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=EEYEIXQU; arc=none smtp.client-ip=103.168.172.142
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
+	s=arc-20240116; t=1787649814; c=relaxed/simple;
+	bh=2vCa4OWaCxs+EPAwn3Fk12/TtCk2qFnRbN4NZBCJLqo=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=ZWAiB6dX5en/sLr5gqMVuHnuz90iuo1ynlEJOEtFQ4cosjE8DjF6GmebISDckiqQFA5IE2B5xvER5qZS48KLOjeuKlwQjrSOmblcDQUn38njzZFhrFTlIHy1lBdZweIWw6DAmM8fkHZ6rkNH5AtMT5AKXcViT67SM1J4q2oY4MI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fSY/4XV+; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=JAdtJP12; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="VmOJZsvu";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="EEYEIXQU"
-Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
-	by mailflow.phl.internal (Postfix) with ESMTP id CB70A1380104;
-	Tue, 25 Aug 2026 00:09:58 -0400 (EDT)
-Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-02.internal (MEProxy); Tue, 25 Aug 2026 00:09:58 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to; s=fm3; t=
-	1787630998; x=1787638198; bh=gfzmhiIcB0bekT0CYQojOTQWt5VjQ1DlVCR
-	0Y2kGVR8=; b=VmOJZsvuLMPuT4/XbFzo+7qH8JmIsulFBHvMYvEEAdqZamZAJe0
-	pkSs2rOgyyZsJx/ggcxsQ+m+M8aZ1sloSs8QoLmn1UFg786DgXbv13TpqamsBkDo
-	B29/XjMlqPloGpnIW31haAbfzfcl1/IpAH+joT0c/votgdQPMEfyl0bTOnD1rOLB
-	slUvWgjpCcOQ1dqVlO0cbpoZ2cN8UUfR9iMKNY1M/RU0OkjpAa9fdieoJpBWsugJ
-	cDbs1HJaX6P9PbxL+XG0P6mQ9cqpYC+m9MhkELIl86/9KnkbH2y/JXxKJygmrYs8
-	GSIdVhjxGdiUMnZSZqYiPg2htZAkN2OKMvQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1787630998; x=
-	1787638198; bh=gfzmhiIcB0bekT0CYQojOTQWt5VjQ1DlVCR0Y2kGVR8=; b=E
-	EYEIXQUW2w+IvyjYge8X3DaNB6r0vHv607haJuOez0M4icKrjYT/amTGoqj99PtF
-	n+uK0UCXU50HbHy5oHtqzlJ3TEZCheLxT/aeeVpMW3roYIEku7K6Kznd0vamrz1a
-	ctfjWJC9446Wste/Drgr47i289kvHEMiVa/sFUT9F3MeZwBpXiH0Iq7qIptmbKOa
-	UhVWEV5PLJSbSrpaMUPcZe1/j3+RcsWBKaXlkRnpBtyFQjiRSvtHAqHd9fLTUGxB
-	yxqc8miu+dSasSTCjiqyQ1DT4cgJcs4c0VFeyY8F9b7oyFqRWBIkM4dWl8ZhgnfN
-	gcfoeQUrIQ8bfVrK0VlpQ==
-X-ME-Sender: <xms:lhWNamVF71uR9GJ31G4ZO444p7EgsO1dj34ek-tF-WJF6J79P7kHSw>
-    <xme:lhWNaqycHXt0IAot3O1HBfnlTNd1khShIudtVSEU_c0DeUnS19_VWd6HVRJaGjvo-
-    A2YjabCXuE0B6uFeWi7EFfxP70fG_zSrE2cmydkHtPzl-HyjA>
-X-ME-Received: <xmr:lhWNahtPN5xHk7o7l7R9sLNp-myD4YRQdS_zVXIe4AiabzHsxUVaYVa86HXnfzmiDrBvQvwQVIoKSUBReCAhwgc4Mjm9Ix4>
-X-ME-Proxy-Cause: dmFkZTFb1V9n/Rau2wZjVEeTtHtAjpRLi3Fx7aQyWsyGbHDDpCn5SpctxOLQF1z4Pp6DFa
-    9u5RfEtGY5ExorOrZ2p6AhLPnE7vhM6Wukm+9E/99g9uWhllVzhra78LAV00rcmHXm9CtX
-    sxRThI/CZ7x+k68gPOCgj85/kxGrOXdHKYxGvExhQ+HqpYpim4/DKKQ1VSLuVUGjv+gfFo
-    rcS5ckepksDSIEfOeE2ooDJs4ZksKbVdt0C1d+A5VNZ9Sf0Y9+lAjSsMgyvT1Zhn8vfSTG
-    CrJ7vggwcZjX/4RRVpVYry9/jh3xS9sWT4haWu3+KA2caFajuAOdVITGx0rQWEGbJyIvt6
-    lUmpuZ7Mjjacvy/4gBvxOgsGlI/U5TA778viJUJljUFLcsPJbkTyaBN306CJ1Nut17fdek
-    yoJuvCcWls1Cq9rHbCBQwXKDMxX2R9fUM1jFqWhMjSnTDtTFp6aeqY+lPdLddoh/g5VlpO
-    Tdi72QDIJXlHlpMnc4gzw/MyvbSCFfiC06wLu/qOl8VVA63AGetsUjfPIJRXR5xkwCXaB5
-    8P9ZKEe9ZC5jOcTrlBa4UIXfzS6Dm/W7EGh/UglMBU/3B/KbcHgwl7DILluhJYmiXxXvUW
-    UQ41DKOiUMmF10GuO5ZVQNFgjbHlxjVdIctb3PJx4+ukParWxM+J+OOBLDTg
-X-ME-Proxy: <xmx:lhWNarAWdNtupeRSPBtBuRi1dyk1lF-oTizL-iOjgaQJFtQOnJvT5g>
-    <xmx:lhWNatr3sZ9SNydp2YV53_-YiA3GsLC8mS62XQgHT1Poyaxzz_cNzA>
-    <xmx:lhWNaiawtpRyFqo2DkEmYFoc0IO2MuEFMrV0gJEjTxqbjPhGqL6lVw>
-    <xmx:lhWNanG_b16RRRA4l-9dbuhINdCwX8ze2MCPJ_0ayf1X6Kku5bX0gA>
-    <xmx:lhWNasNK21d0YsdN7RsTP5tPEqFHidkbfkKWJ9DUzicAw2-Cy_4CAMcx>
-Feedback-ID: i9d664b8f:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 25 Aug 2026 00:09:52 -0400 (EDT)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fSY/4XV+";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="JAdtJP12"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1787649810;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=RK0+xnt7HSnjTdxTCQe8vmw6hrFSmhIbspuPg3DKPMc=;
+	b=fSY/4XV+zzNCVtTusEnCy4niWSPhop2fEr777h6560cwe7I/3x0XpjT43xqXIW01zCxTwJ
+	VYRGzL2/fU5snMgTmZIJfStTyvnxiEYtL1DGm5MuUWhHpQ3ujNSf+8WgQAJ/XzhnTtE7OZ
+	0k1FQXySDw9q3op1kfWBx2QKUYs3x8U=
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
+ [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-122-sYt35L4NORSYhrgz3MoiMA-1; Tue, 25 Aug 2026 05:23:29 -0400
+X-MC-Unique: sYt35L4NORSYhrgz3MoiMA-1
+X-Mimecast-MFC-AGG-ID: sYt35L4NORSYhrgz3MoiMA_1787649808
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c15dfd34e4cso296555566b.0
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 02:23:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1787649808; x=1788254608; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:message-id:date
+         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=RK0+xnt7HSnjTdxTCQe8vmw6hrFSmhIbspuPg3DKPMc=;
+        b=JAdtJP12vrPDXseQOFHUlS8b2Fixty79cyYdWCRMjYTo8qT6LyRNUdGt8Cf3yvnkMt
+         BbPswJHcQqkz2rj5R7tIFJdxjQun3whNRd0XkG/ofgXb7hBjGCqHMauHX7LIpAhptMAA
+         4FaEk1jubo1Dxu++kfYNIGfw9MfylkgEVennnOaRVKuJTmHOnGJw2wzUWdhJSeGMfiwH
+         jFZL9SwKjz5DKCSiCOfZdB/o+4LO3nQ6jTCGR1uMK6foXU7WJl53TWGAAhfQ2UB8fyXl
+         V4qVsvLP9jGI4p1tkPeLcTkbbKIluAeirPtb4xQqwBwasKaVFIecQDberxbWZHMWqYl9
+         6MfQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787649808; x=1788254608;
+        h=content-transfer-encoding:content-type:mime-version:message-id:date
+         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=RK0+xnt7HSnjTdxTCQe8vmw6hrFSmhIbspuPg3DKPMc=;
+        b=kXgics1PydtyvK1D13l/6j8Gdr6j6HpINHvvjiT2rvzwHBAuz8BhjJgoqki8xxw+N6
+         dJ4NeK95NGHQ2DovuyJBcwBirxCRIwUn2dhYGzbRUbyBf6dJmEQ58JAYLuisKRHdqoOE
+         i9DPi5kiLKbPFabout+QDJP/MZ0LOuIUBLzbheMTezkPLuDe6mN6R86EP5xG7Eu9wK32
+         VZWil93LUFTgiPzUAczXmmyuaJvjjekaeC8MUXEUTRxj8gJlfxiDhLZuoXnTGddSTi6d
+         kOZ9qSI9VFPCsxMc+r0MGVu+7emtF94f3bW6tRjmXWUDji6qO5dmimMfAAMstB2Vs7Ag
+         IkGA==
+X-Forwarded-Encrypted: i=1; AHgh+RqBbVzsmXXL3kEF04jUaoFgof7z2hifcYg73oLKy9sudR+qwv7qnS0Li32NwcVun1Ji8kZLq7sg0wQA@vger.kernel.org
+X-Gm-Message-State: AFuF++kWDt1hVvcZXRt/rXb5btEJv3uu6mU5RXjceXYsDq1myK0XT81R
+	L7066PGLqfZCe1cvkhpDNpueO17J1Dcj/qcV96h+WKiFgL3U9L6lg6ox3VTanf4/VFRBh8/Hae8
+	DMZKxi7ilrD0V7gCXfF6Y1WGRHo+QCkEwGADwwrzKD7eViS1YHqSnE2NzJ8CKn4g=
+X-Gm-Gg: AR+sD13dPt9RsLosr7AkHRKtM1ZZ3S+EPZDtR2QTMuO4qNRK/+VEx0fBgaOxfdIaFLK
+	S5J4I4QqiCJs3H3MCMUwsm9PNpnRYb14GrrEjR1T5er31TFn/VS9BXD2WPvXfVXFxIc62/ogtUU
+	HIZpN3V54VUQXnErFNHzgnhNOIwOFQ9tSOiHHURE4r/LpujZTi7RiFOSq73haKxDbhBfCKEJmpD
+	J4ZIqsJm2lFTZI0S7NVf5LHq2jjsHkCbG2LVOuSXPU6aWjWIff6d91tho+V2J5ukFQCIYLQPLT9
+	TCwnxzj+GrLwb2c6A34UoG+tiuuzr+2GbuxPfIOELXh6J2TfLfUyUmytR56JTsRg3EMMq1akI5K
+	8/x3n0Ptqf73GoiSXbZuUqPIzECcIsGvRUQ==
+X-Received: by 2002:a17:907:3d4e:b0:c20:1bc5:7002 with SMTP id a640c23a62f3a-c246a4ad6abmr3801348166b.3.1787649807882;
+        Tue, 25 Aug 2026 02:23:27 -0700 (PDT)
+X-Received: by 2002:a17:907:3d4e:b0:c20:1bc5:7002 with SMTP id a640c23a62f3a-c246a4ad6abmr3801340566b.3.1787649807413;
+        Tue, 25 Aug 2026 02:23:27 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c2496738e8bsm1619137166b.44.2026.08.25.02.23.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Aug 2026 02:23:26 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: =?UTF-8?q?J=C3=A9r=C3=A9my=20Jean?= <Jeremy.Jean@oss.cyber.gouv.fr>
+Cc: Ilya Dryomov <idryomov@gmail.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	ceph-devel@vger.kernel.org,
+	stable@vger.kernel.org
+Subject: [PATCH] fs/ceph: reject export_targets ranks >= CEPH_MAX_MDS in mdsmap decode
+Date: Tue, 25 Aug 2026 09:23:25 +0000
+Message-Id: <20260825092325.2605644-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: NeilBrown <neilb@ownmail.net>
-To: "Chuck Lever" <cel@kernel.org>
-Cc: "Ian Kent" <raven@themaw.net>, "Jake Edge" <jake@lwn.net>,
- "Ilya Dryomov" <idryomov@gmail.com>, "Alex Markuze" <amarkuze@redhat.com>,
- "Viacheslav Dubeyko" <slava@dubeyko.com>, "Jan Harkes" <jaharkes@cs.cmu.edu>,
- coda@cs.cmu.edu, "Alexander Viro" <viro@zeniv.linux.org.uk>,
- "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
- "Trond Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
- "Amir Goldstein" <amir73il@gmail.com>,
- "Andrew Morton" <akpm@linux-foundation.org>,
- "Miklos Szeredi" <mszeredi@redhat.com>, autofs@vger.kernel.org,
- linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org,
- codalist@coda.cs.cmu.edu, linux-fsdevel@vger.kernel.org,
- linux-nfs@vger.kernel.org
-Subject: Re: [PATCH v2 04/18] nfs: separate locked regions in
- nfs_clear_verifier_directory()
-In-reply-to: <f9d16f36-10e6-4bec-aa8e-b9b3cb3ad872@app.fastmail.com>
-References: <20260815042707.2535717-1-neilb@ownmail.net>
-  <20260815042707.2535717-5-neilb@ownmail.net>
-  <f9d16f36-10e6-4bec-aa8e-b9b3cb3ad872@app.fastmail.com>
-Date: Tue, 25 Aug 2026 14:09:48 +1000
-Message-id: <178763098869.3510150.7453977572617670907@noble.neil.brown.name>
-Reply-To: NeilBrown <neil@brown.name>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Tue, 25 Aug 2026, Chuck Lever wrote:
-> On Sat, Aug 15, 2026, at 2:21 PM, NeilBrown wrote:
-> > nfs_clear_verifier_directory() locks the dir to call
-> >   nfs_unset_verifier_delegated()
-> > and also to walk the d_children list.
-> > These are two separate needs and they don't need to both
-> > be in the same locked region.
-> >
-> > Subsequent patches will use a helper for walking the d_children list and
-> > that helper may drop the lock temporarily.  To simplify this transition,
-> > split the locked range by dropping and retaking the lock between to make
-> > two separate locked regions.
-> 
-> I hit this running xfstests against tmpfs with the series applied.  The
-> trigger was incidental (an unrelated process chmod'ed a file on an
-> NFSv4 mount while xfstests was running) so it is not deterministic, but
-> the path looks reachable by any SETATTR that returns a delegation on a
-> directory:
-> 
->   BUG: sleeping function called from invalid context at fs/nfs/dir.c:1497
->   in_atomic(): 1, irqs_disabled(): 0, non_block: 0, pid: 2385380
->   preempt_count: 1, expected: 0
->   Call Trace:
->    __might_resched+0x165/0x180
->    nfs_clear_verifier_delegated+0x112/0x250 [nfs]
->    nfs_start_delegation_return+0xa1/0x130 [nfsv4]
->    nfs4_inode_return_delegation+0x1b/0xf0 [nfsv4]
->    nfs4_inode_make_writeable+0xa9/0x130 [nfsv4]
->    nfs4_proc_setattr+0xa2/0xf0 [nfsv4]
->    nfs_setattr+0x1f2/0x480 [nfs]
->    notify_change+0x321/0x380
->    chmod_common+0x10d/0x1c0
->    do_fchmodat+0x8a/0x110
->    __x64_sys_chmod+0x1d/0x30
-> 
-> Line 1497 is the d_for_each_positive_child() call.
+This patch was sent to me privately. Thanks Jeremy. Posting it to the list.
 
-Thanks for testing!
+From: Jérémy Jean <Jeremy.Jean@oss.cyber.gouv.fr>
 
-nfs_clear_verifier_deleted() holds the inode i_lock across
-nfs_clear_verifier_directory() which walks the the d_children list.
-I'll need to use d_find_alias() to get the dentry like I did in the
-notify code.
-Hopefully I'll send another RFC tomorrow.
+MDSMap export_targets entries are monitor controlled. check_new_map() uses
+each entry as a bit number in a fixed stack bitmap, so a rank outside the
+protocol namespace can make set_bit() write past the end of the array.
 
-Thanks,
-NeilBrown
+Reject ranks outside CEPH_MAX_MDS while decoding the map. Do not validate
+against possible_max_rank here because maps may legitimately reference ranks
+beyond a temporarily reduced max_mds.
+
+Fixes: d517b3983dd3 ("ceph: reconnect to the export targets on new mdsmaps")
+Cc: stable@vger.kernel.org
+Reviewed-by: Alex Markuze <amarkuze@redhat.com>
+Signed-off-by: Jérémy Jean <Jeremy.Jean@oss.cyber.gouv.fr>
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+ fs/ceph/mdsmap.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
+index 4f0626753429..53079ef34c3a 100644
+--- a/fs/ceph/mdsmap.c
++++ b/fs/ceph/mdsmap.c
+@@ -269,6 +269,10 @@ struct ceph_mdsmap *ceph_mdsmap_decode(struct ceph_mds_client *mdsc, void **p,
+ 				goto nomem;
+ 			for (j = 0; j < num_export_targets; j++) {
+ 				target = ceph_decode_32(&pexport_targets);
++				if (target >= CEPH_MAX_MDS) {
++					err = -EIO;
++					goto corrupt;
++				}
+ 				info->export_targets[j] = target;
+ 			}
+ 		} else {
+-- 
+2.34.1
+
