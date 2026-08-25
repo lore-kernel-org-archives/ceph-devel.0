@@ -1,139 +1,176 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 989D93F0767
-	for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 09:29:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787650189; cv=none; b=DRekn6SCizYYUrY6h0uF0DbQLI2oOE5G+Luvoc3l1ginVlWdslOdY+hsEgWTSoV79MuDpsIjopcyg/WRvZ+WKmp9OSlOuAqtZx9wpWMX26kVIOZf7/JGxxYvuE0Szqh2y+WpwHWkMy1hgHC2TNNS2G6W+hqyaxmQPge7a7OxYDo=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787650189; c=relaxed/simple;
-	bh=hb9INDHGhUPT/WoB0U9k2zL8xFQlPxW/TAPBgVzi9a4=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=ot9kfMwW4f738VNl4BhPZwBKyWRO6cFBdc7sh06Yp84aADDoZMG0z/Ni6pwy9Kh733VjdpA53U+P/nDNb78qxRiOrPfsl0xfnQfVIg7rgtOKLfnVPA6bFgXRnMQom8txyasiEMQlPyV8AEtYcqZCprmUguz/O3rMNHbWFXbM0ps=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JsnWsHE+; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=A551CWFe; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CAA139448F
+	for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 10:37:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.45
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787654269; cv=pass; b=BIsf5sOpyuPw+2Wr0ddgjhr7mgf0svhZWphMGmaGjD9Ds14bqCMKAFS0pHCD97HUL2uLLxjH+u+DQZ1X+gXuyEQ93x0LEgCLSPoeh3MQYng+ZrsGlHl29c+yaxGRM8MzONbsXYtR90qzh2uuBE0sjqs5JTPe0WWJD5hUodQ+RNQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787654269; c=relaxed/simple;
+	bh=/VyfSd4LJb1EwLCokMYjjdGYOYyFyVprn/518uoDAtI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=DD+1c1VfKxvyaC99iw4X+unvQlOn7UZzAIit1SW2LEqP3YCS4BZImo8xelsgpufRBvDBDpcww8HD1ooLyuWIsJZEiDFoxQ7wnGeXrp6PkL51w+t6qhzXaeeX19BAJA3DYKOcv6oJij11JOe+CBKDZRlU8FRpYLxb2JOrYHsPaQc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=FESmHSVj; arc=pass smtp.client-ip=209.85.218.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JsnWsHE+";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="A551CWFe"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787650186;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=Tg41b16JGPoqpM3yPOQvId0jCuSStoTlxNu1GbBo8cw=;
-	b=JsnWsHE+c2NnuQyAKBfC1zRX4mrTn07FusJ/3obOfpAYxksnsdHDPYjpiUGBFzi2fzwQJq
-	vj8IOdKyoRawrefIpjfesOkwMBV9nVOwZjoYJia9kjTZUMNU8r0fZk2PCxnw/Us+jMjovw
-	iHFZ8kcYedZjyGWYeIazvroGdHd39CI=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-628-yRDFG5bIOVyu3D3JFiYyUg-1; Tue, 25 Aug 2026 05:29:45 -0400
-X-MC-Unique: yRDFG5bIOVyu3D3JFiYyUg-1
-X-Mimecast-MFC-AGG-ID: yRDFG5bIOVyu3D3JFiYyUg_1787650184
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-38e5a616d07so5897620a91.2
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 02:29:44 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="FESmHSVj"
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c15d3cd51b2so698584066b.3
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 03:37:44 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787654263; cv=none;
+        d=google.com; s=arc-20260327;
+        b=YWlOxNpwfdecRRlyfm2UD5sl00awIP1MUzlQzdHhp0YGkf1tAnSXIAmd76uEgC4Hw6
+         wyIm7tXKAbJoBpzxTR2DSBtbAxAB28jPEMR5VmZpE09Pbn7xw/nk+deaE8u18j9LwODB
+         42SXZf6xPNtrt3kYnx9jve9nhxyiu3W0qwQo9R1I+lAQ48yfjmMszYtP1La3K6Ni0Pdv
+         Yw/yha0KoZnPRGMT7efh8HzC3HVJcWMH41WbGjZ0KIa/mXRTfx3A+bm4FVWQArkOOOFq
+         JYSesceE59trpzKH5nKuUQmY0glZuh2O+sXbWg4jz7cN9qb6Ly8Nm/VHm+Y3dI9pQOde
+         8k/A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=4t3V1apk/Mgs53kB/C548zWS3Sp3PgbLwPMr1IWQZ1w=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=XbopzYk+q7oUn3l85ZHOjtVgOk3wBG+BIeTTgyC13vA/7LWXzwMmq9g61n+3Xb9wpk
+         ltpT3FrCGXY/ms+SVZZwLXg+fv8HS6AjMoJwF/4UybSqpUmNi/BhgIPy3+ojf5+1TJ9j
+         e6aIv+XRW/V6/q8BUJzhwvZD8gNKXCplH1iC/xqrChHzBZrEMCBwEcuf6Vbxlh5HXbu+
+         S8qjdTGYqWbaf5D0tCC1p3mkWOkcB93vR7yeIAT7i6ZcOFM4ueI6vi0Rh0Ae0nJtwIa5
+         A4TS+8szsK7B/cpbDD51BSM74cU9GOF3sK8ADslbyce8fEA04YHKix90gmDbhYBMiO4V
+         5Hrg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1787650184; x=1788254984; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:mime-version:message-id:date
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Tg41b16JGPoqpM3yPOQvId0jCuSStoTlxNu1GbBo8cw=;
-        b=A551CWFeLOnB+y2gRoeXffMYyKxULvicfEb/fsZC0uw85mdDTX1drOcKFblX/wUCS+
-         QINFQWztJU8HXr77ee7tIl1uXkSyVL7HUwM/IoyyAp+bNTzSEXBN7dfHN4RseRxWg4SW
-         RN3x2jfcK0CQjd407yshsNCcbXyBT87Jpekic1SiPUs0/Cq93ToNduLWpEiVYL0tG9Ck
-         0d51wBlx4NZgCYhKPUSAH1Y1bBkxAuOQ9u2R6JIRIMucGQdRK0AQ/z7zhGsaIiYVrz3f
-         qagr5gWyHM13l0osMhmOSGy+J+wDwPRXOyQmIOgL0kU4q8nIkY4pb5Pk6RQbi9Oljk5a
-         /Czw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787650184; x=1788254984;
-        h=content-transfer-encoding:content-type:mime-version:message-id:date
-         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
+        d=clyso.com; s=google; t=1787654263; x=1788259063; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=Tg41b16JGPoqpM3yPOQvId0jCuSStoTlxNu1GbBo8cw=;
-        b=r5teqdTmyETW4il3feBauJXF62k7i2NHXZtYfBybed5ivFfSiqCk+eMpR0c2yXjKXn
-         xyGN4KvPoAytRubfs1J2kgV9++JZkQvFPDgBS45oR8nrCrP4mQ6iIgBKgO2UWDxhLCI6
-         1iDv2tgDh+coAixrpo2ae/eZ19a8pBrTCbdw8qjzxUTmkQ2GDTcraVJkGWwrAiSieJ/Y
-         wbpDQpiUB0fJ74dl94PIRC5DL2Hbi9SynwznK4bn2XcST6I042P7ZuCHYxe3+Q7eNSJa
-         04dDMnp+HUSeUHKuu39plhdbK2QLGEy7eMvIYdPxmIvtH01bisiRklcUCGDB0+d3G6Cb
-         cPZg==
-X-Forwarded-Encrypted: i=1; AHgh+RrXOlTBl9xMIRm68CT1+cOmp3TEcpAN60bbQNmaKRfRRP7SuVLMpxArm5PcFulGEEZk+SHc4yPHw3a1@vger.kernel.org
-X-Gm-Message-State: AFuF++mNdCZSjvH4UNc4F6P3EJL5twzFtFhxZeapaHKoJzw0qDaLk+Jz
-	sNysjqH6HM4Vl6PscCrM2hZTeDtCpMq2T4TXmfxVMOqWEXFnxHTVdVaFb11QpGBnr+nGJEwmHCL
-	ycKxvR9l3fH8Cw3uklQN9Aaa0rnbT47plLP4JVk2XD+/w1aVgcDSBAz5Ez0p5F+Kp0rCZer9tmg
-	==
-X-Gm-Gg: AR+sD10JbgMM2ugaZK0irRIaYWIx6pHwWzLFPcAGDkpOXB6S1RisabQ6Q7vUNVMhQdb
-	trxitP4KgH47ISToIq2/GeBH5oL0DP8ETb0ALMqucbaXKdbpLzy3uGo4fCfoUOqQCTETxMedUna
-	RHyduu6M02mI8JGEWikFW/GB3bM3ZHKyOCInKmtWEyBG7aATPxHd7ZF1axcSgCUP9KGOXliwKy0
-	bSNKP6zJSXJ2MGQBLHH52NF4qkTgxqek+4iAz9/0MS8LnmKW6S6AGn9I3z8LCJgsiZZTmYwy47N
-	6pQOwA5lcLmTxoz2zYOi87A21jsCKiazcufoIqBCGZ/lLrGWzHMzEOtHTBp/AMv3I3EJgQ==
-X-Received: by 2002:a17:90b:53c7:b0:38e:5c6:4db9 with SMTP id 98e67ed59e1d1-396464a15f2mr10987938a91.11.1787650183773;
-        Tue, 25 Aug 2026 02:29:43 -0700 (PDT)
-X-Received: by 2002:a17:90b:53c7:b0:38e:5c6:4db9 with SMTP id 98e67ed59e1d1-396464a15f2mr10987851a91.11.1787650183236;
-        Tue, 25 Aug 2026 02:29:43 -0700 (PDT)
-Received: from cluster.. ([13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-327f91d2d1esm36270057eec.17.2026.08.25.02.29.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 25 Aug 2026 02:29:42 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Viacheslav Dubeyko <slava@dubeyko.com>,
-	Tal Zussman <tz2294@columbia.edu>,
-	ceph-devel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: [PATCH] ceph: fix page vector leak on encrypted netfs read EIO path
-Date: Tue, 25 Aug 2026 09:29:34 +0000
-Message-Id: <20260825092934.2605898-1-amarkuze@redhat.com>
-X-Mailer: git-send-email 2.34.1
+        bh=4t3V1apk/Mgs53kB/C548zWS3Sp3PgbLwPMr1IWQZ1w=;
+        b=FESmHSVj02FL8l5g2zMHhS0sPSVXWJz3v164XaNTbqBslg/Su6q1nkOJHz9nmtFVBF
+         A6SSb2zo0DpBJ5KhuhhKRDeuzXtuYmVXzupYatMXSqaJW8QaOsH+UcHo23Uq6X8P/QV7
+         VNtEKVAlDHib41Rd7R4fpidbK37sj6WH11IcbhGFfJHfPhkNVdUt1jYR/2P+bSWgOAO4
+         epHMCSajdT09CabtW5qiL8VqwNRS+badhoEFY1FOVDQJ9ZpBP3dYXcsaTQdvH9uzlFNJ
+         axmnEAr5+596pt0Xdvk4cC39yXXt8D9ukrLProHStj02EMYACWNxkVDDWL+J0pjlrdti
+         qHIw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787654263; x=1788259063;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=4t3V1apk/Mgs53kB/C548zWS3Sp3PgbLwPMr1IWQZ1w=;
+        b=dsiBEnaTN1eExQpo2ePBVdqQZDkF2spEVwAfQpo45xLX0lyOBuXEnbz/ePmyIRw1Mp
+         wD1l9xbP+nX1erZ1Den6diCMba1n3TaHMyLG9YQwri/Loo7ceoe2fWkP9viKlv4Dm49I
+         Qn+FV1Ae7eHKGE7gzoAMhKwCeD1X9f0MaIIx/9aQIPY3iPlngpsvnUmZ/cHdeJ33Jw2j
+         U4dk11aN91h8ZOCljLX2mOkb4VxjDwiwZ1SQjMho4kiXDwwiYF+Gl0MyTMhHOQEUrZjc
+         GR/dw5w+PLrtSEH1vG3JIkkmTctF+VQeKAGRJ6PTRZrP5h94Wi1/wEcIn6Ga29sipdyW
+         zxEw==
+X-Gm-Message-State: AFuF++l1gi9XV/FeQOv3RbZM7JmUw+8s+z3wjWZRQaHgiZcBB/OcuM/e
+	S7Pqmct2hcoRKqn/Dy826viHO/x/qdVdY/90h+tqHsIRRo41HfUoOa7PNGQYkUi9c++56bz8PMf
+	vAc7jSwul/KeRRMw22D17IiLRRzknC9X8ZK0W3MoAqQ6aPd4re0psPp0=
+X-Gm-Gg: AR+sD13+TPGfdyZA+PB1Nxbagm2V8jnlsnvql8n3qrbcnoU0fqCAY9CqjAAg9k8xRZP
+	yEELwyaqqZovAJ17ouh8q95H/7K4OFu5WVti2JJ+73nypI9E+bo0uxw4EXMpYXFEK+FQX6tvXYu
+	Yi70uuu2Qo/bnvwF4GgJGNagcHOXt87jJrAPcGiGgzvIjIjfDWvadSFQS5z5BsA+QQCsoH/c26Y
+	vd2iiOiAi1AKxlCy44+sADyGLz59snuR80meo7tAQRsHx93J+SHxMtfawgv6Agg+33x+6O8SvLX
+	wQCw9/TVfQal59t0ShQwkvzXzSG+Pt+aMEhZT82HEhsjKQ==
+X-Received: by 2002:a17:907:94d0:b0:c24:8a09:8195 with SMTP id
+ a640c23a62f3a-c249238cd91mr2542620366b.3.1787654263123; Tue, 25 Aug 2026
+ 03:37:43 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20260820-lazyio-v4-1-601bee1ea2c8@clyso.com> <20260824064834.2509055-1-amarkuze@redhat.com>
+In-Reply-To: <20260824064834.2509055-1-amarkuze@redhat.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Tue, 25 Aug 2026 03:37:30 -0700
+X-Gm-Features: AcwNN1Vwm4Dl8chtycdT4EWqTRd6KNh3Qf7F28j2C-NvH-pyOWrWaPW9j3fBlPU
+Message-ID: <CAOJNxRJzAb=oHFMRsiO9fiXzcX3XcJVMDH+yj=j9j+fCxVPSJQ@mail.gmail.com>
+Subject: Re: [v4] ceph: add 'lazyio' mount option to kclient
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-ceph_netfs_issue_read() pins pages with iov_iter_get_pages_alloc2() for
-encrypted inodes and attaches them with own_pages=false. If
-ceph_inc_osd_stopping_blocker() then fails, the request is dropped
-without calling finish_netfs_read(), so the page array and the
-references taken on those pages leak: ceph_osd_data_release() only
-frees pages when own_pages is true, and __free_pages() would be the
-wrong destructor for GUP-pinned pages.
+Hi Alex,
 
-Release the vector with put_page() and kvfree() on that error path,
-matching finish_netfs_read(). Unencrypted ITER reads are unaffected.
+Thanks for the detailed review and for pointing out these issues. You
+are right, those are good catches.
 
-Fixes: 1464de9f813e ("ceph: wait for OSD requests' callbacks to finish when unmounting")
-Cc: stable@vger.kernel.org
-Signed-off-by: Alex Markuze <amarkuze@redhat.com>
----
- fs/ceph/addr.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+This also fixes the read performance issue I hit before.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index c05bdf5d7273..8b009e354d30 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -442,6 +442,17 @@ static void ceph_netfs_issue_read(struct netfs_io_subrequest *subreq)
- 		osd_req_op_extent_osd_iter(req, 0, &subreq->io_iter);
- 	}
- 	if (!ceph_inc_osd_stopping_blocker(fsc->mdsc)) {
-+		struct ceph_osd_data *osd_data =
-+			osd_req_op_extent_osd_data(req, 0);
-+
-+		if (osd_data->type == CEPH_OSD_DATA_TYPE_PAGES) {
-+			int num_pages = calc_pages_for(osd_data->alignment,
-+						       osd_data->length);
-+
-+			for (int i = 0; i < num_pages; i++)
-+				put_page(osd_data->pages[i]);
-+			kvfree(osd_data->pages);
-+		}
- 		err = -EIO;
- 		goto out;
- 	}
--- 
-2.34.1
+Patches are ready and will respin as v5.
 
+Thanks
+- Xiubo
+
+On Sun, 23 Aug 2026 at 23:48, Alex Markuze <amarkuze@redhat.com> wrote:
+>
+> Hi Xiubo,
+>
+> Thanks for the update and the extra testing.
+>
+> NACK for now =E2=80=94 please send a v5 for:
+>
+>   1. fs/ceph/caps.c:2354: FLUSH can ACK a LAZYIO revoke while pages are s=
+till cached
+>      Xiubo, `ceph_adjust_caps_used_for_lazyio()` is applied in
+>      `ceph_check_caps()` and `handle_cap_grant()`, but `__prep_cap()`
+>      still does `cap->implemented &=3D cap->issued | used` with the raw
+>      used set. `try_flush_caps()` and `__kick_flushing_caps()` pass
+>      `__ceph_caps_used()` straight in, so used is CACHE/BUFFER from
+>      `nrpages` / `i_wrbuffer_ref`, not LAZYIO. Once LAZYIO is gone from
+>      `issued`, that drops it from `implemented` and the FLUSH/reconnect
+>      message is an implicit revoke ACK. `ceph_fsync()` hits this easily:
+>      `file_write_and_wait_range()` leaves clean cached pages, then
+>      `try_flush_caps()` runs. After that ACK the MDS can hand CACHE to
+>      another client while we still have the old pages. That is the hole
+>      the v4 `implemented` comment is trying to close, and it still
+>      exists on the FLUSH path.
+>      Suggested fix: Run `used` through
+>      `ceph_adjust_caps_used_for_lazyio()` in `try_flush_caps()` and
+>      `__kick_flushing_caps()`, or once inside `__prep_cap()`. While
+>      `implemented` still has LAZYIO and CACHE/BUFFER are not issued,
+>      report LAZYIO as used so `implemented` keeps it until writeback and
+>      invalidation finish.
+>   2. fs/ceph/addr.c:1999: Non-lazy mmap can keep using stale page cache a=
+fter a CACHE->LAZYIO transition
+>      The new revoke path keeps the inode page cache when CACHE is
+>      dropped but LAZYIO remains, and the used-cap rewrite then lets that
+>      revoke be ACKed. That is only safe if every opener is lazy. After
+>      `remount,lazyio`, `CEPH_IOC_LAZYIO` on one fd, or any mix of old
+>      non-lazy and new lazy opens, a non-lazy mapping still faults
+>      through `ceph_filemap_fault()` with `want =3D CACHE`, gets only RD,
+>      then calls `filemap_fault()` anyway because
+>      `!ceph_has_inline_data()`. Those retained pages were kept solely
+>      for the lazy fd, so the non-lazy mmap can observe stale data.
+>      `try_get_cap_refs()` correctly refuses to satisfy a non-lazy
+>      CACHE/BUFFER want with LAZYIO for `read_iter`/`write_iter`; mmap
+>      never got that gate.
+>      Suggested fix: Only let LAZYIO cover retained page cache when every
+>      opener on the inode is lazy, or skip/invalidate page-cache faults
+>      for non-lazy fds once CACHE has been revoked.
+>   3. fs/ceph/addr.c:2149: ceph_page_mkwrite() can sleep until killed if c=
+aps are gone
+>      The new lazy-fd path drops its refs and waits in
+>      `wait_event_killable(ci->i_cap_wq,
+>      ceph_have_dirtyable_caps(inode))` when it got WR but neither BUFFER
+>      nor LAZYIO. Session reset wakes `i_cap_wq` via cap purge, but
+>      `ceph_have_dirtyable_caps()` stays false once the caps are gone, so
+>      the waiter goes back to sleep. `ceph_inode_shutdown()` does not
+>      make the condition true and does not wake the queue.
+>      `try_get_cap_refs()` already fails with `-ESTALE` on shutdown; this
+>      wait sits outside that path, so a writable fault in that window
+>      wedges until SIGKILL.
+>      Suggested fix: Include shutdown/session-loss in the wait condition,
+>      and fail the fault once the inode can no longer regain BUFFER or
+>      LAZYIO.
+>
+> FLUSH/reconnect still ACKs a LAZYIO revoke while pages remain; non-lazy m=
+map and mkwrite shutdown wait also need fixes.
+>
+>
+> --
+> Alex Markuze
+>
