@@ -1,183 +1,105 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0AC240245F;
-	Tue, 25 Aug 2026 12:10:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2844038330A
+	for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 12:17:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787659840; cv=none; b=e2hTQe4WAVI8xo7yPk4YlXWpjRHmQdguNjMXYu1Z0SwnhtLTC/jXr1FNuJ0vU1ncX9S5LMVN0w9DNUDxnulMT5HZJVhtr5DVZ9wUlWzkr3aB19QiZA+jBcRWfeXP6egLV0f5gA3N//arThuz0lRKy8yObWuordg4YarM4Oymud4=
+	t=1787660225; cv=none; b=VtasOf85FjJDURV58B1B/87opkSLdIVC2xwJRGi9zC8c2rO3MM9e5k0EuoMuyzIpByC4BhW0AnlAY6iZi8EuJO3KZjbO1CyzHcupt0J25P1v4g+A9+8reXxbuNEQ16yhV1uemsFuvkdYqa15oMvTWJZccvEf3wk6KBtEb+RVey0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787659840; c=relaxed/simple;
-	bh=6nRgB4Mrchp0McGdCqY4rzE7zCJd5Il6xnZ+SRgHe+8=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=HjAM/nHcQj5Mj6LQv7DswklS/TY/LeC2G8aBOGD+2WRfd0sBzX2P8qihYdt6qB1APf78Cnu6CVDTG78/xfPhe94p+5s2AcmoqKQhtIYHlJMSdz7+1DNyfsqC6eSFzQ9n2z73v/H3bf6gAKW42W/uVaeTmk4UBCdVyB31NW7Li8w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IEBc9AzF; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1787660225; c=relaxed/simple;
+	bh=sa1SToUeInUqwzSKueX6UDBJCQwQzPYV5riUOldNPws=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=c1olOBv2LBAvE3suJNktX9NE8Xq7lyydu13KlsQG7Mq6TX//iLxI98T7CbYTJ2BaTbbUEdL0eTA/ZrsXk9ljuue9cISwf2ACMJO7KY7y646UD/D5ERWBYwwivoo1/TThq3m6s0TdgnB+FGWF5YDo3t1SAmH89QddDgQXsauQ/q4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CXvlFRMe; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=lsYqNEGr; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IEBc9AzF"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 8FD39C2BCC7;
-	Tue, 25 Aug 2026 12:10:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1787659839;
-	bh=6nRgB4Mrchp0McGdCqY4rzE7zCJd5Il6xnZ+SRgHe+8=;
-	h=From:Subject:Date:To:Cc:Reply-To:From;
-	b=IEBc9AzFvCahC7tZzUyt1DkR9TkXwqOyQUpRIRZhwecExDQTApBP4xq5N1g9wXZwg
-	 9qRrAzF1Nc7D3n2eBHNlapFwz686D1xl1VxBwFqYwCKjuKDdlo8soYQtlXvARozDUh
-	 VodF3Ia2bpm04syljd79EdGumrl0M34HGyXutjgg1/BdNC4nlO15yq33e1YsxqXIzD
-	 WuBB+c+CovQFNUMN+yPr6aNHnNYaU2M3A6o6FvJ52akajMKOQBooArSv5G0KJhOYhJ
-	 GeHKW0okUbDcjn7i5EPRBx+vYN4azUpgbgodgKQ1QkN02SOHqRhoYzLedyOvPNcAcX
-	 qdpF++QxW5bsA==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DBEBC61DBE;
-	Tue, 25 Aug 2026 12:10:39 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Subject: [PATCH v5 0/2] ceph: add 'lazyio' mount option to kclient
-Date: Tue, 25 Aug 2026 05:10:35 -0700
-Message-Id: <20260825-lazyio-v5-0-65118679d6fa@clyso.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CXvlFRMe";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="lsYqNEGr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1787660223;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=fYgyv6EvLVj1+T9DRpgLD1uZHftGlDTgpmhTHB/3R0U=;
+	b=CXvlFRMeWnC36yz8thySspyaJ/WDHgNq8hVaxXA01HhU/PkHifSdDPMJdv1UxoawDliqdr
+	QwOv5/mH7+CP4hMhpJKIDGPxHqmlpglLQOsWedEo7uSBnZrg8IZtgLVpanjApfIrAj7Gii
+	ZHi+jLZuOom4aJhQqNNpd1yDmRiBTMk=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-211-Ldk0nLqvOAWmQHMDWL8b_g-1; Tue, 25 Aug 2026 08:17:01 -0400
+X-MC-Unique: Ldk0nLqvOAWmQHMDWL8b_g-1
+X-Mimecast-MFC-AGG-ID: Ldk0nLqvOAWmQHMDWL8b_g_1787660220
+Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-c2192261d79so523552666b.3
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Aug 2026 05:17:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1787660220; x=1788265020; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=fYgyv6EvLVj1+T9DRpgLD1uZHftGlDTgpmhTHB/3R0U=;
+        b=lsYqNEGriSzk4NGbCRzEyCppAR5SmoQygv1jeYc+qbW8/aN62im1DJT2DHDFfgOyZk
+         GpSRs7ah0Qjt7pxkaRNtAMsu5bqw+9gj40mB2wTTquvjfm4FPQbLz8nTNOnH8Xj9Opjs
+         +CqmHc1arOCPOm4wyeXPrgsIJ5TZI8bzm2Go4GUGuhGghzAmc/QH1ZTv2vsy8OK5L/5a
+         X/bL2JXaQ9+y4SDeuAXfy6BKAlZySVmpnCMCtGBP3rjW19UpcS31w+pJkwyGXMmU/nyG
+         OEsKOau8YJX3Ji6bTXYjjPKc6pahpmrBqNfbQYQ49zsF5MhnGi21rnbdQDYYjHXEZP+q
+         hCOg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787660220; x=1788265020;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=fYgyv6EvLVj1+T9DRpgLD1uZHftGlDTgpmhTHB/3R0U=;
+        b=s7SEEbhDQ64TAAc/Yc/8I1Fs1BLiKAf+zXgXaaFCLyPyrmQVbnOFKf8wEdHaDDFJ3Q
+         Gy97rSU3wjd3gfxTzKfSx2TbueecdQgrL/O3bmstc/+3BWp7Qc8nwFpTDWjjxgXr1v6s
+         85RDGtUe10sxI8TDDwMH4mhCyPVtXuc8QLpYuT+ZSRg0OKt0QKQMXyrQG1gGCbWpaMTr
+         6WM+AOdLePzsoA1ImhAWVrhBKxFhb4Sn/rJXr1CLquvS3rM1hFWz0my1+aREMblwaBrb
+         og7nbLnwFQcbFglhJQb2aoLmsDAwPrCyz2sCvVq8nAzPiC7lURPiLI2gaKOWC9pZtHdy
+         bHMQ==
+X-Gm-Message-State: AFuF++lvOpm7yxzLY07OT5N2BbtKtgz1zErlWgVsKVVb2kXn+zORN+Gz
+	rPAXOkeWiySyJEIrzW+wL1WpWfQV5qv+N2lpvbBPIkRCNLt/Sdea6FJFnyBWgiHaRqkdKmfIL2i
+	LeBM3jXNDDJtql+CW1fWz6y6aB7+robJ0aWoJ1Tc2I2p5okYxinIyRg85h5WC6Gc1auv3JBEoKg
+	==
+X-Gm-Gg: AR+sD111/JrclGbS3n01BnL2FYNCguHI9Jk1i/f+L+B/gzGi8/7grtwZxGjQ7UIhBsH
+	k8Uz8g2qr9bm1YyQcfFVHrywc5KdtVVjMMJ7Bwd5nPXxesgv3CE7Ncy4JQubMdN3btkeMmZQx/v
+	amJ3ICm3YExmjwbPZdLVL+RYHhCh/m7zDX+hziE5+4oQKpq3JAFDvxuV9iMtEsHly4kBVf9r4tL
+	gawdSxQg4tGsC6Z9gRIwuDZ3kQX8sG4JH50B8mROOqL3rpQ3Q+W9WglxZNTlxXfT2q1gVMm/u7u
+	XZY4ZJ+LhLkIJhZs/XDGOzioVVXrc6/+UEslh+62kD/43pEzCZoaFq8j9uSrHBX8kSduMrYIiNN
+	zKbUtDvcHQb/LmCkN6J9BrIUs578/XJp8qw==
+X-Received: by 2002:a17:907:97c9:b0:c20:9447:bd6d with SMTP id a640c23a62f3a-c24e5fc56c2mr639111166b.11.1787660218126;
+        Tue, 25 Aug 2026 05:16:58 -0700 (PDT)
+X-Received: by 2002:a17:907:97c9:b0:c20:9447:bd6d with SMTP id a640c23a62f3a-c24e5fc56c2mr639088666b.11.1787660216309;
+        Tue, 25 Aug 2026 05:16:56 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c249606b683sm1901204166b.5.2026.08.25.05.16.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Aug 2026 05:16:55 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: [PATCH v5 00/11] fs/ceph: optimize struct layouts
+Date: Tue, 25 Aug 2026 12:16:54 +0000
+Message-Id: <20260825121654.2610858-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260824184159.240821-1-max.kellermann@ionos.com>
+References: <20260824184159.240821-1-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/2XNTQ7CIBQE4KsY1mJ4UH7qynsYFwVeFaNiijbWp
- neX1qQaXU4y30xPEjYBE1kvetJgG1KIlxzkckHcobrskQafM+GMK6a4pKfq2YVIVWl0rYWTUtc
- kl68N1uExDW1375zu9ojuNuqxcQjpFptuemph7P2NtkCBeguCaaNN6f3GnboUVy6eyTja8g/TD
- GbGMyudUtqowjBpf5n4MAPlzERmHACYF9oVFn9Z8cU4m1mRmWJgEQEr7sw3G4bhBZ9WvUhTAQA
- A
-X-Change-ID: 20260625-lazyio-6987f73c557f
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1787659836; l=5780;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=6nRgB4Mrchp0McGdCqY4rzE7zCJd5Il6xnZ+SRgHe+8=;
- b=QvwAOK46T8vj5/yyRJvgWaiiGt3pQRDTQYHM/F/9kkJnAMK04LJyqpDHoXUXvvQsotR6EtOod
- +G6nZdaKmmABd98VKijRKgNAQ1wAErhg0tBrrpEYkr8TKLL8i9x5PQE
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
 
-The following is a test report:
+Hi Max,
 
-=== LazyIO Multi-Client Read Test ===
-(B writes → MDS revokes CACHE from A; lazyio keeps LAZYIO → buffered reads)
+Thanks for dropping the pool_id shrink.
 
-  nolazyio: 200 MB in 0.63s -> 319.8 MB/s
-  lazyio  : 200 MB in 0.24s -> 840.3 MB/s
+Reviewed-by: Alex Markuze <amarkuze@redhat.com>
 
-=== IO500 tool ior test: ===
-        nolazyio        lazyio
-Write:  74.49 MB/s  ->  185.24 MB/s
-
-Link: https://tracker.ceph.com/issues/77594
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
-Changes in v5:
-- Do the CACHE/BUFFER -> LAZYIO used-cap substitution inside __prep_cap()
-  so that the FLUSH paths (try_flush_caps(), __kick_flushing_caps()) can
-  no longer ack a LAZYIO revocation while the page cache is still
-  populated.  ceph_fsync() hit this easily: file_write_and_wait_range()
-  leaves clean cached pages behind and try_flush_caps() runs right after.
-- Apply that substitution per cap rather than once per inode in
-  ceph_check_caps().  On a multi-MDS setup a non-auth cap revoking CACHE
-  without holding LAZYIO would otherwise see (revoking & cap_used) == 0
-  and ack the revocation.
-- Only keep the page cache across a CACHE revocation when every opener is
-  lazy (__ceph_all_opens_lazy()), and gate the used-cap substitution the
-  same way while LAZYIO is still issued.  It has to stay unconditional
-  once LAZYIO is itself being revoked, or the first item above comes back.
-- Invalidate the faulting range in ceph_filemap_fault() when a non-lazy fd
-  did not get CACHE and the page cache is only kept alive by LAZYIO.  An
-  open that happens after the cache was retained sends no cap message, so
-  nothing re-evaluates the inode-level gate above.
-- Map LAZYIO back to CEPH_FILE_MODE_LAZY in get_used_fmode(), so the
-  FMODE_WAIT_BIAS bias applied by __ceph_get_caps() no longer makes a lazy
-  fd that is waiting for caps look like a non-lazy opener.
-- Wake i_cap_wq in ceph_inode_shutdown() and fail ceph_page_mkwrite() with
-  -ESTALE on shutdown, instead of waiting for caps that are never coming
-  back.
-- Link to v4: https://patch.msgid.link/20260820-lazyio-v4-1-601bee1ea2c8@clyso.com
-
-Changed in V4:
-- Base the CACHE/BUFFER -> LAZYIO used-cap substitution on implemented,
-  not issued, so ceph_check_caps() holds the revoke ACK until writeback
-  and invalidation complete; also queue writeback when revoking LAZYIO
-  with dirty buffers.
-- In try_get_cap_refs(), let LAZYIO substitute for missing CACHE/BUFFER
-  for callers that request LAZYIO, without dropping issued CACHE/BUFFER
-  refs when LAZYIO is unavailable.
-- In handle_cap_grant(), invalidate on CACHE-then-LAZYIO revoke
-  sequences and flush dirty data before ACKing when LAZYIO was
-  covering it.
-- In ceph_page_mkwrite(), wait for BUFFER/LAZYIO to be (re)granted
-  before dirtying the folio instead of proceeding with WR alone.
-- Request LAZYIO from the netfs read path (ceph_init_request) and
-  ceph_renew_caps().
-- Link to v3: https://patch.msgid.link/20260819-lazyio-v3-1-21110d37c4be@clyso.com
-
-Changes in v3:
-- Rework try_get_cap_refs() so a missing LAZYIO never makes a want
-  unsatisfiable and silently drops CACHE/BUFFER refs (degrading to sync I/O).
-- Add ceph_adjust_caps_used_for_lazyio() and report LAZYIO in used caps to
-  the MDS when it stands in for CACHE/BUFFER.
-- In handle_cap_grant(), flush dirty data before acking an LAZYIO revoke,
-  and invalidate when either CACHE or LAZYIO is revoked and neither remains.
-- Define CEPH_O_LAZY as 00020000 (matching src/include/ceph_fs.h) and send
-  it in the open request flags.
-- Link to v2: https://patch.msgid.link/20260701-lazyio-v2-1-9c667864805b@clyso.com
-
-Changes in v2:
-- Move LAZYIO fmode addition from ceph_init_file_info() to ceph_open() before
-  ceph_caps_for_mode(), so the MDS sees LAZYIO in the wanted caps at open time.
-  Also cover ceph_atomic_open() for the writer path.
-- Add ceph_adjust_caps_used_for_lazyio() to substitute LAZYIO for CACHE/BUFFER
-  in used caps reported to MDS when those caps are not issued.
-- Gate try_get_cap_refs() LAZYIO substitution on want & CEPH_CAP_FILE_LAZYIO
-  so a non-lazy fd cannot have its consistency guarantees weakened by a lazy fd
-  on the same inode.
-- Separate revocation handling in handle_cap_grant(): BUFFER revocation always
-  triggers writeback; LAZYIO revocation triggers writeback only when dirty data
-  is held (i_wrbuffer_ref/i_wb_ref); clean cached pages fall through to the
-  existing invalidation path.
-- Add LAZYIO to ceph_init_request() so readahead works for lazy fds.
-- Fix fmode propagation: use fmode instead of req->r_fmode in ceph_open() MDS
-  path, and set req->r_fmode |= CEPH_FILE_MODE_LAZY for both ceph_open() and
-  ceph_atomic_open().
-- Remove dead #ifdef O_LAZY blocks in ceph_flags_to_mode() and ceph_renew_caps().
-- Link to v1: https://patch.msgid.link/20260625-lazyio-v1-1-db13078789dd@clyso.com
-
-To: Ilya Dryomov <idryomov@gmail.com>
-To: Alex Markuze <amarkuze@redhat.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-
----
-Xiubo Li (2):
-      ceph: wake up i_cap_wq waiters on inode shutdown
-      ceph: add 'lazyio' mount option to kclient
-
- fs/ceph/addr.c               | 117 ++++++++++++++++++++++++++++
- fs/ceph/caps.c               | 177 ++++++++++++++++++++++++++++++++++++++++---
- fs/ceph/file.c               |  33 ++++++--
- fs/ceph/inode.c              |   7 ++
- fs/ceph/super.c              |  15 ++++
- fs/ceph/super.h              |  17 +++++
- fs/ceph/util.c               |   4 -
- include/linux/ceph/ceph_fs.h |   1 +
- 8 files changed, 351 insertions(+), 20 deletions(-)
----
-base-commit: 9fc75b71fdd38465c76c6f6a884cdd4ae3c72d90
-change-id: 20260625-lazyio-6987f73c557f
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
-
+-- 
+Alex Markuze
 
