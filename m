@@ -1,81 +1,149 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+Received: from flow-a7-smtp.messagingengine.com (flow-a7-smtp.messagingengine.com [103.168.172.142])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6760238C2BF
-	for <ceph-devel@vger.kernel.org>; Mon, 24 Aug 2026 19:50:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE50E2D9792;
+	Tue, 25 Aug 2026 04:09:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.142
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787601009; cv=none; b=gsk2UFqv6tAXFgm1Y8KrVlhBOpWXBzVjGHdnrJAU5/lqKl5eI01UMRaNowf9d3V+3h0+n+jgziRoYkqOb1RASwtwo8ZWC13qf9gYNhFLzW+/u8dcQErAsv2iI732zdF7LF0uk3Y8TeioBf/Yx07QOWJUUAMNMnxK9eQS6g1AuwI=
+	t=1787631002; cv=none; b=luAgRr60uFsylVAHUbdQVNr+IemAa20Fn70ioSbFSwryI7uirD8bj621KJt8h9+iUpPqCUDhFV5ggJ1uVFrqudBTxpNjaG4LTn+bECAlvTG3O6FH7xaUFdtb3nicC6YDUY3VdvJIvxgYtHDtv/mVAMozSK1eh+LyjDUs7SOrPz8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787601009; c=relaxed/simple;
-	bh=UXxYWZFFShrRCFy3Z16bjG63cz1+TR1o+JshcDoj3sg=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=mcLW7kl5swSxTtEram1GPtGuT8huIxet/0BVItOugN8x4CTS9/vgejnbHzO59lEfE3sxdkN3yJ8ZlwwkoigpXZedvCt+psSpCcPIizjaSTqDF8nAKPKPM7/YqLPZDzeKgiSnQJ5oM40jXBLV43A8vEyXvHgeaZIGayzzSZyCs1Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Nks1HJis; arc=none smtp.client-ip=192.198.163.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1787631002; c=relaxed/simple;
+	bh=GCKOeqvQQ4h3sLsNo4562hEc6cyczIzgczQh3GCPpv8=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=fhix13fpzYgnPmYKeAxe0DvC+JRVZPgu05v2VSniVMKdQCLbWd0sla8JNCT5wc+yCfviO7r0srkrBillDOzu7vnEUTj0Npg+nk4UYP5ILA0cVxjvbouyHKKdZrvml//kUgtzYNp4rTxpjOR7AXbH6jyOnF+DF6ib2xzUlo2oRuo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=VmOJZsvu; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=EEYEIXQU; arc=none smtp.client-ip=103.168.172.142
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Nks1HJis"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1787601009; x=1819137009;
-  h=date:from:to:cc:subject:message-id;
-  bh=UXxYWZFFShrRCFy3Z16bjG63cz1+TR1o+JshcDoj3sg=;
-  b=Nks1HJisrU4oUC0r6JhG6+99ckLD6QVxfuCZ5n+72DChRKfSYLwhxo8e
-   ocPyRGpI4bUUQZlpEVSVCLc7Ie1dGwcW8N7qeNRVS/RNczEn+IjVfYpy3
-   Fsxs75gvpBfpHgfp1hcBMOTx6RQVczVWg/U7gb18kNFWB3mvGLiOb5E+G
-   Vbf229GYAM7HMKhe62f+CkYQae4cfYaKTmiI8fTxXzp09YcuUwlTtLPzD
-   CnD1YkLF4wVuADLvVgc9MPokXGIZS31RdD+Ahoc18kRYFXY2cGhBAlDsD
-   nV+ArDrooapbHfR3ym94ONz4d6yWgSLa/hmSk7vAodqGAj75JkO9gFZ37
-   Q==;
-X-CSE-ConnectionGUID: 9is6yGO6TGW5vavYmSrGbQ==
-X-CSE-MsgGUID: +tz7RnjeQzCGOTvqGeOxPw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11885"; a="98652730"
-X-IronPort-AV: E=Sophos;i="6.25,241,1779174000"; 
-   d="scan'208";a="98652730"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Aug 2026 12:50:08 -0700
-X-CSE-ConnectionGUID: qn9HjgheS3SwdwV5684QTQ==
-X-CSE-MsgGUID: 3MATyXT4Sti/nIGBN8LsCw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,241,1779174000"; 
-   d="scan'208";a="296997714"
-Received: from lkp-server01.sh.intel.com (HELO 3532383e6126) ([10.239.97.150])
-  by orviesa002.jf.intel.com with ESMTP; 24 Aug 2026 12:50:06 -0700
-Received: from kbuild by 3532383e6126 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1wyagA-000000003wH-2o6U;
-	Mon, 24 Aug 2026 19:50:00 +0000
-Date: Tue, 25 Aug 2026 03:48:02 +0800
-From: kernel test robot <lkp@intel.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: oe-kbuild-all@lists.linux.dev, ceph-devel@vger.kernel.org,
- Alex Markuze <amarkuze@redhat.com>
-Subject: [ceph-client:testing 47/48] ERROR: modpost: "__umoddi3"
- [fs/ceph/ceph.ko] undefined!
-Message-ID: <202608250336.p7NBvgnZ-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="VmOJZsvu";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="EEYEIXQU"
+Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
+	by mailflow.phl.internal (Postfix) with ESMTP id CB70A1380104;
+	Tue, 25 Aug 2026 00:09:58 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-02.internal (MEProxy); Tue, 25 Aug 2026 00:09:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm3; t=
+	1787630998; x=1787638198; bh=gfzmhiIcB0bekT0CYQojOTQWt5VjQ1DlVCR
+	0Y2kGVR8=; b=VmOJZsvuLMPuT4/XbFzo+7qH8JmIsulFBHvMYvEEAdqZamZAJe0
+	pkSs2rOgyyZsJx/ggcxsQ+m+M8aZ1sloSs8QoLmn1UFg786DgXbv13TpqamsBkDo
+	B29/XjMlqPloGpnIW31haAbfzfcl1/IpAH+joT0c/votgdQPMEfyl0bTOnD1rOLB
+	slUvWgjpCcOQ1dqVlO0cbpoZ2cN8UUfR9iMKNY1M/RU0OkjpAa9fdieoJpBWsugJ
+	cDbs1HJaX6P9PbxL+XG0P6mQ9cqpYC+m9MhkELIl86/9KnkbH2y/JXxKJygmrYs8
+	GSIdVhjxGdiUMnZSZqYiPg2htZAkN2OKMvQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1787630998; x=
+	1787638198; bh=gfzmhiIcB0bekT0CYQojOTQWt5VjQ1DlVCR0Y2kGVR8=; b=E
+	EYEIXQUW2w+IvyjYge8X3DaNB6r0vHv607haJuOez0M4icKrjYT/amTGoqj99PtF
+	n+uK0UCXU50HbHy5oHtqzlJ3TEZCheLxT/aeeVpMW3roYIEku7K6Kznd0vamrz1a
+	ctfjWJC9446Wste/Drgr47i289kvHEMiVa/sFUT9F3MeZwBpXiH0Iq7qIptmbKOa
+	UhVWEV5PLJSbSrpaMUPcZe1/j3+RcsWBKaXlkRnpBtyFQjiRSvtHAqHd9fLTUGxB
+	yxqc8miu+dSasSTCjiqyQ1DT4cgJcs4c0VFeyY8F9b7oyFqRWBIkM4dWl8ZhgnfN
+	gcfoeQUrIQ8bfVrK0VlpQ==
+X-ME-Sender: <xms:lhWNamVF71uR9GJ31G4ZO444p7EgsO1dj34ek-tF-WJF6J79P7kHSw>
+    <xme:lhWNaqycHXt0IAot3O1HBfnlTNd1khShIudtVSEU_c0DeUnS19_VWd6HVRJaGjvo-
+    A2YjabCXuE0B6uFeWi7EFfxP70fG_zSrE2cmydkHtPzl-HyjA>
+X-ME-Received: <xmr:lhWNahtPN5xHk7o7l7R9sLNp-myD4YRQdS_zVXIe4AiabzHsxUVaYVa86HXnfzmiDrBvQvwQVIoKSUBReCAhwgc4Mjm9Ix4>
+X-ME-Proxy-Cause: dmFkZTFb1V9n/Rau2wZjVEeTtHtAjpRLi3Fx7aQyWsyGbHDDpCn5SpctxOLQF1z4Pp6DFa
+    9u5RfEtGY5ExorOrZ2p6AhLPnE7vhM6Wukm+9E/99g9uWhllVzhra78LAV00rcmHXm9CtX
+    sxRThI/CZ7x+k68gPOCgj85/kxGrOXdHKYxGvExhQ+HqpYpim4/DKKQ1VSLuVUGjv+gfFo
+    rcS5ckepksDSIEfOeE2ooDJs4ZksKbVdt0C1d+A5VNZ9Sf0Y9+lAjSsMgyvT1Zhn8vfSTG
+    CrJ7vggwcZjX/4RRVpVYry9/jh3xS9sWT4haWu3+KA2caFajuAOdVITGx0rQWEGbJyIvt6
+    lUmpuZ7Mjjacvy/4gBvxOgsGlI/U5TA778viJUJljUFLcsPJbkTyaBN306CJ1Nut17fdek
+    yoJuvCcWls1Cq9rHbCBQwXKDMxX2R9fUM1jFqWhMjSnTDtTFp6aeqY+lPdLddoh/g5VlpO
+    Tdi72QDIJXlHlpMnc4gzw/MyvbSCFfiC06wLu/qOl8VVA63AGetsUjfPIJRXR5xkwCXaB5
+    8P9ZKEe9ZC5jOcTrlBa4UIXfzS6Dm/W7EGh/UglMBU/3B/KbcHgwl7DILluhJYmiXxXvUW
+    UQ41DKOiUMmF10GuO5ZVQNFgjbHlxjVdIctb3PJx4+ukParWxM+J+OOBLDTg
+X-ME-Proxy: <xmx:lhWNarAWdNtupeRSPBtBuRi1dyk1lF-oTizL-iOjgaQJFtQOnJvT5g>
+    <xmx:lhWNatr3sZ9SNydp2YV53_-YiA3GsLC8mS62XQgHT1Poyaxzz_cNzA>
+    <xmx:lhWNaiawtpRyFqo2DkEmYFoc0IO2MuEFMrV0gJEjTxqbjPhGqL6lVw>
+    <xmx:lhWNanG_b16RRRA4l-9dbuhINdCwX8ze2MCPJ_0ayf1X6Kku5bX0gA>
+    <xmx:lhWNasNK21d0YsdN7RsTP5tPEqFHidkbfkKWJ9DUzicAw2-Cy_4CAMcx>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 25 Aug 2026 00:09:52 -0400 (EDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+From: NeilBrown <neilb@ownmail.net>
+To: "Chuck Lever" <cel@kernel.org>
+Cc: "Ian Kent" <raven@themaw.net>, "Jake Edge" <jake@lwn.net>,
+ "Ilya Dryomov" <idryomov@gmail.com>, "Alex Markuze" <amarkuze@redhat.com>,
+ "Viacheslav Dubeyko" <slava@dubeyko.com>, "Jan Harkes" <jaharkes@cs.cmu.edu>,
+ coda@cs.cmu.edu, "Alexander Viro" <viro@zeniv.linux.org.uk>,
+ "Christian Brauner" <brauner@kernel.org>, "Jan Kara" <jack@suse.cz>,
+ "Trond Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
+ "Amir Goldstein" <amir73il@gmail.com>,
+ "Andrew Morton" <akpm@linux-foundation.org>,
+ "Miklos Szeredi" <mszeredi@redhat.com>, autofs@vger.kernel.org,
+ linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org,
+ codalist@coda.cs.cmu.edu, linux-fsdevel@vger.kernel.org,
+ linux-nfs@vger.kernel.org
+Subject: Re: [PATCH v2 04/18] nfs: separate locked regions in
+ nfs_clear_verifier_directory()
+In-reply-to: <f9d16f36-10e6-4bec-aa8e-b9b3cb3ad872@app.fastmail.com>
+References: <20260815042707.2535717-1-neilb@ownmail.net>
+  <20260815042707.2535717-5-neilb@ownmail.net>
+  <f9d16f36-10e6-4bec-aa8e-b9b3cb3ad872@app.fastmail.com>
+Date: Tue, 25 Aug 2026 14:09:48 +1000
+Message-id: <178763098869.3510150.7453977572617670907@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
-tree:   https://github.com/ceph/ceph-client.git testing
-head:   86f405187248b7a5a2104eba07f941d27593893e
-commit: 68477e9bc0513dd9a887745f2af468f2f18526c0 [47/48] ceph: parallelize object copy in ceph_do_objects_copy()
-config: i386-allmodconfig (https://download.01.org/0day-ci/archive/20260825/202608250336.p7NBvgnZ-lkp@intel.com/config)
-compiler: gcc-14 (Debian 14.2.0-19) 14.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260825/202608250336.p7NBvgnZ-lkp@intel.com/reproduce)
+On Tue, 25 Aug 2026, Chuck Lever wrote:
+> On Sat, Aug 15, 2026, at 2:21 PM, NeilBrown wrote:
+> > nfs_clear_verifier_directory() locks the dir to call
+> >   nfs_unset_verifier_delegated()
+> > and also to walk the d_children list.
+> > These are two separate needs and they don't need to both
+> > be in the same locked region.
+> >
+> > Subsequent patches will use a helper for walking the d_children list and
+> > that helper may drop the lock temporarily.  To simplify this transition,
+> > split the locked range by dropping and retaking the lock between to make
+> > two separate locked regions.
+> 
+> I hit this running xfstests against tmpfs with the series applied.  The
+> trigger was incidental (an unrelated process chmod'ed a file on an
+> NFSv4 mount while xfstests was running) so it is not deterministic, but
+> the path looks reachable by any SETATTR that returns a delegation on a
+> directory:
+> 
+>   BUG: sleeping function called from invalid context at fs/nfs/dir.c:1497
+>   in_atomic(): 1, irqs_disabled(): 0, non_block: 0, pid: 2385380
+>   preempt_count: 1, expected: 0
+>   Call Trace:
+>    __might_resched+0x165/0x180
+>    nfs_clear_verifier_delegated+0x112/0x250 [nfs]
+>    nfs_start_delegation_return+0xa1/0x130 [nfsv4]
+>    nfs4_inode_return_delegation+0x1b/0xf0 [nfsv4]
+>    nfs4_inode_make_writeable+0xa9/0x130 [nfsv4]
+>    nfs4_proc_setattr+0xa2/0xf0 [nfsv4]
+>    nfs_setattr+0x1f2/0x480 [nfs]
+>    notify_change+0x321/0x380
+>    chmod_common+0x10d/0x1c0
+>    do_fchmodat+0x8a/0x110
+>    __x64_sys_chmod+0x1d/0x30
+> 
+> Line 1497 is the d_for_each_positive_child() call.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202608250336.p7NBvgnZ-lkp@intel.com/
+Thanks for testing!
 
-All errors (new ones prefixed by >>, old ones prefixed by <<):
+nfs_clear_verifier_deleted() holds the inode i_lock across
+nfs_clear_verifier_directory() which walks the the d_children list.
+I'll need to use d_find_alias() to get the dentry like I did in the
+notify code.
+Hopefully I'll send another RFC tomorrow.
 
->> ERROR: modpost: "__umoddi3" [fs/ceph/ceph.ko] undefined!
-
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Thanks,
+NeilBrown
