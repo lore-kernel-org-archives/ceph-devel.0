@@ -1,46 +1,111 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DC5425B09E;
-	Wed, 26 Aug 2026 04:45:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0A513515C1;
+	Wed, 26 Aug 2026 05:23:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787719525; cv=none; b=iSy/2aRVhuqcuLcihERJ4OFrMhFyQlJzIvLXg8zpsVwjKlolOrcqSko0qq8Meq8OsJ7lhztC6L6PlMScrz15PPYZOnynGQZGdiJcjC3OO15I9KuIQV+pWeHZ5S6SNcHWGWLrahIlbHje4Z6I0B4RtyfSaXYCDQauYbGGmNqRV/4=
+	t=1787721832; cv=none; b=XC5A7Bjm9h2TUzLWkacSXnUSr2Wsovb2Yk5MayaOUKG57mWwh3JZMPd6hGm1BkXsX2DjtpNz7vPU+xzTB7PS4CdB8wMzeSfraVfS+ASsZKEZkQwRTiWfiSjGpnq1a3Y9DLFOoEFqWrgWY8P1jvmOyhuqK2HP7V1HOd247ExYo5k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787719525; c=relaxed/simple;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BQkIS2NyuyIToWa9EgoQHiaSGkWOruTPRkmapL941t07mfnnBwmHgBXG5tKn2Ii40DBIWLlRVRkx/Jl7kzt428ISYmxg1QtYC6RJhhEfZMYuRtNHIsPDuC4i/cA85bi+fU+eZFsIMYgzKfo/bxvL1UARKlOq5j/MK/ob7lZRE20=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id B6FE568AFE; Wed, 26 Aug 2026 06:45:15 +0200 (CEST)
-Date: Wed, 26 Aug 2026 06:45:15 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Tal Zussman <tz2294@columbia.edu>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>,
-	David Howells <dhowells@redhat.com>,
-	"Matthew Wilcox (Oracle)" <willy@infradead.org>,
-	Christoph Hellwig <hch@lst.de>, ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] libceph: remove pinning assertion in
- ceph_msg_data_iter_next()
-Message-ID: <20260826044515.GA14936@lst.de>
-References: <20260825-ceph-msgr-writeback-v2-1-840ef541b0c2@columbia.edu>
+	s=arc-20240116; t=1787721832; c=relaxed/simple;
+	bh=1mKhPFGDwekSh76kj9cyloqWz2TUvTxnRHTCOF2ws6E=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=torBFGdmUlntCcSdzTJ1S3AbP+fxF83bz93KJkSlfVEsCsBxaLavAyPxo05gWyRfL1/jiiWxOVaADE8JDwpmLwYX1rAkhqbPOMMQGQvZyp0cgcwpwBH/ztzfKpCOnrarlkY+wIW21K6E0Zxej0JMhK2e9DzNBtYDPYaYWpF6P7E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NKxnP5oq; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NKxnP5oq"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 5B19EC2BCFA;
+	Wed, 26 Aug 2026 05:23:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1787721832;
+	bh=1mKhPFGDwekSh76kj9cyloqWz2TUvTxnRHTCOF2ws6E=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=NKxnP5oq4Teqf/g0xfkaeGukPxgj6K4gEhbWLZFFipBtgVAanHGaSdCeV0BB3uBcN
+	 GNbtzJ60gsnHh/miYD3i5b27C5g4G1hGHa7LPZW8rQGzXhMexBbdIxMinwe5TUHzap
+	 Oafy+nGoEFZ/pX/VkPZzEEphxF6qYaynfkkPyi1yege06rQELg4h0B9a46DshFTTWz
+	 rwbbHrS1mq0SvkgTISmXBKCkamp6cF0z7vP7lYxTN1E/lwJ5wP2UTlla/pnhbwZylO
+	 9XdZ1pOHtuji6qM+YZcaIV4kaYJBtYjbL5JZRyMG8F17DpK560VxAqqbpHS5U0EMSR
+	 iyEciAWykavJg==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A05EC5DF97;
+	Wed, 26 Aug 2026 05:23:52 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Tue, 25 Aug 2026 22:23:37 -0700
+Subject: [PATCH v2 1/2] ceph: mark the superblock active after mounting
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260825-ceph-msgr-writeback-v2-1-840ef541b0c2@columbia.edu>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260825-b4-b4-ceph-dentry-caps-v2-1-41201d7a4868@clyso.com>
+References: <20260825-b4-b4-ceph-dentry-caps-v2-0-41201d7a4868@clyso.com>
+In-Reply-To: <20260825-b4-b4-ceph-dentry-caps-v2-0-41201d7a4868@clyso.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>, Jeff Layton <jlayton@kernel.org>, 
+ David Howells <dhowells@redhat.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1787721829; l=1739;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=ixCFtWZ2ctnytGgDbGQ+GA3BkQV45N30qXqkNKfViuY=;
+ b=1Y+mOAdwJEnFaHrRHZi2y29bZuPufLAC8aI7ZpKx5PDqAFf7WRTQ99zGPcmZlR5kjRdWGHbq+
+ o7NUX2P4O4qCcD2GBFWiS/s2GcYZzb+Cd3p0UKrRxUUfPot1AAH0Kw6
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-Looks good:
+From: Xiubo Li <xiubo.li@clyso.com>
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+ceph_get_tree() calls sget_fc() directly and so never goes through
+vfs_get_super(), which is what sets SB_ACTIVE after fill_super for
+filesystems that use it.  Before commit 82995cc6c5ae ("libceph, rbd,
+ceph: convert to use the new mount API") the flag used to be set by
+get_sb_nodev(), which did this for ceph, but the conversion dropped it.
+
+SB_ACTIVE is required for iput_final() to retain an inode on the
+inode LRU instead of evicting it once its last reference goes away.
+This has gone unnoticed because ceph sets inode_just_drop() for
+->drop_inode, which always asks for eviction, so the retain branch in
+iput_final() was never reachable.  The next patch makes ->drop_inode()
+able to retain inodes, and that needs the flag to actually work.
+
+Set it once the mount is up, like nfs_get_tree() does.
+
+Fixes: 82995cc6c5ae ("libceph, rbd, ceph: convert to use the new mount API")
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+ fs/ceph/super.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 518ee63d55fb..6573285d704a 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -1381,6 +1381,15 @@ static int ceph_get_tree(struct fs_context *fc)
+ 	doutc(fsc->client, "root %p inode %p ino %llx.%llx\n", res,
+ 		    d_inode(res), ceph_vinop(d_inode(res)));
+ 	fc->root = fsc->sb->s_root;
++
++	/*
++	 * The mount is up.  sget_fc() leaves SB_ACTIVE unset, and, unlike
++	 * filesystems that go through vfs_get_super(), nothing else sets
++	 * it here, so iput_final() would always evict an inode whose
++	 * ->drop_inode() asks to retain it.  Set it like nfs_get_tree()
++	 * does.
++	 */
++	sb->s_flags |= SB_ACTIVE;
+ 	return 0;
+ 
+ out_splat:
+
+-- 
+2.53.0
+
 
