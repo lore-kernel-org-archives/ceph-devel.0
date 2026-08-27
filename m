@@ -1,117 +1,181 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BA4B40F734
-	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 09:22:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787822545; cv=none; b=DRBf/usGbO57d9qc23juB9SHk3GuEgzwrcEtRC4Nr5eSI6b1doAk/vXUiCjuXZV8RwZmS/FNMQesxJRksxnV/oALEZAE+3lLzpuy01Ls8zDmqxMAIy2FcNhim5LxEK4e0vAPXmTH3KvqJbr8LLx4C5KhI3KB4gCD+OQld0v08Cw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787822545; c=relaxed/simple;
-	bh=4KGEmFqBo7s/stuNHhNG0lVjPiFj5YqDpG9ICHflxlQ=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=LXZPzdE1BgS5N4lg1v3e4KeOtmoyYv7n2jg7swNx2xMN919Py0uSB9jgt2eYv1tSqeXj7DJjZUA94Z4waROT/3bNPMmlr5ZJPANeRGFTWhUWEkhXqQcV3byMGuRsBdSe+/clVzrACLvOXG6XgSv6Dxp/BV+iLgo29CGSGAbZCjw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bhzjJiAZ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=rNjdjQ3x; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 485DE417D9C
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 09:23:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.53
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787822624; cv=pass; b=cOZs6dsia5juWPgG0cyDeMopUJT2A4Rb2xrZXT/kgYvAYg8pZ/E4KuXzF7Y65zLxSTupghmnpZU6OJg/0Ya7gJyWW7Uknp4Hs/gENy/O7ZCwMj/R+PpdtVgDJibUccGLntit145ysEf9/V3xTAAyJ0J9n6n8Qw1JU65s8vaB3Rw=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787822624; c=relaxed/simple;
+	bh=DBHBD4i87XSNXLCWnW2smU6A62RZ/Q1PR1qnDwQ3R8M=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=B5yB5s3lwVuJiqqsQ+9kkpUE/ONIZ4aTIv/yNklotW6Jq+1VlJ6SPob/CwOn7EgC4zW5/Emm/xYXfwEtUj08Q1lxTBa+2/IPvM2cJNa067tEqEA814xE1H/HOyD8v6kfQD7IChFldRzRcE9V/Cq+UfgjOCH8De56o7r8vqAtvhM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=N/9CXmyH; arc=pass smtp.client-ip=209.85.218.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bhzjJiAZ";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="rNjdjQ3x"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787822542;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hw7/UxinWaOYi4nmIK8Q/euZYbsafd6DDjJpBXmtBy0=;
-	b=bhzjJiAZcOTHpc/vwZvP4WKpEwIxesk2wASk03WkGecqTfdcqmhZkpH1iyXPQBanR3z1YP
-	R7Y4WmuHq1cdNfG/Ru0+e4ySgbJHS4JYmiHg2Zv8m9kYSOQUG1uk/zgexc7QhGQzMkBrs3
-	ASYlQFh+3Z7xcGgjF53XoYD2RqzFA0o=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-213-oJatM9b7MLeIwKEAk8Skrg-1; Thu, 27 Aug 2026 05:22:21 -0400
-X-MC-Unique: oJatM9b7MLeIwKEAk8Skrg-1
-X-Mimecast-MFC-AGG-ID: oJatM9b7MLeIwKEAk8Skrg_1787822540
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2cfe48ca1efso30689095ad.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 02:22:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="N/9CXmyH"
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-c160420289bso68439066b.0
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 02:23:39 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787822618; cv=none;
+        d=google.com; s=arc-20260327;
+        b=hCNAsv5lbbCbaIMkZfDvsmn2GKmwLzJIR1dKbem9WqN8GaRkrx0Q0s21X2mXgtJhRj
+         Nyg213nvGNIkmuY8zmEFyJh/Gjb29BRtIJlZF52v8oupaNF3c4t4R28AniZM4Yzi6izV
+         mMzgDKZMkNI8jMX9YjLZOWd+JkQH2fx+KbJb+1dXZcMoXYSXXQZB1gXTnvQyqZNIW5jp
+         fvPUyqMtruuBLkGnuQNmEEsCMfYTRLVlEPCsxWVkoXSEvef81xOgoZx2vZH2ZrGLyfRG
+         /44Qa48Jqr3cekmK1y8TVUgQymbpwMAgE45nFLb9evmXNYEgv1SoSjlKruyvRD3NJMLy
+         0xjA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=Fph5DeMJCI7nJtUOB89Y9QP1q6g7bQDJlAzprLWOYQI=;
+        fh=W5I/kpABibqBkpPK6UMJg0JhlSqHZYkA7YkjIpvGzNY=;
+        b=In8SrAnK/4wO/nA42FEecDzkfh5EMg3JbzZoK33WhXhDoXX7I3M3OWs7sAxLtPeMUL
+         JpEofAvVaEEvnX8eC06edN8riJrjzPluky0lC2BD/7Vbwnk7X6hrav264VAPoHekR66l
+         7zN0VnA5YmQM89onDGZhHk6tuV6RCd8eJWHHVfJ2cL/JdDB2sGrfSjjQAAVYrWefrXAz
+         JZA7INZ3slCBgjlbgDxyKWk/3DS7aawRe6FOjjtDcmYedHkDImLenNFp9++jDL7vLA60
+         HfCVy5lSIk8KHw9p9mMEZKd6m72TSCMCY96nGUR6yKMrjp8yXAUq1mbPPQfvbEHFrbfm
+         dHxA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1787822540; x=1788427340; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=hw7/UxinWaOYi4nmIK8Q/euZYbsafd6DDjJpBXmtBy0=;
-        b=rNjdjQ3xTNh4Eby0ZCgWsvIIpkDWL9O+gZ8gfXg0vz5bXdYvB2F+3BxbXLNGbGiMZt
-         +c9b9CHLrckEDW638Ein4e4ey7lD6+bfAnl2qai72RTL1IMbMm9y1SeXWA5ihcM81GE3
-         /Ie2BAl2BtwCVIclxeZM/ELZoJBaHVLW4ErMMPldHhuxenxSG8g6JJBUj9PdhV+PTtyh
-         hb1IVre4m0EAndU8aXJtSIfHYQoh98pU808nRhdVA1VMojmWVTBhfegTXsvbA71polXq
-         QUFNYCIzukjnofxL/KdfBMrNhsTvM9Zc2uyGUvn26jicguWBIfPQD7/DBJNdeSDHi+SM
-         JiAg==
+        d=clyso.com; s=google; t=1787822618; x=1788427418; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=Fph5DeMJCI7nJtUOB89Y9QP1q6g7bQDJlAzprLWOYQI=;
+        b=N/9CXmyH5ZA3yuT5sWoq6ccqE4jFAIAbKZDuYmufvz5csYrdBvAypgbiYduatTIWAH
+         r+9JZ1d9Z9/oCn7vHw8hxEaHnVfvTFowEBFqSxV/mMvLuXMgvv8Y+9ECu6DMx0ldMvwf
+         rrDwNy13uSIX9WCQXL31vz9UIXDnOGZNg01x7FInncPFC6kMNEiRJPtf0uU50/91Ujd7
+         5j1LaTrWgqY+prhgPpQyiwuf5fDijvlTELVYj9lcYnK5lWdp4KvgLwRyxC/n2a167PHA
+         F9nwX7EVvwZXFi0e92O8t7Hfr2ygUN6aZ/rgxy7SzjNEqJNDd97Jisv9/LTzAAAGm0c4
+         hJSg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787822540; x=1788427340;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=hw7/UxinWaOYi4nmIK8Q/euZYbsafd6DDjJpBXmtBy0=;
-        b=eJpAYO8rJwbSOT5yfNRMblMUTKwo6H7jI+hL3gRwl4YUKucjA0TFo8UUKPx4U/RhtW
-         FfOZbSi0zf5CitJg4kth0mwGhLk85n6p/fKggyTRZbpbIKUvDru6SLJ7DE2U1BKcEHp5
-         a5Y2QFaeoVJUPyMkviOtpD6NduOzn1Wlyamn7pwBYWZM7UzHwImZif0khRiTRb4bjkhp
-         Fkv8+EU7FDcQ/xv1ltqApRRydTyJyb9sZKf/gpMK0O0NCkWqjysRo8YZVydX6jE1Hp2L
-         Wb+0JK5GWlYSH1uBQDw9SyzUGM2UtmflOeCuF+yGmBEVTFRBjsNToO4l7szMXyP1JFvG
-         Zd3A==
-X-Gm-Message-State: AFuF++nGE4NNIYjYOzuQHQcDYK/Q6xyLlye6pBmL2uZdlS0a0GlRnJNc
-	uH5Qd6txN+EERJSWjsXQXwHhu9zNp7e6HnpHGb5A76nOvBN+1++6qug7VNCifLXPSh7IU8b/v9N
-	BZDMyTgwJRTCgGosTdnwulFYDmlYtfrxJIrI++R8we7pUDniJIIrdAYshTbyl0nX4IXxI2HNjzg
-	==
-X-Gm-Gg: AR+sD12X8XnYtnfn33eZAMwJBRU16s0iySmS7K6PfRkEvg5a9E8svtJ+Tje6FMynkit
-	Ruzf0W01WghLGjFSxJqlWLCAy/otUfOT3BQML7SzeQ3Qchoq9pkyikSa3m10nYK990RGAQem9mN
-	n0CsCeSBd5bknSWRF/8ni3cNXRsvc+matc8kPS2jr2Md21J3f2sjktvOgAhSB/bgbpXZ7UGbCo3
-	Vyq8l+aowxKiut9yqF3mm9yVeNBQahRT0cmYWUfUJZl3tQbxWgAfylgnsuyBCMHhC6xO1MiucGf
-	GzI50w4kwU+NzNirL+kOnnbU5uDUnSk66ctmw7OP7u6U3GPr8yh65F3pKat1fbo+uTIjhw==
-X-Received: by 2002:a17:902:f542:b0:2d0:cc92:f7c2 with SMTP id d9443c01a7336-2d707a01932mr254855005ad.1.1787822539905;
-        Thu, 27 Aug 2026 02:22:19 -0700 (PDT)
-X-Received: by 2002:a17:902:f542:b0:2d0:cc92:f7c2 with SMTP id d9443c01a7336-2d707a01932mr254854015ad.1.1787822539387;
-        Thu, 27 Aug 2026 02:22:19 -0700 (PDT)
-Received: from cluster.. ([13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3283d60c291sm27728862eec.6.2026.08.27.02.22.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 27 Aug 2026 02:22:15 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v5 0/2] ceph: add 'lazyio' mount option to kclient
-Date: Thu, 27 Aug 2026 09:22:08 +0000
-Message-Id: <20260827092208.2741445-1-amarkuze@redhat.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260825-lazyio-v5-0-65118679d6fa@clyso.com>
-References: <20260825-lazyio-v5-0-65118679d6fa@clyso.com>
+        d=1e100.net; s=20251104; t=1787822618; x=1788427418;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=Fph5DeMJCI7nJtUOB89Y9QP1q6g7bQDJlAzprLWOYQI=;
+        b=N/SiX3U4kEQarumX9CYMgYwSUS6gtIS9LU9xN0XjLedAJVjr6RoCTbFhtIU9xvALn2
+         98oS8WdVrYSH2/xF+xGjW4Tf1xXIVRdqB7lwlLE1iNpkLt5DXQY3CzJh4KlIqAwMc4SJ
+         zTzfY9zVNDvOjz4yoNi7uONqEQ54HmeVBWO421PssbmeaeU15NxMMvjWMB2VFfeEIEfJ
+         wgyNtqorQOVDu1nzBD5Id0PTLYYok4PVrydAtxXGeblDm9ECEIZelPpNYem49iV6IW1T
+         0LWpgFrvSAxkq6LlEoR8JzbJZhh1gCQUYMG7skGCM6V2bHoZyv/nSU8GxRYrAiKiGvk7
+         fVBA==
+X-Forwarded-Encrypted: i=1; AHgh+RoIJcT6VwjF2i1fxlc+OuiQ6TvR/UvxWKRgr+d++GknkLzJuSCasUbE8tq0oNQHM9sZ/qHCKzbouV/d@vger.kernel.org
+X-Gm-Message-State: AFuF++nZkjeFuY5LsBStiMiT+9hVWickkBM7kdZkrJe2r+QQOHLVFnu+
+	ikAFHspveWsWM5QiTEw0FdKxrvdvTVwHHgI1ipGOmi3StHHhGy9jymqIpflzTOokzMRHnOBRF2U
+	I70p3+m5C2AnCv13wXuDUgCEl+Ba8J6TO6KljpLyR2yqkzf7OUU1WN2o=
+X-Gm-Gg: AR+sD12tNDwUQX+aKpIaqcT3zaozA2s4dvGFGHWIB69OUR/LPKFCiaegZLarwbvXrni
+	hZUrdv3XdW27vfb3Jzwykx6yBvGtSCfMohGw/okNrQLDRR1Q3TnO1fA/YBVuIKlnwlG7O01FgNM
+	Rtb/RhgbyjwPnGVkG2mdSt6M/OdWokcwvgh5RXhVuZ1BjT/TT8u5C/N+QSChGj0OYY2dveeNbZv
+	rIkYpxHqeGqpErplLG1vjHVE0KpNBM0CIx37qSEmfPxRLkn9JQej8CzmChfpo/oY6lhk51Yj1FY
+	j9g646255CmluruXcApZ2QN+IlQomLkPjKXMJOg9wZCvcCZ2ofAR1iHG
+X-Received: by 2002:a17:906:9fd1:b0:c25:362e:fb8b with SMTP id
+ a640c23a62f3a-c25362efe10mr476489366b.7.1787822617738; Thu, 27 Aug 2026
+ 02:23:37 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260824164707.225547-1-max.kellermann@ionos.com>
+In-Reply-To: <20260824164707.225547-1-max.kellermann@ionos.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Thu, 27 Aug 2026 02:23:24 -0700
+X-Gm-Features: AcwNN1UwIC-FqqFXy9MiN3M9lqUGjoxGkQeIpqgmUwjYu1w1OyWgOlMiaP06l8k
+Message-ID: <CAOJNxR+vqTNU-1k5tCO1XPBbaVYi+GK_X+x9M5cOtN+BFvecdw@mail.gmail.com>
+Subject: Re: [PATCH] ceph: lock mutex in ceph_mds_check_access()
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: idryomov@gmail.com, amarkuze@redhat.com, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Xiubo,
+LGTM.
 
-NACK. Please send a v6 rebased on current testing. Patch 1 looks
-fine; the series still cannot go in as-is.
+Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
 
-  1. fs/ceph/super.h: CEPH_MOUNT_OPT_LAZYIO (1<<18) collides with NEARFULL_SYNC
-     nearfull_sync is in testing now, using bit 18.
-     v5 still defines CEPH_MOUNT_OPT_LAZYIO as (1<<18), so 2/2 does not
-     apply (conflicts in super.h and super.c). Use (1<<19).
-  2. fs/ceph/addr.c: ceph_filemap_fault() ignores -EBUSY from invalidate
-     The new non-lazy fault path calls invalidate_inode_pages2_range()
-     and ignores the return. That helper returns -EBUSY for a dirty
-     folio (ceph has no launder_folio). After CACHE is revoked the
-     page cache is only kept for LAZYIO, which is the state this check
-     is meant to catch, and filemap_fault() still maps it into a
-     non-lazy VMA.
-     If invalidate returns -EBUSY, do not call filemap_fault(). Flush
-     the range, retry the invalidate, and only then re-read.
-
--- 
-Alex Markuze
-
+On Mon, 24 Aug 2026 at 09:47, Max Kellermann <max.kellermann@ionos.com> wrote:
+>
+> MDS session OPEN handling replaces mdsc->s_cap_auths under
+> mdsc->mutex, freeing the previous array and its strings.
+>
+> ceph_mds_check_access() traverses this array without holding the
+> mutex.  A concurrent session reopen can therefore free the array while
+> it is being inspected, resulting in a use-after-free like this:
+>
+>   Unable to handle kernel paging request at virtual address 003aaad64b2c8bb9
+>   [...]
+>   Internal error: Oops: 0000000096000004 [#1]  SMP
+>   Modules linked in:
+>   CPU: 56 UID: 2953037534 PID: 1253231 Comm: php-cgi8.4 Not tainted 6.18.45-i2-ampere #1146 NONE
+>   [..]
+>   pc : ceph_mds_check_access+0xd4/0x550
+>   lr : ceph_mds_check_access+0xc8/0x550
+>   [...]
+>   Call trace:
+>    ceph_mds_check_access+0xd4/0x550 (P)
+>    ceph_atomic_open+0x138/0xbe8
+>    path_openat+0xa24/0xfa8
+>    do_filp_open+0x94/0x158
+>    do_sys_openat2+0x88/0xf8
+>
+> Fixes: 596afb0b8933 ("ceph: add ceph_mds_check_access() helper")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+> ---
+>  fs/ceph/mds_client.c | 4 ++++
+>  fs/ceph/mds_client.h | 1 +
+>  2 files changed, 5 insertions(+)
+>
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 3c692ad02c85..0348e8b848ff 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -6532,11 +6532,13 @@ int ceph_mds_check_access(struct ceph_mds_client *mdsc, char *tpath, int mask)
+>         doutc(cl, "tpath '%s', mask %d, caller_uid %d, caller_gid %d\n",
+>               tpath, mask, caller_uid, caller_gid);
+>
+> +       mutex_lock(&mdsc->mutex);
+>         for (i = 0; i < mdsc->s_cap_auths_num; i++) {
+>                 struct ceph_mds_cap_auth *s = &mdsc->s_cap_auths[i];
+>
+>                 err = ceph_mds_auth_match(mdsc, s, cred, tpath);
+>                 if (err < 0) {
+> +                       mutex_unlock(&mdsc->mutex);
+>                         put_cred(cred);
+>                         return err;
+>                 } else if (err > 0) {
+> @@ -6558,6 +6560,7 @@ int ceph_mds_check_access(struct ceph_mds_client *mdsc, char *tpath, int mask)
+>         doutc(cl, "root_squash_perms %d, rw_perms_s %p\n", root_squash_perms,
+>               rw_perms_s);
+>         if (root_squash_perms && rw_perms_s == NULL) {
+> +               mutex_unlock(&mdsc->mutex);
+>                 doutc(cl, "access allowed\n");
+>                 return 0;
+>         }
+> @@ -6572,6 +6575,7 @@ int ceph_mds_check_access(struct ceph_mds_client *mdsc, char *tpath, int mask)
+>                       !!(mask & MAY_READ), !!(mask & MAY_WRITE));
+>         }
+>         doutc(cl, "access denied\n");
+> +       mutex_unlock(&mdsc->mutex);
+>         return -EACCES;
+>  }
+>
+> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+> index 0ece4c9e3529..8774c7d7d18d 100644
+> --- a/fs/ceph/mds_client.h
+> +++ b/fs/ceph/mds_client.h
+> @@ -603,6 +603,7 @@ struct ceph_mds_client {
+>         struct rw_semaphore     pool_perm_rwsem;
+>         struct rb_root          pool_perm_tree;
+>
+> +       /* protected by mutex */
+>         u32                      s_cap_auths_num;
+>         struct ceph_mds_cap_auth *s_cap_auths;
+>
+> --
+> 2.47.3
+>
