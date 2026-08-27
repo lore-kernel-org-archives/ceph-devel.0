@@ -1,384 +1,128 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 785A9440A34
-	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 09:39:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787823574; cv=none; b=TP8Q3FfoShtx5p6eEjPDOXRXMm5JRz2laXN6KsXYifIRD0SyLqosj3UxhNV941t52dLtyI/1DKN9KlpSWqNIDV8R5SyI4sKykO+Rc76c5dyTDnMXgZkbovF12qqVVGrOwDFKvZIztVzwhyjMQk0PoMpgRRDzVT91dkZdvumQCEQ=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787823574; c=relaxed/simple;
-	bh=bylhMG/xsSU1DkXbS6+3JW09TUtD1Fx+cKBW3g6t9Dw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=T1Aegsr9M/a/dLX3FqtTHY+hnu7synVvp4+dxM32iNMmxR4N28k1ED9wbyDoFcZwRcbaK834Ye/QD+FyTiVjn0r4LJrC42BspSIpKXYpW2s+AqYJzjB87LLzg4BfkW/a+ODDkklQAlZHKBcVB6y8BO+lMLc87fQnpZyq6Bk/mJ0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gujkIw2G; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C68C358D27
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 10:16:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.49
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787825795; cv=pass; b=UPDbF5Qs7A/bi0fgjOCHaZH3VYyQldYugs3ZLg78xEvZtOrz0DwSvSelL1WRYZ3qD5EZL+CefbAEmrKUogLj9gvMXFY+SlQbjWL5R8pb+RkWV19pdJfqphEDXkukBXBcvxzEO5Rk6H+M1O1K9RvytukKjCluNnfwid2Sd5vB6ao=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787825795; c=relaxed/simple;
+	bh=Qqa7plR3DgvMxHWqVtzzh9cdHeguMCRYeLiN/vCoUMk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Hh5X9O+/DN5gK+xRI8JDEI30LWJQPpq5erEA5zf0MGrsNtjYA+m6tpVh8+hdxywrOlUf8vhrRdO8mB4pn9u2CcUW4r96Pzu95TACwEZrIm33HM76ITRzXDseOy5hihpRPJ56vtvoEM4JtcE2l37eWIJKBncSNyiR72V9qH6Qju8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=Tv/HyKRe; arc=pass smtp.client-ip=209.85.218.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gujkIw2G"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787823564;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=VU0W9uWkxCfILwS/Tq6pNCdVsczcmnOSDkZC96gvMGs=;
-	b=gujkIw2G9edvluxDOPxF0IVj3IKieBKoyX1UqJadrJUoV5PvcfkaS5m5P53dYMbj3khQx0
-	AQgwMJJQAVvnDzcmMStAjHArIyYuXyQvJRmL7DVGNYYrEYDAZztxThlS3W7STE+C1+Gbbx
-	W9sB/I252XfRu9cnSCsa3jRcbcb/GYU=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-510-Zy1ds6MwNleJUjpFzBzbPw-1; Thu,
- 27 Aug 2026 05:39:18 -0400
-X-MC-Unique: Zy1ds6MwNleJUjpFzBzbPw-1
-X-Mimecast-MFC-AGG-ID: Zy1ds6MwNleJUjpFzBzbPw_1787823556
-Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3D16D19560B4;
-	Thu, 27 Aug 2026 09:39:16 +0000 (UTC)
-Received: from warthog.com (unknown [10.22.88.47])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id D216330001A2;
-	Thu, 27 Aug 2026 09:39:13 +0000 (UTC)
-From: David Howells <dhowells@redhat.com>
-To: Christian Brauner <christian@brauner.io>
-Cc: David Howells <dhowells@redhat.com>,
-	Paulo Alcantara <pc@manguebit.org>,
-	netfs@lists.linux.dev,
-	linux-afs@lists.infradead.org,
-	linux-cifs@vger.kernel.org,
-	ceph-devel@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v3 09/10] netfs: Fix read progress reporting
-Date: Thu, 27 Aug 2026 10:38:24 +0100
-Message-ID: <20260827093828.1956211-10-dhowells@redhat.com>
-In-Reply-To: <20260827093828.1956211-1-dhowells@redhat.com>
-References: <20260827093828.1956211-1-dhowells@redhat.com>
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="Tv/HyKRe"
+Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-c1600d040e4so128568766b.1
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 03:16:30 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787825788; cv=none;
+        d=google.com; s=arc-20260327;
+        b=VoiZIqakxSggoRmZipieOw9DdXhayXECpDwdXZXmnOTR/rvFP598bBRRzp/0NNgTqh
+         yJW3R0EaumSJBLAbW99NX8tTX4XF8kHE7PWleDenuup4Yci0amA32Djf3E4UQLUHpHQU
+         H6Ad3ATdH0jZFf4R2i2b3ZA/s0z5ueVoond7P0fia2j6NC/08Sv3E/t6JgBxw6fYcVgg
+         4bUTLJ/Js8/VpP6NxD/rYTw2/tAJDvLp8w2XjTcuxvh4VpDxVaJnNk6JfhOsEQ6I7VOQ
+         1JxCTFY1UZHkSQN6GeOh19Grv2yNFOlxKOf4zyYlg8XnBgHsrk6Mb9yB/ZjL900Qf0XR
+         e/aQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=V/R9XdMzOE2Wo3EuNdZVeUYyBELBttwS5KAlv2sFGA8=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=FIXBsn9JTzPpHH+kZM5ScLid1+78oubGRd/F26Q4AEyAc25jdGcQ8Xyt5XC8LmL5gm
+         y/yNl/u497MYnoMgYiwDyWLHPc8yG/ieNjN39q9inUONMZwYQ9X2cHv9HbH2SnruliV4
+         P7//WQ7Lsd8kN02n0KK64PakEsnBZKHf7ncYasHyOhjzZb4LAcSVWUYNa6kVxvnQnhDN
+         63XNp/qNVQUU2CBxbsbjta3LcetfzY/f6Z68yxEPpLCkRE+VYfsbDLx0j8uHOiPUQuCE
+         lkp4ShBK5v9zyHltq/OL0EpM5Kwr2pU4z7ofBfZ60bgdyRXi2otJWewQtHZcX3ZwY2DX
+         SE8A==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=clyso.com; s=google; t=1787825788; x=1788430588; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=V/R9XdMzOE2Wo3EuNdZVeUYyBELBttwS5KAlv2sFGA8=;
+        b=Tv/HyKReTymCcWz1W0cvckj5rzDaaoHqkF7OEMvyMgqYlN3pA/lDn+XYAlitNZWB0T
+         2wPH0awXnaeP8BPbni8jHdeNvID9NZKRGti/ejOWsbgjQIzdH5lMMuG+9ClROiyojqcY
+         g0Is1aii4x4fy0expf1gkOdvxhOd1he+XGIgsDpdNPGeUHyexKYQCXI5N0mFhbrC51vB
+         a3kZj713l2agUj/0a9fO9ZroyeZ0vonLJUbqdYXe9r1chOZe43oTGFpDUMQMyes5/83c
+         kTk9PNJbCrYrVLSOz6WlRc0nyKwvHKtvTcYi031EuYvoLIySsHg1LEy7fH7RH3eIbuZc
+         Lzbw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787825788; x=1788430588;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=V/R9XdMzOE2Wo3EuNdZVeUYyBELBttwS5KAlv2sFGA8=;
+        b=QWylnjB+ML1YOXjW//OadNWp/xsRZWV58godsxzJst3lv6EGkmVOeiEo6NYtq/Ms0L
+         VA+xhhttEwyaxS1EQ9/oaIGv5VHjQ9veIwoA+nYFnp7DwmWJV6um/O3m0feLRY8yxLJ+
+         a916OVMrOFvG1YdUUFJQxXPbjsI3bpUpIDAqg2EeN1miUDXBaowgjcQAjrFvcoLx0nVv
+         kQy1m+7l+xwceoX3PD8X4ifErg9XMn7KFqO39o+LDhJC4Rkoo0RuKO7votNcGx08tbv8
+         N2w5G/AqRMRFLQ6aqLJ0rdxkFMSgl3rMe1Ri97UQLjk8o+6dH3O8/iDM6/HFY66isitV
+         T4kg==
+X-Gm-Message-State: AFuF++lrJmTFX0zHBpcINih1/UM368mpxyAgrY2GkfGlTJdkh0tPmwJ1
+	Q7Wm1jyYkgU5uBnBw3RR9ilZzMxp48lQC27xbPqhVCqzCKeXUDbtAHsHDBtYq6oA/LGVz/jl5sb
+	LuCfvKRUsVEt/nciXZhdyQPe7QpZUlfH3mfPQKAehU2AickOgWMGHtyw=
+X-Gm-Gg: AR+sD128eFvBSfeaeFvd+uHU5QAF/rHsoc0q7JUwlpeJz+Buu5LYP9Cn6CsmCPXFPhf
+	ojl3yYiUoO82onK40cpU/UXQmCKC/v5GhMDYNxOQHsJH5mRPw6+yHr2ML3+alKXvARHD2RvwSlo
+	Kr9Z6kFmoXlEyjz5MLR77k8Zj1XBsjOwdUuRxjB3/QzxhKa5/OtnTcq3rJQFqD2G3ltXzFF1RnS
+	F8h6CBJRr5Z7611UYrnLz/uu0pr9mr1oxW5VjOyNMF3V6UMJl+WAk6UTucCwtQHbxkqENSrz2n5
+	xGjgPKnwN5Cz66UiJTXs1GBDS4Ak++p6LAFZvXHVVclM5w==
+X-Received: by 2002:a17:907:1c03:b0:c20:7166:cc16 with SMTP id
+ a640c23a62f3a-c253611b00dmr397245066b.15.1787825787893; Thu, 27 Aug 2026
+ 03:16:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
+References: <20260825-lazyio-v5-0-65118679d6fa@clyso.com> <20260827092208.2741445-1-amarkuze@redhat.com>
+In-Reply-To: <20260827092208.2741445-1-amarkuze@redhat.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Thu, 27 Aug 2026 03:16:16 -0700
+X-Gm-Features: AcwNN1UU7e3RKg-5zrPxFtAFGTMkuxQN9Da6NFnwTpZoDtEOU09RhVhiHZHUK80
+Message-ID: <CAOJNxRJn5-EnU5UyWN4AUxu3gjSDimb7FF115uk6YBF_1SwZ1A@mail.gmail.com>
+Subject: Re: [PATCH v5 0/2] ceph: add 'lazyio' mount option to kclient
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-For really big read RPC ops that span multiple folios, netfslib allows the
-filesystem to give progress notifications to wake up the collector thread
-to do a collection of folios that have now been fetched, even if the RPC is
-still ongoing, thereby allowing the application to make progress.
+Hi Alex,
 
-This works by taking the current rreq->cleaned_to value (which indicates
-which folios have been unlocked) and adding the stashed size of the next
-folio to it.  cleaned_to, however, is subject to 64-bit tearing on a 32-bit
-arch.
+Good catches. You are right.
 
-Fix this by stashing the next progress notification point as a size_t
-(which won't tear) to be added to rreq->start (which won't change), with
-the collector thread calculating that from cleaned_to plus the next folio
-size.
+I will fix the bit collision and the -EBUSY handling in
+ceph_filemap_fault, then respin as v6 rebased on the current testing
+branch.
 
-Further, however, if the folios are small, the collector thread gets
-constantly woken up - which has a negative performance impact on the
-system.
+Thanks
+- Xiubo
 
-Fix that too by setting a minimum trigger of 256KiB or the size of the
-folio at the front of the queue, whichever is larger.  Note that this has
-an issue that different subreqs have different need-to-be-cached
-properties; this is solved by a preceding patch that marks the property on
-the folios whilst issuing subreqs rather than when collecting them.
-
-Also, make sure rreq->cleaned_to is initialised up front, along with
-rreq->collected_to and stream->collected_to.
-
-Fixes: e2d46f2ec332 ("netfs: Change the read result collector to only use one work item")
-Link: https://sashiko.dev/#/patchset/20260804100224.2748935-1-dhowells%40redhat.com
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Paulo Alcantara <pc@manguebit.org>
-cc: netfs@lists.linux.dev
-cc: linux-fsdevel@vger.kernel.org
----
- fs/netfs/buffered_read.c     |  2 ++
- fs/netfs/internal.h          |  1 +
- fs/netfs/objects.c           | 32 +++++++++++++--------
- fs/netfs/read_collect.c      | 56 +++++++++++++++++++++++++++---------
- fs/netfs/read_single.c       |  2 ++
- include/linux/netfs.h        |  2 +-
- include/trace/events/netfs.h | 21 ++++++++++++++
- 7 files changed, 90 insertions(+), 26 deletions(-)
-
-diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
-index 20f358209730..252dbd9bc4fd 100644
---- a/fs/netfs/buffered_read.c
-+++ b/fs/netfs/buffered_read.c
-@@ -443,6 +443,7 @@ void netfs_readahead(struct readahead_control *ractl)
- 
- 	rreq->submitted = rreq->start + added;
- 	rreq->cleaned_to = rreq->start;
-+	netfs_read_set_unlock_at(rreq);
- 
- 	netfs_read_to_pagecache(rreq);
- 	netfs_maybe_bulk_drop_ra_refs(rreq);
-@@ -468,6 +469,7 @@ static int netfs_create_singular_buffer(struct netfs_io_request *rreq, struct fo
- 	if (added < 0)
- 		return added;
- 	rreq->submitted = rreq->start + added;
-+	rreq->progress_at = added;
- 	return 0;
- }
- 
-diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
-index bd8b2d633f96..c734cad7063e 100644
---- a/fs/netfs/internal.h
-+++ b/fs/netfs/internal.h
-@@ -110,6 +110,7 @@ static inline void netfs_see_subrequest(struct netfs_io_subrequest *subreq,
- /*
-  * read_collect.c
-  */
-+void netfs_read_set_unlock_at(struct netfs_io_request *rreq);
- bool netfs_read_collection(struct netfs_io_request *rreq);
- void netfs_read_collection_worker(struct work_struct *work);
- void netfs_cancel_read(struct netfs_io_subrequest *subreq, int error);
-diff --git a/fs/netfs/objects.c b/fs/netfs/objects.c
-index 01461a74642d..7f6a3e912602 100644
---- a/fs/netfs/objects.c
-+++ b/fs/netfs/objects.c
-@@ -41,24 +41,32 @@ struct netfs_io_request *netfs_alloc_request(struct address_space *mapping,
- 
- 	memset(rreq, 0, kmem_cache_size(cache));
- 	INIT_WORK(&rreq->cleanup_work, netfs_free_request);
--	rreq->gfp	= gfp;
--	rreq->start	= start;
--	rreq->len	= len;
--	rreq->origin	= origin;
--	rreq->netfs_ops	= ctx->ops;
--	rreq->mapping	= mapping;
--	rreq->inode	= inode;
--	rreq->i_size	= i_size_read(inode);
--	rreq->debug_id	= atomic_inc_return(&debug_ids);
--	rreq->wsize	= INT_MAX;
-+	rreq->gfp		= gfp;
-+	rreq->start		= start;
-+	rreq->collected_to	= start;
-+	rreq->cleaned_to	= start;
-+	rreq->len		= len;
-+	rreq->progress_at	= 0;
-+	rreq->origin		= origin;
-+	rreq->netfs_ops		= ctx->ops;
-+	rreq->mapping		= mapping;
-+	rreq->inode		= inode;
-+	rreq->i_size		= i_size_read(inode);
-+	rreq->debug_id		= atomic_inc_return(&debug_ids);
-+	rreq->wsize		= INT_MAX;
- 	rreq->io_streams[0].sreq_max_len = ULONG_MAX;
- 	rreq->io_streams[0].sreq_max_segs = 0;
- 	spin_lock_init(&rreq->lock);
--	INIT_LIST_HEAD(&rreq->io_streams[0].subrequests);
--	INIT_LIST_HEAD(&rreq->io_streams[1].subrequests);
- 	init_waitqueue_head(&rreq->waitq);
- 	refcount_set(&rreq->ref, 2);
- 
-+	for (int s = 0; s < NR_IO_STREAMS; s++) {
-+		struct netfs_io_stream *stream = &rreq->io_streams[s];
-+
-+		INIT_LIST_HEAD(&stream->subrequests);
-+		stream->collected_to = rreq->start;
-+	}
-+
- 	if (origin == NETFS_READAHEAD ||
- 	    origin == NETFS_READPAGE ||
- 	    origin == NETFS_READ_GAPS ||
-diff --git a/fs/netfs/read_collect.c b/fs/netfs/read_collect.c
-index 4e298b690219..75a4aa4b949d 100644
---- a/fs/netfs/read_collect.c
-+++ b/fs/netfs/read_collect.c
-@@ -94,6 +94,35 @@ static void netfs_unlock_read_folio(struct netfs_io_request *rreq,
- 	folioq_clear(folioq, slot);
- }
- 
-+/*
-+ * Determine how much to gather before unlocking more folios.
-+ */
-+void netfs_read_set_unlock_at(struct netfs_io_request *rreq)
-+{
-+	struct folio_queue *folioq = rreq->buffer.tail;
-+	unsigned int slot = rreq->buffer.first_tail_slot;
-+	size_t cleaned_to = rreq->cleaned_to - rreq->start;
-+	size_t progress_at = cleaned_to;
-+	size_t minimum = 256 * 1024;
-+
-+	while (progress_at < rreq->len) {
-+		if (slot >= folioq_count(folioq)) {
-+			folioq = folioq->next;
-+			if (!folioq)
-+				break;
-+			slot = 0;
-+		}
-+
-+		progress_at += folioq_folio_size(folioq, slot);
-+		if (progress_at - cleaned_to >= minimum)
-+			break;
-+		slot++;
-+	}
-+
-+	WRITE_ONCE(rreq->progress_at, progress_at);
-+	trace_netfs_read_progress_at(rreq);
-+}
-+
- /*
-  * Unlock any folios we've finished with.
-  */
-@@ -112,7 +141,7 @@ static void netfs_read_unlock_folios(struct netfs_io_request *rreq,
- 	if (slot >= folioq_nr_slots(folioq)) {
- 		folioq = rolling_buffer_delete_spent(&rreq->buffer);
- 		if (!folioq) {
--			rreq->front_folio_order = 0;
-+			WRITE_ONCE(rreq->progress_at, ULONG_MAX);
- 			return;
- 		}
- 		slot = 0;
-@@ -127,8 +156,7 @@ static void netfs_read_unlock_folios(struct netfs_io_request *rreq,
- 
- 	for (;;) {
- 		struct folio *folio;
--		unsigned long long fpos, fend;
--		unsigned int order;
-+		unsigned long long fpos = rreq->cleaned_to, fend;
- 		size_t fsize;
- 
- 		folio = folioq_folio(folioq, slot);
-@@ -137,9 +165,7 @@ static void netfs_read_unlock_folios(struct netfs_io_request *rreq,
- 			      rreq->debug_id, folio->index))
- 			trace_netfs_folio(folio, netfs_folio_trace_not_locked);
- 
--		order = folioq_folio_order(folioq, slot);
--		rreq->front_folio_order = order;
--		fsize = PAGE_SIZE << order;
-+		fsize = folioq_folio_size(folioq, slot);
- 		fpos = folio_pos(folio);
- 		fend = fpos + fsize;
- 
-@@ -174,6 +200,8 @@ static void netfs_read_unlock_folios(struct netfs_io_request *rreq,
- 	rreq->buffer.tail = folioq;
- done:
- 	rreq->buffer.first_tail_slot = slot;
-+
-+	netfs_read_set_unlock_at(rreq);
- }
- 
- /*
-@@ -234,7 +262,7 @@ static void netfs_collect_read_results(struct netfs_io_request *rreq)
- 		 * subreqs.
- 		 */
- 		if (notes & BUFFERED) {
--			size_t fsize = PAGE_SIZE << rreq->front_folio_order;
-+			uoff_t unlock_at = rreq->start + rreq->progress_at;
- 
- 			/* Clear the tail of a short read. */
- 			if (!(notes & HIT_PENDING) &&
-@@ -256,7 +284,7 @@ static void netfs_collect_read_results(struct netfs_io_request *rreq)
- 				transferred = front->len;
- 				trace_netfs_rreq(rreq, netfs_rreq_trace_set_abandon);
- 			}
--			if (front->start + transferred >= rreq->cleaned_to + fsize ||
-+			if (front->start + transferred >= unlock_at ||
- 			    test_bit(NETFS_SREQ_HIT_EOF, &front->flags))
- 				netfs_read_unlock_folios(rreq, &notes);
- 		} else {
-@@ -476,20 +504,22 @@ void netfs_read_collection_worker(struct work_struct *work)
- void netfs_read_subreq_progress(struct netfs_io_subrequest *subreq)
- {
- 	struct netfs_io_request *rreq = subreq->rreq;
--	struct netfs_io_stream *stream = &rreq->io_streams[0];
--	size_t fsize = PAGE_SIZE << rreq->front_folio_order;
--
--	trace_netfs_sreq(subreq, netfs_sreq_trace_progress);
-+	struct netfs_io_stream *stream = &rreq->io_streams[subreq->stream_nr];
-+	size_t progress_at = READ_ONCE(rreq->progress_at);
-+	uoff_t update_at = rreq->start + progress_at;
-+	uoff_t transferred_to = subreq->start + subreq->transferred;
- 
- 	/* If we are at the head of the queue, wake up the collector,
- 	 * getting a ref to it if we were the ones to do so.
- 	 */
--	if (subreq->start + subreq->transferred > rreq->cleaned_to + fsize &&
-+	if (progress_at != ULONG_MAX &&
-+	    transferred_to >= update_at &&
- 	    (rreq->origin == NETFS_READAHEAD ||
- 	     rreq->origin == NETFS_READPAGE ||
- 	     rreq->origin == NETFS_READ_FOR_WRITE) &&
- 	    list_is_first(&subreq->rreq_link, &stream->subrequests)
- 	    ) {
-+		trace_netfs_sreq(subreq, netfs_sreq_trace_progress);
- 		__set_bit(NETFS_SREQ_MADE_PROGRESS, &subreq->flags);
- 		netfs_wake_collector(rreq);
- 	}
-diff --git a/fs/netfs/read_single.c b/fs/netfs/read_single.c
-index 8833550d2eb6..de67ac41548d 100644
---- a/fs/netfs/read_single.c
-+++ b/fs/netfs/read_single.c
-@@ -170,6 +170,8 @@ ssize_t netfs_read_single(struct inode *inode, struct file *file, struct iov_ite
- 	if (IS_ERR(rreq))
- 		return PTR_ERR(rreq);
- 
-+	rreq->progress_at = rreq->len;
-+
- 	ret = netfs_single_begin_cache_read(rreq, ictx);
- 	if (ret == -ENOMEM || ret == -EINTR || ret == -ERESTARTSYS)
- 		goto cleanup_free;
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 49fea3a30611..307c27721027 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -246,6 +246,7 @@ struct netfs_io_request {
- 	unsigned long long	submitted;	/* Amount submitted for I/O so far */
- 	unsigned long long	len;		/* Length of the request */
- 	size_t			transferred;	/* Amount to be indicated as transferred */
-+	size_t			progress_at;	/* Report read progress when hit this much read */
- 	long			error;		/* 0 or error that occurred */
- 	unsigned long long	i_size;		/* Size of the file */
- 	unsigned long long	start;		/* Start position */
-@@ -262,7 +263,6 @@ struct netfs_io_request {
- 	atomic_t		subreq_counter;	/* Next subreq->debug_index */
- 	unsigned int		nr_group_rel;	/* Number of refs to release on ->group */
- 	spinlock_t		lock;		/* Lock for queuing subreqs */
--	unsigned char		front_folio_order; /* Order (size) of front folio */
- 	enum netfs_io_origin	origin;		/* Origin of the request */
- 	bool			direct_bv_unpin; /* T if direct_bv[] must be unpinned */
- 	refcount_t		ref;
-diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
-index a22084813cb5..3fec3e8f91c8 100644
---- a/include/trace/events/netfs.h
-+++ b/include/trace/events/netfs.h
-@@ -791,6 +791,27 @@ TRACE_EVENT(netfs_folioq,
- 		      __print_symbolic(__entry->trace, netfs_folioq_traces))
- 	    );
- 
-+TRACE_EVENT(netfs_read_progress_at,
-+	    TP_PROTO(const struct netfs_io_request *rreq),
-+
-+	    TP_ARGS(rreq),
-+
-+	    TP_STRUCT__entry(
-+		    __field(unsigned int,	rreq)
-+		    __field(size_t,		progress_at)
-+		    __field(size_t,		cleaned_to)
-+			     ),
-+
-+	    TP_fast_assign(
-+		    __entry->rreq	= rreq->debug_id;
-+		    __entry->cleaned_to	= rreq->cleaned_to - rreq->start;
-+		    __entry->progress_at = rreq->progress_at;
-+			   ),
-+
-+	    TP_printk("R=%08x cln=%zx prg=%zx",
-+		      __entry->rreq, __entry->cleaned_to, __entry->progress_at)
-+	    );
-+
- #undef EM
- #undef E_
- #endif /* _TRACE_NETFS_H */
-
+On Thu, 27 Aug 2026 at 02:22, Alex Markuze <amarkuze@redhat.com> wrote:
+>
+> Hi Xiubo,
+>
+> NACK. Please send a v6 rebased on current testing. Patch 1 looks
+> fine; the series still cannot go in as-is.
+>
+>   1. fs/ceph/super.h: CEPH_MOUNT_OPT_LAZYIO (1<<18) collides with NEARFULL_SYNC
+>      nearfull_sync is in testing now, using bit 18.
+>      v5 still defines CEPH_MOUNT_OPT_LAZYIO as (1<<18), so 2/2 does not
+>      apply (conflicts in super.h and super.c). Use (1<<19).
+>   2. fs/ceph/addr.c: ceph_filemap_fault() ignores -EBUSY from invalidate
+>      The new non-lazy fault path calls invalidate_inode_pages2_range()
+>      and ignores the return. That helper returns -EBUSY for a dirty
+>      folio (ceph has no launder_folio). After CACHE is revoked the
+>      page cache is only kept for LAZYIO, which is the state this check
+>      is meant to catch, and filemap_fault() still maps it into a
+>      non-lazy VMA.
+>      If invalidate returns -EBUSY, do not call filemap_fault(). Flush
+>      the range, retry the invalidate, and only then re-read.
+>
+> --
+> Alex Markuze
+>
