@@ -1,175 +1,54 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx1.manguebit.org (mx1.manguebit.org [143.255.12.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11631471276
-	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 17:37:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7894B3AA9CA;
+	Thu, 27 Aug 2026 22:59:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=143.255.12.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787852231; cv=none; b=l03ZsKckVABv/rJMhzEkXxDsl3HiBySLy/Uk138/vHzOqTbqCnPfrHzXLAlFuvUMGiBPLYXUkwT5YQsmbu2ESXaSNfC1AThT6R7K0BVxxomKKESIMgaJfo6mjxzj5g+bUY/9osZlafrYizrmxoTqsRA+qdDvL/xffz7lx22kzaE=
+	t=1787871571; cv=none; b=ZfnAiUEXDSiEeWbfhKEnuTYAjzpjfxqhxdzyUFeKGzUMNrRgAAvGTkJjmgqDemTrfIOLLofF3uD001AeJG6u6e2KAWVtRpSUzbu12aShyaW2WHAq1WhhgnXxEdc5d3ZswlPmQLT48jMRa8GzamPK/IkQ85tTanG96kWqnltV7Y0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787852231; c=relaxed/simple;
-	bh=qPsUp4IBU702AYv5m5TMwKUH3RCsApcpmsXTAVAyBAs=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=kmPeGMRDlza+zwGiTvTEIAZD1gSxddwi8BZWzW30WqJg+bJVh5VOcF7fJmTqq68Aec5A/dvkSgYGC3ZZvf7vCzZ6gNMJuluXfrZG+oKe96lgHR7CKgTQYsnxtsDZMdkKf1dOVvC4/MgLwHbYToT0KrXkWqGU/Rw40FU5lu6GtaQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W4mLZd1h; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=PBswFAB4; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1787871571; c=relaxed/simple;
+	bh=Bbt9HxWbrJ1lCK2u8DaGS18B13vieZ80j1irQqCa1O4=;
+	h=Message-ID:From:To:Cc:Subject:In-Reply-To:References:Date:
+	 MIME-Version:Content-Type; b=t5mxGxR2dyo2ZBl+jpPbFhxgT7ku2oPD483h8GvItJkuPKIzz0fVtOmy9MWnzZ2hTaVmXGOuN+KiiyW181W7Rr3fexKWg8rb5BGD9a1/YPgWQ4vuG+Jo1I5eLVu817KyVUZVQYnA1YphOiX10QsXQWdLN/W7GKY55nrJW+KyBEM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manguebit.org; spf=pass smtp.mailfrom=manguebit.org; dkim=pass (2048-bit key) header.d=manguebit.org header.i=@manguebit.org header.b=E5GlpDs6; arc=none smtp.client-ip=143.255.12.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manguebit.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manguebit.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W4mLZd1h";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="PBswFAB4"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787852229;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=kjNPRgM2Y7JIhIV41NJgBnIZmEAkNtWdFSBVc2llNG8=;
-	b=W4mLZd1h66BvXosEdWaMafoyeRILtiqIdyGejgLt3iizqJ6ttHn0M8cWXUsigd8OZChsPt
-	EIj5My3ezIABvi35d46eYCgOQgbpWYS0gb9NJ46dS0xMuA4ol4v+jv2bXafnNEQYa88DAV
-	9Le5qlDnQPTPvpVSAA+m4MIfxe0ybqo=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-601-AZMDvpH2MceJwfsRRZAeWA-1; Thu, 27 Aug 2026 13:37:07 -0400
-X-MC-Unique: AZMDvpH2MceJwfsRRZAeWA-1
-X-Mimecast-MFC-AGG-ID: AZMDvpH2MceJwfsRRZAeWA_1787852226
-Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-6a3e6916a5eso51175a12.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 10:37:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1787852226; x=1788457026; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:mime-version:message-id:date
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=kjNPRgM2Y7JIhIV41NJgBnIZmEAkNtWdFSBVc2llNG8=;
-        b=PBswFAB49bQzhdoRiI5Pb4sad49xfOIRRXr0/kD+YkAQFrhTvlAdwZrtg1TbJyt8aD
-         4hGD3YPRp9ojsJpG8dwFtICQJ+vGSX1AB0Ib5UcPB23feMWhF8s6ndiQYCNpop9/le5+
-         h/DIkC1DxDuGv+fR7aBKnSPmHrjzbzm5ZohBrUCvGR2GLBN8YqOyynCShkScZvBVuZPG
-         a3KhrGYRCEYSfu4JZrq2aTbUnFLaMnGW98PmHKiWQ6HNM832H2wOaFc83Drkj9jydP+c
-         +XEXmQqQfnROUJ2bDpenLSJX4Wbnjy8bMC+rfi77GqI1mmFZZmx6mqKXT5Ue+szyrlik
-         xhWA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787852226; x=1788457026;
-        h=content-transfer-encoding:content-type:mime-version:message-id:date
-         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=kjNPRgM2Y7JIhIV41NJgBnIZmEAkNtWdFSBVc2llNG8=;
-        b=QiZ03tYJP4ZQYhXCE1hF+ebdFN323w3MaoKcZmMBUwsl3jlndkxvSlQkc9Fz/nbpvW
-         /+3cUCK7lvsQRWZaF9Q+QMv5BILBjaXkOTxXLXIVHU5cgp7cMDQxy9OLPXhYD7XFY6VC
-         Dhs1nEyN9yhE0lghnKnjqHMXzaFheDkd+h/Noi0ue2IuInXUg9hzwrq+cdj8enRIHbi1
-         R8ERkSAqWRFbovQ8FbKNCZWXodZQ2NDnMwqwTIow3Wkg1VvpPHQpUNkYUhVEUV4xut+G
-         7S4Ewr2dzhMG4rvruMeiSlFePmOx7Dmc2GJOkK5yvDwzonFgnAc1c0rL9VJLeNj6XJSJ
-         2w3A==
-X-Forwarded-Encrypted: i=1; AHgh+RpZzEeCsQY3+1TMpexcDChXcMZB96+ZsEyPhXK3l+TKBwB4onGVUsU3mxQqO9zi0PQAlEE3V95aOyaa@vger.kernel.org
-X-Gm-Message-State: AFuF++mMMdHBKmJYfldFCajn/bnBRNuEZ3LMXmMqzPbTyMFAmqfFtz4B
-	a6/pqaIjEdyRDO0ricpcaTeORbxwY6lnaQRLiPnyEsqIjuk6dopbHGEvHBqj/VEaRy0Bp4mPQj4
-	4md2myVxu/UswEKauZHFrzX7BAio5Uh2SlQ4IpcwSqB3xDGrE/uJgAWoxW//mXoqo0Xe3n+JjNw
-	==
-X-Gm-Gg: AR+sD11uMdzV9s8zbn+Y1AIgD0sHdF0km7aQuhw2QPqdGPKAGJowhsFyxaDtr5ou2gl
-	zUyUYxZT+tuHoP906u1BL4psiDexv7Fa5uHn5lItZfmxx4jISysqEaryG4Qqfj0zYvDLsNyhv5q
-	R5rco25sqcyEKaQnKwCfPYdAa3uRdNhC7cJvlJCVqnuMaU3Ji8mDSux9gJSy7rmlZtuQ6m92xSW
-	YwFpvG2reo8tYIFajO2p/JOdW0sqYCHKPhI5cmhMEuIcDHJ6so7BOizoinQ58q2ktJGGt7VTqIR
-	6X9sycq8fToxa26fOhKnQh3YFJRgqo1fJ3bQ6pAR485P5Lw9PNr72uEdCRmmrm7KGegkTT1F1HF
-	OWDibUHq3LEroLHMXH9oEf7FqxRTRsGmt2g==
-X-Received: by 2002:a17:907:60cc:b0:c24:dd7f:3254 with SMTP id a640c23a62f3a-c2556c195e2mr24617466b.3.1787852226171;
-        Thu, 27 Aug 2026 10:37:06 -0700 (PDT)
-X-Received: by 2002:a17:907:60cc:b0:c24:dd7f:3254 with SMTP id a640c23a62f3a-c2556c195e2mr24613466b.3.1787852225685;
-        Thu, 27 Aug 2026 10:37:05 -0700 (PDT)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c250a88ab82sm799262066b.31.2026.08.27.10.37.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 27 Aug 2026 10:37:05 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>,
-	Xiubo Li <xiubo.li@clyso.com>,
-	ceph-devel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: [PATCH] libceph: avoid infinite loop in ceph_pg_is_split()
-Date: Thu, 27 Aug 2026 17:37:03 +0000
-Message-Id: <20260827173703.2762844-1-amarkuze@redhat.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=manguebit.org header.i=@manguebit.org header.b="E5GlpDs6"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=manguebit.org; s=dkim; h=Content-Type:MIME-Version:Date:References:
+	In-Reply-To:Subject:Cc:To:From:Message-ID:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=Bbt9HxWbrJ1lCK2u8DaGS18B13vieZ80j1irQqCa1O4=; b=E5GlpDs6/A0/TwUajXhAmAp6n+
+	uU46VnkzLb1SvtK4+noQD1KQLoHNGiwqGmi7rQIH5ij1CsS5ggOddcCV2Pl1FU8v1rF6yq0cHok2n
+	M0LuojzjtkB7GEe9VLfUUF43OTtudCmS/Juv+TB8eed6bFT7qN5rxU10I+aeT0IYf9Trrttb5gA5I
+	7YYCFclqrDYAg/Z64K5lWOyYDyXV3/WO3wIzIavQvoF6boOE6Sg8yYbL+ZntG3nMHxGu/JOqbTBxX
+	/HOiePNUqWrWhDU/SM825XIw0ApewzSLXS19mKympqHW0Tg3uVAV43JKZA5erKaAV++mRdjhMACtB
+	lR3WPWOg==;
+Received: from pc by mx1.manguebit.org with local (Exim 4.99.5)
+	id 1wzj3z-000000008a3-3UGq;
+	Thu, 27 Aug 2026 19:59:15 -0300
+Message-ID: <e789bd4431e38ad9b76ab49a841fbfc3@manguebit.org>
+From: Paulo Alcantara <pc@manguebit.org>
+To: David Howells <dhowells@redhat.com>, Christian Brauner
+ <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>, netfs@lists.linux.dev,
+ linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
+ ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v4 00/10] netfs, cachefiles: Miscellaneous fixes
+In-Reply-To: <20260827134304.2075713-1-dhowells@redhat.com>
+References: <20260827134304.2075713-1-dhowells@redhat.com>
+Date: Thu, 27 Aug 2026 19:59:15 -0300
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-old_pg_num and new_pg_num come from the OSD map. When old_pg_num is at
-least 2^31, calc_bits_of() returns 32 and both (1 << 32) and
-n << (old_bits - 1) are undefined in 32-bit signed arithmetic. On
-machines that mask the shift count, next_bit toggles between 0 and
-2^31 so s never reaches new_pg_num and the loop never exits. old_pg_num
-== 0 hits n << -1, which is also undefined.
+Looks good.
 
-Do the shift in u64, build the 2^n-1 mask without a 32-bit overflow,
-treat old_pg_num == 0 as not-a-split, and compute stable_mod in
-unsigned so seeds in the high half of the u32 range stay well-defined.
-A hostile map can no longer pin the client in this helper.
-
-Reported-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Link: https://lore.kernel.org/ceph-devel/d1dc7faa-2373-4c96-ba0e-0e6d3e3b8457@tu-ilmenau.de/
-Fixes: 63244fa123a7 ("libceph: introduce ceph_osd_request_target, calc_target()")
-Cc: stable@vger.kernel.org
-Signed-off-by: Alex Markuze <amarkuze@redhat.com>
----
- net/ceph/osdmap.c | 34 ++++++++++++++++++++++++----------
- 1 file changed, 24 insertions(+), 10 deletions(-)
-
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index e3448915bdec..558c7c3a4a84 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -2307,25 +2307,39 @@ void ceph_osds_copy(struct ceph_osds *dest, const struct ceph_osds *src)
- bool ceph_pg_is_split(const struct ceph_pg *pgid, u32 old_pg_num,
- 		      u32 new_pg_num)
- {
--	int old_bits = calc_bits_of(old_pg_num);
--	int old_mask = (1 << old_bits) - 1;
--	int n;
-+	unsigned int old_bits;
-+	u32 old_mask, n;
- 
--	WARN_ON(pgid->seed >= old_pg_num);
--	if (new_pg_num <= old_pg_num)
-+	if (!old_pg_num || new_pg_num <= old_pg_num)
- 		return false;
- 
--	for (n = 1; ; n++) {
--		int next_bit = n << (old_bits - 1);
--		u32 s = next_bit | pgid->seed;
-+	WARN_ON(pgid->seed >= old_pg_num);
-+
-+	old_bits = calc_bits_of(old_pg_num);
-+	if (old_bits >= 32)
-+		old_mask = ~0U;
-+	else
-+		old_mask = (1U << old_bits) - 1;
-+
-+	for (n = 1; n; n++) {
-+		u64 next_bit, s;
-+		u32 parent;
-+
-+		next_bit = (u64)n << (old_bits - 1);
-+		if (next_bit >= new_pg_num)
-+			break;
- 
-+		s = next_bit | pgid->seed;
- 		if (s < old_pg_num || s == pgid->seed)
- 			continue;
- 		if (s >= new_pg_num)
- 			break;
- 
--		s = ceph_stable_mod(s, old_pg_num, old_mask);
--		if (s == pgid->seed)
-+		if ((s & old_mask) < old_pg_num)
-+			parent = s & old_mask;
-+		else
-+			parent = s & (old_mask >> 1);
-+		if (parent == pgid->seed)
- 			return true;
- 	}
- 
--- 
-2.34.1
-
+Acked-by: Paulo Alcantara <pc@manguebit.org>
