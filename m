@@ -1,89 +1,58 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E025F2D9796
-	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 09:31:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39FF143802D
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 09:38:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787823073; cv=none; b=GdU0dq12+9/HaS+qpXAuzotUZ7FltFO0TrkccFPTv/Ci8+1u5aBOvKmd853qrFXt/ZlqFRRJXX6pZK72v+yEBzcLqaRJqEpINuVwOZVOGNK5mktYF0Nwq3ArCHAfvq9hhrJ/6JpqkoIDtI/BjqWFUuMDeday7GJwWbA85hmz3Cc=
+	t=1787823532; cv=none; b=Cl3BTRKP4W/beblit75jGVkeivJ90+rL0BjtbTIoIqHIANyr9tTCeST7HCMXuLD8KNniwwhCcewu/VhthmJxWwMAH4NR7cs6YjFAwW+KFOBgl09i3hebicu7b4hTCak4V+gxGu/Nqt3gs4V5/zMn6qKF4qF6cpGE0DgL54rAVao=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787823073; c=relaxed/simple;
-	bh=hLVQ1ftq7EVejCnHot1sW/PcbtMmvC6zm8K/x3ZhQa8=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=V6SW8liVLGn3v+CPn0G0JmmVMtzdNWDT0DuLlPGRfg9oHZIYwPmoBg6tt6X2Lxbnh5Wz7iT8yEswjjNRx6NDEaWOtTzilOTbVIx6Q+LxL+XsOYStM74eU804U86iQcaF67lVpo+tXARnPjrrApSw8iCvOvklsxIn4ea1fK+iriI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Zud6MBPB; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Gyemwtws; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1787823532; c=relaxed/simple;
+	bh=xjb5979/QIug4PmWxujJWqtP1uK1jBCSYMrRh2EIv5s=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gnVSFUF9VYn0lXgK5M+2LM3Keea+rTVtCi0d9bFs9XlzfzWs8ztptSFB3DPR9R2jFsgx8tDaSjcVdDd+lMUVP7w0iwpESxeLx+GcCc4t48biQaeZNqSoITlT8fC2Agr+ttPPBrZ2a9ENg7zbHzXzUyttdvV9RsPnYLmxXH22o3s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UG4qMzy0; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Zud6MBPB";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Gyemwtws"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UG4qMzy0"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787823070;
+	s=mimecast20190719; t=1787823527;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
-	b=Zud6MBPBvu8whwAJUTB+BXxvSIlx54/L0G6NXhn065W0wfnu+6kDqtPRELtaGQV1vSkrKM
-	6MisiG35sjPn+q5JtAWCfACpLnlA/So+M9M8DWILeOPSEHs+ZqH8CvhqmQ0aoMInMgnd+c
-	H/Bw0+7rm0YNyrzrftSewWHa3ZWMZ2I=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-576-beUNJtB1NgOO9wEz6ol-cQ-1; Thu, 27 Aug 2026 05:31:09 -0400
-X-MC-Unique: beUNJtB1NgOO9wEz6ol-cQ-1
-X-Mimecast-MFC-AGG-ID: beUNJtB1NgOO9wEz6ol-cQ_1787823067
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-38e7ff7b375so3315510a91.1
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 02:31:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1787823067; x=1788427867; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
-        b=GyemwtwsDk0RpR3KWqFwQZ68zypOgOh2w5E8P9EBTyB7vQ0+4vdw2LpgrRosFbXUaa
-         jCt/0iN8WkYroZG1CNMHtJSRdGQ/Sy11/Jl+7SeRpcAISUsnirKv3ef08JKmcfhNCwKV
-         Sb1PBQMJp07biyqW2oaKXv242cPPD8QNHMBJMXRoAuKSJiUhqYNhz2iCWQXQJB24W2G7
-         GifaRtr/Kod5Cx918M6dyONZDuluoH8qMjb+tTjB4V9TVdojr+5yqxpDXpT8ZRu3LdMJ
-         ro42Mw0tKbnN128cTGeBz82smpHqCWqRCadK2Be6V91PAHAUNn+mJLfvGGxoK/4+bHl8
-         srZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787823067; x=1788427867;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
-        b=jAAz+YMThjzBggp3UhTMtgwMUGYZi/V0j76LdYwzBkq6c+cYJOxII/Rr8KUoTkb7Ry
-         gSV7Usq/do0fdwMoU7y+YynD1mE60FposzI5kBl599GDkEqu5iygaozD3O3oumhuQlxY
-         P9fBeE+vIUcrxqYiP+NFasnXFitW3KPjBFg7bCTiYZiEyeA16b2DifaLC+u2OAXnA9+v
-         oLyec4wJrNrX+LSdnDZaZ+vzKVeiiWCZGoWdUUWqmSvy31+2NGsGZTQnAz8s/nOqMT7k
-         rTlvUrS7IVoS9ckv+TwPn5HqWWYjWSB0EKkLe2jKT5tFs1Yr0VQV5hpfLrownLEvLfBt
-         PsPg==
-X-Gm-Message-State: AFuF++k3v6L/SnM7BwaPzvH3nqsVshqJm0Vig+lv7sk9twgwMDLo/Hw2
-	wZzJACQDWAIog56yX3PGAyrNhroIbAGKPmMd1cG4u1Q+lM2COpTINcwAFS7wQYe4WuhWhOwp1B9
-	Hh552MKPjwrirZ8742yHxCeCyWfIGPr99Ni8475Ah/98MnNhYGwK5v2h3cxcsdnY=
-X-Gm-Gg: AR+sD12enq9dCb12UO3zt/9L2wx+n1+lNDmJEtRZLqr7y6LeNgjDVcP7XwlmsAkSGlV
-	M6DaaEAyQw23z42LHZwtJCZ9PsxMuNjMuq4hsW0e4yRfF0bGuxSHtqpmGzxfyThyVsifhWfSAgR
-	sJviazhFr0zfg3hKCBkwF0IzEI4aJyMStbXIdmvqopJp+nB8WHOSSgQxRZDiIYOJBCt8HctJIni
-	HLzptosdRTUXOyEgphuDNhJKO7lta7WSY0AtxkMpusGJmTZBdejD+zcEzwj3epKqWcrN6ZK4cW3
-	47tk0mcdEFdzXgrs8ugJHnOV8tvmp6n0wn/GFY1ITH3i5Dn1TXTuEuvhlcfQk1ytsp/k5g==
-X-Received: by 2002:a05:6300:6cce:20b0:3d1:39e9:b267 with SMTP id adf61e73a8af0-3d139e9b38amr5348359637.3.1787823067194;
-        Thu, 27 Aug 2026 02:31:07 -0700 (PDT)
-X-Received: by 2002:a05:6300:6cce:20b0:3d1:39e9:b267 with SMTP id adf61e73a8af0-3d139e9b38amr5348300637.3.1787823066721;
-        Thu, 27 Aug 2026 02:31:06 -0700 (PDT)
-Received: from cluster.. ([13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3283d8c4e56sm15429427eec.22.2026.08.27.02.31.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 27 Aug 2026 02:31:06 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: [v3] ceph: remove the inline data support
-Date: Thu, 27 Aug 2026 09:30:58 +0000
-Message-Id: <20260827093058.2741942-1-amarkuze@redhat.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260825-b4-ceph-remove-inline-data-v3-1-235b6890d7b7@clyso.com>
-References: <20260825-b4-ceph-remove-inline-data-v3-1-235b6890d7b7@clyso.com>
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=kULfUyQq7EqkKb8DB+KYwFU87ezqhr1+/Exo1PKTlDQ=;
+	b=UG4qMzy0C2YMiYzD/nN2KIDAWjSMy6sT8feghXRhzQwrHzJk/Ojt3gAo/bn5IXqvClSEJk
+	F0GqloHyn0KQceivBwqbpgIr3vmntMzuDYp/zMc05erngubdzTpfNZqoJa0Tt1E80FZ0wl
+	6KII4BQT8C4gvkRiMoMcYWUDSSwvnHM=
+Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-556-Jlguz078NyalceJlyShADQ-1; Thu,
+ 27 Aug 2026 05:38:43 -0400
+X-MC-Unique: Jlguz078NyalceJlyShADQ-1
+X-Mimecast-MFC-AGG-ID: Jlguz078NyalceJlyShADQ_1787823521
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 9C3561801344;
+	Thu, 27 Aug 2026 09:38:41 +0000 (UTC)
+Received: from warthog.com (unknown [10.22.88.47])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 92B661955F04;
+	Thu, 27 Aug 2026 09:38:38 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v3 00/10] netfs, cachefiles: Miscellaneous fixes
+Date: Thu, 27 Aug 2026 10:38:15 +0100
+Message-ID: <20260827093828.1956211-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -91,13 +60,118 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-Hi Xiubo,
+Hi Christian,
 
-Thanks for the patch.
+Here are some miscellaneous fixes for netfslib and one for cachefiles, if
+you could pick them up?
 
-Reviewed-by: Alex Markuze <amarkuze@redhat.com>
+The first six are all in unbuffered/DIO write:
 
--- 
-Alex Markuze
+ (1) Fix an uninitialised return value from netfs_unbuffered_write().
+
+ (2) Fix the normal error return, preferring partial transfer size over
+     request error over immediate error (e.g. EINTR).
+
+ (3) Fix the async error return, preferring partial transfer size over
+     error.
+
+ (4) Fix the update of i_size on partial transfer ending in an error.
+
+ (5) Fix a subrequest leak in an error path.
+
+ (6) Fix the code to handle subrequest allocation failure.
+
+Then there's:
+
+ (7) Fix synchronisation issues with using a progressive rolling buffer for
+     readahead by fetching everything into it upfront so that the issues
+     don't arise.  Dropping the refs so acquired is deferred until after
+     I/O is begun.
+
+ (8) Change the marking of folios to be copied to the cache to be done
+     whilst subreqs are being issued rather than at the time they're
+     collected.  Whilst this is not strictly a fix, it means that the
+     collector thread doesn't need to try and keep track of that, which
+     means that delayed progress reporting will not be a problem in patch
+     (9).
+
+ (9) Fix read progress reporting to avoid 64-bit tearing on a 32-bit
+     machine.  This has been modified from the previous submission as part
+     of a different series to take account of a sashiko reported issue[1].
+
+(10) Fix a potential UAF/KASAN warning reported by sashiko[1] in cachefiles
+     in which the coherency data buffer is cast to a __be64* and
+     dereferenced in a tracepoint - even though it might not be at least
+     that large (or aligned).
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-fixes
+
+Thanks,
+David
+
+Changes
+=======
+ver #3)
+- Fixed a number of issues reported by Sashiko[3]:
+  - Fixed netfs_unbuffered_write() to return -ENOMEM to async writes too.
+  - Added a patch to preload the entire readahead folio collection up front
+    to avoid producer-consumer synchronisation issues.
+  - Added a patch to premark buffered read folios with whether or not
+    they're going to require caching so that the read-progress fix works
+    correctly.
+
+ver #2)
+- Imported a patch to add subreq alloc failure handling in unbuffered/DIO
+  write.
+- Fixed a number of issues reported by Sashiko[2]:
+  - Added four patches to fix bugs in unbuffered/DIO write.
+  - Added a patch to fix readahead rolling buffer issues.
+  - Fixed the cachefiles xattr stuff to use max() not min() when
+    allocating.
+  - Fixed the cachefiles trace comment with regard to alignment.
+  - Fixed netfs_read_set_unlock_at() to use folioq_count(), not
+    folio_nr_slots().
+
+[1] https://sashiko.dev/#/patchset/20260810144746.574036-1-dhowells%40redhat.com
+[2] https://sashiko.dev/#/patchset/20260824120224.504575-1-dhowells%40redhat.com
+[3] https://sashiko.dev/#/patchset/20260825132045.1000787-1-dhowells%40redhat.com
+
+David Howells (8):
+  netfs: Fix unbuffered/DIO write partial transfer error return
+  netfs: Fix error vs transferred passed to ->ki_complete()
+  netfs: Fix i_size update for partial transfer
+  netfs: Fix subreq ref leak
+  netfs: Fix readahead synchronisation issues by loading all folios
+    upfront
+  netfs: Mark folios with COPY_TO_CACHE whilst issuing subreqs
+  netfs: Fix read progress reporting
+  cachefiles: Fix potential UAF/KASAN warning
+
+Edward Adam Davis (1):
+  netfs: break unbuffered write when netfs_alloc_subrequest() fails
+
+Karl Mehltretter (1):
+  netfs: Fix uninitialized return value in netfs_unbuffered_write()
+
+ fs/cachefiles/xattr.c             |  16 +--
+ fs/netfs/buffered_read.c          | 165 ++++++++++++++++++++++--------
+ fs/netfs/direct_write.c           |  31 ++++--
+ fs/netfs/internal.h               |   2 +
+ fs/netfs/misc.c                   |  19 ++++
+ fs/netfs/objects.c                |  32 +++---
+ fs/netfs/read_collect.c           | 103 ++++++++++++-------
+ fs/netfs/read_pgpriv2.c           |  13 ++-
+ fs/netfs/read_retry.c             |   7 ++
+ fs/netfs/read_single.c            |   2 +
+ fs/netfs/rolling_buffer.c         |  81 +++++++++------
+ fs/netfs/write_issue.c            |   2 +
+ include/linux/netfs.h             |   5 +-
+ include/linux/rolling_buffer.h    |   6 +-
+ include/trace/events/cachefiles.h |  19 +++-
+ include/trace/events/netfs.h      |  30 +++++-
+ 16 files changed, 381 insertions(+), 152 deletions(-)
 
