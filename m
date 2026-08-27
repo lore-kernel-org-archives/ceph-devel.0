@@ -1,294 +1,107 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4D0D4418F2;
-	Thu, 27 Aug 2026 11:08:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9BEA64457BD
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 11:41:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787828900; cv=none; b=KbutS9JBTBmuVSEzzjsqlxPyrbu+W5WQT9g8TlshTNF/0U7y6hgK1Gg3LVzEKwLSJNmRQfNc/YJXosOqUg/o6oBOYmN65YAv2lK47Sl6WO4RuLcpK+NMRE/B80u+1oFXKy6TUzRll/5FvZ14X/M7Tju3K0BlzD/R1iDCbuwea0M=
+	t=1787830874; cv=none; b=UDuLUBqFyWvjSZL1voKDZIjWb2x//peAHQsqkzw2tFDYQuAKhkEgcWU6X6CzxEhniXzXtaJ9bQDrsCq9I1GnhxON6ek+5Vwb7YuXoBUvgvYhDTa0oW/NaXaQRxjFzPdf1ouT1wWZSa5frn1O56Qo7QEbjdUB8x4PTCe4HUsDV90=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787828900; c=relaxed/simple;
-	bh=IQ2IdHOM+XAmkh6P+c7D0H9YFznnEZvBwPjdNXqWnV0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=SxNtBmUGasjNvy1aHbAyRpaEe9gyUoYXvIyGzGz+I7LSBUsAnbyy/KLCRZ1pF6Zljm5CuPV3EY+ODK9oBanRxPL4ueKrFjQ/yav+NmiuFpS3xc2Dv046udAfhmjRccTZkgI10solvZTVmADDZhubTMZnKQ+ouk1ZEQ5q7EluzJQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mWQOYBv5; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1787830874; c=relaxed/simple;
+	bh=b13KtGev4+wig579K7ZcJDxQB+1zZou2dNn12sCyji0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=kKS9j4jt2+EaYTNyqmnTBM19qEh6AZHwiSfheO+x8z+98F9cXSHZgfj+Y9wcnHQrI638CQ9M7Y1hjLwSJ9jNpWt+eTYYf3EJDAqRCsupp34mAcWNOCXHBi/c/EQo0OswGjoHoWwv30bgpKGvbCtruM3PHjkaQk561o5ZPaZvEFM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fJ0dMe4T; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=mB7izLKp; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mWQOYBv5"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 4D28BC2BCC7;
-	Thu, 27 Aug 2026 11:08:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1787828900;
-	bh=IQ2IdHOM+XAmkh6P+c7D0H9YFznnEZvBwPjdNXqWnV0=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=mWQOYBv5ncc9f3U1wZqopFpCw/YG7anvtIDLGH2pU9vxhz/HpwllWWLBAoaav7gUu
-	 SLkfkASjOUcL+DHBMNibfzX9VS9gnKozSml7WVwnkdTV3J75nBE/3ceVWNTK/4KePG
-	 YmzG3OMbB7vVTvVWoGG6/c9yyggnaiOgXMZa1eU8R1SvdPVH5Ou30LznQeHoo5H5Ao
-	 9pcr8H2gM4EjH7w7Ig0wiwb/VlvWoiwOOeGQqAyh2votM4kPmqZymM3MOO3CP2XNxZ
-	 +8ZdX9/X/RPCffhFhPRMCcibO3DOWfRwXcx0sB7a5O5n0ObspyNWLZSrakEUkEekg3
-	 L0I59a3RPemYg==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3084FC61DC7;
-	Thu, 27 Aug 2026 11:08:20 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Thu, 27 Aug 2026 04:08:17 -0700
-Subject: [PATCH v3 2/2] ceph: keep the inode, not the name, when a dentry
- lease expires
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fJ0dMe4T";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="mB7izLKp"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1787830871;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Wu5FgtZmyt12/HiCrKqah0/7jy+9+aNLplj2ocXAM/w=;
+	b=fJ0dMe4T9E+YeaU7IfeLdGWS4BN4JNEJUZNzrXHY12UlbNYaTic1+Jceu6lWyMJNbg5fA/
+	TAi2e3B1TucBuOkGfMhZtLXBrBMRAa12hTYXjxyZaEn1fpgtrBb3R0KCAv/EDkKwAaFZg0
+	rjP/MDYc3wJJHs1H/cMb2ZouD3pVofw=
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
+ [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-218-obx52GQ1OnW3jXl2bbUArg-1; Thu, 27 Aug 2026 07:41:09 -0400
+X-MC-Unique: obx52GQ1OnW3jXl2bbUArg-1
+X-Mimecast-MFC-AGG-ID: obx52GQ1OnW3jXl2bbUArg_1787830868
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c2541129b02so51710166b.1
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 04:41:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1787830868; x=1788435668; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=Wu5FgtZmyt12/HiCrKqah0/7jy+9+aNLplj2ocXAM/w=;
+        b=mB7izLKpbh58yg8b1pQePQSiA7MG+jsV9vrms5f3SQoeckU2+75Gy61xbQfIq2sXaN
+         2TBTpMb7S4ta4ZdCd/gQu2lodkOvQQ6pKlweJYToa2cwzZR5BtmvVPiAw4i3p6d/dLnW
+         WLRZktnNWuCqRdRMZGotzcc2CRTHlbEGXLUk8fYYK6X/1Q++BVSyvPMPVMFY2RRBU5vR
+         4BnRTiSBFpo2I2QlQREOKElOCwOgwS7jAPVOn/78qx4tmqG2c7Z1j1NRTBGJnsDDTxwO
+         Rn/Rdhxnv8Ig2ueqanZ3DGfNHuHE71WeYsRglrCWaJyvmBWeU1BmtNBaTlqA74W/vd6y
+         bppw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787830868; x=1788435668;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=Wu5FgtZmyt12/HiCrKqah0/7jy+9+aNLplj2ocXAM/w=;
+        b=SVX451FkPPufMt7OBZSp7ZvasZlUBtMb0PFMswZRWM+Covfs7bTgiNEcYrFhjO4F0q
+         Rbnr9n/qlX3JG0nNtoTjcpN9SPV7jyoqf0XIdVAVHpPyoSQUtzTe2ga5VXagP4bvIirC
+         9ItB4DcABXHFRT+jZgNL8KqD4SelbJnfuY5owe00DAcu5QtJY5Rb9wES/oErxs1lLlth
+         GkdS12GgGn63XY4Ia7y6WMFkzEDajQhKIWUi4gonSHe/bfUmVZ05RyGIJcF2Nn4gqSl3
+         /EBlbOkJDQObB7Tho6tsSxbFI2F7uDBKasb1hB6gjocooGL9iW4Wk/krs5slpUA9IrcP
+         CR0w==
+X-Gm-Message-State: AFuF++kYkuxg/1i4qd3OJUOwR9XuElfc19dX/M0j00XGXJKC5+tNIrHd
+	5aCH4n47UjmVBCRj1867OuOqlmWY0CzM+CGjgRFb6r9ansjV72NBiGWhXXnkPfeGXRBfARB29Eh
+	kbh71UMmYFWko69058uMLVDSkWZBqxU+QJGboQnwSwKzuh+AHFq40kPAajUL/g/c=
+X-Gm-Gg: AR+sD12/cjUJDbJzhfJKkuVBFFDwLCHZ5tPlqDKcgxQXR/WBHxsjme1fn/vQJwVefCR
+	+9/T+ovVAbPhDacnP3ytNGCcz3ltoG14tkZw/bk2dSYFeSp7ALhXlxV2h3eKrksWxB3nMjgIQEX
+	EmPLxDdLlOYJULdu4t+siiaWTQrkkQ7X6TuIY6fKF09Oo+VaIbmoOJutUfwsI4zJLqf74uTxdN5
+	HkphEgS+d5a3eyOTt+ZUSlxONPt8oRiTDGyMsCFIDBQEXJx/dpnV2e8l5ul+60nVFV03cHBBLz5
+	fHMHv40Zqj3Bf+UwNWbfm+bb3WZScLv0jfoE7tiWTdDmmkuXL80KY7/aNv0BW1/7egDhCQ==
+X-Received: by 2002:a17:907:9701:b0:c24:b11a:46fc with SMTP id a640c23a62f3a-c250c35b4ffmr1399785566b.22.1787830868176;
+        Thu, 27 Aug 2026 04:41:08 -0700 (PDT)
+X-Received: by 2002:a17:907:9701:b0:c24:b11a:46fc with SMTP id a640c23a62f3a-c250c35b4ffmr1399782366b.22.1787830867816;
+        Thu, 27 Aug 2026 04:41:07 -0700 (PDT)
+Received: from cluster.. ([13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c250a9b43absm729352766b.51.2026.08.27.04.41.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 27 Aug 2026 04:41:06 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Xiubo Li <xiubo.li@clyso.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: [v3] ceph: parallelize object copy in ceph_do_objects_copy()
+Date: Thu, 27 Aug 2026 11:41:02 +0000
+Message-Id: <20260827114102.2750347-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260826-b4-ceph-copyfrom-v3-1-9bbeb82a9a80@clyso.com>
+References: <20260826-b4-ceph-copyfrom-v3-1-9bbeb82a9a80@clyso.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260827-b4-b4-ceph-dentry-caps-v3-2-f0619f4134e0@clyso.com>
-References: <20260827-b4-b4-ceph-dentry-caps-v3-0-f0619f4134e0@clyso.com>
-In-Reply-To: <20260827-b4-b4-ceph-dentry-caps-v3-0-f0619f4134e0@clyso.com>
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>, Jeff Layton <jlayton@kernel.org>, 
- David Howells <dhowells@redhat.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1787828896; l=9430;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=j4YgMxx1p5DyTcNGf73hdsboxM67AqIIfi+w+T5b3pk=;
- b=QQrOKjmEt8h0TlfgAXlhxhWgsot18timdfbcngWtaa7fMTWcrhg7AkK+NMfu6srWdJR9iaEbw
- L85YcOR1WBED9/6lAMjVund/5TMMaC1TydN1kMxxTRaaWweYxrtBmD3
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
+Content-Transfer-Encoding: 8bit
 
-From: Xiubo Li <xiubo.li@clyso.com>
+Hi Xiubo,
 
-ceph_d_delete() drops a dentry once its lease expires.  Since ceph uses
-inode_just_drop() for ->drop_inode, that last dput also evicts the
-inode, and ceph_evict_inode() throws away a page cache that the caps
-still vouch for.  A buffered write that outlasts the dentry lease (30s
-by default on the MDS side) is therefore flushed and closed, and the
-reopen re-reads everything from the OSDs even though both the caps and
-the pages were still valid.
+NACK. Please send a v4.
 
-Commit 52dd0f1b3f94 ("ceph: use generic_delete_inode() for
-->drop_inode") removed the ->drop_inode hook because "positive dentry
-and corresponding inode are always accompanied in MDS reply.  So no
-need to keep inode in the cache after dropping all its aliases".  That
-holds for the metadata, but it ties the lifetime of the page cache to
-the lifetime of a name, and the two are validated by entirely different
-things: a dentry is only as good as its lease, while cached pages are
-good for as long as the caps that back them.
-
-So bring the hook back and keep a regular file's inode while it still
-has cached pages and still holds real caps.  The name is unaffected: an
-expired dentry is unhashed exactly as before, and the next lookup goes
-to the MDS and finds the retained inode via ceph_get_inode() ->
-iget5_locked(), which is keyed on the vino from the reply rather than
-on any dentry.  ceph_fill_inode() then refills it without touching the
-mapping.
-
-Retention is bounded by the page cache itself, and reclaim runs in that
-order rather than the other way round.  A retained inode holds no
-reference of its own, but it does not sit on the inode LRU either:
-mapping_shrinkable() is false while real folios are present, so the
-inode shrinker never sees it.  Page reclaim frees its pages like any
-other file's; emptying the mapping is what makes it shrinkable and puts
-it on the LRU, and only then can the inode shrinker evict it.  Unmount
-evicts it regardless, as evict_inodes() walks sb->s_inodes rather than
-the LRU.
-
-MDS cap trim needs one more thing.  trim_caps_cb() releases an unused
-cap indirectly, by pruning the inode's aliases and letting the eviction
-that follows call __ceph_remove_caps().  Retaining the inode breaks
-that chain in both of its cases: an inode whose aliases are already
-gone was never reachable that way, and after d_prune_aliases() the
-iput() that ceph_iterate_session_caps() owes the inode no longer evicts
-it.  Give that path an explicit override in
-CEPH_I_EVICT_ON_FINAL_IPUT_BIT, which ceph_drop_inode() consumes with
-test_and_clear_bit().  Being one-shot is the point: it lets the MDS
-force this inode out now without permanently changing how the inode is
-cached afterwards, which is why I_DONTCACHE is not used here.
-
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
- fs/ceph/inode.c      | 59 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/mds_client.c | 37 ++++++++++++++++++++++++++------
- fs/ceph/super.c      |  2 +-
- fs/ceph/super.h      |  2 ++
- 4 files changed, 93 insertions(+), 7 deletions(-)
-
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index d52e2b389e0b..59a3a85a5552 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -792,6 +792,65 @@ void ceph_evict_inode(struct inode *inode)
- 	ceph_put_string(rcu_dereference_raw(ci->i_cached_layout.pool_ns));
- }
- 
-+/*
-+ * Decide whether to keep an inode once its last reference is gone.
-+ *
-+ * Dropping it here runs ceph_evict_inode(), which throws away the page
-+ * cache along with the caps that still vouch for it.  Keep a regular
-+ * file's inode while it has cached pages and still holds real caps, so
-+ * that a close and reopen can serve reads from the page cache instead
-+ * of re-reading everything from the OSDs.
-+ *
-+ * Such an inode is not pinned: it holds no reference of its own, and
-+ * page reclaim frees its pages like any other file's.  It is not on the
-+ * inode LRU either, since mapping_shrinkable() is false while real
-+ * folios are present; emptying the mapping is what puts it there for
-+ * the inode shrinker.  Unmount evicts it regardless, since
-+ * evict_inodes() walks sb->s_inodes rather than the LRU.
-+ *
-+ * The retention is bypassed whenever fscrypt requires the inode to be
-+ * evicted, e.g. after its encryption key has been removed: the page
-+ * cache holds plaintext, so it has to go with the key.
-+ * FS_IOC_REMOVE_ENCRYPTION_KEY relies on that, as it evicts the
-+ * dentries and then expects the inodes to follow.  fscrypt is
-+ * therefore asked before any of the retention below, and its answer is
-+ * never overridden by it.
-+ *
-+ * Handing caps back to the MDS used to fall out of this eviction, so
-+ * trim_caps_cb() sets CEPH_I_EVICT_ON_FINAL_IPUT_BIT to override the
-+ * retention for one put when the MDS asks for its caps back.
-+ *
-+ * ->drop_inode() is called with inode->i_lock held, so i_ceph_lock
-+ * cannot be taken here and i_caps is tested racily.  That is good
-+ * enough: either answer only keeps or drops an inode that could have
-+ * gone the other way.
-+ */
-+int ceph_drop_inode(struct inode *inode)
-+{
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+
-+	/* the MDS asked for this one back */
-+	if (test_and_clear_bit(CEPH_I_EVICT_ON_FINAL_IPUT_BIT,
-+			       &ci->i_ceph_flags))
-+		return 1;
-+
-+	if (inode_generic_drop(inode))
-+		return 1;
-+
-+	if (fscrypt_drop_inode(inode))
-+		return 1;
-+
-+	if (ceph_inode_is_shutdown(inode))
-+		return 1;
-+
-+	/* nothing here worth keeping the inode for */
-+	if (!S_ISREG(inode->i_mode) || !inode->i_data.nrpages)
-+		return 1;
-+
-+	/* keep the pages only while the inode still holds real caps */
-+	return !__ceph_is_any_real_caps(ci);
-+}
-+
- static inline blkcnt_t calc_inode_blocks(u64 size)
- {
- 	return (size + (1<<9) - 1) >> 9;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 2fdef73b28f4..f5d0590df8b2 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2254,8 +2254,9 @@ static bool drop_negative_children(struct dentry *dentry)
-  * Trim old(er) caps.
-  *
-  * Because we can't cache an inode without one or more caps, we do
-- * this indirectly: if a cap is unused, we prune its aliases, at which
-- * point the inode will hopefully get dropped to.
-+ * this indirectly: if a cap is unused, we prune its aliases and mark
-+ * the inode for eviction, at which point the inode will hopefully get
-+ * dropped too, releasing the cap with it.
-  *
-  * Yes, this is a bit sloppy.  Our only real goal here is to respond to
-  * memory pressure from the MDS, though, so it needn't be perfect.
-@@ -2316,20 +2317,44 @@ static int trim_caps_cb(struct inode *inode, int mds, void *arg)
- 		(*remaining)--;
- 	} else {
- 		struct dentry *dentry;
-+		bool pruned = false;
-+
- 		/* try dropping referring dentries */
- 		spin_unlock(&ci->i_ceph_lock);
- 		dentry = d_find_any_alias(inode);
--		if (dentry && drop_negative_children(dentry)) {
--			int count;
-+		if (!dentry) {
-+			/* nothing refers to it in the first place */
-+			pruned = true;
-+		} else if (drop_negative_children(dentry)) {
- 			dput(dentry);
- 			d_prune_aliases(inode);
-+			pruned = true;
-+		} else {
-+			dput(dentry);
-+		}
-+
-+		if (pruned) {
-+			int count;
-+
-+			/*
-+			 * ceph_drop_inode() keeps a regular file's inode
-+			 * alive while it still has cached pages, so pruning
-+			 * the aliases is no longer enough on its own to get
-+			 * this cap back.  Mirror that condition here and ask
-+			 * for a one-shot eviction: the iput() that
-+			 * ceph_iterate_session_caps() still owes this inode
-+			 * then runs ceph_evict_inode(), which is what hands
-+			 * the cap back.
-+			 */
-+			if (S_ISREG(inode->i_mode) && inode->i_data.nrpages)
-+				set_bit(CEPH_I_EVICT_ON_FINAL_IPUT_BIT,
-+					&ci->i_ceph_flags);
-+
- 			count = icount_read_once(inode);
- 			if (count == 1)
- 				(*remaining)--;
- 			doutc(cl, "%p %llx.%llx cap %p pruned, count now %d\n",
- 			      inode, ceph_vinop(inode), cap, count);
--		} else {
--			dput(dentry);
- 		}
- 		return 0;
- 	}
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 88ea9aa53adc..150d05d685bd 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -1052,7 +1052,7 @@ static const struct super_operations ceph_super_ops = {
- 	.alloc_inode	= ceph_alloc_inode,
- 	.free_inode	= ceph_free_inode,
- 	.write_inode    = ceph_write_inode,
--	.drop_inode	= inode_just_drop,
-+	.drop_inode	= ceph_drop_inode,
- 	.evict_inode	= ceph_evict_inode,
- 	.sync_fs        = ceph_sync_fs,
- 	.put_super	= ceph_put_super,
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 72d4e30304dc..ff736fbf1fe9 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -713,6 +713,7 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- 					      * force a cap message to the MDS once
- 					      * the deferred work completes
- 					      */
-+#define CEPH_I_EVICT_ON_FINAL_IPUT_BIT	(16) /* evict at the final iput() */
- 
- #define CEPH_I_DIR_ORDERED		(1 << CEPH_I_DIR_ORDERED_BIT)
- #define CEPH_I_FLUSH			(1 << CEPH_I_FLUSH_BIT)
-@@ -1100,6 +1101,7 @@ struct ceph_acl_sec_ctx;
- extern const struct inode_operations ceph_file_iops;
- 
- extern struct inode *ceph_alloc_inode(struct super_block *sb);
-+extern int ceph_drop_inode(struct inode *inode);
- extern void ceph_evict_inode(struct inode *inode);
- extern void ceph_free_inode(struct inode *inode);
- 
+  1. fs/ceph/file.c:3078: Parallel COPY_FROM2 leaves dest objects past the reported result
+     Xiubo, `orig_dst_off >= i_size` does not keep speculative copies
+     hidden.
+     On first failure, drop dest objects after `first_fail_obj` (or bump
+     truncate_seq/truncate_size to the published EOF before returning).
 
 -- 
-2.53.0
-
+Alex Markuze
 
