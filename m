@@ -1,47 +1,47 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6C6243802D
-	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 09:39:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A90F843CEF6
+	for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 09:39:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787823568; cv=none; b=jnkaIJx5I5ZLRDiKTAVX0xjKvCl1ksDGFJWF4doEgNQJmC9Wknr4yUBHRsf6wHwQ+fJiFqzdeksqIEkfWcUhQtHYo2TfKrQoeeODia+mS983E8QpAPDoizPfxUePTOBzqIOEUvR8Cktp7EnJiyCim8iondbCjKl9zAnxZ6epIW0=
+	t=1787823576; cv=none; b=r4VrN1lPEt+d8hQkchOztwzNMoUZa0Zu+E9Ww7Ez+2HRhxI/ab7POFuJXsmMI/umvfEQpO+iLIZGhpQmrzbz+/DqBKlKMIKes6fknAkF0bNWbc7p6Of9uiX2x7PlMmCljiGLkFI44J9vdMpuagKvavDQLlVC95OVLmAk0PPGF1E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787823568; c=relaxed/simple;
-	bh=enMiTh7ajQJDRkBDW3/xeNSf2AzA38c8MZQEyZKKMKA=;
+	s=arc-20240116; t=1787823576; c=relaxed/simple;
+	bh=KZ6KryDoeo8J6srSXmaESOaWmDJlcHglaMBB60PNPQY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=nExHUHIj2gW9NOsVOEJOcAynJCxo8NfVGi4Uqqmv50c1ONy4VNcleHVYOVvcVZmcnrc+kjlcrX/DSszz6VCCZ+c5IfQC1rqYi80NqMy0Et6uSY1a2GUWCTIYekGBjoVnwmDkr83amiC6Qil8Iue3KUn8rD+AnHNN9jYnLDqenxI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XPB6tJdr; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=p9j7ja7UfjGC+d8LvQiZ229A8xNPl7RWx1Dvv4/Ps1Q64hB0nynwMFRFl7hTSuBZqmU7LOBRTnZTSXcRHZ7UP8Ju8QsC1vEOXn7Dc4EBZoIeYw/R7iYCpNDNuX7rBvbVykhGui/PPoyJ/NQtTHYFiDThY6tynzal+nY430VnV4k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iCmg/+Df; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XPB6tJdr"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iCmg/+Df"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1787823560;
+	s=mimecast20190719; t=1787823566;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=u3E4rlqJ8DWtsJPMhxO6MmP2nf33NlSqugS9DB0Zuf8=;
-	b=XPB6tJdrwL1pJGZqSpA56mT06YTHObQ/BPvHiRJ977pN8oEAPJlZF/xi7bcYvLy61LaWLh
-	1RQBgt4V0MjJ3Fx5AYumHNtFR605zHrajgYa5vvB3TGxo7EDkmlNTae9lfHqCCoPqr7QW0
-	ROH+iYW89mswv18lI3VwWY1En/hdcu4=
-Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+	bh=XdmER/0ot6k2e8DhxaTBmIQEr/pm9tQfzddtSKAfHwo=;
+	b=iCmg/+DfkhAZ8l9pW1pSWJvCYompHE7TCCtnbll1VCcqj2S7HK0A38Rxa/HfrURABX42bP
+	oKEsVp0SacggpP1rkBC+zuRfCFxStMaZiCR67ba1ih7enbyQi6fP8/lMMc+1aB4BAKULvX
+	+81b2dF+5Mhtdc6mmr+1/1EUBZCddiM=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-458-BRu3Mo4bN4K9PLAYtjhPdg-1; Thu,
- 27 Aug 2026 05:39:14 -0400
-X-MC-Unique: BRu3Mo4bN4K9PLAYtjhPdg-1
-X-Mimecast-MFC-AGG-ID: BRu3Mo4bN4K9PLAYtjhPdg_1787823553
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-444-Om0HkeuXMW-zuixSouzTbA-1; Thu,
+ 27 Aug 2026 05:39:22 -0400
+X-MC-Unique: Om0HkeuXMW-zuixSouzTbA-1
+X-Mimecast-MFC-AGG-ID: Om0HkeuXMW-zuixSouzTbA_1787823559
 Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 97DEE18009C0;
-	Thu, 27 Aug 2026 09:39:12 +0000 (UTC)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 741A11956063;
+	Thu, 27 Aug 2026 09:39:19 +0000 (UTC)
 Received: from warthog.com (unknown [10.22.88.47])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id D82343000223;
-	Thu, 27 Aug 2026 09:39:09 +0000 (UTC)
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 75E5130001A2;
+	Thu, 27 Aug 2026 09:39:17 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -51,12 +51,10 @@ Cc: David Howells <dhowells@redhat.com>,
 	linux-cifs@vger.kernel.org,
 	ceph-devel@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Matthew Wilcox <willy@infradead.org>,
-	linux-mm@kvack.org
-Subject: [PATCH v3 08/10] netfs: Mark folios with COPY_TO_CACHE whilst issuing subreqs
-Date: Thu, 27 Aug 2026 10:38:23 +0100
-Message-ID: <20260827093828.1956211-9-dhowells@redhat.com>
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v3 10/10] cachefiles: Fix potential UAF/KASAN warning
+Date: Thu, 27 Aug 2026 10:38:25 +0100
+Message-ID: <20260827093828.1956211-11-dhowells@redhat.com>
 In-Reply-To: <20260827093828.1956211-1-dhowells@redhat.com>
 References: <20260827093828.1956211-1-dhowells@redhat.com>
 Precedence: bulk
@@ -68,288 +66,141 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-Mark folios with COPY_TO_CACHE whilst issuing subreqs rather than when
-collecting them.  This means that the collector thread doesn't have to try
-and keep track of which subreqs contribute to which folios - and thus which
-folios will need to be copied to the cache because at least one byte wasn't
-in the cache.  Instead, this is marked on the folios up front and the
-collector need only consider the folios.
+Currently, trace_cachefiles_coherency() is being passed a pointer to a
+__be64 lain over the coherency data in struct cachefiles_xattr so that it
+can display the first 8 bytes.  However, the data is of variable length and
+could even be 0 bytes.  This could lead to a UAF or KASAN warning.
 
+Fix this by making sure the buffer has room for at least 8 bytes and that
+those 8 bytes are pre-cleared.
+
+Further, those bytes are not 8-byte aligned, so fix the tracepoint to
+extract the data as four 2-byte words (they are 2-byte aligned) and
+reassemble the __be64.  The compiler will convert this into a single 8-byte
+load where the CPU supports it.
+
+Fixes: 229105e5cfd9 ("cachefiles: Add auxiliary data trace")
+Link: https://sashiko.dev/#/patchset/20260810144746.574036-1-dhowells%40redhat.com
 Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Paulo Alcantara (Red Hat) <pc@manguebit.org>
-cc: Matthew Wilcox <willy@infradead.org>
+cc: Paulo Alcantara <pc@manguebit.org>
 cc: netfs@lists.linux.dev
-cc: linux-mm@kvack.org
 cc: linux-fsdevel@vger.kernel.org
 ---
- fs/netfs/buffered_read.c     | 62 +++++++++++++++++++++++++++++++++++-
- fs/netfs/read_collect.c      | 40 ++++++++++-------------
- fs/netfs/read_pgpriv2.c      | 13 +++++---
- include/linux/netfs.h        |  2 +-
- include/trace/events/netfs.h |  6 ++--
- 5 files changed, 90 insertions(+), 33 deletions(-)
+ fs/cachefiles/xattr.c             | 16 ++++++++--------
+ include/trace/events/cachefiles.h | 19 +++++++++++++++++--
+ 2 files changed, 25 insertions(+), 10 deletions(-)
 
-diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
-index 303fdce54fba..20f358209730 100644
---- a/fs/netfs/buffered_read.c
-+++ b/fs/netfs/buffered_read.c
-@@ -211,6 +211,55 @@ static void netfs_issue_read(struct netfs_io_request *rreq,
- 	}
- }
+diff --git a/fs/cachefiles/xattr.c b/fs/cachefiles/xattr.c
+index f8ae78b3f7b6..c70bf67e52b0 100644
+--- a/fs/cachefiles/xattr.c
++++ b/fs/cachefiles/xattr.c
+@@ -13,6 +13,7 @@
+ #include <linux/quotaops.h>
+ #include <linux/xattr.h>
+ #include <linux/slab.h>
++#include <linux/unaligned.h>
+ #include "internal.h"
  
-+/*
-+ * Mark folios that we want to copy to the cache.  For filesystems that use
-+ * netfslib fully, we set folio->private to NETFS_FOLIO_COPY_TO_CACHE;
-+ * otherwise we set the deprecated PG_private_2.
-+ */
-+static void netfs_mark_copy_to_cache(struct netfs_io_request *rreq,
-+				     struct folio_queue **fq,
-+				     unsigned int *offset,
-+				     int *slot,
-+				     size_t len,
-+				     bool copy)
-+{
-+	while (len > 0) {
-+		struct folio *folio;
-+		size_t fsize, overlap;
-+
-+		if (!*fq)
-+			break;
-+		if (*slot >= folioq_count(*fq)) {
-+			*fq = (*fq)->next;
-+			*slot = 0;
-+			*offset = 0;
-+			continue;
-+		}
-+
-+		/* Determine how much the subreq overlaps the folio, if at all. */
-+		fsize = folioq_folio_size(*fq, *slot);
-+		overlap = min(len, fsize - *offset);
-+
-+		if (overlap > 0 && copy) {
-+			folio = folioq_folio(*fq, *slot);
-+			if (unlikely(test_bit(NETFS_RREQ_USE_PGPRIV2, &rreq->flags))) {
-+				if (!folio_test_private_2(folio))
-+					folio_start_private_2(folio);
-+			} else {
-+				if (!folio_get_private(folio))
-+					folio_attach_private(folio, NETFS_FOLIO_COPY_TO_CACHE);
-+			}
-+			trace_netfs_folio(folio, netfs_folio_trace_mark_copy);
-+		}
-+
-+		*offset += overlap;
-+		if (*offset >= fsize) {
-+			*slot += 1;
-+			*offset = 0;
-+		}
-+	}
-+}
-+
- /*
-  * Perform a read to the pagecache from a series of sources of different types,
-  * slicing up the region to be read according to available cache blocks and
-@@ -218,9 +267,11 @@ static void netfs_issue_read(struct netfs_io_request *rreq,
-  */
- static void netfs_read_to_pagecache(struct netfs_io_request *rreq)
- {
-+	struct folio_queue *fq = rreq->buffer.tail;
- 	unsigned long long start = rreq->start;
-+	unsigned int offset;
- 	ssize_t size = rreq->len;
--	int ret = 0;
-+	int ret = 0, slot = 0;
+ #define CACHEFILES_COOKIE_TYPE_DATA 1
+@@ -50,7 +51,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
  
- 	do {
- 		struct netfs_io_subrequest *subreq;
-@@ -308,6 +359,15 @@ static void netfs_read_to_pagecache(struct netfs_io_request *rreq)
- 			set_bit(NETFS_RREQ_ALL_QUEUED, &rreq->flags);
- 		}
+ 	_enter("%x,#%d", object->debug_id, len);
  
-+		if (fq) {
-+			/* See if the cache indicated this should be cached. */
-+			bool copy = test_bit(NETFS_SREQ_COPY_TO_CACHE, &subreq->flags);
-+
-+			if (copy)
-+				set_bit(NETFS_RREQ_WRITE_TO_CACHE, &rreq->flags);
-+			netfs_mark_copy_to_cache(rreq, &fq, &slot, &offset, slice, copy);
-+		}
-+
- 		netfs_issue_read(rreq, subreq);
- 		netfs_maybe_bulk_drop_ra_refs(rreq);
+-	buf = kmalloc(sizeof(struct cachefiles_xattr) + len, GFP_KERNEL);
++	buf = kmalloc(sizeof(struct cachefiles_xattr) + max(len, sizeof(__be64)), GFP_KERNEL);
+ 	if (!buf)
+ 		return -ENOMEM;
  
-diff --git a/fs/netfs/read_collect.c b/fs/netfs/read_collect.c
-index edf7cea7e2f9..4e298b690219 100644
---- a/fs/netfs/read_collect.c
-+++ b/fs/netfs/read_collect.c
-@@ -19,7 +19,6 @@
- #define MADE_PROGRESS	0x04	/* Made progress cleaning up a stream or the folio set */
- #define BUFFERED	0x08	/* The pagecache needs cleaning up */
- #define NEED_RETRY	0x10	/* A front op requests retrying */
--#define COPY_TO_CACHE	0x40	/* Need to copy subrequest to cache */
- #define ABANDON_SREQ	0x80	/* Need to abandon untransferred part of subrequest */
+@@ -60,6 +61,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
+ 	buf->content		= object->content_info;
+ 	if (test_bit(FSCACHE_COOKIE_LOCAL_WRITE, &object->cookie->flags))
+ 		buf->content	= CACHEFILES_CONTENT_DIRTY;
++	put_unaligned_be64(0, (__be64 *)buf->data);
+ 	if (len > 0)
+ 		memcpy(buf->data, fscache_get_aux(object->cookie), len);
  
- /*
-@@ -55,30 +54,31 @@ static void netfs_unlock_read_folio(struct netfs_io_request *rreq,
- 	folio_mark_uptodate(folio);
- 
- 	if (!test_bit(NETFS_RREQ_USE_PGPRIV2, &rreq->flags)) {
--		finfo = netfs_folio_info(folio);
--		if (finfo) {
--			trace_netfs_folio(folio, netfs_folio_trace_filled_gaps);
--			if (finfo->netfs_group)
--				folio_change_private(folio, finfo->netfs_group);
--			else
--				folio_detach_private(folio);
--			kfree(finfo);
--		}
--
--		if (test_bit(NETFS_RREQ_FOLIO_COPY_TO_CACHE, &rreq->flags)) {
--			if (!WARN_ON_ONCE(folio_get_private(folio) != NULL)) {
--				trace_netfs_folio(folio, netfs_folio_trace_copy_to_cache);
--				folio_attach_private(folio, NETFS_FOLIO_COPY_TO_CACHE);
-+		if (folio_get_private(folio) == NETFS_FOLIO_COPY_TO_CACHE)  {
-+			if (test_bit(NETFS_RREQ_WRITE_TO_CACHE, &rreq->flags)) {
-+				trace_netfs_folio(folio, netfs_folio_trace_sched_copy);
- 				folio_mark_dirty(folio);
-+			} else {
-+				trace_netfs_folio(folio, netfs_folio_trace_cancel_copy);
-+				folio_detach_private(folio);
- 			}
- 		} else {
-+			finfo = netfs_folio_info(folio);
-+			if (finfo) {
-+				trace_netfs_folio(folio, netfs_folio_trace_filled_gaps);
-+				if (finfo->netfs_group)
-+					folio_change_private(folio, finfo->netfs_group);
-+				else
-+					folio_detach_private(folio);
-+				kfree(finfo);
-+			}
- 			trace_netfs_folio(folio, netfs_folio_trace_read_done);
- 		}
- 
- 		folioq_clear(folioq, slot);
+@@ -77,8 +79,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
+ 		trace_cachefiles_vfs_error(object, file_inode(file), ret,
+ 					   cachefiles_trace_setxattr_error);
+ 		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
+-					   be64_to_cpup((__be64 *)buf->data),
+-					   buf->content,
++					   buf->data, buf->content,
+ 					   cachefiles_coherency_set_fail);
+ 		if (ret != -ENOMEM)
+ 			cachefiles_io_error_obj(
+@@ -86,8 +87,7 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
+ 				"Failed to set xattr with error %d", ret);
  	} else {
- 		// TODO: Use of PG_private_2 is deprecated.
--		if (test_bit(NETFS_RREQ_FOLIO_COPY_TO_CACHE, &rreq->flags))
-+		if (test_bit(NETFS_RREQ_WRITE_TO_CACHE, &rreq->flags))
- 			netfs_pgpriv2_copy_to_cache(rreq, folio);
+ 		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
+-					   be64_to_cpup((__be64 *)buf->data),
+-					   buf->content,
++					   buf->data, buf->content,
+ 					   cachefiles_coherency_set_ok);
  	}
  
-@@ -131,9 +131,6 @@ static void netfs_read_unlock_folios(struct netfs_io_request *rreq,
- 		unsigned int order;
- 		size_t fsize;
+@@ -110,9 +110,10 @@ int cachefiles_check_auxdata(struct cachefiles_object *object, struct file *file
+ 	int ret = -ESTALE;
  
--		if (*notes & COPY_TO_CACHE)
--			set_bit(NETFS_RREQ_FOLIO_COPY_TO_CACHE, &rreq->flags);
--
- 		folio = folioq_folio(folioq, slot);
- 		if (WARN_ONCE(!folio_test_locked(folio),
- 			      "R=%08x: folio %lx is not locked\n",
-@@ -156,8 +153,6 @@ static void netfs_read_unlock_folios(struct netfs_io_request *rreq,
- 		WRITE_ONCE(rreq->cleaned_to, fpos + fsize);
- 		*notes |= MADE_PROGRESS;
+ 	tlen = sizeof(struct cachefiles_xattr) + len;
+-	buf = kmalloc(tlen, GFP_KERNEL);
++	buf = kmalloc(sizeof(struct cachefiles_xattr) + max(len, sizeof(__be64)), GFP_KERNEL);
+ 	if (!buf)
+ 		return -ENOMEM;
++	put_unaligned_be64(0, (__be64 *)buf->data);
  
--		clear_bit(NETFS_RREQ_FOLIO_COPY_TO_CACHE, &rreq->flags);
--
- 		/* Clean up the head folioq.  If we clear an entire folioq, then
- 		 * we can get rid of it provided it's not also the tail folioq
- 		 * being filled by the issuer.
-@@ -255,9 +250,6 @@ static void netfs_collect_read_results(struct netfs_io_request *rreq)
- 			stream->collected_to = front->start + transferred;
- 			rreq->collected_to = stream->collected_to;
+ 	xlen = cachefiles_inject_read_error();
+ 	if (xlen == 0)
+@@ -148,8 +149,7 @@ int cachefiles_check_auxdata(struct cachefiles_object *object, struct file *file
  
--			if (test_bit(NETFS_SREQ_COPY_TO_CACHE, &front->flags))
--				notes |= COPY_TO_CACHE;
--
- 			if (test_bit(NETFS_SREQ_FAILED, &front->flags)) {
- 				rreq->abandon_to = front->start + front->len;
- 				front->transferred = front->len;
-diff --git a/fs/netfs/read_pgpriv2.c b/fs/netfs/read_pgpriv2.c
-index c31190993b76..fb57fc45b3fd 100644
---- a/fs/netfs/read_pgpriv2.c
-+++ b/fs/netfs/read_pgpriv2.c
-@@ -55,7 +55,7 @@ static void netfs_pgpriv2_copy_folio(struct netfs_io_request *creq, struct folio
- 	/* Attach the folio to the rolling buffer. */
- 	if (rolling_buffer_append(&creq->buffer, folio, 0, creq->gfp) < 0) {
- 		folio_end_private_2(folio);
--		clear_bit(NETFS_RREQ_FOLIO_COPY_TO_CACHE, &creq->flags);
-+		clear_bit(NETFS_RREQ_WRITE_TO_CACHE, &creq->flags);
- 		return;
- 	}
- 
-@@ -122,7 +122,7 @@ static struct netfs_io_request *netfs_pgpriv2_begin_copy_to_cache(
- 	netfs_put_failed_request(creq);
- cancel:
- 	rreq->copy_to_cache = ERR_PTR(-ENOBUFS);
--	clear_bit(NETFS_RREQ_FOLIO_COPY_TO_CACHE, &rreq->flags);
-+	clear_bit(NETFS_RREQ_WRITE_TO_CACHE, &rreq->flags);
- 	return ERR_PTR(-ENOBUFS);
+ out:
+ 	trace_cachefiles_coherency(object, file_inode(file)->i_ino,
+-				   be64_to_cpup((__be64 *)buf->data),
+-				   buf->content, why);
++				   buf->data, buf->content, why);
+ 	kfree(buf);
+ 	return ret;
  }
+diff --git a/include/trace/events/cachefiles.h b/include/trace/events/cachefiles.h
+index 9259bc71049e..e3101410e8b2 100644
+--- a/include/trace/events/cachefiles.h
++++ b/include/trace/events/cachefiles.h
+@@ -372,7 +372,7 @@ TRACE_EVENT(cachefiles_rename,
+ TRACE_EVENT(cachefiles_coherency,
+ 	    TP_PROTO(struct cachefiles_object *obj,
+ 		     ino_t ino,
+-		     u64 disk_aux,
++		     const void *disk_aux,
+ 		     enum cachefiles_content content,
+ 		     enum cachefiles_coherency_trace why),
  
-@@ -136,11 +136,14 @@ void netfs_pgpriv2_copy_to_cache(struct netfs_io_request *rreq, struct folio *fo
+@@ -389,12 +389,27 @@ TRACE_EVENT(cachefiles_coherency,
+ 			     ),
  
- 	if (!creq)
- 		creq = netfs_pgpriv2_begin_copy_to_cache(rreq, folio);
--	if (IS_ERR(creq))
-+	if (IS_ERR(creq)) {
-+		clear_bit(NETFS_RREQ_WRITE_TO_CACHE, &rreq->flags);
- 		return;
-+	}
+ 	    TP_fast_assign(
++		    union {
++			    __be16 s[4];
++			    __be64 ll;
++		    } x;
++
+ 		    __entry->obj	= obj->debug_id;
+ 		    __entry->why	= why;
+ 		    __entry->content	= content;
+ 		    __entry->ino	= ino;
+ 		    __entry->aux	= be64_to_cpup((__be64 *)obj->cookie->inline_aux);
+-		    __entry->disk_aux	= disk_aux;
++
++		    /* cachefiles_xattr::data is 2-byte aligned but not 8-byte aligned. */
++		    if (disk_aux) {
++			    x.s[0] = ((__be16 *)disk_aux)[0];
++			    x.s[1] = ((__be16 *)disk_aux)[1];
++			    x.s[2] = ((__be16 *)disk_aux)[2];
++			    x.s[3] = ((__be16 *)disk_aux)[3];
++			    __entry->disk_aux = be64_to_cpu(x.ll);
++		    } else {
++			    __entry->disk_aux = 0;
++		    }
+ 			   ),
  
--	trace_netfs_folio(folio, netfs_folio_trace_copy_to_cache);
--	folio_start_private_2(folio);
-+	trace_netfs_folio(folio, netfs_folio_trace_pgpriv2_copy);
-+	if (WARN_ON_ONCE(!folio_test_private_2(folio)))
-+		return;
- 	netfs_pgpriv2_copy_folio(creq, folio);
- }
- 
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index 5c538d0c5d79..49fea3a30611 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -275,7 +275,7 @@ struct netfs_io_request {
- #define NETFS_RREQ_SHORT_TRANSFER	5	/* Set if we have a short transfer */
- #define NETFS_RREQ_OFFLOAD_COLLECTION	8	/* Offload collection to workqueue */
- #define NETFS_RREQ_NO_UNLOCK_FOLIO	9	/* Don't unlock no_unlock_folio on completion */
--#define NETFS_RREQ_FOLIO_COPY_TO_CACHE	10	/* Copy current folio to cache from read */
-+#define NETFS_RREQ_WRITE_TO_CACHE	10	/* Need to write to the cache */
- #define NETFS_RREQ_UPLOAD_TO_SERVER	11	/* Need to write to the server */
- #define NETFS_RREQ_USE_IO_ITER		12	/* Use ->io_iter rather than ->i_pages */
- #define NETFS_RREQ_NEED_PUT_RA_REFS	17	/* Need to put the folio refs RA gave us */
-diff --git a/include/trace/events/netfs.h b/include/trace/events/netfs.h
-index 9bda9302be90..a22084813cb5 100644
---- a/include/trace/events/netfs.h
-+++ b/include/trace/events/netfs.h
-@@ -198,7 +198,6 @@
- 	EM(netfs_folio_trace_clear_cc,		"clear-cc")	\
- 	EM(netfs_folio_trace_clear_g,		"clear-g")	\
- 	EM(netfs_folio_trace_clear_s,		"clear-s")	\
--	EM(netfs_folio_trace_copy_to_cache,	"mark-copy")	\
- 	EM(netfs_folio_trace_end_copy,		"end-copy")	\
- 	EM(netfs_folio_trace_filled_gaps,	"filled-gaps")	\
- 	EM(netfs_folio_trace_invalidate_all,	"inval-all")	\
-@@ -209,16 +208,19 @@
- 	EM(netfs_folio_trace_kill_cc,		"kill-cc")	\
- 	EM(netfs_folio_trace_kill_g,		"kill-g")	\
- 	EM(netfs_folio_trace_kill_s,		"kill-s")	\
-+	EM(netfs_folio_trace_mark_copy,		"mark-copy")	\
- 	EM(netfs_folio_trace_mkwrite,		"mkwrite")	\
- 	EM(netfs_folio_trace_mkwrite_plus,	"mkwrite+")	\
--	EM(netfs_folio_trace_not_under_wback,	"!wback")	\
- 	EM(netfs_folio_trace_not_locked,	"!locked")	\
-+	EM(netfs_folio_trace_not_under_wback,	"!wback")	\
-+	EM(netfs_folio_trace_pgpriv2_copy,	"pgpriv2-copy")	\
- 	EM(netfs_folio_trace_put,		"put")		\
- 	EM(netfs_folio_trace_read,		"read")		\
- 	EM(netfs_folio_trace_read_done,		"read-done")	\
- 	EM(netfs_folio_trace_read_gaps,		"read-gaps")	\
- 	EM(netfs_folio_trace_read_unlock,	"read-unlock")	\
- 	EM(netfs_folio_trace_redirtied,		"redirtied")	\
-+	EM(netfs_folio_trace_sched_copy,	"sched-copy")	\
- 	EM(netfs_folio_trace_store,		"store")	\
- 	EM(netfs_folio_trace_store_copy,	"store-copy")	\
- 	EM(netfs_folio_trace_store_plus,	"store+")	\
+ 	    TP_printk("o=%08x %s B=%llx c=%u aux=%llx dsk=%llx",
 
