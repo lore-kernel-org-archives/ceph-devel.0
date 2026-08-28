@@ -1,124 +1,171 @@
-Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A85B3403FF
-	for <ceph-devel@vger.kernel.org>; Fri, 28 Aug 2026 05:44:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.214.182
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787895895; cv=pass; b=Iuxuv0Eq1Q6ZqwuktINM5IqITOy8un+xThbrRCmmpu/ysvAA+2fTFRu9zcCG2zhnL5jjwSiKBxql3Xr8BN7GGUWHcBwmToHJc6R+SL//7yGtnr/HinhfpxXrdzgorVnapA+7CyHu3s4IS/46rKrf4UHql3yzPnKtlt790mckRiA=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787895895; c=relaxed/simple;
-	bh=TyNvMMqIrDrrdQrNSTAkjwcw9uAfd2HiNJdpFGlLXMw=;
-	h=From:MIME-Version:Date:Message-ID:Subject:To:Cc:Content-Type; b=DMy1NUgSbo8L+C3GOEfaeFJ3HvdlvbZeqlPslo2YMl06UtT/YMtXIBGVecEqc/bHaM2bJb0aTk3jl7SsHltK8wCBJRnaS6/HUnKL1vQSh1OqgU3iFCxSb4FbKwRF+oX/ItNDsA991mfP89qUzGK9m1lUV1w69q/kvcKG56Sri9w=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=berkeley.edu; spf=pass smtp.mailfrom=berkeley.edu; dkim=pass (2048-bit key) header.d=berkeley.edu header.i=@berkeley.edu header.b=nZewbbOn; arc=pass smtp.client-ip=209.85.214.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=berkeley.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=berkeley.edu
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E4C4381B0D;
+	Fri, 28 Aug 2026 07:19:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787901592; cv=none; b=jHxDU2nqa3ze4eIDyhZ/2FshgGsyn7mXVPPvFBzA6+/4dyedWW8qTs0GvaPLxln3PVE7oWDsy23ay1xnSxFgbepbbFcIuuC38jSvJW1M0ynf3896gXkXRQnzp+LxzSeZWA2gzoHLtLJr0PIa7Qjl03iIWHw1swYj3eo/YxzmCIg=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787901592; c=relaxed/simple;
+	bh=Qwh1evNey1RqwtlKCdO/sm2TJvcyqoG+uj8ZqTaUQMw=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=qB23uOImzCIqR/VkDJpU7y/a23YbiBuCXW9or4FH/mz2Zy6RDPQWGOSoEbTCIB/6qhl/q9O4rDft5pBZiSLKYmf6K2j8UjoRMTuyrPF1qQWAuFgUQapq6xt/gppF322Tw7g4w35DN6QOAr+zns7rUoydhwTPxwNp7gYhYVODx1k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PGT54BDi; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=berkeley.edu header.i=@berkeley.edu header.b="nZewbbOn"
-Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-2d049069377so7446615ad.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Aug 2026 22:44:54 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1787895894; cv=none;
-        d=google.com; s=arc-20260327;
-        b=p5iLwylBs3Iq7o1JN8CX9Xqtxa+1iY5Q9KMiKzCq1uqNVyX7wm4ne1MzyeaNUk+8z1
-         /HcZrqzD1l72Tq8Q+7Yqr0NdDwmci0rKd4u3pnUzriYBJ8QJFcAgUaQgHitoxhYNxp0A
-         mfRHI0iedsD+HryvcuLCQv/XCnmvISl9CMqEtEDCb5pnb2C1WeT6ZGdJhpRg4kLELagr
-         HvI/MMQKqSux3TkPYBwanVgJhGFIYU9XSNYtt1GSyIM2gC+nNSCodZhEY28bod68E9fO
-         SPpxYF9lLgFNpWFBr94JazHfPlO1NgwncFF8KA6DqynzvuubTBeAax2X0o7NY5DhGJzK
-         0bQg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:mime-version:from:dkim-signature;
-        bh=GlVbWj9nJs4r3HvjeZeXaQSMdk8WIjeCxs6FsayvhQ8=;
-        fh=CtAGUr4AfHPdhlN2+ULigVih8qaq0J7jdGjlmjHB5l4=;
-        b=mGY15/o08mTI58xgnlKRs8jJUX0TMAnklSOI9dPaoa7XLXtPpOqp4PEG3NBqxYkOgJ
-         g1PeZ9Gta9c0lZBG/wIfMV0QZtE7mRoPcdiLxPxfveqBvT2COH/ddBE6rmBUkM/1V6xd
-         ZpYep1udDbRVfAy29JuvGB6heXUEIY2rb211CLK3km7Q75cWuiAmayPguYOQqkImEmCm
-         MYuqdQkUqYgIQxVYf6PYt6lLliWenU57p7WddfoaZxM5Es8f8Sm++GHMlnSJ6kGUU3P9
-         EGeVS9Q8NZXg5JaBykL6GDEFCzomfra03TqZcTVePvaaZ7knZrnQrc8e+Uk6ghF2DE3f
-         JfpQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=berkeley.edu; s=google; t=1787895894; x=1788500694; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:mime-version:from:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=GlVbWj9nJs4r3HvjeZeXaQSMdk8WIjeCxs6FsayvhQ8=;
-        b=nZewbbOn14tQBRrQuiwSJTZ08OlAxVu/MDYknSVUwuOVFpZwJR/OyArHF0NZfnskn2
-         OFVwxnxrWUjsqgDy8WVX1YGuYb54IcYDpQksoyJSLX14QiIHYmgplQiS0ub7k0z4Xh8f
-         xAHFG4J4pcee3+sFqNMgTaIMtVMkN8HQ5UMxA3ohjLxAIR+ZIIIOdWvi8sAGjtUZKAT7
-         4zUk1MfgW3/ADkp4iiuAatVsk19EhqxT6i7G+lu2hd7NsGApUsWQFGDJ6GDZD5ivwXvQ
-         7MkH28H/prhSeuTrCPlNBumEgF5HC40HacH7iC7Z/PAJG4lrRm5YylBbzpm5prmyVhXl
-         RsTA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787895894; x=1788500694;
-        h=content-type:cc:to:subject:message-id:date:mime-version:from
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=GlVbWj9nJs4r3HvjeZeXaQSMdk8WIjeCxs6FsayvhQ8=;
-        b=bz9g0X1VpPMxy4DRPH+A3naVT8FcOW5+f9JwQtEjuNVFfNfByDtYxoD2fHetl+/psU
-         ciK8jDuuopIIUvKUUFsB5sfqhihlbzST7leRf976SoOayE3nu0XijOwGoi+anZvVSsSD
-         1uNNNlpnUop+yEGVDSUx1WS+c4YtcfqcBMTkC2xNh135phI9uknS90w4j4xL/heBiy/0
-         LBss6o5qDwiSSL8hTwePAsdPntYIPvdYNdZUvFqYHIuk2wd8JTUoCblGJerEc34z1gOp
-         JlKAUoHjDh2feH124pvb7lBTPttmxWRJRq3SALkdqpPlzPT2D/YCdJvl/mL4pGdZo2lz
-         wH0g==
-X-Forwarded-Encrypted: i=1; AHgh+RqfHM7DzAUZxCUmNioFgvjvBsjRM2VRyCxvLP1uHyrumoArzO5F4EVzRSCKnTrKcaLPitLowVvhSP7H@vger.kernel.org
-X-Gm-Message-State: AFuF++m81p0LhIM6jXXbhBvfVGtKIi7xwARJ+NUZatRnuARuTxJCkV0i
-	ePDKhVV627f51tMEIKkiA0Xrdinf9txvjOQEf1TAi21s1MwEadtBd28taIhu7sU6yhSoccvRg01
-	9bCAz92GZETrwfzeJ2+YFlmLRkbijAvs4gnUhg16z
-X-Gm-Gg: AR+sD12VC6PKNMc6Ib2QMg48AXEVAvzOkftYBuhOtGOPYmAwYgLr4X2Hp8Ng3oIh1IL
-	+0pahoFlyi57K2V1UwJyDJZ0j4YkVpUPBKK0pZakMaUJw0x8SvuLyjwoklg/V2QXNdfB7pmEax8
-	8irzUckUpHAbDbbQLkwASPrz3qbG90lOeKwnn5gE0ToojPrYHeLP9iovlLj9UM3CrKTQEIZ0hqg
-	rnDhVXNNTFvtLJ70bcDOWgbkba2cpB1uJaAufrMtkIOqKAG57usOgo532c8I268kFehnzhUET7G
-	HtBn9C1gDqrpMGUOUdiMCh/h+gMc30o+M11NfpqoH+lbZQsiNCFARYBwY0sbhXu2LVE/dGt5mXl
-	YXoSe6gWQ3n9sqZisa10709E+U9VSYnHw
-X-Received: by 2002:a17:902:e74f:b0:2d7:5ebe:a588 with SMTP id
- d9443c01a7336-2d75ebeabbbmr24264815ad.13.1787895892791; Thu, 27 Aug 2026
- 22:44:52 -0700 (PDT)
-Received: from 474444807712 named unknown by gmailapi.google.com with
- HTTPREST; Thu, 27 Aug 2026 22:44:52 -0700
-Received: from 474444807712 named unknown by gmailapi.google.com with
- HTTPREST; Thu, 27 Aug 2026 22:44:52 -0700
-From: Farhad Alemi <farhad.alemi@berkeley.edu>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PGT54BDi"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id BFA66C19425;
+	Fri, 28 Aug 2026 07:19:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1787901591;
+	bh=Qwh1evNey1RqwtlKCdO/sm2TJvcyqoG+uj8ZqTaUQMw=;
+	h=From:Date:Subject:To:Cc:Reply-To:From;
+	b=PGT54BDipAbYTAmpUB3efGFR/nZWOenF0Ibr8fNmuGR1ofdm2NGUOoA/bBMflEbg7
+	 bxUOByComQAz1+UazEqXAeZ3FnCTNH6Ptr9+0XNXgjPgZnvcdsE8KqK7mF+fYQIt1L
+	 p/3FDwgOrmK1fxcrMDaaQyx6ABrdDjDi5mDtdfrzselBz2QWr2kRE/Z8butfG5VtMM
+	 LM536rmfTM1XwjiFBAmGWhdIEzZPjkGceDbuZ7QkRJKxFyQkYieoqS0teQoK/phs2/
+	 Bowtu+eg3qLhL8acXTWyYdcEaZM0ZxL45Td+dp2GfvjNEwBpePCjGXhEa1FbOCfXp/
+	 85Rt75EBs7y3Q==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C8CDC61DC7;
+	Fri, 28 Aug 2026 07:19:51 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Fri, 28 Aug 2026 00:19:44 -0700
+Subject: [PATCH] ceph: unregister aborted requests in
+ ceph_mdsc_wait_request()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 27 Aug 2026 22:44:52 -0700
-X-Gm-Features: AcwNN1X8SEHOkHuj9cQDgmFe2kkXov2vM2emNM_BCi0ltZI-VSEqYIh1j3pwqxU
-Message-ID: <CA+0ovCjLWPoUdo=W93DQ4vKj-A+Xo0AQkjzcM+SQ35ph0VzukA@mail.gmail.com>
-Subject: [BUG] WARNING in ceph_fill_trace
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260828-b4-ceph-fix-abort-request-uaf-new-v1-1-96e480d5a028@clyso.com>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXNywrCMBSE4VcpZ+2BGKRGX0VcJOnEHhdpzUWF0
+ ndvqssPhn8WykiCTNduoYS3ZJliw/HQkR9tfIBlaCatdK+MPrM7scc8cpAvWzelwgmvily42sA
+ RH7YXE4zvB6sUqHXmhDb+fdzuf+fqnvBlD9O6botkd5+FAAAA
+X-Change-ID: 20260827-b4-ceph-fix-abort-request-uaf-new-a98f8c6da00e
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Viacheslav Dubeyko <slava@dubeyko.com>, Alexander Viro <viro@zeniv.linux.org.uk>, 
-	Christian Brauner <brauner@kernel.org>
-Cc: falemi@asu.edu, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+ Viacheslav Dubeyko <slava@dubeyko.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ stable@vger.kernel.org, Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1787901589; l=5446;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=xOjNIYx5UpPI1bdwdUUnY3dY/FlR7eDo3///O/wyWVM=;
+ b=LvkX9rMT+9tEYkPvxddgvQpdntIdw59wdI46lYJbusiYeTXuEA2GcuQQfrMvX024FCCZ46uqn
+ 2E+CNs242arBulo8VUgVk5fVqkAQc5Kr0xDx2D9+N9q/KJqTlIUc+aO
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-Hello,
+From: Xiubo Li <xiubo.li@clyso.com>
 
-As part of the kernel research at ASU's SEFCOM
-lab, we hit the crash below. Crash reports can be found here:
+When a request is aborted because the waiter was killed or the wait
+timed out, the abort path marks it with CEPH_MDS_R_ABORTED but leaves
+it parked on a wait list (r_wait) and registered in the request tree.
+The waiter's put can then be the last reference while the request is
+still linked, freeing it with r_wait non-empty:
 
-  https://github.com/farhad-alemi/public_bug_reports/tree/main/171-warning-in-ceph-fill-trace/
+  WARNING: fs/ceph/mds_client.c:1233 ceph_mdsc_release_request+0x247/0x250
+  WARN_ON_ONCE(!list_empty(&req->r_wait))
 
-  WARNING: fs/ceph/inode.c:1632 at ceph_fill_trace+0x493/0x3a80
-fs/ceph/inode.c:1632, CPU#1: kworker/1:5/11236
-  Workqueue: ceph-msgr ceph_con_workfn
-  RIP: 0010:ceph_fill_trace+0x493/0x3a80 fs/ceph/inode.c:1632
-  Call Trace:
-   ceph_fill_trace+0x493/0x3a80 fs/ceph/inode.c:1632
-   handle_reply fs/ceph/mds_client.c:4050 [inline]
-   mds_dispatch+0x4753/0x77d0 fs/ceph/mds_client.c:6384
-   ceph_con_process_message+0x14f/0x530 net/ceph/messenger.c:1425
-   ceph_con_v1_try_read+0x2f40/0x6f20 net/ceph/messenger_v1.c:1430
-   ceph_con_workfn+0x1f5/0x1440 net/ceph/messenger.c:1577
-   process_scheduled_works+0x881/0x1170 kernel/workqueue.c:3397
-   worker_thread+0x988/0xde0 kernel/workqueue.c:3478
+The freed request stays behind as a dangling entry on the session's
+waiting list, and the next __wake_requests() or kick_requests() walk
+uses it after free (a stress test that SIGKILLs waiters during MDS
+failovers reproduces this reliably).
 
-Our reproducer.c is available upon request.
+Fix the abort path so that the request is removed from its wait list
+and from the request tree when the waiter gives up, making the waiter's
+put the final reference on a request that is no longer linked anywhere.
+Both operations happen under mdsc->mutex; a racing reply or forward may
+already have unregistered the request, so only unregister it when it is
+still in the tree.
 
-Happy to test a patch if that would help.
+Fixes: e1518c7c0a67a ("ceph: clean up mds reply, error handling")
+Cc: stable@vger.kernel.org
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+The full call trace:
 
-Regards,
+ ------------[ cut here ]------------
+ refcount_t: addition on 0; use-after-free.
+ WARNING: lib/refcount.c:25 at refcount_warn_saturate+0x6a/0x90, CPU#1: kworker/1:1/99
+ Modules linked in: ceph libceph krb5 netfs xsk_diag vsock_diag uinput snd_seq_dummy snd_hrtimer rfkill nf_conntrack_netbios_ns nf_conntrack_broadcast nft_fib_inet nft_fib_ipv4 nft_fib_ipv6 nft_fib nft_reject_inet nf_reject_ipv4 nf_reject_ipv6 nft_reject nft_ct nft_chain_nat nf_nat nf_conntrack nf_defrag_ipv6 nf_defrag_ipv4 nf_tables qrtr sunrpc intel_rapl_msr intel_rapl_common intel_uncore_frequency_common intel_pmc_core pmt_telemetry pmt_discovery pmt_class intel_pmc_ssram_telemetry intel_pmc_pwrm_telemetry intel_vsec kvm_intel kvm snd_hda_codec_generic irqbypass snd_hda_intel rapl snd_hda_codec snd_hda_core snd_intel_dspcfg snd_intel_sdw_acpi snd_hwdep snd_seq iTCO_wdt snd_seq_device intel_pmc_bxt snd_pcm i2c_i801 snd_timer pcspkr i2c_smbus snd lpc_ich virtio_balloon soundcore joydev zram lz4hc_compress vmw_vsock_virtio_transport vmw_vsock_virtio_transport_common vsock virtio_net net_failover virtio_gpu failover virtio_dma_buf serio_raw i2c_dev qemu_fw_cfg virtiofs fuse
+ CPU: 1 UID: 0 PID: 99 Comm: kworker/1:1 Tainted: G      D             7.2.0-rc7-lockdep+ #13 PREEMPT(lazy)
+ Tainted: [D]=DIE
+ Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.17.0-10.fc44 06/10/2025
+ Workqueue: ceph-msgr ceph_con_workfn [libceph]
+ RIP: 0010:refcount_warn_saturate+0x6a/0x90
+ Code: cc 48 8d 3d b8 f6 d4 01 67 48 0f b9 3a c3 cc cc cc cc 48 8d 3d b7 f6 d4 01 67 48 0f b9 3a c3 cc cc cc cc 48 8d 3d b6 f6 d4 01 <67> 48 0f b9 3a c3 cc cc cc cc 48 8d 3d b5 f6 d4 01 67 48 0f b9 3a
+ RSP: 0018:ffffcdb6403a7cc0 EFLAGS: 00010246
+ RAX: 0000000000000000 RBX: ffff8d5e6441c000 RCX: ffff8d5e43de6a60
+ RDX: ffff8d5e5afbd468 RSI: 0000000000000002 RDI: ffffffffa7fbe040
+ RBP: ffffcdb6403a7ce8 R08: 0000000000000001 R09: ffff8d5e5afbd550
+ R10: ffffcdb6403a7cc8 R11: 0000000000000000 R12: ffff8d5e6441c000
+ R13: ffff8d5e5afbd028 R14: ffff8d5e515c0000 R15: ffff8d5e5a621008
+ FS:  0000000000000000(0000) GS:ffff8d61f7904000(0000) knlGS:0000000000000000
+ CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+ CR2: 00007f0541dbf000 CR3: 000000011ad8b005 CR4: 0000000000772ef0
+ PKRU: 55555554
+ Call Trace:
+  <TASK>
+  __wake_requests+0x3af/0x3d0 [ceph]
+  mds_dispatch+0xad/0x240 [ceph]
+  ceph_con_process_message+0x88/0x1c0 [libceph]
+  ceph_con_v1_try_read+0x316/0x6f0 [libceph]
+  ceph_con_workfn+0x1f4/0x500 [libceph]
+  ? process_one_work+0x20d/0x600
+  process_one_work+0x234/0x600
+  worker_thread+0x1e5/0x3c0
+  ? __pfx_worker_thread+0x10/0x10
+  kthread+0xf5/0x130
+  ? __pfx_kthread+0x10/0x10
+  ret_from_fork+0x24a/0x360
+  ? __pfx_kthread+0x10/0x10
+  ret_from_fork_asm+0x1a/0x30
+  </TASK>
+ irq event stamp: 7923424
+ hardirqs last  enabled at (7923423): [<ffffffffa6d5b2a8>] _raw_spin_unlock_irq+0x28/0x50
+ hardirqs last disabled at (7923424): [<ffffffffa6d4cdb5>] __schedule+0x685/0x820
+---
+ fs/ceph/mds_client.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 85f8ceb10377..6b27146d0c9f 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -4024,6 +4024,19 @@ int ceph_mdsc_wait_request(struct ceph_mds_client *mdsc,
+ 		if (req->r_parent &&
+ 		    (req->r_op & CEPH_MDS_OP_WRITE))
+ 			ceph_invalidate_dir_request(req);
++
++		/*
++		 * The waiter is about to drop its reference, which is
++		 * the last one held by the request's caller.  Make sure
++		 * the request is no longer parked on a wait list or
++		 * registered in the request tree, or it could be walked
++		 * (and in the tree case, replied to) after it is freed.
++		 * A racing reply may already have unregistered it, in
++		 * which case it is no longer in the tree.
++		 */
++		list_del_init(&req->r_wait);
++		if (lookup_request(&mdsc->request_tree, req->r_tid) == req)
++			__unregister_request(mdsc, req);
+ 	} else {
+ 		err = req->r_err;
+ 	}
+
+---
+base-commit: dee30ce1286a0d18b14545ecac345e4cf4a80511
+change-id: 20260827-b4-ceph-fix-abort-request-uaf-new-a98f8c6da00e
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
+
+
