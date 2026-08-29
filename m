@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8CA137C11C;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7BEE396B73;
 	Sat, 29 Aug 2026 11:35:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788003307; cv=none; b=PMkPoC47iUfAEpS1D5knPncLi18Pr4XmzOIjXNbhJD9xgyv4lJSWBgjQ8hhkuOx8mj/0IsLVRNX7bGu1Ictzlef/Eyc3RMrOYCyvnPcA0VYi8sKuHLdlV/gaVlbP9r+ZCMIVhalx3JtMMg4YzpK7EIOmRVwWV5VFg1asUXMUmX8=
+	t=1788003308; cv=none; b=FFSHMte3SAp8isP0XLmqbRm0yAH/Cwi65RLr1kpJ9akRJKdRMzHfmkmajqCxAytWiMbttu8BA8MGlHYXnxWeB/4xoAKZlLweD1wIzsdQlB9j/n1obT+JiWbqFwv1fG3VS1B/gn8TxoNNl4sFpvGf31cMQKKGEzGVFqu3tNxPYHo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788003307; c=relaxed/simple;
-	bh=ReSU1PA4YpUFweZ1hhi1BF7SlkAYjDQIgzPWmrvFytM=;
+	s=arc-20240116; t=1788003308; c=relaxed/simple;
+	bh=b8eGT81xD59LoNyGSUZ5Ly3rF6alKppgCVacsl6/Fz0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=o9DN4hzozfo9cyxgEbjHtOzdmv8Dav674xpERMcIyw5HEWSH4YA4VgQB3zEgfo4fWVio8MCIRk6xy1XEVcru8AMf62ibocZxsVecWGibjn9+rgc0M3s53NWyx2LOJ12o69eB1Ca6OcVBV6aCe3UObLN5ALjHzw6SQ0t4Sr3cxwc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XAeesi7K; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=dDOOplgbWZuGt2kWku2H8bbfMvvSJOZPQkMmN9sxQfM7kJ2xjod/orhN2h4r45mhyL5DF6R0am5Cv+8bbg4Ll8Fmvy5ITwe4NBT4QdI3hTx4xbNICsBJWe8yD7RQ0sirGNWyUrVOQ2LibeLT+tlwjx3MyaznteIw0yQ04vZx2VY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AmC9Or+U; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XAeesi7K"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 6BE62C2BCFA;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AmC9Or+U"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 83B5EC2BCFD;
 	Sat, 29 Aug 2026 11:35:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1788003307;
-	bh=ReSU1PA4YpUFweZ1hhi1BF7SlkAYjDQIgzPWmrvFytM=;
+	bh=b8eGT81xD59LoNyGSUZ5Ly3rF6alKppgCVacsl6/Fz0=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=XAeesi7Kngn84i+kyu2IUhPjX8uZjPIcSIfCQUtUWi/F/o7m8wfRe2WaI/eoeH8JK
-	 oesm47cwpfUO5EKy391DE/UiCLBPBla121jj8WsJt/vbKTTQo56zvwlmiucOvz+7XO
-	 gC2Dl61BOSrUH1VyXfgaGIcy9kC5VUJJXI26megaoH+UtlyozaWwPRTPn5i+HW7Jo0
-	 Lwx7+u13cieZ6dX/cOxnnmaEs/ZBwEbyUNiNp6fi1JLKacqSvI8GUhcN+0HE0SdwKI
-	 NP7KXepPYGHJOiNtH9I6snCJh2nKlr4oJpLg8D4hCN/g/mpNd22bM2UMlkS7OnQhr4
-	 iyopQPq/2kH1A==
+	b=AmC9Or+UqTx8ZVk5WTaFvBN5c3CRFwnbPFgy17LJenxyIxMXXiKu6nUeaThmQ1rJ/
+	 k/PEHN2SAVRUy5ZBFMVMpoWk2OYofaugUjWbvxdBp3rLKU/61FhdTfxlnSh27COwBO
+	 LWXftVKwimjLeEhnyNYTN+EMSM/3RWwLs2IIIUhZc6D5iDM2wxedwgt/oHUXjpfNbu
+	 pE82RKr8IIV50QKoOsCRT4uCKjlwVP3yQHFeDs56+NUXskx/M4YD1ulERE7XfAmebC
+	 c2fI44t2yx8V68Qv1t3+dm3b6NuaK27kGCScXl6337ynk181m1wNXiGCtlL0NwfITv
+	 FQo5X2ztSdXiA==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53F50C61DDE;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72DE0C61DE1;
 	Sat, 29 Aug 2026 11:35:07 +0000 (UTC)
 From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Sat, 29 Aug 2026 04:35:03 -0700
-Subject: [PATCH v6 3/5] ceph: add wait_list_lock for wait-list
- serialization
+Date: Sat, 29 Aug 2026 04:35:05 -0700
+Subject: [PATCH v6 5/5] ceph: narrow mdsc->mutex scope in
+ replay_unsafe_requests
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -40,8 +40,8 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260829-ceph-mdsc-mutex-optimization-v6-3-466936ccbd9d@clyso.com>
+Content-Transfer-Encoding: 8bit
+Message-Id: <20260829-ceph-mdsc-mutex-optimization-v6-5-466936ccbd9d@clyso.com>
 References: <20260829-ceph-mdsc-mutex-optimization-v6-0-466936ccbd9d@clyso.com>
 In-Reply-To: <20260829-ceph-mdsc-mutex-optimization-v6-0-466936ccbd9d@clyso.com>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
@@ -49,11 +49,11 @@ To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Xiubo Li <xiubo.li@clyso.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1788003303; l=4398;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1788003304; l=20051;
  i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=iD8fn2jHJiggYB291Y2t7iJ47QONEWyxmBRxD4/dJ2c=;
- b=ZsxzaqHenLV0qCgGa6XbN8QG1xTemPT20CW48ZzMgMLWlKWGJjmN+96I3fjcF5bS/9jy/Lzs2
- CzaQj+xy0YcCqnLU5idsfocPaEUKmgpBl7EIWBTn4uZv/rT4KR5dpVE
+ bh=/EHyoZ7wRER2jIWRnLrnYMw6tSJhevbbtpyXEzZ2iKo=;
+ b=f7omZYl6VFVRNV3sykvWGZ6/1+UGyEj/aL87HgRGWy75DhlTxEULUrfW4obSX0GH0VdnEVz6e
+ Q7sqt0c9KSrAlQ2masxbVSg0ScdUNmXuBKwiuogRes3f8durZk7022m
 X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
  pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
 X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
@@ -63,119 +63,540 @@ Reply-To: xiubo.li@clyso.com
 
 From: Xiubo Li <xiubo.li@clyso.com>
 
-The per-MDS session wait list and the global waiting-for-map list
-are currently serialized by mdsc->mutex, even though the list
-operations themselves don't need the mutex's broader protection.
-Introduce a dedicated spinlock to guard these lists so that
-waking and kicking waiters can run outside the mutex.
+Currently replay_unsafe_requests() holds mdsc->mutex across the
+entire function, including the __send_request() calls.  Since
+__send_request() is lockless and the async cap-release helper
+schedules deferred work, neither needs the mutex.
 
-Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
+Collect the unsafe-list entries and the matching old xarray
+entries into local lists under mdsc->mutex, taking a reference on
+each, then replay them outside the mutex.  Taking a reference
+ensures a concurrent reply handler can complete and unregister a
+request without invalidating the local list or the iterator.
+
+Unsafe requests remain on session->s_unsafe; r_aux_item serves
+only as a walk-list link.  This keeps them tracked as unsafe
+until the MDS replies, so a later reconnect can replay them again
+and cleanup_session_requests() can still abort them on session
+teardown.
+
 Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
- fs/ceph/mds_client.c | 18 +++++++++++++++++-
- fs/ceph/mds_client.h |  3 +++
- 2 files changed, 20 insertions(+), 1 deletion(-)
+ fs/ceph/mds_client.c | 311 ++++++++++++++++++++++++++++++++++++++++++++-------
+ fs/ceph/mds_client.h |  30 ++++-
+ 2 files changed, 300 insertions(+), 41 deletions(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index fdaf6f56ecd3..5983ae6e3085 100644
+index 0b515df15081..aaf7e11b3d60 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -3689,7 +3689,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 			doutc(cl, "no mdsmap, waiting for map\n");
- 			trace_ceph_mdsc_suspend_request(mdsc, session, req,
- 							ceph_mdsc_suspend_reason_no_mdsmap);
-+			spin_lock(&mdsc->wait_list_lock);
- 			list_add(&req->r_wait, &mdsc->waiting_for_map);
-+			spin_unlock(&mdsc->wait_list_lock);
- 			return;
- 		}
- 		if (!(mdsc->fsc->mount_options->flags &
-@@ -3712,7 +3714,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 		doutc(cl, "no mds or not active, waiting for map\n");
- 		trace_ceph_mdsc_suspend_request(mdsc, session, req,
- 						ceph_mdsc_suspend_reason_no_active_mds);
-+		spin_lock(&mdsc->wait_list_lock);
- 		list_add(&req->r_wait, &mdsc->waiting_for_map);
-+		spin_unlock(&mdsc->wait_list_lock);
+@@ -1925,12 +1925,24 @@ static void cleanup_session_requests(struct ceph_mds_client *mdsc,
+ 			mapping_set_error(req->r_unsafe_dir->i_mapping, -EIO);
+ 		__unregister_request(mdsc, req);
+ 	}
+-	/* zero r_attempts, so kick_requests() will re-send requests */
++	/*
++	 * Zero r_attempts so that the following kick_requests() will
++	 * re-send the request.  If a dispatch owner is currently in the
++	 * send window (CEPH_MDS_R_DISPATCHING set), a concurrent
++	 * kick_requests() could not pick the request up and the resend
++	 * request would be lost; set CEPH_MDS_R_RESEND instead and let
++	 * the owner re-evaluate the request when it releases dispatch
++	 * ownership.
++	 */
+ 	idx = 0;
+ 	xa_for_each(&mdsc->request_tree, idx, req) {
+ 		if (req->r_session &&
+-		    req->r_session->s_mds == session->s_mds)
++		    req->r_session->s_mds == session->s_mds) {
+ 			req->r_attempts = 0;
++			if (test_bit(CEPH_MDS_R_DISPATCHING,
++				     &req->r_req_flags))
++				set_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
++		}
+ 	}
+ 	mutex_unlock(&mdsc->mutex);
+ }
+@@ -3661,37 +3673,58 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 	int err = 0;
+ 	bool random;
+ 
++restart:
++	/* re-entry from the resend loop below: reset per-pass state */
++	session = NULL;
++	err = 0;
+ 	mutex_lock(&mdsc->mutex);
+ 
+ 	/*
+-	 * r_attempts is bumped under mdsc->mutex just before the mutex
+-	 * is dropped to send the request, and it is only ever written
+-	 * back to 0 by the forward handler or cleanup_session_requests()
+-	 * (both under the mutex) before re-dispatching through a new
+-	 * __do_request() call.  Consequently, r_attempts > 0 at this
+-	 * point always means another __do_request() instance has already
+-	 * passed the point of no return for this request, i.e. a racing
+-	 * kick_requests() or __wake_requests() picked up the same
+-	 * request from the xarray or a wait list and is about to send
+-	 * it.  Bail out to prevent a double dispatch.
++	 * r_attempts only counts protocol send attempts now.  Dispatch
++	 * ownership is claimed separately via CEPH_MDS_R_DISPATCHING
++	 * under mdsc->mutex and held across the unlocked prepare/send
++	 * window: only one context may rebuild and send req->r_request
++	 * at a time.  A racing kick_requests() or __wake_requests()
++	 * that sees the claim set simply drops the request here.
+ 	 *
+-	 * Note: kick_requests() also filters on r_attempts > 0 during
+-	 * its collection pass, but that is a one-time snapshot taken
+-	 * under the mutex.  Between that snapshot and the actual
+-	 * __do_request() call the mutex is dropped and re-acquired, so
+-	 * the protection is not atomic — this per-request gate closes
+-	 * the remaining window.
++	 * cleanup_session_requests() and handle_forward() may zero
++	 * r_attempts while the owner is in flight; instead of racing,
++	 * they set CEPH_MDS_R_RESEND and the owner consumes it when
++	 * releasing ownership below.
+ 	 */
+-	if (req->r_attempts > 0) {
++	if (test_and_set_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags)) {
+ 		mutex_unlock(&mdsc->mutex);
  		return;
  	}
++	/*
++	 * Claiming dispatch ownership supersedes any pending resend
++	 * request: the dispatch about to happen below is the
++	 * re-evaluation.  RESEND set later, while the send window is
++	 * open, is consumed by the release path at the bottom.
++	 */
++	clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
  
-@@ -3760,9 +3764,12 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 			if (ceph_test_mount_opt(mdsc->fsc, CLEANRECOVER)) {
+ 	if (req->r_err || test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
+ 		if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
+ 			__unregister_request(mdsc, req);
+-		mutex_unlock(&mdsc->mutex);
+-		return;
++		/*
++		 * The request is done (or dead) and must not be sent
++		 * again; the dispatch ownership claimed above is simply
++		 * released, consuming any pending resend request with it.
++		 */
++		clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
++		clear_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags);
++		goto no_dispatch;
++	}
++	if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags)) {
++		/*
++		 * Unsafe requests are replayed only by
++		 * replay_unsafe_requests() during MDS reconnect, never
++		 * through the normal dispatch path.
++		 */
++		clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
++		clear_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags);
++		goto no_dispatch;
+ 	}
+ 
+ 	if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_FENCE_IO) {
+@@ -3721,10 +3754,10 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 			trace_ceph_mdsc_suspend_request(mdsc, session, req,
+ 							ceph_mdsc_suspend_reason_no_mdsmap);
+ 			spin_lock(&mdsc->wait_list_lock);
++			list_del_init(&req->r_wait);
+ 			list_add(&req->r_wait, &mdsc->waiting_for_map);
+ 			spin_unlock(&mdsc->wait_list_lock);
+-			mutex_unlock(&mdsc->mutex);
+-			return;
++			goto out_session;
+ 		}
+ 		if (!(mdsc->fsc->mount_options->flags &
+ 		      CEPH_MOUNT_OPT_MOUNTWAIT) &&
+@@ -3747,10 +3780,10 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 		trace_ceph_mdsc_suspend_request(mdsc, session, req,
+ 						ceph_mdsc_suspend_reason_no_active_mds);
+ 		spin_lock(&mdsc->wait_list_lock);
++		list_del_init(&req->r_wait);
+ 		list_add(&req->r_wait, &mdsc->waiting_for_map);
+ 		spin_unlock(&mdsc->wait_list_lock);
+-		mutex_unlock(&mdsc->mutex);
+-		return;
++		goto out_session;
+ 	}
+ 
+ 	/* get, open session */
+@@ -3798,6 +3831,7 @@ static void __do_request(struct ceph_mds_client *mdsc,
  				trace_ceph_mdsc_suspend_request(mdsc, session, req,
  								ceph_mdsc_suspend_reason_rejected);
-+				spin_lock(&mdsc->wait_list_lock);
+ 				spin_lock(&mdsc->wait_list_lock);
++				list_del_init(&req->r_wait);
  				list_add(&req->r_wait, &mdsc->waiting_for_map);
--			} else
-+				spin_unlock(&mdsc->wait_list_lock);
-+			} else {
- 				err = -EACCES;
-+			}
- 			goto out_session;
- 		}
- 
-@@ -3777,7 +3784,9 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 		}
+ 				spin_unlock(&mdsc->wait_list_lock);
+ 			} else {
+@@ -3818,6 +3852,7 @@ static void __do_request(struct ceph_mds_client *mdsc,
  		trace_ceph_mdsc_suspend_request(mdsc, session, req,
  						ceph_mdsc_suspend_reason_session);
-+		spin_lock(&mdsc->wait_list_lock);
+ 		spin_lock(&mdsc->wait_list_lock);
++		list_del_init(&req->r_wait);
  		list_add(&req->r_wait, &session->s_waiting);
-+		spin_unlock(&mdsc->wait_list_lock);
+ 		spin_unlock(&mdsc->wait_list_lock);
  		goto out_session;
+@@ -3905,6 +3940,20 @@ static void __do_request(struct ceph_mds_client *mdsc,
+ 		complete_request(mdsc, req);
+ 		__unregister_request(mdsc, req);
  	}
++	/*
++	 * Release dispatch ownership.  If a session teardown or a
++	 * forward observed this request while the mutex was dropped
++	 * above, it set CEPH_MDS_R_RESEND under the mutex: consume it
++	 * here and re-evaluate, unless the request has already been
++	 * unregistered (error path above, or a racing reply).
++	 */
++	clear_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags);
++	if (test_and_clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags) &&
++	    xa_load(&mdsc->request_tree, req->r_tid) == req) {
++		mutex_unlock(&mdsc->mutex);
++		goto restart;
++	}
++no_dispatch:
+ 	mutex_unlock(&mdsc->mutex);
+ 	return;
+ }
+@@ -3913,22 +3962,68 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
+ 			    struct list_head *head)
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
+-	struct ceph_mds_request *req;
+-	LIST_HEAD(tmp_list);
++	struct ceph_mds_request *req, *nreq;
++	LIST_HEAD(wake_list);
  
-@@ -3870,7 +3879,9 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
- 	struct ceph_mds_request *req;
- 	LIST_HEAD(tmp_list);
++	/*
++	 * Serialize the splice against the park decision in
++	 * __do_request(): both take mdsc->mutex, so a request cannot
++	 * be parked on @head after we have drained it, and everything
++	 * parked before we take the mutex is moved here.
++	 */
++	mutex_lock(&mdsc->mutex);
+ 	spin_lock(&mdsc->wait_list_lock);
+-	list_splice_init(head, &tmp_list);
++	list_for_each_entry_safe(req, nreq, head, r_wait) {
++		/*
++		 * A non-empty r_aux_item means the request is already
++		 * owned by another dispatch collector (kick_requests()
++		 * or replay_unsafe_requests()); let it be dispatched by
++		 * that collector.  No stale waiter can result: a
++		 * kick-owned request was already delinked from r_wait
++		 * at claim time, and a replay-owned request is never on
++		 * a wait list (s_unsafe requests carry GOT_UNSAFE,
++		 * which __do_request() refuses to park, and replay's
++		 * old-request scan only takes r_attempts > 0 while
++		 * parked requests always have r_attempts == 0).
++		 */
++		if (!list_empty(&req->r_aux_item))
++			continue;
++		list_del_init(&req->r_wait);
++		/*
++		 * Pin the request in the same critical section that
++		 * delinks it from the wait list: once r_wait is
++		 * delinked, no list still owns it, so the reference
++		 * keeps the object alive while it is dispatched.
++		 */
++		ceph_mdsc_get_request(req);
++		list_add_tail(&req->r_aux_item, &wake_list);
++	}
+ 	spin_unlock(&mdsc->wait_list_lock);
++	mutex_unlock(&mdsc->mutex);
++
++	/*
++	 * Dispatch without holding the locks, but pop each node under
++	 * mdsc->mutex: r_aux_item doubles as the collector-ownership
++	 * predicate, so every access to it (collector list_empty()
++	 * checks and these pops) must be serialized by the mutex to
++	 * avoid a real data race on the node.
++	 */
++	mutex_lock(&mdsc->mutex);
++	while (!list_empty(&wake_list)) {
++		req = list_first_entry(&wake_list, struct ceph_mds_request,
++				       r_aux_item);
++		list_del_init(&req->r_aux_item);
++		mutex_unlock(&mdsc->mutex);
  
-+	spin_lock(&mdsc->wait_list_lock);
- 	list_splice_init(head, &tmp_list);
-+	spin_unlock(&mdsc->wait_list_lock);
+-	while (!list_empty(&tmp_list)) {
+-		req = list_entry(tmp_list.next,
+-				 struct ceph_mds_request, r_wait);
+-		list_del_init(&req->r_wait);
+ 		doutc(cl, " wake request %p tid %llu\n", req,
+ 		      req->r_tid);
+ 		trace_ceph_mdsc_resume_request(mdsc, req);
+ 		__do_request(mdsc, req);
++		ceph_mdsc_put_request(req);
++
++		mutex_lock(&mdsc->mutex);
+ 	}
++	mutex_unlock(&mdsc->mutex);
+ }
  
- 	while (!list_empty(&tmp_list)) {
- 		req = list_entry(tmp_list.next,
-@@ -3903,7 +3914,9 @@ static void kick_requests(struct ceph_mds_client *mdsc, int mds)
- 		if (req->r_session &&
- 		    req->r_session->s_mds == mds) {
- 			doutc(cl, " kicking tid %llu\n", req->r_tid);
-+			spin_lock(&mdsc->wait_list_lock);
+ /*
+@@ -3938,7 +4033,7 @@ static void __wake_requests(struct ceph_mds_client *mdsc,
+ static void kick_requests(struct ceph_mds_client *mdsc, int mds)
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
+-	struct ceph_mds_request *req, *nreq;
++	struct ceph_mds_request *req;
+ 	unsigned long idx;
+ 	LIST_HEAD(kick_list);
+ 
+@@ -3958,19 +4053,42 @@ static void kick_requests(struct ceph_mds_client *mdsc, int mds)
+ 			spin_lock(&mdsc->wait_list_lock);
  			list_del_init(&req->r_wait);
-+			spin_unlock(&mdsc->wait_list_lock);
- 			trace_ceph_mdsc_resume_request(mdsc, req);
- 			__do_request(mdsc, req);
- 		}
-@@ -6365,6 +6378,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 	mdsc->snap_realms = RB_ROOT;
- 	INIT_LIST_HEAD(&mdsc->snap_empty);
- 	spin_lock_init(&mdsc->snap_empty_lock);
-+	spin_lock_init(&mdsc->wait_list_lock);
- 	xa_init(&mdsc->request_tree);
- 	INIT_DELAYED_WORK(&mdsc->delayed_work, delayed_work);
- 	mdsc->last_renew_caps = jiffies;
-@@ -6447,7 +6461,9 @@ static void wait_requests(struct ceph_mds_client *mdsc)
- 		mutex_lock(&mdsc->mutex);
- 		while ((req = __get_oldest_req(mdsc))) {
- 			doutc(cl, "timed out on tid %llu\n", req->r_tid);
-+			spin_lock(&mdsc->wait_list_lock);
- 			list_del_init(&req->r_wait);
-+			spin_unlock(&mdsc->wait_list_lock);
- 			__unregister_request(mdsc, req);
+ 			spin_unlock(&mdsc->wait_list_lock);
++			/*
++			 * A non-empty r_aux_item means the request is
++			 * already owned by another dispatch collector
++			 * (__wake_requests() or replay_unsafe_requests());
++			 * never queue the same node twice.
++			 */
++			if (!list_empty(&req->r_aux_item)) {
++				ceph_mdsc_put_request(req);
++				continue;
++			}
+ 			list_add_tail(&req->r_aux_item, &kick_list);
  		}
  	}
+ 	mutex_unlock(&mdsc->mutex);
+ 
+ 	/* replay without the mutex */
+-	list_for_each_entry_safe(req, nreq, &kick_list, r_aux_item) {
++	/*
++	 * Same as __wake_requests(): r_aux_item is the collector-ownership
++	 * predicate, so pops are done under mdsc->mutex; the dispatch
++	 * itself runs outside the locks.
++	 */
++	mutex_lock(&mdsc->mutex);
++	while (!list_empty(&kick_list)) {
++		req = list_first_entry(&kick_list, struct ceph_mds_request,
++				       r_aux_item);
++		list_del_init(&req->r_aux_item);
++		mutex_unlock(&mdsc->mutex);
++
+ 		doutc(cl, " kicking tid %llu\n", req->r_tid);
+ 		trace_ceph_mdsc_resume_request(mdsc, req);
+-		list_del_init(&req->r_aux_item);
+ 		__do_request(mdsc, req);
+ 		ceph_mdsc_put_request(req);
++
++		mutex_lock(&mdsc->mutex);
+ 	}
++	mutex_unlock(&mdsc->mutex);
+ }
+ 
+ int ceph_mdsc_submit_request(struct ceph_mds_client *mdsc, struct inode *dir,
+@@ -4423,6 +4541,15 @@ static void handle_forward(struct ceph_mds_client *mdsc,
+ 		req->r_num_fwd = fwd_seq;
+ 		req->r_resend_mds = next_mds;
+ 		put_request_session(req);
++		/*
++		 * If a dispatch owner is in the send window, the
++		 * __do_request() below cannot claim the request and the
++		 * forward would be lost; set CEPH_MDS_R_RESEND so that
++		 * the owner re-evaluates the request when it releases
++		 * dispatch ownership.
++		 */
++		if (test_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags))
++			set_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
+ 	}
+ 	mutex_unlock(&mdsc->mutex);
+ 
+@@ -4812,13 +4939,44 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
+ {
+ 	struct ceph_mds_request *req, *nreq;
+ 	unsigned long idx;
++	LIST_HEAD(unsafe_list);
++	LIST_HEAD(old_list);
+ 
+ 	doutc(mdsc->fsc->client, "mds%d\n", session->s_mds);
+ 
++	/*
++	 * Collect unsafe and old requests under mdsc->mutex, then
++	 * replay them without it: __send_request() is lockless and
++	 * ceph_mdsc_release_dir_caps_async() schedules work.
++	 */
+ 	mutex_lock(&mdsc->mutex);
+-	list_for_each_entry_safe(req, nreq, &session->s_unsafe, r_unsafe_item)
++	list_for_each_entry_safe(req, nreq, &session->s_unsafe,
++				 r_unsafe_item) {
++		/*
++		 * A non-empty r_aux_item means the request is already
++		 * owned by another dispatch collector; never queue the
++		 * same node twice.  Replay sends __send_request()
++		 * directly, so it must also claim dispatch ownership
++		 * (CEPH_MDS_R_DISPATCHING) to exclude a concurrent
++		 * __do_request() from the send window.
++		 */
++		if (!list_empty(&req->r_aux_item))
++			continue;
++		if (test_and_set_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags))
++			continue;
++		/* the replay send below supersedes any pending resend */
++		clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
++		ceph_mdsc_get_request(req);
+ 		req->r_attempts++;
+-		__send_request(session, req, true);
++		/*
++		 * Keep the request on s_unsafe: r_aux_item is only a
++		 * walk list.  The request must stay tracked as unsafe
++		 * until the MDS replies, so that a later reconnect can
++		 * replay it again and cleanup_session_requests() can
++		 * still abort it on session teardown.
++		 */
++		list_add_tail(&req->r_aux_item, &unsafe_list);
++	}
+ 
+ 	/*
+ 	 * also re-send old requests when MDS enters reconnect stage. So that MDS
+@@ -4834,11 +4992,83 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
+ 			continue;
+ 		if (req->r_session->s_mds != session->s_mds)
+ 			continue;
++		if (!list_empty(&req->r_aux_item))
++			continue;
++		if (test_and_set_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags))
++			continue;
++		/* the replay send below supersedes any pending resend */
++		clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
+ 
+-		ceph_mdsc_release_dir_caps_async(req);
+-
++		ceph_mdsc_get_request(req);
+ 		req->r_attempts++;
++		list_add_tail(&req->r_aux_item, &old_list);
++	}
++
++	mutex_unlock(&mdsc->mutex);
++
++	/*
++	 * Same as __wake_requests(): r_aux_item is the
++	 * collector-ownership predicate, so every access to it (the
++	 * list_empty() checks in the collectors above and these pops)
++	 * is serialized by mdsc->mutex.  The send itself runs outside
++	 * the locks.
++	 */
++
++	/* replay unsafe requests */
++	mutex_lock(&mdsc->mutex);
++	while (!list_empty(&unsafe_list)) {
++		bool resend;
++
++		req = list_first_entry(&unsafe_list, struct ceph_mds_request,
++				       r_aux_item);
++		list_del_init(&req->r_aux_item);
++		mutex_unlock(&mdsc->mutex);
++
+ 		__send_request(session, req, true);
++
++		mutex_lock(&mdsc->mutex);
++		clear_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags);
++		resend = test_and_clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
++		mutex_unlock(&mdsc->mutex);
++		/*
++		 * A teardown or forward may have requested a re-evaluation
++		 * while this replay send was in flight.  Re-dispatch
++		 * through the normal path, which claims dispatch ownership
++		 * itself: if the request has become unsafe meanwhile,
++		 * __do_request() sees GOT_UNSAFE and bails out, leaving
++		 * the request queued for the next replay; otherwise it is
++		 * sent again normally.
++		 */
++		if (resend)
++			__do_request(mdsc, req);
++		ceph_mdsc_put_request(req);
++
++		mutex_lock(&mdsc->mutex);
++	}
++	mutex_unlock(&mdsc->mutex);
++
++	/* replay old requests */
++	mutex_lock(&mdsc->mutex);
++	while (!list_empty(&old_list)) {
++		bool resend;
++
++		req = list_first_entry(&old_list, struct ceph_mds_request,
++				       r_aux_item);
++		list_del_init(&req->r_aux_item);
++		mutex_unlock(&mdsc->mutex);
++
++		ceph_mdsc_release_dir_caps_async(req);
++		__send_request(session, req, true);
++
++		mutex_lock(&mdsc->mutex);
++		clear_bit(CEPH_MDS_R_DISPATCHING, &req->r_req_flags);
++		resend = test_and_clear_bit(CEPH_MDS_R_RESEND, &req->r_req_flags);
++		mutex_unlock(&mdsc->mutex);
++		if (resend)
++			__do_request(mdsc, req);
++		ceph_mdsc_put_request(req);
++
++		mutex_lock(&mdsc->mutex);
+ 	}
+ 	mutex_unlock(&mdsc->mutex);
+ }
+@@ -5398,9 +5628,10 @@ static int send_mds_reconnect(struct ceph_mds_client *mdsc,
+ 
+ 	mutex_unlock(&session->s_mutex);
+ 
++	up_read(&mdsc->snap_rwsem);
++
+ 	__wake_requests(mdsc, &session->s_waiting);
+ 
+-	up_read(&mdsc->snap_rwsem);
+ 	ceph_pagelist_release(recon_state.pagelist);
+ 	return 0;
+ 
 diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index baba5dcf0def..0ea144ba4c7d 100644
+index 11059678284d..4de4064ab727 100644
 --- a/fs/ceph/mds_client.h
 +++ b/fs/ceph/mds_client.h
-@@ -531,6 +531,9 @@ struct ceph_mds_client {
- 	struct list_head        snap_empty;
- 	int			num_snap_realms;
- 	spinlock_t              snap_empty_lock;  /* protect snap_empty */
-+	spinlock_t              wait_list_lock;   /* protect waiting_for_map
-+						   * and s_waiting lists
-+						   */
+@@ -359,6 +359,28 @@ struct ceph_mds_request {
+ #define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
+ #define CEPH_MDS_R_ASYNC		(8) /* async request */
+ #define CEPH_MDS_R_FSCRYPT_FILE		(9) /* must marshal fscrypt_file field */
++/*
++ * A dispatch owner has claimed the right to rebuild and send
++ * req->r_request (__do_request() past the send gate, or
++ * replay_unsafe_requests()).  Set and cleared under mdsc->mutex;
++ * held across the unlocked send window, cleared by the owner when it
++ * re-acquires the mutex and releases ownership.
++ */
++#define CEPH_MDS_R_DISPATCHING		(10)
++/*
++ * Another context observed a session/request state change while a
++ * dispatch owner was in flight and wants a re-evaluation.  It is a
++ * request to re-evaluate, not a guarantee that a resend is still
++ * needed.
++ *
++ * If RESEND is set while DISPATCHING is held, the current dispatcher
++ * consumes it on release and redispatches.
++ * If RESEND is set after DISPATCHING has been cleared, the producer
++ * must itself trigger a redispatch: cleanup_session_requests() is
++ * followed by kick_requests(), while handle_forward() calls
++ * __do_request() directly.
++ */
++#define CEPH_MDS_R_RESEND		(11)
+ 	unsigned long	r_req_flags;
  
- 	u64                    last_tid;      /* most recent mds request */
- 	u64                    oldest_tid;    /* oldest incomplete mds request,
+ 	struct mutex r_fill_mutex;
+@@ -428,7 +450,13 @@ struct ceph_mds_request {
+ 	struct completion r_safe_completion;
+ 	ceph_mds_request_callback_t r_callback;
+ 	struct list_head  r_unsafe_item;  /* per-session unsafe list item */
+-	struct list_head  r_aux_item;     /* auxiliary local list item */
++	/*
++	 * Auxiliary walk list for the dispatch collectors; doubles as
++	 * the collector-ownership token.  INIT_LIST_HEAD() is done
++	 * before publication; afterwards, all accesses are serialized
++	 * by mdsc->mutex.
++	 */
++	struct list_head  r_aux_item;
+ 
+ 	long long	  r_dir_release_cnt;
+ 	long long	  r_dir_ordered_cnt;
 
 -- 
 2.53.0
