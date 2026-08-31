@@ -1,893 +1,397 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from BL2PR02CU003.outbound.protection.outlook.com (mail-eastusazon11011032.outbound.protection.outlook.com [52.101.52.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 453954B384C;
-	Mon, 31 Aug 2026 13:52:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788184327; cv=none; b=AKKNT06YdPp0T0J7DTrXTyn2uPQeVkVXQL+zZCGBASfQPwXzVEl2yhNuoa8J/M6qNlCm4VVyOC0tZ8ZzMnddUq82IIyzKxT6vc+TpT49rEk5Cl7kP5Vr/IMG5s9SMmNOSpOp0rbDz6qnEInWcOICV9ASJ75/QvtGabDvs0QnKr4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788184327; c=relaxed/simple;
-	bh=jdfpGoPZA9TMbjKm/lVmCyD/toiMM33TSs7TSqWXGIQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=qM7UaP+j51GxlASVdYvJMXrg7NmKyW66VYoYhCGWNWCMfEN6WOMUo+/f5tcak3F02EU3kEUVA34MNU+HtOFRG2ShtJiBniKlalpt8+UUX41A1YK0Bf5KOi2/5q4PVi97/nEH40T0TqxN8Qm5mfvp0mTNA7O0vbleay2Sz6EErf8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aDU5fxeS; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B85E37267C;
+	Mon, 31 Aug 2026 19:26:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.52.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788204364; cv=fail; b=Rzy64s7zsNVJQ2PFuaNl3v2AoBjXSsy8At2fXnudcPOKVxDnbbDT/4s5sqZ/c1XB6d4zK1A8a0m0MEFlu/dt3LppqU19qrEKjtOtDCsLE5uOJOpPROLa0OYZFTI0KaANvJFgj8ffBAFL4/WGbVdt1ftO+kNS/0qmXGS7dR2ZfCw=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788204364; c=relaxed/simple;
+	bh=h0fF5srlZMbkymRg6qp2B5rR1Lvd3Lg4HBLYZ5W6W5U=;
+	h=From:Subject:Date:Message-Id:Content-Type:To:Cc:MIME-Version; b=Mou+CNeINcRfUENifrMo6gV8yUC6ETRyDsyztcU+gIHjDl9FC8QCRDxOSHvl5jmVQPVaN8aLY3Weg6ROlvrkJsG/LSdEZO/GDXDUaiHSABHuKT0hNJaVTSvAHnAhC4RMFCeg7tOSxaAxyl1oavuD6XsLvDpKg7WwcNYK20icwPM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=d+UgtiZG; arc=fail smtp.client-ip=52.101.52.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aDU5fxeS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0EE661F00A3E;
-	Mon, 31 Aug 2026 13:52:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788184324;
-	bh=sRp1R+0aiX6vs4E4s0mu/8jpNsnzWXMkGzc5VOvhLas=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=aDU5fxeSZNj7eOKX3mpzIQpHNl7o2h3yC7zzsSiaZiU7QsXTQH9wkApgvy9eOC4Ym
-	 TRahuSz6BSTPwpQzZ3eqHdF/X5j4nex3mphDTUsnT4Qjfyv4NqWYoYltglTU6vTGdO
-	 7mYGP8ElQrR55LPzqBV7NY/YqOyjSo8gxmhc+XZoM09/Ug+y5XoM2t3Pe8kCZ8mANe
-	 C6JXcUgKwdwVnI+b17OrHvn/267S1x18ttJN7LJuGPzP5j7Meqwgv5K2voO75q4TYG
-	 GqDs5+UlNs2YPmWHFmxwo+7Js4Du41u6XhpqW+RzLvnk7sDTuh0fIDR9XqrWdnRYig
-	 zY9s0zJP+defw==
-From: Sasha Levin <sashal@kernel.org>
-To: patches@lists.linux.dev,
-	stable@vger.kernel.org
-Cc: Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	Sasha Levin <sashal@kernel.org>,
-	slava@dubeyko.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.18] ceph: convert inode flags to named bit positions and atomic bitops
-Date: Mon, 31 Aug 2026 09:30:53 -0400
-Message-ID: <20260831133314.4125787-625-sashal@kernel.org>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260831133314.4125787-1-sashal@kernel.org>
-References: <20260831133314.4125787-1-sashal@kernel.org>
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="d+UgtiZG"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Izag6lOTbk0TC+BKQj5TpYJeX6iV3e5A2yIbAJ+p/egYWEdYGNXsZwZrUvqggEh2hwiX9diiOfbBd884vFz8J5CvP1j4oCa1ae3C5NDjMO0tF/m36mJRIfTOhk2gjkwB9uvEVPFCyMSFCAK7nNA0AyiaulPQoKL1/zgJmjxPrz3dj/wSANoxAIvO9vxRgQGVsywRSH2eVr9aKXS1BNa6vyix0ixu38gweI9ioRfdA5/1H/LmFUTAVwCWW7QAHaf2YsBRvcIgz1Tj/xCniHi3OCjUgLIHcK53JTA3jmRTz5ua3XHTjGNQcsizM65kWx3BLjV3ZhjPpeHX9YL61Nl/dA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=1M7t11bVlX5NiEt6HPea3pXuobyxilLjoOBo2kqy1z0=;
+ b=ukjJ2fN7T+DluBFHtGO5rHNfOeojWk/xaeHJTLQxVg6RuVo3Y9ZRDrOTQEwLX7nlCmC7ekRG9fn8MGBinHFPbdVHlKoaBgZ5tPFXal7tC0PDSGvyjfEnDuxP55Pp6Fzh9/3pxC5BiESPjggBE3YKBn4XU9fjLu7153NHT1/zWofcKJYvVSJMgpAG2rvl+nNxCY3KxDjQZwXgHYz9ENO2mwxQAeUU6kDtc3GwX2iCb8PAodBhPoKJNN/I8uclDYkudIPUf1jGsGsMMH0NztbwVjmqW7SOuLfn9xrysIZcynND+y2Ol7mMtpUpuJvpDOk9xs9jMcKzuFyjOp1rlgLWlQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=1M7t11bVlX5NiEt6HPea3pXuobyxilLjoOBo2kqy1z0=;
+ b=d+UgtiZGPj2sblyxOpIcXM7SJktNxDWdOozEjOnkAkye8n7UtMZyN/jOyZM/AeG99DHQ4GIRrAOAz+xOclj925+H0fjxv7k+I4CHW+/6RDwp8cc9deRQ9umdQEpBWBAKZRb0qk5XzOOZEnYW+84/lMlvZMlv5dgUq/3NfITDXJ3lOu/FuUYdp8hHEd+Ho9xG3EfRNRS66dum9BPwBejbuzcQ9NntBMBp6rBCIL8QstpH4GgNV0xiFn1+1cQS1PJvy945hxKSRjuO++Gjoq1uxKWk+ukM84JUWEn7AMWAQJKHcpJ1sm+TLDibqURugxJsSBonc5u71dd8jqTi6fGyBw==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nvidia.com;
+Received: from IA0PR12MB8374.namprd12.prod.outlook.com (2603:10b6:208:40e::7)
+ by SA1PR12MB8742.namprd12.prod.outlook.com (2603:10b6:806:373::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.7; Mon, 31 Aug
+ 2026 19:25:38 +0000
+Received: from IA0PR12MB8374.namprd12.prod.outlook.com
+ ([fe80::d85f:4c87:ae84:3f16]) by IA0PR12MB8374.namprd12.prod.outlook.com
+ ([fe80::d85f:4c87:ae84:3f16%5]) with mapi id 15.21.0360.008; Mon, 31 Aug 2026
+ 19:25:38 +0000
+From: Zi Yan <ziy@nvidia.com>
+Subject: [PATCH v2 00/14] Remove PG_private by using page/folio->private
+ checks instead
+Date: Mon, 31 Aug 2026 15:25:23 -0400
+Message-Id: <20260831-remove-pg_private-v2-0-3668159cd9e8@nvidia.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/22Nyw6CMBBFf4XM2ho6aHms/A9DTC0DzALatKTRk
+ P67lbh0eU5yz90hkGcK0BU7eIoc2K4Z8FSAmfU6keAhM2CJqqyxEZ4WG0m46eE8R72RMCO1qEw
+ 9NpWBvHOeRn4dzXufeeawWf8+LqL82l+tkn9qUYpSyAuatn7q6qrwtkYeWJ+NXaBPKX0AdZkNU
+ bMAAAA=
+X-Change-ID: 20260728-remove-pg_private-cfe926c7f83c
+To: David Hildenbrand <david@kernel.org>, 
+ "Matthew Wilcox (Oracle)" <willy@infradead.org>, 
+ Andrew Morton <akpm@linux-foundation.org>, 
+ Muchun Song <muchun.song@linux.dev>, Lorenzo Stoakes <ljs@kernel.org>, 
+ "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, 
+ Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
+ Michal Hocko <mhocko@suse.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
+ Nico Pache <nico.pache@linux.dev>, Ryan Roberts <ryan.roberts@arm.com>, 
+ Dev Jain <dev.jain@arm.com>, Barry Song <baohua@kernel.org>, 
+ Lance Yang <lance.yang@linux.dev>, Usama Arif <usama.arif@linux.dev>, 
+ Gregory Price <gourry@gourry.net>, 
+ Ying Huang <ying.huang@linux.alibaba.com>, 
+ Alistair Popple <apopple@nvidia.com>, Johannes Weiner <hannes@cmpxchg.org>, 
+ Qi Zheng <qi.zheng@linux.dev>, Shakeel Butt <shakeel.butt@linux.dev>, 
+ Kairui Song <kasong@tencent.com>
+Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, 
+ Zi Yan <ziy@nvidia.com>, Minchan Kim <minchan@kernel.org>, 
+ Sergey Senozhatsky <senozhatsky@chromium.org>, 
+ Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@redhat.com>, 
+ Arnaldo Carvalho de Melo <acme@kernel.org>, 
+ Namhyung Kim <namhyung@kernel.org>, Thomas Gleixner <tglx@kernel.org>, 
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
+ x86@kernel.org, Mark Rutland <mark.rutland@arm.com>, 
+ Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
+ Jiri Olsa <jolsa@kernel.org>, Ian Rogers <irogers@google.com>, 
+ Adrian Hunter <adrian.hunter@intel.com>, 
+ James Clark <james.clark@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, 
+ linux-perf-users@vger.kernel.org, Juergen Gross <jgross@suse.com>, 
+ Stefano Stabellini <sstabellini@kernel.org>, 
+ Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>, 
+ xen-devel@lists.xenproject.org, Eric Biggers <ebiggers@kernel.org>, 
+ "Theodore Y. Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, 
+ linux-fscrypt@vger.kernel.org, Oscar Salvador <osalvador@suse.de>, 
+ Chao Yu <chao@kernel.org>, linux-f2fs-devel@lists.sourceforge.net, 
+ Gao Xiang <xiang@kernel.org>, Jan Kara <jack@suse.cz>, 
+ Yue Hu <zbestahu@gmail.com>, Jeffle Xu <jefflexu@linux.alibaba.com>, 
+ Sandeep Dhavale <dhavale@google.com>, Hongbo Li <hongbohbli@tencent.com>, 
+ Chunhai Guo <guochunhai@vivo.com>, linux-erofs@lists.ozlabs.org, 
+ linux-fsdevel@vger.kernel.org, Steven Rostedt <rostedt@goodmis.org>, 
+ Masami Hiramatsu <mhiramat@kernel.org>, 
+ Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
+ Matthew Brost <matthew.brost@intel.com>, 
+ Joshua Hahn <joshua.hahnjy@gmail.com>, Rakie Kim <rakie.kim@sk.com>, 
+ Byungchul Park <byungchul@sk.com>, 
+ Axel Rasmussen <axelrasmussen@google.com>, Yuanchu Xie <yuanchu@google.com>, 
+ Wei Xu <weixugc@google.com>, linux-trace-kernel@vger.kernel.org, 
+ Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
+ linux-nfs@vger.kernel.org, Song Liu <song@kernel.org>, 
+ Yu Kuai <yukuai@fygo.io>, Ilya Dryomov <idryomov@gmail.com>, 
+ Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
+ Li Nan <magiclinan@didiglobal.com>, Xiao Ni <xiao@kernel.org>, 
+ linux-raid@vger.kernel.org, ceph-devel@vger.kernel.org, 
+ Richard Weinberger <richard@nod.at>, Zhihao Cheng <chengzhihao1@huawei.com>, 
+ linux-mtd@lists.infradead.org, Baoquan He <baoquan.he@linux.dev>, 
+ Pasha Tatashin <pasha.tatashin@soleen.com>, 
+ Pratyush Yadav <pratyush@kernel.org>, Jonathan Corbet <corbet@lwn.net>, 
+ Dave Young <ruirui.yang@linux.dev>, Shuah Khan <skhan@linuxfoundation.org>, 
+ kexec@lists.infradead.org, linux-doc@vger.kernel.org
+X-Mailer: b4 0.15.2
+X-ClientProxiedBy: YQBP288CA0014.CANP288.PROD.OUTLOOK.COM
+ (2603:10b6:c01:6a::27) To IA0PR12MB8374.namprd12.prod.outlook.com
+ (2603:10b6:208:40e::7)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.18.48
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: IA0PR12MB8374:EE_|SA1PR12MB8742:EE_
+X-MS-Office365-Filtering-Correlation-Id: 41106e9b-83b1-4289-148e-08df0795a348
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|7416014|376014|366016|1800799024|23010399003|56012099006|10067099003|5023799004|11063799006|18002099003|3023799007|6133799003|921020;
+X-Microsoft-Antispam-Message-Info:
+	htBZZ7Vb0eSvRuQ6i6qCoafiHji3CmdV5q+gWWn3j5SvAJqLVVvyzr7grLrG1sgQn/Bm4NsXVwcpqWuNsYuZSEmYz8wBonsejxrvXRxhgaBiU380txw+dm6fJ6scn8Ya5yOfX5tfwcX9KopytlqfBOVOlbskj1efRgAVY9t1aK/8/nw6ga3RzmTgvdBEjdffhLOJvQOGImpxzMeWnrDjOC+WSQuEU6YwXNa9m23T4iaqk18laKGiTbLXNcUTS1jfWtB8bGkVFvyw5VIosMU3c2N4zUw/PwfzO7DMFK7ym/E4g3JG4N8DxBkkW4K0CAHy0LvCrG1RghbJxVDMCa9CLvk9zpCJzIRoiWtOkjt2S3uDAozEea+p7+YXq133RvaHZXq9ZMqk4Q9a/jdEut7x6VZDz9zgTyAyRitZmmtfUj0IPo6RUIiKKlmxY6brx0yRsJ8IMtBqpWK8XvAspquCK2YpzVcpkZIaKEcN+Dj9CtlKJMrDzf77KLesP4zpGJFJduRBQ9FrOcNHvGGTueB8NPWC59MUIDc4uw6mf1Naa35YScoP/TB6m2jf9NWxq3Zda9+uJ5qXI5Zo0LHl2g/bxA0UtkZAukAQyxh45SaiUn5UjQmZNvVfap3X0UiXa1gKZ40QqNL3VyFBltaZFJCSE92FJQpdbh/p/ybZaVlN5lWMdMWl0n+CCs7YuBljKU8TU5Tgt8PFmUsLS1V5HC7m/A==
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA0PR12MB8374.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(366016)(1800799024)(23010399003)(56012099006)(10067099003)(5023799004)(11063799006)(18002099003)(3023799007)(6133799003)(921020);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?aldNM29LWVhMQWN4WGlpSkJRWkxtZFRZNlFYRFNPMERWbkZyb211NWZRR25K?=
+ =?utf-8?B?N2ZrOElmcTcxdXZybjBwLy84WUlRUlh0QjZDdGgzM0JqdEp2YXEyNTJZWUpI?=
+ =?utf-8?B?cC80TEo3SzNNcDYwMitaNTdvQUgyck9UUlJkVUhtTVdhRDVjYUNINnRlOWVu?=
+ =?utf-8?B?amxwRlN0UC9DTHdaMzlKYWtzVEpucU5zWjgrcUl2VkxjTVZDUUlUUGpub0Jj?=
+ =?utf-8?B?RTFDR3VDdXN5T1llNGJMK01xVnNNYTgvTUlBL1VvMklwcFMwVERpTjBhcWll?=
+ =?utf-8?B?UENNOUxuYlVIWVhkckhtS3pVQ3dqUnhBVUlIUjc0UmZxZnJkZnJBdWwvWm1E?=
+ =?utf-8?B?ZjZrbjIrY21zSTYzYVVlY0d4M3BJb1lxa1ZmWTJBbUZRbUNlNFFuZGdrdDhu?=
+ =?utf-8?B?bHlxNG85MnhvZVlVQjM3WlJhMWt1VXprV21jek1sVUdxR3RFTG1iWFNSYkxZ?=
+ =?utf-8?B?TjR3eEhqQ3k1bnFubGs1eEZaOHM4WmRKamtPa24xZTFnbFZzQjFiQTBFUmwr?=
+ =?utf-8?B?RnRKRkNWT00vRjUvTVBWVVBSRW0xTHQvLzI0T3VLR0VLRGpjR2RCOGYwclUz?=
+ =?utf-8?B?dmFNaXlUVElXaWV3QXoxODh1OFFtMmcyM2dHMlU5ZDNCeVZMSFFCaXJzQStm?=
+ =?utf-8?B?SFVtZ2c5enlDM3pVMmhEMTBweGFkTDFqZlRQN2tXSWhJZnRpODBzVW5BdW5D?=
+ =?utf-8?B?L25CVWdDWG9JaTI0cXR1V2pqSnhRQ09vUTgrakk5OUhpclZra0VSZ2dOTmk2?=
+ =?utf-8?B?L25XWEp4b1JPTUxGV0JUQ2ZpM21OOFlJMGZDMmJvQ2FxRUZBRTI5RjBrTGth?=
+ =?utf-8?B?VVlOQktYenJ2emJFM2llazU1SUlIRkdEWG9QNldTQW1QWTFpT0tIYkpSdk1a?=
+ =?utf-8?B?VzRQb1hYZys3R0lEaHA5Rkp4UEdkbzB3N3JYbElURGpZZWZ3MGttRVFLLzc4?=
+ =?utf-8?B?amhBc3gvd21nK0dXb0FUQ2ZENkNKZHh3bFZiR0VBcGdiMTJIcHNkZ21nVHdl?=
+ =?utf-8?B?bmZRY3Y1MWhlS2FEUU5UV0JKYmZiT0NWano5dFUyWFJpN0w1aWZENTVvSVNo?=
+ =?utf-8?B?dHVHQjIzMmZRN0FDRXJqbGRHTkZEdXRHc3dxNUN0bXpSVVpOeXVJZmNyT3RM?=
+ =?utf-8?B?cTA3SGNsdUFoc2QrMWxSNkZJNnFGQjkvQ3pYSDZJQ3NNQnJqRjlBY1pZUFJn?=
+ =?utf-8?B?R0VpdndVbFlCa05SNG0rckgyZ0NiZ1dhMlIrSlpmcHBPQXNQMm1USitlaU4y?=
+ =?utf-8?B?U0p1WC80UHU4VzJrZDZ5SnhGUm9URUFPajd2MlVWdkRiQTRrN05Jb0xHU1E3?=
+ =?utf-8?B?cjBxZTFhWWtVamJHdzBua0Y0Q0JQOTBJYnN5eDJtdnl5YUtEUGc4MUdvWTdu?=
+ =?utf-8?B?ZVRtclY2dFZaaFBtSy83aFN5QWdLNXlycUpTNisyNkE1YmZCOFRQQzA1bDdx?=
+ =?utf-8?B?SkZDcm5zcEgyWHlYVEQvODliYXN6VTVrcDRTTGJOUVF0VmVRZStDV1dCT2Uw?=
+ =?utf-8?B?UVVvYSsxMkpBMkpYeHBJSlM3TWZIeHZqM25LaWJMTG5yaFAxSHFNMlExSlpW?=
+ =?utf-8?B?SU01YUk5TlZ6Zm9IZURRelFLNkMxaEZZRGJSa2ZaSTBoNXNRWU52bFd3NzJk?=
+ =?utf-8?B?V091Q1RjdWVCMnRmRnh6RGZObmZ1WVhDNWdlUWRzSlBJR3Q2QVo1Szc4L2dB?=
+ =?utf-8?B?WFhuN1ZBZjhwOFdFZG85bFNjRDQyYWtsQ1ZsZzZCNXBNU2Y2R21taUZTTlFj?=
+ =?utf-8?B?emJPTnBNYUxicGw5cnNwVmlTYzJSMGZIeWh3dG9kcDdYWUJYZFQ4bm5ObG94?=
+ =?utf-8?B?VTJCN1cvYy9rZEZDS2xIZjROMnpSMVB1VmVVRDEybEkxU1QveWE5bW5VVnls?=
+ =?utf-8?B?RVd0N3VOdmlZb3lTYnpUb3lwckZMbHY1RFJCa05MY05PT090YTErME9BT0Zh?=
+ =?utf-8?B?bHpIbTVNb2ZFaU1BQnQyQ1ZtamxuSE1YSFRza2FtaTU4UFN5Q1RDVXY2Y2NS?=
+ =?utf-8?B?WmRlQThFNFZ6S043cWpuaWNVQUsyUU5lNGtDYVQzWGhraytqT2ZHakVQc1NE?=
+ =?utf-8?B?VU9weW1ONjNrWVVZc2xBSVZKNG85ekg5eE9HQURBaVBxUDNvVUdENDdiR0xI?=
+ =?utf-8?B?S1NrcytDZmNEMldBbVRXNnJNMnlEenM4Qml1ZVdJb1k4VXJkMmdHWW9WRFUw?=
+ =?utf-8?B?SFNNWXM4UkpXSHl0ZzRXTnRHUThUeHhITmdDTG5la21FVmU1MzhtODAzWkI2?=
+ =?utf-8?B?QzZvMkNjNlpVaEp5b0xIaGRuUFl6N3lHYmkxNjBkeUpCNVJoRzRWZUFvcWJI?=
+ =?utf-8?Q?QUyE3mqIbnBvqUtxPa?=
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 41106e9b-83b1-4289-148e-08df0795a348
+X-MS-Exchange-CrossTenant-AuthSource: IA0PR12MB8374.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 Aug 2026 19:25:38.2564
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: n843s1whvSfgneW2wvMilxUPWuaDS8ZfBLBStLsy0PfIZUOOEULUw1e08PmJRM8m
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR12MB8742
 
-From: Alex Markuze <amarkuze@redhat.com>
+Hi all,
 
-[ Upstream commit e120e2b666851c4c0c7bffd315ff69a09f9fe4ac ]
+This patchset removes PG_private to make space for upcoming PG_folio
+(reserved as __PG_folio) for identifying pages from a folio (more details
+in Note below). Instead of checking PG_private, all code is changed to
+check page/folio->private != NULL instead.
 
-Define named bit-position constants for all CEPH_I_* inode flags and
-derive the bitmask values from them.  This gives every flag a named
-_BIT constant usable with the test_bit/set_bit/clear_bit family.
-The intentionally unused bit position 1 is documented inline.
+MM people are cc'd on all patches and subsystem people are cc'd on the
+cover letter and corresponding patches.
 
-Convert all flag modifications to use atomic bitops (set_bit,
-clear_bit, test_and_clear_bit).  The previous code mixed lockless
-atomic ops on some flags (ERROR_WRITE, ODIRECT) with non-atomic
-read-modify-write (|= / &= ~) on other flags sharing the same
-unsigned long.  A concurrent non-atomic RMW can clobber an
-adjacent lockless atomic update -- for example, a lockless
-clear_bit(ERROR_WRITE) could be silently resurrected by a
-concurrent ci->i_ceph_flags |= CEPH_I_FLUSH under the spinlock.
-Using atomic bitops for all modifications eliminates this class
-of race entirely.
+Overview
+===
+Most code uses folio_attach/detach/change_private() functions, so folio
+refcount is increased and decreased when folio->private is set and reset,
+respectively. There is no need to change them.
 
-Flags whose only users are now the _BIT form (ERROR_WRITE,
-ASYNC_CHECK_CAPS) have their old mask defines removed to document
-that callers must use the _BIT constant with the set_bit/test_bit
-family.  ERROR_FILELOCK and SHUTDOWN retain their mask defines
-because they are still used via bitmask tests in lockless readers
-(ceph_inode_is_shutdown, reconnect_caps_cb).
+Changes are needed for exceptional users:
+1. zsmalloc uses PG_private to indicate first component zpdesc page and
+   page->private is used to store zspage in zpdesc. To remove PG_private,
+   is_first_zpdesc() is replaced by pointer comparison.
 
-The direct assignment in ceph_finish_async_create() is converted
-from i_ceph_flags = CEPH_I_ASYNC_CREATE to set_bit().  This
-inode is I_NEW at this point -- still invisible to other threads
-and guaranteed to have zero flags from alloc_inode -- so either
-form is safe, but set_bit() keeps the conversion uniform.
+2. kernel/events/ring_buffer.c stores page order in page->private.
+   Replacing PG_private with page->private != NULL works.
 
-Signed-off-by: Alex Markuze <amarkuze@redhat.com>
-Reviewed-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Signed-off-by: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+3. drivers/xen/grant-table.c stores xen_page_foreign in page->private,
+   where on 32-bit, a pointer to xen_page_foreign is stored; on 64-bit,
+   page->private is used as xen_page_foreign. PG_private check is replaced
+   by page->private != NULL on 32-bit for xen_page_foreign deallocation.
+   On 64-bit, page->private is cleared unconditionally since {domid=0,
+   gref=0} (xen_page_foreign can be 0) is valid.
+
+4. fs/crypto/crypto.c stores a folio pointer in page->private, PG_private
+   checks are replaced by page->private != NULL.
+
+5. fs/erofs has two different uses:
+
+    5a. folio->private is used to form a reversed list of
+    the outputs of readahead_folio(). readahead_folio_last() is added to
+    output folios in reversed order, so that ->private is no longer needed.
+
+    5b. folio->private is used as an in-flight I/O counter. Convert the
+    code to use folio_attach/detach/get_private() and add bias==1 to the
+    counter to avoid folio->private being zero.
+
+6. fs/nfs/write.c: folio refcount maintenance is in a bigger scope than
+   folio->private. So folio_attach/detach/get_private() is not used.
+   Nothing to change.
+
+7. fs/f2fs uses attach_page_private() to first reset folio->private then
+   immediately sets PAGE_PRIVATE_NOT_POINTER bit on it. Change it to use
+   attach_page_private() to set PAGE_PRIVATE_NOT_POINTER bit directly to
+   avoid folio->private == NULL gap inside set_page_private_##name().
+
+8. hugetlb uses folio_change_private(folio, NULL) without folio refcount
+   maintenance. Change it to folio->private = NULL.
+
+After the above changes, PG_private ops are converted to
+page/folio->private ops.
+
+folio_test_fs_private() is added to check filesystem-only private data by
+excluding swapcache and hugetlb folios, because swapcache folios overlap
+swp_entry_t swap with ->private and hugetlb sets its own flags in
+->private.
+
+Note
+===
+1. KPF_PRIVATE is removed after PG_private is removed.
+
+2. Documentation/mm/hugetlbfs_reserv.rst is outdated, so I did not remove
+   PG_private related text. It should be rewritten.
+
+3. PG_folio is planned to be set on every page from a folio in
+   page_rmappable_folio(), so folios with any order (currently
+   PG_large_rmappable is used to identify >0 order folios) can be
+   identified, vm_insert_*() can correctly reject all folios, and rmap code
+   can accept only folios. Eventually, page_folio() will return NULL for
+   non-folio pages by checking PG_folio, but before that all existing users
+   that treat compound pages as folios will be converted. 
+
+Tests
+===
+1. allmodconfig build passed.
+
+2. zsmalloc is tested using ext4 on a 1GB lz4 zram:
+    2a. zram load + zsmalloc compaction;
+    2b. concurrent zspage migration via memory compaction;
+    2c. confirmed that multi-page zspages actually formed.
+
+    Details: https://github.com/x-y-z/linux-dev/blob/b4/remove-pg_private/test_zsmalloc.md
+
+3. erofs is tested on images created with -C4096 and lz4hc, lzma,
+   deflate, and zstd algorithms:
+   3a. cold read of all files, verify checksums match source;
+   3b. readahead + reclaim/migration race.
+
+   Details: https://github.com/x-y-z/linux-dev/blob/b4/remove-pg_private/test_erofs.md
+
+4. fscrypt is tested on software-encrypted ext4 with writes to exercise
+   bounce pages.
+
+   Details: https://github.com/x-y-z/linux-dev/blob/b4/remove-pg_private/test_fscrypt.md
+
+5. f2fs is tested on an image with inline_data,compress_algorithm=lz4:
+    5a. INLINE_INODE — lots of tiny files;
+    5b. REF_RESOURCE + general writeback — buffered write churn with fsync;
+    5c. ONGOING_MIGRATION — force GC / page migration;
+    5d. ATOMIC_WRITE — atomic-write ioctl path.
+
+    Details: https://github.com/x-y-z/linux-dev/blob/b4/remove-pg_private/test_f2fs.md
+    (I did not run xfstests)
+
+6. MM selftests passed.
+
+LLM use
+===
+Claude was used to form a concrete plan on what code needs to be changed
+and how to change them. The plan was reviewed by Codex until no issue was
+spotted.
+
+Plan is at: https://github.com/x-y-z/linux-dev/blob/b4/remove-pg_private/plan.md
+
+I then followed the plan to make code changes. I did bounce ideas with
+Claude how to change fs/erofs, since I did not like the original idea.
+After each change, I asked Claude to review my code and git commit message.
+I also asked Claude to give me test plans (see above).
+
+At last, Codex was used to review all patches.
+
+Comments and suggestions are welcome. Thanks.
+
+Assisted-by: Claude:claude-opus-4-8
+Assisted-by: Codex:gpt-5
+Signed-off-by: Zi Yan <ziy@nvidia.com>
 ---
-
-LLM Generated explanations, may be completely bogus:
-
-# Stable Backport Analysis: `ceph: convert inode flags to named bit
-positions and atomic bitops`
-
-**Local tree:** Linux **6.18.44** (`git describe HEAD` →
-`v6.18.44-1-g2736c32da98b9`)
-**Commit analyzed:** `e120e2b666851` (on `master`, **not** in this tree)
-**Patch applies cleanly:** `git show e120e2b666851 | git apply --check`
-→ success
-
----
-
-## PHASE 1: COMMIT MESSAGE FORENSICS
-
-### Step 1.1: Subject line
-**Record:** `[ceph]` `[convert]` — Convert Ceph inode `i_ceph_flags` to
-named `_BIT` constants and use atomic bitops for all flag modifications.
-
-### Step 1.2: Tags
-**Record:**
-| Tag | Value |
-|-----|-------|
-| Signed-off-by | Alex Markuze, Viacheslav Dubeyko, Ilya Dryomov |
-| Reviewed-by | Viacheslav Dubeyko |
-| Fixes: | **Absent** (expected for manual review) |
-| Reported-by: | **Absent** |
-| Tested-by: | **Absent** in commit; series cover letter has `Tested-by:
-Viacheslav Dubeyko` |
-| Cc: stable | **Absent** |
-| Link: | **Absent** |
-
-No syzbot, no CVE, no explicit stable nomination in the commit.
-
-### Step 1.3: Body analysis
-**Record:**
-- **Bug:** `i_ceph_flags` mixes atomic per-bit ops
-  (`set_bit`/`clear_bit`) with non-atomic word RMW (`|=` / `&= ~`) on
-  the same `unsigned long`.
-- **Symptom:** Concurrent non-atomic RMW can clobber adjacent atomic bit
-  updates (example: `clear_bit(ERROR_WRITE)` resurrected by
-  `ci->i_ceph_flags |= CEPH_I_FLUSH`).
-- **Root cause:** Inconsistent flag-update mechanism on a shared
-  bitfield.
-- **Versions:** Not stated; prerequisite context is `fbeafe782bd98`
-  (ODIRECT atomic bitops), which **is** in 6.18.44.
-
-### Step 1.4: Hidden bug fix?
-**Record:** **Yes.** Described as a conversion, but it fixes a real
-concurrency defect class (CWE-366 / lost-update on shared bitfield).
-Also removes spinlocks from some hot paths (`ERROR_WRITE`,
-`ERROR_FILELOCK`) only after making all flag updates atomic.
-
----
-
-## PHASE 2: DIFF ANALYSIS
-
-### Step 2.1: Inventory
-**Record:**
-| File | Change |
-|------|--------|
-| `fs/ceph/super.h` | Define `_BIT` constants; convert
-`ceph_set/clear_error_write()` to lockless `set_bit`/`clear_bit` |
-| `fs/ceph/caps.c` | 12 flag mutations → atomic bitops |
-| `fs/ceph/addr.c` | Pool-perm flags → `set_bit`; re-read flags after
-update |
-| `fs/ceph/file.c` | `ASYNC_CREATE`/`ERROR_WRITE` → atomic; rename
-`CEPH_ASYNC_CREATE_BIT` → `CEPH_I_ASYNC_CREATE_BIT` |
-| `fs/ceph/locks.c` | Lockless `test_bit`/`clear_bit` for
-`ERROR_FILELOCK` |
-| `fs/ceph/inode.c`, `snap.c`, `xattr.c`, `mds_client.c/h` | Mechanical
-conversions |
-
-**Scope:** 10 files, +74/−82 lines. Multi-file but mechanical; not a
-refactor for its own sake.
-
-### Step 2.2: Code flow (key hunks)
-**Record:**
-- **Before:** `ci->i_ceph_flags |= CEPH_I_FLUSH` (load/OR/store) under
-  `cap_delay_lock`; `clear_bit(CEPH_I_ODIRECT_BIT, ...)` under
-  `i_ceph_lock` (since `fbeafe782bd98`).
-- **After:** All modifications use
-  `set_bit`/`clear_bit`/`test_and_clear_bit`.
-- **`ceph_set_error_write()`:** spinlock + `|=` → lockless `set_bit`.
-- **`ceph_fl_release_lock()`:** spinlock + `&= ~` → lockless
-  `clear_bit`.
-- **`ceph_pool_perm_check()`:** builds flag mask then `|=` → individual
-  `set_bit` calls; re-reads flags under lock before `goto check`.
-
-### Step 2.3: Bug mechanism
-**Record:** **Category:** Race condition / lost update on shared
-bitfield.
-**Mechanism:** Non-atomic word RMW is not composable with concurrent
-atomic bitops on the same `unsigned long` unless all writers use atomic
-bitops. A non-atomic `|=` can write back a stale word value and undo a
-concurrent `clear_bit()` on a different bit.
-
-### Step 2.4: Fix quality
-**Record:** Fix is standard kernel practice for multi-bit `unsigned
-long` fields. Minimal logic change; no API changes. Low regression risk;
-slightly changes locking for `ERROR_WRITE`/`ERROR_FILELOCK`
-(intentionally lockless, made safe by uniform atomic bitops).
-
----
-
-## PHASE 3: GIT HISTORY
-
-### Step 3.1: Blame
-**Record:**
-- `ceph_set/clear_error_write()`: Jeff Layton, 2017 (`26544c623e741a`) —
-  non-atomic RMW under `i_ceph_lock`.
-- ODIRECT `clear_bit()`: `fbeafe782bd98` (Viacheslav Dubeyko, Jul 2025)
-  — **in 6.18.44**.
-- ODIRECT flag itself: `321fe13c93987` (Jeff Layton, 2019) — xfstest
-  generic/451 data-coherency fix.
-
-### Step 3.2: Fixes: tag
-**Record:** N/A — no `Fixes:` tag. Bug partially introduced/worsened by
-`fbeafe782bd98`, which converted ODIRECT to atomic bitops while other
-flags remained non-atomic RMW.
-
-### Step 3.3: Related history
-**Record:**
-- `fbeafe782bd98` — Coverity CWE-366 fix for ODIRECT; ancestor of HEAD.
-- Commit is **v4 01/11** of “ceph: manual client session reset” series;
-  later patches add debugfs/tracepoints (not in 6.18.44).
-- On `master`, 3 commits ahead of HEAD in `fs/ceph/super.h`; this is the
-  oldest of them.
-
-### Step 3.4: Author context
-**Record:** Alex Markuze (Red Hat ceph contributor). Reviewed/acked by
-Viacheslav Dubeyko (IBM, authored ODIRECT race fix). Committed by Ilya
-Dryomov (ceph maintainer).
-
-### Step 3.5: Dependencies
-**Record:** **Standalone for backport purposes.** Patch 1/11 of a larger
-series, but only renames/converts existing flag handling. No new
-structures or APIs. `git apply --check` passes on 6.18.44 HEAD.
-
----
-
-## PHASE 4: MAILING LIST / EXTERNAL
-
-### Step 4.1: Discussion
-**Record:** `b4 dig -c e120e2b666851` →
-https://patch.msgid.link/20260507122737.2804094-2-amarkuze@redhat.com
-Series: v1 (RFC 1/4) → v2 (1/7) → v3 (01/11) → v4 (01/11, committed
-version).
-WebFetch of lore blocked by bot protection; thread retrieved via `b4 dig
--m`.
-
-### Step 4.2: Reviewers
-**Record:** CC'd: `ceph-devel@vger.kernel.org`, `idryomov@gmail.com`,
-`vdubeyko@redhat.com`. Multiple `Reviewed-by: Viacheslav Dubeyko` across
-series. `Tested-by: Viacheslav Dubeyko` on cover letter.
-
-### Step 4.3: Bug reports
-**Record:** No external bug report. Related: Coverity CID findings for
-ODIRECT in `fbeafe782bd98`. No syzbot.
-
-### Step 4.4: Series context
-**Record:** Patch 1 enables atomic flag handling for the manual session-
-reset series (patches 2–11). Patches 2–11 are new functionality and
-would not accompany this backport; patch 1 is independently correct.
-
-### Step 4.5: Stable list
-**Record:** No `Cc: stable` found in mbox thread grep. No stable-list
-discussion found.
-
----
-
-## PHASE 5: CODE SEMANTIC ANALYSIS
-
-### Step 5.1: Key functions
-**Record:** `ceph_set/clear_error_write()`,
-`__cap_delay_requeue_front()`, `__prep_cap()`, `ceph_check_caps()`,
-`ceph_block_o_direct()`, `ceph_block_buffered()`,
-`ceph_pool_perm_check()`, `wake_async_create_waiters()`,
-`ceph_fl_release_lock()`, `ceph_inode_shutdown()`.
-
-### Step 5.2: Callers
-**Record:**
-- `ceph_start_io_direct()` / `ceph_start_io_read()` — from `file.c`
-  read/write paths (common I/O).
-- `__cap_delay_requeue_front()` — from `ceph_write_inode()` (sync/fsync
-  path).
-- `ceph_set/clear_error_write()` — from `file.c`, `addr.c` on I/O
-  errors.
-- `ceph_check_caps()` — cap management hot path.
-- `ceph_fl_release_lock()` — file lock release.
-
-### Step 5.3: Callees
-**Record:** `set_bit`, `clear_bit`, `test_bit`, `test_and_clear_bit`,
-`clear_and_wake_up_bit`, spinlocks (`i_ceph_lock`, `cap_delay_lock`).
-
-### Step 5.4: Reachability
-**Record:** All paths reachable from normal CephFS mount activity — file
-I/O, cap flush, pool permission checks, file locking. Triggerable by
-unprivileged users with access to mounted Ceph filesystem.
-
-### Step 5.5: Similar patterns
-**Record:** `fbeafe782bd98` already uses atomic bitops for ODIRECT only.
-`clear_and_wake_up_bit(CEPH_ASYNC_CREATE_BIT, ...)` already uses atomic
-ops for async-create. This commit unifies the pattern across all flags.
+Changes in v2:
+1. removed is_first_zpdesc() in patch 1 and open coded the checks.
+2. fixed wording in patch 2's commit message and clarified page_private()
+   also works when ring buffer's AUX page order is 0.
+3. removed the empty loop in 64-bit gnttab_pages_set_private().
+4. clarified folio->private will be reset to NULL by
+   fscrypt_free_bounce_page() in the commit message.
+5. clarified why hugetlb needs to restore hugetlb_vmemmap_optimized.
+6. renamed readahead_folio_reverse() readahead_folio_last() and
+   reimplemented readahead_folio_last() by adding a new readahead_control
+   private member, _forward, and a new helper __readahead_advance().
+7. added a bias, 1, to erofs I/O counter, so that folio->private stays non
+   NULL between folio_attach_private() and folio_detach_private().
+8. converted more call sites to use folio_test_fs_private().
+- Link to v1: https://lore.kernel.org/r/20260731-remove-pg_private-v1-0-142c97ba3562@nvidia.com
 
 ---
+Zi Yan (14):
+      mm/zsmalloc: replace PG_private with pointer comparison
+      perf/ring_buffer: stop using PG_private as AUX page high-order marker
+      xen/grant-table: stop setting PG_private on pages for grant mapping
+      fscrypt: stop setting PG_private on bounce page
+      mm/hugetlb: use direct assignment instead of folio_change_private()
+      f2fs: stop using PG_private
+      erofs: mm/pagemap: add readahead_folio_last() to avoid folio->private
+      erofs: use folio_attach/detach_private() instead of direct assignment
+      mm/page-flags: check page/folio->private instead of PG_private
+      mm/page-flags: introduce folio_test_fs_private()
+      treewide: remove folio_set/clear_private()
+      treewide: replace PagePrivate() with page_private()
+      treewide: adjust comments on PagePrivate and PG_private
+      mm/page-flags: remove PG_private
 
-## PHASE 6: CROSS-REFERENCE WITH LOCAL TREE (6.18.44)
-
-### Step 6.1: Buggy code present?
-**Record:** **Yes.** Current tree has:
-- `clear_bit(CEPH_I_ODIRECT_BIT, ...)` in `io.c` (`fbeafe782bd98`)
-- Non-atomic `ci->i_ceph_flags |= CEPH_I_FLUSH` in
-  `__cap_delay_requeue_front()` (line 551)
-- Non-atomic `|=` / `&= ~` throughout `caps.c`, `super.h`, etc.
-
-Fix commit `e120e2b666851` is **not** in this tree (only on `master`).
-
-### Step 6.2: Backport complications
-**Record:** **Clean apply** verified. No conflicting changes in 6.18.44
-for these hunks.
-
-### Step 6.3: Related fixes already present?
-**Record:** `fbeafe782bd98` (partial ODIRECT fix with barriers) is
-present. The unified atomic-bitops fix is **not** present. No duplicate
-fix found.
-
+ Documentation/admin-guide/kdump/vmcoreinfo.rst |  2 +-
+ Documentation/filesystems/vfs.rst              |  6 +--
+ arch/x86/events/intel/bts.c                    |  3 --
+ arch/x86/events/intel/pt.c                     |  6 +--
+ drivers/md/md-bitmap.c                         |  6 +--
+ drivers/xen/balloon.c                          |  5 +++
+ drivers/xen/grant-table.c                      | 11 +++--
+ fs/ceph/addr.c                                 |  8 ++--
+ fs/crypto/crypto.c                             |  2 -
+ fs/erofs/data.c                                | 16 ++++---
+ fs/erofs/zdata.c                               | 13 ++----
+ fs/f2fs/f2fs.h                                 |  8 ++--
+ fs/nfs/file.c                                  |  4 +-
+ fs/nfs/write.c                                 |  2 -
+ fs/proc/page.c                                 |  1 -
+ fs/ubifs/file.c                                |  8 ++--
+ include/linux/buffer_head.h                    |  6 ---
+ include/linux/kernel-page-flags.h              |  1 -
+ include/linux/mm.h                             | 35 +++++++++------
+ include/linux/mm_types.h                       |  4 +-
+ include/linux/page-flags.h                     | 38 +++++++++++-----
+ include/linux/pagemap.h                        | 60 +++++++++++++++++++++-----
+ include/trace/events/mmflags.h                 |  2 +-
+ include/trace/events/pagemap.h                 |  2 +-
+ kernel/events/ring_buffer.c                    |  7 ++-
+ kernel/vmcore_info.c                           |  1 -
+ mm/huge_memory.c                               |  2 +-
+ mm/hugetlb.c                                   |  6 +--
+ mm/migrate.c                                   |  3 +-
+ mm/page-writeback.c                            |  2 +-
+ mm/vmscan.c                                    |  2 +-
+ mm/zpdesc.h                                    |  2 +-
+ mm/zsmalloc.c                                  | 24 +++--------
+ tools/mm/page-types.c                          |  2 -
+ 34 files changed, 163 insertions(+), 137 deletions(-)
 ---
+base-commit: 443451c85ca8d6389d34b1299decada62128f1fe
+change-id: 20260728-remove-pg_private-cfe926c7f83c
 
-## PHASE 7: SUBSYSTEM CONTEXT
-
-### Step 7.1: Subsystem / criticality
-**Record:** `fs/ceph` — CephFS client. **IMPORTANT** (network
-filesystem; data/metadata integrity matters to production users).
-
-### Step 7.2: Activity
-**Record:** Actively maintained; recent fixes in caps, MDS client, and
-I/O paths in 6.18.y.
-
----
-
-## PHASE 8: IMPACT AND RISK
-
-### Step 8.1: Who is affected
-**Record:** CephFS users (`CONFIG_CEPH_FS`). All workloads using mixed
-buffered/direct I/O, cap flushing, write-error handling, or file
-locking.
-
-### Step 8.2: Trigger conditions
-**Record:** Concurrent flag updates on the same inode from different
-code paths — e.g., O_DIRECT mode transition (`io.c`) concurrent with cap
-flush flagging (`caps.c`), or (after this patch) lockless
-`ERROR_WRITE`/`ERROR_FILELOCK` updates concurrent with cap operations.
-Realistic under multi-threaded I/O on the same file.
-
-### Step 8.3: Failure mode severity
-**Record:**
-- **Corrupted `CEPH_I_ODIRECT` state** → buffered and direct I/O not
-  properly excluded → **stale data reads** (the original problem ODIRECT
-  flag was added to solve in xfstest generic/451).
-- **Corrupted `CEPH_I_ERROR_WRITE`** → incorrect write-error
-  propagation.
-- **Corrupted cap flush flags** → delayed/incorrect metadata flush to
-  MDS.
-- **Severity: HIGH** (data integrity / coherency); not a typical kernel
-  oops, but silent wrong-data risk.
-
-### Step 8.4: Risk-benefit
-**Record:**
-- **Benefit: HIGH** for CephFS correctness under concurrency.
-- **Risk: LOW** — mechanical, reviewer-approved, applies cleanly, no new
-  APIs.
-- **Ratio:** Favorable.
-
----
-
-## PHASE 9: FINAL SYNTHESIS
-
-### Step 9.1: Evidence summary
-
-**FOR backport:**
-- Fixes a real, well-understood concurrency defect (atomic vs non-atomic
-  bitfield updates).
-- Prerequisite asymmetric pattern exists in 6.18.44 since
-  `fbeafe782bd98`.
-- CephFS data coherency impact (ODIRECT/buffered exclusion).
-- Small, mechanical, maintainer-reviewed, applies cleanly.
-- Filesystem correctness fix, not a feature add.
-
-**AGAINST backport:**
-- No user crash report or syzbot reproduction.
-- Part of an 11-patch feature series (though patch 1 is self-contained).
-- Most current-tree flag writers hold `i_ceph_lock`, which serializes
-  many paths today; the worst races become fully exposed when this patch
-  makes `ERROR_WRITE`/`ERROR_FILELOCK` lockless (which it also fixes
-  atomically).
-- No explicit stable nomination.
-
-**Unresolved:** No runtime reproduction or KCSAN report for the specific
-clobber scenario in 6.18.44. Impact inferred from code analysis and
-maintainer description.
-
-### Step 9.2: Stable rules checklist
-
-| Criterion | Result |
-|-----------|--------|
-| 1. Obviously correct and tested? | **PASS** — standard atomic-bitops
-pattern; `Reviewed-by` + `Tested-by` on series |
-| 2. Fixes real bug affecting users? | **PASS** — inode flag lost-update
-can corrupt ODIRECT/cap/error state |
-| 3. Important issue? | **PASS** — data coherency / metadata flush
-correctness (**HIGH**) |
-| 4. Small and contained? | **PASS** — ~156 lines, 10 files, mechanical
-|
-| 5. No new features/APIs? | **PASS** — behavior fix only |
-| 6. Can apply to local tree? | **PASS** — verified clean apply on
-6.18.44 |
-
-### Step 9.3: Exception categories
-**Record:** None (not a quirk, device ID, DT, build, or docs fix).
-
-### Step 9.4: Decision rationale
-
-For **Linux 6.18.44**, the asymmetric flag-update pattern introduced by
-`fbeafe782bd98` is present and the fix is absent. The commit eliminates
-a class of lost-update races on `i_ceph_flags` that can affect
-O_DIRECT/buffered I/O exclusion and cap/error-flag correctness — issues
-with direct data-integrity impact for CephFS production users. The patch
-is small, obviously correct, self-contained, and applies cleanly.
-Conservative stable policy still favors this kind of filesystem
-coherency fix over leaving a known race in place.
-
----
-
-## Verification
-
-- **[Phase 1]** Parsed commit message and tags from user query and `git
-  show e120e2b666851`
-- **[Phase 2]** Diff analysis from provided patch; grep confirmed `|=` /
-  `&= ~` and `set_bit`/`clear_bit` coexistence in tree
-- **[Phase 3]** `git describe HEAD` → 6.18.44; `git show fbeafe782bd98`;
-  `git blame` on `super.h:692-708`, `io.c:30-36`; `git merge-base --is-
-  ancestor fbeafe782bd98 HEAD` → ancestor; commit on `master` not in
-  HEAD
-- **[Phase 4]** `b4 dig -c e120e2b666851` → lore URL; `b4 dig -a` →
-  v1–v4 revisions; `b4 dig -w` → recipients; `b4 dig -m` → mbox saved;
-  grep found `Tested-by`/`Reviewed-by`, no stable nomination
-- **[Phase 5]** Grep callers of `__cap_delay_requeue_front`,
-  `ceph_start_io_direct`, `ceph_set_error_write`; read `caps.c`, `io.c`,
-  `locks.c`
-- **[Phase 6]** `git show e120e2b666851 | git apply --check` → clean;
-  grep confirms buggy pattern in HEAD; fix not in HEAD
-- **[Phase 7]** Subsystem identified as `fs/ceph`
-- **[Phase 8]** Failure mode derived from ODIRECT flag purpose
-  (`321fe13c93987` xfstest generic/451) and flag semantics in `super.h`
-- **UNVERIFIED:** No runtime reproduction of flag clobber on 6.18.44;
-  lore thread body not fully readable via WebFetch (bot blocked), relied
-  on mbox grep
-
-**YES**The background searches finished and match the earlier analysis:
-
-- **Commit location:** `e120e2b666851` ("ceph: convert inode flags to
-  named bit positions and atomic bitops") is on `master`, not in the
-  checked-out **6.18.44** tree.
-- **Current tree state:** The asymmetric flag pattern is still present
-  (atomic `clear_bit`/`set_bit` for ODIRECT mixed with non-atomic `|=` /
-  `&= ~` elsewhere). No equivalent fix is already applied.
-- **Backport readiness:** The patch applies cleanly to 6.18.44.
-
-**Verdict for this tree: YES** — backport as a CephFS
-concurrency/correctness fix with data-coherency impact.
-
- fs/ceph/addr.c       | 20 +++++++-------
- fs/ceph/caps.c       | 24 ++++++++---------
- fs/ceph/file.c       | 13 ++++-----
- fs/ceph/inode.c      |  4 +--
- fs/ceph/locks.c      | 22 ++++-----------
- fs/ceph/mds_client.c |  3 ++-
- fs/ceph/mds_client.h |  2 +-
- fs/ceph/snap.c       |  2 +-
- fs/ceph/super.h      | 64 +++++++++++++++++++++++---------------------
- fs/ceph/xattr.c      |  2 +-
- 10 files changed, 74 insertions(+), 82 deletions(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index ea31c892a1fb1..9d496da6683e7 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -2565,7 +2565,8 @@ int ceph_pool_perm_check(struct inode *inode, int need)
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_string *pool_ns;
- 	s64 pool;
--	int ret, flags;
-+	int ret;
-+	unsigned long flags;
- 
- 	/* Only need to do this for regular files */
- 	if (!S_ISREG(inode->i_mode))
-@@ -2607,20 +2608,19 @@ int ceph_pool_perm_check(struct inode *inode, int need)
- 	if (ret < 0)
- 		return ret;
- 
--	flags = CEPH_I_POOL_PERM;
--	if (ret & POOL_READ)
--		flags |= CEPH_I_POOL_RD;
--	if (ret & POOL_WRITE)
--		flags |= CEPH_I_POOL_WR;
--
- 	spin_lock(&ci->i_ceph_lock);
- 	if (pool == ci->i_layout.pool_id &&
- 	    pool_ns == rcu_dereference_raw(ci->i_layout.pool_ns)) {
--		ci->i_ceph_flags |= flags;
--        } else {
-+		set_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
-+		if (ret & POOL_READ)
-+			set_bit(CEPH_I_POOL_RD_BIT, &ci->i_ceph_flags);
-+		if (ret & POOL_WRITE)
-+			set_bit(CEPH_I_POOL_WR_BIT, &ci->i_ceph_flags);
-+	} else {
- 		pool = ci->i_layout.pool_id;
--		flags = ci->i_ceph_flags;
- 	}
-+	/* Re-read flags under the lock so check: sees the updated bits. */
-+	flags = ci->i_ceph_flags;
- 	spin_unlock(&ci->i_ceph_lock);
- 	goto check;
- }
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index d9924ef55f4a2..2974bb1184264 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -548,7 +548,7 @@ static void __cap_delay_requeue_front(struct ceph_mds_client *mdsc,
- 
- 	doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
- 	spin_lock(&mdsc->cap_delay_lock);
--	ci->i_ceph_flags |= CEPH_I_FLUSH;
-+	set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
- 	if (!list_empty(&ci->i_cap_delay_list))
- 		list_del_init(&ci->i_cap_delay_list);
- 	list_add(&ci->i_cap_delay_list, &mdsc->cap_delay_list);
-@@ -1408,7 +1408,7 @@ static void __prep_cap(struct cap_msg_args *arg, struct ceph_cap *cap,
- 	      ceph_cap_string(revoking));
- 	BUG_ON((retain & CEPH_CAP_PIN) == 0);
- 
--	ci->i_ceph_flags &= ~CEPH_I_FLUSH;
-+	clear_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
- 
- 	cap->issued &= retain;  /* drop bits we don't want */
- 	/*
-@@ -1665,7 +1665,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
- 		last_tid = capsnap->cap_flush.tid;
- 	}
- 
--	ci->i_ceph_flags &= ~CEPH_I_FLUSH_SNAPS;
-+	clear_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 
- 	while (first_tid <= last_tid) {
- 		struct ceph_cap *cap = ci->i_auth_cap;
-@@ -2025,7 +2025,7 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
- 
- 	spin_lock(&ci->i_ceph_lock);
- 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
--		ci->i_ceph_flags |= CEPH_I_ASYNC_CHECK_CAPS;
-+		set_bit(CEPH_I_ASYNC_CHECK_CAPS_BIT, &ci->i_ceph_flags);
- 
- 		/* Don't send messages until we get async create reply */
- 		spin_unlock(&ci->i_ceph_lock);
-@@ -2576,7 +2576,7 @@ static void __kick_flushing_caps(struct ceph_mds_client *mdsc,
- 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE)
- 		return;
- 
--	ci->i_ceph_flags &= ~CEPH_I_KICK_FLUSH;
-+	clear_bit(CEPH_I_KICK_FLUSH_BIT, &ci->i_ceph_flags);
- 
- 	list_for_each_entry_reverse(cf, &ci->i_cap_flush_list, i_list) {
- 		if (cf->is_capsnap) {
-@@ -2685,7 +2685,7 @@ void ceph_early_kick_flushing_caps(struct ceph_mds_client *mdsc,
- 			__kick_flushing_caps(mdsc, session, ci,
- 					     oldest_flush_tid);
- 		} else {
--			ci->i_ceph_flags |= CEPH_I_KICK_FLUSH;
-+			set_bit(CEPH_I_KICK_FLUSH_BIT, &ci->i_ceph_flags);
- 		}
- 
- 		spin_unlock(&ci->i_ceph_lock);
-@@ -2828,7 +2828,7 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
- 	spin_lock(&ci->i_ceph_lock);
- 
- 	if ((flags & CHECK_FILELOCK) &&
--	    (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK)) {
-+	    test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		doutc(cl, "%p %llx.%llx error filelock\n", inode,
- 		      ceph_vinop(inode));
- 		ret = -EIO;
-@@ -3206,7 +3206,7 @@ static int ceph_try_drop_cap_snap(struct ceph_inode_info *ci,
- 		BUG_ON(capsnap->cap_flush.tid > 0);
- 		ceph_put_snap_context(capsnap->context);
- 		if (!list_is_last(&capsnap->ci_item, &ci->i_cap_snaps))
--			ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
-+			set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 
- 		list_del(&capsnap->ci_item);
- 		ceph_put_cap_snap(capsnap);
-@@ -3395,7 +3395,7 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
- 				if (ceph_try_drop_cap_snap(ci, capsnap)) {
- 					put++;
- 				} else {
--					ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
-+					set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 					flush_snaps = true;
- 				}
- 			}
-@@ -3647,7 +3647,7 @@ static void handle_cap_grant(struct inode *inode,
- 
- 		if (ci->i_layout.pool_id != old_pool ||
- 		    extra_info->pool_ns != old_ns)
--			ci->i_ceph_flags &= ~CEPH_I_POOL_PERM;
-+			clear_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
- 
- 		extra_info->pool_ns = old_ns;
- 
-@@ -4812,7 +4812,7 @@ int ceph_drop_caps_for_unlink(struct inode *inode)
- 			doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode,
- 			      ceph_vinop(inode));
- 			spin_lock(&mdsc->cap_delay_lock);
--			ci->i_ceph_flags |= CEPH_I_FLUSH;
-+			set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
- 			if (!list_empty(&ci->i_cap_delay_list))
- 				list_del_init(&ci->i_cap_delay_list);
- 			list_add_tail(&ci->i_cap_delay_list,
-@@ -5077,7 +5077,7 @@ int ceph_purge_inode_cap(struct inode *inode, struct ceph_cap *cap, bool *invali
- 
- 		if (atomic_read(&ci->i_filelock_ref) > 0) {
- 			/* make further file lock syscall return -EIO */
--			ci->i_ceph_flags |= CEPH_I_ERROR_FILELOCK;
-+			set_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
- 			pr_warn_ratelimited_client(cl,
- 				" dropping file locks for %p %llx.%llx\n",
- 				inode, ceph_vinop(inode));
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index ceb5706fe3665..7893150db858b 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -579,12 +579,12 @@ static void wake_async_create_waiters(struct inode *inode,
- 
- 	spin_lock(&ci->i_ceph_lock);
- 	if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE) {
--		clear_and_wake_up_bit(CEPH_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
-+		/* Serialized by i_ceph_lock; the two ops touch different bits. */
-+		clear_and_wake_up_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags);
- 
--		if (ci->i_ceph_flags & CEPH_I_ASYNC_CHECK_CAPS) {
--			ci->i_ceph_flags &= ~CEPH_I_ASYNC_CHECK_CAPS;
-+		if (test_and_clear_bit(CEPH_I_ASYNC_CHECK_CAPS_BIT,
-+				      &ci->i_ceph_flags))
- 			check_cap = true;
--		}
- 	}
- 	ceph_kick_flushing_inode_caps(session, ci);
- 	spin_unlock(&ci->i_ceph_lock);
-@@ -747,7 +747,8 @@ static int ceph_finish_async_create(struct inode *dir, struct inode *inode,
- 			 * that point and don't worry about setting
- 			 * CEPH_I_ASYNC_CREATE.
- 			 */
--			ceph_inode(inode)->i_ceph_flags = CEPH_I_ASYNC_CREATE;
-+			set_bit(CEPH_I_ASYNC_CREATE_BIT,
-+				&ceph_inode(inode)->i_ceph_flags);
- 			unlock_new_inode(inode);
- 		}
- 		if (d_in_lookup(dentry) || d_really_is_negative(dentry)) {
-@@ -2422,7 +2423,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 
- 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
- 	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
--	    (ci->i_ceph_flags & CEPH_I_ERROR_WRITE)) {
-+	    test_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags)) {
- 		struct ceph_snap_context *snapc;
- 		struct iov_iter data;
- 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index b6c60d787692e..2804c64252980 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1153,7 +1153,7 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
- 		rcu_assign_pointer(ci->i_layout.pool_ns, pool_ns);
- 
- 		if (ci->i_layout.pool_id != old_pool || pool_ns != old_ns)
--			ci->i_ceph_flags &= ~CEPH_I_POOL_PERM;
-+			clear_bit(CEPH_I_POOL_PERM_BIT, &ci->i_ceph_flags);
- 
- 		pool_ns = old_ns;
- 
-@@ -3216,7 +3216,7 @@ void ceph_inode_shutdown(struct inode *inode)
- 	bool invalidate = false;
- 
- 	spin_lock(&ci->i_ceph_lock);
--	ci->i_ceph_flags |= CEPH_I_SHUTDOWN;
-+	set_bit(CEPH_I_SHUTDOWN_BIT, &ci->i_ceph_flags);
- 	p = rb_first(&ci->i_caps);
- 	while (p) {
- 		struct ceph_cap *cap = rb_entry(p, struct ceph_cap, ci_node);
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index dd764f9c64b9f..c4ff2266bb944 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -57,9 +57,7 @@ static void ceph_fl_release_lock(struct file_lock *fl)
- 	ci = ceph_inode(inode);
- 	if (atomic_dec_and_test(&ci->i_filelock_ref)) {
- 		/* clear error when all locks are released */
--		spin_lock(&ci->i_ceph_lock);
--		ci->i_ceph_flags &= ~CEPH_I_ERROR_FILELOCK;
--		spin_unlock(&ci->i_ceph_lock);
-+		clear_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags);
- 	}
- 	fl->fl_u.ceph.inode = NULL;
- 	iput(inode);
-@@ -271,15 +269,10 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- 	else if (IS_SETLKW(cmd))
- 		wait = 1;
- 
--	spin_lock(&ci->i_ceph_lock);
--	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
--		err = -EIO;
--	}
--	spin_unlock(&ci->i_ceph_lock);
--	if (err < 0) {
-+	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		if (op == CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(fl))
- 			posix_lock_file(file, fl, NULL);
--		return err;
-+		return -EIO;
- 	}
- 
- 	if (lock_is_read(fl))
-@@ -331,15 +324,10 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
- 
- 	doutc(cl, "fl_file: %p\n", fl->c.flc_file);
- 
--	spin_lock(&ci->i_ceph_lock);
--	if (ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) {
--		err = -EIO;
--	}
--	spin_unlock(&ci->i_ceph_lock);
--	if (err < 0) {
-+	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		if (lock_is_unlock(fl))
- 			locks_lock_file_wait(file, fl);
--		return err;
-+		return -EIO;
- 	}
- 
- 	if (IS_SETLKW(cmd))
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index ba9f96efc8ee7..af7137661c8fc 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -3600,7 +3600,8 @@ static void __do_request(struct ceph_mds_client *mdsc,
- 
- 		spin_lock(&ci->i_ceph_lock);
- 		cap = ci->i_auth_cap;
--		if (ci->i_ceph_flags & CEPH_I_ASYNC_CREATE && mds != cap->mds) {
-+		if (test_bit(CEPH_I_ASYNC_CREATE_BIT, &ci->i_ceph_flags) &&
-+		    mds != cap->mds) {
- 			doutc(cl, "session changed for auth cap %d -> %d\n",
- 			      cap->session->s_mds, session->s_mds);
- 
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 0428a5eaf28c6..e91a199d56fd8 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -658,7 +658,7 @@ static inline int ceph_wait_on_async_create(struct inode *inode)
- {
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 
--	return wait_on_bit(&ci->i_ceph_flags, CEPH_ASYNC_CREATE_BIT,
-+	return wait_on_bit(&ci->i_ceph_flags, CEPH_I_ASYNC_CREATE_BIT,
- 			   TASK_KILLABLE);
- }
- 
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index c65f2b202b2b3..0ba33749a37dd 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -700,7 +700,7 @@ int __ceph_finish_cap_snap(struct ceph_inode_info *ci,
- 		return 0;
- 	}
- 
--	ci->i_ceph_flags |= CEPH_I_FLUSH_SNAPS;
-+	set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
- 	doutc(cl, "%p %llx.%llx cap_snap %p snapc %p %llu %s s=%llu\n",
- 	      inode, ceph_vinop(inode), capsnap, capsnap->context,
- 	      capsnap->context->seq, ceph_cap_string(capsnap->dirty),
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 29a980e22dc26..1168103659b51 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -655,23 +655,34 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- /*
-  * Ceph inode.
-  */
--#define CEPH_I_DIR_ORDERED	(1 << 0)  /* dentries in dir are ordered */
--#define CEPH_I_FLUSH		(1 << 2)  /* do not delay flush of dirty metadata */
--#define CEPH_I_POOL_PERM	(1 << 3)  /* pool rd/wr bits are valid */
--#define CEPH_I_POOL_RD		(1 << 4)  /* can read from pool */
--#define CEPH_I_POOL_WR		(1 << 5)  /* can write to pool */
--#define CEPH_I_SEC_INITED	(1 << 6)  /* security initialized */
--#define CEPH_I_KICK_FLUSH	(1 << 7)  /* kick flushing caps */
--#define CEPH_I_FLUSH_SNAPS	(1 << 8)  /* need flush snapss */
--#define CEPH_I_ERROR_WRITE	(1 << 9) /* have seen write errors */
--#define CEPH_I_ERROR_FILELOCK	(1 << 10) /* have seen file lock errors */
--#define CEPH_I_ODIRECT_BIT	(11) /* inode in direct I/O mode */
--#define CEPH_I_ODIRECT		(1 << CEPH_I_ODIRECT_BIT)
--#define CEPH_ASYNC_CREATE_BIT	(12)	  /* async create in flight for this */
--#define CEPH_I_ASYNC_CREATE	(1 << CEPH_ASYNC_CREATE_BIT)
--#define CEPH_I_SHUTDOWN		(1 << 13) /* inode is no longer usable */
--#define CEPH_I_ASYNC_CHECK_CAPS	(1 << 14) /* check caps immediately after async
--					     creating finishes */
-+#define CEPH_I_DIR_ORDERED_BIT		(0)  /* dentries in dir are ordered */
-+					     /* bit 1 historically unused */
-+#define CEPH_I_FLUSH_BIT		(2)  /* do not delay flush of dirty metadata */
-+#define CEPH_I_POOL_PERM_BIT		(3)  /* pool rd/wr bits are valid */
-+#define CEPH_I_POOL_RD_BIT		(4)  /* can read from pool */
-+#define CEPH_I_POOL_WR_BIT		(5)  /* can write to pool */
-+#define CEPH_I_SEC_INITED_BIT		(6)  /* security initialized */
-+#define CEPH_I_KICK_FLUSH_BIT		(7)  /* kick flushing caps */
-+#define CEPH_I_FLUSH_SNAPS_BIT		(8)  /* need flush snaps */
-+#define CEPH_I_ERROR_WRITE_BIT		(9)  /* have seen write errors */
-+#define CEPH_I_ERROR_FILELOCK_BIT	(10) /* have seen file lock errors */
-+#define CEPH_I_ODIRECT_BIT		(11) /* inode in direct I/O mode */
-+#define CEPH_I_ASYNC_CREATE_BIT		(12) /* async create in flight for this */
-+#define CEPH_I_SHUTDOWN_BIT		(13) /* inode is no longer usable */
-+#define CEPH_I_ASYNC_CHECK_CAPS_BIT	(14) /* check caps after async creating finishes */
-+
-+#define CEPH_I_DIR_ORDERED		(1 << CEPH_I_DIR_ORDERED_BIT)
-+#define CEPH_I_FLUSH			(1 << CEPH_I_FLUSH_BIT)
-+#define CEPH_I_POOL_PERM		(1 << CEPH_I_POOL_PERM_BIT)
-+#define CEPH_I_POOL_RD			(1 << CEPH_I_POOL_RD_BIT)
-+#define CEPH_I_POOL_WR			(1 << CEPH_I_POOL_WR_BIT)
-+#define CEPH_I_SEC_INITED		(1 << CEPH_I_SEC_INITED_BIT)
-+#define CEPH_I_KICK_FLUSH		(1 << CEPH_I_KICK_FLUSH_BIT)
-+#define CEPH_I_FLUSH_SNAPS		(1 << CEPH_I_FLUSH_SNAPS_BIT)
-+#define CEPH_I_ERROR_FILELOCK		(1 << CEPH_I_ERROR_FILELOCK_BIT)
-+#define CEPH_I_ODIRECT			(1 << CEPH_I_ODIRECT_BIT)
-+#define CEPH_I_ASYNC_CREATE		(1 << CEPH_I_ASYNC_CREATE_BIT)
-+#define CEPH_I_SHUTDOWN			(1 << CEPH_I_SHUTDOWN_BIT)
- 
- /*
-  * Masks of ceph inode work.
-@@ -684,27 +695,18 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- 
- /*
-  * We set the ERROR_WRITE bit when we start seeing write errors on an inode
-- * and then clear it when they start succeeding. Note that we do a lockless
-- * check first, and only take the lock if it looks like it needs to be changed.
-- * The write submission code just takes this as a hint, so we're not too
-- * worried if a few slip through in either direction.
-+ * and then clear it when they start succeeding. The write submission code
-+ * just takes this as a hint, so we're not too worried if a few slip through
-+ * in either direction.
-  */
- static inline void ceph_set_error_write(struct ceph_inode_info *ci)
- {
--	if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
--		spin_lock(&ci->i_ceph_lock);
--		ci->i_ceph_flags |= CEPH_I_ERROR_WRITE;
--		spin_unlock(&ci->i_ceph_lock);
--	}
-+	set_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
- }
- 
- static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
- {
--	if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
--		spin_lock(&ci->i_ceph_lock);
--		ci->i_ceph_flags &= ~CEPH_I_ERROR_WRITE;
--		spin_unlock(&ci->i_ceph_lock);
--	}
-+	clear_bit(CEPH_I_ERROR_WRITE_BIT, &ci->i_ceph_flags);
- }
- 
- static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index caf0fe4d2b1b7..7e8b1b2bda743 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -1056,7 +1056,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 	if (current->journal_info &&
- 	    !strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) &&
- 	    security_ismaclabel(name + XATTR_SECURITY_PREFIX_LEN))
--		ci->i_ceph_flags |= CEPH_I_SEC_INITED;
-+		set_bit(CEPH_I_SEC_INITED_BIT, &ci->i_ceph_flags);
- out:
- 	spin_unlock(&ci->i_ceph_lock);
- 	return err;
--- 
-2.53.0
+Best regards,
+--  
+Yan, Zi
 
