@@ -1,236 +1,454 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72C4B34CFA1
-	for <ceph-devel@vger.kernel.org>; Sat, 29 Aug 2026 12:33:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F044C37646E
+	for <ceph-devel@vger.kernel.org>; Mon, 31 Aug 2026 06:34:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.41
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788006835; cv=pass; b=IkXyhh3ORUYjS2YhUgQQjwNncjgHdgfINgEu+/t6S0kEb66o/X34ttO7eFeLpuqcWrsY9Wp3aEzfZYuU3q5NIh+qM/cDXVwqvyG+CDnVUpXUrh0/htCuO8LbvtzZ18pD90ery3ba8WV/azoK3Ou/2VC90xprnhqspSO2/KZ+gRI=
+	t=1788158094; cv=pass; b=NKUJ6BSx0UR9pPlJEnblKtEeJlgpoFpf2FbqYpl8vqrESyqaJ5SngU7D0+JBhTLTdVtmfFxOHHnden1Ez7AT2MnMjHCS+C/uTI5/5uP41443n9C/oJjwv+2fBfWR4HbdFr4zlKLjLX8fzHPx9qzVi1PgBu6/KJiuxilHJv4w8gU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788006835; c=relaxed/simple;
-	bh=hBwV6bw+8UpmBV7uVU1vSp5FlWAejGuVAmSKursMnzo=;
+	s=arc-20240116; t=1788158094; c=relaxed/simple;
+	bh=a8jHlklF1gC20OVPgr0TNH+1C0wqwqVjnRU26kK3fck=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=XF8MGLfEkVYq4T6ZSPBiQiRQgcfP2JoDv8St02T3KTLh1XQL1tZOL0QEKhj7zZSyFifAjk6JMNUvlfTj3Cps9SUZbeezbIqY5uStt0YDu8rbroDj3dOOwygs1jEB6llAjLz4UUhmxHU50/wHSX/PMKfs1NtzBQ3XsKRn4AK5/BI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=cgdAAOfR; arc=pass smtp.client-ip=209.85.218.52
+	 To:Cc:Content-Type; b=BRPe6Da862OoYDhLpk8kS3RMifeqnfkbJ7L9Uc803uTkU+0GyEsFK6UFXO1ret5O7eRj0gkZURpBYctWc3Jod804N4Bcnha+HSZ3h8qYK6DU68ZAMO1qtxgfZ5z3mJDJsBJ99F7rTlkV0S0C7SctCV6jceI4K6OlPVuDumP0Ex8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=lOM0oyBl; arc=pass smtp.client-ip=209.85.218.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="cgdAAOfR"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-c1670dad7a8so304020666b.3
-        for <ceph-devel@vger.kernel.org>; Sat, 29 Aug 2026 05:33:52 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1788006830; cv=none;
+	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="lOM0oyBl"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-c252e703fa3so454937866b.3
+        for <ceph-devel@vger.kernel.org>; Sun, 30 Aug 2026 23:34:49 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788158088; cv=none;
         d=google.com; s=arc-20260327;
-        b=JkMAzci9/Ahm17ypiDJSTvLERbKm2ScyEjG5CQBGJv17FyWRCJlgoSura8ulgFTSfD
-         8tFr46shwZEWssZy/qqh98RL2YYT0KbMlXqB8tVQ/Ntcs+Wy0CwglfhY7ptW+k69w/RU
-         Weqt/chl7kFQGi0BS0J4nPROGY3PxUfKQSZIrL+uyIfsJiiQ4wismO2Gf02c2MpENgd/
-         j6YvMvpy8hLDia1EKaU3fCOQdPOKhyWG3VaZ3GsNu8IkKEc3J7ol6opgwwzV5E7CnQnL
-         6b4AYYqbA4dEGVOFd9gRJWqPg9+Qq8/MP5AhXC5Zbk4yDbT4XStohAjIvk3RjCWa7jHM
-         smZA==
+        b=Etqu2BbIW8mRfKcEHw3iJdAJR32Dgtm0+WddxitzYetOzpyZD62FMY9dFaWlytIw+8
+         I3H+KcO4HmoBSjMKoY85n9+WmIdAY0hootAh8iy/fpH7pm/NDGf/jy0wH6UWArLZ6VvZ
+         QdjWEBTE3FQDUEJG41xmJoBqbp7RmXG4tlCCRJ3Ys+ul6S1Gd6MDMI/qqS93nuuk5j2j
+         WviGZh/EQMW2SXpb/+B4czHRMr2iAdhpbhbj5WUyW5bNvDNHSSxgW9LOxkLL6HYqRSBa
+         el62gTz+RAsdex66tX1IpKhcw69eJg8rWDKSSbIQ/cWzIFhVuKWYY4lx6r1tbnDq0alu
+         sJ8g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=eleisf3XG7h/r4Bt4oplKXRzj71VJ+TpPnU8vz1RmL4=;
-        fh=n+LfmJGlj2+y+D0uvhKBhGA7/QJbrOQMA7VNsCdyb70=;
-        b=Qi8nhBws9P6l+jasW4XzcJE6u0mu8ClbUm728885Ly2aYjV7X2FMT5wbiVa6OBQa9k
-         y8A9X28aU4f/T57jWpZVbV6KCBqDk3eb33VHZJ72JbFQGq6qvkfc3/+Py9VWZBznd47h
-         lwvKdGhF3Y2AX7X+LHUnPjP6deTLQyV1UbYQtKBehbwnvUG/YEY925I0SrhlLI3H0Kim
-         p5H+IUlpDljzVIV5e83DFxUzmcD+fmRf0/hqlhAgflWwED/k0f7Vp5aRbBYmemPb6NAk
-         dUz1Y/XshiaCpDRFizrkEZ3cVpuqshXCRqh5oIrEe08ve6bQP7uwzr16mPQzEMjxMwHh
-         IR2w==;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=5xkbFh0fQe9Arfb2s6Rv2V6Kg0DTw0/4lqQu8KNODQ4=;
+        fh=FI8OSwkgL3KsCnhqckUBG5SZ0q2g227py5cBZMHwsgk=;
+        b=AC2z1Q05hkzg0g4gAVf3mkwQqQzlUsTztmsN9igS0EAgEW8jV+Uw7RV1MkdSh1X2bs
+         8GPovkbDfnIG9j6qgDycKvGGl6Cke778CDIs4qAdXe3MMnznefIMv0DY46qqFEnijMmM
+         wsIqSZFyCwoRYIMjE2I1OL9Up2jF5SPWbUe5TyJaDUGUbIfTZ1mhwYwkVFS4bFp4MykB
+         YCXOL2sEjeKZczXlnOeozINqoQErbPq4CXZPayAhli1bgxPOufzB9nq1jghA7gjhjCfv
+         twYyX4BGNr/ofxsDY0mDTxVh7rks70t0jVMhFb2Xi2aWas3Qhq7CJsVryggB1r/EH/J+
+         TfXA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1788006830; x=1788611630; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=eleisf3XG7h/r4Bt4oplKXRzj71VJ+TpPnU8vz1RmL4=;
-        b=cgdAAOfRToRAu3QigzA2nTO6OtCaV0oG0T93EPsESfQxRNCkm6bYTqyvej6UlgHQBz
-         BoW64dTHpZSX9V1VeDpHus+ph0yD8RCmiVVQvPXI/A5YMV4MijnIFZtOK3PXB5kT5x/s
-         WY7eXCt30xNhBp4ljuK4O4quslLDXeIP9Id4reEbQWfryFr6XEEHDqpiu6yrbnEY/VSf
-         keiTcAAax5Kpop7Qti0okRlK3dOlr5FK5z/aMgAi6wuH100dYEO3Vg4SlCdf+Un/+UUO
-         IzqZijHwe8oW/m5aspxP3xH5JBZzFDg3uX7F5CZzytiDfnW58jkRUSMOFV6cNWEb4jvZ
-         qRMg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788006830; x=1788611630;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+        d=clyso.com; s=google; t=1788158088; x=1788762888; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=eleisf3XG7h/r4Bt4oplKXRzj71VJ+TpPnU8vz1RmL4=;
-        b=O/PGN8m2+jlx/tdSXB/95HxGbkMirC4fAHlT9dlZd29aPvrtt7P+eoRKAnjXBUoRh8
-         AD8uE/j8gJSVO7SilzZnl90eQbYlHPBLseFqPcZTFAXs+CTWM0StrTIy6zJrYWzq1L9Q
-         s4EzEobNbDc/ealoxWgKU5FmzXpuw0kL/odsSLBVUWdvAmLF9c3xstv4tEQcntTr5ijx
-         h+W3m//gLjDHOV8HqLHx1I3gpSai9NqqYDWGBRAyWk6/RxiJjSodJpGPuOMAvug30nAL
-         /A8vt+0Jpyrm7AN89TQRxczv9Jt38/OMn0PAmy12Q0Ktazy/3EVj1+/p26eN+1caaxpJ
-         YfRw==
-X-Forwarded-Encrypted: i=1; AHgh+Rr5ZkaFoxPyd/BAVXDMbYJxXzJvtotyx4/WsOkrXVYg1bEZvquPyHJB/rY+qxLAYSUTulKW+WQlQDcI@vger.kernel.org
-X-Gm-Message-State: AFuF++nd6pieA4yVwNxpKPwtNUxNrD0tNSDqprgcLjkYpTBrAjQy3ob4
-	bhAE6jqcRRs8DVssmSALXfM0AsT8Lln9QXltmFeVPr6nES/oZdzoJyfTaHEChAu+1+yHlzQdVvF
-	/EOlgYj3ogi6BThxr07vP/OEwjU+XhfghFp56IZOtdQ==
-X-Gm-Gg: AR+sD13jJ6Ek62MvbTpjvSh/chhvFuWCZ7WaXb2+P7R/eV7nNtloZVx51YV1slOzVGQ
-	e6VEJ7FHLPwExKqEaFWBlLgmPDj7hvqWcoOUZOOiS6qUGGGFutCjkzK3LxilB84Vgten103WSlD
-	egtFcFZKVlmUhhZYp/14zGysQtC1OLRsIBDUqEPyH3BG0OcThvHeaN1Zx2kPTYOw0P4n1wmOexd
-	uVSuEs5t2X17XiZRoDVy1rPmYhaEeAsjUC5tNDdCqNHFs0qPWsEPoSIv3yQUl68qhIivjvbSis8
-	fo6Wa3xB7ZSj4tB556fQso8QRWMivMgIkUwDsQDb1BIlqA==
-X-Received: by 2002:a17:906:100e:10b0:c25:74ee:9e3d with SMTP id
- a640c23a62f3a-c2574eeae06mr153899566b.14.1788006830455; Sat, 29 Aug 2026
- 05:33:50 -0700 (PDT)
+        bh=5xkbFh0fQe9Arfb2s6Rv2V6Kg0DTw0/4lqQu8KNODQ4=;
+        b=lOM0oyBl6uYjREnd9M0JV7prmcyVATGBc8Mgj2OZfhThBTRscT9qbYezE5FGMEn7tF
+         wBC4dL74GzDNL3XckZBrN2DHhjXEttDUQI6NvbcerLxcJfg/r8u8HdY2sycXrv/xVzRd
+         cY1muYsO2JR8M0ltUrW0XvNKZX1xml5UtOX8FAT0+bpfABG446LBhm5UBHeaiXnaLCL4
+         xh8hs/TJPpkUCn8IcEtSpGpH0+oIdEy7+al/fopLc+TbRs8fNTzyIAgpkNL7LIS1hkat
+         RhcN7YdJt2EY2i5YsIJmIOkdR9CyTp5ni5jL0OSEMrZs9Z83bvSfIL76ildGVcepA4hr
+         1YWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788158088; x=1788762888;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=5xkbFh0fQe9Arfb2s6Rv2V6Kg0DTw0/4lqQu8KNODQ4=;
+        b=VkVTgCjMM5lhuhC27TYYQqHeN2mJzv/xDSvch5mJpIY/o3OzPaXB0FdbRI+zlHJipn
+         ue8oWEU+9p0QIUbPq6pEsUNb85ks0agjpQznlYI/0UsydblI7rOX3O5EjD1OwMyNyBk1
+         cKlBUvSB3MiYUGnGlAEDUlq0pNmSi3anjlGbvd9uqEDn9g1sc777YMq8G2kf7nssLqYM
+         QQ2GO0VIO07S4ofBTAM39LuPVbttUW9gWXLseNN6a6fkd50/HUVAO5jUSRzalMN9/dOa
+         98z0MXgyJe+RTDtOAXB82g8Bg7wGoD6dsuiCUv9wrsqZL6ErUdKFqdBKzsD6Olqykf5m
+         j1Ig==
+X-Forwarded-Encrypted: i=1; AHgh+Rru3HIKaax0IlFLyEoK4TJiTBSx2L/eYJawqzxqiFVID/y7EfzL2SPtqBH7mcQiq2SilPu0JgojXpxD@vger.kernel.org
+X-Gm-Message-State: AFuF++mgbE3CxZAy8K5Xdr0/zmptOmC6+LzS5kgVE7Zo17q3TCmMJv6G
+	mDVuFKrfDeMP6HsQ4CDrLEhHcHEGWpNXJIdiimY92k3QQYjORKRaF5782+E6AfgyBGfL6Ywd8wp
+	35YYP17VLT8mrwHH0zyrEgQMlUGMvJ4KiLuLxhGpsnw==
+X-Gm-Gg: AR+sD13tF+5v6BTkRAIFVPac7S6q6ZHF69k3KF4rzF/I3J64rJIRtyjQvWy+N3glL6T
+	7yek1FJOBZiAqU6SaYd8lE0yP02GbIMm+4YwxFFxErop0+rHkrl3gy4HbQ8VDQq0Cgl8ImRtDTW
+	PrdPCCf+NtL48r8lZXq14GbFb49cOwS+axFLbQC8C60LpB9la2dKgJ9rSsyGJB9BOWcVy0QfpHm
+	GDT+C9nPgkbZ8Pv2X1qf2++mBo4JVEFcmG+Lu34lM35dY2HGcexpK4etA2HlHYbxsgXWhT2BqBN
+	V6IIiluUVI03WX9leG5tfvs6rU3FRKtXZSzAfKSR3r0wRQ==
+X-Received: by 2002:a17:907:960d:b0:c25:659:89ba with SMTP id
+ a640c23a62f3a-c2556c4b566mr1384348366b.9.1788158087791; Sun, 30 Aug 2026
+ 23:34:47 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260828-b4-ceph-fix-abort-request-uaf-new-v1-1-96e480d5a028@clyso.com>
-In-Reply-To: <20260828-b4-ceph-fix-abort-request-uaf-new-v1-1-96e480d5a028@clyso.com>
+References: <20260828174504.1247038-1-max.kellermann@ionos.com> <20260828174504.1247038-4-max.kellermann@ionos.com>
+In-Reply-To: <20260828174504.1247038-4-max.kellermann@ionos.com>
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Sat, 29 Aug 2026 05:33:37 -0700
-X-Gm-Features: AcwNN1VWDF9gPaDesRBI7J-vzZ4wmg5MfBnswgC6T-0HRwQHc_bfSmNuQ9uK6yc
-Message-ID: <CAOJNxR+F0C5R9rXzCxm57hHcmqatzxaF3TR1LvV-8skrtUSoZQ@mail.gmail.com>
-Subject: Re: [PATCH] ceph: unregister aborted requests in ceph_mdsc_wait_request()
-To: xiubo.li@clyso.com
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Viacheslav Dubeyko <slava@dubeyko.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Date: Sun, 30 Aug 2026 23:34:36 -0700
+X-Gm-Features: AcwNN1WTI1xhAQKPyCaikqSqU7WO9dHoU71eM2apdekKJD61pFzwO4h9_cZvPnE
+Message-ID: <CAOJNxRL2UkiOTMkBTK1+trQk82RFHShAUNk5e8nmudTeSOoi+Q@mail.gmail.com>
+Subject: Re: [PATCH v3 3/3] ceph: don't unregister an MDS session before
+ removing its caps
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: idryomov@gmail.com, amarkuze@redhat.com, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Also found one bug of this patch. I have respin for V2.
+Hi Max
 
-Thanks.
+Patches 1 and 2 LGTM.
 
-On Fri, 28 Aug 2026 at 00:19, Xiubo Li via B4 Relay
-<devnull+xiubo.li.clyso.com@kernel.org> wrote:
+But it seems the ceph_mdsc_reset_workfn() still unregisters before the
+teardown. The admin-reset teardown loop in ceph_mdsc_reset_workfn()
+still does:
+
+        sessions[i]->s_state = CEPH_MDS_SESSION_CLOSED;
+        __unregister_session(mdsc, sessions[i]);
+        __wake_requests(mdsc, &sessions[i]->s_waiting);
+        mutex_unlock(&mdsc->mutex);
+
+        mutex_lock(&sessions[i]->s_mutex);
+        cleanup_session_requests(mdsc, sessions[i]);
+        remove_session_caps(sessions[i]);
+
+That is exactly the pattern this series fixes: the rank is vacant while the old
+session still owns all its caps.  It is even more exposed here, because
+__wake_requests() synchronously re-dispatches parked requests and
+__do_request() will register a fresh session for the rank before
+remove_session_caps() has even started.  Once the new session opens,
+ceph_add_cap() finds the old caps by rank, moves them onto the new
+session's list without decrementing the old session's s_nr_caps, and the
+reset thread hits the same BUG_ON(session->s_nr_caps > 0).
+
+Please apply the same treatment as in mds_peer_reset(): keep the session
+registered in CLOSED state, do the verify-guarded unregister after
+remove_session_caps(), then wake_up_all(&mdsc->session_close_wq)
+before __wake_requests()/kick_requests().
+
+Thanks
+Xiubo
+
+On Fri, 28 Aug 2026 at 10:45, Max Kellermann <max.kellermann@ionos.com> wrote:
 >
-> From: Xiubo Li <xiubo.li@clyso.com>
+> handle_session() removed the session from mdsc->sessions[] at the very
+> top of `CEPH_SESSION_CLOSE` handling, before taking `s_mutex`.
+> Between session unregistration and remove_session_caps(), the MDS rank
+> has no registered session while the old session still owns all caps it
+> was granted.
 >
-> When a request is aborted because the waiter was killed or the wait
-> timed out, the abort path marks it with CEPH_MDS_R_ABORTED but leaves
-> it parked on a wait list (r_wait) and registered in the request tree.
-> The waiter's put can then be the last reference while the request is
-> still linked, freeing it with r_wait non-empty:
+> Any concurrent filesystem operation may walk into that and the next
+> __do_request() call registers a new session for this rank.  Once it is
+> open and the MDS issues caps, ceph_fill_inode() calls
+> ceph_add_cap(), which looks caps up by rank, not
+> by session identity, finding old caps linked to the old session.
 >
->   WARNING: fs/ceph/mds_client.c:1233 ceph_mdsc_release_request+0x247/0x25=
-0
->   WARN_ON_ONCE(!list_empty(&req->r_wait))
+> The list_move_tail() call then moves the cap object to the new
+> session, which is already a bad thing to do.  Since it doesn't
+> decrement `old_session->s_nr_caps`, this will quickly run into a BUG()
+> instead of crashing:
 >
-> The freed request stays behind as a dangling entry on the session's
-> waiting list, and the next __wake_requests() or kick_requests() walk
-> uses it after free (a stress test that SIGKILLs waiters during MDS
-> failovers reproduces this reliably).
+>   kernel BUG at fs/ceph/mds_client.c:1959!
+>   Internal error: Oops - BUG: 00000000f2000800 [#1]  SMP
+>   [...]
+>   Workqueue: ceph-msgr ceph_con_workfn
+>   pstate: 20400009 (nzCv daif +PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+>   pc : remove_session_caps+0x2bc/0x2d8
+>   lr : remove_session_caps+0x74/0x2d8
+>   [...]
+>   Call trace:
+>    remove_session_caps+0x2bc/0x2d8 (P)
+>    mds_dispatch+0xf48/0x1b60
+>    ceph_con_process_message+0x74/0xa0
+>    ceph_con_v1_try_read+0x3a0/0x1510
+>    ceph_con_workfn+0x260/0x460
+>    process_one_work+0x168/0x3b8
+>    worker_thread+0x1bc/0x3a0
+>    kthread+0x118/0x1e0
+>    ret_from_fork+0x10/0x20
 >
-> Fix the abort path so that the request is removed from its wait list
-> and from the request tree when the waiter gives up, making the waiter's
-> put the final reference on a request that is no longer linked anywhere.
-> Both operations happen under mdsc->mutex; a racing reply or forward may
-> already have unregistered the request, so only unregister it when it is
-> still in the tree.
+> That's BUG_ON(session->s_nr_caps > 0).
 >
-> Fixes: e1518c7c0a67a ("ceph: clean up mds reply, error handling")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+> I was able to reproduce this reliably by delaying the close and
+> starting I/O during the delay.
+>
+> This patch keeps the session registered with
+> `CEPH_MDS_SESSION_CLOSED`.  New requests will be put on the
+> `s_waiting` list where they will be resumed on the new session.
+>
+> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 > ---
-> The full call trace:
+> v1->v2: skip CLOSED sessions in check_new_map()
+> v2->v3: split session pinning and stale-map guards into two preparatory
+>     patches; rework CLOSED-session and export-target teardown handling
 >
->  ------------[ cut here ]------------
->  refcount_t: addition on 0; use-after-free.
->  WARNING: lib/refcount.c:25 at refcount_warn_saturate+0x6a/0x90, CPU#1: k=
-worker/1:1/99
->  Modules linked in: ceph libceph krb5 netfs xsk_diag vsock_diag uinput sn=
-d_seq_dummy snd_hrtimer rfkill nf_conntrack_netbios_ns nf_conntrack_broadca=
-st nft_fib_inet nft_fib_ipv4 nft_fib_ipv6 nft_fib nft_reject_inet nf_reject=
-_ipv4 nf_reject_ipv6 nft_reject nft_ct nft_chain_nat nf_nat nf_conntrack nf=
-_defrag_ipv6 nf_defrag_ipv4 nf_tables qrtr sunrpc intel_rapl_msr intel_rapl=
-_common intel_uncore_frequency_common intel_pmc_core pmt_telemetry pmt_disc=
-overy pmt_class intel_pmc_ssram_telemetry intel_pmc_pwrm_telemetry intel_vs=
-ec kvm_intel kvm snd_hda_codec_generic irqbypass snd_hda_intel rapl snd_hda=
-_codec snd_hda_core snd_intel_dspcfg snd_intel_sdw_acpi snd_hwdep snd_seq i=
-TCO_wdt snd_seq_device intel_pmc_bxt snd_pcm i2c_i801 snd_timer pcspkr i2c_=
-smbus snd lpc_ich virtio_balloon soundcore joydev zram lz4hc_compress vmw_v=
-sock_virtio_transport vmw_vsock_virtio_transport_common vsock virtio_net ne=
-t_failover virtio_gpu failover virtio_dma_buf serio_raw i2c_dev qemu_fw_cfg=
- virtiofs fuse
->  CPU: 1 UID: 0 PID: 99 Comm: kworker/1:1 Tainted: G      D             7.=
-2.0-rc7-lockdep+ #13 PREEMPT(lazy)
->  Tainted: [D]=3DDIE
->  Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.17.0-10.fc44 =
-06/10/2025
->  Workqueue: ceph-msgr ceph_con_workfn [libceph]
->  RIP: 0010:refcount_warn_saturate+0x6a/0x90
->  Code: cc 48 8d 3d b8 f6 d4 01 67 48 0f b9 3a c3 cc cc cc cc 48 8d 3d b7 =
-f6 d4 01 67 48 0f b9 3a c3 cc cc cc cc 48 8d 3d b6 f6 d4 01 <67> 48 0f b9 3=
-a c3 cc cc cc cc 48 8d 3d b5 f6 d4 01 67 48 0f b9 3a
->  RSP: 0018:ffffcdb6403a7cc0 EFLAGS: 00010246
->  RAX: 0000000000000000 RBX: ffff8d5e6441c000 RCX: ffff8d5e43de6a60
->  RDX: ffff8d5e5afbd468 RSI: 0000000000000002 RDI: ffffffffa7fbe040
->  RBP: ffffcdb6403a7ce8 R08: 0000000000000001 R09: ffff8d5e5afbd550
->  R10: ffffcdb6403a7cc8 R11: 0000000000000000 R12: ffff8d5e6441c000
->  R13: ffff8d5e5afbd028 R14: ffff8d5e515c0000 R15: ffff8d5e5a621008
->  FS:  0000000000000000(0000) GS:ffff8d61f7904000(0000) knlGS:000000000000=
-0000
->  CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
->  CR2: 00007f0541dbf000 CR3: 000000011ad8b005 CR4: 0000000000772ef0
->  PKRU: 55555554
->  Call Trace:
->   <TASK>
->   __wake_requests+0x3af/0x3d0 [ceph]
->   mds_dispatch+0xad/0x240 [ceph]
->   ceph_con_process_message+0x88/0x1c0 [libceph]
->   ceph_con_v1_try_read+0x316/0x6f0 [libceph]
->   ceph_con_workfn+0x1f4/0x500 [libceph]
->   ? process_one_work+0x20d/0x600
->   process_one_work+0x234/0x600
->   worker_thread+0x1e5/0x3c0
->   ? __pfx_worker_thread+0x10/0x10
->   kthread+0xf5/0x130
->   ? __pfx_kthread+0x10/0x10
->   ret_from_fork+0x24a/0x360
->   ? __pfx_kthread+0x10/0x10
->   ret_from_fork_asm+0x1a/0x30
->   </TASK>
->  irq event stamp: 7923424
->  hardirqs last  enabled at (7923423): [<ffffffffa6d5b2a8>] _raw_spin_unlo=
-ck_irq+0x28/0x50
->  hardirqs last disabled at (7923424): [<ffffffffa6d4cdb5>] __schedule+0x6=
-85/0x820
+> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 > ---
->  fs/ceph/mds_client.c | 13 +++++++++++++
->  1 file changed, 13 insertions(+)
+>  fs/ceph/caps.c       |   3 +
+>  fs/ceph/mds_client.c | 138 ++++++++++++++++++++++++++++++++++++++-----
+>  2 files changed, 127 insertions(+), 14 deletions(-)
 >
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index d7283fb54cec..b21d0a9ac324 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -4195,6 +4195,9 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+>                 }
+>                 new_cap = ceph_get_cap(mdsc, NULL);
+>         } else {
+> +               if (tsession == ERR_PTR(-EAGAIN))
+> +                       return;
+> +
+>                 WARN_ON(1);
+>                 tsession = NULL;
+>                 target = -1;
 > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 85f8ceb10377..6b27146d0c9f 100644
+> index 03809328e4aa..ec8ee95cad6e 100644
 > --- a/fs/ceph/mds_client.c
 > +++ b/fs/ceph/mds_client.c
-> @@ -4024,6 +4024,19 @@ int ceph_mdsc_wait_request(struct ceph_mds_client =
-*mdsc,
->                 if (req->r_parent &&
->                     (req->r_op & CEPH_MDS_OP_WRITE))
->                         ceph_invalidate_dir_request(req);
+> @@ -1733,6 +1733,30 @@ static int __open_session(struct ceph_mds_client *mdsc,
+>         return 0;
+>  }
+>
+> +/* Is this rank still occupied by a session being torn down? */
+> +static bool __mds_rank_closing(struct ceph_mds_client *mdsc, int mds)
+> +{
+> +       return mds < mdsc->max_sessions && mdsc->sessions[mds] &&
+> +               mdsc->sessions[mds]->s_state == CEPH_MDS_SESSION_CLOSED;
+> +}
+> +
+> +/*
+> + * Wait until the rank is no longer occupied by a CLOSED session.
+> + *
+> + * The caller must hold mdsc->mutex.  The mutex is dropped while sleeping and
+> + * held again on return.  Another session may occupy the rank by then.  The
+> + * wait also ends when shutdown starts, so the caller must check
+> + * mdsc->stopping before proceeding.
+> + */
+> +static void wait_for_mds_rank_not_closing(struct ceph_mds_client *mdsc,
+> +                                         int mds)
+> +{
+> +       wait_event_cmd(mdsc->session_close_wq,
+> +                      !__mds_rank_closing(mdsc, mds) || mdsc->stopping,
+> +                      mutex_unlock(&mdsc->mutex),
+> +                      mutex_lock(&mdsc->mutex));
+> +}
+> +
+>  /*
+>   * open sessions for any export targets for the given mds
+>   *
+> @@ -1750,6 +1774,16 @@ __open_export_target_session(struct ceph_mds_client *mdsc, int target)
+>                 if (IS_ERR(session))
+>                         return session;
+>         }
+> +       if (session->s_state == CEPH_MDS_SESSION_CLOSED) {
+> +               /*
+> +                * handle_session() is currently closing this session;
+> +                * it stays registered until its caps are gone.  Do
+> +                * not return it to our caller because we don't want
+> +                * it to attach new caps to it.
+> +                */
+> +               ceph_put_mds_session(session);
+> +               return ERR_PTR(-EAGAIN);
+> +       }
+>         if (session->s_state == CEPH_MDS_SESSION_NEW ||
+>             session->s_state == CEPH_MDS_SESSION_CLOSING) {
+>                 ret = __open_session(mdsc, session);
+> @@ -1769,7 +1803,19 @@ ceph_mdsc_open_export_target_session(struct ceph_mds_client *mdsc, int target)
+>         doutc(cl, "to mds%d\n", target);
+>
+>         mutex_lock(&mdsc->mutex);
+> -       session = __open_export_target_session(mdsc, target);
+> +       for (;;) {
+> +               session = __open_export_target_session(mdsc, target);
+> +               if (session != ERR_PTR(-EAGAIN) || mdsc->stopping)
+> +                       break;
 > +
 > +               /*
-> +                * The waiter is about to drop its reference, which is
-> +                * the last one held by the request's caller.  Make sure
-> +                * the request is no longer parked on a wait list or
-> +                * registered in the request tree, or it could be walked
-> +                * (and in the tree case, replied to) after it is freed.
-> +                * A racing reply may already have unregistered it, in
-> +                * which case it is no longer in the tree.
+> +                * Keep the exported cap on its old session until the
+> +                * target rank is vacant.  Dropping it here can discard a
+> +                * dirty auth cap; handle_session() wakes us after removing
+> +                * the old target session's caps and unregistering it.
 > +                */
-> +               list_del_init(&req->r_wait);
-> +               if (lookup_request(&mdsc->request_tree, req->r_tid) =3D=
-=3D req)
-> +                       __unregister_request(mdsc, req);
->         } else {
->                 err =3D req->r_err;
+> +               wait_for_mds_rank_not_closing(mdsc, target);
+> +       }
+>         mutex_unlock(&mdsc->mutex);
+>
+>         return session;
+> @@ -4492,8 +4538,20 @@ static void handle_session(struct ceph_mds_session *session,
+>                         ceph_metric_bind_session(mdsc, session);
 >         }
+>         if (op == CEPH_SESSION_CLOSE) {
+> +               /*
+> +                * Pin the session for the rest of this function.  The
+> +                * __unregister_session() call is deferred until after
+> +                * remove_session_caps() below, or else other
+> +                * processes may find caps still assigned to this
+> +                * session while working with a new session object.
+> +                */
+>                 ceph_get_mds_session(session);
+> -               __unregister_session(mdsc, session);
+> +
+> +               if (session->s_state == CEPH_MDS_SESSION_RECONNECTING)
+> +                       pr_info_client(cl, "mds%d reconnect denied\n",
+> +                                      session->s_mds);
+> +
+> +               session->s_state = CEPH_MDS_SESSION_CLOSED;
+>         }
+>         /* FIXME: this ttl calculation is generous */
+>         session->s_ttl = jiffies + HZ*mdsc->mdsmap->m_session_autoclose;
+> @@ -4551,12 +4609,24 @@ static void handle_session(struct ceph_mds_session *session,
+>                 break;
 >
-> ---
-> base-commit: dee30ce1286a0d18b14545ecac345e4cf4a80511
-> change-id: 20260827-b4-ceph-fix-abort-request-uaf-new-a98f8c6da00e
+>         case CEPH_SESSION_CLOSE:
+> -               if (session->s_state == CEPH_MDS_SESSION_RECONNECTING)
+> -                       pr_info_client(cl, "mds%d reconnect denied\n",
+> -                                      session->s_mds);
+> -               session->s_state = CEPH_MDS_SESSION_CLOSED;
+>                 cleanup_session_requests(mdsc, session);
+>                 remove_session_caps(session);
+> +
+> +               /*
+> +                * Now that all caps are removed, it is safe release
+> +                * the MDS rank and allow other processes to create a
+> +                * new session object.
+> +                *
+> +                * A concurrent ceph_mdsc_close_sessions() or
+> +                * check_new_map() may have unregistered the session
+> +                * already, so check __verify_registered_session()
+> +                * first.
+> +                */
+> +               mutex_lock(&mdsc->mutex);
+> +               if (!__verify_registered_session(mdsc, session))
+> +                       __unregister_session(mdsc, session);
+> +               mutex_unlock(&mdsc->mutex);
+> +
+>                 wake = 2; /* for good measure */
+>                 wake_up_all(&mdsc->session_close_wq);
+>                 break;
+> @@ -5802,6 +5872,10 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>                 s = __ceph_lookup_mds_session(mdsc, i);
+>                 if (!s)
+>                         continue;
+> +               if (s->s_state == CEPH_MDS_SESSION_CLOSED) {
+> +                       ceph_put_mds_session(s);
+> +                       continue;
+> +               }
+>                 oldstate = ceph_mdsmap_get_state(oldmap, i);
+>                 newstate = ceph_mdsmap_get_state(newmap, i);
 >
-> Best regards,
+> @@ -5814,18 +5888,24 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>
+>                 if (i >= newmap->possible_max_rank) {
+>                         /* force close session for stopped mds */
+> -                       __unregister_session(mdsc, s);
+> -                       __wake_requests(mdsc, &s->s_waiting);
+> +                       s->s_state = CEPH_MDS_SESSION_CLOSED;
+>                         mutex_unlock(&mdsc->mutex);
+>
+>                         mutex_lock(&s->s_mutex);
+>                         cleanup_session_requests(mdsc, s);
+>                         remove_session_caps(s);
+> +
+> +                       mutex_lock(&mdsc->mutex);
+> +                       if (!__verify_registered_session(mdsc, s))
+> +                               __unregister_session(mdsc, s);
+> +                       mutex_unlock(&mdsc->mutex);
+>                         mutex_unlock(&s->s_mutex);
+>
+> -                       ceph_put_mds_session(s);
+> +                       wake_up_all(&mdsc->session_close_wq);
+>
+>                         mutex_lock(&mdsc->mutex);
+> +                       __wake_requests(mdsc, &s->s_waiting);
+> +                       ceph_put_mds_session(s);
+>                         if (mdsc->mdsmap->m_epoch != map_epoch)
+>                                 return;
+>                         kick_requests(mdsc, i);
+> @@ -5844,6 +5924,16 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>                                 ceph_put_mds_session(s);
+>                                 return;
+>                         }
+> +                       if (s->s_state == CEPH_MDS_SESSION_CLOSED) {
+> +                               /*
+> +                                * handle_session() set state=CLOSED
+> +                                * in the mutex gap above and is tearing it
+> +                                * down
+> +                                */
+> +                               mutex_unlock(&s->s_mutex);
+> +                               ceph_put_mds_session(s);
+> +                               continue;
+> +                       }
+>                         ceph_con_close(&s->s_con);
+>                         mutex_unlock(&s->s_mutex);
+>                         s->s_state = CEPH_MDS_SESSION_RESTARTING;
+> @@ -5902,6 +5992,9 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>          * Only open and reconnect sessions that don't exist yet.
+>          */
+>         for (i = 0; i < newmap->possible_max_rank; i++) {
+> +               if (mdsc->stopping)
+> +                       return;
+> +
+>                 /*
+>                  * In case the import MDS is crashed just after
+>                  * the EImportStart journal is flushed, so when
+> @@ -5927,6 +6020,19 @@ static void check_new_map(struct ceph_mds_client *mdsc,
+>                  * reconnection request in up:reconnect state.
+>                  */
+>                 s = __ceph_lookup_mds_session(mdsc, i);
+> +               if (s && s->s_state == CEPH_MDS_SESSION_CLOSED) {
+> +                       /*
+> +                        * Wait for handle_session() to remove the caps and
+> +                        * unregister this session, so the reconnect below
+> +                        * uses a fresh session on the now vacant rank
+> +                        */
+> +                       ceph_put_mds_session(s);
+> +                       wait_for_mds_rank_not_closing(mdsc, i);
+> +                       if (mdsc->stopping ||
+> +                           mdsc->mdsmap->m_epoch != map_epoch)
+> +                               return;
+> +                       s = NULL;
+> +               }
+>                 if (likely(!s)) {
+>                         s = __open_export_target_session(mdsc, i);
+>                         if (IS_ERR(s)) {
+> @@ -7087,9 +7193,7 @@ static void mds_peer_reset(struct ceph_connection *con)
+>          * Snapshot session state with READ_ONCE, then revalidate under
+>          * mdsc->mutex before acting.  The subsequent mdsc->mutex
+>          * section rechecks s_state to catch concurrent transitions, so
+> -        * the lockless snapshot here is safe.  s->s_mutex is taken
+> -        * separately for cleanup after unregistration, which avoids
+> -        * introducing a new s->s_mutex + mdsc->mutex nesting.
+> +        * the lockless snapshot here is safe.
+>          */
+>         session_state = READ_ONCE(s->s_state);
+>
+> @@ -7114,18 +7218,24 @@ static void mds_peer_reset(struct ceph_connection *con)
+>
+>                 ceph_get_mds_session(s);
+>                 s->s_state = CEPH_MDS_SESSION_CLOSED;
+> -               __unregister_session(mdsc, s);
+> -               __wake_requests(mdsc, &s->s_waiting);
+>                 mutex_unlock(&mdsc->mutex);
+>
+>                 mutex_lock(&s->s_mutex);
+>                 cleanup_session_requests(mdsc, s);
+>                 remove_session_caps(s);
+> +
+> +               /* Keep the rank occupied until all old-session caps are gone. */
+> +               mutex_lock(&mdsc->mutex);
+> +               if (!__verify_registered_session(mdsc, s))
+> +                       __unregister_session(mdsc, s);
+> +               mutex_unlock(&mdsc->mutex);
+> +
+>                 mutex_unlock(&s->s_mutex);
+>
+>                 wake_up_all(&mdsc->session_close_wq);
+>
+>                 mutex_lock(&mdsc->mutex);
+> +               __wake_requests(mdsc, &s->s_waiting);
+>                 kick_requests(mdsc, s->s_mds);
+>                 mutex_unlock(&mdsc->mutex);
+>
 > --
-> Xiubo Li <xiubo.li@clyso.com>
->
+> 2.47.3
 >
