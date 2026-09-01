@@ -1,310 +1,406 @@
-Received: from CH5PR02CU005.outbound.protection.outlook.com (mail-northcentralusazon11012005.outbound.protection.outlook.com [40.107.200.5])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A28C737C911;
-	Mon, 31 Aug 2026 19:26:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.200.5
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788204366; cv=fail; b=HzCvOKfFo9ugxtFJ+iD4wUNnhATq6ckTYRp3Ttj+oO2D/nakZEHfnpmJ4id7EHiytw+vaE2qwmDE9lo1wa4cGEi10Z9L1/mKki70y+5Mip2acHpmmMMpOtIdL5C1eUtW2zfadSR/dpX1FdCUlbgEAn4YJrJ+tli4b4UPJC8a8qs=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788204366; c=relaxed/simple;
-	bh=4zGG3F4y9ZxLXAr8xFku3h+krWrEkhGq6KJCkInB24c=;
-	h=From:Date:Subject:Content-Type:Message-Id:References:In-Reply-To:
-	 To:Cc:MIME-Version; b=Ymac2L8GYqHo5qhEGe2/kbi1caLuWShPULEGx/5a8pTccIJGNWEw6pWHfdH9ndUpcVJd7nEQugZf71wzibndxKhU+AVSoF8n4/qXtTcKin7q2OorRCPProZzMQrwc5lLBIqiSwKUdde1Sm/PMJia3frNSgPesbqA9W1Y4DXtJ5E=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=fJ6FJOp/; arc=fail smtp.client-ip=40.107.200.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 296C13AAF6E;
+	Tue,  1 Sep 2026 12:14:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788264887; cv=none; b=ZBgvJTj6MDoY3nDhYuq5re/+jpVnEfQeWcaaS32d6ug80roBqrxwMKODpU3EbZb5N1YB/zvCNxp2wKGLo6hGPTfmjfrzpKejcq8GducGuWxghRFmcESS2clQ1zue9INbrj/SJe8RxniJPWFItWkbSMCtSwIYNh4a6SlsJtwLqOo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788264887; c=relaxed/simple;
+	bh=qEPD7TqTrsX4F9tRI6QayPtuz8wbQeuZ+h+xBDW2b9M=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=hfslb+LaThJz3AKbFbRYHQpetdsHxo35jnTu/QqklcIDT19WOz6wVOOJcJgDPSPgCT8Pq8+TXJ2q7bMho6QKiPSYBqOYoCOzQhDfIGeVXjTDgE58fPD54vdUQ+F9dyjBZtu/rBUwSIqegbxh5Vy47A/vTa+XAF4fEKxmQJwMXYI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Qsvihrq0; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="fJ6FJOp/"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=YqrIARDt+wre83+RMRmK+oQlHlLSBN9tJuRsmYieuL9MWtxPllZxu13pi4SZKIdcCaitj+/4lVSW0ssDGCOZODp2pR3cDOZviR90dWdJDVO0bAMlUYUnMqWZNVhaTqESImIzx1OMviNtRGxTuKfGCOyY6FBikPszzfwAFRop6z/HvIGj/2D+lRxRm0LLHrj1c/lmvjpI77ZQeHqAL+ErcrbxioAS6Cdixhn0tP4KybhlTBIsSjak87SA3DW0Ttpk+6/rHpQSN/vLkwcTn/eY+zdrBE56+VSJ4BJGyhxS50wp+elzNuvOetVcRn4Ck9oSFl4Wjk0U0Aa7yyayy8LkyA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=RjyqvtfBBlSxPQWh0x7FDeUVapoLG79pHCjYhlTljVs=;
- b=ky373oexwEOZnMhU3HW2XRh4zJEWIyqapl8qPw3ldgFK80Ej+DmtMRj9LSQPzDy9kX0o2qfWQW3Gr0QEvH20He+t0wWu5wMCHLUVJUD0YRd2TVTXK9d+uprAFA13KVCe0XDqJakD1Rdy2BehOiVd3V9HIUI0CIybEUE4tjaWxH7vP8rf/cAc5ysg0zmm+T/RDnVuG3phRlCi+dMGNrWhvRACzEWq6DUobc7YeqDif7gYY/7j8v1z1TJVDpjvkH4gEOn7C/A/ukMvUPK8rRrCClBonHbLI2g+hPxlOHRIdDstwaK8daU33nfqDhrARdTDZrbpxZxSUGDMhrh6LNuadQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=RjyqvtfBBlSxPQWh0x7FDeUVapoLG79pHCjYhlTljVs=;
- b=fJ6FJOp/x/n+HMWfrGLXu0BFEIj+r5TTLbImWLqkQvIo/lqAYbeBQR1F1rjl6KhJM/EkJky9+XPcecVAQahukx8UBSdf57XfvbXFbSw7ejHemloq+IjPAopUlkiUcpcCmEzaalfdTYuw1afJ2Qt4lfRgvTcxPtSK/AXgwyShaNPts0ivcT9zEOgvHxZaFBBJIpE1INTn3KoyTQAmOR+zELzM/Bq3dJvyfwwJCvrA+ykyhL1wmu/izwx0gTUdJ0xyo3lwYYTMruSikwnOU9q94bAqjLPk1JGw+/fyFZdTO/3CtRPNBJ8TcSbofAt/A2c7KoSaKfKzQcsnZQ907CZLVA==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from IA0PR12MB8374.namprd12.prod.outlook.com (2603:10b6:208:40e::7)
- by SJ5PPF0C60B25BF.namprd12.prod.outlook.com (2603:10b6:a0f:fc02::98a) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Mon, 31 Aug
- 2026 19:25:58 +0000
-Received: from IA0PR12MB8374.namprd12.prod.outlook.com
- ([fe80::d85f:4c87:ae84:3f16]) by IA0PR12MB8374.namprd12.prod.outlook.com
- ([fe80::d85f:4c87:ae84:3f16%5]) with mapi id 15.21.0360.008; Mon, 31 Aug 2026
- 19:25:58 +0000
-From: Zi Yan <ziy@nvidia.com>
-Date: Mon, 31 Aug 2026 15:25:36 -0400
-Subject: [PATCH v2 13/14] treewide: adjust comments on PagePrivate and
- PG_private
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260831-remove-pg_private-v2-13-3668159cd9e8@nvidia.com>
-References: <20260831-remove-pg_private-v2-0-3668159cd9e8@nvidia.com>
-In-Reply-To: <20260831-remove-pg_private-v2-0-3668159cd9e8@nvidia.com>
-To: David Hildenbrand <david@kernel.org>, 
- "Matthew Wilcox (Oracle)" <willy@infradead.org>, 
- Andrew Morton <akpm@linux-foundation.org>, 
- Muchun Song <muchun.song@linux.dev>, Lorenzo Stoakes <ljs@kernel.org>, 
- "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>, 
- Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>, 
- Michal Hocko <mhocko@suse.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
- Nico Pache <nico.pache@linux.dev>, Ryan Roberts <ryan.roberts@arm.com>, 
- Dev Jain <dev.jain@arm.com>, Barry Song <baohua@kernel.org>, 
- Lance Yang <lance.yang@linux.dev>, Usama Arif <usama.arif@linux.dev>, 
- Gregory Price <gourry@gourry.net>, 
- Ying Huang <ying.huang@linux.alibaba.com>, 
- Alistair Popple <apopple@nvidia.com>, Johannes Weiner <hannes@cmpxchg.org>, 
- Qi Zheng <qi.zheng@linux.dev>, Shakeel Butt <shakeel.butt@linux.dev>, 
- Kairui Song <kasong@tencent.com>
-Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, 
- Zi Yan <ziy@nvidia.com>, Ilya Dryomov <idryomov@gmail.com>, 
- Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
- Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
- Richard Weinberger <richard@nod.at>, Zhihao Cheng <chengzhihao1@huawei.com>, 
- ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org, 
- linux-mtd@lists.infradead.org
-X-Mailer: b4 0.15.2
-X-ClientProxiedBy: YQBPR0101CA0315.CANPRD01.PROD.OUTLOOK.COM
- (2603:10b6:c01:6c::16) To IA0PR12MB8374.namprd12.prod.outlook.com
- (2603:10b6:208:40e::7)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Qsvihrq0"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2B9C61F000E9;
+	Tue,  1 Sep 2026 12:14:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788264885;
+	bh=HSS0AdBvpnxdShiiljl/JK78q8YL3ndZU+6Be46HYQ8=;
+	h=From:Subject:Date:To:Cc;
+	b=Qsvihrq0XRSaimrPFxYzPpwnLzFBpVowAtY1YS5Lpx7V5XcfdmHV/YM/uG3U5smmZ
+	 +Jcx/hVqFmgG0Ed4uM4esfpwhIxRj62LY+KxDekKvf613PV0zDOrLctfJgZRIZzfd9
+	 Svp/C821cWpXN86eiefS/FrurMl52pjA6A0TNd2NG/MULJU/krOKNZY8n0DGf56BRt
+	 U43EEebRB0gwfDEis0WP//UCem9rXAASYINq6Ia5hPTaz/ZOpCRgFnvqRYPhnimvu2
+	 ZRPd+Uz5qzRKJ1dJjETol0ed4RcnzKrY6dwMIwmoJsuxeBUUJzdQo2boWC2/8UdQdb
+	 tnPyYCqTI04dA==
+From: Christian Brauner <brauner@kernel.org>
+Subject: [PATCH 00/27] fs: port to const struct mnt_idmap
+Date: Tue, 01 Sep 2026 14:14:25 +0200
+Message-Id: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA0PR12MB8374:EE_|SJ5PPF0C60B25BF:EE_
-X-MS-Office365-Filtering-Correlation-Id: 78bc9ccf-88f4-4f5d-49f8-08df0795af1b
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|366016|23010399003|7416014|376014|18002099003|22082099003|56012099006|11063799006|10067099003|921020;
-X-Microsoft-Antispam-Message-Info:
-	ThSdE5GGLZTT/nuw7A0dqkxVQwB2qU9PRMPgQa0Xl05QBDC53fhI3fckqnudjEKmBDTE88+260sZHGF8FKM8WXX6ecP2X8o6z4Cz+h2WRxAgGJq5ExFLIYtChJMdGthZZDOxgzfxv340/ulhSvIozPN8UQaD1TVsHQvuF2n7+9IuGAM4bJ2MsIdFgzeDHjm4WoyQJO/imJz7HJQ1C/HR6+uDGEGeVKcMZiVnUpGkQjDd1y5WBbQM4WzJum1KQT4T4n1Y1YbyPZ0qGPLg0l6Zdjoy+AvM0u2vwhcOJuMnp12EEZ8iRbx+5qvbrAdwdF88aOaQLgXPNEAofUJsDPTURSGrPpBesBoiSkRoW7JUSdyDxJR5sImZizTpSmiwqc2jkTYFBtre5JFzJ+bWCO31lpcWjkEQROpn95izxMlUCwxb5iYuhuMXUeTYFlLzE6b8YxIxpc4o36MyC1S8jMfle0ESJL91yjt0lfjbmab9Vki1tJCpP41JpEfMD9au6Ay+ir7ZdNEl8PfVZdt5iER9Deqd31L9oeJUEeeJsUE63H8OTy+vPa6ly+G/gMUusrWVzHp6TrJnXo906H87KwcKlkWkXdN0L7NtPTWz0nEG0y/GIy49BdKZJxXVk8bpkrTjHref+LKiSpYU5EvIwBjHoXrw6zZMU9ys1wFB0t4vVdpKCljqUu1rMTgwa3oBsDcM3W9fgh84RUgoQi98dblgRg==
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA0PR12MB8374.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(23010399003)(7416014)(376014)(18002099003)(22082099003)(56012099006)(11063799006)(10067099003)(921020);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?R1ZjUTdTSWptNThBM3R1dWxza1hKSlBLek9YVmZSdGI0eDdvazFQcjZCeVdE?=
- =?utf-8?B?ZWVlaHYyd0pUQmJvTmNvMnk0NUlGMlJjdmFBM01UanNEMmFQZzR0TGhpQmMx?=
- =?utf-8?B?QjFaMGlFeTFmRHl4d0FmQmFseTFnVkJFd0dTOEVxb2ovMzdpSDRaMStLRXJq?=
- =?utf-8?B?bDd1VGtxUXVTdTZUUXZiRGQ0SENxWThTSy9qRjRkb2h4LzJFM0FyNDcwd2w5?=
- =?utf-8?B?VGdYL2FEZmlnSVBsQlJaN3luZk9TbnhiWkJBVXlqSW03MDAvZlBqSzlkOE9V?=
- =?utf-8?B?VGxzK0RUYU5tRGhBVjhXaFZFNWNhOVg1U2xGaURlRzBGWXFqOCtsN04zekww?=
- =?utf-8?B?dGs0RG0wUDZQejkxTE5ZSHZLeDdOUWhKSnFWSUMrMkc2c1hENWRkL05wcm9Q?=
- =?utf-8?B?OHk4cWVmVTF4ZWs4THhrVk9rLzl3RktIcDhLWW9ZaStlL3N3dTJQaHlHMCtk?=
- =?utf-8?B?eTJ2dWxSQjhqUitsSlpBazVmdDVsS25xdkxaWklRaXJlVS94TlpISURaWmRQ?=
- =?utf-8?B?SzZlVFMvVytDdVU5bWNDUkQ4MjIyVXc3VDNkYldKWXF0d21lclpSa0JZcElo?=
- =?utf-8?B?c2VCZmZjamx1WHo4VVd2RDJjd0l2TFF2cUFxQVB2UFNSRk5WNzNoSTJzaXBV?=
- =?utf-8?B?aXpRTngzVHZ5ejdnR3Y2Z3Ezd0tLOW1POHZ3ODhNVXVvMXZNblE5UklCWC9k?=
- =?utf-8?B?TVRiRENpbDZWcWtXeVhmQzdhZE9GYmt4YmpmSFNVMHZTRlRLVFRoUFNXWlJm?=
- =?utf-8?B?L3FIV244OTA5STZFcmJQc2hXVk1jdnZvb1VvUjBIUGZuY0dvYnhKTXpqNDAx?=
- =?utf-8?B?NldjWm8rYmJzVGtXbDFPTzZxRXlVRjJER2h3ZkJlYTJ4YWZyekNiVzZnS3ly?=
- =?utf-8?B?aGJmZFBnYUoxbXQ0c1pNbkc0OGJwWFhyUXFUQ2ZpVjZrVzQveGVTYUNpcStt?=
- =?utf-8?B?cThwcEI0M0lEY1ovcWVBSlZKK3VQSHFtQmRZZVJWMCsyT3orZEcwRGR5YmJy?=
- =?utf-8?B?Y1crVXYxN3dSQklCM0VvMHVzUGFGSFJhdlVYNFJaem54a1pIeVJ0dXl3SlZC?=
- =?utf-8?B?ZkNvSzAzdmtTMS95NXJCZVZEWTJsakh5eldGS2EvOUJVTlI2MW04djVoMzFT?=
- =?utf-8?B?cXdKb2JGb3g3Sk1nRm9IOUZGbUNXbC94US85WUc2MEV1K3gvWWxML2gvZ0E1?=
- =?utf-8?B?Q2trK1hhN3hxRzdLdmRvRGUzSHNWZE5hNzlvS0VPemlFWVhsYU05OTlHcWlL?=
- =?utf-8?B?VEVxWVpwQlVyS0h0Mm9hY2JFMFozQmdvVzZ4VUJHclBNeWU1V2xwRVBUMzV5?=
- =?utf-8?B?d08xZDRHM01nQWpYZ2djb0xTalR2VlNFdnBLcEFzNkhpQUJHU0w0VGh0TVJw?=
- =?utf-8?B?SmlBclZYbUpkeHpKT25yZmlIcW1ZTC9Zbk5zSGR3dmhKd2ZhUGJOOWV4ZzBa?=
- =?utf-8?B?b2ZVVkQzZTMzcGhvR1ZUSVhML2kxazFnZXUzeXNDWXdMVzd3U3Q1eXBxUFY3?=
- =?utf-8?B?Q3BBMk5Ma0xidVVSTFRBQnRYVVFnKzg0MEljazZjWU9yQUFxQzdQNWN0SjZH?=
- =?utf-8?B?azBFemU5ZndvR0lBendsck1HYisrRGNZbTZxdzYvOHlxUUhrTklDd0ZaYWlH?=
- =?utf-8?B?SWZqNk53dUFNOEREZzV6Rll4OEs1SjFlNThGT1crQU1acWVCQy9KVzdjeWhj?=
- =?utf-8?B?S3ordGhveEJEdXhKQnArRnBuNjY2U1dVUFZEOTh2MGh2Q3hrOHVrdVZLY0Z6?=
- =?utf-8?B?UWhBS0FQZ3R2MHpjdWhuZ3hwYS9kS0hQVnk5YzBZNG1haU16SWNwOUd4dUVz?=
- =?utf-8?B?bzByR2VLSmRSeTNxQlVUcXdRK05KQ0ROZFdKbS83eWRnV25GRllWN0hXYURk?=
- =?utf-8?B?SnA5VTV3ZGk5ZTY5Mnl1SkhGckYrOFFTcXk1eXR2ay9TeDZkbGN1T21YdnpF?=
- =?utf-8?B?V0hFRmlzbjBSNDJtVEN2NFJPcGJZTW9TNm4yNDZwKzczQU1YSUE3SldETnQ5?=
- =?utf-8?B?dkNYSXd1cGVyQ2d2OTVYVzVDTmlYR3pFdGxsTGp2U1VuUW1HME5QM0k5YVBx?=
- =?utf-8?B?WkdrcXBLZE5zcE1oQkpqOW5rUURvZUxLQVBPMmRVMlNJMHdqclZmQmxTa2w3?=
- =?utf-8?B?WTdhYkxJQlo3NHI0YnYxRHo0SnI4ZWdIZWxNM1hwN0p3bStlMStON1dEa0tx?=
- =?utf-8?B?dkhTSFg4Q0R4a093ZW42RU1PaUZUOWt1TjhLeXhsQm9HSUdRMjR5WmZiM0xN?=
- =?utf-8?B?aEtML3ptUk0vY1g2Tk8ybGNRVldJakdvSmJlZEp2S0luWTI4VmYreHRybjVZ?=
- =?utf-8?Q?ATgZNVnOmzpoQSE68C?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 78bc9ccf-88f4-4f5d-49f8-08df0795af1b
-X-MS-Exchange-CrossTenant-AuthSource: IA0PR12MB8374.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 Aug 2026 19:25:58.0584
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: c4D+bONIoe+hJjLC3tCtYFp3gZo1ni4TTzhIrcQAIKslfsqrXAibpTfmeO7KLioJ
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ5PPF0C60B25BF
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yWMyw7CIBBFf6WZtRBg4etXjIsBB4tGaGZaNWn67
+ wIuz32cFYQ4kcB5WIHpnSSVXMHuBggj5jupdKsMzri9ORmrPoWfNXvhpELJMiuP0R/JOjxEhHq
+ bmGL6duXl+mdZ/IPC3Dxt4VFIecYcxhY1o+5G3Y269bBtP5UF9kCcAAAA
+X-Change-ID: 20260901-work-idmap-const-bafb8e12a7fa
+To: linux-fsdevel@vger.kernel.org
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>, 
+ Christoph Hellwig <hch@lst.de>, Seth Forshee <sforshee@kernel.org>, 
+ Paul Moore <paul@paul-moore.com>, linux-security-module@vger.kernel.org, 
+ Mimi Zohar <zohar@linux.ibm.com>, linux-integrity@vger.kernel.org, 
+ Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, 
+ Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org, 
+ Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>, 
+ linux-unionfs@vger.kernel.org, Namjae Jeon <linkinjeon@kernel.org>, 
+ linux-cifs@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ "Christian Brauner (Amutable)" <brauner@kernel.org>
+X-Mailer: b4 0.17-dev-db0b7
+X-Developer-Signature: v=1; a=openpgp-sha256; l=18235; i=brauner@kernel.org;
+ h=from:subject:message-id; bh=qEPD7TqTrsX4F9tRI6QayPtuz8wbQeuZ+h+xBDW2b9M=;
+ b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWRNO7jm5dwfhSfmH3g8Q2bir+PHn+7+3LlpoY2q9cFlC
+ y1jf9d4rO4oYWEQ42KQFVNkcWg3CZdbzlOx2ShTA2YOKxPIEAYuTgGYyAsFhi+cSydMEa5YeH5W
+ TP2RzaqHxcUPm23Xfz591Yv7oQ3ZayIY/ofVXYzZePRA5rWSLddfiEQu1VC7U10TxC+5S+PRlKM
+ qhrwA
+X-Developer-Key: i=brauner@kernel.org; a=openpgp;
+ fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 
-PG_private is going to be deleted. Adjust related comments to refer to
-page/folio->private instead.
+A mount's idmapping is immutable. The only thing that is allowed to be
+modified afterwards is the reference count and that is hidden behind
+mnt_idmap_get() and mnt_idmap_put(). Everything else only ever reads
+from the idmapping. This is the same model that struct cred uses and the
+idmapping is also rather sensitive.
 
-Assisted-by: Claude:claude-opus-4-8
-Assisted-by: Codex:gpt-5
-Signed-off-by: Zi Yan <ziy@nvidia.com>
-To: Ilya Dryomov <idryomov@gmail.com>
-To: Alex Markuze <amarkuze@redhat.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Trond Myklebust <trondmy@kernel.org>
-To: Anna Schumaker <anna@kernel.org>
-To: Richard Weinberger <richard@nod.at>
-To: Andrew Morton <akpm@linux-foundation.org>
-To: David Hildenbrand <david@kernel.org>
-Cc: Zhihao Cheng <chengzhihao1@huawei.com>
-Cc: Lorenzo Stoakes <ljs@kernel.org>
-Cc: "Liam R. Howlett" <liam@infradead.org>
-Cc: Vlastimil Babka <vbabka@kernel.org>
-Cc: Mike Rapoport <rppt@kernel.org>
-Cc: Suren Baghdasaryan <surenb@google.com>
-Cc: Michal Hocko <mhocko@suse.com>
-Cc: ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Cc: linux-nfs@vger.kernel.org
-Cc: linux-mtd@lists.infradead.org
-Cc: linux-mm@kvack.org
+So make the idmap argument const wherever we can. The conversion is done
+from the bottom up so callers can continue to pass a non-const pointer
+to a const parameter until the conversion is finished.
+
+Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 ---
- fs/ceph/addr.c           |  4 ++--
- fs/nfs/file.c            |  4 ++--
- fs/ubifs/file.c          |  8 ++++----
- include/linux/mm.h       | 15 ++++++++-------
- include/linux/mm_types.h |  4 ++--
- 5 files changed, 18 insertions(+), 17 deletions(-)
+Christian Brauner (27):
+      userns: pass const uid_gid_map in lookup helpers
+      fs: port mnt_idmap_{get,put}() to const mnt_idmap
+      fs: port vfs{g,u}id helpers to const mnt_idmap
+      fs: port fs{g,u}id helpers to const mnt_idmap
+      fs: port i_{g,u}id_into_vfs{g,u}id() to const mnt_idmap
+      fs: port i_{g,u}id_{needs_}update() to const mnt_idmap
+      quota: port to const mnt_idmap
+      fs: port privilege checking helpers to const mnt_idmap
+      fs: port inode_owner_or_capable() to const mnt_idmap
+      fs: port inode_init_owner() to const mnt_idmap
+      fs: port acl to const mnt_idmap
+      fs: port ->permission() to pass const mnt_idmap
+      fs: port xattr to const mnt_idmap
+      fs: port ->fileattr_set() to pass const mnt_idmap
+      fs: port ->set_acl() to pass const mnt_idmap
+      fs: port ->get_acl() to pass const mnt_idmap
+      fs: port ->tmpfile() to pass const mnt_idmap
+      fs: port ->mknod() to pass const mnt_idmap
+      fs: port ->rename() to pass const mnt_idmap
+      fs: port ->mkdir() to pass const mnt_idmap
+      fs: port ->symlink() to pass const mnt_idmap
+      fs: port ->create() to pass const mnt_idmap
+      fs: port ->getattr() to pass const mnt_idmap
+      fs: port ->setattr() to pass const mnt_idmap
+      fs: port vfs_*() helpers to const mnt_idmap
+      fs: port mnt_idmap() and file_mnt_idmap() to const mnt_idmap
+      fs: make nop_mnt_idmap and invalid_mnt_idmap const
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index fad17df1d5082..f9b2ec9550481 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -122,8 +122,8 @@ static bool ceph_dirty_folio(struct address_space *mapping, struct folio *folio)
- 	spin_unlock(&ci->i_ceph_lock);
- 
- 	/*
--	 * Reference snap context in folio->private.  Also set
--	 * PagePrivate so that we get invalidate_folio callback.
-+	 * Reference snap context in folio->private. Setting folio->private is
-+	 * what gets us the invalidate_folio callback.
- 	 */
- 	VM_WARN_ON_FOLIO(folio->private, folio);
- 	folio_attach_private(folio, snapc);
-diff --git a/fs/nfs/file.c b/fs/nfs/file.c
-index e1bdd10b35f10..38f830a6467c9 100644
---- a/fs/nfs/file.c
-+++ b/fs/nfs/file.c
-@@ -484,7 +484,7 @@ static int nfs_write_end(const struct kiocb *iocb,
-  * Partially or wholly invalidate a page
-  * - Release the private state associated with a page if undergoing complete
-  *   page invalidation
-- * - Called if either PG_private or PG_fscache is set on the page
-+ * - Called if either folio->private or PG_fscache is set on the page
-  * - Caller holds page lock
-  */
- static void nfs_invalidate_folio(struct folio *folio, size_t offset,
-@@ -555,7 +555,7 @@ static void nfs_check_dirty_writeback(struct folio *folio,
-  * Attempt to clear the private state associated with a page when an error
-  * occurs that requires the cached contents of an inode to be written back or
-  * destroyed
-- * - Called if either PG_private or fscache is set on the page
-+ * - Called if either page->private or fscache is set on the page
-  * - Caller holds page lock
-  * - Return 0 if successful, -error otherwise
-  */
-diff --git a/fs/ubifs/file.c b/fs/ubifs/file.c
-index e73c28b12f97f..aa0298ce451ef 100644
---- a/fs/ubifs/file.c
-+++ b/fs/ubifs/file.c
-@@ -12,14 +12,14 @@
-  * This file implements VFS file and inode operations for regular files, device
-  * nodes and symlinks as well as address space operations.
-  *
-- * UBIFS uses 2 page flags: @PG_private and @PG_checked. @PG_private is set if
-+ * UBIFS uses folio->private and page flag @PG_checked. folio->private is set if
-  * the page is dirty and is used for optimization purposes - dirty pages are
-- * not budgeted so the flag shows that 'ubifs_write_end()' should not release
-+ * not budgeted so it shows that 'ubifs_write_end()' should not release
-  * the budget for this page. The @PG_checked flag is set if full budgeting is
-  * required for the page e.g., when it corresponds to a file hole or it is
-  * beyond the file size. The budgeting is done in 'ubifs_write_begin()', because
-  * it is OK to fail in this function, and the budget is released in
-- * 'ubifs_write_end()'. So the @PG_private and @PG_checked flags carry
-+ * 'ubifs_write_end()'. So the folio->private and the @PG_checked flag carry
-  * information about how the page was budgeted, to make it possible to release
-  * the budget properly.
-  *
-@@ -1509,7 +1509,7 @@ static vm_fault_t ubifs_vm_page_mkwrite(struct vm_fault *vmf)
- 	 *
- 	 * At the moment we do not know whether the folio is dirty or not, so we
- 	 * assume that it is not and budget for a new folio. We could look at
--	 * the @PG_private flag and figure this out, but we may race with write
-+	 * folio->private and figure this out, but we may race with write
- 	 * back and the folio state may change by the time we lock it, so this
- 	 * would need additional care. We do not bother with this at the
- 	 * moment, although it might be good idea to do. Instead, we allocate
-diff --git a/include/linux/mm.h b/include/linux/mm.h
-index b5b60f3ad58dc..2855739a0f379 100644
---- a/include/linux/mm.h
-+++ b/include/linux/mm.h
-@@ -2075,20 +2075,21 @@ vm_fault_t finish_fault(struct vm_fault *vmf);
-  *
-  * A pagecache page contains an opaque `private' member, which belongs to the
-  * page's address_space. Usually, this is the address of a circular list of
-- * the page's disk buffers. PG_private must be set to tell the VM to call
-- * into the filesystem to release these pages.
-+ * the page's disk buffers. It tells the VM to call into the filesystem to
-+ * release these pages.
-  *
-  * A folio may belong to an inode's memory mapping. In this case,
-  * folio->mapping points to the inode, and folio->index is the file
-  * offset of the folio, in units of PAGE_SIZE.
-  *
-- * If pagecache pages are not associated with an inode, they are said to be
-- * anonymous pages. These may become associated with the swapcache, and in that
-- * case PG_swapcache is set, and page->private is an offset into the swapcache.
-+ * If pagecache folios are not associated with an inode, they are said to be
-+ * anonymous folios. These may become associated with the swapcache, and in that
-+ * case PG_swapcache is set, and folio->private is an offset into the swapcache.
-  *
-  * In either case (swapcache or inode backed), the pagecache itself holds one
-- * reference to the page. Setting PG_private should also increment the
-- * refcount. The each user mapping also has a reference to the page.
-+ * reference to the folio. Attaching filesystem private data via
-+ * folio_attach_private() also increments the refcount. Each user mapping also
-+ * has a reference to the folio.
-  *
-  * The pagecache pages are stored in a per-mapping radix tree, which is
-  * rooted at mapping->i_pages, and indexed by offset.
-diff --git a/include/linux/mm_types.h b/include/linux/mm_types.h
-index 6d815f6440c94..e35aece38b933 100644
---- a/include/linux/mm_types.h
-+++ b/include/linux/mm_types.h
-@@ -108,7 +108,7 @@ struct page {
- 			};
- 			/**
- 			 * @private: Mapping-private opaque data.
--			 * Usually used for buffer_heads if PagePrivate.
-+			 * Usually used for buffer_heads.
- 			 * Used for swp_entry_t if swapcache flag set.
- 			 * Indicates order in the buddy system if PageBuddy
- 			 * or on pcp_llist.
-@@ -675,7 +675,7 @@ static inline void ptdesc_pmd_pts_init(struct ptdesc *ptdesc)
- #define STRUCT_PAGE_MAX_SHIFT	(order_base_2(sizeof(struct page)))
- 
- /*
-- * page_private can be used on tail pages.  However, PagePrivate is only
-+ * page_private can be used on tail pages.  However, it is only
-  * checked by the VM on the head page.  So page_private on the tail pages
-  * should be used for data that's ancillary to the head page (eg attaching
-  * buffer heads to tail pages after attaching buffer heads to the head page)
-
--- 
-2.53.0
+ Documentation/filesystems/locking.rst     |  24 +++----
+ Documentation/filesystems/porting.rst     |  13 ++++
+ Documentation/filesystems/vfs.rst         |  24 +++----
+ arch/powerpc/platforms/cell/spufs/inode.c |   2 +-
+ drivers/android/binder/rust_binderfs.c    |   2 +-
+ drivers/android/binderfs.c                |   2 +-
+ fs/9p/acl.c                               |   4 +-
+ fs/9p/acl.h                               |   4 +-
+ fs/9p/v9fs.h                              |   2 +-
+ fs/9p/v9fs_vfs.h                          |   2 +-
+ fs/9p/vfs_inode.c                         |  14 ++--
+ fs/9p/vfs_inode_dotl.c                    |  14 ++--
+ fs/9p/xattr.c                             |   2 +-
+ fs/adfs/adfs.h                            |   2 +-
+ fs/adfs/inode.c                           |   2 +-
+ fs/affs/affs.h                            |  10 +--
+ fs/affs/inode.c                           |   2 +-
+ fs/affs/namei.c                           |   8 +--
+ fs/afs/dir.c                              |  16 ++---
+ fs/afs/inode.c                            |   4 +-
+ fs/afs/internal.h                         |   6 +-
+ fs/afs/security.c                         |   2 +-
+ fs/afs/xattr.c                            |   4 +-
+ fs/anon_inodes.c                          |   4 +-
+ fs/attr.c                                 |  16 ++---
+ fs/autofs/root.c                          |  12 ++--
+ fs/backing-file.c                         |   2 +-
+ fs/bad_inode.c                            |  20 +++---
+ fs/bfs/dir.c                              |   4 +-
+ fs/btrfs/acl.c                            |   2 +-
+ fs/btrfs/acl.h                            |   2 +-
+ fs/btrfs/btrfs_inode.h                    |   2 +-
+ fs/btrfs/inode.c                          |  24 +++----
+ fs/btrfs/ioctl.c                          |  16 ++---
+ fs/btrfs/ioctl.h                          |   2 +-
+ fs/btrfs/xattr.c                          |   6 +-
+ fs/ceph/acl.c                             |   2 +-
+ fs/ceph/dir.c                             |  10 +--
+ fs/ceph/file.c                            |   2 +-
+ fs/ceph/inode.c                           |  10 +--
+ fs/ceph/mds_client.h                      |   2 +-
+ fs/ceph/super.h                           |  10 +--
+ fs/ceph/xattr.c                           |   2 +-
+ fs/coda/coda_linux.h                      |   6 +-
+ fs/coda/dir.c                             |  10 +--
+ fs/coda/inode.c                           |   4 +-
+ fs/coda/pioctl.c                          |   4 +-
+ fs/configfs/configfs_internal.h           |   4 +-
+ fs/configfs/dir.c                         |   2 +-
+ fs/configfs/inode.c                       |   2 +-
+ fs/configfs/symlink.c                     |   2 +-
+ fs/coredump.c                             |   2 +-
+ fs/debugfs/inode.c                        |   2 +-
+ fs/ecryptfs/inode.c                       |  26 +++----
+ fs/efivarfs/inode.c                       |   6 +-
+ fs/erofs/inode.c                          |   2 +-
+ fs/erofs/internal.h                       |   2 +-
+ fs/exec.c                                 |   4 +-
+ fs/exfat/exfat_fs.h                       |   4 +-
+ fs/exfat/file.c                           |   6 +-
+ fs/exfat/namei.c                          |   6 +-
+ fs/ext2/acl.c                             |   2 +-
+ fs/ext2/acl.h                             |   2 +-
+ fs/ext2/ext2.h                            |   6 +-
+ fs/ext2/inode.c                           |   4 +-
+ fs/ext2/ioctl.c                           |   2 +-
+ fs/ext2/namei.c                           |  12 ++--
+ fs/ext2/xattr_security.c                  |   2 +-
+ fs/ext2/xattr_trusted.c                   |   2 +-
+ fs/ext2/xattr_user.c                      |   2 +-
+ fs/ext4/acl.c                             |   2 +-
+ fs/ext4/acl.h                             |   2 +-
+ fs/ext4/ext4.h                            |  10 +--
+ fs/ext4/ialloc.c                          |   2 +-
+ fs/ext4/inode.c                           |   6 +-
+ fs/ext4/ioctl.c                           |   6 +-
+ fs/ext4/namei.c                           |  16 ++---
+ fs/ext4/symlink.c                         |   2 +-
+ fs/ext4/xattr_hurd.c                      |   2 +-
+ fs/ext4/xattr_security.c                  |   2 +-
+ fs/ext4/xattr_trusted.c                   |   2 +-
+ fs/ext4/xattr_user.c                      |   2 +-
+ fs/f2fs/acl.c                             |   6 +-
+ fs/f2fs/acl.h                             |   2 +-
+ fs/f2fs/f2fs.h                            |   8 +--
+ fs/f2fs/file.c                            |  14 ++--
+ fs/f2fs/namei.c                           |  24 +++----
+ fs/f2fs/xattr.c                           |   4 +-
+ fs/failfs.c                               |   4 +-
+ fs/fat/fat.h                              |   4 +-
+ fs/fat/file.c                             |   6 +-
+ fs/fat/namei_msdos.c                      |   6 +-
+ fs/fat/namei_vfat.c                       |   6 +-
+ fs/fhandle.c                              |   2 +-
+ fs/file_attr.c                            |   6 +-
+ fs/fuse/acl.c                             |   4 +-
+ fs/fuse/dir.c                             |  51 +++++++-------
+ fs/fuse/file.c                            |   2 +-
+ fs/fuse/fuse_i.h                          |  12 ++--
+ fs/fuse/ioctl.c                           |   2 +-
+ fs/fuse/req.c                             |   8 ++-
+ fs/fuse/xattr.c                           |   2 +-
+ fs/gfs2/acl.c                             |   2 +-
+ fs/gfs2/acl.h                             |   2 +-
+ fs/gfs2/file.c                            |   2 +-
+ fs/gfs2/inode.c                           |  16 ++---
+ fs/gfs2/inode.h                           |   4 +-
+ fs/gfs2/xattr.c                           |   2 +-
+ fs/hfs/attr.c                             |   2 +-
+ fs/hfs/dir.c                              |   6 +-
+ fs/hfs/hfs_fs.h                           |   2 +-
+ fs/hfs/inode.c                            |   2 +-
+ fs/hfsplus/dir.c                          |  10 +--
+ fs/hfsplus/hfsplus_fs.h                   |   4 +-
+ fs/hfsplus/inode.c                        |   6 +-
+ fs/hfsplus/xattr.c                        |   2 +-
+ fs/hfsplus/xattr_security.c               |   2 +-
+ fs/hfsplus/xattr_trusted.c                |   2 +-
+ fs/hfsplus/xattr_user.c                   |   2 +-
+ fs/hostfs/hostfs_kern.c                   |  14 ++--
+ fs/hpfs/hpfs_fn.h                         |   2 +-
+ fs/hpfs/inode.c                           |   2 +-
+ fs/hpfs/namei.c                           |  10 +--
+ fs/hugetlbfs/inode.c                      |  14 ++--
+ fs/inode.c                                |  12 ++--
+ fs/internal.h                             |  28 ++++----
+ fs/jffs2/acl.c                            |   2 +-
+ fs/jffs2/acl.h                            |   2 +-
+ fs/jffs2/dir.c                            |  20 +++---
+ fs/jffs2/fs.c                             |   2 +-
+ fs/jffs2/os-linux.h                       |   2 +-
+ fs/jffs2/security.c                       |   2 +-
+ fs/jffs2/xattr_trusted.c                  |   2 +-
+ fs/jffs2/xattr_user.c                     |   2 +-
+ fs/jfs/acl.c                              |   2 +-
+ fs/jfs/file.c                             |   2 +-
+ fs/jfs/ioctl.c                            |   2 +-
+ fs/jfs/jfs_acl.h                          |   2 +-
+ fs/jfs/jfs_inode.h                        |   4 +-
+ fs/jfs/namei.c                            |  10 +--
+ fs/jfs/xattr.c                            |   4 +-
+ fs/kernfs/dir.c                           |   4 +-
+ fs/kernfs/inode.c                         |  10 +--
+ fs/kernfs/kernfs-internal.h               |   6 +-
+ fs/libfs.c                                |   8 +--
+ fs/minix/file.c                           |   2 +-
+ fs/minix/inode.c                          |   2 +-
+ fs/minix/minix.h                          |   2 +-
+ fs/minix/namei.c                          |  12 ++--
+ fs/mnt_idmapping.c                        |  33 +++++----
+ fs/namei.c                                |  84 +++++++++++------------
+ fs/namespace.c                            |   8 +--
+ fs/nfs/dir.c                              |  12 ++--
+ fs/nfs/inode.c                            |   4 +-
+ fs/nfs/internal.h                         |  10 +--
+ fs/nfs/namespace.c                        |   4 +-
+ fs/nfs/nfs3_fs.h                          |   2 +-
+ fs/nfs/nfs3acl.c                          |   2 +-
+ fs/nfs/nfs4proc.c                         |  10 +--
+ fs/nilfs2/inode.c                         |   4 +-
+ fs/nilfs2/ioctl.c                         |   2 +-
+ fs/nilfs2/namei.c                         |  10 +--
+ fs/nilfs2/nilfs.h                         |   6 +-
+ fs/ntfs/ea.c                              |  10 +--
+ fs/ntfs/ea.h                              |   6 +-
+ fs/ntfs/file.c                            |   4 +-
+ fs/ntfs/inode.h                           |   4 +-
+ fs/ntfs/namei.c                           |  12 ++--
+ fs/ntfs3/file.c                           |   6 +-
+ fs/ntfs3/inode.c                          |   2 +-
+ fs/ntfs3/namei.c                          |  10 +--
+ fs/ntfs3/ntfs_fs.h                        |  16 ++---
+ fs/ntfs3/xattr.c                          |  12 ++--
+ fs/ocfs2/acl.c                            |   2 +-
+ fs/ocfs2/acl.h                            |   2 +-
+ fs/ocfs2/dlmfs/dlmfs.c                    |   6 +-
+ fs/ocfs2/file.c                           |   6 +-
+ fs/ocfs2/file.h                           |   6 +-
+ fs/ocfs2/ioctl.c                          |   2 +-
+ fs/ocfs2/ioctl.h                          |   2 +-
+ fs/ocfs2/namei.c                          |  10 +--
+ fs/ocfs2/xattr.c                          |   6 +-
+ fs/omfs/dir.c                             |   6 +-
+ fs/omfs/file.c                            |   2 +-
+ fs/open.c                                 |   6 +-
+ fs/orangefs/acl.c                         |   2 +-
+ fs/orangefs/inode.c                       |   8 +--
+ fs/orangefs/namei.c                       |   8 +--
+ fs/orangefs/orangefs-kernel.h             |   8 +--
+ fs/orangefs/xattr.c                       |   2 +-
+ fs/overlayfs/dir.c                        |  14 ++--
+ fs/overlayfs/file.c                       |   2 +-
+ fs/overlayfs/inode.c                      |  16 ++---
+ fs/overlayfs/overlayfs.h                  |  14 ++--
+ fs/overlayfs/ovl_entry.h                  |   2 +-
+ fs/overlayfs/util.c                       |   4 +-
+ fs/overlayfs/xattrs.c                     |   4 +-
+ fs/pidfs.c                                |   6 +-
+ fs/posix_acl.c                            |  26 +++----
+ fs/proc/base.c                            |  10 +--
+ fs/proc/fd.c                              |   6 +-
+ fs/proc/fd.h                              |   2 +-
+ fs/proc/generic.c                         |   4 +-
+ fs/proc/internal.h                        |   4 +-
+ fs/proc/proc_net.c                        |   2 +-
+ fs/proc/proc_sysctl.c                     |   6 +-
+ fs/proc/root.c                            |   2 +-
+ fs/quota/dquot.c                          |   2 +-
+ fs/ramfs/file-nommu.c                     |   4 +-
+ fs/ramfs/inode.c                          |  10 +--
+ fs/remap_range.c                          |   2 +-
+ fs/smb/client/cifsacl.c                   |   4 +-
+ fs/smb/client/cifsfs.c                    |   2 +-
+ fs/smb/client/cifsfs.h                    |  16 ++---
+ fs/smb/client/cifsproto.h                 |   4 +-
+ fs/smb/client/dir.c                       |   6 +-
+ fs/smb/client/inode.c                     |   8 +--
+ fs/smb/client/link.c                      |   2 +-
+ fs/smb/client/xattr.c                     |   2 +-
+ fs/smb/server/ndr.c                       |   2 +-
+ fs/smb/server/ndr.h                       |   2 +-
+ fs/smb/server/oplock.c                    |   2 +-
+ fs/smb/server/smb2pdu.c                   |  22 +++---
+ fs/smb/server/smb_common.c                |   2 +-
+ fs/smb/server/smbacl.c                    |  20 +++---
+ fs/smb/server/smbacl.h                    |   8 +--
+ fs/smb/server/vfs.c                       |  44 ++++++------
+ fs/smb/server/vfs.h                       |  28 ++++----
+ fs/stat.c                                 |   4 +-
+ fs/tracefs/event_inode.c                  |   2 +-
+ fs/tracefs/inode.c                        |   8 +--
+ fs/ubifs/dir.c                            |  14 ++--
+ fs/ubifs/file.c                           |   4 +-
+ fs/ubifs/ioctl.c                          |   2 +-
+ fs/ubifs/ubifs.h                          |   6 +-
+ fs/ubifs/xattr.c                          |   2 +-
+ fs/udf/file.c                             |   2 +-
+ fs/udf/namei.c                            |  12 ++--
+ fs/udf/symlink.c                          |   2 +-
+ fs/ufs/inode.c                            |   2 +-
+ fs/ufs/namei.c                            |  10 +--
+ fs/ufs/ufs.h                              |   2 +-
+ fs/vboxsf/dir.c                           |   8 +--
+ fs/vboxsf/utils.c                         |   4 +-
+ fs/vboxsf/vfsmod.h                        |   4 +-
+ fs/xattr.c                                |  30 ++++-----
+ fs/xfs/libxfs/xfs_inode_util.h            |   2 +-
+ fs/xfs/xfs_acl.c                          |   2 +-
+ fs/xfs/xfs_acl.h                          |   2 +-
+ fs/xfs/xfs_inode.c                        |   4 +-
+ fs/xfs/xfs_inode.h                        |   2 +-
+ fs/xfs/xfs_ioctl.c                        |   2 +-
+ fs/xfs/xfs_ioctl.h                        |   2 +-
+ fs/xfs/xfs_iops.c                         |  24 +++----
+ fs/xfs/xfs_iops.h                         |   2 +-
+ fs/xfs/xfs_itable.c                       |   2 +-
+ fs/xfs/xfs_itable.h                       |   2 +-
+ fs/xfs/xfs_symlink.c                      |   2 +-
+ fs/xfs/xfs_symlink.h                      |   2 +-
+ fs/xfs/xfs_xattr.c                        |   2 +-
+ fs/zonefs/super.c                         |   2 +-
+ include/linux/capability.h                |   8 +--
+ include/linux/fileattr.h                  |   2 +-
+ include/linux/fs.h                        | 108 +++++++++++++++---------------
+ include/linux/lsm_hook_defs.h             |  24 +++----
+ include/linux/mnt_idmapping.h             |  24 +++----
+ include/linux/mount.h                     |   4 +-
+ include/linux/namei.h                     |  16 ++---
+ include/linux/nfs_fs.h                    |   6 +-
+ include/linux/posix_acl.h                 |  24 +++----
+ include/linux/quotaops.h                  |   6 +-
+ include/linux/security.h                  |  54 +++++++--------
+ include/linux/uidgid.h                    |  12 ++--
+ include/linux/xattr.h                     |  20 +++---
+ ipc/mqueue.c                              |   2 +-
+ kernel/bpf/inode.c                        |   6 +-
+ kernel/capability.c                       |   4 +-
+ kernel/user_namespace.c                   |  28 ++++----
+ mm/secretmem.c                            |   2 +-
+ mm/shmem.c                                |  30 ++++-----
+ net/socket.c                              |   6 +-
+ net/unix/af_unix.c                        |   2 +-
+ security/apparmor/apparmorfs.c            |   2 +-
+ security/apparmor/lsm.c                   |   4 +-
+ security/commoncap.c                      |  10 +--
+ security/integrity/evm/evm_main.c         |  26 +++----
+ security/integrity/ima/ima.h              |  10 +--
+ security/integrity/ima/ima_api.c          |   2 +-
+ security/integrity/ima/ima_appraise.c     |  12 ++--
+ security/integrity/ima/ima_main.c         |   6 +-
+ security/integrity/ima/ima_policy.c       |   4 +-
+ security/security.c                       |  24 +++----
+ security/selinux/hooks.c                  |  14 ++--
+ security/selinux/selinuxfs.c              |   2 +-
+ security/smack/smack_lsm.c                |  14 ++--
+ virt/kvm/guest_memfd.c                    |   2 +-
+ 296 files changed, 1156 insertions(+), 1135 deletions(-)
+---
+base-commit: cee9395acd8043be0644b25c34bfa86623f2b935
+change-id: 20260901-work-idmap-const-bafb8e12a7fa
 
