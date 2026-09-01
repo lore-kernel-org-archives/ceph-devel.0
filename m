@@ -1,114 +1,233 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from sonic307-15.consmr.mail.ne1.yahoo.com (sonic307-15.consmr.mail.ne1.yahoo.com [66.163.190.38])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95D4147F76B;
-	Tue,  1 Sep 2026 12:16:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E548564
+	for <ceph-devel@vger.kernel.org>; Tue,  1 Sep 2026 16:04:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=66.163.190.38
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788265020; cv=none; b=dDk72a6Y7uFDUU9n3MmfOM1OGsPViE9A9zP8APXpeHavnzGUip1XYmE0BVw+eI94aUTZJ28ugyh97aPs6vSjQV+tyMfa0PDOkWFX6/FRs3U7Bp+UIQ+ZApJwJOKYeYgWlzWK3ovpbU9ptoukRT7sFX9WTKA5R8ZRM+XUaq2ImzY=
+	t=1788278644; cv=none; b=qUw7Bpaueb85DQYgQS4Q8QRCG2h55CBhZDGNnQAUKGCd9C/z2riDM8DypN/HSCbKpcb9Ya42g+yFvT5rrL0Cii3PP2fU5ZhWpRF8Qt98M8kAn2rbG/8FEQyeYKl9YBOERAAHKCFRGZdLWfBOaJLA4xs/Vc3bfOEXu3Lb5OxrSpw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788265020; c=relaxed/simple;
-	bh=F/j2NqH+w7TNV8U4wBjPBjnprw3X0ltqzP2LkSeZfIQ=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=fZdW2N26sQEJ1X8CHqNe72h6FubetyyWmjqf2nOwpOMo1kOYiJzGabMz9KdyFT+v8eZwSuv3D4UJeRF0pp/35KOhNY2E5wQwEgo/cWM8+PDT1VkbKMsdR/vlG3qPPk0TDcmwDAMhIJ/W9MrLUWVHg9dNj4GMLpLbRqxrWCdAXKs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O+9iSSna; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788278644; c=relaxed/simple;
+	bh=EIjyPnqw8QTTn+ydcMEjt0qRWEFtEg0Ql8NGv6CxEVA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=L0uRNHQFrdaqS5joZf4PNuGPdIj/msOsO0O6ctNAJEkzTtQ7uS+Y34DW5MSHKfvwsR0LIUQdxGE8QI2ySYdIwMRVTjHSSGAVT4XWqBfSpavfhg8aySdGRJV0CKETaBfOGHopMDdpM6JLMprQVaJ7+/j+0QqUyRu6FFHyINvDi4E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=schaufler-ca.com; spf=none smtp.mailfrom=schaufler-ca.com; dkim=pass (2048-bit key) header.d=yahoo.com header.i=@yahoo.com header.b=t7KRRm3X; arc=none smtp.client-ip=66.163.190.38
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=schaufler-ca.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=schaufler-ca.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O+9iSSna"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC7B91F00A3E;
-	Tue,  1 Sep 2026 12:16:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788265019;
-	bh=BcC4YMfM11/fGljBqSTApr2iuzA2VgR75nVP6J1Ns+U=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=O+9iSSnaLb98YWV2BOQGyoaOGowmVxpgGMBak8Z6FXI8QAR7yfBQ5hTcd+G6LrlP/
-	 2N3uSTb1RL6fK7rW1NtU3wJK5l6FTSj9oBbVOwMx7aXnUUQPjLMMe08l/XbxFMd1VD
-	 f3rwyXmzRQJ3l7F3WqTv5BlGcht151R7uj3RafMzmCarjjYPXasUe7GjmJhAkOfT0m
-	 MEv390o/4NJj05ivjF2QtHeqWE3XtLSIjeg3bWH8iqN9jr1gVQwnDGIt+K0MnnLYeZ
-	 Iz2uszihWkWFAaYqCp7I9mCCcvSp1xY4YZXkgTwQ6g35QIUgSG5GW9CSDbzMeWn5Fw
-	 ybQULS0u+cKZA==
-From: Christian Brauner <brauner@kernel.org>
-Date: Tue, 01 Sep 2026 14:14:52 +0200
-Subject: [PATCH 27/27] fs: make nop_mnt_idmap and invalid_mnt_idmap const
+	dkim=pass (2048-bit key) header.d=yahoo.com header.i=@yahoo.com header.b="t7KRRm3X"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1788278642; bh=gPh+X/iBiqRKhw1S4WGz1YTRGse+nCFpHEMx4R0LHRw=; h=Date:Subject:To:Cc:References:From:In-Reply-To:From:Subject:Reply-To; b=t7KRRm3XgCFkruxyYM9252tkPJec8OaaacuCvjp0MbbDwFcMv8lpQhNrR+pzoZSpglgiXtXyNx3bPAvkEJAOBoe55VoZDH7FRkClDdN8dF2qN2yuYpC+fD2klY6PTKOBc3By+LyxDnxCn00oMqyG3QWkjWJ51qVl/yk8hUqQ/ji2BWUKrJjvJZZwFQQtAdBYCvaIvJeb6+mvp9bVpc5lZHgu3cYIb/HSygHgIUl8siEqbR4fd1zs9JmGydVkSk4ig1B3Y9aPrzqgCldxEr0cjUX5rVwQaZ2Z8wg/At+OgtnxIhMKXbuR/QTw7XIWF64xqI7MYqVv/yUqqutIYEy6AA==
+X-SONIC-DKIM-SIGN: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1788278642; bh=pqDccrar8DLI34m6MU0BTM5E3Xuo5W9LNmKK1XsWnLw=; h=X-Sonic-MF:Date:Subject:To:From:From:Subject; b=ZpkpbZXs7PhoR7dCw2/OirGmoZN3T3cGXORF1NfRH0t+qTKXh2GLPREbSJucqFx/DHX4nKlordArGAc69VzRYRaarWsj/1CpvkPgPyXKi5BlOQZ53f6nTgpnnyj14Krpso9tsd93OLPos2u+Qw2EtXCdfSLY+8LV5qyH8d3ElhS3ZGuB4kunMAKMqGtcewwACRAvvWmvuj4UsZb8Ln1Rpff2BDsXa5hQcuukPPJTW++9Jvc/VQzAsfFahO4u2yBQndqZ6zaHIVlwwY8sE1kIXADmr/vM1kgf0UPj8N6ZBm8bUMWzNrBAyBxliwzPMQrwHv9iAgU1a3Fh8RacT7rfkA==
+X-YMail-OSG: BnRSzUsVM1l6DMJ0RcDbVkj8OA4EnfP5.zaF5Sy_6KG2J6a5XNB2nRUsOjT3ART
+ x5kLRUjxN7qI.IXN_GOJxUAxbDm4WQ1qWxDFpikbntvRnmDeeModNmJvEuDFj70nMxMVDCfR7i08
+ TLoHA1R6hIZ1LhwgEBJz6BXTQpcu137HEdLRqbU3iAMWdmdCgHN.jybBtQrF.C89oj3iXdcwq83U
+ kyDrUGwY2QAD56uB_yS9.v1b6lpsfgvy_wVq5Xl.XMcya.NblpqHct.74b_WgBLRj.n2g260Ze_5
+ MC6oHD9kLsWBzV7oNxexUIrvLvA2NSEWiiQVAEF5Dyw0J_p2gi34blnPWV1ffY2fr2.2ndZK5mCw
+ q8JZUkPybYawiAqbZMETn62xgxSJxqPLZriKVsh.Yur2GcbnN9rZY_BrvztvDaILL1w.poZ6QlwF
+ HHWdMVYN65I.NYExwdSzLBLVE_XCTXiFgVwWkHjUWiRUX1WAttlhY7x7O4pRzoFf7rDr5KUvjq5T
+ QFYbawEwONrjsddJQcutigmcwqUqQcYbsFsMPcGrG7uqKjThJvkpiyR9ZVvBcSQW7i.VmngJ09L3
+ zNPMqOW23l3jYUmLNJA9tdLGcCRY8qixdtT_dA_LF6khvJdag3IzZ0iJXOPiBVwoPqOpVzmSDK0K
+ rYXwTp56ucWKOEXaUx9qB5fKNpyhTVno69lmXRn586srKGKH9bcyQNuag15gmd4cQ_bwLRJpsebv
+ hrH9oshCVWTElz0zb3kh5ZTnkTH3F540Joo96iqkl4GF1jBVeoHTGqM93jXemH20j.XQzu7F1kjv
+ silAPMLu3nlfcOUZEuG6P6yeunGiFF8wT88ZXiNAvrO_eCWdV.BKTTl_GDY8Ki1_nhXYmMPNWTWL
+ L4WVgb9bg2GzAGgwe7O_YWw1lUPljGE_7kizgV86h5n6.AeO1GAta2FijW7JtM4CIp94IlvVt3_X
+ n2JoT.pEZXBK5T0805WWPzRfy0KT0RDYN2uYFdzPP3vo1mIWkiWPjfBSfdpa0P6T2p84k6QfmCkz
+ HPyi8EzuxmPrb0oXLYeiYnj9Wv99M29bnqSOdD_91vneq9YVbWF7Q6Ob8VIQf6f_em9BBLlclDi4
+ EXEc8pebwZ6v3bSF9hJIvWVd_1nwlDXudPKpTYbDy01lfwwMPxHqX4U7yo7jMXECMbWjiPC_EIei
+ 1rwJ6gZqwT_kXId0dQZTUuj7.NHXwISkRI5c77y.JwwNOrTopnjvAO50EPbmSmBYZ.Wm9.zbd7zz
+ 8mffN78xMRX437TWJmZsia5XHlwnD__SwtGTCFgLLDLqG0waLpdI5Gnjsk7PEsRhAB7b3weR_G4t
+ mFhIaY7iOjLIM44a1g_LCMSSyJWLGhnL1u9Qf2jhZLL5gJ_6IYVXHVRVfV9ziNetQXEm_8WaIrTT
+ tlixevJkEx6Dz..j6uh5NXC35zBpJbSM7StGjzdCZ6VVY86xr1QYX9Xm8BJhSQ7pkqx89uwC3CP0
+ .p1kR0Plgh_Gdiw1C.9uSEEfWllyoBISuzXgpocW6t8tN5S53NAmNWF18cQm.SZHhO3Ncak.CkAx
+ lo6eXKa52FjEofHF7ZRseScCLRHlnMH854MvxW05_v4OQqzn_dKcr.1mdNt1FlZvmNwoNCvKEhTr
+ GBc11oR5WIkXvaO1zclx6FmXGgDjPc.Ie266nDgGo_72clnHYHYUKf875KOPIW1AzvxAW7oCLKHe
+ 2ahfFP1DPqv5akZ1S14Gks6tf1x27QnHtgR7mdotq8XOFuwAZe7DpFOphuTtnOuu3rwpY5WAFfoO
+ 8trFKjtEC7u.3PTb_9.FyXwuzAcJdZp6xU1DxO1LCDc9QG1ccOvBHiFjpwSgUkohS1J3Mu_vnr1p
+ d5Wxy21YJJhYtS21aiCcV50vmBxj0jgvFg59llCpT3vN1pMaxf14PawfRh5PKiqRWhpad2vNXT4f
+ FKtJWRdyhVAaFVTSBsbPot7S9XzzRgEInkTcl.vBKUhn9jtA8ADT7YWT9zvV1foYbKik0_X_dnYJ
+ 7ckBVPo6fIx2.7eqgJZ8JOsUBOfYNp5C6Cd2io8btrpEiGP8XXEIXv8lNiMIuiZrcm841JUkmksG
+ DyK0xgr3MeyHSybaP_Fys7Nltg.EIr4Q0v4309l60Yib91EEQ7awW7xjVpdcnBZw1bekGO9PBACm
+ HJtn0fGSUS3U9JB.nlXkq9a.8PxosWl9UkcaGzsm98E_rYsjhEt3dLJIH0eSlHBj8M9ednNL0JvJ
+ WkoKD3FJpOYf25tly81HBtlpU0e0sVW1fbNJ3xF70RJgzlCrypYY0bHfiaif786dAoWYR1oDy_Pd
+ SPBHQbxcB6yTNOQ--
+X-Sonic-MF: <casey@schaufler-ca.com>
+X-Sonic-ID: ae5512ae-c89c-4588-a92d-d5c736d4192f
+Received: from sonic.gate.mail.ne1.yahoo.com by sonic307.consmr.mail.ne1.yahoo.com with HTTP; Tue, 1 Sep 2026 16:04:02 +0000
+Received: by hermes--production-gq1-678d9dd684-mxdfs (Yahoo Inc. Hermes SMTP Server) with ESMTPA ID 7bb86a24437c43194baefa3abed212e3;
+          Tue, 01 Sep 2026 15:53:44 +0000 (UTC)
+Message-ID: <d3656927-c39d-421f-8baa-f04c8d4eeff3@schaufler-ca.com>
+Date: Tue, 1 Sep 2026 08:53:42 -0700
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260901-work-idmap-const-v1-27-54ccd48e100b@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 24/27] fs: port ->setattr() to pass const mnt_idmap
+To: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>,
+ Christoph Hellwig <hch@lst.de>, Seth Forshee <sforshee@kernel.org>,
+ Paul Moore <paul@paul-moore.com>, linux-security-module@vger.kernel.org,
+ Mimi Zohar <zohar@linux.ibm.com>, linux-integrity@vger.kernel.org,
+ Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
+ Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org,
+ Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>,
+ linux-unionfs@vger.kernel.org, Namjae Jeon <linkinjeon@kernel.org>,
+ linux-cifs@vger.kernel.org, linux-kernel@vger.kernel.org,
+ Casey Schaufler <casey@schaufler-ca.com>
 References: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
-In-Reply-To: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
-To: linux-fsdevel@vger.kernel.org
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>, 
- Christoph Hellwig <hch@lst.de>, Seth Forshee <sforshee@kernel.org>, 
- Paul Moore <paul@paul-moore.com>, linux-security-module@vger.kernel.org, 
- Mimi Zohar <zohar@linux.ibm.com>, linux-integrity@vger.kernel.org, 
- Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, 
- Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org, 
- Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>, 
- linux-unionfs@vger.kernel.org, Namjae Jeon <linkinjeon@kernel.org>, 
- linux-cifs@vger.kernel.org, linux-kernel@vger.kernel.org, 
- "Christian Brauner (Amutable)" <brauner@kernel.org>
-X-Mailer: b4 0.17-dev-db0b7
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1731; i=brauner@kernel.org;
- h=from:subject:message-id; bh=F/j2NqH+w7TNV8U4wBjPBjnprw3X0ltqzP2LkSeZfIQ=;
- b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWRNO7juuASHSvjdD2vZN/1wK1Q8PP2K8SIPF4Nds+KrQ
- tZn6yupdZSyMIhxMciKKbI4tJuEyy3nqdhslKkBM4eVCWQIAxenAEzkwDGGP1yn3TyV2B+5WR/7
- OGsWf21se1dQxD6NlxOZboaqhcUFA1Xwv3b+1lLjefzIN8fv0XP3d2wuslt8guU/o9nzRLPE4j2
- MAA==
-X-Developer-Key: i=brauner@kernel.org; a=openpgp;
- fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+ <20260901-work-idmap-const-v1-24-54ccd48e100b@kernel.org>
+Content-Language: en-US
+From: Casey Schaufler <casey@schaufler-ca.com>
+In-Reply-To: <20260901-work-idmap-const-v1-24-54ccd48e100b@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Mailer: WebService/1.1.26380 mail.backend.jedi.jws.acl:role.jedi.acl.token.atz.jws.hermes.yahoo
 
-Make both static maps const so they end up in rodata. Any attempt to
-modify them now faults instead of silently corrupting the initial
-idmapping.
+On 9/1/2026 5:14 AM, Christian Brauner wrote:
+> Convert to const struct mnt_idmap.
+>
+> A mount's idmapping is immutable. The only thing that is allowed to be
+> modified afterwards is the reference count and that is hidden behind
+> mnt_idmap_get() and mnt_idmap_put(). Everything else only ever reads
+> from the idmapping. This is the same model that struct cred uses and the
+> idmapping is also rather sensitive.
+>
+> So make the idmap argument const wherever we can. The conversion is done
+> from the bottom up so callers can continue to pass a non-const pointer
+> to a const parameter until the conversion is finished.
+>
+> No functional changes.
+>
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+> ---
+>  Documentation/filesystems/locking.rst     | 2 +-
+>  Documentation/filesystems/vfs.rst         | 2 +-
+>  arch/powerpc/platforms/cell/spufs/inode.c | 2 +-
+>  fs/9p/v9fs_vfs.h                          | 2 +-
+>  fs/9p/vfs_inode.c                         | 2 +-
+>  fs/9p/vfs_inode_dotl.c                    | 2 +-
+>  fs/adfs/adfs.h                            | 2 +-
+>  fs/adfs/inode.c                           | 2 +-
+>  fs/affs/affs.h                            | 2 +-
+>  fs/affs/inode.c                           | 2 +-
+>  fs/afs/inode.c                            | 2 +-
+>  fs/afs/internal.h                         | 2 +-
+>  fs/anon_inodes.c                          | 2 +-
+>  fs/attr.c                                 | 2 +-
+>  fs/bad_inode.c                            | 2 +-
+>  fs/btrfs/inode.c                          | 2 +-
+>  fs/ceph/inode.c                           | 2 +-
+>  fs/ceph/super.h                           | 2 +-
+>  fs/coda/coda_linux.h                      | 2 +-
+>  fs/coda/inode.c                           | 2 +-
+>  fs/configfs/configfs_internal.h           | 2 +-
+>  fs/configfs/inode.c                       | 2 +-
+>  fs/debugfs/inode.c                        | 2 +-
+>  fs/ecryptfs/inode.c                       | 2 +-
+>  fs/efivarfs/inode.c                       | 2 +-
+>  fs/exfat/exfat_fs.h                       | 2 +-
+>  fs/exfat/file.c                           | 2 +-
+>  fs/ext2/ext2.h                            | 2 +-
+>  fs/ext2/inode.c                           | 2 +-
+>  fs/ext4/ext4.h                            | 2 +-
+>  fs/ext4/inode.c                           | 2 +-
+>  fs/f2fs/f2fs.h                            | 2 +-
+>  fs/f2fs/file.c                            | 2 +-
+>  fs/fat/fat.h                              | 2 +-
+>  fs/fat/file.c                             | 2 +-
+>  fs/fuse/dir.c                             | 2 +-
+>  fs/gfs2/inode.c                           | 2 +-
+>  fs/hfs/hfs_fs.h                           | 2 +-
+>  fs/hfs/inode.c                            | 2 +-
+>  fs/hfsplus/inode.c                        | 2 +-
+>  fs/hostfs/hostfs_kern.c                   | 2 +-
+>  fs/hpfs/hpfs_fn.h                         | 2 +-
+>  fs/hpfs/inode.c                           | 2 +-
+>  fs/hugetlbfs/inode.c                      | 2 +-
+>  fs/inode.c                                | 2 +-
+>  fs/internal.h                             | 2 +-
+>  fs/jffs2/fs.c                             | 2 +-
+>  fs/jffs2/os-linux.h                       | 2 +-
+>  fs/jfs/file.c                             | 2 +-
+>  fs/jfs/jfs_inode.h                        | 2 +-
+>  fs/kernfs/inode.c                         | 2 +-
+>  fs/kernfs/kernfs-internal.h               | 2 +-
+>  fs/libfs.c                                | 4 ++--
+>  fs/minix/file.c                           | 2 +-
+>  fs/nfs/inode.c                            | 2 +-
+>  fs/nfs/namespace.c                        | 2 +-
+>  fs/nilfs2/inode.c                         | 2 +-
+>  fs/nilfs2/nilfs.h                         | 2 +-
+>  fs/ntfs/file.c                            | 2 +-
+>  fs/ntfs/inode.h                           | 2 +-
+>  fs/ntfs3/file.c                           | 2 +-
+>  fs/ntfs3/ntfs_fs.h                        | 2 +-
+>  fs/ocfs2/dlmfs/dlmfs.c                    | 2 +-
+>  fs/ocfs2/file.c                           | 2 +-
+>  fs/ocfs2/file.h                           | 2 +-
+>  fs/omfs/file.c                            | 2 +-
+>  fs/orangefs/inode.c                       | 2 +-
+>  fs/orangefs/orangefs-kernel.h             | 2 +-
+>  fs/overlayfs/inode.c                      | 2 +-
+>  fs/overlayfs/overlayfs.h                  | 2 +-
+>  fs/pidfs.c                                | 2 +-
+>  fs/proc/base.c                            | 2 +-
+>  fs/proc/generic.c                         | 2 +-
+>  fs/proc/internal.h                        | 2 +-
+>  fs/proc/proc_sysctl.c                     | 2 +-
+>  fs/ramfs/file-nommu.c                     | 4 ++--
+>  fs/smb/client/cifsfs.h                    | 2 +-
+>  fs/smb/client/inode.c                     | 2 +-
+>  fs/tracefs/event_inode.c                  | 2 +-
+>  fs/tracefs/inode.c                        | 2 +-
+>  fs/ubifs/file.c                           | 2 +-
+>  fs/ubifs/ubifs.h                          | 2 +-
+>  fs/udf/file.c                             | 2 +-
+>  fs/ufs/inode.c                            | 2 +-
+>  fs/ufs/ufs.h                              | 2 +-
+>  fs/vboxsf/utils.c                         | 2 +-
+>  fs/vboxsf/vfsmod.h                        | 2 +-
+>  fs/xfs/xfs_iops.c                         | 2 +-
+>  fs/zonefs/super.c                         | 2 +-
+>  include/linux/fs.h                        | 6 +++---
+>  include/linux/lsm_hook_defs.h             | 4 ++--
+>  include/linux/nfs_fs.h                    | 2 +-
+>  include/linux/security.h                  | 8 ++++----
+>  mm/secretmem.c                            | 2 +-
+>  mm/shmem.c                                | 2 +-
+>  net/socket.c                              | 2 +-
+>  security/integrity/evm/evm_main.c         | 4 ++--
+>  security/integrity/ima/ima_appraise.c     | 2 +-
+>  security/security.c                       | 4 ++--
+>  security/selinux/hooks.c                  | 2 +-
+>  security/smack/smack_lsm.c                | 2 +-
+>  virt/kvm/guest_memfd.c                    | 2 +-
+>  102 files changed, 112 insertions(+), 112 deletions(-)
 
-Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
----
- fs/mnt_idmapping.c            | 4 ++--
- include/linux/mnt_idmapping.h | 4 ++--
- 2 files changed, 4 insertions(+), 4 deletions(-)
+...
 
-diff --git a/fs/mnt_idmapping.c b/fs/mnt_idmapping.c
-index 26704eeb7318..bed57094cef0 100644
---- a/fs/mnt_idmapping.c
-+++ b/fs/mnt_idmapping.c
-@@ -28,7 +28,7 @@ struct mnt_idmap {
-  * mapping. This means that {g,u}id 0 is mapped to {g,u}id 0, {g,u}id 1 is
-  * mapped to {g,u}id 1, [...], {g,u}id 1000 to {g,u}id 1000, [...].
-  */
--struct mnt_idmap nop_mnt_idmap = {
-+const struct mnt_idmap nop_mnt_idmap = {
- 	.count	= REFCOUNT_INIT(1),
- };
- EXPORT_SYMBOL_GPL(nop_mnt_idmap);
-@@ -37,7 +37,7 @@ EXPORT_SYMBOL_GPL(nop_mnt_idmap);
-  * Carries the invalid idmapping of a full 0-4294967295 {g,u}id range.
-  * This means that all {g,u}ids are mapped to INVALID_VFS{G,U}ID.
-  */
--struct mnt_idmap invalid_mnt_idmap = {
-+const struct mnt_idmap invalid_mnt_idmap = {
- 	.count	= REFCOUNT_INIT(1),
- };
- EXPORT_SYMBOL_GPL(invalid_mnt_idmap);
-diff --git a/include/linux/mnt_idmapping.h b/include/linux/mnt_idmapping.h
-index b445c7660040..78eeef4c2996 100644
---- a/include/linux/mnt_idmapping.h
-+++ b/include/linux/mnt_idmapping.h
-@@ -8,8 +8,8 @@
- struct mnt_idmap;
- struct user_namespace;
- 
--extern struct mnt_idmap nop_mnt_idmap;
--extern struct mnt_idmap invalid_mnt_idmap;
-+extern const struct mnt_idmap nop_mnt_idmap;
-+extern const struct mnt_idmap invalid_mnt_idmap;
- extern struct user_namespace init_user_ns;
- 
- typedef struct {
 
--- 
-2.53.0
+> diff --git a/security/smack/smack_lsm.c b/security/smack/smack_lsm.c
+> index df4fc6ff26aa..bb78569b3d5b 100644
+> --- a/security/smack/smack_lsm.c
+> +++ b/security/smack/smack_lsm.c
+> @@ -1270,7 +1270,7 @@ static int smack_inode_permission(struct inode *inode, int mask)
+>   *
+>   * Returns 0 if access is permitted, an error code otherwise
+>   */
+> -static int smack_inode_setattr(struct mnt_idmap *idmap, struct dentry *dentry,
+> +static int smack_inode_setattr(const struct mnt_idmap *idmap, struct dentry *dentry,
+>  			       struct iattr *iattr)
 
+Please keep to 80 columns.
+
++static int smack_inode_setattr(const struct mnt_idmap *idmap,
++				struct dentry *dentry, struct iattr *iattr)
+
+Note that the above may get whitespace mangled.
+
+>  {
+>  	struct smk_audit_info ad;
+>
