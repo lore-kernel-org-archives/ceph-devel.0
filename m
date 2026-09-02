@@ -1,233 +1,161 @@
-Received: from sonic307-15.consmr.mail.ne1.yahoo.com (sonic307-15.consmr.mail.ne1.yahoo.com [66.163.190.38])
+Received: from mail-vk1-f174.google.com (mail-vk1-f174.google.com [209.85.221.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E548564
-	for <ceph-devel@vger.kernel.org>; Tue,  1 Sep 2026 16:04:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=66.163.190.38
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788278644; cv=none; b=qUw7Bpaueb85DQYgQS4Q8QRCG2h55CBhZDGNnQAUKGCd9C/z2riDM8DypN/HSCbKpcb9Ya42g+yFvT5rrL0Cii3PP2fU5ZhWpRF8Qt98M8kAn2rbG/8FEQyeYKl9YBOERAAHKCFRGZdLWfBOaJLA4xs/Vc3bfOEXu3Lb5OxrSpw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788278644; c=relaxed/simple;
-	bh=EIjyPnqw8QTTn+ydcMEjt0qRWEFtEg0Ql8NGv6CxEVA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=L0uRNHQFrdaqS5joZf4PNuGPdIj/msOsO0O6ctNAJEkzTtQ7uS+Y34DW5MSHKfvwsR0LIUQdxGE8QI2ySYdIwMRVTjHSSGAVT4XWqBfSpavfhg8aySdGRJV0CKETaBfOGHopMDdpM6JLMprQVaJ7+/j+0QqUyRu6FFHyINvDi4E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=schaufler-ca.com; spf=none smtp.mailfrom=schaufler-ca.com; dkim=pass (2048-bit key) header.d=yahoo.com header.i=@yahoo.com header.b=t7KRRm3X; arc=none smtp.client-ip=66.163.190.38
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=schaufler-ca.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=schaufler-ca.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCCFD42FCAF
+	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2026 10:07:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.174
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788343646; cv=pass; b=RdiKwNbsQBHgSZX/teB0LPq+CwmfkZELjs/JhGchGB0lknOr/WhXzC70FXNOg1KI/Q84CJMWeZ9U5stc3pc8LvTbqpmYwLPg8B3fTGBXzvUEu0WUks4FU0lWa9XlFguAkY3yYztG3OHqUOAyPwWkPoKYXrAHyL8q1raHCTqQQBA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788343646; c=relaxed/simple;
+	bh=1xa+lElD+YJMoo2jLjMuafTdhcpMKsbzXGbVsD/2zXI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ByodvE/VU16cMdblL0jJ3PRnz+VUT6XztWQdJ84nclU/Ojm4szzgyxjmBi8LxLW6pKoaG2lhj3jEjiV020G96PdA8nQRiWbD3poqVyFH4gJD5LiubGT8diJwOUJYcVZGoxeY9DZCIuDjFP1D4oQimvIHUQgMDoj3ReZA8rZTBK0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GGe9ZU8D; arc=pass smtp.client-ip=209.85.221.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=yahoo.com header.i=@yahoo.com header.b="t7KRRm3X"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1788278642; bh=gPh+X/iBiqRKhw1S4WGz1YTRGse+nCFpHEMx4R0LHRw=; h=Date:Subject:To:Cc:References:From:In-Reply-To:From:Subject:Reply-To; b=t7KRRm3XgCFkruxyYM9252tkPJec8OaaacuCvjp0MbbDwFcMv8lpQhNrR+pzoZSpglgiXtXyNx3bPAvkEJAOBoe55VoZDH7FRkClDdN8dF2qN2yuYpC+fD2klY6PTKOBc3By+LyxDnxCn00oMqyG3QWkjWJ51qVl/yk8hUqQ/ji2BWUKrJjvJZZwFQQtAdBYCvaIvJeb6+mvp9bVpc5lZHgu3cYIb/HSygHgIUl8siEqbR4fd1zs9JmGydVkSk4ig1B3Y9aPrzqgCldxEr0cjUX5rVwQaZ2Z8wg/At+OgtnxIhMKXbuR/QTw7XIWF64xqI7MYqVv/yUqqutIYEy6AA==
-X-SONIC-DKIM-SIGN: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1788278642; bh=pqDccrar8DLI34m6MU0BTM5E3Xuo5W9LNmKK1XsWnLw=; h=X-Sonic-MF:Date:Subject:To:From:From:Subject; b=ZpkpbZXs7PhoR7dCw2/OirGmoZN3T3cGXORF1NfRH0t+qTKXh2GLPREbSJucqFx/DHX4nKlordArGAc69VzRYRaarWsj/1CpvkPgPyXKi5BlOQZ53f6nTgpnnyj14Krpso9tsd93OLPos2u+Qw2EtXCdfSLY+8LV5qyH8d3ElhS3ZGuB4kunMAKMqGtcewwACRAvvWmvuj4UsZb8Ln1Rpff2BDsXa5hQcuukPPJTW++9Jvc/VQzAsfFahO4u2yBQndqZ6zaHIVlwwY8sE1kIXADmr/vM1kgf0UPj8N6ZBm8bUMWzNrBAyBxliwzPMQrwHv9iAgU1a3Fh8RacT7rfkA==
-X-YMail-OSG: BnRSzUsVM1l6DMJ0RcDbVkj8OA4EnfP5.zaF5Sy_6KG2J6a5XNB2nRUsOjT3ART
- x5kLRUjxN7qI.IXN_GOJxUAxbDm4WQ1qWxDFpikbntvRnmDeeModNmJvEuDFj70nMxMVDCfR7i08
- TLoHA1R6hIZ1LhwgEBJz6BXTQpcu137HEdLRqbU3iAMWdmdCgHN.jybBtQrF.C89oj3iXdcwq83U
- kyDrUGwY2QAD56uB_yS9.v1b6lpsfgvy_wVq5Xl.XMcya.NblpqHct.74b_WgBLRj.n2g260Ze_5
- MC6oHD9kLsWBzV7oNxexUIrvLvA2NSEWiiQVAEF5Dyw0J_p2gi34blnPWV1ffY2fr2.2ndZK5mCw
- q8JZUkPybYawiAqbZMETn62xgxSJxqPLZriKVsh.Yur2GcbnN9rZY_BrvztvDaILL1w.poZ6QlwF
- HHWdMVYN65I.NYExwdSzLBLVE_XCTXiFgVwWkHjUWiRUX1WAttlhY7x7O4pRzoFf7rDr5KUvjq5T
- QFYbawEwONrjsddJQcutigmcwqUqQcYbsFsMPcGrG7uqKjThJvkpiyR9ZVvBcSQW7i.VmngJ09L3
- zNPMqOW23l3jYUmLNJA9tdLGcCRY8qixdtT_dA_LF6khvJdag3IzZ0iJXOPiBVwoPqOpVzmSDK0K
- rYXwTp56ucWKOEXaUx9qB5fKNpyhTVno69lmXRn586srKGKH9bcyQNuag15gmd4cQ_bwLRJpsebv
- hrH9oshCVWTElz0zb3kh5ZTnkTH3F540Joo96iqkl4GF1jBVeoHTGqM93jXemH20j.XQzu7F1kjv
- silAPMLu3nlfcOUZEuG6P6yeunGiFF8wT88ZXiNAvrO_eCWdV.BKTTl_GDY8Ki1_nhXYmMPNWTWL
- L4WVgb9bg2GzAGgwe7O_YWw1lUPljGE_7kizgV86h5n6.AeO1GAta2FijW7JtM4CIp94IlvVt3_X
- n2JoT.pEZXBK5T0805WWPzRfy0KT0RDYN2uYFdzPP3vo1mIWkiWPjfBSfdpa0P6T2p84k6QfmCkz
- HPyi8EzuxmPrb0oXLYeiYnj9Wv99M29bnqSOdD_91vneq9YVbWF7Q6Ob8VIQf6f_em9BBLlclDi4
- EXEc8pebwZ6v3bSF9hJIvWVd_1nwlDXudPKpTYbDy01lfwwMPxHqX4U7yo7jMXECMbWjiPC_EIei
- 1rwJ6gZqwT_kXId0dQZTUuj7.NHXwISkRI5c77y.JwwNOrTopnjvAO50EPbmSmBYZ.Wm9.zbd7zz
- 8mffN78xMRX437TWJmZsia5XHlwnD__SwtGTCFgLLDLqG0waLpdI5Gnjsk7PEsRhAB7b3weR_G4t
- mFhIaY7iOjLIM44a1g_LCMSSyJWLGhnL1u9Qf2jhZLL5gJ_6IYVXHVRVfV9ziNetQXEm_8WaIrTT
- tlixevJkEx6Dz..j6uh5NXC35zBpJbSM7StGjzdCZ6VVY86xr1QYX9Xm8BJhSQ7pkqx89uwC3CP0
- .p1kR0Plgh_Gdiw1C.9uSEEfWllyoBISuzXgpocW6t8tN5S53NAmNWF18cQm.SZHhO3Ncak.CkAx
- lo6eXKa52FjEofHF7ZRseScCLRHlnMH854MvxW05_v4OQqzn_dKcr.1mdNt1FlZvmNwoNCvKEhTr
- GBc11oR5WIkXvaO1zclx6FmXGgDjPc.Ie266nDgGo_72clnHYHYUKf875KOPIW1AzvxAW7oCLKHe
- 2ahfFP1DPqv5akZ1S14Gks6tf1x27QnHtgR7mdotq8XOFuwAZe7DpFOphuTtnOuu3rwpY5WAFfoO
- 8trFKjtEC7u.3PTb_9.FyXwuzAcJdZp6xU1DxO1LCDc9QG1ccOvBHiFjpwSgUkohS1J3Mu_vnr1p
- d5Wxy21YJJhYtS21aiCcV50vmBxj0jgvFg59llCpT3vN1pMaxf14PawfRh5PKiqRWhpad2vNXT4f
- FKtJWRdyhVAaFVTSBsbPot7S9XzzRgEInkTcl.vBKUhn9jtA8ADT7YWT9zvV1foYbKik0_X_dnYJ
- 7ckBVPo6fIx2.7eqgJZ8JOsUBOfYNp5C6Cd2io8btrpEiGP8XXEIXv8lNiMIuiZrcm841JUkmksG
- DyK0xgr3MeyHSybaP_Fys7Nltg.EIr4Q0v4309l60Yib91EEQ7awW7xjVpdcnBZw1bekGO9PBACm
- HJtn0fGSUS3U9JB.nlXkq9a.8PxosWl9UkcaGzsm98E_rYsjhEt3dLJIH0eSlHBj8M9ednNL0JvJ
- WkoKD3FJpOYf25tly81HBtlpU0e0sVW1fbNJ3xF70RJgzlCrypYY0bHfiaif786dAoWYR1oDy_Pd
- SPBHQbxcB6yTNOQ--
-X-Sonic-MF: <casey@schaufler-ca.com>
-X-Sonic-ID: ae5512ae-c89c-4588-a92d-d5c736d4192f
-Received: from sonic.gate.mail.ne1.yahoo.com by sonic307.consmr.mail.ne1.yahoo.com with HTTP; Tue, 1 Sep 2026 16:04:02 +0000
-Received: by hermes--production-gq1-678d9dd684-mxdfs (Yahoo Inc. Hermes SMTP Server) with ESMTPA ID 7bb86a24437c43194baefa3abed212e3;
-          Tue, 01 Sep 2026 15:53:44 +0000 (UTC)
-Message-ID: <d3656927-c39d-421f-8baa-f04c8d4eeff3@schaufler-ca.com>
-Date: Tue, 1 Sep 2026 08:53:42 -0700
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GGe9ZU8D"
+Received: by mail-vk1-f174.google.com with SMTP id 71dfb90a1353d-5c2ae02f69eso809447e0c.2
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 03:07:24 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788343643; cv=none;
+        d=google.com; s=arc-20260327;
+        b=HQ/VNO+nVbfE5zGOlSQk9ih3TfLD7AtMByloYIccpfHm/Q96wTXutnKcL6O34wfye0
+         yiuVdeKrHJ8mJptMhqeiu88RwK3ALzMXg6Z+uoRPZUFZ/Epl8dr0UZhE6c3n7hKbvMnv
+         Pqq7lTOQvpC2ih6/43lDJIpFjwFBKd7AZyn35mssaFNJEGb8Sty9ucqjj1nDxi/ReIHm
+         Xu+aGcfIug4flWNV4bfZNHy0px4tzjFzmpHpB6upM33pFSo41K+u4LaJ8TtKvG9qPS0K
+         79aM/7skHA+kus5ODMDGXFxKOiSuW26MGSl1+fwKdCemiN4KjQb5f3Yx3dOpq5hJh1ZH
+         xwZQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=LtaXRwU7EmfoNAd9qDxh30eMQcuF5WCOAQg3rtox4ZA=;
+        fh=H40w+CpaVwwR2VEJJP5WVXUwKUA27aLcaEzQEVpB1Gw=;
+        b=IiuYOm1jaq6qw2ODjXXaVFiSGaIQxcxbncrQjkICO9JLGWm22Kgi6H3K2FnHkml30s
+         PfFWnjy11EN9uZ3VBmKmgoHDpnK5N2RtMIXO9PcEaumaQSczxHErblVHkMi5f5QtreDv
+         b4xzix+Fj0xraj7bdV1JoIf7mtjKbjZq7Sy9ws7nxnsSTcCWUzDS66cSJKuBPnOfl9LX
+         Rn740Vl/gpSOE0Pbxr1DnQ+hyxdyN0R63hzDzle5AcyB0r/e/kzKHK47GzVnVcNlkOBv
+         UYh+Wnk/23BInmsOEiMGB+E5usonz8tPbP2IyOeQQmkTaLkRf8y3gIV/ruLr3V2z2Fav
+         xMHQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1788343643; x=1788948443; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=LtaXRwU7EmfoNAd9qDxh30eMQcuF5WCOAQg3rtox4ZA=;
+        b=GGe9ZU8Dc94fA77fMlFhyZI9JnoyD41q5AUAEQK0ULWLO+bGGfIxwH4OlMF2ZLjQXU
+         WgW8W9yRNY93POrTBOtK47UMgEDuZPj0oitr3Ww6a2Jo8069gAyqTSdl2B4s1sCsHD7A
+         mt44zKg4NJsm/jlF8sXWsS1IXTTwwpFiiye0B6BQ1XocPMAZyuk1qQexUvmZwyKT8PQJ
+         G0FpG1UwlWGUq0soz3yj2PPNquv8MD4BJiXFRQnUrZcSPBCQyuaSvo1XZuQy71KUaolc
+         yHhvsRKxx9tSlTYk5lsvjW9s9fkU1Lim3KaFazS+jMF4ufXF5RCrqvvo/uFxgw/2Ah/c
+         eaaw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788343643; x=1788948443;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=LtaXRwU7EmfoNAd9qDxh30eMQcuF5WCOAQg3rtox4ZA=;
+        b=MeCUDqZBYYxmH+1JaZhEtsREhKuP5W14QPXQ3RMU7+m4HmTlCL84c9SPiu+THpJmxu
+         HvYa/bLimZHX8NAkf60GFLspreQNujTU3FPoRvF+Ap2cOJc10pHxuqvHB4U1s71VAL5k
+         Yrlm7Y/+7Z6fSrOdcy4VTJkTKqsfv0o6xennl/ZtUFb8uE0zKEWLpomv1aYyS1h8y0sd
+         Ds8RBTLYmgbBVL8qg8tJAWu3kuOwVhtUrrjyaNDNCXHio5OZKM98GUAA/oahG9uOT6aY
+         NFgi4oAF+9R+vI0a17/p6BTs9V/r9/p8gGIe98nACxmrHoLQP5io5GlMwGtisKbXGRiA
+         C/JQ==
+X-Forwarded-Encrypted: i=1; AKwUvBxOMA8ZgjOT+G0AbNQgJwyHB+KcZF45ZxNxLKU1hUNRwAsdgFLb0Q4UdNg/3DslBzWekFCQaecdm1+x@vger.kernel.org
+X-Gm-Message-State: AFuF++m9p8UCId9cQyja6PWzsHa/7EfWZV3nUTSPRrXRhirvDzYBzRu8
+	vU2e5zuq93ewrZXRVbRQrjAOmyr6lgL3bhJy1BSNwtmntLtBUShB+xRmp33w1snyxlnEXtrZSEj
+	2w7HCUsNLS7QTblmn2cJtTxCETWAO5AY=
+X-Gm-Gg: AYBFou0smh4MYqVWwxWpjZxinPQN0m9Et1l5vBCQ/LlSvb3VK5ilpgjQlFsnRrhQ4od
+	8OdxoB9DZyAwshAoeSUion2UtgCOI5oQ7C39AD7GTxPWDbLTzOm65LDKOH/QQbaYcCbEInwe8x4
+	EN+nLvJPjq7wu8k5CtYgkiC5Qo8FPdKHBNBpYgFu+2XJNoFG/Jlu/r4JZbcrwirIEf2dkVH6LUz
+	stHckpbotG/mG84Ce4oYnOHE6OYHCdST/eWaYDD52d3PYt6etSsX3gRBk8aTUphJ5/TYU2Fr1z5
+	IBh3bTkVmSWQbCI8M7yo736X0iWJFOUp+5ob6JZ501IF5byjLaWomUSzUp6eNq1L/vg+REiV1iV
+	T9U4o8oAmcM6VWA==
+X-Received: by 2002:a05:6102:2d0e:b0:784:b9ec:913d with SMTP id
+ ada2fe7eead31-78a1f364141mr1279608137.8.1788343643602; Wed, 02 Sep 2026
+ 03:07:23 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 24/27] fs: port ->setattr() to pass const mnt_idmap
-To: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>,
- Christoph Hellwig <hch@lst.de>, Seth Forshee <sforshee@kernel.org>,
- Paul Moore <paul@paul-moore.com>, linux-security-module@vger.kernel.org,
- Mimi Zohar <zohar@linux.ibm.com>, linux-integrity@vger.kernel.org,
- Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
- Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org,
- Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>,
- linux-unionfs@vger.kernel.org, Namjae Jeon <linkinjeon@kernel.org>,
- linux-cifs@vger.kernel.org, linux-kernel@vger.kernel.org,
- Casey Schaufler <casey@schaufler-ca.com>
-References: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
- <20260901-work-idmap-const-v1-24-54ccd48e100b@kernel.org>
-Content-Language: en-US
-From: Casey Schaufler <casey@schaufler-ca.com>
-In-Reply-To: <20260901-work-idmap-const-v1-24-54ccd48e100b@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Mailer: WebService/1.1.26380 mail.backend.jedi.jws.acl:role.jedi.acl.token.atz.jws.hermes.yahoo
+References: <20260825-ceph-msgr-writeback-v2-1-840ef541b0c2@columbia.edu>
+In-Reply-To: <20260825-ceph-msgr-writeback-v2-1-840ef541b0c2@columbia.edu>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Wed, 2 Sep 2026 12:07:10 +0200
+X-Gm-Features: AcwNN1WAleROut0sEKdtlOPPnJNCWxFi5LIaqqirKxexZnt_ltqakLRjMrs_NzQ
+Message-ID: <CAOi1vP-ObFuVcD9OJW2aeguZ0pUYQZf3pF2L9KxXQ3wKpHgNEQ@mail.gmail.com>
+Subject: Re: [PATCH v2] libceph: remove pinning assertion in ceph_msg_data_iter_next()
+To: Tal Zussman <tz2294@columbia.edu>
+Cc: Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>, 
+	David Howells <dhowells@redhat.com>, "Matthew Wilcox (Oracle)" <willy@infradead.org>, 
+	Christoph Hellwig <hch@lst.de>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 9/1/2026 5:14 AM, Christian Brauner wrote:
-> Convert to const struct mnt_idmap.
+On Tue, Aug 25, 2026 at 5:41=E2=80=AFPM Tal Zussman <tz2294@columbia.edu> w=
+rote:
 >
-> A mount's idmapping is immutable. The only thing that is allowed to be
-> modified afterwards is the reference count and that is hidden behind
-> mnt_idmap_get() and mnt_idmap_put(). Everything else only ever reads
-> from the idmapping. This is the same model that struct cred uses and the
-> idmapping is also rather sensitive.
+> ceph_msg_data_iter_next() gets a page reference from
+> iov_iter_get_pages2() only to immediately drop it, asserting that the
+> page is pinned some other way. The assertion is the last caller of
+> PageWriteback() in the tree, blocking removal of the PG_writeback page
+> flag accessors.
 >
-> So make the idmap argument const wherever we can. The conversion is done
-> from the bottom up so callers can continue to pass a non-const pointer
-> to a const parameter until the conversion is finished.
+> Remove the assertion, as it is a CONFIG_DEBUG_VM-only check of an
+> assumption the FIXME comment already documents. Converting to
+> iov_iter_extract_pages() instead was considered, but the messenger never
+> releases what it extracts, so it would still rely entirely on the caller
+> holding the pages. That would be just as much of an abuse of the API, so
+> leave it as-is for now.
 >
-> No functional changes.
->
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+> Signed-off-by: Tal Zussman <tz2294@columbia.edu>
 > ---
->  Documentation/filesystems/locking.rst     | 2 +-
->  Documentation/filesystems/vfs.rst         | 2 +-
->  arch/powerpc/platforms/cell/spufs/inode.c | 2 +-
->  fs/9p/v9fs_vfs.h                          | 2 +-
->  fs/9p/vfs_inode.c                         | 2 +-
->  fs/9p/vfs_inode_dotl.c                    | 2 +-
->  fs/adfs/adfs.h                            | 2 +-
->  fs/adfs/inode.c                           | 2 +-
->  fs/affs/affs.h                            | 2 +-
->  fs/affs/inode.c                           | 2 +-
->  fs/afs/inode.c                            | 2 +-
->  fs/afs/internal.h                         | 2 +-
->  fs/anon_inodes.c                          | 2 +-
->  fs/attr.c                                 | 2 +-
->  fs/bad_inode.c                            | 2 +-
->  fs/btrfs/inode.c                          | 2 +-
->  fs/ceph/inode.c                           | 2 +-
->  fs/ceph/super.h                           | 2 +-
->  fs/coda/coda_linux.h                      | 2 +-
->  fs/coda/inode.c                           | 2 +-
->  fs/configfs/configfs_internal.h           | 2 +-
->  fs/configfs/inode.c                       | 2 +-
->  fs/debugfs/inode.c                        | 2 +-
->  fs/ecryptfs/inode.c                       | 2 +-
->  fs/efivarfs/inode.c                       | 2 +-
->  fs/exfat/exfat_fs.h                       | 2 +-
->  fs/exfat/file.c                           | 2 +-
->  fs/ext2/ext2.h                            | 2 +-
->  fs/ext2/inode.c                           | 2 +-
->  fs/ext4/ext4.h                            | 2 +-
->  fs/ext4/inode.c                           | 2 +-
->  fs/f2fs/f2fs.h                            | 2 +-
->  fs/f2fs/file.c                            | 2 +-
->  fs/fat/fat.h                              | 2 +-
->  fs/fat/file.c                             | 2 +-
->  fs/fuse/dir.c                             | 2 +-
->  fs/gfs2/inode.c                           | 2 +-
->  fs/hfs/hfs_fs.h                           | 2 +-
->  fs/hfs/inode.c                            | 2 +-
->  fs/hfsplus/inode.c                        | 2 +-
->  fs/hostfs/hostfs_kern.c                   | 2 +-
->  fs/hpfs/hpfs_fn.h                         | 2 +-
->  fs/hpfs/inode.c                           | 2 +-
->  fs/hugetlbfs/inode.c                      | 2 +-
->  fs/inode.c                                | 2 +-
->  fs/internal.h                             | 2 +-
->  fs/jffs2/fs.c                             | 2 +-
->  fs/jffs2/os-linux.h                       | 2 +-
->  fs/jfs/file.c                             | 2 +-
->  fs/jfs/jfs_inode.h                        | 2 +-
->  fs/kernfs/inode.c                         | 2 +-
->  fs/kernfs/kernfs-internal.h               | 2 +-
->  fs/libfs.c                                | 4 ++--
->  fs/minix/file.c                           | 2 +-
->  fs/nfs/inode.c                            | 2 +-
->  fs/nfs/namespace.c                        | 2 +-
->  fs/nilfs2/inode.c                         | 2 +-
->  fs/nilfs2/nilfs.h                         | 2 +-
->  fs/ntfs/file.c                            | 2 +-
->  fs/ntfs/inode.h                           | 2 +-
->  fs/ntfs3/file.c                           | 2 +-
->  fs/ntfs3/ntfs_fs.h                        | 2 +-
->  fs/ocfs2/dlmfs/dlmfs.c                    | 2 +-
->  fs/ocfs2/file.c                           | 2 +-
->  fs/ocfs2/file.h                           | 2 +-
->  fs/omfs/file.c                            | 2 +-
->  fs/orangefs/inode.c                       | 2 +-
->  fs/orangefs/orangefs-kernel.h             | 2 +-
->  fs/overlayfs/inode.c                      | 2 +-
->  fs/overlayfs/overlayfs.h                  | 2 +-
->  fs/pidfs.c                                | 2 +-
->  fs/proc/base.c                            | 2 +-
->  fs/proc/generic.c                         | 2 +-
->  fs/proc/internal.h                        | 2 +-
->  fs/proc/proc_sysctl.c                     | 2 +-
->  fs/ramfs/file-nommu.c                     | 4 ++--
->  fs/smb/client/cifsfs.h                    | 2 +-
->  fs/smb/client/inode.c                     | 2 +-
->  fs/tracefs/event_inode.c                  | 2 +-
->  fs/tracefs/inode.c                        | 2 +-
->  fs/ubifs/file.c                           | 2 +-
->  fs/ubifs/ubifs.h                          | 2 +-
->  fs/udf/file.c                             | 2 +-
->  fs/ufs/inode.c                            | 2 +-
->  fs/ufs/ufs.h                              | 2 +-
->  fs/vboxsf/utils.c                         | 2 +-
->  fs/vboxsf/vfsmod.h                        | 2 +-
->  fs/xfs/xfs_iops.c                         | 2 +-
->  fs/zonefs/super.c                         | 2 +-
->  include/linux/fs.h                        | 6 +++---
->  include/linux/lsm_hook_defs.h             | 4 ++--
->  include/linux/nfs_fs.h                    | 2 +-
->  include/linux/security.h                  | 8 ++++----
->  mm/secretmem.c                            | 2 +-
->  mm/shmem.c                                | 2 +-
->  net/socket.c                              | 2 +-
->  security/integrity/evm/evm_main.c         | 4 ++--
->  security/integrity/ima/ima_appraise.c     | 2 +-
->  security/security.c                       | 4 ++--
->  security/selinux/hooks.c                  | 2 +-
->  security/smack/smack_lsm.c                | 2 +-
->  virt/kvm/guest_memfd.c                    | 2 +-
->  102 files changed, 112 insertions(+), 112 deletions(-)
-
-...
-
-
-> diff --git a/security/smack/smack_lsm.c b/security/smack/smack_lsm.c
-> index df4fc6ff26aa..bb78569b3d5b 100644
-> --- a/security/smack/smack_lsm.c
-> +++ b/security/smack/smack_lsm.c
-> @@ -1270,7 +1270,7 @@ static int smack_inode_permission(struct inode *inode, int mask)
->   *
->   * Returns 0 if access is permitted, an error code otherwise
->   */
-> -static int smack_inode_setattr(struct mnt_idmap *idmap, struct dentry *dentry,
-> +static int smack_inode_setattr(const struct mnt_idmap *idmap, struct dentry *dentry,
->  			       struct iattr *iattr)
-
-Please keep to 80 columns.
-
-+static int smack_inode_setattr(const struct mnt_idmap *idmap,
-+				struct dentry *dentry, struct iattr *iattr)
-
-Note that the above may get whitespace mangled.
-
->  {
->  	struct smk_audit_info ad;
+> The assertion is the last caller of PageWriteback() in the tree. The
+> removal of the PG_writeback page flag accessors will be sent
+> separately.
 >
+> Changes in v2:
+> - Only delete the assertion and leave the rest as-is, per Christoph.
+> - Rebase onto latest ceph for-linus branch, as v1 was applied to the
+>   testing branch.
+> - Link to v1: https://lore.kernel.org/r/20260817-ceph-msgr-writeback-v1-1=
+-38f3754034b9@columbia.edu
+> ---
+>  net/ceph/messenger.c | 1 -
+>  1 file changed, 1 deletion(-)
+>
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 34b3097b4c7b..95929eeb1f85 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -1003,7 +1003,6 @@ static struct page *ceph_msg_data_iter_next(struct =
+ceph_msg_data_cursor *cursor,
+>          *        we'll get an iov_iter_get_pages2 variant that doesn't t=
+ake
+>          *        page refs. Until then, just put the page ref.
+>          */
+> -       VM_BUG_ON_PAGE(!PageWriteback(page) && page_count(page) < 2, page=
+);
+>         put_page(page);
+>
+>         *length =3D min_t(size_t, len, cursor->resid);
+>
+> ---
+> base-commit: 91880e4a7fac45bc407771bc57bbaf4f37e9b4c3
+> change-id: 20260808-ceph-msgr-writeback-a67d25e28f1e
+>
+> Best regards,
+> --
+> Tal Zussman <tz2294@columbia.edu>
+>
+
+Applied.
+
+Thanks,
+
+                Ilya
