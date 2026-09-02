@@ -1,207 +1,112 @@
-Received: from mail-qk1-f180.google.com (mail-qk1-f180.google.com [209.85.222.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 762843955CB
-	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2026 19:35:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6806E7080D
+	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2026 19:49:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788377718; cv=none; b=JjSrapD4ghykDylIxUOm+mvhYpIe5GjYkCviBvWZWVKMfbQz8SkMpR6ueqzUaKSjHtTu1VMWv6CpvvzRN7KjiIWHchT9AvmLt5Z2mTjj0FhTS0D4Y99z2z1q1N1HOrrJwxFSZTNTE1pA3rhGkv3XyhOoMRNFBMAWaL77UjgXtZI=
+	t=1788378589; cv=none; b=u+91DDRlDmmdNayxU8+W6rhqeDINXliP/cVSzdhnTOVxE0zSuVH3euaPOkcgLkBItqTI8MDcX9CIuRIp7FtpFtkRWlvVvZfdifzjGwS2KeN3xsGfNvPzALznS7ekHip9tZNF2QwT0BOCjDALwMoU/tgvXkg1BU020eYn4C+aZJM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788377718; c=relaxed/simple;
-	bh=hV2MW1omBZf24pDu1TyLQ7VokUTMjJdalm/WKcqe5oQ=;
-	h=Date:Message-ID:MIME-Version:Content-Type:From:To:Cc:Subject:
-	 References:In-Reply-To; b=dxqo3qrQhQwO5LASpwmG2XVXnol+dRsc/5zjLpslb70TQCBbPM0S8Z/j6EskFrJEd8eUeHlZURuIgoImaxycJd+71HOw2GXeew7wPyqHzOwzq44rtmHKNISMYCebMnP/22oR+cVgj7/IK8aQmTaJVr/UyI0pS1gItfe3qrY2Z8E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=paul-moore.com; spf=pass smtp.mailfrom=paul-moore.com; dkim=pass (2048-bit key) header.d=paul-moore.com header.i=@paul-moore.com header.b=GOKkdTYL; arc=none smtp.client-ip=209.85.222.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=paul-moore.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=paul-moore.com
+	s=arc-20240116; t=1788378589; c=relaxed/simple;
+	bh=HsDZjMzquy88+BTDR4fcbEML0Y2n+zffQlh4t+kDmaI=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=D8Nq0nUnep3R6tt3FIxVkHsEEDfNs6Kt1fhEoLTYdR07U1Fhs/4yHqcpZLdQth48zPlcOZlP3bRF/uUwRaD+Fw83RuaKzXWNBMx4GfPIkSamGNDbvYFtPyjT5qz51Kkj17cT1gFVsh+0XXNnpUSeZkxX5+wHDsGMyl4222gF76U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fcr0ZR3L; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=bRTgo70s; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=paul-moore.com header.i=@paul-moore.com header.b="GOKkdTYL"
-Received: by mail-qk1-f180.google.com with SMTP id af79cd13be357-92e57a753f9so176020685a.2
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 12:35:00 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fcr0ZR3L";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="bRTgo70s"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1788378582;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=abJwaDwwItG/15iUfXoPokfBnWruzKGAmptUdifQFSQ=;
+	b=fcr0ZR3LHqgORUr0EGppDvthJ8Am4xgygGqu0qfbEX2q2uPgGBAUK9xCAKg/6aEkirldBh
+	l+xxh9G8FC2rNb95jSWiLxqYp/KHUwiS28sAhSjyNGBW7k9mvludAH6KkonLKMfX3ElLfC
+	C4e9K3DKUe4e7Um0ZUc7ud7AnzIsqLM=
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
+ [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-494-D35aheYtM1m02yoJouUV6g-1; Wed, 02 Sep 2026 15:49:40 -0400
+X-MC-Unique: D35aheYtM1m02yoJouUV6g-1
+X-Mimecast-MFC-AGG-ID: D35aheYtM1m02yoJouUV6g_1788378579
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c217f249fa1so141686066b.0
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 12:49:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=paul-moore.com; s=google; t=1788377695; x=1788982495; darn=vger.kernel.org;
-        h=in-reply-to:references:subject:cc:to:from:content-transfer-encoding
-         :content-type:mime-version:message-id:date:from:to:cc:subject:date
+        d=redhat.com; s=google; t=1788378579; x=1788983379; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=GC4FIfkk2kp9PFt1uwqlIhd5i3bfmRn6wjlpVpmfWwA=;
-        b=GOKkdTYLHtwfO3ngYpVGTvFI8bS9jy2AxeRMxBguqtyz+mrrUORq9lf9kDCSAKxOoR
-         I2u1MFMWwWZGUNwTNq/9I+IlnwmgCDArVPN+m+Iu/wTXYKIlMgFa93lR+Jynm0Mu4qEf
-         5PxuBOn4U3HwoWjMrUL94iXOSPSBHNeM4yrBPcctQBFB5MDB+AQSFM9k5owfyUGQEbiN
-         HUGDO1RvIz7iOVnLN1KfotthYbhUcF+ZHQXILDGx1Sj+n9/Ike59tT+7EsIK6KEFRo2/
-         Badzc6YVVwyjOiepd7sGNucttV9+0d0PqG4UHoWs9HhvSznmEOYBaD96nPZTIopNTfjc
-         ituw==
+        bh=abJwaDwwItG/15iUfXoPokfBnWruzKGAmptUdifQFSQ=;
+        b=bRTgo70sMH8XoTFH4bgawBTaGJfhOAxOmzmdVIvAhoPuZlkuKcwpkhFfT0Jm0P72lK
+         g9tGsZnn/n8CilHdcpF+F1j4kYTqqN7dCdifUK3LiFr7XmCiysGAGtmQzyXLl6m3q5bC
+         /m5BgjQwl8HS4pFebFn1Qg3FJgjV4GQB1ffXp1ELzGHjNsdc6ZlAXbBGixslkL/c8tl3
+         78JoTVpI7ZDj7Ys101vw61vISZjwePemw+SYZrA+nSwNsm6nZ9C4FeK32EqZfCYFDl+q
+         jhTot6ycFITrtyGUeFzg1fX+NNkR24TIbTzosYeBt/RugtgMSuvGf35PkOIkOHDWqras
+         2ZMw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788377695; x=1788982495;
-        h=in-reply-to:references:subject:cc:to:from:content-transfer-encoding
-         :content-type:mime-version:message-id:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=GC4FIfkk2kp9PFt1uwqlIhd5i3bfmRn6wjlpVpmfWwA=;
-        b=V4eH8Yeer44wQPWIJABJLSUn4oUNf+dx+cz+vAzmDWJpaaAFtyXdh+rU7eJTeQN1JJ
-         rq6V+ThhYlZd07h4cgdV36jV9WnpEHZfg1tfe/Dhn10p5HRC/ROkGY3ZGjAq8+mMxbsv
-         ozkirKnZKKZrl2QbVKa2WnsSKPdn6NlOi5+YY3wpOtGE0j4TL2bYK2DksDsyoIvZOBqw
-         Yzi/ZVJB7DIGoHp8sc2RItDJZ7xOXoTETc4WtTYKOQDJtvvsSV45WHdzmncULW1mzJwh
-         hiUK47WtBuJ+U8GFwjDbTLDXL2uT7v756c5lZYB6f/H04pK6U9k3uHELVrnMf0wR54T5
-         Wkkg==
-X-Forwarded-Encrypted: i=1; AKwUvByasWmY7CSCbHCN9cAmvyYeyhM8gjizPMwj6B0sCBDn/ga+7r646g0y5CgwZJ3Y1kLBS2F8qVs1RQX2@vger.kernel.org
-X-Gm-Message-State: AFuF++lcd5nF4SDMwtDS+HlLtKZ0FwPLdI8AKAvTSzsgEY63CREo2yct
-	fqVlEJp67TUWQh/lN7PfCX5s4xzLCiEM1/CMmaow68/cQos5xVHjfR9YmK2OW/7tXg==
-X-Gm-Gg: AYBFou3InE28Ko7SKlyg3hNxuULnSnN5VIccdgBDR1iLDph3jMDv+iCY/UYPS8J9cjf
-	LBOZZJbKYqwqt0NvSaUvjyxJ2IYWitAtIKVMttE8JLLlHa0o902CVxFvEdt/hthZoAwuXz+y/j9
-	svf9LKRsQAEcX2UicXGiP+fZPqJNpzM/+chmmScEDsZTaW1Y/uoDXrxezFx4XeBmknzpKt0ctEw
-	3B9+5m/bxvFgqJr3My4o+eOlFA+yLp6JVXsdwCodi1cpbDXPwtZOoF45LznrKHE3lwLQbdSylev
-	zhzK8EBvmrixlcFpNvCMgo9hXV8JsCT5+JHzkyJEzHgksDwdpWnYY0O6XW+qoZV4OluYP+x+G9z
-	hOC+xI3m56+jF2y7MApIltgEXZqCn2Occ/T5Vhcq6i7p1iylOLUD4vV8+oR5TYN3VAB4rzv1d7N
-	qZnAk7csZh9bYnWqBOcAfN1a3po/0Y2D2QhJ8WyT08tV1BHqiQGfmMO3NxvtH18oN20szM10Yry
-	Op9ivsDKpulYIfvuK3z091rLWx/s2XmASE=
-X-Received: by 2002:a05:620a:d94:b0:939:6de9:4cfb with SMTP id af79cd13be357-9396de968a9mr206623085a.46.1788377695492;
-        Wed, 02 Sep 2026 12:34:55 -0700 (PDT)
-Received: from localhost (pool-71-126-255-178.bstnma.fios.verizon.net. [71.126.255.178])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-90e9ef0e9b1sm25737496d6.43.2026.09.02.12.34.54
+        d=1e100.net; s=20251104; t=1788378579; x=1788983379;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=abJwaDwwItG/15iUfXoPokfBnWruzKGAmptUdifQFSQ=;
+        b=sz5cfT/8UkNj51Iqe7FM3CKyam2RWSGT5SrNeqizTstrzYU5F4ekPmy7qNP8QU1dZd
+         CQml6jetTQKzuZhGYSSNng2lnSRptVq9LKsxJMGNVrKfq2vYy51/B4/u0YkVI4/Mb0lk
+         gpwHKbmtwB3eoejyaZN03WEfttJfkW3y+zY53xLfcH+Mg/v3KswlRMb2n0TBnHoZN5cc
+         elDlqf0o2MYYuak9iwDqZLzhKvfMYkgX4IJMsYEb4FenYqqV175URlc5S1c3xUGDlfJ9
+         HspCVbK0iWnGTUktiRbxSx8a6cdYAjVm+ge9Dp+6Wy2ztwOOg1lsihidEU6qPdyDg5up
+         kQyQ==
+X-Gm-Message-State: AFuF++neSdrGaMkwHQKKvKIXg20YrIVCiTDT5bNLSG9vYAx+gkoEh5XX
+	d/kzSwRyiVTWZxytkcTVG5w7DJqB1f4uiMEk7ScYWqkWExkH5uGx4SjdncLEZwVMQ+vnPKYCYZs
+	cmvs/KfPhl8Xh8e27iE5ZaKHuc5JBGxQZro0FnYbo1QBSFkoFHjJ68YWZD8WTFwDuxU4R3FVY9A
+	==
+X-Gm-Gg: AYBFou1hvNkz4aRovOogi20fmOB8rbxenj4ylw5T/rM2bI0EkXIciktefGOlJnrCVIj
+	+pafcI0+vVT4Ev9brw8/RWiKO4NpNwOPjzEjtQ/tW7p1QfxvpaZeD7OCj7WR+RIJSX8ZsdPE/Fl
+	1G1PvYBJcC+9My14hEHKVaAk3OWWBw4OxCMwI/Xb7Ilr5wwLGCM7Xv7fsUd7m58tbGyTXdJd2lO
+	f7ZGLsKm47r9zOo+iLEqLxfR12/Zy299d+dubGUU3rjZTCbRv6kOiaEBTOW2MBcyNAlhecJiXLu
+	ZSS372rCnlINSv4VNRTbo8GIdN7t5ruBMSENOLLBx4qa/b1QYW7E4I0wPvAAAmVvrqv+tf+60hp
+	bWsSi4msqXDXCwG1Dxr88m65juHItoiKiTzLErut8p1BO4cXp7hVpReqxTQnktstRN6kpYXUy/i
+	rxSXOFyfDQg2NcYw==
+X-Received: by 2002:a17:907:d89:b0:c24:6985:d7a1 with SMTP id a640c23a62f3a-c25d547b88amr434894166b.7.1788378579532;
+        Wed, 02 Sep 2026 12:49:39 -0700 (PDT)
+X-Received: by 2002:a17:907:d89:b0:c24:6985:d7a1 with SMTP id a640c23a62f3a-c25d547b88amr434890466b.7.1788378579136;
+        Wed, 02 Sep 2026 12:49:39 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c25f3eecf0bsm5494666b.3.2026.09.02.12.49.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Sep 2026 12:34:54 -0700 (PDT)
-Date: Wed, 02 Sep 2026 15:34:53 -0400
-Message-ID: <0a5d61e6a17442e42646e98ac73dd7df@paul-moore.com>
+        Wed, 02 Sep 2026 12:49:38 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: [v3,1/3] ceph/mds_client: pin sessions while checking a new MDS map
+Date: Wed,  2 Sep 2026 19:49:37 +0000
+Message-Id: <20260902194937.3210958-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260828174504.1247038-2-max.kellermann@ionos.com>
+References: <20260828174504.1247038-2-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0 
-Content-Type: text/plain; charset=UTF-8 
-Content-Transfer-Encoding: 8bit 
-X-Mailer: pstg-pwork:20260902_1319/pstg-lib:20260901_1604/pstg-pwork:20260902_1319
-From: Paul Moore <paul@paul-moore.com>
-To: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>, Christoph Hellwig <hch@lst.de>, Seth Forshee <sforshee@kernel.org>, linux-security-module@vger.kernel.org, Mimi Zohar <zohar@linux.ibm.com>, linux-integrity@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>, linux-unionfs@vger.kernel.org, Namjae Jeon <linkinjeon@kernel.org>, linux-cifs@vger.kernel.org, linux-kernel@vger.kernel.org, "Christian Brauner (Amutable)" <brauner@kernel.org>
-Subject: Re: [PATCH 24/27] fs: port ->setattr() to pass const mnt_idmap
-References: <20260901-work-idmap-const-v1-24-54ccd48e100b@kernel.org>
-In-Reply-To: <20260901-work-idmap-const-v1-24-54ccd48e100b@kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-On Sep  1, 2026 Christian Brauner <brauner@kernel.org> wrote:
-> 
-> Convert to const struct mnt_idmap.
-> 
-> A mount's idmapping is immutable. The only thing that is allowed to be
-> modified afterwards is the reference count and that is hidden behind
-> mnt_idmap_get() and mnt_idmap_put(). Everything else only ever reads
-> from the idmapping. This is the same model that struct cred uses and the
-> idmapping is also rather sensitive.
-> 
-> So make the idmap argument const wherever we can. The conversion is done
-> from the bottom up so callers can continue to pass a non-const pointer
-> to a const parameter until the conversion is finished.
-> 
-> No functional changes.
-> 
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
-> Reviewed-by: Jan Kara <jack@suse.cz>
-> ---
->  Documentation/filesystems/locking.rst     | 2 +-
->  Documentation/filesystems/vfs.rst         | 2 +-
->  arch/powerpc/platforms/cell/spufs/inode.c | 2 +-
->  fs/9p/v9fs_vfs.h                          | 2 +-
->  fs/9p/vfs_inode.c                         | 2 +-
->  fs/9p/vfs_inode_dotl.c                    | 2 +-
->  fs/adfs/adfs.h                            | 2 +-
->  fs/adfs/inode.c                           | 2 +-
->  fs/affs/affs.h                            | 2 +-
->  fs/affs/inode.c                           | 2 +-
->  fs/afs/inode.c                            | 2 +-
->  fs/afs/internal.h                         | 2 +-
->  fs/anon_inodes.c                          | 2 +-
->  fs/attr.c                                 | 2 +-
->  fs/bad_inode.c                            | 2 +-
->  fs/btrfs/inode.c                          | 2 +-
->  fs/ceph/inode.c                           | 2 +-
->  fs/ceph/super.h                           | 2 +-
->  fs/coda/coda_linux.h                      | 2 +-
->  fs/coda/inode.c                           | 2 +-
->  fs/configfs/configfs_internal.h           | 2 +-
->  fs/configfs/inode.c                       | 2 +-
->  fs/debugfs/inode.c                        | 2 +-
->  fs/ecryptfs/inode.c                       | 2 +-
->  fs/efivarfs/inode.c                       | 2 +-
->  fs/exfat/exfat_fs.h                       | 2 +-
->  fs/exfat/file.c                           | 2 +-
->  fs/ext2/ext2.h                            | 2 +-
->  fs/ext2/inode.c                           | 2 +-
->  fs/ext4/ext4.h                            | 2 +-
->  fs/ext4/inode.c                           | 2 +-
->  fs/f2fs/f2fs.h                            | 2 +-
->  fs/f2fs/file.c                            | 2 +-
->  fs/fat/fat.h                              | 2 +-
->  fs/fat/file.c                             | 2 +-
->  fs/fuse/dir.c                             | 2 +-
->  fs/gfs2/inode.c                           | 2 +-
->  fs/hfs/hfs_fs.h                           | 2 +-
->  fs/hfs/inode.c                            | 2 +-
->  fs/hfsplus/inode.c                        | 2 +-
->  fs/hostfs/hostfs_kern.c                   | 2 +-
->  fs/hpfs/hpfs_fn.h                         | 2 +-
->  fs/hpfs/inode.c                           | 2 +-
->  fs/hugetlbfs/inode.c                      | 2 +-
->  fs/inode.c                                | 2 +-
->  fs/internal.h                             | 2 +-
->  fs/jffs2/fs.c                             | 2 +-
->  fs/jffs2/os-linux.h                       | 2 +-
->  fs/jfs/file.c                             | 2 +-
->  fs/jfs/jfs_inode.h                        | 2 +-
->  fs/kernfs/inode.c                         | 2 +-
->  fs/kernfs/kernfs-internal.h               | 2 +-
->  fs/libfs.c                                | 4 ++--
->  fs/minix/file.c                           | 2 +-
->  fs/nfs/inode.c                            | 2 +-
->  fs/nfs/namespace.c                        | 2 +-
->  fs/nilfs2/inode.c                         | 2 +-
->  fs/nilfs2/nilfs.h                         | 2 +-
->  fs/ntfs/file.c                            | 2 +-
->  fs/ntfs/inode.h                           | 2 +-
->  fs/ntfs3/file.c                           | 2 +-
->  fs/ntfs3/ntfs_fs.h                        | 2 +-
->  fs/ocfs2/dlmfs/dlmfs.c                    | 2 +-
->  fs/ocfs2/file.c                           | 2 +-
->  fs/ocfs2/file.h                           | 2 +-
->  fs/omfs/file.c                            | 2 +-
->  fs/orangefs/inode.c                       | 2 +-
->  fs/orangefs/orangefs-kernel.h             | 2 +-
->  fs/overlayfs/inode.c                      | 2 +-
->  fs/overlayfs/overlayfs.h                  | 2 +-
->  fs/pidfs.c                                | 2 +-
->  fs/proc/base.c                            | 2 +-
->  fs/proc/generic.c                         | 2 +-
->  fs/proc/internal.h                        | 2 +-
->  fs/proc/proc_sysctl.c                     | 2 +-
->  fs/ramfs/file-nommu.c                     | 4 ++--
->  fs/smb/client/cifsfs.h                    | 2 +-
->  fs/smb/client/inode.c                     | 2 +-
->  fs/tracefs/event_inode.c                  | 2 +-
->  fs/tracefs/inode.c                        | 2 +-
->  fs/ubifs/file.c                           | 2 +-
->  fs/ubifs/ubifs.h                          | 2 +-
->  fs/udf/file.c                             | 2 +-
->  fs/ufs/inode.c                            | 2 +-
->  fs/ufs/ufs.h                              | 2 +-
->  fs/vboxsf/utils.c                         | 2 +-
->  fs/vboxsf/vfsmod.h                        | 2 +-
->  fs/xfs/xfs_iops.c                         | 2 +-
->  fs/zonefs/super.c                         | 2 +-
->  include/linux/fs.h                        | 6 +++---
->  include/linux/lsm_hook_defs.h             | 4 ++--
->  include/linux/nfs_fs.h                    | 2 +-
->  include/linux/security.h                  | 8 ++++----
->  mm/secretmem.c                            | 2 +-
->  mm/shmem.c                                | 2 +-
->  net/socket.c                              | 2 +-
->  security/integrity/evm/evm_main.c         | 4 ++--
->  security/integrity/ima/ima_appraise.c     | 2 +-
->  security/security.c                       | 4 ++--
->  security/selinux/hooks.c                  | 2 +-
->  security/smack/smack_lsm.c                | 2 +-
->  virt/kvm/guest_memfd.c                    | 2 +-
->  102 files changed, 112 insertions(+), 112 deletions(-)
+Hi Max,
 
-Acked-by: Paul Moore <paul@paul-moore.com> (LSM, SELinux)
+NACK. Please respin.
 
---
-paul-moore.com
+  1. fs/ceph/mds_client.c:5191: send_mds_reconnect() overwrites CLOSED and reconnects a session CLOSE will purge
+     Max, v3's CLOSED skips after the address-change mutex gap and the
+     export-target rank wait are the right shape, but
+     `send_mds_reconnect()` still has a hole.
+     In `send_mds_reconnect()`, keep `mdsc->mutex` until after the state
+     store, and skip if `s_state` is CLOSED (or the session is no longer
+     registered).
+
+-- 
+Alex Markuze
+
