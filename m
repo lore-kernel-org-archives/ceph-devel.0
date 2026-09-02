@@ -1,591 +1,226 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-00364e01.pphosted.com (mx0a-00364e01.pphosted.com [148.163.135.74])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0959A331ED0;
-	Wed,  2 Sep 2026 14:22:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A74494A3870
+	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2026 14:34:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.135.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788358941; cv=none; b=nhwwzD9YChVNDnzh9K8JoNHVH6W55CZ3zHujHX9anG1/0KVEELJFNt0nFg711NV5+KNbwigprFfk7NqKuryvEVctgi6qVLb6tdsNcDMS9PhU8n2JkaYPAP9fs1td8ovsk/4/MeEFYnUgpKolTIuyBMOHR/niND1SDApUnwXoHGA=
+	t=1788359654; cv=none; b=oPfyzxZoIw31xQnG0pb32QZ4NtQTkQHvKsxRRFq4yHXWkuju219arRotQ0nEzmSfys8Ni5vVh5a54m6MM1Jxt7fUYMRPxeCmzNvocs1sVModkvFrVlUkWmFEmsaEmhuHFn8tygcOiW/cdoGj88jXEhie8BsVSN2dZis66P0R6Aw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788358941; c=relaxed/simple;
-	bh=qbcCGEVG/JY7HT0s4r2rliekdpw4C65GjwOVd9Bx/oQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LEUX3iEKy8lxd00InoE1ekv1L9qPVeiDXnFZVcqSFFzKD/nZO/929Rc2f/OHt24Vp1+SoQmbBFOSgZt+xkpIBk4y0EHTa43o1GVBwBHPt8oy1yinIkdrdjFmWnwR9iakVqTiOLpH5qVAqrymCYuDuPkdZhd1rxZlBZjFiQj5LlI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=ztQ4lkZa; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=4m/MVv9S; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=UYjrxqeB; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=b0wfUrip; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1788359654; c=relaxed/simple;
+	bh=FiIj8Mu/M5MlHNmrXdICXLmZM0g6OmS6W32hmfXxyIg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=JbMEMTG9gpHCirQwOzairhN+ci3p+s5l9oUC7izcl8SPiMGjPi9GvkSR8Okfl7ltykLypzQ7gVkOLPOPBOmhNG0lvn6VXoUEAA/gN0zN71QbguTTHKyb9lo2+wAC5ISTAe6CWvNz93ofnnaLX25/msM+wLxYYZ4Zz5ZDYDUUqxg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=leWXjE2R; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=dUr/+Xbf; arc=none smtp.client-ip=148.163.135.74
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="ztQ4lkZa";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="4m/MVv9S";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="UYjrxqeB";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="b0wfUrip"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id C771021D22;
-	Wed,  2 Sep 2026 14:22:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1788358933; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Zul3SMiRCKIzn4+/AoP8uI+Vb+G05dBmN6Y046iX5xs=;
-	b=ztQ4lkZaidvSTglafWuO787YkENuE76xB0kcziTy9FTdk5CM4YJL/zecs+r8n/iBRX58ge
-	eXztCoPzx6UMsBhMYMb6wmkk25XsOvPxLxRnxFTH4is1NWvZFOAN6in+BRhj8MX/L7kZoy
-	gNOJDdphkgs5tOcCgbKSrr41SuwG/EU=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1788358933;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Zul3SMiRCKIzn4+/AoP8uI+Vb+G05dBmN6Y046iX5xs=;
-	b=4m/MVv9S14lLC2VLbOmZz4kDozMIsIXOCYruOgboR/pZrlPeWH2owqfVuhAAkG9PDFMSZb
-	i8IdmfHFyHfuZ0Cw==
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=UYjrxqeB;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=b0wfUrip
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1788358928; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Zul3SMiRCKIzn4+/AoP8uI+Vb+G05dBmN6Y046iX5xs=;
-	b=UYjrxqeBb52toJWVGejpHgLxlVnqoiW+Oxe6ydnBq/vu/qrrdaeSBKr3fiFh3ZQYQ1XXWZ
-	Klm7fWsfNw1vCPRKOWjDYUw4y1DPZbE8ZAQwAZBUNGBeGCcLU9LTP2vxrLBD032wsj5rTl
-	Cg3zwGHwcxORe5HPS/izwBgdXmcjDTI=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1788358928;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Zul3SMiRCKIzn4+/AoP8uI+Vb+G05dBmN6Y046iX5xs=;
-	b=b0wfUripXyy265Ihq37dQK+hda9JXDjGCg/5aIqZgTX3816svrnBJj17D2OoLGfE012aqX
-	ltTPs6EfVZ3utACg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id A1296136E6;
-	Wed,  2 Sep 2026 14:22:08 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id ZBFWJxAxmGp0DwAAD6G6ig
-	(envelope-from <jack@suse.cz>); Wed, 02 Sep 2026 14:22:08 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id 4EA67A13B5; Wed, 02 Sep 2026 16:22:08 +0200 (CEST)
-Date: Wed, 2 Sep 2026 16:22:08 +0200
-From: Jan Kara <jack@suse.cz>
-To: Christian Brauner <brauner@kernel.org>
-Cc: linux-fsdevel@vger.kernel.org, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>, Christoph Hellwig <hch@lst.de>, 
-	Seth Forshee <sforshee@kernel.org>, Paul Moore <paul@paul-moore.com>, 
-	linux-security-module@vger.kernel.org, Mimi Zohar <zohar@linux.ibm.com>, 
-	linux-integrity@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, 
-	Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, 
-	Amir Goldstein <amir73il@gmail.com>, linux-unionfs@vger.kernel.org, 
-	Namjae Jeon <linkinjeon@kernel.org>, linux-cifs@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 11/27] fs: port acl to const mnt_idmap
-Message-ID: <aqkorqm6bqes4i2an44j7ks2ha522hr4lupvo4pji3yiip6avt@3ae27hhk4sly>
-References: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
- <20260901-work-idmap-const-v1-11-54ccd48e100b@kernel.org>
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="leWXjE2R";
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="dUr/+Xbf"
+Received: from pps.filterd (m0167072.ppops.net [127.0.0.1])
+	by mx0a-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 682DnGpY4075617
+	for <ceph-devel@vger.kernel.org>; Wed, 2 Sep 2026 10:34:10 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pps01; bh=5nq8
+	F0xboXei8La9m4xhYCwKh6IJ8CtNFoD7hWN6IF4=; b=leWXjE2R9OMgS3Kr0MGQ
+	pxvMVDL8XeBDSu8+tM3NjwSGeKHPK/86EjabJLTaUdwjcOSc6YCNjyAw59bFet6l
+	slMFCA2Jbtpu453vxYOn0S9QBcmFmrc0gq4P2iBRc8CsONhhH153FBkBoZHUFWU0
+	hED/3nH+IC68PvBWJUIgOET0yyDcdzYF58uAeJ7UfWnpaQtEEoHFhzSrg/QLPDKN
+	w1CROv6PeuNr3zPiAYkl3wMFIyaai93LdbcTcmAiDFBqkgXQWZKAFtxMJ+2N9LIM
+	C86ETTwNnCaUqH9PEa3+OitF6/CUInUyrWuWzu72yWxkfSI1+kMD94DLaI3DqLPM
+	xw==
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com [209.85.222.200])
+	by mx0a-00364e01.pphosted.com (PPS) with ESMTPS id 4gefkbj8w6-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 10:34:10 -0400 (EDT)
+Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-92e820609d9so237810285a.2
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 07:34:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=columbia.edu; s=lionmail; t=1788359649; x=1788964449; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=5nq8F0xboXei8La9m4xhYCwKh6IJ8CtNFoD7hWN6IF4=;
+        b=dUr/+XbfuBEt2LF5IWc/mFLnFmDAfMiMZCRrbsXWFytAWN3IzGaAjEDsueovAfPlB3
+         DRQRLftPzybocsdBHzxA3YM2e6EK4iSwGxIEgLqtYHkozEXCJQKy5PUCLz/N8UaWy2Ca
+         4rv20H+g33z/7Kv4fV7SYOs9Q+0n6TrsRPryvJt0Gfm+fxuvtLfMrRIG7n3RJyZ5L8yn
+         AwSz/l5lVHIXM+94DHu7hHr5DlrnPP3bziipMRTnHJleqWGu7zQXBrG80DNHqzgirTA2
+         FHTX5MEZ7Qfv5NV34Cfej1H94mZLE99kRP/bbIzrOuCnKPhklKTCtv43iY+km/U1fWVv
+         mEhg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788359649; x=1788964449;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=5nq8F0xboXei8La9m4xhYCwKh6IJ8CtNFoD7hWN6IF4=;
+        b=izeQtQX6KIOZF8K6wWiEdXuGPjjm1Bjmrs7SGhneFnmQfmd1b+WEiOJw5sYK87RKYr
+         fG9Q+VnKSM3981DdOVpv0ke3M1R+zBzo0T1rcg/RfIXJf2mCz+mHO9B6vfVmNjTELunY
+         4r6kYZoswFgTFJMZIc7tg/fIGa+jhDQvl+NVHWG7wCzsXfr8lJthNYaDS97hq/M52j5I
+         mnU60h8crDvy2NoWQTC/zFkFmWx4PpY3pNQYgvmNrbL13ol14BHCgdu1Zv74o5spI0Wd
+         7zUNDKFIUKZg2TgjSC7Q1NlTqBHwFD5UoWzTLhcJX7wBFdPVT4M1V6EsFMQoAcnIM2Fe
+         45Bg==
+X-Forwarded-Encrypted: i=1; AHgh+Rr/CJatn+Yxc/B8w4WpkeTth5uKvirjyO1EBGsDy+dNjiW+Bqxlhyjiguzc1YC93uEXiqcZvxe2LV1N@vger.kernel.org
+X-Gm-Message-State: AFuF++lfq46huguhtvXoJYva/vZeHzxrAGJ4Z7/Ti+AKYvp4hCszz4S9
+	Mm2EI8mQ2rSyqlAdiAlios1r+8nJl2AUZm39L64Yilc22UXiK6fIInGbmNPsWocE/odJGc5aaYv
+	tHXb6EmqYWA/CeV23YM4xmj2LofxENwbdO0bj53WdLQtUpglKvfj7/UwrP8Y=
+X-Gm-Gg: AR+sD13WRci2XWdeb/CNSlKqXF1w2/gP9ovfA9Rwdzrh4zHrXJXiI5IAuEpyetvuif8
+	xgBJmYwJPsB0xI2T5XAGTT1h/HQvb/8nqxTGEdCdgqR25ZEiNSWt6xVyVwAyHe42CFRoatSPpq9
+	nJ1kKgordSnaawgzAHTEOhn6slG6cA01tABpT8mcl4otVD3pLZdfI9g0b1SrCbvPew+pugWIlb1
+	yJFrQhiZR2lanzTOQ6oDG6i57YS7osNrwIlBmb1AzKYzu0Cc4tz8pRWTe08W5nHndFS8PssSr4w
+	Uv86ZhEKX8u3kpr1uiSuzUWM19kENekyJXfmb3y2YtWmciho/HJHyVpsXHFBA7a2/M9QiLPdBpZ
+	vIpE2VkbSfRW7L2U7f+B/af1OrOpwGxlPxf+HwHbz6UJE0Xwfdfu2CW5lHg==
+X-Received: by 2002:a05:620a:3196:b0:92e:71bb:d1c0 with SMTP id af79cd13be357-93960dea964mr622058385a.15.1788359649521;
+        Wed, 02 Sep 2026 07:34:09 -0700 (PDT)
+X-Received: by 2002:a05:620a:3196:b0:92e:71bb:d1c0 with SMTP id af79cd13be357-93960dea964mr621987485a.15.1788359646377;
+        Wed, 02 Sep 2026 07:34:06 -0700 (PDT)
+Received: from [10.207.49.22] (nat-128-59-178-193.net.columbia.edu. [128.59.178.193])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c25d043e6bcsm152362966b.61.2026.09.02.07.34.02
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 02 Sep 2026 07:34:05 -0700 (PDT)
+Message-ID: <dac0f543-4687-49eb-87ae-500ecf32112d@columbia.edu>
+Date: Wed, 2 Sep 2026 10:34:01 -0400
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260901-work-idmap-const-v1-11-54ccd48e100b@kernel.org>
-X-Spam-Level: 
-X-Rspamd-Action: no action
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Rspamd-Queue-Id: C771021D22
-X-Spamd-Result: default: False [-4.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	RCVD_COUNT_THREE(0.00)[3];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	ARC_NA(0.00)[];
-	RCPT_COUNT_TWELVE(0.00)[20];
-	MIME_TRACE(0.00)[0:+];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCVD_TLS_LAST(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	MISSING_XM_UA(0.00)[];
-	FREEMAIL_CC(0.00)[vger.kernel.org,zeniv.linux.org.uk,suse.cz,lst.de,kernel.org,paul-moore.com,linux.ibm.com,gmail.com,szeredi.hu];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.cz:dkim,suse.cz:email]
-X-Spam-Flag: NO
-X-Spam-Score: -4.01
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 01/10] ceph: fix error handling when the OSD client is
+ stopping in ceph_submit_write()
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Alex Markuze <amarkuze@redhat.com>,
+        Viacheslav Dubeyko
+ <slava@dubeyko.com>,
+        "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        Jan Kara <jack@suse.cz>, Andrew Morton <akpm@linux-foundation.org>,
+        David Hildenbrand <david@kernel.org>, Lorenzo Stoakes <ljs@kernel.org>,
+        "Liam R. Howlett" <liam@infradead.org>,
+        Vlastimil Babka <vbabka@kernel.org>, Mike Rapoport <rppt@kernel.org>,
+        Suren Baghdasaryan <surenb@google.com>, Michal Hocko <mhocko@suse.com>,
+        Zi Yan <ziy@nvidia.com>, Christian Brauner <brauner@kernel.org>,
+        David Howells <dhowells@redhat.com>, Jeff Layton <jlayton@kernel.org>,
+        ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+        Sashiko <sashiko-bot@kernel.org>
+References: <20260817-remove-wait-on-page-writeback-v4-0-0e5e53d47eb0@columbia.edu>
+ <20260817-remove-wait-on-page-writeback-v4-1-0e5e53d47eb0@columbia.edu>
+ <CAOi1vP8SCZaFTodwm3_c9cFfc4UB5X8J8vF-sxh+4TuhCS8iog@mail.gmail.com>
+Content-Language: en-US
+From: Tal Zussman <tz2294@columbia.edu>
+In-Reply-To: <CAOi1vP8SCZaFTodwm3_c9cFfc4UB5X8J8vF-sxh+4TuhCS8iog@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-GUID: 32qawOHlBTNmVfScEmdCvGxIUEn3zJOq
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTAyMDEyOCBTYWx0ZWRfX96fnjh9wicIV
+ GWix1DYRjK2DuWCN7tRyTAFcWRgvLSuOo5j4XG6+5Y2l2+jlr3BF9dpYmSt+MB72AouVzQ0fqBn
+ ZGrxiR5sevANzY29wXPIWhO5m5M66dm9VwzK1VfcsGUIBhbB6xzp
+X-Authority-Analysis: v=2.4 cv=aIzAb79m c=1 sm=1 tr=0 ts=6a9833e2 cx=c_pps
+ a=hnmNkyzTK/kJ09Xio7VxxA==:117 a=XwBYxoxBwSosfWEfMcqm5A==:17
+ a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10 a=x7bEGLp0ZPQA:10 a=A0y_DWxS2BwA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=SsB-OO3BMngHh3ZO9fOt:22
+ a=uherdBYGAAAA:8 a=c92rfblmAAAA:8 a=VwQbUJbxAAAA:8 a=TZ2kbKYv5CYyi6T0hQQA:9
+ a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10 a=PEH46H7Ffwr30OY-TuGO:22
+ a=GvGzcOZaWPEFPQC_NcjD:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTAyMDEyOCBTYWx0ZWRfX3+3O/AbykKpl
+ zW21PSRELogFerspZT+37/CU15ymDl38kJtkirSB2XOT1Smi3GNUmC2fTHUQQUlAyDi545EyFnG
+ URxi7gFiTK87MoKI+crZkIHX+uhhc0If/gDkbXwNj+k2neqQVcCzvFo7nScG0w0x/0KRz/tWgMz
+ VvuJXWK0iqqIR1+x12EX6unrsIZL2bNXhA3mDnEFcG+IjV7kgxW7ovHq6fE8OjIDz7WpVkPeMyl
+ 4KA4VYGwRSHuYy5Jc2SgqRwN+YgDwodGsqWR5cJLop/1kxCDVDeiJuiE4KIUKC269V+IgWtY6B8
+ p3Y9Gy8L6r/QemZXjAx47d8nGBUYuSxeMBE1taZi2DyC/7FkULFg9XgZDLI+cgQmrtR6e7P4C0I
+ byWS4/9LjAnN80HQaIi8fXJPGrqh3DbJEKu3+9UpIFBzXsqEDkaTwjn+VMKdDjJMhVYZwoq/P1Y
+ /A0IS9stU8gtCZxn8TQ==
+X-Proofpoint-ORIG-GUID: 32qawOHlBTNmVfScEmdCvGxIUEn3zJOq
+X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11894
+ signatures=596817
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 lowpriorityscore=10 adultscore=0 malwarescore=0
+ bulkscore=10 clxscore=1015 impostorscore=10 phishscore=0 spamscore=0
+ suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2609020128
 
-On Tue 01-09-26 14:14:36, Christian Brauner wrote:
-> Convert to const struct mnt_idmap.
+On 9/2/26 4:44 PM, Ilya Dryomov wrote: 
+> On Mon, Aug 17, 2026 at 9:15 PM Tal Zussman <tz2294@columbia.edu> wrote:
+>>
+>> When ceph_inc_osd_stopping_blocker() fails, ceph_submit_write()
+>> redirties and unlocks the folios remaining in ceph_wbc->fbatch.
+>> However, none of those folios are locked at this point: locked folios
+>> were moved to ceph_wbc->pages[] and removed from the fbatch by
+>> ceph_process_folio_batch(). Unlocking them triggers
+>> VM_BUG_ON_FOLIO(!folio_test_locked(folio)) in folio_unlock(), or
+>> unlocks a folio locked by another task.
+>>
+>> This error path also returns -EIO without fully cleaning up the folios in
+>> ceph_wbc->pages[]: their references are never dropped, fscrypt bounce
+>> pages are never freed, the writeback congestion count is never
+>> decremented, and the pages array is leaked. ceph_wbc->locked_pages is
+>> also left non-zero, so ceph_writepages_start() loops back around and
+>> hits BUG_ON(ceph_wbc.locked_pages).
+>>
+>> Leave the fbatch folios alone, as ceph_writepages_start() drops their
+>> references when releasing the batch, and unwind ceph_wbc->pages[] the
+>> same way writepages_finish() would have. Abort writeback in
+>> ceph_writepages_start() instead of continuing, matching the handling
+>> of ceph_inc_osd_stopping_blocker() failure on entry, as the OSD
+>> client is being torn down and further writeback cannot make progress.
+>>
+>> An LLM was used to verify that the cleanup was comprehensive, and
+>> suggested aborting the writeback instead of continuing.
+>>
+>> Fixes: 1551ec61dc55 ("ceph: introduce ceph_submit_write() method")
+>> Reported-by: Sashiko <sashiko-bot@kernel.org>
+>> Link: https://urldefense.com/v3/__https://sashiko.dev/*/patchset/20260804-remove-wait- 
+> on-page-writeback-v2-0-81f0ab065284*40columbia.edu?part=5__;IyU!!BDUfV1Et5lrpZQ! 
+> WQ0-twAxqcZ2nQ5MBrBDnqIxwPV4RXuFNZvUldEY6jTQafdUjhi46Zgym70Ltd8gwAKpSl92mam7YO- 
+> tlU-7hw$ <https://urldefense.com/v3/__https://sashiko.dev/*/patchset/20260804-remove-wait-on-page-writeback-v2-0-81f0ab065284*40columbia.edu?part=5__;IyU!!BDUfV1Et5lrpZQ!WQ0-twAxqcZ2nQ5MBrBDnqIxwPV4RXuFNZvUldEY6jTQafdUjhi46Zgym70Ltd8gwAKpSl92mam7YO-tlU-7hw$>
+>> Assisted-by: Claude:fable-5
+>> Signed-off-by: Tal Zussman <tz2294@columbia.edu>
+>> ---
+>>  fs/ceph/addr.c | 36 ++++++++++++++++++++----------------
+>>  1 file changed, 20 insertions(+), 16 deletions(-)
+>>
+>> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+>> index 1f77aec8e960..d5a349daf4d0 100644
+>> --- a/fs/ceph/addr.c
+>> +++ b/fs/ceph/addr.c
+>> @@ -1482,27 +1482,28 @@ int ceph_submit_write(struct address_space *mapping,
+>>         BUG_ON(len < ceph_fscrypt_page_offset(page) + thp_size(page) - offset);
+>>
+>>         if (!ceph_inc_osd_stopping_blocker(fsc->mdsc)) {
+>> -               for (i = 0; i < folio_batch_count(&ceph_wbc->fbatch); i++) {
+>> -                       struct folio *folio = ceph_wbc->fbatch.folios[i];
+>> -
+>> -                       if (!folio)
+>> -                               continue;
+>> -
+>> -                       page = &folio->page;
+>> -                       redirty_page_for_writepage(wbc, page);
+>> -                       unlock_page(page);
+>> -               }
+>> -
+>>                 for (i = 0; i < ceph_wbc->locked_pages; i++) {
+>> -                       page = ceph_fscrypt_pagecache_page(ceph_wbc->pages[i]);
+>> +                       fscrypt_finalize_bounce_page(&ceph_wbc->pages[i]);
 > 
-> A mount's idmapping is immutable. The only thing that is allowed to be
-> modified afterwards is the reference count and that is hidden behind
-> mnt_idmap_get() and mnt_idmap_put(). Everything else only ever reads
-> from the idmapping. This is the same model that struct cred uses and the
-> idmapping is also rather sensitive.
+> Hi Tal,
 > 
-> So make the idmap argument const wherever we can. The conversion is done
-> from the bottom up so callers can continue to pass a non-const pointer
-> to a const parameter until the conversion is finished.
+> fscrypt_finalize_bounce_page() was removed in 7.3-rc1, so this one and
+> patch 8 need to be reworked now.
 > 
-> No functional changes.
+> Thanks,
 > 
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+>                  Ilya
+> 
 
-Looks good. Feel free to add:
+Hi Ilya,
 
-Reviewed-by: Jan Kara <jack@suse.cz>
+I'll send a v5 today.
 
-								Honza
+Thanks,
+Tal
 
-> ---
->  fs/ntfs/ea.c                          |  4 ++--
->  fs/ntfs/ea.h                          |  2 +-
->  fs/ntfs/namei.c                       |  2 +-
->  fs/ntfs3/inode.c                      |  2 +-
->  fs/ntfs3/ntfs_fs.h                    |  4 ++--
->  fs/ntfs3/xattr.c                      |  4 ++--
->  fs/posix_acl.c                        |  6 +++---
->  include/linux/lsm_hook_defs.h         |  8 ++++----
->  include/linux/posix_acl.h             |  4 ++--
->  include/linux/security.h              | 16 ++++++++--------
->  security/integrity/evm/evm_main.c     | 10 +++++-----
->  security/integrity/ima/ima_appraise.c |  4 ++--
->  security/security.c                   |  8 ++++----
->  security/selinux/hooks.c              |  6 +++---
->  security/smack/smack_lsm.c            |  6 +++---
->  15 files changed, 43 insertions(+), 43 deletions(-)
-> 
-> diff --git a/fs/ntfs/ea.c b/fs/ntfs/ea.c
-> index cdd306933d73..744ea8c446e5 100644
-> --- a/fs/ntfs/ea.c
-> +++ b/fs/ntfs/ea.c
-> @@ -998,7 +998,7 @@ struct posix_acl *ntfs_get_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->  	return acl;
->  }
->  
-> -static noinline int ntfs_set_acl_ex(struct mnt_idmap *idmap,
-> +static noinline int ntfs_set_acl_ex(const struct mnt_idmap *idmap,
->  				    struct inode *inode, struct posix_acl *acl,
->  				    int type, bool init_acl)
->  {
-> @@ -1086,7 +1086,7 @@ int ntfs_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->  	return ntfs_set_acl_ex(idmap, d_inode(dentry), acl, type, false);
->  }
->  
-> -int ntfs_init_acl(struct mnt_idmap *idmap, struct inode *inode,
-> +int ntfs_init_acl(const struct mnt_idmap *idmap, struct inode *inode,
->  		  struct inode *dir)
->  {
->  	struct posix_acl *default_acl, *acl;
-> diff --git a/fs/ntfs/ea.h b/fs/ntfs/ea.h
-> index acb39c2a6fbc..9d17abc2e491 100644
-> --- a/fs/ntfs/ea.h
-> +++ b/fs/ntfs/ea.h
-> @@ -21,7 +21,7 @@ struct posix_acl *ntfs_get_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->  			       int type);
->  int ntfs_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->  		 struct posix_acl *acl, int type);
-> -int ntfs_init_acl(struct mnt_idmap *idmap, struct inode *inode,
-> +int ntfs_init_acl(const struct mnt_idmap *idmap, struct inode *inode,
->  		  struct inode *dir);
->  #else
->  #define ntfs_get_acl NULL
-> diff --git a/fs/ntfs/namei.c b/fs/ntfs/namei.c
-> index 7091b2496fac..e2cf1ab6935a 100644
-> --- a/fs/ntfs/namei.c
-> +++ b/fs/ntfs/namei.c
-> @@ -391,7 +391,7 @@ static int ntfs_sd_add_everyone(struct ntfs_inode *ni)
->  	return ret;
->  }
->  
-> -static struct ntfs_inode *__ntfs_create(struct mnt_idmap *idmap, struct inode *dir,
-> +static struct ntfs_inode *__ntfs_create(const struct mnt_idmap *idmap, struct inode *dir,
->  		__le16 *name, u8 name_len, mode_t mode, dev_t dev,
->  		const char *target, int target_len)
->  {
-> diff --git a/fs/ntfs3/inode.c b/fs/ntfs3/inode.c
-> index 56b4f6469a28..a9fdd33f2886 100644
-> --- a/fs/ntfs3/inode.c
-> +++ b/fs/ntfs3/inode.c
-> @@ -1381,7 +1381,7 @@ ntfs_create_reparse_buffer(struct ntfs_sb_info *sbi, const char *symname,
->   *
->   * NOTE: if fnd != NULL (ntfs_atomic_open) then @dir is locked
->   */
-> -int ntfs_create_inode(struct mnt_idmap *idmap, struct inode *dir,
-> +int ntfs_create_inode(const struct mnt_idmap *idmap, struct inode *dir,
->  		      struct dentry *dentry, const struct cpu_str *uni,
->  		      umode_t mode, dev_t dev, const char *symname, u32 size,
->  		      struct ntfs_fnd *fnd)
-> diff --git a/fs/ntfs3/ntfs_fs.h b/fs/ntfs3/ntfs_fs.h
-> index 5811d89d67b3..a2b74f41048f 100644
-> --- a/fs/ntfs3/ntfs_fs.h
-> +++ b/fs/ntfs3/ntfs_fs.h
-> @@ -803,7 +803,7 @@ int ntfs_set_size(struct inode *inode, u64 new_size);
->  int ntfs3_write_inode(struct inode *inode, struct writeback_control *wbc);
->  int ntfs_sync_inode(struct inode *inode);
->  int inode_read_data(struct inode *inode, void *data, size_t bytes);
-> -int ntfs_create_inode(struct mnt_idmap *idmap, struct inode *dir,
-> +int ntfs_create_inode(const struct mnt_idmap *idmap, struct inode *dir,
->  		      struct dentry *dentry, const struct cpu_str *uni,
->  		      umode_t mode, dev_t dev, const char *symname, u32 size,
->  		      struct ntfs_fnd *fnd);
-> @@ -967,7 +967,7 @@ struct posix_acl *ntfs_get_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->  			       int type);
->  int ntfs_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->  		 struct posix_acl *acl, int type);
-> -int ntfs_init_acl(struct mnt_idmap *idmap, struct inode *inode,
-> +int ntfs_init_acl(const struct mnt_idmap *idmap, struct inode *inode,
->  		  struct inode *dir);
->  #else
->  #define ntfs_get_acl NULL
-> diff --git a/fs/ntfs3/xattr.c b/fs/ntfs3/xattr.c
-> index 594ef6860b93..d800735477c3 100644
-> --- a/fs/ntfs3/xattr.c
-> +++ b/fs/ntfs3/xattr.c
-> @@ -595,7 +595,7 @@ struct posix_acl *ntfs_get_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->  	return acl;
->  }
->  
-> -static noinline int ntfs_set_acl_ex(struct mnt_idmap *idmap,
-> +static noinline int ntfs_set_acl_ex(const struct mnt_idmap *idmap,
->  				    struct inode *inode, struct posix_acl *acl,
->  				    int type, bool init_acl)
->  {
-> @@ -688,7 +688,7 @@ int ntfs_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->   *
->   * Called from ntfs_create_inode().
->   */
-> -int ntfs_init_acl(struct mnt_idmap *idmap, struct inode *inode,
-> +int ntfs_init_acl(const struct mnt_idmap *idmap, struct inode *inode,
->  		  struct inode *dir)
->  {
->  	struct posix_acl *default_acl, *acl;
-> diff --git a/fs/posix_acl.c b/fs/posix_acl.c
-> index f9c55a59c6c6..b279804ebf56 100644
-> --- a/fs/posix_acl.c
-> +++ b/fs/posix_acl.c
-> @@ -378,7 +378,7 @@ EXPORT_SYMBOL(posix_acl_from_mode);
->   * by the acl. Returns -E... otherwise.
->   */
->  int
-> -posix_acl_permission(struct mnt_idmap *idmap, struct inode *inode,
-> +posix_acl_permission(const struct mnt_idmap *idmap, struct inode *inode,
->  		     const struct posix_acl *acl, int want)
->  {
->  	const struct posix_acl_entry *pa, *pe, *mask_obj;
-> @@ -709,7 +709,7 @@ EXPORT_SYMBOL_GPL(posix_acl_create);
->   *
->   * Called from set_acl inode operations.
->   */
-> -int posix_acl_update_mode(struct mnt_idmap *idmap,
-> +int posix_acl_update_mode(const struct mnt_idmap *idmap,
->  			  struct inode *inode, umode_t *mode_p,
->  			  struct posix_acl **acl)
->  {
-> @@ -889,7 +889,7 @@ EXPORT_SYMBOL (posix_acl_to_xattr);
->   * Return: On success, the size of the stored uapi posix acls, on error a
->   * negative errno.
->   */
-> -static ssize_t vfs_posix_acl_to_xattr(struct mnt_idmap *idmap,
-> +static ssize_t vfs_posix_acl_to_xattr(const struct mnt_idmap *idmap,
->  				      struct inode *inode,
->  				      const struct posix_acl *acl, void *buffer,
->  				      size_t size)
-> diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-> index 65c9609ec207..30897590258f 100644
-> --- a/include/linux/lsm_hook_defs.h
-> +++ b/include/linux/lsm_hook_defs.h
-> @@ -159,15 +159,15 @@ LSM_HOOK(void, LSM_RET_VOID, inode_post_removexattr, struct dentry *dentry,
->  	 const char *name)
->  LSM_HOOK(int, 0, inode_file_setattr, struct dentry *dentry, struct file_kattr *fa)
->  LSM_HOOK(int, 0, inode_file_getattr, struct dentry *dentry, struct file_kattr *fa)
-> -LSM_HOOK(int, 0, inode_set_acl, struct mnt_idmap *idmap,
-> +LSM_HOOK(int, 0, inode_set_acl, const struct mnt_idmap *idmap,
->  	 struct dentry *dentry, const char *acl_name, struct posix_acl *kacl)
->  LSM_HOOK(void, LSM_RET_VOID, inode_post_set_acl, struct dentry *dentry,
->  	 const char *acl_name, struct posix_acl *kacl)
-> -LSM_HOOK(int, 0, inode_get_acl, struct mnt_idmap *idmap,
-> +LSM_HOOK(int, 0, inode_get_acl, const struct mnt_idmap *idmap,
->  	 struct dentry *dentry, const char *acl_name)
-> -LSM_HOOK(int, 0, inode_remove_acl, struct mnt_idmap *idmap,
-> +LSM_HOOK(int, 0, inode_remove_acl, const struct mnt_idmap *idmap,
->  	 struct dentry *dentry, const char *acl_name)
-> -LSM_HOOK(void, LSM_RET_VOID, inode_post_remove_acl, struct mnt_idmap *idmap,
-> +LSM_HOOK(void, LSM_RET_VOID, inode_post_remove_acl, const struct mnt_idmap *idmap,
->  	 struct dentry *dentry, const char *acl_name)
->  LSM_HOOK(int, 0, inode_need_killpriv, struct dentry *dentry)
->  LSM_HOOK(int, 0, inode_killpriv, struct mnt_idmap *idmap,
-> diff --git a/include/linux/posix_acl.h b/include/linux/posix_acl.h
-> index 62d497763e25..7c6cfcae0a9d 100644
-> --- a/include/linux/posix_acl.h
-> +++ b/include/linux/posix_acl.h
-> @@ -84,7 +84,7 @@ struct posix_acl *posix_acl_clone(const struct posix_acl *acl, gfp_t flags);
->  int posix_acl_chmod(struct mnt_idmap *, struct dentry *, umode_t);
->  extern int posix_acl_create(struct inode *, umode_t *, struct posix_acl **,
->  		struct posix_acl **);
-> -int posix_acl_update_mode(struct mnt_idmap *, struct inode *, umode_t *,
-> +int posix_acl_update_mode(const struct mnt_idmap *, struct inode *, umode_t *,
->  			  struct posix_acl **);
->  
->  int simple_set_acl(struct mnt_idmap *, struct dentry *,
-> @@ -96,7 +96,7 @@ void set_cached_acl(struct inode *inode, int type, struct posix_acl *acl);
->  void forget_cached_acl(struct inode *inode, int type);
->  void forget_all_cached_acls(struct inode *inode);
->  int posix_acl_valid(struct user_namespace *, const struct posix_acl *);
-> -int posix_acl_permission(struct mnt_idmap *, struct inode *,
-> +int posix_acl_permission(const struct mnt_idmap *, struct inode *,
->  			 const struct posix_acl *, int);
->  
->  static inline void cache_no_acl(struct inode *inode)
-> diff --git a/include/linux/security.h b/include/linux/security.h
-> index 4598a13657ee..12bc12e243bf 100644
-> --- a/include/linux/security.h
-> +++ b/include/linux/security.h
-> @@ -430,16 +430,16 @@ int security_inode_getattr(const struct path *path);
->  int security_inode_setxattr(struct mnt_idmap *idmap,
->  			    struct dentry *dentry, const char *name,
->  			    const void *value, size_t size, int flags);
-> -int security_inode_set_acl(struct mnt_idmap *idmap,
-> +int security_inode_set_acl(const struct mnt_idmap *idmap,
->  			   struct dentry *dentry, const char *acl_name,
->  			   struct posix_acl *kacl);
->  void security_inode_post_set_acl(struct dentry *dentry, const char *acl_name,
->  				 struct posix_acl *kacl);
-> -int security_inode_get_acl(struct mnt_idmap *idmap,
-> +int security_inode_get_acl(const struct mnt_idmap *idmap,
->  			   struct dentry *dentry, const char *acl_name);
-> -int security_inode_remove_acl(struct mnt_idmap *idmap,
-> +int security_inode_remove_acl(const struct mnt_idmap *idmap,
->  			      struct dentry *dentry, const char *acl_name);
-> -void security_inode_post_remove_acl(struct mnt_idmap *idmap,
-> +void security_inode_post_remove_acl(const struct mnt_idmap *idmap,
->  				    struct dentry *dentry,
->  				    const char *acl_name);
->  void security_inode_post_setxattr(struct dentry *dentry, const char *name,
-> @@ -1003,7 +1003,7 @@ static inline int security_inode_setxattr(struct mnt_idmap *idmap,
->  	return cap_inode_setxattr(dentry, name, value, size, flags);
->  }
->  
-> -static inline int security_inode_set_acl(struct mnt_idmap *idmap,
-> +static inline int security_inode_set_acl(const struct mnt_idmap *idmap,
->  					 struct dentry *dentry,
->  					 const char *acl_name,
->  					 struct posix_acl *kacl)
-> @@ -1016,21 +1016,21 @@ static inline void security_inode_post_set_acl(struct dentry *dentry,
->  					       struct posix_acl *kacl)
->  { }
->  
-> -static inline int security_inode_get_acl(struct mnt_idmap *idmap,
-> +static inline int security_inode_get_acl(const struct mnt_idmap *idmap,
->  					 struct dentry *dentry,
->  					 const char *acl_name)
->  {
->  	return 0;
->  }
->  
-> -static inline int security_inode_remove_acl(struct mnt_idmap *idmap,
-> +static inline int security_inode_remove_acl(const struct mnt_idmap *idmap,
->  					    struct dentry *dentry,
->  					    const char *acl_name)
->  {
->  	return 0;
->  }
->  
-> -static inline void security_inode_post_remove_acl(struct mnt_idmap *idmap,
-> +static inline void security_inode_post_remove_acl(const struct mnt_idmap *idmap,
->  						  struct dentry *dentry,
->  						  const char *acl_name)
->  { }
-> diff --git a/security/integrity/evm/evm_main.c b/security/integrity/evm/evm_main.c
-> index 06e187c9912d..aaf228ebed7c 100644
-> --- a/security/integrity/evm/evm_main.c
-> +++ b/security/integrity/evm/evm_main.c
-> @@ -652,7 +652,7 @@ static int evm_inode_removexattr(struct mnt_idmap *idmap, struct dentry *dentry,
->  }
->  
->  #ifdef CONFIG_FS_POSIX_ACL
-> -static int evm_inode_set_acl_change(struct mnt_idmap *idmap,
-> +static int evm_inode_set_acl_change(const struct mnt_idmap *idmap,
->  				    struct dentry *dentry, const char *name,
->  				    struct posix_acl *kacl)
->  {
-> @@ -671,7 +671,7 @@ static int evm_inode_set_acl_change(struct mnt_idmap *idmap,
->  	return 0;
->  }
->  #else
-> -static inline int evm_inode_set_acl_change(struct mnt_idmap *idmap,
-> +static inline int evm_inode_set_acl_change(const struct mnt_idmap *idmap,
->  					   struct dentry *dentry,
->  					   const char *name,
->  					   struct posix_acl *kacl)
-> @@ -693,7 +693,7 @@ static inline int evm_inode_set_acl_change(struct mnt_idmap *idmap,
->   *
->   * Return: zero on success, -EPERM on failure.
->   */
-> -static int evm_inode_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
-> +static int evm_inode_set_acl(const struct mnt_idmap *idmap, struct dentry *dentry,
->  			     const char *acl_name, struct posix_acl *kacl)
->  {
->  	enum integrity_status evm_status;
-> @@ -745,7 +745,7 @@ static int evm_inode_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
->   *
->   * Return: zero on success, -EPERM on failure.
->   */
-> -static int evm_inode_remove_acl(struct mnt_idmap *idmap, struct dentry *dentry,
-> +static int evm_inode_remove_acl(const struct mnt_idmap *idmap, struct dentry *dentry,
->  				const char *acl_name)
->  {
->  	return evm_inode_set_acl(idmap, dentry, acl_name, NULL);
-> @@ -926,7 +926,7 @@ static void evm_inode_post_removexattr(struct dentry *dentry,
->   * Update the 'security.evm' xattr with the EVM HMAC re-calculated after
->   * removing posix acls.
->   */
-> -static inline void evm_inode_post_remove_acl(struct mnt_idmap *idmap,
-> +static inline void evm_inode_post_remove_acl(const struct mnt_idmap *idmap,
->  					     struct dentry *dentry,
->  					     const char *acl_name)
->  {
-> diff --git a/security/integrity/ima/ima_appraise.c b/security/integrity/ima/ima_appraise.c
-> index 6b21db789ef1..1aed041c127a 100644
-> --- a/security/integrity/ima/ima_appraise.c
-> +++ b/security/integrity/ima/ima_appraise.c
-> @@ -790,7 +790,7 @@ static int ima_inode_setxattr(struct mnt_idmap *idmap, struct dentry *dentry,
->  	return result;
->  }
->  
-> -static int ima_inode_set_acl(struct mnt_idmap *idmap, struct dentry *dentry,
-> +static int ima_inode_set_acl(const struct mnt_idmap *idmap, struct dentry *dentry,
->  			     const char *acl_name, struct posix_acl *kacl)
->  {
->  	if (evm_revalidate_status(acl_name))
-> @@ -815,7 +815,7 @@ static int ima_inode_removexattr(struct mnt_idmap *idmap, struct dentry *dentry,
->  	return result;
->  }
->  
-> -static int ima_inode_remove_acl(struct mnt_idmap *idmap, struct dentry *dentry,
-> +static int ima_inode_remove_acl(const struct mnt_idmap *idmap, struct dentry *dentry,
->  				const char *acl_name)
->  {
->  	return ima_inode_set_acl(idmap, dentry, acl_name, NULL);
-> diff --git a/security/security.c b/security/security.c
-> index 2ee276ab15c5..e81dcda3050b 100644
-> --- a/security/security.c
-> +++ b/security/security.c
-> @@ -1953,7 +1953,7 @@ int security_inode_setxattr(struct mnt_idmap *idmap,
->   *
->   * Return: Returns 0 if permission is granted.
->   */
-> -int security_inode_set_acl(struct mnt_idmap *idmap,
-> +int security_inode_set_acl(const struct mnt_idmap *idmap,
->  			   struct dentry *dentry, const char *acl_name,
->  			   struct posix_acl *kacl)
->  {
-> @@ -1990,7 +1990,7 @@ void security_inode_post_set_acl(struct dentry *dentry, const char *acl_name,
->   *
->   * Return: Returns 0 if permission is granted.
->   */
-> -int security_inode_get_acl(struct mnt_idmap *idmap,
-> +int security_inode_get_acl(const struct mnt_idmap *idmap,
->  			   struct dentry *dentry, const char *acl_name)
->  {
->  	if (unlikely(IS_PRIVATE(d_backing_inode(dentry))))
-> @@ -2009,7 +2009,7 @@ int security_inode_get_acl(struct mnt_idmap *idmap,
->   *
->   * Return: Returns 0 if permission is granted.
->   */
-> -int security_inode_remove_acl(struct mnt_idmap *idmap,
-> +int security_inode_remove_acl(const struct mnt_idmap *idmap,
->  			      struct dentry *dentry, const char *acl_name)
->  {
->  	if (unlikely(IS_PRIVATE(d_backing_inode(dentry))))
-> @@ -2026,7 +2026,7 @@ int security_inode_remove_acl(struct mnt_idmap *idmap,
->   * Update inode security data after successfully removing posix acls on
->   * @dentry in @idmap. The posix acls are identified by @acl_name.
->   */
-> -void security_inode_post_remove_acl(struct mnt_idmap *idmap,
-> +void security_inode_post_remove_acl(const struct mnt_idmap *idmap,
->  				    struct dentry *dentry, const char *acl_name)
->  {
->  	if (unlikely(IS_PRIVATE(d_backing_inode(dentry))))
-> diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
-> index 035aaf113d1d..672d6374d8b0 100644
-> --- a/security/selinux/hooks.c
-> +++ b/security/selinux/hooks.c
-> @@ -3453,20 +3453,20 @@ static int selinux_inode_setxattr(struct mnt_idmap *idmap,
->  			    &ad);
->  }
->  
-> -static int selinux_inode_set_acl(struct mnt_idmap *idmap,
-> +static int selinux_inode_set_acl(const struct mnt_idmap *idmap,
->  				 struct dentry *dentry, const char *acl_name,
->  				 struct posix_acl *kacl)
->  {
->  	return dentry_has_perm(current_cred(), dentry, FILE__SETATTR);
->  }
->  
-> -static int selinux_inode_get_acl(struct mnt_idmap *idmap,
-> +static int selinux_inode_get_acl(const struct mnt_idmap *idmap,
->  				 struct dentry *dentry, const char *acl_name)
->  {
->  	return dentry_has_perm(current_cred(), dentry, FILE__GETATTR);
->  }
->  
-> -static int selinux_inode_remove_acl(struct mnt_idmap *idmap,
-> +static int selinux_inode_remove_acl(const struct mnt_idmap *idmap,
->  				    struct dentry *dentry, const char *acl_name)
->  {
->  	return dentry_has_perm(current_cred(), dentry, FILE__SETATTR);
-> diff --git a/security/smack/smack_lsm.c b/security/smack/smack_lsm.c
-> index 8e88ac65fd7f..244cdb49e928 100644
-> --- a/security/smack/smack_lsm.c
-> +++ b/security/smack/smack_lsm.c
-> @@ -1543,7 +1543,7 @@ static int smack_inode_removexattr(struct mnt_idmap *idmap,
->   *
->   * Returns 0 if access is permitted, an error code otherwise
->   */
-> -static int smack_inode_set_acl(struct mnt_idmap *idmap,
-> +static int smack_inode_set_acl(const struct mnt_idmap *idmap,
->  			       struct dentry *dentry, const char *acl_name,
->  			       struct posix_acl *kacl)
->  {
-> @@ -1566,7 +1566,7 @@ static int smack_inode_set_acl(struct mnt_idmap *idmap,
->   *
->   * Returns 0 if access is permitted, an error code otherwise
->   */
-> -static int smack_inode_get_acl(struct mnt_idmap *idmap,
-> +static int smack_inode_get_acl(const struct mnt_idmap *idmap,
->  			       struct dentry *dentry, const char *acl_name)
->  {
->  	struct smk_audit_info ad;
-> @@ -1588,7 +1588,7 @@ static int smack_inode_get_acl(struct mnt_idmap *idmap,
->   *
->   * Returns 0 if access is permitted, an error code otherwise
->   */
-> -static int smack_inode_remove_acl(struct mnt_idmap *idmap,
-> +static int smack_inode_remove_acl(const struct mnt_idmap *idmap,
->  				  struct dentry *dentry, const char *acl_name)
->  {
->  	struct smk_audit_info ad;
-> 
-> -- 
-> 2.53.0
-> 
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
