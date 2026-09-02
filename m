@@ -1,549 +1,453 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DBE04A9D46;
-	Wed,  2 Sep 2026 16:03:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A64B3AA4E4
+	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2026 16:04:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788364983; cv=none; b=o3DDCTcbV6FGZksDaCEKZKfDlo4Ao1fA5xvSMHOszL5PZJ0vd/Dpbh2O+akYWKStCvtq/aORv83Hdj5zQrVbbxwf/p0RzNsZo/A3AqnvND5LHDUJIH5K2RNoQvf2RGR7NGJEcdTTEvfsGHk0K9bC8wd9arMdwofmsGpAodK+wWA=
+	t=1788365059; cv=none; b=q2Rz9uL3kXGSYH3RbsCIIQOLVUBvvDqQ/ti2GSr6JHUePCFuZUeiNXv2TKmdVvGOc0BzjQyjnguKKKHalWKUBbzuhsscatujfXjUq6cPLqKyhgcU/puuAd8pQ84tmc6kkRbtGN7SRWDsCHG1aioozjVMxrw7pTF2LOCWE6qp3FE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788364983; c=relaxed/simple;
-	bh=HsygTzcif32HXcEBLL9ZV6GPJhAa2FOTk4u+ob8NehY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OkPCpeWU+tT8ZczDujq0q3xJ/RSbfIzERChWzZMk4A8Ud1OmzovoV8NO/lHP/ChMDeMTLQZkxUACA5nSYdK+8PmViwOPTI6SDOi0rrnl+yFXnKiB5FvvSh1mndy3mvitlNqtQx6H0IGE2kMg6qqMIzXA2vjj9DZOVhW2Q/Od39o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=AJStpF7h; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=T3Oiqh7u; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=1QVSfmEh; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=RcMISohv; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1788365059; c=relaxed/simple;
+	bh=qY+kEul6M2tzYqXfXn+y41rFQiyi2Hlwl7JOyogmcgE=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=qpTCFjamv/tJQErMW8YlXY3QcIemCXrgIYLcl/WgVj/zMvdjDIzvkfZUoh8I2Z5Yh5eXFHGKGTa4fGQ9g0cXzUxvnxqc0kI7kER32YU8V3jxVPPlWbK8r3U0FeMHP2YiMRO8FnKxXGF5ZCVFMIRWuJAHz0/O5+09Yx8/TsWZuDg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eimMAmRn; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=hdoricwp; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="AJStpF7h";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="T3Oiqh7u";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="1QVSfmEh";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="RcMISohv"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 1766021CC0;
-	Wed,  2 Sep 2026 16:02:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1788364975; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eimMAmRn";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="hdoricwp"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1788365055;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=LdDMPxNCIBFQNL+uLKvaJ+WaYLrmiG55V4yIQYE/a6I=;
-	b=AJStpF7hiOTPtKozAkghpixe2rzvDIt+mYHaFYK6KNVL/E8H/tjlpA4YXR0mceuW3S4Hjx
-	CXvxLsjaojL+7ebQGLDoVU5IwqhR32IR5q195hS6uR+HMObUA4PPMflqMRLO5KYUa+qVLa
-	90E3s7LxYaRFEPloxBhq5hcyCKc+ISg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1788364975;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LdDMPxNCIBFQNL+uLKvaJ+WaYLrmiG55V4yIQYE/a6I=;
-	b=T3Oiqh7uSJf3pHjXlG8GBJKu3YZI0XMzmMCJsehC/vdDTldv8RpfR3Y/QV+CaB2be6XwR0
-	kNNqMNA75sFYfbCQ==
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=1QVSfmEh;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=RcMISohv
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1788364971; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LdDMPxNCIBFQNL+uLKvaJ+WaYLrmiG55V4yIQYE/a6I=;
-	b=1QVSfmEhM3+Jrwlez2VarStEgNfdjzlc9YeTFSp54vJ5Wdk9OlapuNWtFoGPAI4S/B6NeA
-	L7OIlSl32HZyUXNJF7uzOx0nkmnHJbLV9WFHwnYSnCjvQ11O47LpQDppRVmeHFms3+MGuc
-	0KziNSrpyOoriE65NGumNyh1XWpWjFc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1788364971;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LdDMPxNCIBFQNL+uLKvaJ+WaYLrmiG55V4yIQYE/a6I=;
-	b=RcMISohvQXUC5WlfA1zUgu0gU3aiTVgO5UapcroIY0iyvextL7NcqFRRq0if9A/TF6cuKd
-	9mj78dgxWTpk+NBw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E954B13515;
-	Wed,  2 Sep 2026 16:02:50 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id I2v0OKpImGpvdgAAD6G6ig
-	(envelope-from <jack@suse.cz>); Wed, 02 Sep 2026 16:02:50 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id 914C1A13B5; Wed, 02 Sep 2026 18:02:46 +0200 (CEST)
-Date: Wed, 2 Sep 2026 18:02:46 +0200
-From: Jan Kara <jack@suse.cz>
-To: Christian Brauner <brauner@kernel.org>
-Cc: linux-fsdevel@vger.kernel.org, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>, Christoph Hellwig <hch@lst.de>, 
-	Seth Forshee <sforshee@kernel.org>, Paul Moore <paul@paul-moore.com>, 
-	linux-security-module@vger.kernel.org, Mimi Zohar <zohar@linux.ibm.com>, 
-	linux-integrity@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, 
-	Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>, 
-	Amir Goldstein <amir73il@gmail.com>, linux-unionfs@vger.kernel.org, 
-	Namjae Jeon <linkinjeon@kernel.org>, linux-cifs@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 25/27] fs: port vfs_*() helpers to const mnt_idmap
-Message-ID: <hkuct3g6weocxhksq6x23osse2i44gr54cfnnacphxfxqtjgas@4gzzwlypnqxc>
-References: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
- <20260901-work-idmap-const-v1-25-54ccd48e100b@kernel.org>
+	bh=Dc0OLQo8HrTBQZG+oYdeLYkHl2/FElZFnzDfd0zQQSQ=;
+	b=eimMAmRnGFRjwwYosJoinMUH1z+a3hH3FivIla1F9HxDa7lcxI4nEPLcOT6ZeTg2aGZPK3
+	UdTDLyL6qIR9SqxxT5a3QD12dKvibvZiGaQ6VM+KPmjIPgMow6qefL3OYvjUpgAQtezbbW
+	yEIZkGXgDt9RCLTUwzQME4s27St0RCI=
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
+ [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-656-I-gMipUXMMS_lilqXGb5vQ-1; Wed, 02 Sep 2026 12:04:14 -0400
+X-MC-Unique: I-gMipUXMMS_lilqXGb5vQ-1
+X-Mimecast-MFC-AGG-ID: I-gMipUXMMS_lilqXGb5vQ_1788365053
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c1c4715cf0eso95331566b.2
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 09:04:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1788365053; x=1788969853; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=Dc0OLQo8HrTBQZG+oYdeLYkHl2/FElZFnzDfd0zQQSQ=;
+        b=hdoricwpyYdHUMccg6ohp+c2lMve9mnqYPBgiyz+VmvWsB+LEqSDm3O3FavRc0ASVP
+         L9JhGEAiEkGj3A1X09sOgykTd/+RpzQ7SCW3VbrfzxEjW4QvFkumNeKgkTxQqIBGCwGD
+         OCWISjrcKEuZMTO5EtDgth3Z5BFnJb/7/fRcc04Kc9SSfRk+Gxod88YYUoKtOZykIe0K
+         0nMJsTpN2lRjN8xcwUxNxRnqxMDR6Ikz2T+ZEPUnTNK/rQ3OTDHl9Rbq4uIyyDjDNd2l
+         hjPTu4Gw37D5CqgS3/gwqCsvVeDmq7M9QTvshaz58AU1Rzmx2PdrqLfxiVGW59Cl4BiN
+         eHXQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788365053; x=1788969853;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=Dc0OLQo8HrTBQZG+oYdeLYkHl2/FElZFnzDfd0zQQSQ=;
+        b=IMAvr8TjWz8AgD2lREdH1VZpVhkjawahDjx/QTFlli3LB+asTb1emO1HgGcyASg6AL
+         HwiDMJT10UgcHLqxkDnm3t7eA5JfIHIqQ6b+pU4WZF89Bu65xzbx/d09JRpLm3ZkiFD4
+         4vJ32SEx96PVxJ8Fu+TBG+Sa82Bj48TCXLODhpEMvJ/m7GIR3E8JpU270sTFsKNWDk9C
+         NOldcGOCCgUOAQQndzjZVzxeGu8ACG7mWuljHHBPDkym1mk31EjFu2mEQV2I7/0HlxzQ
+         t/TAaWuXDv6klLyeCby8+DGbpSUOKbe3URu3rkn9AHZ1JcyjL2NOH1qOhX5PNwtoaoI7
+         LSvg==
+X-Gm-Message-State: AFuF++nbK/G/CwiQ4lBG/MAymQLbTzGI/lqxKZwn7O2QJ06GQJEOHjWu
+	iaCYFrMBjfbkwXVlDvxi4eV4YotGM4qZ543ZLgYwfLRzjdo1187zL2yZZvkRHbiNiB8esLHNNK3
+	tTOVNpXeukPXmCw1a38oNeWFK+O+tjPlkfrMwFEdhi8YdjZgywpyeV3n39V5e1RWfRHDJG5Z+Cm
+	jvSk/CviAUjEM+qC1j0uyK7ZCz57z8aEMc43/k9oQDu9jdjCo=
+X-Gm-Gg: AYBFou1GQ/Dfm6er0kwGStwsPKDhh/ZXzwOwI9WIgshXuZM9S7FEDEw2KFl7K5JwJFT
+	Fji+iFZR8V/k+nYZFZbt8K+oIOMfidyprn0pGj33yUh984O//8Cycls5W3Pmx6Z5cKRvnvC+r4N
+	KRmkvPBJVLAwtr3RVgFz18UwzBnzEzcHQimIfo0KvV/iw6EYYYx/LOznD05r5pHhf31QdYgZ2NH
+	NHG6mhNx6IEWp0QBCTCpOyyaHc105cMW2BqzBeZcQbtjNAEZs5uSZWZV4FoUx9jiuubNk+5MFx+
+	Co/RgGRO1nFn99eld3Pk76UqdhQgnOAHPrp0mZzqEi5g/UYNvAq2+ApZDrb0G/uWEXMEkL4QIfL
+	VllnnNkM569yKuQ5irlLwHnsg9uHgkrASiz417hxesZvS3wRmh6MdwAR6cFEtiy39IJaNyeoycn
+	PWEgDLuhPh7gwPvA==
+X-Received: by 2002:a17:907:97cd:b0:c25:4cff:5d01 with SMTP id a640c23a62f3a-c25d54f7e85mr359295766b.18.1788365052852;
+        Wed, 02 Sep 2026 09:04:12 -0700 (PDT)
+X-Received: by 2002:a17:907:97cd:b0:c25:4cff:5d01 with SMTP id a640c23a62f3a-c25d54f7e85mr359289066b.18.1788365052351;
+        Wed, 02 Sep 2026 09:04:12 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c25cffc7108sm165874566b.10.2026.09.02.09.04.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 02 Sep 2026 09:04:11 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: Ilya Dryomov <idryomov@gmail.com>,
+	Xiubo Li <xiubo.li@clyso.com>
+Subject: [PATCH v4 02/14] ceph: add BLOG deserialization support
+Date: Wed,  2 Sep 2026 16:03:55 +0000
+Message-Id: <20260902160407.3196013-3-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260902160407.3196013-1-amarkuze@redhat.com>
+References: <cover.1787229471.git.amarkuze@redhat.com>
+ <20260902160407.3196013-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260901-work-idmap-const-v1-25-54ccd48e100b@kernel.org>
-X-Spam-Level: 
-X-Rspamd-Action: no action
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Rspamd-Queue-Id: 1766021CC0
-X-Spamd-Result: default: False [-4.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	RCVD_COUNT_THREE(0.00)[3];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	RCPT_COUNT_TWELVE(0.00)[20];
-	RCVD_TLS_LAST(0.00)[];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	TO_DN_SOME(0.00)[];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	MISSING_XM_UA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FREEMAIL_CC(0.00)[vger.kernel.org,zeniv.linux.org.uk,suse.cz,lst.de,kernel.org,paul-moore.com,linux.ibm.com,gmail.com,szeredi.hu];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:dkim,suse.cz:email,suse.com:email,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Flag: NO
-X-Spam-Score: -4.01
+Content-Transfer-Encoding: 8bit
 
-On Tue 01-09-26 14:14:50, Christian Brauner wrote:
-> Convert to const struct mnt_idmap.
-> 
-> A mount's idmapping is immutable. The only thing that is allowed to be
-> modified afterwards is the reference count and that is hidden behind
-> mnt_idmap_get() and mnt_idmap_put(). Everything else only ever reads
-> from the idmapping. This is the same model that struct cred uses and the
-> idmapping is also rather sensitive.
-> 
-> So make the idmap argument const wherever we can. The conversion is done
-> from the bottom up so callers can continue to pass a non-const pointer
-> to a const parameter until the conversion is finished.
-> 
-> No functional changes.
-> 
-> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+Add blog_des.c implementing the binary record deserialization engine
+used by the debugfs read paths.  Supports %d, %i, %u, %o, %x, %X,
+%s, %p, %c, and length modifiers (l, ll, h, hh, z).
 
-Looks good. Feel free to add:
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+ fs/ceph/blog_des.c | 335 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 335 insertions(+)
+ create mode 100644 fs/ceph/blog_des.c
 
-Reviewed-by: Jan Kara <jack@suse.cz>
-
-								Honza
-
-> ---
->  fs/btrfs/ioctl.c      |  4 ++--
->  fs/internal.h         |  2 +-
->  fs/namei.c            | 44 ++++++++++++++++++++++----------------------
->  fs/open.c             |  2 +-
->  include/linux/fs.h    | 30 +++++++++++++++---------------
->  include/linux/namei.h | 16 ++++++++--------
->  6 files changed, 49 insertions(+), 49 deletions(-)
-> 
-> diff --git a/fs/btrfs/ioctl.c b/fs/btrfs/ioctl.c
-> index 94c98801800f..e20e66c0fead 100644
-> --- a/fs/btrfs/ioctl.c
-> +++ b/fs/btrfs/ioctl.c
-> @@ -864,7 +864,7 @@ static int create_snapshot(struct btrfs_root *root, struct inode *dir,
->   * inside this filesystem so it's quite a bit simpler.
->   */
->  static noinline int btrfs_mksubvol(struct dentry *parent,
-> -				   struct mnt_idmap *idmap,
-> +				   const struct mnt_idmap *idmap,
->  				   struct qstr *qname, struct btrfs_root *snap_src,
->  				   bool readonly,
->  				   struct btrfs_qgroup_inherit *inherit)
-> @@ -911,7 +911,7 @@ static noinline int btrfs_mksubvol(struct dentry *parent,
->  }
->  
->  static noinline int btrfs_mksnapshot(struct dentry *parent,
-> -				   struct mnt_idmap *idmap,
-> +				   const struct mnt_idmap *idmap,
->  				   struct qstr *qname,
->  				   struct btrfs_root *root,
->  				   bool readonly,
-> diff --git a/fs/internal.h b/fs/internal.h
-> index 2b8cffc22fb3..973436f44770 100644
-> --- a/fs/internal.h
-> +++ b/fs/internal.h
-> @@ -63,7 +63,7 @@ int filename_mknodat(int dfd, struct filename *name, umode_t mode, unsigned int
->  int filename_symlinkat(struct filename *from, int newdfd, struct filename *to);
->  int filename_linkat(int olddfd, struct filename *old, int newdfd,
->  			struct filename *new, int flags);
-> -int vfs_tmpfile(struct mnt_idmap *idmap,
-> +int vfs_tmpfile(const struct mnt_idmap *idmap,
->  		const struct path *parentpath,
->  		struct file *file, umode_t mode);
->  struct dentry *d_hash_and_lookup(struct dentry *, struct qstr *);
-> diff --git a/fs/namei.c b/fs/namei.c
-> index f5e00ae41ed4..14970fe08387 100644
-> --- a/fs/namei.c
-> +++ b/fs/namei.c
-> @@ -3111,7 +3111,7 @@ int lookup_noperm_common(struct qstr *qname, struct dentry *base)
->  	return 0;
->  }
->  
-> -static int lookup_one_common(struct mnt_idmap *idmap,
-> +static int lookup_one_common(const struct mnt_idmap *idmap,
->  			     struct qstr *qname, struct dentry *base)
->  {
->  	int err;
-> @@ -3190,7 +3190,7 @@ EXPORT_SYMBOL(lookup_noperm);
->   *
->   * The caller must hold base->i_rwsem.
->   */
-> -struct dentry *lookup_one(struct mnt_idmap *idmap, struct qstr *name,
-> +struct dentry *lookup_one(const struct mnt_idmap *idmap, struct qstr *name,
->  			  struct dentry *base)
->  {
->  	struct dentry *dentry;
-> @@ -3223,7 +3223,7 @@ EXPORT_SYMBOL(lookup_one);
->   *	    - ERR_PTR(-ENOENT) if parent has been removed, or
->   *	    - ERR_PTR(-EACCES) if parent directory is not searchable.
->   */
-> -struct dentry *lookup_one_unlocked(struct mnt_idmap *idmap, struct qstr *name,
-> +struct dentry *lookup_one_unlocked(const struct mnt_idmap *idmap, struct qstr *name,
->  				   struct dentry *base)
->  {
->  	int err;
-> @@ -3263,7 +3263,7 @@ EXPORT_SYMBOL(lookup_one_unlocked);
->   *	   - same errors as lookup_one_unlocked() or
->   *	   - ERR_PTR(-EINTR) if a fatal signal is pending.
->   */
-> -struct dentry *lookup_one_positive_killable(struct mnt_idmap *idmap,
-> +struct dentry *lookup_one_positive_killable(const struct mnt_idmap *idmap,
->  					    struct qstr *name,
->  					    struct dentry *base)
->  {
-> @@ -3306,7 +3306,7 @@ EXPORT_SYMBOL(lookup_one_positive_killable);
->   *	   - ERR_PTR(-ENOENT) if the name could not be found, or
->   *	   - same errors as lookup_one_unlocked().
->   */
-> -struct dentry *lookup_one_positive_unlocked(struct mnt_idmap *idmap,
-> +struct dentry *lookup_one_positive_unlocked(const struct mnt_idmap *idmap,
->  					    struct qstr *name,
->  					    struct dentry *base)
->  {
-> @@ -3396,7 +3396,7 @@ EXPORT_SYMBOL(lookup_noperm_positive_unlocked);
->   *
->   * Returns: a negative or positive dentry, or an error.
->   */
-> -struct dentry *start_creating(struct mnt_idmap *idmap, struct dentry *parent,
-> +struct dentry *start_creating(const struct mnt_idmap *idmap, struct dentry *parent,
->  			      struct qstr *name)
->  {
->  	int err = lookup_one_common(idmap, name, parent);
-> @@ -3423,7 +3423,7 @@ EXPORT_SYMBOL(start_creating);
->   *
->   * Returns: a positive dentry, or an error.
->   */
-> -struct dentry *start_removing(struct mnt_idmap *idmap, struct dentry *parent,
-> +struct dentry *start_removing(const struct mnt_idmap *idmap, struct dentry *parent,
->  			      struct qstr *name)
->  {
->  	int err = lookup_one_common(idmap, name, parent);
-> @@ -3451,7 +3451,7 @@ EXPORT_SYMBOL(start_removing);
->   *
->   * Returns: a negative or positive dentry, or an error.
->   */
-> -struct dentry *start_creating_killable(struct mnt_idmap *idmap,
-> +struct dentry *start_creating_killable(const struct mnt_idmap *idmap,
->  				       struct dentry *parent,
->  				       struct qstr *name)
->  {
-> @@ -3482,7 +3482,7 @@ EXPORT_SYMBOL(start_creating_killable);
->   *
->   * Returns: a positive dentry, or an error.
->   */
-> -struct dentry *start_removing_killable(struct mnt_idmap *idmap,
-> +struct dentry *start_removing_killable(const struct mnt_idmap *idmap,
->  				       struct dentry *parent,
->  				       struct qstr *name)
->  {
-> @@ -3642,7 +3642,7 @@ int user_path_at(int dfd, const char __user *name, unsigned flags,
->  }
->  EXPORT_SYMBOL(user_path_at);
->  
-> -int __check_sticky(struct mnt_idmap *idmap, struct inode *dir,
-> +int __check_sticky(const struct mnt_idmap *idmap, struct inode *dir,
->  		   struct inode *inode)
->  {
->  	kuid_t fsuid = current_fsuid();
-> @@ -3675,7 +3675,7 @@ EXPORT_SYMBOL(__check_sticky);
->   * 11. We don't allow removal of NFS sillyrenamed files; it's handled by
->   *     nfs_async_unlink().
->   */
-> -int may_delete_dentry(struct mnt_idmap *idmap, struct inode *dir,
-> +int may_delete_dentry(const struct mnt_idmap *idmap, struct inode *dir,
->  		      struct dentry *victim, bool isdir)
->  {
->  	struct inode *inode = d_backing_inode(victim);
-> @@ -3728,7 +3728,7 @@ EXPORT_SYMBOL(may_delete_dentry);
->   *  4. We should have write and exec permissions on dir
->   *  5. We can't do it if dir is immutable (done in permission())
->   */
-> -int may_create_dentry(struct mnt_idmap *idmap,
-> +int may_create_dentry(const struct mnt_idmap *idmap,
->  		      struct inode *dir, struct dentry *child)
->  {
->  	audit_inode_child(dir, child, AUDIT_TYPE_CHILD_CREATE);
-> @@ -4174,7 +4174,7 @@ static inline umode_t vfs_prepare_mode(const struct mnt_idmap *idmap,
->   * On non-idmapped mounts or if permission checking is to be performed on the
->   * raw inode simply pass @nop_mnt_idmap.
->   */
-> -int vfs_create(struct mnt_idmap *idmap, struct dentry *dentry, umode_t mode,
-> +int vfs_create(const struct mnt_idmap *idmap, struct dentry *dentry, umode_t mode,
->  	       struct delegated_inode *di)
->  {
->  	struct inode *dir = d_inode(dentry->d_parent);
-> @@ -4287,7 +4287,7 @@ static int may_open(const struct mnt_idmap *idmap, const struct path *path,
->  	return 0;
->  }
->  
-> -static int handle_truncate(struct mnt_idmap *idmap, struct file *filp)
-> +static int handle_truncate(const struct mnt_idmap *idmap, struct file *filp)
->  {
->  	const struct path *path = &filp->f_path;
->  	struct inode *inode = path->dentry->d_inode;
-> @@ -4863,7 +4863,7 @@ static int do_open(struct nameidata *nd,
->   * On non-idmapped mounts or if permission checking is to be performed on the
->   * raw inode simply pass @nop_mnt_idmap.
->   */
-> -int vfs_tmpfile(struct mnt_idmap *idmap,
-> +int vfs_tmpfile(const struct mnt_idmap *idmap,
->  		const struct path *parentpath,
->  		struct file *file, umode_t mode)
->  {
-> @@ -4921,7 +4921,7 @@ int vfs_tmpfile(struct mnt_idmap *idmap,
->   * hence this is only for kernel internal use, and must not be installed into
->   * file tables or such.
->   */
-> -struct file *kernel_tmpfile_open(struct mnt_idmap *idmap,
-> +struct file *kernel_tmpfile_open(const struct mnt_idmap *idmap,
->  				 const struct path *parentpath,
->  				 umode_t mode, int open_flag,
->  				 const struct cred *cred)
-> @@ -5236,7 +5236,7 @@ EXPORT_SYMBOL(dentry_create);
->   * On non-idmapped mounts or if permission checking is to be performed on the
->   * raw inode simply pass @nop_mnt_idmap.
->   */
-> -int vfs_mknod(struct mnt_idmap *idmap, struct inode *dir,
-> +int vfs_mknod(const struct mnt_idmap *idmap, struct inode *dir,
->  	      struct dentry *dentry, umode_t mode, dev_t dev,
->  	      struct delegated_inode *delegated_inode)
->  {
-> @@ -5378,7 +5378,7 @@ SYSCALL_DEFINE3(mknod, const char __user *, filename, umode_t, mode, unsigned, d
->   *
->   * In case of an error the dentry is dput() and an ERR_PTR() is returned.
->   */
-> -struct dentry *vfs_mkdir(struct mnt_idmap *idmap, struct inode *dir,
-> +struct dentry *vfs_mkdir(const struct mnt_idmap *idmap, struct inode *dir,
->  			 struct dentry *dentry, umode_t mode,
->  			 struct delegated_inode *delegated_inode)
->  {
-> @@ -5485,7 +5485,7 @@ SYSCALL_DEFINE2(mkdir, const char __user *, pathname, umode_t, mode)
->   * On non-idmapped mounts or if permission checking is to be performed on the
->   * raw inode simply pass @nop_mnt_idmap.
->   */
-> -int vfs_rmdir(struct mnt_idmap *idmap, struct inode *dir,
-> +int vfs_rmdir(const struct mnt_idmap *idmap, struct inode *dir,
->  	      struct dentry *dentry, struct delegated_inode *delegated_inode)
->  {
->  	int error = may_delete_dentry(idmap, dir, dentry, true);
-> @@ -5620,7 +5620,7 @@ SYSCALL_DEFINE1(rmdir, const char __user *, pathname)
->   * On non-idmapped mounts or if permission checking is to be performed on the
->   * raw inode simply pass @nop_mnt_idmap.
->   */
-> -int vfs_unlink(struct mnt_idmap *idmap, struct inode *dir,
-> +int vfs_unlink(const struct mnt_idmap *idmap, struct inode *dir,
->  	       struct dentry *dentry, struct delegated_inode *delegated_inode)
->  {
->  	struct inode *target = dentry->d_inode;
-> @@ -5770,7 +5770,7 @@ SYSCALL_DEFINE1(unlink, const char __user *, pathname)
->   * On non-idmapped mounts or if permission checking is to be performed on the
->   * raw inode simply pass @nop_mnt_idmap.
->   */
-> -int vfs_symlink(struct mnt_idmap *idmap, struct inode *dir,
-> +int vfs_symlink(const struct mnt_idmap *idmap, struct inode *dir,
->  		struct dentry *dentry, const char *oldname,
->  		struct delegated_inode *delegated_inode)
->  {
-> @@ -5872,7 +5872,7 @@ SYSCALL_DEFINE2(symlink, const char __user *, oldname, const char __user *, newn
->   * On non-idmapped mounts or if permission checking is to be performed on the
->   * raw inode simply pass @nop_mnt_idmap.
->   */
-> -int vfs_link(struct dentry *old_dentry, struct mnt_idmap *idmap,
-> +int vfs_link(struct dentry *old_dentry, const struct mnt_idmap *idmap,
->  	     struct inode *dir, struct dentry *new_dentry,
->  	     struct delegated_inode *delegated_inode)
->  {
-> diff --git a/fs/open.c b/fs/open.c
-> index 6b1c14e684a9..971e51008e67 100644
-> --- a/fs/open.c
-> +++ b/fs/open.c
-> @@ -36,7 +36,7 @@
->  
->  #include "internal.h"
->  
-> -int do_truncate(struct mnt_idmap *idmap, struct dentry *dentry,
-> +int do_truncate(const struct mnt_idmap *idmap, struct dentry *dentry,
->  		loff_t length, unsigned int time_attrs, struct file *filp)
->  {
->  	int ret;
-> diff --git a/include/linux/fs.h b/include/linux/fs.h
-> index 55d8e7e473ff..935b0f92786f 100644
-> --- a/include/linux/fs.h
-> +++ b/include/linux/fs.h
-> @@ -1761,19 +1761,19 @@ bool inode_owner_or_capable(const struct mnt_idmap *idmap,
->  /*
->   * VFS helper functions..
->   */
-> -int vfs_create(struct mnt_idmap *, struct dentry *, umode_t,
-> +int vfs_create(const struct mnt_idmap *, struct dentry *, umode_t,
->  	       struct delegated_inode *);
-> -struct dentry *vfs_mkdir(struct mnt_idmap *, struct inode *,
-> +struct dentry *vfs_mkdir(const struct mnt_idmap *, struct inode *,
->  			 struct dentry *, umode_t, struct delegated_inode *);
-> -int vfs_mknod(struct mnt_idmap *, struct inode *, struct dentry *,
-> +int vfs_mknod(const struct mnt_idmap *, struct inode *, struct dentry *,
->  	      umode_t, dev_t, struct delegated_inode *);
-> -int vfs_symlink(struct mnt_idmap *, struct inode *,
-> +int vfs_symlink(const struct mnt_idmap *, struct inode *,
->  		struct dentry *, const char *, struct delegated_inode *);
-> -int vfs_link(struct dentry *, struct mnt_idmap *, struct inode *,
-> +int vfs_link(struct dentry *, const struct mnt_idmap *, struct inode *,
->  	     struct dentry *, struct delegated_inode *);
-> -int vfs_rmdir(struct mnt_idmap *, struct inode *, struct dentry *,
-> +int vfs_rmdir(const struct mnt_idmap *, struct inode *, struct dentry *,
->  	      struct delegated_inode *);
-> -int vfs_unlink(struct mnt_idmap *, struct inode *, struct dentry *,
-> +int vfs_unlink(const struct mnt_idmap *, struct inode *, struct dentry *,
->  	       struct delegated_inode *);
->  
->  /**
-> @@ -1787,7 +1787,7 @@ int vfs_unlink(struct mnt_idmap *, struct inode *, struct dentry *,
->   * @flags:             rename flags
->   */
->  struct renamedata {
-> -	struct mnt_idmap *mnt_idmap;
-> +	const struct mnt_idmap *mnt_idmap;
->  	struct dentry *old_parent;
->  	struct dentry *old_dentry;
->  	struct dentry *new_parent;
-> @@ -1798,14 +1798,14 @@ struct renamedata {
->  
->  int vfs_rename(struct renamedata *);
->  
-> -static inline int vfs_whiteout(struct mnt_idmap *idmap,
-> +static inline int vfs_whiteout(const struct mnt_idmap *idmap,
->  			       struct inode *dir, struct dentry *dentry)
->  {
->  	return vfs_mknod(idmap, dir, dentry, S_IFCHR | WHITEOUT_MODE,
->  			 WHITEOUT_DEV, NULL);
->  }
->  
-> -struct file *kernel_tmpfile_open(struct mnt_idmap *idmap,
-> +struct file *kernel_tmpfile_open(const struct mnt_idmap *idmap,
->  				 const struct path *parentpath,
->  				 umode_t mode, int open_flag,
->  				 const struct cred *cred);
-> @@ -2483,7 +2483,7 @@ static inline bool is_idmapped_mnt(const struct vfsmount *mnt)
->  }
->  
->  int vfs_truncate(const struct path *, loff_t);
-> -int do_truncate(struct mnt_idmap *, struct dentry *, loff_t start,
-> +int do_truncate(const struct mnt_idmap *, struct dentry *, loff_t start,
->  		unsigned int time_attrs, struct file *filp);
->  extern int vfs_fallocate(struct file *file, int mode, loff_t offset,
->  			loff_t len);
-> @@ -2721,12 +2721,12 @@ static inline int path_permission(const struct path *path, int mask)
->  	return inode_permission(mnt_idmap(path->mnt),
->  				d_inode(path->dentry), mask);
->  }
-> -int __check_sticky(struct mnt_idmap *idmap, struct inode *dir,
-> +int __check_sticky(const struct mnt_idmap *idmap, struct inode *dir,
->  		   struct inode *inode);
->  
-> -int may_delete_dentry(struct mnt_idmap *idmap, struct inode *dir,
-> +int may_delete_dentry(const struct mnt_idmap *idmap, struct inode *dir,
->  		      struct dentry *victim, bool isdir);
-> -int may_create_dentry(struct mnt_idmap *idmap,
-> +int may_create_dentry(const struct mnt_idmap *idmap,
->  		      struct inode *dir, struct dentry *child);
->  
->  static inline bool execute_ok(struct inode *inode)
-> @@ -3578,7 +3578,7 @@ static inline bool is_sxid(umode_t mode)
->  	return mode & (S_ISUID | S_ISGID);
->  }
->  
-> -static inline int check_sticky(struct mnt_idmap *idmap,
-> +static inline int check_sticky(const struct mnt_idmap *idmap,
->  			       struct inode *dir, struct inode *inode)
->  {
->  	if (!(dir->i_mode & S_ISVTX))
-> diff --git a/include/linux/namei.h b/include/linux/namei.h
-> index 86d657b24fc6..da5b4ccca1b5 100644
-> --- a/include/linux/namei.h
-> +++ b/include/linux/namei.h
-> @@ -70,24 +70,24 @@ extern struct dentry *try_lookup_noperm(struct qstr *, struct dentry *);
->  extern struct dentry *lookup_noperm(struct qstr *, struct dentry *);
->  extern struct dentry *lookup_noperm_unlocked(struct qstr *, struct dentry *);
->  extern struct dentry *lookup_noperm_positive_unlocked(struct qstr *, struct dentry *);
-> -struct dentry *lookup_one(struct mnt_idmap *, struct qstr *, struct dentry *);
-> -struct dentry *lookup_one_unlocked(struct mnt_idmap *idmap,
-> +struct dentry *lookup_one(const struct mnt_idmap *, struct qstr *, struct dentry *);
-> +struct dentry *lookup_one_unlocked(const struct mnt_idmap *idmap,
->  				   struct qstr *name, struct dentry *base);
-> -struct dentry *lookup_one_positive_unlocked(struct mnt_idmap *idmap,
-> +struct dentry *lookup_one_positive_unlocked(const struct mnt_idmap *idmap,
->  					    struct qstr *name,
->  					    struct dentry *base);
-> -struct dentry *lookup_one_positive_killable(struct mnt_idmap *idmap,
-> +struct dentry *lookup_one_positive_killable(const struct mnt_idmap *idmap,
->  					    struct qstr *name,
->  					    struct dentry *base);
->  
-> -struct dentry *start_creating(struct mnt_idmap *idmap, struct dentry *parent,
-> +struct dentry *start_creating(const struct mnt_idmap *idmap, struct dentry *parent,
->  			      struct qstr *name);
-> -struct dentry *start_removing(struct mnt_idmap *idmap, struct dentry *parent,
-> +struct dentry *start_removing(const struct mnt_idmap *idmap, struct dentry *parent,
->  			      struct qstr *name);
-> -struct dentry *start_creating_killable(struct mnt_idmap *idmap,
-> +struct dentry *start_creating_killable(const struct mnt_idmap *idmap,
->  				       struct dentry *parent,
->  				       struct qstr *name);
-> -struct dentry *start_removing_killable(struct mnt_idmap *idmap,
-> +struct dentry *start_removing_killable(const struct mnt_idmap *idmap,
->  				       struct dentry *parent,
->  				       struct qstr *name);
->  struct dentry *start_creating_noperm(struct dentry *parent, struct qstr *name);
-> 
-> -- 
-> 2.53.0
-> 
+diff --git a/fs/ceph/blog_des.c b/fs/ceph/blog_des.c
+new file mode 100644
+index 000000000000..772e60c63be1
+--- /dev/null
++++ b/fs/ceph/blog_des.c
+@@ -0,0 +1,335 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * BLOG record deserialization.
++ */
++
++#include "blog_des.h"
++#include "blog.h"
++#include <linux/string.h>
++#include <linux/ctype.h>
++#include <linux/types.h>
++#include <linux/kernel.h>
++#include <linux/printk.h>
++#include <linux/align.h>
++#include <linux/unaligned.h>
++
++static inline void des_advance(int ret, char **out, size_t *remaining)
++{
++	if (ret > 0) {
++		if ((size_t)ret > *remaining)
++			ret = *remaining;
++		*out += ret;
++		*remaining -= ret;
++	}
++}
++
++/**
++ * blog_des_reconstruct - Reconstructs a formatted string from serialized values
++ * @fmt: Format string containing % specifiers
++ * @buffer: Buffer containing serialized values
++ * @size: Size of the buffer in bytes
++ * @out: Buffer to store the reconstructed string
++ * @out_size: Size of the output buffer
++ */
++int blog_des_reconstruct(const char *fmt, const void *buffer,
++			 size_t size, char *out, size_t out_size)
++{
++	const char *buf_start = (const char *)buffer;
++	const char *buf_ptr = buf_start;
++	const char *buf_end = buf_start + size;
++	const char *fmt_ptr = fmt;
++	char *out_ptr = out;
++	/* Payload budget; snprintf() is called with remaining + 1 so the
++	 * last character that still fits is not dropped for the NUL. */
++	size_t remaining = out_size - 1;
++	size_t arg_count = 0;
++	int ret;
++
++	if (!fmt || !buffer || !out || !out_size) {
++		pr_err_ratelimited("blog_des_reconstruct: invalid params fmt=%p buffer=%p out=%p out_size=%zu\n",
++			fmt, buffer, out, out_size);
++		return -EINVAL;
++	}
++
++	*out_ptr = '\0';
++
++	while (*fmt_ptr && remaining > 0) {
++		int is_long;
++		int is_long_long;
++		int alt_form = 0;
++		int dyn_width = -1;
++		int dyn_precision = -1;
++
++		if (*fmt_ptr != '%') {
++			*out_ptr++ = *fmt_ptr++;
++			remaining--;
++			continue;
++		}
++
++		fmt_ptr++;
++
++		if (*fmt_ptr == '%') {
++			*out_ptr++ = '%';
++			fmt_ptr++;
++			remaining--;
++			continue;
++		}
++
++		/* Skip flags (-+#0 space); remember '#' for hex/octal. */
++		while (*fmt_ptr && (*fmt_ptr == '-' || *fmt_ptr == '+' || *fmt_ptr == '#' ||
++				   *fmt_ptr == '0' || *fmt_ptr == ' ')) {
++			if (*fmt_ptr == '#')
++				alt_form = 1;
++			fmt_ptr++;
++		}
++
++		/* Consume field width: digits are format-only, * is serialized */
++		while (*fmt_ptr && (*fmt_ptr >= '0' && *fmt_ptr <= '9'))
++			fmt_ptr++;
++		if (*fmt_ptr == '*') {
++			if (buf_ptr + sizeof(int) > buf_end)
++				return -EBADMSG;
++			dyn_width = get_unaligned((int *)buf_ptr);
++			buf_ptr += sizeof(int);
++			fmt_ptr++;
++		}
++
++		/* Consume precision: digits are format-only, * is serialized */
++		if (*fmt_ptr == '.') {
++			fmt_ptr++;
++			while (*fmt_ptr && (*fmt_ptr >= '0' && *fmt_ptr <= '9'))
++				fmt_ptr++;
++			if (*fmt_ptr == '*') {
++				if (buf_ptr + sizeof(int) > buf_end)
++					return -EBADMSG;
++				dyn_precision = get_unaligned((int *)buf_ptr);
++				buf_ptr += sizeof(int);
++				fmt_ptr++;
++			}
++		}
++
++		/*
++		 * dyn_width: consumed from the buffer to keep offsets
++		 * aligned; output width-padding is not implemented.
++		 */
++		(void)dyn_width;
++
++		/* Parse length modifiers (l, ll, h, hh, z) */
++		is_long = 0;
++		is_long_long = 0;
++
++		if (*fmt_ptr == 'l') {
++			fmt_ptr++;
++			is_long = 1;
++			if (*fmt_ptr == 'l') {
++				fmt_ptr++;
++				is_long_long = 1;
++				is_long = 0;
++			}
++		} else if (*fmt_ptr == 'h') {
++			fmt_ptr++;
++			if (*fmt_ptr == 'h')
++				fmt_ptr++;
++		} else if (*fmt_ptr == 'z') {
++			fmt_ptr++;
++			if (sizeof(size_t) == sizeof(long long))
++				is_long_long = 1;
++			else
++				is_long = 1;
++		}
++
++		switch (*fmt_ptr) {
++		case 's': {
++			const char *str;
++			size_t str_len;
++			size_t out_len;
++			size_t max_scan_len;
++
++			if (buf_ptr >= buf_end) {
++				pr_err_ratelimited("blog_des_reconstruct: string arg %zu overruns buffer (no space)\n",
++					       arg_count);
++				return -EBADMSG;
++			}
++
++			str = buf_ptr;
++			max_scan_len = buf_end - buf_ptr;
++
++			str_len = strnlen(str, max_scan_len);
++			if (str_len == max_scan_len && str[str_len - 1] != '\0') {
++				pr_err_ratelimited("blog_des_reconstruct: unterminated string at arg %zu (fmt=%s)\n",
++					       arg_count, fmt);
++				return -EBADMSG;
++			}
++
++			buf_ptr += round_up(str_len + 1, 4);
++			if (buf_ptr > buf_end) {
++				pr_err_ratelimited("blog_des_reconstruct: string arg %zu overruns buffer after copy (fmt=%s)\n",
++					       arg_count, fmt);
++				return -EBADMSG;
++			}
++
++			out_len = str_len;
++			if (dyn_precision >= 0 && (size_t)dyn_precision < out_len)
++				out_len = (size_t)dyn_precision;
++			if (out_len > remaining)
++				out_len = remaining;
++			memcpy(out_ptr, str, out_len);
++			out_ptr += out_len;
++			remaining -= out_len;
++			break;
++		}
++		case 'd':
++		case 'i': {
++			if (is_long_long) {
++				long long val;
++
++				if (buf_ptr + sizeof(long long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((long long *)buf_ptr);
++				buf_ptr += sizeof(long long);
++				ret = snprintf(out_ptr, remaining + 1, "%lld", val);
++			} else if (is_long) {
++				long val;
++
++				if (buf_ptr + sizeof(long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((long *)buf_ptr);
++				buf_ptr += sizeof(long);
++				ret = snprintf(out_ptr, remaining + 1, "%ld", val);
++			} else {
++				int val;
++
++				if (buf_ptr + sizeof(int) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((int *)buf_ptr);
++				buf_ptr += sizeof(int);
++				ret = snprintf(out_ptr, remaining + 1, "%d", val);
++			}
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'u': {
++			if (is_long_long) {
++				unsigned long long val;
++
++				if (buf_ptr + sizeof(unsigned long long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long long);
++				ret = snprintf(out_ptr, remaining + 1, "%llu", val);
++			} else if (is_long) {
++				unsigned long val;
++
++				if (buf_ptr + sizeof(unsigned long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long);
++				ret = snprintf(out_ptr, remaining + 1, "%lu", val);
++			} else {
++				unsigned int val;
++
++				if (buf_ptr + sizeof(unsigned int) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned int *)buf_ptr);
++				buf_ptr += sizeof(unsigned int);
++				ret = snprintf(out_ptr, remaining + 1, "%u", val);
++			}
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'o':
++		case 'x':
++		case 'X': {
++			const char *num_fmt;
++
++			if (*fmt_ptr == 'o')
++				num_fmt = is_long_long ? (alt_form ? "%#llo" : "%llo") :
++					  is_long ? (alt_form ? "%#lo" : "%lo") :
++					  (alt_form ? "%#o" : "%o");
++			else if (*fmt_ptr == 'x')
++				num_fmt = is_long_long ? (alt_form ? "%#llx" : "%llx") :
++					  is_long ? (alt_form ? "%#lx" : "%lx") :
++					  (alt_form ? "%#x" : "%x");
++			else
++				num_fmt = is_long_long ? (alt_form ? "%#llX" : "%llX") :
++					  is_long ? (alt_form ? "%#lX" : "%lX") :
++					  (alt_form ? "%#X" : "%X");
++
++			if (is_long_long) {
++				unsigned long long val;
++
++				if (buf_ptr + sizeof(unsigned long long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long long);
++				ret = snprintf(out_ptr, remaining + 1, num_fmt, val);
++			} else if (is_long) {
++				unsigned long val;
++
++				if (buf_ptr + sizeof(unsigned long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long);
++				ret = snprintf(out_ptr, remaining + 1, num_fmt, val);
++			} else {
++				unsigned int val;
++
++				if (buf_ptr + sizeof(unsigned int) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned int *)buf_ptr);
++				buf_ptr += sizeof(unsigned int);
++				ret = snprintf(out_ptr, remaining + 1, num_fmt, val);
++			}
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'p': {
++			void *ptr;
++
++			if (buf_ptr + sizeof(void *) > buf_end)
++				return -EBADMSG;
++
++			ptr = (void *)(unsigned long)get_unaligned((unsigned long *)buf_ptr);
++			buf_ptr += sizeof(void *);
++
++			/*
++			 * Skip kernel %p sub-specifiers (U, I, d, D, etc.).
++			 * bout/boutc do not support %p extensions; call sites
++			 * must pre-format them with snprintf and pass %s.
++			 */
++			while (fmt_ptr[1] && isalnum(fmt_ptr[1]))
++				fmt_ptr++;
++
++			ret = snprintf(out_ptr, remaining + 1, "%p", ptr);
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'c': {
++			char val;
++
++			if (buf_ptr + sizeof(int) > buf_end)
++				return -EBADMSG;
++
++			val = (char)get_unaligned((int *)buf_ptr);
++			buf_ptr += sizeof(int);
++
++			if (remaining > 0) {
++				*out_ptr++ = val;
++				remaining--;
++			}
++			break;
++		}
++		default:
++			pr_err_ratelimited("%s: unsupported format specifier '%%%c' at argument %zu\n",
++				       __func__, *fmt_ptr, arg_count);
++			return -EINVAL;
++		}
++
++		fmt_ptr++;
++		arg_count++;
++	}
++
++	*out_ptr = '\0';
++
++	return out_ptr - out;
++}
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.34.1
+
