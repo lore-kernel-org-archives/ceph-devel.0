@@ -1,88 +1,88 @@
 Received: from mx0b-00364e01.pphosted.com (mx0b-00364e01.pphosted.com [148.163.139.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5564A4AA3E6
-	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2026 16:35:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53CEC472092
+	for <ceph-devel@vger.kernel.org>; Wed,  2 Sep 2026 16:35:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.139.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788366937; cv=none; b=KZ67ZUQblEovaW2onZSLzgXUlAjmVxUXuXDotXasINLuRn8BLYn108H8yeM/d1wY2lGvoCmjz4eborSw+I26li/cwUq0Ohnh08mjppT9pZAxGhgB4jMe717dNJYG0OhlOxByCtzeynuG5KdAuULFYwLlyQfdcNv2ocJg6klJboM=
+	t=1788366938; cv=none; b=tCqFuhq9mU7qrqPwBLhu5JFiOnu8fWTKtxnLOaD+oHTw5ajX4l372UflsVIzJYzJweYNE4enVlkd00xj1MDvAfU/V3uhXTjCGPCwM23g16qTeOj5DvEaexkcXEwvAPElYQOmeVqPFDEjBcz0CrGTvw8kGJFg4O2vtWWyYT2LFMs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788366937; c=relaxed/simple;
-	bh=b+4cr//KTHdtH9y3belFVKy6m9NQe1/PbGrSu+2Fbo4=;
+	s=arc-20240116; t=1788366938; c=relaxed/simple;
+	bh=FKNO/gpmAVt+VDw7el0xjVHLO1MIiNJKgMXIKJGAeK0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=mvocEroc1lRbWe7P1iJym1h/aQXaE6bvpVQHDXbjaUqYUd8QfU16WLcT3+Isz5wjzuC4MSbQKDN0/PhQfOYIsrmU1qOVZsErEqw0S2O6XsjzUhXUJqNoK8CvL7GhVBUFxtX8hqROpFYsgouRlzTY6cVw+kwIeVLIPWdx+OXQSuc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=WHiV+VVb; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=o3mrWc5Q; arc=none smtp.client-ip=148.163.139.74
+	 In-Reply-To:To:Cc; b=ZLftCVpBYvxx0YBp8sk9RKBWwqXGw4irdpDNSSAE6fe7YwZVE9em9axHGNh/31zK7a43BUITDWlouCZvQ8wMqJMYhgjRKw4kBHO6gOiOyHQhNekihoLRE1GIfBKY3BH5boxONNovRhc8JOfpcvzVBxnNSMYNBwdaVc6xStkeR8k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=G5/2Wf4s; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=qb7LErgT; arc=none smtp.client-ip=148.163.139.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="WHiV+VVb";
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="o3mrWc5Q"
-Received: from pps.filterd (m0167073.ppops.net [127.0.0.1])
-	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 682GZ5ic621520
-	for <ceph-devel@vger.kernel.org>; Wed, 2 Sep 2026 12:35:34 -0400
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="G5/2Wf4s";
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="qb7LErgT"
+Received: from pps.filterd (m0499198.ppops.net [127.0.0.1])
+	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 682GYv8k1055261
+	for <ceph-devel@vger.kernel.org>; Wed, 2 Sep 2026 12:35:35 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pps01; bh=rGQy
-	tyu+hfKlnP9ENWv2ki4cFbW5IycOKsm9AkBuG18=; b=WHiV+VVbMsaN1sFM3prF
-	2Lfipm/ZvQgVmA26ooifoRsLAKxxBYY64gqpilEERsPGsFx3Q1jEsaTcuUCPaVOp
-	PLXz+dp0RqaVw2xFkam2QXYVJKZn+hmP5ZYiybJqlvBvPC/O/SCePvdiz0zQZvDo
-	FK3Mix6m2C2zgJPt+p2ZrXAb2jKf1g2SPvOCXrS1zeuGdJwO1VUVf3Nr1eIn6bZK
-	x+h0dRBWuW7hobOQz73pTJLtykCtxf/AQbb2w7jQEOKsdlvhfe2ZVDSiCH+hzF2e
-	S9Vm8hZp+3fFBCUMIx0sSPgoMsGogf1WjgSuY79SaL95XW7B9ByX5WY4A6ypqTvy
-	hw==
-Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com [209.85.219.70])
-	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4ge833w640-1
+	:message-id:mime-version:references:subject:to; s=pps01; bh=GTwc
+	o3hmUZRwt41gI95cTAhbEEbMLzY1+oJYH554KZY=; b=G5/2Wf4sfp+nLTaNfhyM
+	eBhy3vvGhz0z/aOeesEV+cXgTaYY/dPfKNC5976Fv/yCx9tBoPkSGMQkL3okQRjL
+	YpNdGmhtdcRuRJIDUxVbVmxv7LRebB+RnpSvecGQQ1W4ovsfT1s+X/bNb1r0gQS7
+	LaQn2KtYb/4YgT7pPhdTNOrkjsIqs7BSMfrohCjjBmnHKMtlQR+Pc3xPupHOSK7Z
+	DuL/TcRiUo2N1Doid8IeSiTd54xbCQ6u8tetgtX3G0cLpy6eMJVQNGrU4UGrKrrl
+	sq5Ak44RosC3uOZNR9Veo+4YlE6AmfBDjbX1XVzaK4MCShJcLRREoRA7q3qzN2qB
+	Vw==
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com [209.85.219.72])
+	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4gegv7u6ya-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 12:35:33 -0400 (EDT)
-Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-90cddf4f59eso23954666d6.3
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 09:35:33 -0700 (PDT)
+	for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 12:35:34 -0400 (EDT)
+Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-90ceabcd64aso27020566d6.3
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Sep 2026 09:35:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=columbia.edu; s=lionmail; t=1788366933; x=1788971733; darn=vger.kernel.org;
+        d=columbia.edu; s=lionmail; t=1788366934; x=1788971734; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :content-type:mime-version:subject:date:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=rGQytyu+hfKlnP9ENWv2ki4cFbW5IycOKsm9AkBuG18=;
-        b=o3mrWc5QS8uCQHneWoN3KQDU/PWOSp3HuD7Nk+l9A6cOFAyAeiHZ+4px4LtIPavMsE
-         i05009V+7ysuMZdy3lmeVvySMU7NGhkLTO4m45lSU01qlUxnJ7MoHhcKkFPeqggrhoRn
-         SPkNCCz/CByQxdYNwAE/l8CHNu7Ugro8nkv3sVph+NDh4sSVbcAvB3z3rEqjcqeVbIT8
-         6A7dK0So23f3aXVlRwKBXKMrfyMkG0nIJFjIU4nDp0sQqzYjrvlyyoazoUNLIorn6x0i
-         y0+cqxW+T8RGyU67CTMtkAqhBJQv6j6mG+oHrp4aHvuqT4f2FHyOQIbnYSQsw78FMEMS
-         GCNA==
+        bh=GTwco3hmUZRwt41gI95cTAhbEEbMLzY1+oJYH554KZY=;
+        b=qb7LErgTIcfjnQpOt4yLwju3QOP6e8f/XVxjAvvKGuDbhvweGUbO0chLdh9FK8jK2z
+         5wBdS0+DPzrCrKziBAl72b/9XqEf7Xpl86u4VVx9aPQCj6nOXL/XVu753Vf9AtRVTUBO
+         thzjLLCogQu/CbZtJue09ypGp5HpDY+bMNLXXEdVcO0Vvpqn06nkvWK+j0t6GdAjRYqm
+         SmQ+bFpywsN2y64DIHFZh4dR2Q/E4ga2ozFAhxUQJMO5DwcEk/y3nHDM+Jxby12gaBYt
+         Rv+VANZ3RHCvGCf5NIW2vk1xrKCqM5pgSQ7lHXDhJhpb7zQgxwi8xXkfvGzuWrMpaV+t
+         rdkg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788366933; x=1788971733;
+        d=1e100.net; s=20251104; t=1788366934; x=1788971734;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :content-type:mime-version:subject:date:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=rGQytyu+hfKlnP9ENWv2ki4cFbW5IycOKsm9AkBuG18=;
-        b=nK+CIVIfrKeCOwr7Bk2s1c7iyjDeRLVVp+bbLgjkuVGSno8tImGpXljkMvxP+krZin
-         5NFZHuJVrkWuRJVd7tGELwy6nNjlHKWPnGSx2/zsS/Wcbmpn7906v5QPb7N3QIA159yt
-         etX0jpw67x8eVzp4zzzYu22Ws3eKAQ6eR/nixpQS5LMgJnJTZDV6Y+XXaCf1uL3e0Fj8
-         2A3OPhEZhT1jaHsPqNAQV5vOmCaS+fi4k+ZXc8WDDyklmhJSf+19Q6uVB2fsNwc50kc9
-         aTK2yguguK9FAe1AEX5aOctPftdWmgiJV+pyX2WZlsYdFkRAo+YaMfTBF+4YWOeQBxtd
-         Zxyg==
-X-Forwarded-Encrypted: i=1; AHgh+RqE9KvJ0d14gC29VJ2NFXRL1Ocq+NiFSYdRhJfpquILC/ACgWoLlroKD6AIzizgjv4WnVpJ1CngVKBQ@vger.kernel.org
-X-Gm-Message-State: AFuF++nzLCp3w3UrudGFlM2EjLaeRwXv7GmNZwGbtIihe/udVKfOu2ve
-	0o7yKKfe/WcuT5S9HsaxQMTTBlSqsZBFbNHgMOv0Jw35d/L1qtYi13jQMghbsLYwl901aDxCdRt
-	ssPaSK2Gbc5w0Lhf8GZzNZdWTab/UziWedLn3CbsK2XWaPCuCX8l8q4Q/COI=
-X-Gm-Gg: AR+sD12zT/IUrkAsSNZEmX398VvNPa/BhEUALGjyJnfmmAjshFf1FUsoMfKPeF+yhWP
-	9OjnEdOziYagfrz0fLM2djsdFQlOWSMtTK5b978yW3amR34ngzenVxOH8MMXAO9rG1+XTkH4ZPG
-	LviBDWserW+J5+sndCFGwGEAbjngJEW1G7+sTRzI+OGmdSeX/NK1fEyjLxOnW1VJhZGeCDQVYyv
-	Is95VCDZQ7xvCPYxHH4udSafJCqq+hD1/54LndZLWIH+qQBOvuqxMAyjFh9ty58fE0TmDXS42hI
-	huCr2GbcfX4EgTAhgEmQghZaZb3s2eo2J75CWT9IanwS9XLhBOgHno4/u0FjSoyr6e82wdhMwPM
-	0xq0hBmqqgb/BJ0wy+e6cL6NfI8/cwg2EImXgPV+afklNOsMNNdAugw==
-X-Received: by 2002:a05:620a:450f:b0:939:13a7:70f0 with SMTP id af79cd13be357-93960ccf33dmr685802485a.5.1788366933295;
+        bh=GTwco3hmUZRwt41gI95cTAhbEEbMLzY1+oJYH554KZY=;
+        b=c6U5vsaSHKlmJZ1o4HbyWqBsDu/oA8CKoZHMyjhfxoQaHjulvhPboq7s2NOhVKb0cu
+         O9A8m3eEYZyuMxQMMUpKKvs0PddZ9Ix1KOxYhKr59nb/WhKXIH/hAwpapUKL/+wJXfKm
+         1ODnXzOOH6DyNGPEz6rWkvZm1gNKbmQFvyEkvs0o4GRxXfJrdIO1Bdxq7trkJvWcdWdv
+         GmqAwIopyLkLdXp+xkyjYtCBQUlPFnF8Y3VpcfVsliUkVGkXdITnU/ATYfXpDVdgF2Do
+         mUfb6izq5Tdn0B5yodR7cCDt42Brt49us30r9Jbm7urpyf/S3xkC3G51JazNnyjz082Q
+         wBDQ==
+X-Forwarded-Encrypted: i=1; AKwUvByvSqHgF/DPZdZ4Nfg6rT7VLkKZ/AL500ks6r+b7L4jJVoHKVrNu6czmvf8c1EynxK3UdlcJxnCndFk@vger.kernel.org
+X-Gm-Message-State: AFuF++mh8fEBvMf0JZYxRDoFcAWpoCYO9uLaotkSSt4CHkUG1jVcpZAm
+	0jFy1J50Its4LH36K2UOTqKp3QQbEP3GhXJdNMd31KOnKO/BMnvoLB1+2YOSD/W0yyntnH6T/K2
+	h9x4/KuTqxBDBxa0l4W6zibhnANStp5ox8UxT3UIcnN37RNy26lBeo70fQOA=
+X-Gm-Gg: AYBFou35916osCnOJoBTC9RqzNv5DNqTApaqUdsyFKjWYlbyOVRL4QnZaGTvqbntles
+	alvzNo35ecVVW81H0Tu48eAbrJMzn3ilzr1jpPusgmzzQAnBGQJdwkQ3QAMGeisGeAQZp95CEmT
+	Ft6CbdQpaoG4OIlUKz+UuCGIJq0AsU22dGriNnKIoWP4CwI4Gl4HQwKJUvg93C7+HZojIUQwlgx
+	1N4FVHZmrMPM9MqtLTdynuta7SCDpfDpzdtgP0Gu59ypHVF7quLnPFtF68AhK0Rtk8Gi/UEhYJX
+	i8da8FeiU5D5DQvARe2da4U9STePFr7AenBVoNCU4P1iUxDfLHlBa4HXqO2m+IWRnMJoZ1rMCxT
+	XMPHVNXK6SwTf6DA7h7fASzr0e7NmN7PKKpZcD/uRD68yGyqZq10Tlg==
+X-Received: by 2002:a05:6214:3d9b:b0:90e:98b2:f594 with SMTP id 6a1803df08f44-90eca37a1eamr95960476d6.17.1788366934279;
+        Wed, 02 Sep 2026 09:35:34 -0700 (PDT)
+X-Received: by 2002:a05:6214:3d9b:b0:90e:98b2:f594 with SMTP id 6a1803df08f44-90eca37a1eamr95959726d6.17.1788366933830;
         Wed, 02 Sep 2026 09:35:33 -0700 (PDT)
-X-Received: by 2002:a05:620a:450f:b0:939:13a7:70f0 with SMTP id af79cd13be357-93960ccf33dmr685796985a.5.1788366932798;
-        Wed, 02 Sep 2026 09:35:32 -0700 (PDT)
 Received: from [127.0.1.1] (nat-128-59-178-193.net.columbia.edu. [128.59.178.193])
         by smtp.gmail.com with ESMTPSA id 6a1803df08f44-90e9eef5067sm21805726d6.34.2026.09.02.09.35.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Sep 2026 09:35:32 -0700 (PDT)
+        Wed, 02 Sep 2026 09:35:33 -0700 (PDT)
 From: Tal Zussman <tz2294@columbia.edu>
-Date: Wed, 02 Sep 2026 12:35:09 -0400
-Subject: [PATCH v2 3/5] ceph: use a folio in the READ_INLINE path of
- ceph_read_iter()
+Date: Wed, 02 Sep 2026 12:35:10 -0400
+Subject: [PATCH v2 4/5] ceph: convert ceph_fill_inline_data() to take a
+ folio
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -91,7 +91,7 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260902-ceph-inline-folio-v2-3-6c9098112352@columbia.edu>
+Message-Id: <20260902-ceph-inline-folio-v2-4-6c9098112352@columbia.edu>
 References: <20260902-ceph-inline-folio-v2-0-6c9098112352@columbia.edu>
 In-Reply-To: <20260902-ceph-inline-folio-v2-0-6c9098112352@columbia.edu>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
@@ -100,108 +100,174 @@ Cc: "Matthew Wilcox (Oracle)" <willy@infradead.org>,
         ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
         Tal Zussman <tz2294@columbia.edu>
 X-Mailer: b4 0.17-dev-db0b7
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1788366929; l=2358;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1788366929; l=4383;
  i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
- bh=b+4cr//KTHdtH9y3belFVKy6m9NQe1/PbGrSu+2Fbo4=;
- b=Da4oX/LTHkK/aaEoVeFCIuUv6xwKj0ErZkO66RR5jrhwVLBo76PSFr8Nt+lRCyVKoSunh5Zbc
- flwmJOJQx1nCHwdg1mH7hy6hbdsSxTFXhNTaACXoSFU6CufxJYJTZAc
+ bh=FKNO/gpmAVt+VDw7el0xjVHLO1MIiNJKgMXIKJGAeK0=;
+ b=UhYWP6M6sORULWDfmLlyNcydClno0w8htjUfHIgnBlxtwz0xplWEFIk0Y1dWAVmjsUVMtbFvZ
+ 96nylYeIw1EALKDWJaQjsfNrU+p1lYZioTT4n8xbMfbsBVSuGzGzXdE
 X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
  pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
-X-Proofpoint-GUID: -6A6KGcF3XUw7vsrbze3FQD1oBuxEF-Y
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTAyMDE0NSBTYWx0ZWRfX4TE/5JC9vNRO
- /NYqGoOy1cxNSn1jKRDJA+kYvc8DPhLY3WizD+IE3qj10SNUpimQ+B20btqfJRNf/PSaYan2UuL
- 03i+5gH62fuSC2I4XEVICcS4c0Jp8/oi40No0EXHNbIAWl0MRT+0
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTAyMDE0NSBTYWx0ZWRfXzJbja21HIeZY
- 1R95KEZn3SsL3CWGtGe7lGMALl01+ZYKV+X67P00/+24XlewrkVr/FnRDrg5uXU6K4tBx+nyNDz
- ebkVrtIqUDhg6D/0teatZPVS8Kjizf+beYMSoIpU82zYyTZxjjqACLNOAusmlctqtmUP1ECjroX
- DRN3NxzVDLj4Sd+2QPv80+HGtt88GH9P4zRmg8G9djSn2tiEGb4pdttxk27YX5xqHwpQJG2Q8Dj
- bimkkU/LJyF64bvRw+wHu1qJ51ErXQ8p0uqyPntgZISRXaDbTmCPiTxLeSEP7Ldl3rbbIp/c1XQ
- hfrO6OqzofeWyaUR8Jfubyg/L7lf3YpemQPyre3+KhA9Z0umPh+p7cdX7roczNp1zTRD2CalxiM
- 2/YUR4YXu1I3OPi+XsHM5IRmAjGKVM7aUvE+AK0zNIKo97VoZrB2oB1Mhfaujb0almQGnMzJ3OM
- W+yoK+WA2pVSjbOQ9Pg==
-X-Authority-Analysis: v=2.4 cv=ZpPd7d7G c=1 sm=1 tr=0 ts=6a985055 cx=c_pps
- a=oc9J++0uMp73DTRD5QyR2A==:117 a=XwBYxoxBwSosfWEfMcqm5A==:17
- a=lYjiPEibtFqA77pR:21 a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10 a=x7bEGLp0ZPQA:10
- a=A0y_DWxS2BwA:10 a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22
- a=jHxIr1HyPKZ_Q5_91PL3:22 a=lJkK8zq6xVIZ8jstRnwA:9
- a=+jEqtf1s3R9VXZ0wqowq2kgwd+I=:19 a=QEXdDO2ut3YA:10 a=iYH6xdkBrDN1Jqds4HTS:22
-X-Proofpoint-ORIG-GUID: -6A6KGcF3XUw7vsrbze3FQD1oBuxEF-Y
+X-Proofpoint-ORIG-GUID: 2y14QSGSRQDghQlW-otEzCo9baPxUaf2
+X-Proofpoint-GUID: 2y14QSGSRQDghQlW-otEzCo9baPxUaf2
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTAyMDE0NSBTYWx0ZWRfX60fB3H/dhlkN
+ 60vLv5WVFUqLF3poAWbKmAvcB8R+bGhNQ7zd//me5mCA+Kta5GyD6ejzhaIP0ck+VFBPoN175Zf
+ DloRXtAqRjuYp5SvEkQzkc9Ig7bZ5mE2vXLECSqSVhATRmh/UPag
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTAyMDE0NSBTYWx0ZWRfX0gzFOyxRLaif
+ GWv71W1wse2hh8vNkpY6rB7kqp6cMHhytN+7nsuIhqlHTml1lWR6B1OdY6KNMrLZTsy5r0WuJIk
+ GWSWvKMXX3s/Nv4lCk0EnuMEF7FXkfrUWqFakwSZ/RGDCh+D2ZSVk2+gtqRuHOi6yoakpxxy3CR
+ fzcdulQl4J+we7cG7rJi/D5k95C/Bj+tAR8D7fBax1m8By0GYp5Wzs1QpBEpqTt3LxFNIHUZ1yB
+ 7Cci8uvR31UGpMsYTUQAEZ/Xr3b1QsBBmcJ0aaybZQBgr4OIN1Uv12yMiY8VMIPxo1m+P2Bpi2l
+ a0c2Q1dawa73+2pi34vUEOWnoW0a5VqquGuc6X+VSLGR4IfQvTqlb2N/VsBjNvtVpPbterJrbTC
+ kR/n1cqvrE1BciHDDkkp9JcXRcwEJ8iN8+YbvuVzxm2bOWMCUv8s8jziugn+qxdO5nwve9R+Ckm
+ qqD7uMCUzOUN5Hldu8w==
+X-Authority-Analysis: v=2.4 cv=JcCMa0KV c=1 sm=1 tr=0 ts=6a985056 cx=c_pps
+ a=7E5Bxpl4vBhpaufnMqZlrw==:117 a=XwBYxoxBwSosfWEfMcqm5A==:17
+ a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10 a=x7bEGLp0ZPQA:10 a=A0y_DWxS2BwA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=BpGzv1V74M3SfeTrGa8v:22
+ a=WbdBKpkgloUaICT7gCgA:9 a=QEXdDO2ut3YA:10 a=pJ04lnu7RYOZP9TFuWaZ:22
 X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11894
  signatures=596817
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=10 suspectscore=0 adultscore=0 clxscore=1015 spamscore=0
- phishscore=0 impostorscore=10 priorityscore=1501 bulkscore=10 malwarescore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2609020145
+ impostorscore=10 spamscore=0 suspectscore=0 adultscore=0 bulkscore=10
+ malwarescore=0 clxscore=1015 phishscore=0 lowpriorityscore=10
+ priorityscore=1501 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2609020145
 
-The inline data is read into a scratch buffer that never enters the page
-cache, so allocate it with folio_alloc() instead of
-__page_cache_alloc(). This drops the cpuset page spreading that
-__page_cache_alloc() applies on NUMA systems, which only makes sense for
-page cache pages. The temporary buffer here is better off node local.
+Convert the internals to folio APIs and pass a folio in from
+ceph_fill_inode(). The kmap_atomic()/memcpy() pair becomes
+memcpy_to_folio(), which also flushes the dcache, so drop the explicit
+flush from the folio creation path. When a locked folio is passed in,
+the callers flush after filling it, so the flush in memcpy_to_folio()
+is redundant there, but harmless.
 
-The mismatched __free_page()/__free_pages() pair both become
-folio_put(). The __ceph_do_getattr() locked page plumbing will be
-converted in a later patch, so pass &folio->page for now.
+This removes the last caller of find_or_create_page() in ceph and saves
+six calls to compound_head(). The page_folio() call added in
+ceph_fill_inode() goes away once the locked page plumbing is converted.
+
+Remove extern from the function declaration while at it.
 
 Signed-off-by: Tal Zussman <tz2294@columbia.edu>
 ---
- fs/ceph/file.c | 19 ++++++++++---------
- 1 file changed, 10 insertions(+), 9 deletions(-)
+ fs/ceph/addr.c  | 47 +++++++++++++++++++++--------------------------
+ fs/ceph/inode.c |  3 ++-
+ fs/ceph/super.h |  6 +++---
+ 3 files changed, 26 insertions(+), 30 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index d5606456dbd5..f0e77a1ab4d1 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -2247,21 +2247,22 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 16681133cf17..71d9f7bdb0c6 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -2190,50 +2190,45 @@ static vm_fault_t ceph_page_mkwrite(struct vm_fault *vmf)
+ }
  
- 	if (retry_op > HAVE_RETRIED && ret >= 0) {
- 		int statret;
--		struct page *page = NULL;
-+		struct folio *folio = NULL;
- 		loff_t i_size;
- 		int mask = CEPH_STAT_CAP_SIZE;
- 		if (retry_op == READ_INLINE) {
--			page = __page_cache_alloc(GFP_KERNEL);
--			if (!page)
-+			folio = folio_alloc(GFP_KERNEL, 0);
-+			if (!folio)
- 				return -ENOMEM;
+ #ifdef CONFIG_CEPH_FS_INLINE_DATA
+-void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
++void ceph_fill_inline_data(struct inode *inode, struct folio *locked_folio,
+ 			   char	*data, size_t len)
+ {
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	struct address_space *mapping = inode->i_mapping;
+-	struct page *page;
++	struct folio *folio;
  
- 			mask = CEPH_STAT_CAP_INLINE_DATA;
- 		}
- 
--		statret = __ceph_do_getattr(inode, page, mask, !!page);
-+		statret = __ceph_do_getattr(inode, folio ? &folio->page : NULL,
-+					    mask, !!folio);
- 		if (statret < 0) {
--			if (page)
--				__free_page(page);
-+			if (folio)
-+				folio_put(folio);
- 			if (statret == -ENODATA) {
- 				BUG_ON(retry_op != READ_INLINE);
- 				goto again;
-@@ -2278,8 +2279,8 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- 						   iocb->ki_pos + len);
- 				end = min_t(loff_t, end, PAGE_SIZE);
- 				if (statret < end)
--					zero_user_segment(page, statret, end);
--				ret = copy_page_to_iter(page,
-+					folio_zero_segment(folio, statret, end);
-+				ret = copy_folio_to_iter(folio,
- 						iocb->ki_pos & ~PAGE_MASK,
- 						end - iocb->ki_pos, to);
- 				iocb->ki_pos += ret;
-@@ -2292,7 +2293,7 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- 				iocb->ki_pos += ret;
- 				read += ret;
- 			}
--			__free_pages(page, 0);
+-	if (locked_page) {
+-		page = locked_page;
++	if (locked_folio) {
++		folio = locked_folio;
+ 	} else {
+ 		if (i_size_read(inode) == 0)
+ 			return;
+-		page = find_or_create_page(mapping, 0,
+-					   mapping_gfp_constraint(mapping,
+-					   ~__GFP_FS));
+-		if (!page)
++		folio = __filemap_get_folio(mapping, 0,
++				FGP_LOCK | FGP_ACCESSED | FGP_CREAT,
++				mapping_gfp_constraint(mapping, ~__GFP_FS));
++		if (IS_ERR(folio))
+ 			return;
+-		if (PageUptodate(page)) {
+-			unlock_page(page);
+-			put_page(page);
++		if (folio_test_uptodate(folio)) {
++			folio_unlock(folio);
 +			folio_put(folio);
- 			return read;
+ 			return;
  		}
+ 	}
  
+-	doutc(cl, "%p %llx.%llx len %zu locked_page %p\n", inode,
+-	      ceph_vinop(inode), len, locked_page);
++	doutc(cl, "%p %llx.%llx len %zu locked_folio %p\n", inode,
++	      ceph_vinop(inode), len, locked_folio);
+ 
+-	if (len > 0) {
+-		void *kaddr = kmap_atomic(page);
+-		memcpy(kaddr, data, len);
+-		kunmap_atomic(kaddr);
+-	}
++	if (len > 0)
++		memcpy_to_folio(folio, 0, data, len);
+ 
+-	if (page != locked_page) {
+-		if (len < PAGE_SIZE)
+-			zero_user_segment(page, len, PAGE_SIZE);
+-		else
+-			flush_dcache_page(page);
++	if (folio != locked_folio) {
++		if (len < folio_size(folio))
++			folio_zero_segment(folio, len, folio_size(folio));
+ 
+ 		if (len > 0)
+-			SetPageUptodate(page);
++			folio_mark_uptodate(folio);
+ 
+-		unlock_page(page);
+-		put_page(page);
++		folio_unlock(folio);
++		folio_put(folio);
+ 	}
+ }
+ 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 209e8972287d..21d72b7667bc 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1454,7 +1454,8 @@ int ceph_fill_inode(struct inode *inode, struct page *locked_page,
+ 	ceph_fscache_register_inode_cookie(inode);
+ 
+ 	if (fill_inline)
+-		ceph_fill_inline_data(inode, locked_page,
++		ceph_fill_inline_data(inode,
++				      locked_page ? page_folio(locked_page) : NULL,
+ 				      iinfo->inline_data, iinfo->inline_len);
+ 
+ 	if (wake)
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index f3d99027e193..ed750ea73d85 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1434,8 +1434,8 @@ int ceph_purge_inode_cap(struct inode *inode, struct ceph_cap *cap, bool *invali
+ 
+ #ifdef CONFIG_CEPH_FS_INLINE_DATA
+ extern int ceph_uninline_data(struct file *file);
+-extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
+-				  char *data, size_t len);
++void ceph_fill_inline_data(struct inode *inode, struct folio *locked_folio,
++			   char *data, size_t len);
+ 
+ static inline u64 ceph_inline_version(const struct ceph_inode_info *ci)
+ {
+@@ -1459,7 +1459,7 @@ static inline int ceph_uninline_data(struct file *file)
+ }
+ 
+ static inline void ceph_fill_inline_data(struct inode *inode,
+-					 struct page *locked_page,
++					 struct folio *locked_folio,
+ 					 char *data, size_t len)
+ {
+ }
 
 -- 
 2.39.5
