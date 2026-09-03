@@ -1,67 +1,35 @@
-Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0E5B40F8E3;
-	Thu,  3 Sep 2026 10:48:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DD0D37FF53;
+	Thu,  3 Sep 2026 16:11:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788432504; cv=none; b=iDIfsDY+SMgilaJyFiGlwt8gbuh+lLw29DcGpYIfk4Wq9AG3jEgp0Qx1Bu5ATD9dQYrmi8j58CQllAQgenPX/UAJ+r/ztvl+XnNkrEXpkv90Ixtjsug0h4dUhL6OejfmH6vVVMOO4Vr3NNjnPfClAoy9ryNdCMloS4RNsiQnUrM=
+	t=1788451866; cv=none; b=YJnZE4o/+nhg7hgl67cJliBGprlblhdpqzJhzh0rsiFdf7yf0jiPcD5Wg39hHA+aC5NXxJw0qwAphzoNp2HWPROBKm5mCy5Yke65PyvS5A0hpqmzILxT9Zom5HpBAVx4OBnN/+l9QL7ZQf3S/rnH1x6iDvbaVtAkdsT1XwvXXto=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788432504; c=relaxed/simple;
-	bh=gwTSc64pkHgPgsanVKcuL2s/zoNRDsEMhK6TOPry8Gg=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=u92VsAUQt+7kkUCv6eivcbVe6iw5wnvglvs7+vpWqBVJSQW6kcmlWqF5w/Xo3SGJHCREbtDB1ZwFbjg8UcJdF4o566DN1m0Nxhi/cm05Lij1zxqQ44BrYHrtTjtk4IUsbp7vvVzZrSX2Mn12yrq+hBVUrZu4QE7l3yfVW1HFPHY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
-X-UUID: f4633224a78411f19a56ed5b684f684d-20260903
-X-CTIC-Tags:
-	HR_CC_COUNT, HR_CC_DOMAIN_COUNT, HR_CC_NAME, HR_CC_NO_NAME, HR_CTE_8B
-	HR_CTT_MISS, HR_DATE_H, HR_DATE_WKD, HR_DATE_ZONE, HR_FROM_NAME
-	HR_SJ_LANG, HR_SJ_LEN, HR_SJ_LETTER, HR_SJ_NOR_SYM, HR_SJ_PHRASE
-	HR_SJ_PHRASE_LEN, HR_SJ_WS, HR_TO_COUNT, HR_TO_DOMAIN_COUNT, HR_TO_NO_NAME
-	IP_TRUSTED, SRC_TRUSTED, DN_TRUSTED, SA_TRUSTED, SA_EXISTED
-	SN_TRUSTED, SN_EXISTED, SPF_NOPASS, DKIM_NOPASS, DMARC_NOPASS
-	CIE_GOOD, CIE_GOOD_SPF, GTI_FG_BS, GTI_RG_INFO, GTI_C_BU
-	AMN_GOOD, ABX_MISS_RDNS
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.3.19,REQID:d7e4669d-066f-40bc-a177-4806e663f3c6,IP:15,
-	URL:0,TC:0,Content:-5,EDM:-20,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACT
-	ION:release,TS:-10
-X-CID-INFO: VERSION:1.3.19,REQID:d7e4669d-066f-40bc-a177-4806e663f3c6,IP:15,UR
-	L:0,TC:0,Content:-5,EDM:-20,RT:0,SF:0,FILE:0,BULK:0,RULE:EDM_GE969F26,ACTI
-	ON:release,TS:-10
-X-CID-META: VersionHash:7db8b62,CLOUDID:7e2a629567d72180bf23537f3cda4ce8,BulkI
-	D:260903184814ZRT3184A,BulkQuantity:0,SF:10|38|66|78|102|127|850|865|898,T
-	C:nil,Content:0|15|50|99,EDM:1|-100,IP:-2,URL:0,File:nil,RT:nil,Bulk:nil,Q
-	S:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,
-	ARC:0
-X-CID-BVR: 2,SSN|SDN
-X-CID-BAS: 2,SSN|SDN,0,_
-X-CID-FACTOR: TF_CID_SPAM_AEC,TF_CID_SPAM_SNR
-X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
-X-UUID: f4633224a78411f19a56ed5b684f684d-20260903
-X-User: yijiangshan@kylinos.cn
-Received: from localhost.localdomain [(116.128.244.171)] by mailgw.kylinos.cn
-	(envelope-from <yijiangshan@kylinos.cn>)
-	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
-	with ESMTP id 2013039303; Thu, 03 Sep 2026 18:48:10 +0800
-From: Jiangshan Yi <yijiangshan@kylinos.cn>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	slava@dubeyko.com
-Cc: mchangir@redhat.com,
-	lhenriques@suse.de,
-	jlayton@kernel.org,
-	xiubli@redhat.com,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	13667453960@163.com,
-	Jiangshan Yi <yijiangshan@kylinos.cn>,
-	stable@vger.kernel.org
-Subject: [PATCH] ceph: fix longname buffer overflow in ceph_fname_to_usr()
-Date: Thu,  3 Sep 2026 18:47:42 +0800
-Message-Id: <20260903104742.729279-1-yijiangshan@kylinos.cn>
-X-Mailer: git-send-email 2.25.1
+	s=arc-20240116; t=1788451866; c=relaxed/simple;
+	bh=EZkrPu4MIblzYuAARYgWy6bsvyK3BVJiKofRW0Irh5c=;
+	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc; b=H2x2ZvJg9evdsSqyhV4088y7rZ/fasm5n9TeWwOZ2tzytkPpSoMoZrQPPtxnu1SyGN0rszNNxUS2YIWPTDsPmA5nM8LDIqHpfXw/vYm0bcnpjR+6dB0BIlsvb62ROrQA/PBh3Na9kZa64+rjMr3PA0II+NSDp5ZMpj8K5zcaET8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JxlK65jB; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JxlK65jB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 929241F00A3D;
+	Thu,  3 Sep 2026 16:11:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788451864;
+	bh=0GGJyshhlAlKfjOpgr7j97Mh0m1+5qav5ykVgFpFUIA=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc;
+	b=JxlK65jBcGgrsk9TAjqXxFnNxMSr2EUzOMWx942qjPBc2ybpTNX4WvsfPUiPxOaFl
+	 CvaTGDSQ1oizIiQKMXWYE2OVnwqIcGg5ydGC/+fP1+mqJ1GuK69hXukg6W16b7JT1r
+	 w2aaHejOOmNUZBUXMT7w7PrSbcyV2uNkwH9yBFLEDwdRzAceRy7X++SL5zY6FEYsfi
+	 FKkGMEhCG0T0FcIFQ+7naHWPwvlEPmk672vo9ZWS+QDqA+Td4EZLGZ+BJGrxKQ67ij
+	 TyZdI3BpB9bpqUcAWwS6PSI4Q7NaBwZ/Wa6AfOhrb223ZyOEtRQ2bZ96TF514AV+At
+	 BAPEfyocjj+3A==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 1986738119CB;
+	Thu,  3 Sep 2026 16:10:07 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -69,40 +37,71 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Subject: Re: [f2fs-dev] [PATCH RFC 00/14] Remove PG_private by using
+ page/folio->private checks instead
+From: patchwork-bot+f2fs@kernel.org
+Message-Id: 
+ <178845180590.3423963.571905514968785918.git-patchwork-notify@kernel.org>
+Date: Thu, 03 Sep 2026 16:10:05 +0000
+References: <20260731-remove-pg_private-v1-0-142c97ba3562@nvidia.com>
+In-Reply-To: <20260731-remove-pg_private-v1-0-142c97ba3562@nvidia.com>
+To: Zi Yan <ziy@nvidia.com>
+Cc: david@kernel.org, willy@infradead.org, akpm@linux-foundation.org,
+ muchun.song@linux.dev, ljs@kernel.org, liam@infradead.org, vbabka@kernel.org,
+ rppt@kernel.org, surenb@google.com, mhocko@suse.com,
+ baolin.wang@linux.alibaba.com, nico.pache@linux.dev, ryan.roberts@arm.com,
+ dev.jain@arm.com, baohua@kernel.org, lance.yang@linux.dev,
+ usama.arif@linux.dev, gourry@gourry.net, ying.huang@linux.alibaba.com,
+ apopple@nvidia.com, hannes@cmpxchg.org, qi.zheng@linux.dev,
+ shakeel.butt@linux.dev, kasong@tencent.com, mark.rutland@arm.com,
+ irogers@google.com, jack@suse.cz, linux-doc@vger.kernel.org,
+ amarkuze@redhat.com, peterz@infradead.org, kexec@lists.infradead.org,
+ dave.hansen@linux.intel.com, ruirui.yang@linux.dev, adrian.hunter@intel.com,
+ linux-mm@kvack.org, hongbohbli@tencent.com, hpa@zytor.com,
+ guochunhai@vivo.com, skhan@linuxfoundation.org, ceph-devel@vger.kernel.org,
+ baoquan.he@linux.dev, matthew.brost@intel.com, anna@kernel.org,
+ sstabellini@kernel.org, zbestahu@gmail.com, rakie.kim@sk.com,
+ minchan@kernel.org, richard@nod.at, x86@kernel.org, ebiggers@kernel.org,
+ alexander.shishkin@linux.intel.com, mingo@redhat.com, slava@dubeyko.com,
+ weixugc@google.com, yukuai@fygo.io, xen-devel@lists.xenproject.org,
+ xiang@kernel.org, magiclinan@didiglobal.com, mhiramat@kernel.org,
+ joshua.hahnjy@gmail.com, xiao@kernel.org, byungchul@sk.com,
+ james.clark@linaro.org, acme@kernel.org, linux-raid@vger.kernel.org,
+ linux-fscrypt@vger.kernel.org, bp@alien8.de, rostedt@goodmis.org,
+ linux-mtd@lists.infradead.org, axelrasmussen@google.com,
+ jefflexu@linux.alibaba.com, namhyung@kernel.org, jaegeuk@kernel.org,
+ yuanchu@google.com, idryomov@gmail.com, osalvador@suse.de, jgross@suse.com,
+ pratyush@kernel.org, linux-nfs@vger.kernel.org, tytso@mit.edu,
+ oleksandr_tyshchenko@epam.com, song@kernel.org, corbet@lwn.net,
+ pasha.tatashin@soleen.com, linux-kernel@vger.kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net, linux-perf-users@vger.kernel.org,
+ senozhatsky@chromium.org, tglx@kernel.org, jolsa@kernel.org,
+ linux-fsdevel@vger.kernel.org, mathieu.desnoyers@efficios.com,
+ linux-trace-kernel@vger.kernel.org, linux-erofs@lists.ozlabs.org,
+ trondmy@kernel.org
 
-The snapshot longname reconstruction in ceph_fname_to_usr() uses
-snprintf() to format "_<name>_<inode>" into a temporary buffer and
-then memcpy()s the result into oname->name.  Since snprintf() returns
-the number of characters that would have been written, the memcpy
-length can exceed the NAME_MAX + 1 byte oname->name buffer when the
-decoded snapshot name is long, causing a heap buffer overflow.
+Hello:
 
-Check the reconstructed name length and return -ENAMETOOLONG if it
-exceeds NAME_MAX, jumping to the existing cleanup path to avoid
-leaking the temporary _tname buffer and the parse_longname() inode
-reference.
+This patch was applied to jaegeuk/f2fs.git (dev)
+by Jaegeuk Kim <jaegeuk@kernel.org>:
 
-Fixes: dd66df0053ef ("ceph: add support for encrypted snapshot names")
-Cc: stable@vger.kernel.org
-Signed-off-by: Jiangshan Yi <yijiangshan@kylinos.cn>
----
- fs/ceph/crypto.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+On Fri, 31 Jul 2026 22:13:23 -0400 you wrote:
+> Hi all,
+> 
+> This patchset removes PG_private to make space for upcoming PG_folio
+> (reserved as __PG_folio) for identifying pages from a folio (more details
+> in Note below). Instead of checking PG_private, all code is changed to
+> check page/folio->private != NULL instead.
+> 
+> [...]
 
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index bc0a097a4cea..076e7f2f3c0e 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -403,6 +403,10 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
- 
- 		name_len = snprintf(tmp_buf, sizeof(tmp_buf), "_%.*s_%llu",
- 				    oname->len, oname->name, dir->i_ino);
-+		if (name_len > NAME_MAX) {
-+			ret = -ENAMETOOLONG;
-+			goto out;
-+		}
- 		memcpy(oname->name, tmp_buf, name_len);
- 		oname->len = name_len;
- 	}
+Here is the summary with links:
+  - [f2fs-dev,RFC,06/14] fs/f2fs: stop using PG_private
+    https://git.kernel.org/jaegeuk/f2fs/c/5ad9409a9533
+
+You are awesome, thank you!
 -- 
-2.25.1
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
+
+
