@@ -1,73 +1,73 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56B6645561A
-	for <ceph-devel@vger.kernel.org>; Fri,  4 Sep 2026 10:51:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58DE84EBAC6
+	for <ceph-devel@vger.kernel.org>; Fri,  4 Sep 2026 15:03:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788519091; cv=none; b=WPwkeOgDNw76TpmkJER0QOLON0w+s5SBH4XMFl/rJN/9vX/sq3tsD/u0vkIiIJzlcD+wVjYZTyQfxjXkTv6PbALh/desJWHRPaNuXcCTxdZHaxhoUZofdjLucYiogCJcvZ2ghLUe80+BLfrnMRkztHXB93hE23pv1KraVylWp4Q=
+	t=1788534193; cv=none; b=qmN46rXqXo8j+yuXif2ybXqKbITTrQCtDYbrfjqiJsu8CK/cg8oeMLkVEjBeZbWTCWOP0El7IEUXAEnAMmmpmNxNYIz6cMBp+QPuW8HtQXLL/+P4elF1RM9Vb+JZh7th5V+IfhQ3Yp9ruU5w9++noOkGhG6otbT2ebmXjR6yt8I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788519091; c=relaxed/simple;
-	bh=pSs45CfVUBr+rhnKvEiDoD6ZPLo0hWpaRQjQK59eGXg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=E3dcNifjWBKgkn4KQIUrai8I46g95RI4aXuUzPu0zCPIZY7QRvfkx999a8b3AZi18c+uM2hRUULuL2jaBcTa/taYlDWn6JuUz8JCs5Tm3p5NY4z3GETu2Ex5uXU4GhkX3xWYfpwSSvhDB7fStej4r/TymhA9bnRQ5usr8bJ6Qe0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=PuFOYiF9; arc=none smtp.client-ip=209.85.128.53
+	s=arc-20240116; t=1788534193; c=relaxed/simple;
+	bh=vUYKsim8YIohPrr2ha3b5zw95mYzREtEWQ/Hb9jEMVI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Y89bu6EH+QLiQvdGiq96ljyUBgY4SxqK617o9bx3ixZdC8nrO8NUfjS3yDoLE+V05pErJUmbFxeO9O1CfQ6grkEkE7VJ84xOYXGqS1psbjy3YncvKmHvPLLgmnVw9er7a4mbOcbaDNz+DHO/C397v8BKnfXMptixnw8So1ZdTDM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com; spf=pass smtp.mailfrom=ionos.com; dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b=K2Tf1UdY; arc=none smtp.client-ip=209.85.218.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="PuFOYiF9"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-49954b88fffso6284585e9.0
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Sep 2026 03:51:29 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.b="K2Tf1UdY"
+Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-c2055573c8cso140984766b.3
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Sep 2026 08:03:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1788519087; x=1789123887; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1788534188; x=1789138988; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=yg+f8T7nBpMfHcLwEI2qPhrkmiUiafLrkzAcu6wVsTA=;
-        b=PuFOYiF9mqcbIzmjBOPfxiYQ5IEYHyFVNoMgvUIYmvntJgG8rc9D1TixkoVNuTBRDR
-         0LsxMzy+6gkxGCg412pkfjWggYmDxv5PWABphPmURGOgTZN2eZMjY+P6RoC2c169VYuf
-         0x8dl3x8QOmT7roS2d+XPCf2rH37BgKjjx2GZ4eZAxZHDZGC21KFKLvkiJym7mW72Osl
-         nrNAubCs7gU1H1BdMd/PvmO+yxXU1i8ir7z0zLkNYy5zJyQhio295QocRbmBO8GmIV3Q
-         maO6yLRIO5k0xxgQTJ4SWBqnALgw89Zxiri5U71BIFoD4pIMeFKbNAvtL2p/XZoyJNAS
-         tH9w==
+        bh=JT4rpozCU7LONPSkeYDRA/CM4iMBiYZN6doPlweUA9Y=;
+        b=K2Tf1UdY0LQDWVTtm7dKcQBtF9K8GdsULQD45uGM2ydUm47pTtPDnXuycEo8pEc0Dx
+         IJ+egf6wZPkmTG6NQitsy5skQvhjOnyndgoLV0v5CNi3wXEHaOVe4SYf9VYADRpb6phs
+         PYlpbE3gqRan1JdEeBdF1WVWQXBfTuZL9rFOVT1fJmqmii84LoYnelbDfPJJ+FDBKpKO
+         0mp+yQNefOqD6XzfcbrL1xFMK+ryPQ5RZo/bSQP18nnwSVrfc7nOIyC/P9qZY2+nveZe
+         whLqyAKfLYgHJEbX/K3TKGGTI/RYIfe0Mi4FIxn5RtZZi5dBQosKGwJFYkpQU4E94+Qk
+         4lOA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788519087; x=1789123887;
+        d=1e100.net; s=20251104; t=1788534188; x=1789138988;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=yg+f8T7nBpMfHcLwEI2qPhrkmiUiafLrkzAcu6wVsTA=;
-        b=BNXopXj23g+oSwFYRKpcSjA7TNOR5NmPzcz+JeTF8lV/vT6iQYGdY5v2n+dcIgZCz3
-         s2sinQXUSpSSpMiwG2N9RkorrKPkkePdH7qc0+sffKltebAQ6L24pB7Qtb+4jvGC3mwe
-         Og+p+umPCvn6y0/rpB+jSW+KsbrwpZ9NaM+fHupcCJaXVhbi9ly2ShbgDkuSPQj6Ecoc
-         Vw6nXqCB8ecx5A5iI1lEHN4R6Za9smHT4hg2Qqa85mflkSjXw3zCqeEP+etfjH8sU/BJ
-         BLQwurzYWKC9J3McNp8cUz+wrTIyWeFxzsZXBv0ukYX4NVRS4kDZr/GhK4PTCelMClQ4
-         jKaA==
-X-Forwarded-Encrypted: i=1; AKwUvBww0GAL5LQ/k5WJFnnBPSVN9Mrv3s/y85UT7MfvImONRoiHtc3VldTN505AMn5u9iBip0JSEOpU9lfF@vger.kernel.org
-X-Gm-Message-State: AFuF++nOkRC4RpFz27b6hHFgMGMGl8CUWjTzHKVniwUQA+VIu+cObH+K
-	DyKnyhOT5nERBvQ13uMNDAESJvg2PjC1PV6uRfwFGf81R4fiE1aBpCVQ+wWrogZlATs=
-X-Gm-Gg: AYBFou0x6miRlLhSWxoSNC74cUfx/elfnS4XlGzkiegQs1zooJrNOxWS4KyKctTGY6N
-	8Idn2l/TQLwGTj2Gs6eVY+Ypc/1Aetj3NEY4tAkO8NVM/o35X9nuB1lpm8O67QiEVfUMnR1oS/F
-	RYRGzAS6BeOXJQO+726S9lUmE3arE0EZJ6wbWSEcCWnY09QPMe3+NSVUnEA/ERVS7B/sga35rTX
-	0lF2hVrIygd3GcMyuvaPaHOgkcO83xguENi495gvF2amaP1ZpeThBrDSlpRrcsVk7pw4AUqifuX
-	Jn/cy1Oh5vVapI8WEpmW+wCBA4zXjxk+JAQGxZKWTrUAoLsJqzG888Jttx5Ll5om+FBD8ZIivDF
-	iUcTLV8OBQLPwGS5kaH9aoiygUYwF3bDjeyskgaId0IYsXv8rDprobsqWDY+9dJLMyXGRryr10G
-	SyrifjlcGWn/dPCwQLOmVc164SU9M869kEwdu/RSHPjAF+oVHFf/CeLJl3XqX6T5QwlRTlNzhaa
-	/gWLLMoYxoStevwWGFSd8nRRjCUYYwG4SHw8YuNjuD9VSM3KHl+Ysy2cKHOJhZj
-X-Received: by 2002:a05:600c:870f:b0:49c:fc6c:bdfb with SMTP id 5b1f17b1804b1-49cfc6cbfb2mr21910075e9.18.1788519087540;
-        Fri, 04 Sep 2026 03:51:27 -0700 (PDT)
+        bh=JT4rpozCU7LONPSkeYDRA/CM4iMBiYZN6doPlweUA9Y=;
+        b=ByyW6vd5hKWmx0JGg719PtDzojZz+JFJBon6Jc9Ze6IaSOxbeoqENdYfr5SNRrvH4D
+         PtMfg0mWElJOTkQVq3oiOfR6zTe5+n4Ba2crNQyFSx+m0O+BEz6fJeh07pllYClN81TU
+         aFNFrChciR5taA4mp6zc6IZRnoUQuqhNApewjsTDo1faEsXGo3qq1YBPBYl+8+Qi/b0y
+         j4qyucQpOEbs3ZeiNgqTaexwSEGSxPfPDjVab5SYAwOh6ypV9dmq+KQRxWPKsYzjH9v0
+         x88bQP9Zp1JFyEbsgCB01HP2qT4NzZz0oPFqKTlaekqACY/RL5RqbWfhVVFitQAjqw+c
+         kF8Q==
+X-Forwarded-Encrypted: i=1; AKwUvBxTu7gceYck1OnD73jJBkfqFnGO5m2VWsJPpmECM0kh0EviMWkHaXtjBtX4FQfUO4YbXJJpzSJMs901@vger.kernel.org
+X-Gm-Message-State: AFuF++mZ/lacPlr2HLKLdYRjjvAQnH1f/OHkwZR5LgUfTu+469bhmlD+
+	FI6t10lEMg6qACnylifVdlETd9q6kLO3eptaAydnuBilHNb/1e0TD89D7dEf9aILZ+I=
+X-Gm-Gg: AYBFou2ab0axQ3A34867MSZyf9HbnFDgriTsSg+n3DgaekiyeJ1fPQLFSR0hV6YKrxq
+	tRGIKu6UZGnMOcMr1PtNjwHVCFHQlO+no0+L0OsGtz/Lfcrh2sLPKmFXaZwx3W3F/ddfs+IOeLD
+	Bf9//AI4cS1kx17UsH52ocj2NmBwmXZpa+J27dYzXVsm4yfo0Osk/ddhZPEWa++TUwO39KGztom
+	x6RP/76DY4YBLABKDFbO8rS78LJG7YBTETAjfk8AOe5zwY3jioVsT5i4F1KtoeOEKeZYDrdYdcU
+	DL5wvZ3vcJ1uQVbSeIHUKjT1b01iu5MA7nfWGhX5QMCZ3yhojG4+XGg4U76bRwi1mdDcPSbeleL
+	2WBteL7noDtq0nj1CeRgBktbESXl367AJZI0R2mrtOIIZkb//hEcX9Cc7SOX8Guutx6QVGueyXi
+	MwwYq7NPlpifHOIbb0KFwdGKVQmbqGqmuMo8ZJtRRwxY72S02piZJy+KdujK9h5ZGH7lH8BU1SM
+	lmLFaIERSCfjQi8dGLGdXXgCzMa5BU8SpXsnlyVIOdP2doDV7D7ifvyl7lwgD6JlVWxt6onPRQU
+	mQ==
+X-Received: by 2002:a17:907:a893:b0:c1f:1520:4de5 with SMTP id a640c23a62f3a-c260c66a8demr277059766b.1.1788534188160;
+        Fri, 04 Sep 2026 08:03:08 -0700 (PDT)
 Received: from raven.intern.cm-ag (p200300dc6f04b700023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f04:b700:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-485885be1c1sm5382163f8f.32.2026.09.04.03.51.26
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c260d6e1c93sm122438866b.63.2026.09.04.08.03.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Sep 2026 03:51:27 -0700 (PDT)
+        Fri, 04 Sep 2026 08:03:07 -0700 (PDT)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: idryomov@gmail.com,
 	amarkuze@redhat.com,
 	xiubo.li@clyso.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>,
-	stable@vger.kernel.org
-Subject: [PATCH v2] ceph: acquire caps for read_folio without an rw context
-Date: Fri,  4 Sep 2026 12:51:22 +0200
-Message-ID: <20260904105122.19938-1-max.kellermann@ionos.com>
+Cc: Max Kellermann <max.kellermann@ionos.com>
+Subject: [PATCH v4 0/3] ceph: don't unregister an MDS session before removing its caps
+Date: Fri,  4 Sep 2026 17:03:01 +0200
+Message-ID: <20260904150304.49104-1-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -77,155 +77,73 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This fixes a data corruption problem that leaked permanently into
-fscache.  File-backed erofs reads metadata using
-read_mapping_folio(), and the Ceph implementation of this call forgets
-to acquire Ceph caps.  Therefore, mounting an erofs image file from a
-Ceph mount that was just written (but not yet committed to the OSD)
-would fail because the erofs code saw only zero-filled pages.  These
-zero-filled pages were then copied to the fscache, making this data
-corruption permanent (on this host).
+handle_session() removed the session from mdsc->sessions[] at the very
+top of `CEPH_SESSION_CLOSE` handling, before taking `s_mutex`.
+Between session unregistration and remove_session_caps(), the MDS rank
+has no registered session while the old session still owns all caps it
+was granted.
 
-Usually, Ceph checks/acquires caps at its own entry points and not in
-the `address_space_operations`: ceph_read_iter() and
-ceph_filemap_fault() acquire Fr/Fc before calling filemap_read() or
-filemap_fault(), and ceph_write_iter() holds Fw/Fb around write_begin.
+Any concurrent filesystem operation may walk into that and the next
+__do_request() call registers a new session for this rank.  Once it is
+open and the MDS issues caps, ceph_fill_inode() calls
+ceph_add_cap(), which looks caps up by rank, not
+by session identity, finding old caps linked to the old session.
 
-Only readahead, which the VM can invoke without passing through a Ceph
-entry point, checks caps itself.  That check was added by
-commit 2b1ac852eb67 ("ceph: try getting buffer capability for
-readahead/fadvise") to the readpages path, converted to use the rw
-context list by commit 5d988308283e ("ceph: track read contexts in
-ceph_file_info"), and moved into ceph_init_request() for
-NETFS_READAHEAD by commit a5c9dc445139 ("ceph: Make
-ceph_init_request() check caps on readahead").
+The list_move_tail() call then moves the cap object to the new
+session, which is already a bad thing to do.  Since it doesn't
+decrement `old_session->s_nr_caps`, this quickly triggers:
 
-The single-folio read path never had such a check, neither in the old
-ceph_readpage() nor in netfs_read_folio() via ceph_init_request().  It
-assumes that the `read_folio` method is only ever reached from
-filemap_read() or filemap_fault(), both of which Ceph wraps.
+  kernel BUG at fs/ceph/mds_client.c:1959!
+  Internal error: Oops - BUG: 00000000f2000800 [#1]  SMP
+  [...]
+  Workqueue: ceph-msgr ceph_con_workfn
+  pstate: 20400009 (nzCv daif +PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+  pc : remove_session_caps+0x2bc/0x2d8
+  lr : remove_session_caps+0x74/0x2d8
+  [...]
+  Call trace:
+   remove_session_caps+0x2bc/0x2d8 (P)
+   mds_dispatch+0xf48/0x1b60
+   ceph_con_process_message+0x74/0xa0
+   ceph_con_v1_try_read+0x3a0/0x1510
+   ceph_con_workfn+0x260/0x460
+   process_one_work+0x168/0x3b8
+   worker_thread+0x1bc/0x3a0
+   kthread+0x118/0x1e0
+   ret_from_fork+0x10/0x20
 
-However, since Linux 6.12, erofs file-backed mounts
-(commit ce63cb62d794 ("erofs: support unencoded inodes for fileio"))
-read all metadata (including the superblock) by calling
-read_mapping_folio() directly on the backing file's mapping.  On Ceph,
-this issues an OSD read without holding any caps.
+That's BUG_ON(session->s_nr_caps > 0).
 
-The result is silent data corruption.  Ceph clients do not write back
-dirty pages on close(); a writer keeps Fb and its dirty data until the
-MDS revokes the cap.  When another client opens the file, the MDS
-initiates that revoke and replies to the open immediately.  A read()
-would now block in ceph_get_caps() until the writer has flushed and
-acked the cap-revoke, but the erofs superblock read goes to the OSD
-without acquiring caps and thus races with the writeback.  If the
-object does not exist yet, the OSD returns -ENOENT, which
-finish_netfs_read() treats as "success, no data", and netfs zero-fills
-the folio.  The folio is marked uptodate and, because it counts as
-downloaded from the server, is also copied into fscache.  This never
-recovers because Ceph invalidates the page cache and fscache only when
-Fc is revoked, but gaining Fc later will not invalidate it.
+I was able to reproduce this reliably by delaying the close and
+starting I/O during the delay.
 
-Add a Ceph read_folio wrapper which acquires caps synchronously when no
-rw context is present.  Cap acquisition can process a pending truncate,
-so drop the folio lock before acquiring caps.  After relocking, verify
-that the folio still belongs to the mapping and has not already become
-uptodate before passing it to netfs_read_folio().  Leave reads with an
-existing rw context and the legacy inline-data path unchanged.
-
-Fixes: ce63cb62d794 ("erofs: support unencoded inodes for fileio")
-Cc: stable@vger.kernel.org
-Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
----
-Note:
-- commit e587a984d332 ("erofs: use dedicated meta inodes for
-  file-backed mounts") eliminates this trigger, so Linux 7.3-rc1 and
-  later are not affected.  The fix remains relevant to older stable
-  kernels and to future direct read_mapping_folio() callers.
-v1 -> v2:
-- Move cap acquisition from ceph_init_request() into a read_folio
-  wrapper, leaving the readahead path unchanged.
-- Drop the folio lock around blocking cap acquisition, then relock and
-  revalidate the folio to avoid a truncate deadlock.
-- Preserve the legacy inline-data path.
-- Handle a NULL file argument without acquiring caps a second time.
-- Require Fc before populating the page cache; CEPH_CAP_FILE_LAZYIO
-  cannot be added because the want mask is conjunctive
+This patch keeps the session registered with
+`CEPH_MDS_SESSION_CLOSED`.  New requests will be put on the
+`s_waiting` list where they will be resumed on the new session.
 
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/addr.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 57 insertions(+), 1 deletion(-)
+v1->v2: skip CLOSED sessions in check_new_map()
+v2->v3: split session pinning and stale-map guards into two preparatory
+    patches; rework CLOSED-session and export-target teardown handling
+v3->v4:
+- replace "ceph/mds_client: pin sessions while checking a new
+  MDS map" which was meanwhile superseded by commit ee611a750955
+  ("ceph: fix UAF in check_new_map() on session freed during
+  unlock") with one that fixes the remaining UAF bugs
+- adjust ceph_mdsc_reset_workfn()
+- serialize send_mds_reconnect() state transitions with session CLOSE and
+  prevented reconnect failure rollback from overwriting CLOSED.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 657c2cb0f881..78b805ccc5d4 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1959,8 +1959,64 @@ static int ceph_write_end(const struct kiocb *iocb,
- 	return copied;
- }
- 
-+static int ceph_read_folio(struct file *file, struct folio *folio)
-+{
-+	struct inode *inode = folio_inode(folio);
-+	struct ceph_inode_info *ci = ceph_inode(inode);
-+	struct ceph_file_info *fi = file ? file->private_data : NULL;
-+	int got = 0;
-+	int ret;
-+
-+	/*
-+	 * Existing Ceph read paths acquire caps before entering the page
-+	 * cache.  Keep the legacy inline-data path unchanged.
-+	 */
-+	if (ceph_has_inline_data(ci) ||
-+	    (fi && ceph_find_rw_context(fi)))
-+		return netfs_read_folio(file, folio);
-+
-+	/*
-+	 * Cap acquisition can process a pending truncate, which may lock and
-+	 * remove this folio.  It must therefore happen without the folio lock.
-+	 */
-+	folio_unlock(folio);
-+	ret = __ceph_get_caps(inode, fi, CEPH_CAP_FILE_RD,
-+			      CEPH_CAP_FILE_CACHE, -1, &got);
-+	if (ret < 0)
-+		return ret;
-+
-+	if (!(got & CEPH_CAP_FILE_CACHE)) {
-+		ret = -EACCES;
-+		goto out;
-+	}
-+
-+	folio_lock(folio);
-+
-+	/*
-+	 * After re-locking, check if the folio still belongs to the
-+	 * mapping...
-+	 */
-+	if (folio->mapping != inode->i_mapping) {
-+		folio_unlock(folio);
-+		ret = AOP_TRUNCATED_PAGE;
-+		goto out;
-+	}
-+
-+	/* .. or has been filled already meanwhile */
-+	if (folio_test_uptodate(folio)) {
-+		folio_unlock(folio);
-+		ret = 0;
-+		goto out;
-+	}
-+
-+	ret = netfs_read_folio(file, folio);
-+out:
-+	ceph_put_cap_refs(ci, got);
-+	return ret;
-+}
-+
- const struct address_space_operations ceph_aops = {
--	.read_folio = netfs_read_folio,
-+	.read_folio = ceph_read_folio,
- 	.readahead = netfs_readahead,
- 	.writepages = ceph_writepages_start,
- 	.write_begin = ceph_write_begin,
+Max Kellermann (3):
+  ceph: fix use-after-free in check_new_map() after early session put
+  ceph: stop checking a stale MDS map after dropping mutex
+  ceph: don't unregister an MDS session before removing its caps
+
+ fs/ceph/caps.c       |   4 +
+ fs/ceph/mds_client.c | 214 +++++++++++++++++++++++++++++++++++--------
+ 2 files changed, 179 insertions(+), 39 deletions(-)
+
 -- 
 2.47.3
 
