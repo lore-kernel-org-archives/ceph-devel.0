@@ -1,107 +1,108 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E50F4E8E03;
-	Thu,  3 Sep 2026 16:11:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 824B0311968;
+	Fri,  4 Sep 2026 01:48:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788451868; cv=none; b=K4W6WSS6FZjl5ezUNL//f67eN3Dk0lSS026kxjJy5APsVZLUVf7tY4PTm61HSHuJv2ApprT1BxebULfIxdvFITSdRUf4BSeVhSzIeTM1ogYipQqitVXFPXbDB4lnkJXj/jJr9g8UEFjt6puR7iDWWyJgnWmOtGW0WCbBbM8dC+o=
+	t=1788486536; cv=none; b=JbRn1b4fdFRKvnq38OdDlANdmrsIyaXbUfGkMpDqrHbEDgi5Kmg4NEwx2+6myDOivJ1Es1K1FI7BaOi742JG1D4S63ftfrpu7NVwIq2072hnSZnvtNHYO1eCM+f14Ze0hFq8iTgIagKRiVdN7D5yuGCdSl3aKVkCU/l4f7Day+Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788451868; c=relaxed/simple;
-	bh=l35oToW/fo74fXmscJTEC53dmZRIZLoLhJhrPRWkVDA=;
-	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
-	 In-Reply-To:To:Cc; b=cnIsHkH71IhJUamXq94MZxahwP7TBbDlO+b5Ye3nUWG2xGBccXc0LjOcPN+fkXOrY9HkEcewy4f5iTapokAjwcKRrOw8e+ZZQi0oB0nSKEXbSOfD9ASeukirXOiCSvv5bEG/jpJvaI0T02CIdE4PiTKbXg0TzghGHTsZk5/z2TA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cX5S97ua; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788486536; c=relaxed/simple;
+	bh=YH1C+COc8qRA1j5l1eSyNnqVxG5y3HDv6cEHry1GiWk=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=cGjKyBwHYXp2sNw8/oO2IrJ6z49JPEeNsajZvnoBf4oEUjiXLfufAgSwK9XF4q2fFBiOU9WZofMEN90GLCdf72mUFxvGeOW/UbazjMvPYD+rooQDmwlYNEUXiEF3ILVGklK5XfSVfhrEWHPx+XGrudqdqfO6CBGUkQc2O5BTw9M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GwHgevU/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cX5S97ua"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 119AE1F00A3E;
-	Thu,  3 Sep 2026 16:11:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788451866;
-	bh=wQC/B3FS4e5cPaDkFUi05H5/4Cpx4sxh25n+vGHWmYc=;
-	h=Subject:From:Date:References:In-Reply-To:To:Cc;
-	b=cX5S97uavmnQ1oACZHN9HgQC0w4BW6l7gd3KhLLv7D3CEwvQqVkkISIabPe6cAz15
-	 lWkG+FcJx8T5bL8zvHYmPd7BTeb+q0xV22oPkTs+7zHVI76huUqtzlAazKHgiijpXC
-	 fPayLcChJfd8lQhKnDDxnDwCYBYoono4GRg6E8M/XmWnKu3w06nB/6JtY5EZEZ4JTc
-	 Ls6Rs/u56x5sozaE9TxltbKV3YH5hTFABAAIOg6efQ6qc4ZyXelz1bMHFgK7aaDnWZ
-	 9Y02WV5P78L1/Fs/n5/fmLT+8/kOHgOC2mjZC6o6yNFynXnGH6uYX4iYf9Gpt3FU4F
-	 Kd4tFkH7OtvQA==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 9386938119CB;
-	Thu,  3 Sep 2026 16:10:08 +0000 (UTC)
-Content-Type: text/plain; charset="utf-8"
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GwHgevU/"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 0BEA4C2BCB8;
+	Fri,  4 Sep 2026 01:48:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1788486536;
+	bh=YH1C+COc8qRA1j5l1eSyNnqVxG5y3HDv6cEHry1GiWk=;
+	h=From:Date:Subject:To:Cc:Reply-To:From;
+	b=GwHgevU/24dyBaM4XEj5w7I85mf/WFm1QTD3YIj8Qooez+/yx7cEtl2F+LSQR2sHX
+	 q+IbCyeOM2Jo37J9gCk4hEM8CTvMM5XbQwNJrlW6Jj0lqAxeUcc7+8V1rWp6dKvr3M
+	 0u+kgXF675lanBnrF3YEkXWdIMJRqWP1NjbNQ9nfJppyKCKR6O6xKCdqJBc2VnOVuc
+	 AU2IoA84Txv24/poBoCc88d+R0PHcQ4TpA6VVfrl52GHH//tzD2d7Bq0irbgeB8eJX
+	 DwDrRFTdu7J3S9ar8iMOJHJrCKfM48ELqQKvcS7tW0CI4LUy1zvaHU5pJXSAuIUlX4
+	 gIS7n7bEEMpsA==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBC24C624DB;
+	Fri,  4 Sep 2026 01:48:55 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Thu, 03 Sep 2026 18:48:36 -0700
+Subject: [PATCH] libceph: only set read_from_replica on read requests
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: Re: [f2fs-dev] [PATCH v2 00/14] Remove PG_private by using
- page/folio->private checks instead
-From: patchwork-bot+f2fs@kernel.org
-Message-Id: 
- <178845180715.3423963.14220073137991024856.git-patchwork-notify@kernel.org>
-Date: Thu, 03 Sep 2026 16:10:07 +0000
-References: <20260831-remove-pg_private-v2-0-3668159cd9e8@nvidia.com>
-In-Reply-To: <20260831-remove-pg_private-v2-0-3668159cd9e8@nvidia.com>
-To: Zi Yan <ziy@nvidia.com>
-Cc: david@kernel.org, willy@infradead.org, akpm@linux-foundation.org,
- muchun.song@linux.dev, ljs@kernel.org, liam@infradead.org, vbabka@kernel.org,
- rppt@kernel.org, surenb@google.com, mhocko@suse.com,
- baolin.wang@linux.alibaba.com, nico.pache@linux.dev, ryan.roberts@arm.com,
- dev.jain@arm.com, baohua@kernel.org, lance.yang@linux.dev,
- usama.arif@linux.dev, gourry@gourry.net, ying.huang@linux.alibaba.com,
- apopple@nvidia.com, hannes@cmpxchg.org, qi.zheng@linux.dev,
- shakeel.butt@linux.dev, kasong@tencent.com, mark.rutland@arm.com,
- irogers@google.com, jack@suse.cz, linux-doc@vger.kernel.org,
- amarkuze@redhat.com, peterz@infradead.org, kexec@lists.infradead.org,
- dave.hansen@linux.intel.com, ruirui.yang@linux.dev, adrian.hunter@intel.com,
- linux-mm@kvack.org, hongbohbli@tencent.com, hpa@zytor.com,
- guochunhai@vivo.com, skhan@linuxfoundation.org, ceph-devel@vger.kernel.org,
- baoquan.he@linux.dev, matthew.brost@intel.com, anna@kernel.org,
- sstabellini@kernel.org, zbestahu@gmail.com, rakie.kim@sk.com,
- minchan@kernel.org, richard@nod.at, x86@kernel.org, ebiggers@kernel.org,
- alexander.shishkin@linux.intel.com, mingo@redhat.com, slava@dubeyko.com,
- weixugc@google.com, yukuai@fygo.io, xen-devel@lists.xenproject.org,
- xiang@kernel.org, magiclinan@didiglobal.com, mhiramat@kernel.org,
- joshua.hahnjy@gmail.com, xiao@kernel.org, byungchul@sk.com,
- james.clark@linaro.org, acme@kernel.org, linux-raid@vger.kernel.org,
- linux-fscrypt@vger.kernel.org, bp@alien8.de, rostedt@goodmis.org,
- linux-mtd@lists.infradead.org, axelrasmussen@google.com,
- jefflexu@linux.alibaba.com, namhyung@kernel.org, jaegeuk@kernel.org,
- yuanchu@google.com, idryomov@gmail.com, osalvador@suse.de, jgross@suse.com,
- pratyush@kernel.org, linux-nfs@vger.kernel.org, tytso@mit.edu,
- oleksandr_tyshchenko@epam.com, song@kernel.org, corbet@lwn.net,
- pasha.tatashin@soleen.com, linux-kernel@vger.kernel.org,
- linux-f2fs-devel@lists.sourceforge.net, linux-perf-users@vger.kernel.org,
- senozhatsky@chromium.org, tglx@kernel.org, jolsa@kernel.org,
- linux-fsdevel@vger.kernel.org, mathieu.desnoyers@efficios.com,
- linux-trace-kernel@vger.kernel.org, linux-erofs@lists.ozlabs.org,
- trondmy@kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260903-b4-read-from-replica-v1-1-76d1ad8d7c2e@clyso.com>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMwQ6CMBCE4Vche3aT2iUEfRXjoS0DrFEgWzUmh
+ Hen6m2+w/wrZZgi07layfDWrPNUcDxUlMYwDWDtisk737iTE441G0LHvc2Pspa7psBeRBBi9Gi
+ FynUx9Pr5ZS/Xv/Mr3pCe3xZt2w4AJj7qeAAAAA==
+X-Change-ID: 20260903-b4-read-from-replica-2333eabb2e83
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>, Jeff Layton <jlayton@kernel.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ stable@vger.kernel.org, Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1788486534; l=1667;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=1pp/hauPyQPUhFkDy5Rb9gGCh+DLMtRFxWdPt0GBjHY=;
+ b=dsJX6n/Fq3mMTVrwc5yJ4ApdkX4MOSvn+uELMQtll59cU0ddJ1liPq502KO3I9qJ4Lf4d4o/n
+ U6kHeQxGItsBPQOhW9Ov8Eh04CDAoqBA0UGqlOyPY8ozSVCx7X4+7x4
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-Hello:
+From: Xiubo Li <xiubo.li@clyso.com>
 
-This patch was applied to jaegeuk/f2fs.git (dev)
-by Jaegeuk Kim <jaegeuk@kernel.org>:
+ceph_osdc_alloc_request() ORs the mount option's read_from_replica
+flag into r_flags for every request, writes included.  The flag is
+meant for reads: calc_target() skips the replica choice for any
+request that has CEPH_OSD_FLAG_WRITE, and the OSDs only know
+BALANCE_READS on read ops.  Sending it on writes is at best ignored;
+with read_from_replica=balance a buffered write that fell back to
+ceph_sync_write() after losing BUFFER to a revoke failed with -EIO,
+while the same run without the option works fine.
 
-On Mon, 31 Aug 2026 15:25:23 -0400 you wrote:
-> Hi all,
-> 
-> This patchset removes PG_private to make space for upcoming PG_folio
-> (reserved as __PG_folio) for identifying pages from a folio (more details
-> in Note below). Instead of checking PG_private, all code is changed to
-> check page/folio->private != NULL instead.
-> 
-> [...]
+Gate the flag on CEPH_OSD_FLAG_READ.
 
-Here is the summary with links:
-  - [f2fs-dev,v2,06/14] f2fs: stop using PG_private
-    https://git.kernel.org/jaegeuk/f2fs/c/5ad9409a9533
+Fixes: 22d2cfdffa5b ("libceph: move away from global osd_req_flags")
+Cc: stable@vger.kernel.org
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+ net/ceph/osd_client.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-You are awesome, thank you!
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/patchwork/pwbot.html
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index f68918fc27f9..a5fc5de2c2b5 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1109,7 +1109,9 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 	req->r_base_oloc.pool = layout->pool_id;
+ 	req->r_base_oloc.pool_ns = ceph_try_get_string(layout->pool_ns);
+ 	ceph_oid_printf(&req->r_base_oid, "%llx.%08llx", vino.ino, objnum);
+-	req->r_flags = flags | osdc->client->options->read_from_replica;
++	req->r_flags = flags;
++	if (flags & CEPH_OSD_FLAG_READ)
++		req->r_flags |= osdc->client->options->read_from_replica;
+ 
+ 	req->r_snapid = vino.snap;
+ 	if (flags & CEPH_OSD_FLAG_WRITE)
+
+---
+base-commit: 6b039a71d37a39bb90a64c4e271f90ee0588ac4a
+change-id: 20260903-b4-read-from-replica-2333eabb2e83
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
 
 
