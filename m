@@ -1,385 +1,167 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DF0C399D0D
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Sep 2026 08:10:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8295C4FDE74
+	for <ceph-devel@vger.kernel.org>; Tue,  8 Sep 2026 09:10:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788855030; cv=none; b=Lt9z9p0a7NoJ5A4vLzE1GMJ/I0HVQm8yJvTJt6GIOucUNYg0qpUmikreKx2/l/82loeDJD/g0TmNIOgoRiKT9KjegMjxsc9NpN0fs9tLZuh1sW7m3ySvjejfTqHxquXkNwGA4Zzsd20fFWGVbhHWuU/aNBm6EWvoPphJC4haitI=
+	t=1788858653; cv=none; b=UfXTEFdgI8kn/myzth2o6sim1+ttc/tobMTsiDZh7VD8Q4EA5KrnY32lTBygQaMS3wA4xWGk0bcvX8IpUU7QZQ1CWRZRBIEU+iC2iEdZVlvCAW+eE6QAzNyVzwGFN4lMnqvGVePFCZciUdlNkBV4ZW/xIskD13aOoxb4In737ok=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788855030; c=relaxed/simple;
-	bh=s1zVA2H/PKWK5iinunasHDlpz232xSDYGJsJyKsppgc=;
-	h=Date:From:To:Cc:Subject:Message-ID; b=PudUYufFOkiFRiAK6I0teyBMQmIsaU5Md5cemC+2/r75QLj4epRhr2lnRtMyZpFFcjn5KMIrq/qbPboxnp6BgFa5gyrxhQLxygfnYxTqdp8Z0h0wS8DHArIPqH7RXFr3lFP6zWUuI0ijxpwcB3vG41IvBIJvcUJcr3MMkD/VQ20=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=XDpVyCsq; arc=none smtp.client-ip=198.175.65.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1788858653; c=relaxed/simple;
+	bh=8tSqHlLIXJuWsBQYydJqqwZT5KxUO6DtIPiXjOTGxhs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kQvjgqY65a/Dg65lWgi696eIUX3CFTHQGdz3AyiLE0rWq9pSFJMxUOVF6TLuForEeFJGHwWk3i4LJi6VB7aFeTPWjXtv9XwUGy/X+fQEZOf/cheBPYEeRM3IueP0zJGKvalKzrUl4XrAZdYnlRGWhPZU2u/5eereslMgIS0SFj0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XYbQ6+xP; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="XDpVyCsq"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1788855027; x=1820391027;
-  h=date:from:to:cc:subject:message-id;
-  bh=s1zVA2H/PKWK5iinunasHDlpz232xSDYGJsJyKsppgc=;
-  b=XDpVyCsqPgznC8+8zPvcfwMxyBvnu1sB63pKx/pgky4jCZfg694MFq8C
-   Rm+nlgdjlvYIETvoyFHahIWcazEVc+g+WZHDzosC4YIJ5gJtofj1u7qer
-   5QJxJKv0XSsHOktMAJTHs5v1hYagSbnHCNr/D1vUpt6HjwEQwoA/PWPjx
-   n92KLfne5IqESR608bHhp2B/ZSrbgs3Jq3UBTUeOScYKPESRyuiC/wk18
-   2jcoGats1d/n8FAVrchGgshql1ehf5nq1ixKUIvRG6D8+xxj/dSzNmH/K
-   kSroELvGpmCi1QQooI1wSP0hFcwLf6ICj/yYuEtnnWp/PnxgRDYmnDOuN
-   g==;
-X-CSE-ConnectionGUID: axnk0y/bR225jh9tv0BqlQ==
-X-CSE-MsgGUID: CbPGdn9tSH+LfccFh03Alw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11899"; a="89094165"
-X-IronPort-AV: E=Sophos;i="6.25,268,1779174000"; 
-   d="scan'208";a="89094165"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Sep 2026 01:10:27 -0700
-X-CSE-ConnectionGUID: nN0LrCqGSrGlNWEF8ZM36w==
-X-CSE-MsgGUID: gFLDhIGoRoarDvmRm4m37A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,268,1779174000"; 
-   d="scan'208";a="275064872"
-Received: from lkp-server01.sh.intel.com (HELO dff15f1b2031) ([10.239.97.150])
-  by orviesa005.jf.intel.com with ESMTP; 08 Sep 2026 01:10:24 -0700
-Received: from kbuild by dff15f1b2031 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1x3quJ-000000001s1-1eZN;
-	Tue, 08 Sep 2026 08:10:19 +0000
-Date: Tue, 08 Sep 2026 16:09:33 +0800
-From: kernel test robot <lkp@intel.com>
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: oe-kbuild-all@lists.linux.dev, ceph-devel@vger.kernel.org,
- Xiubo Li <xiubo.li@clyso.com>
-Subject: [ceph-client:testing 29/33] fs/ceph/export.c:90:9: sparse:
- sparse: non size-preserving pointer to integer cast
-Message-ID: <202609081512.3JH2caOg-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XYbQ6+xP"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1788858650;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=C0xiqVZ1UP4oD+0sq73SGDSnEeFESxAGnTexw/YKrQk=;
+	b=XYbQ6+xPKhdULTdZwa4MyBMGLMulhkFhG+cFq/Pg8rckggehWWeZZmL/BoV5hJcdzWQKHr
+	OZT/Cir+aDKwyP1U4XucPiaX3xvvO3fOgCQ9ug4HqvRlXXeAHZ2oKTiYeWHeKmSLvGXnmn
+	Tos4QX9kJ48W/5ZihVroP50bA+b0GfI=
+Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-522-Z9G_OryfNLuOMVNfyLh3Ag-1; Tue,
+ 08 Sep 2026 05:10:46 -0400
+X-MC-Unique: Z9G_OryfNLuOMVNfyLh3Ag-1
+X-Mimecast-MFC-AGG-ID: Z9G_OryfNLuOMVNfyLh3Ag_1788858644
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 4B2B31834595;
+	Tue,  8 Sep 2026 09:10:43 +0000 (UTC)
+Received: from warthog.com (unknown [10.44.32.158])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 3AA8430001A2;
+	Tue,  8 Sep 2026 09:10:34 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Paulo Alcantara <pc@manguebit.org>
+Cc: David Howells <dhowells@redhat.com>,
+	Christian Brauner <christian@brauner.io>,
+	Matthew Wilcox <willy@infradead.org>,
+	Namjae Jeon <linkinjeon@kernel.org>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Stefan Metzmacher <metze@samba.org>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-erofs@lists.ozlabs.org,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v12 0/8] netfs: Miscellaneous preparatory changes
+Date: Tue,  8 Sep 2026 10:10:21 +0100
+Message-ID: <20260908091031.1506798-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-tree:   https://github.com/ceph/ceph-client.git testing
-head:   190736464f4572bfb360fd3747fb827493e02e09
-commit: fd5e42ddd4a0b8d56a2160d51b6ee07c96b501e9 [29/33] ceph: convert VFS inode and directory paths to bout
-config: nios2-randconfig-r133-20260908 (https://download.01.org/0day-ci/archive/20260908/202609081512.3JH2caOg-lkp@intel.com/config)
-compiler: nios2-linux-gcc (GCC) 8.5.0
-sparse: v0.6.5-rc1
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260908/202609081512.3JH2caOg-lkp@intel.com/reproduce)
+Hi Christian,
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202609081512.3JH2caOg-lkp@intel.com/
+Could you pull these patches please for -next?  This is the first of four
+batches.  This is based on your vfs.fixes as there are some prerequisite
+patches there.  This was split from v11 of a larger series[1].
 
-sparse warnings: (new ones prefixed by >>)
->> fs/ceph/export.c:90:9: sparse: sparse: non size-preserving pointer to integer cast
->> fs/ceph/export.c:90:9: sparse: sparse: non size-preserving integer to pointer cast
->> fs/ceph/export.c:90:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:125:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:125:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:125:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:125:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:125:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:125:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:133:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:133:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:133:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:300:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:300:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:302:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:302:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:302:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:339:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:438:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:438:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:438:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:438:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:473:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:588:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:588:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:588:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:588:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:657:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:657:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:657:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:657:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/export.c:657:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/export.c:657:9: sparse: sparse: non size-preserving pointer to integer cast
---
->> fs/ceph/dir.c:125:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:202:9: sparse: sparse: non size-preserving pointer to integer cast
->> fs/ceph/dir.c:202:9: sparse: sparse: non size-preserving integer to pointer cast
->> fs/ceph/dir.c:202:9: sparse: sparse: non size-preserving integer to pointer cast
->> fs/ceph/dir.c:202:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:233:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:233:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:233:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:233:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:275:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:275:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:275:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:275:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:345:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:345:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:345:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:345:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:345:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:354:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:354:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:354:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:371:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:371:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:371:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:432:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:432:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:432:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:432:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:492:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:492:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:492:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:527:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:527:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:527:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:556:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:556:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:556:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:556:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:556:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:595:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:595:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:595:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:595:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:595:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:595:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:645:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:645:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:645:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:661:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:661:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:661:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:669:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:669:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:676:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:676:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:676:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:676:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:748:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:748:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:748:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:748:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:787:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:787:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:787:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:787:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:787:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:787:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:819:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:819:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:819:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:869:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:869:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:869:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:869:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:869:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:899:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:899:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:911:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:911:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:954:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1015:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1015:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1015:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1015:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1015:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1015:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1140:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1140:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1140:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1140:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1140:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1219:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1219:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1219:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1219:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1224:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1224:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1224:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1224:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1224:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1332:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1332:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1332:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/dir.c:1332:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/dir.c:1332:9: sparse: sparse: non size-preserving pointer to integer cast
---
->> fs/ceph/inode.c:345:9: sparse: sparse: non size-preserving pointer to integer cast
->> fs/ceph/inode.c:345:9: sparse: sparse: non size-preserving integer to pointer cast
->> fs/ceph/inode.c:345:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:462:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:462:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:462:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:468:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:468:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:468:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:493:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:493:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:493:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:558:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:558:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:558:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:757:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:757:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:757:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:783:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:892:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:892:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:937:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:937:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:945:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:945:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1008:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1008:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1014:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1014:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1023:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1023:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1027:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1027:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1047:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1115:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1115:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1115:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1115:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1115:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1212:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1212:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1212:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1212:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1284:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1284:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1425:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1435:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1435:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1506:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1645:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1645:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1645:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1645:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1645:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1652:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1652:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1652:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1652:17: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1680:9: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1680:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1680:9: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1750:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1750:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1750:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1759:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1759:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1759:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1779:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1779:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1864:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1864:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1864:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1864:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1866:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1866:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1873:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1873:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1873:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1873:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1880:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1880:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1896:33: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1926:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1926:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1926:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1926:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1926:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1926:25: sparse: sparse: non size-preserving integer to pointer cast
-   fs/ceph/inode.c:1938:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1949:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:1949:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2074:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2127:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2130:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2174:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2174:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2174:17: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2181:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2181:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2181:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2200:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2200:25: sparse: sparse: non size-preserving pointer to integer cast
-   fs/ceph/inode.c:2252:33: sparse: sparse: non size-preserving pointer to integer cast
+This a collection of miscellaneous modifications to netfslib that I want to
+make ahead of bigger changes, including:
 
-vim +90 fs/ceph/export.c
+ (1) Convert "unsigned long long" to "uoff_t".  This makes it a little more
+     obvious as to the meaning of the value.  Also convert some "loff_t" to
+     "uoff_t" as most of the time it's used the value really should never
+     be negative.
 
-    35	
-    36	#define BYTES_PER_U32		(sizeof(u32))
-    37	#define CEPH_FH_BASIC_SIZE \
-    38		(sizeof(struct ceph_nfs_fh) / BYTES_PER_U32)
-    39	#define CEPH_FH_WITH_PARENT_SIZE \
-    40		(sizeof(struct ceph_nfs_confh) / BYTES_PER_U32)
-    41	#define CEPH_FH_SNAPPED_INODE_SIZE \
-    42		(sizeof(struct ceph_nfs_snapfh) / BYTES_PER_U32)
-    43	
-    44	static int ceph_encode_snapfh(struct inode *inode, u32 *rawfh, int *max_len,
-    45				      struct inode *parent_inode)
-    46	{
-    47		struct ceph_client *cl = ceph_inode_to_client(inode);
-    48		static const int snap_handle_length = CEPH_FH_SNAPPED_INODE_SIZE;
-    49		struct ceph_nfs_snapfh *sfh = (void *)rawfh;
-    50		u64 snapid = ceph_snap(inode);
-    51		int ret;
-    52		bool no_parent = true;
-    53	
-    54		if (*max_len < snap_handle_length) {
-    55			*max_len = snap_handle_length;
-    56			ret = FILEID_INVALID;
-    57			goto out;
-    58		}
-    59	
-    60		ret =  -EINVAL;
-    61		if (snapid != CEPH_SNAPDIR) {
-    62			struct inode *dir;
-    63			struct dentry *dentry = d_find_alias(inode);
-    64			if (!dentry)
-    65				goto out;
-    66	
-    67			rcu_read_lock();
-    68			dir = d_inode_rcu(dentry->d_parent);
-    69			if (ceph_snap(dir) != CEPH_SNAPDIR) {
-    70				sfh->parent_ino = ceph_ino(dir);
-    71				sfh->hash = ceph_dentry_hash(dir, dentry);
-    72				no_parent = false;
-    73			}
-    74			rcu_read_unlock();
-    75			dput(dentry);
-    76		}
-    77	
-    78		if (no_parent) {
-    79			if (!S_ISDIR(inode->i_mode))
-    80				goto out;
-    81			sfh->parent_ino = sfh->ino;
-    82			sfh->hash = 0;
-    83		}
-    84		sfh->ino = ceph_ino(inode);
-    85		sfh->snapid = snapid;
-    86	
-    87		*max_len = snap_handle_length;
-    88		ret = FILEID_BTRFS_WITH_PARENT;
-    89	out:
-  > 90		boutc(cl, "%p %llx.%llx ret=%d\n", inode, ceph_vinop(inode), ret);
-    91		return ret;
-    92	}
-    93	
+ (2) Remove the writethrough code as the locking is really tricky to get
+     right and it looks like it could deadlock with Ceph if snapshots are
+     used.
 
---
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+ (3) Adjust some tracepoints, including adding the cache object ID to
+     certain tracepoinits.
+
+ (4) Make use of PG_private_2 opt-in.  Use of PG_private_2 is deprecated
+     and the MM people would like their page bit back, so we need to stop
+     using it soon.
+
+ (5) Add some helper functions to handle the barriering needed for the
+     NETFS_RREQ_ALL_QUEUED flag.
+
+ (6) Set the subrequest type at allocation time so that the allocation
+     trace records the proposed type.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-next-1
+
+Thanks,
+David
+
+Changes
+=======
+ver #12)
+- Split from v11 of "netfs: Keep track of folios in a segmented bio_vec[]
+  chain"[1]
+
+[1] https://lore.kernel.org/r/20260902173350.3468672-1-dhowells@redhat.com/
+
+David Howells (8):
+  netfs: Use uoff_t instead of unsigned long long and loff_t
+  netfs: Remove the writethrough code
+  netfs: trace: Change the "clear" folio traces to "endwb"
+  netfs: trace: Rejig a couple of the tracepoints
+  netfs: Add the cache object ID to netfs_read/write tracepoints
+  netfs: Make deprecated PG_private_2 support opt-in
+  netfs: Add some functions to wrap the all-queued handling
+  netfs: Set subrequest->source at alloc before trace emission
+
+ fs/9p/vfs_addr.c                  |   1 -
+ fs/afs/file.c                     |   5 +-
+ fs/cachefiles/interface.c         |  10 +--
+ fs/cachefiles/internal.h          |   4 +-
+ fs/cachefiles/io.c                |  25 +++---
+ fs/ceph/Kconfig                   |   1 +
+ fs/ceph/addr.c                    |   4 +-
+ fs/netfs/Kconfig                  |   3 +
+ fs/netfs/Makefile                 |   2 +-
+ fs/netfs/buffered_read.c          |  35 ++++----
+ fs/netfs/buffered_write.c         |  66 +++------------
+ fs/netfs/direct_read.c            |  14 ++--
+ fs/netfs/direct_write.c           |   8 +-
+ fs/netfs/fscache_cookie.c         |   8 +-
+ fs/netfs/fscache_io.c             |  10 +--
+ fs/netfs/internal.h               |  67 ++++++++++++---
+ fs/netfs/iterator.c               |   2 +-
+ fs/netfs/main.c                   |   1 -
+ fs/netfs/misc.c                   |  10 +--
+ fs/netfs/objects.c                |   6 +-
+ fs/netfs/read_collect.c           |  14 ++--
+ fs/netfs/read_pgpriv2.c           |  13 ++-
+ fs/netfs/read_retry.c             |   5 +-
+ fs/netfs/read_single.c            |  11 +--
+ fs/netfs/stats.c                  |   4 +-
+ fs/netfs/write_collect.c          |  25 +++---
+ fs/netfs/write_issue.c            | 123 ++-------------------------
+ fs/netfs/write_retry.c            |   5 +-
+ fs/nfs/Kconfig                    |   1 +
+ include/linux/fscache-cache.h     |   2 +-
+ include/linux/fscache.h           |  36 ++++----
+ include/linux/netfs.h             |  80 +++++++++---------
+ include/trace/events/cachefiles.h |  30 +++----
+ include/trace/events/fscache.h    |  10 +--
+ include/trace/events/netfs.h      | 134 +++++++++++++++---------------
+ 35 files changed, 324 insertions(+), 451 deletions(-)
+
