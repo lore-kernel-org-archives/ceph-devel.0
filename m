@@ -1,236 +1,71 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45B2C52FE2C
-	for <ceph-devel@vger.kernel.org>; Tue,  8 Sep 2026 09:11:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFE98544898;
+	Tue,  8 Sep 2026 15:26:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788858715; cv=none; b=lHVQmana0KaoQxvpvLV5gSsmCRd6FFrX5vzmlHKa7MZFXdNoVuMZSQT4LsqUl28knBfRy8XIij/i9mRJLsHkbEQZhhPJCj9evfJbaTGp5EXKhoL79/NN8DtBamcBOERgjiFxj711TpzzHWZDXDTanWMiXxBPJaLqN1YVfK0WRaY=
+	t=1788881182; cv=none; b=PxDm2NNZtuuEknWE27g3zj3VJnsIrc4fNneY5XMK9Wj6UVpLVX3N1/Te7NyvL69BoO3RqWiXp7m5wB6lc3pPKjfYftd4O+Kj71ME15JZuERt0nfM1ifgFbUIUJwPlZid69xkRPkEfQMvcNmHT/Gtnqx4lHK+1qWs3qkr1z1Of9Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788858715; c=relaxed/simple;
-	bh=AfC6AN0+oRv9f00/2dtlwIkW+5nMtEfQM9UmhCLa+bE=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=DjyfYMzJUs1muF0/uzChJFzqGb/7CnZ5BG7pOBo1ip5sWZtgUxtGfq4VIvPhj0K/E525yl0Qsa5EFWLKyb5kYnYD2jDGx2UTT7Mh6HotyQe/pJGeZFyG8RxvTMGh9D7x12LD012S8Zwyh9xpXrLLDHfgROMTtw/Q8IeeO/uU1p8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=H7rj62h1; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1788881182; c=relaxed/simple;
+	bh=lM71MoOq8m7w/bKwihitgxNfGYQ+zsFbJrkU6LZZD1A=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=cH8QzazIVEOAooU0svhyUM/SYmOLMgfnn+lawsZhjSYLNybuDcebm7tMevY8yd74LQbI9bn+bMAUcQ7izRBDZUNAW+HLJa3ep46NKX6xqNFo2yXRt7ny1zHw7BF9HY6dV0M/0D6Qx0UgHKiji63OFAyHAs7ufFQXqJnnoqAOZzk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kqq8D3yd; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="H7rj62h1"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1788858712;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=sxO7FEkCCz/20KjVrg30v5ozCynNyOtWLTOKJ0S48jc=;
-	b=H7rj62h1xvJ0ly1C/XQbGgQrPfQjLOrvhuAp7gZCOWauuhuB4y4KNeQ0NmEGgwLmDoSxSP
-	yT4BVfcdyk7nb/1m3MVsEGMkup7y1/tH1o4uYFmZmy9hyCwkS9+PXKVXTdh83nsd9JpQ3l
-	qWTm6ufb2sfj7A2CxMYl03Biv9updAU=
-Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-622-8YNJsXH9MtiWIpWsQgpP2g-1; Tue,
- 08 Sep 2026 05:11:47 -0400
-X-MC-Unique: 8YNJsXH9MtiWIpWsQgpP2g-1
-X-Mimecast-MFC-AGG-ID: 8YNJsXH9MtiWIpWsQgpP2g_1788858705
-Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 017AC195DB9B;
-	Tue,  8 Sep 2026 09:11:45 +0000 (UTC)
-Received: from warthog.com (unknown [10.44.32.158])
-	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 260CF1800605;
-	Tue,  8 Sep 2026 09:11:38 +0000 (UTC)
-From: David Howells <dhowells@redhat.com>
-To: Paulo Alcantara <pc@manguebit.org>
-Cc: David Howells <dhowells@redhat.com>,
-	Christian Brauner <christian@brauner.io>,
-	Matthew Wilcox <willy@infradead.org>,
-	Namjae Jeon <linkinjeon@kernel.org>,
-	Marc Dionne <marc.dionne@auristor.com>,
-	Stefan Metzmacher <metze@samba.org>,
-	Eric Van Hensbergen <ericvh@kernel.org>,
-	Dominique Martinet <asmadeus@codewreck.org>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	netfs@lists.linux.dev,
-	linux-afs@lists.infradead.org,
-	linux-cifs@vger.kernel.org,
-	linux-nfs@vger.kernel.org,
-	ceph-devel@vger.kernel.org,
-	v9fs@lists.linux.dev,
-	linux-erofs@lists.ozlabs.org,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mm@kvack.org
-Subject: [PATCH v12 8/8] netfs: Set subrequest->source at alloc before trace emission
-Date: Tue,  8 Sep 2026 10:10:29 +0100
-Message-ID: <20260908091031.1506798-9-dhowells@redhat.com>
-In-Reply-To: <20260908091031.1506798-1-dhowells@redhat.com>
-References: <20260908091031.1506798-1-dhowells@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kqq8D3yd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BFA641F00A3A;
+	Tue,  8 Sep 2026 15:26:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788881175;
+	bh=//23ChfxTe+Ew0eBEIcqmG2+N/ngieDxQYGCRmyh9qc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=kqq8D3ydnf6SL+iUUfmirToJzWY3SoroK0OR8HsE5VhyR+YM8g1Bv6uRAvUqeLOkm
+	 bIQR0rlXzLa5K0/Li4n0ba+ULamsgqCDVudEQAqF16vWEd8kFdO34Z+MORP3E+ZMvZ
+	 hlbYY+Kb8ez5iLOXiqJfb7JtE92vWfVP/BPq8emd62OagHCwtG6J5yGQKG3n9rw4/t
+	 ZtfNVRCqnC7zWxa/qJanaqdAIPITB+QP0xW5BxSje0sE63tHgo2czRwIuC9WhQGu+l
+	 RONthPCOAKUKO7nST/gA0vssrQs53kyOuu9PbL/qURKaBUoTwIJ9pLChHHLeKrir4K
+	 2Cdn4x0+f/p7A==
+Date: Tue, 8 Sep 2026 10:25:57 -0500
+From: Seth Forshee <sforshee@kernel.org>
+To: Christian Brauner <brauner@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>,
+	Jan Kara <jack@suse.cz>, Christoph Hellwig <hch@lst.de>,
+	Paul Moore <paul@paul-moore.com>,
+	linux-security-module@vger.kernel.org,
+	Mimi Zohar <zohar@linux.ibm.com>, linux-integrity@vger.kernel.org,
+	Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
+	Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org,
+	Miklos Szeredi <miklos@szeredi.hu>,
+	Amir Goldstein <amir73il@gmail.com>, linux-unionfs@vger.kernel.org,
+	Namjae Jeon <linkinjeon@kernel.org>, linux-cifs@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 00/27] fs: port to const struct mnt_idmap
+Message-ID: <aqApBd1t3i1FIXK5@ubuntu-x1>
+References: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260901-work-idmap-const-v1-0-54ccd48e100b@kernel.org>
 
-Set subrequest->source in netfs_alloc_subrequest() before we emit the trace
-line indicating we allocated the subrequest.  Note that this requires the
-allocation of the subreq in netfs_read_to_pagecache() to be pushed to after
-the decision about what sort of subreq it should be.
+On Tue, Sep 01, 2026 at 02:14:25PM +0200, Christian Brauner wrote:
+> A mount's idmapping is immutable. The only thing that is allowed to be
+> modified afterwards is the reference count and that is hidden behind
+> mnt_idmap_get() and mnt_idmap_put(). Everything else only ever reads
+> from the idmapping. This is the same model that struct cred uses and the
+> idmapping is also rather sensitive.
+> 
+> So make the idmap argument const wherever we can. The conversion is done
+> from the bottom up so callers can continue to pass a non-const pointer
+> to a const parameter until the conversion is finished.
+> 
+> Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Paulo Alcantara <pc@manguebit.org>
-cc: netfs@lists.linux.dev
-cc: linux-fsdevel@vger.kernel.org
-cc: linux-mm@kvack.org
----
- fs/netfs/buffered_read.c | 4 ++--
- fs/netfs/direct_read.c   | 3 +--
- fs/netfs/internal.h      | 3 ++-
- fs/netfs/objects.c       | 4 +++-
- fs/netfs/read_retry.c    | 3 +--
- fs/netfs/read_single.c   | 2 +-
- fs/netfs/write_issue.c   | 3 +--
- fs/netfs/write_retry.c   | 3 +--
- 8 files changed, 12 insertions(+), 13 deletions(-)
+Looks good!
 
-diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
-index e7fa30376862..f88b87c8303e 100644
---- a/fs/netfs/buffered_read.c
-+++ b/fs/netfs/buffered_read.c
-@@ -276,10 +276,10 @@ static void netfs_read_to_pagecache(struct netfs_io_request *rreq)
- 
- 	do {
- 		struct netfs_io_subrequest *subreq;
--		enum netfs_io_source source = NETFS_SOURCE_UNKNOWN;
-+		enum netfs_io_source source;
- 		ssize_t slice;
- 
--		subreq = netfs_alloc_subrequest(rreq);
-+		subreq = netfs_alloc_subrequest(rreq, NETFS_SOURCE_UNKNOWN);
- 		if (!subreq) {
- 			ret = -ENOMEM;
- 			break;
-diff --git a/fs/netfs/direct_read.c b/fs/netfs/direct_read.c
-index 5405e108b7a3..8c15f3079723 100644
---- a/fs/netfs/direct_read.c
-+++ b/fs/netfs/direct_read.c
-@@ -55,7 +55,7 @@ static void netfs_dispatch_unbuffered_reads(struct netfs_io_request *rreq)
- 		struct netfs_io_subrequest *subreq;
- 		ssize_t slice;
- 
--		subreq = netfs_alloc_subrequest(rreq);
-+		subreq = netfs_alloc_subrequest(rreq, NETFS_DOWNLOAD_FROM_SERVER);
- 		if (!subreq) {
- 			/* Stash the error in the request if there's not
- 			 * already an error set.
-@@ -64,7 +64,6 @@ static void netfs_dispatch_unbuffered_reads(struct netfs_io_request *rreq)
- 			break;
- 		}
- 
--		subreq->source	= NETFS_DOWNLOAD_FROM_SERVER;
- 		subreq->start	= start;
- 		subreq->len	= size;
- 
-diff --git a/fs/netfs/internal.h b/fs/netfs/internal.h
-index e0aa0ea510e9..ec520c948420 100644
---- a/fs/netfs/internal.h
-+++ b/fs/netfs/internal.h
-@@ -92,7 +92,8 @@ void netfs_get_request(struct netfs_io_request *rreq, enum netfs_rreq_ref_trace
- void netfs_clear_subrequests(struct netfs_io_request *rreq);
- void netfs_put_request(struct netfs_io_request *rreq, enum netfs_rreq_ref_trace what);
- void netfs_put_failed_request(struct netfs_io_request *rreq);
--struct netfs_io_subrequest *netfs_alloc_subrequest(struct netfs_io_request *rreq);
-+struct netfs_io_subrequest *netfs_alloc_subrequest(struct netfs_io_request *rreq,
-+						   enum netfs_io_source source);
- 
- static inline void netfs_see_request(struct netfs_io_request *rreq,
- 				     enum netfs_rreq_ref_trace what)
-diff --git a/fs/netfs/objects.c b/fs/netfs/objects.c
-index 3460aa1c4af1..9c6ea718692a 100644
---- a/fs/netfs/objects.c
-+++ b/fs/netfs/objects.c
-@@ -207,7 +207,8 @@ void netfs_put_failed_request(struct netfs_io_request *rreq)
- /*
-  * Allocate and partially initialise an I/O request structure.
-  */
--struct netfs_io_subrequest *netfs_alloc_subrequest(struct netfs_io_request *rreq)
-+struct netfs_io_subrequest *netfs_alloc_subrequest(struct netfs_io_request *rreq,
-+						   enum netfs_io_source source)
- {
- 	struct netfs_io_subrequest *subreq;
- 	mempool_t *mempool = rreq->netfs_ops->subrequest_pool ?: &netfs_subrequest_pool;
-@@ -224,6 +225,7 @@ struct netfs_io_subrequest *netfs_alloc_subrequest(struct netfs_io_request *rreq
- 	INIT_WORK(&subreq->work, NULL);
- 	INIT_LIST_HEAD(&subreq->rreq_link);
- 	refcount_set(&subreq->ref, 2);
-+	subreq->source = source;
- 	subreq->rreq = rreq;
- 	subreq->debug_index = atomic_inc_return(&rreq->subreq_counter);
- 	netfs_get_request(rreq, netfs_rreq_trace_get_subreq);
-diff --git a/fs/netfs/read_retry.c b/fs/netfs/read_retry.c
-index 46810d29f0c0..396a05432a7e 100644
---- a/fs/netfs/read_retry.c
-+++ b/fs/netfs/read_retry.c
-@@ -195,12 +195,11 @@ static void netfs_retry_read_subrequests(struct netfs_io_request *rreq)
- 		 * and insert them after.
- 		 */
- 		do {
--			subreq = netfs_alloc_subrequest(rreq);
-+			subreq = netfs_alloc_subrequest(rreq, NETFS_DOWNLOAD_FROM_SERVER);
- 			if (!subreq) {
- 				subreq = to;
- 				goto abandon_after;
- 			}
--			subreq->source		= NETFS_DOWNLOAD_FROM_SERVER;
- 			subreq->start		= start;
- 			subreq->len		= len;
- 			subreq->stream_nr	= stream->stream_nr;
-diff --git a/fs/netfs/read_single.c b/fs/netfs/read_single.c
-index ccb5fc809d99..50775370d13d 100644
---- a/fs/netfs/read_single.c
-+++ b/fs/netfs/read_single.c
-@@ -92,7 +92,7 @@ static int netfs_single_dispatch_read(struct netfs_io_request *rreq)
- 	struct netfs_io_subrequest *subreq;
- 	int ret = 0;
- 
--	subreq = netfs_alloc_subrequest(rreq);
-+	subreq = netfs_alloc_subrequest(rreq, NETFS_DOWNLOAD_FROM_SERVER);
- 	if (!subreq)
- 		return -ENOMEM;
- 
-diff --git a/fs/netfs/write_issue.c b/fs/netfs/write_issue.c
-index 9a528da4bf9f..e7cb496f6324 100644
---- a/fs/netfs/write_issue.c
-+++ b/fs/netfs/write_issue.c
-@@ -168,10 +168,9 @@ void netfs_prepare_write(struct netfs_io_request *wreq,
- 	    wreq_iter->folioq_slot >= folioq_nr_slots(wreq_iter->folioq))
- 		rolling_buffer_make_space(&wreq->buffer, wreq->gfp);
- 
--	subreq = netfs_alloc_subrequest(wreq);
-+	subreq = netfs_alloc_subrequest(wreq, stream->source);
- 	if (!subreq)
- 		return;
--	subreq->source		= stream->source;
- 	subreq->start		= start;
- 	subreq->stream_nr	= stream->stream_nr;
- 	subreq->io_iter		= *wreq_iter;
-diff --git a/fs/netfs/write_retry.c b/fs/netfs/write_retry.c
-index 6cd584242af2..d7d5348496fc 100644
---- a/fs/netfs/write_retry.c
-+++ b/fs/netfs/write_retry.c
-@@ -149,8 +149,7 @@ static void netfs_retry_write_stream(struct netfs_io_request *wreq,
- 		 * and insert them after.
- 		 */
- 		do {
--			subreq = netfs_alloc_subrequest(wreq);
--			subreq->source		= to->source;
-+			subreq = netfs_alloc_subrequest(wreq, stream->source);
- 			subreq->start		= start;
- 			subreq->stream_nr	= to->stream_nr;
- 			subreq->retry_count	= 1;
-
+Reviewed-by: Seth Forshee <sforshee@kernel.org>
