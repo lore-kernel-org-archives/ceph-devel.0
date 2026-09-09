@@ -1,90 +1,90 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CC7A55C325
-	for <ceph-devel@vger.kernel.org>; Wed,  9 Sep 2026 12:54:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8F5655C333
+	for <ceph-devel@vger.kernel.org>; Wed,  9 Sep 2026 12:54:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788958482; cv=none; b=AMfRZDS9bbGCMbK42OWgFzgXYJmquhplevDkzqR84aDjgaztiX6lvmxTVgaKGFPRSX2RJSx6w+WYkp/mhcEMjfVRiQvD4xlQCb5EaoNIK9r2B6K2SgADdwE2gL7K0pft8mKKHd4LE0BTvjTEBaXuLNjpBMnGeNMR9c7BitRa6m4=
+	t=1788958483; cv=none; b=l1NjeWtntQc1WqWjZAQBwCtv8GRMy1hqeZ32KL1qHbRM7jO9Gds/hI2motSZoB87R9lBYA9JlcjKQjAbhl9mw5WPz3M9t9vdpWcfHeuN1hZ2BxKvmaSkLtlPkVSjet/uocpeJa6ihi+ctMBhd7arvDlIjsdwd3bM5Bd3mVdY1T4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788958482; c=relaxed/simple;
-	bh=uuAhhJOSjCnXhMqlvwcNHrBpSCa/GUrT4ntrbvLwWgk=;
+	s=arc-20240116; t=1788958483; c=relaxed/simple;
+	bh=6bq6Bbx4DrrTfmrkBKg3Ha8F01BLzAUi4qbYfuaxOjo=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=u+3BWOyvUPaNCJVAp6qG7up7Q4sDuZHEUZEo0N8RrOsfB/4iYrmWaIOaM2WmHVLts0VWxP5qulmJ7p2c/7wkbY6JFLLUVGgm+jYd+g/dd2lGl+QZzeFdJO94J6hLo5qLDaftPasRjuv3HqnoKzQyZIc5N64ukaTqqHcRm1D9TDo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SZvqOH/5; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=NalJ0o1t; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=aPvM/nu8RDDaWJ9CqNIsAmT+gLglo7KYIfK1MXBxe6+DMXWphshLu8P9e26iVRTd9IdIEI1VvTFOc2Zz1rMpeRmdFLyneJTZSLV2t/f4iaXO0K3Pd0NLZkJCQ4c/pwQGwIGF2cx8otFCdkIqh0OA8Vp+SkimHfarNjgyuXF0wAU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=BJuP55su; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=pCUs7k1F; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SZvqOH/5";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="NalJ0o1t"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BJuP55su";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="pCUs7k1F"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1788958477;
+	s=mimecast20190719; t=1788958479;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Wt732rEzf3r2tlruY6OqkC89ZpuhTN3vDkGDP+KToNY=;
-	b=SZvqOH/5Y3TOr374dyOaiTZRQMTHGaJ9UZNyo1wFssCj1jSRJhGmO6SaX5QpEmL7k540nP
-	F5asqvemP3ZWwBouLomEtc8WMGx+Jj8i5GdLoXEBZ9odJ/sALpsIYBhkNN5ENsaJUL8HZ7
-	NTs3aZKOIxLoKQdXWVOATtgURyexcIY=
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
- [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=tWjdSnjBpBHS8GMqCSo26G8pWVpbyLUFP7k8Dvq8K9A=;
+	b=BJuP55su5c9Z1K8O50IVqTgPlm5c5nwnRj6/L3RoNnlKlZSNiuubZ9zNHgt39mOxENCXjd
+	oPajdkDmN+I+nHnms2gTikb+EUoOyOL9gfEnCudpmrCXp996bvHT87BviK+Fdmpb/a2Ro4
+	RPx36c2AQHy4PsCIEtUJVraWvnXaqGc=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-682-QAHmSWHFNSyF5KGH-zlhjw-1; Wed, 09 Sep 2026 08:54:36 -0400
-X-MC-Unique: QAHmSWHFNSyF5KGH-zlhjw-1
-X-Mimecast-MFC-AGG-ID: QAHmSWHFNSyF5KGH-zlhjw_1788958475
-Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-9390a2c895bso1179886485a.0
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Sep 2026 05:54:36 -0700 (PDT)
+ us-mta-459-1_sfbvZfPgm5Vt3IBp0OCg-1; Wed, 09 Sep 2026 08:54:38 -0400
+X-MC-Unique: 1_sfbvZfPgm5Vt3IBp0OCg-1
+X-Mimecast-MFC-AGG-ID: 1_sfbvZfPgm5Vt3IBp0OCg_1788958478
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-93915f50a5cso1367601585a.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Sep 2026 05:54:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1788958475; x=1789563275; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1788958478; x=1789563278; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=Wt732rEzf3r2tlruY6OqkC89ZpuhTN3vDkGDP+KToNY=;
-        b=NalJ0o1tQxGeTA7X8cv24XG/yT09RIpBg/Ss1LE9X/Lvp4DN1mur7bUtFT1XdNhCAk
-         IFIGA7acyaRIZo6EwtefLuBzuP+qghAU4g5ZFZa7zytBNQM/mSSphUU28fEoUMvL0oVE
-         /XGNU6VWCm8mA6BmYvlLpBYuJuQKXw4oGbFVYDuNud4Y5tUulHKtlBo0T0BWahFUIfC5
-         ODKjy71ijjqsjw7vziAWbE9j4FGV+6aKcI9houxMMR4L0Ip4eSBxR4FcU8of1CResWQg
-         1zeEyYbLEeKrCzPgNbgGE0SV+0yB/JZ97ZroCQxhjCcpJcs3ghiFmwbcPesI+W+LQhUk
-         Jtzg==
+        bh=tWjdSnjBpBHS8GMqCSo26G8pWVpbyLUFP7k8Dvq8K9A=;
+        b=pCUs7k1FnBSEst/9mWe6WmyYfPSJbY77Zk0Jq7Kus3mWmexFA9ddxEzHobJI37d2oQ
+         9hBYr95rxcUAg034UWLX3MVM0dfcsLxLnnd0+u3GNnLkKPLq3A/dniYW9be/DAx/4Om4
+         DHSDn20gT5wpsfQS9ryHM4x6pV8PRcJvhhPupHp95iOvoPtDgsLP2gJIthn11gnJxRHl
+         GkAh5CduRJqNP4jZ7hK9sXALzhTOMht3v6XJ01CL2r3+zhElRqR12/AJuTzD0AFMIxQQ
+         7LTR8VIGuy37u39K9DlcaryxJgmAnEK1SHRian2C4jI4ljJ6eXd2ONmqcWxykHLc5bzW
+         D4KQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788958475; x=1789563275;
+        d=1e100.net; s=20251104; t=1788958478; x=1789563278;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Wt732rEzf3r2tlruY6OqkC89ZpuhTN3vDkGDP+KToNY=;
-        b=r+7zalt5xbNQ2DXvZkI/HnSxfslGF8oPzyj7vC1i1hRBFJMVml/zdscRlsGhhn454B
-         7NtfvjJIgCTEmf/1wdlCNq1S01AW7PF3G45/JlJ/jRNReexgpY6AVTS0ZSDb0F4NPUE7
-         YvwgedKLBTsOif9ml72pE1IPeS1Ao5YPHBvQyPvp0WdPyQFgeM1WSiAYaSY8kU0MXXne
-         lP+bQkVzJIqRqR6l7snB38vqsuhZSBnPt4THfwQVTGprFOzPfQlokovHV713KoVLDl83
-         7KdHVyzPOb2KXF0sFEOe+kOful7QJbdyqBwhrekiSUyRSbFVqiF35dj5DsSUll9RanBb
-         7x/w==
-X-Gm-Message-State: AFuF++mJrUqpptT4XBtKYxDbeVia84adYgEtbenbGQnvmsRd44U/Kr2P
-	srfZUmU5kvahdVajKZdqwn5MAhkCfTTvDetgThcbt4WzGQFRGn59WH+UUgOU6BkwgefyHnQnyWB
-	emla25lzHxj0+oWXlHZp+UnmTISmW/vsZXpJeMuApGznERkqRydwA0cgrnbzSQPXK0w+ttKsg8k
-	MRg3EQLgpZcbayOg1y6txttdw2IAXzwyyQ0bd2WOFy2IxWK3m6lQ==
-X-Gm-Gg: AYBFou0s9sJzsYfwbGrpWUCkrHFKR23lOhpb7MjxwI9DdHn27w4Zwcx9q6SSjt2U4zs
-	gNbE1YgHl9NWzQ50H0BK3U3AJ0MSaNkdRZjl9mqP2MI80D/W8MnsHMXmAClkw7YY+qIJhn0Y9fh
-	EVZub3fTROitsI+KCVeXQcfKg9mzbSqn6ImWjP2vV6fX7C2YqdEKDMUBsYMqY7JJ9Ee0alkN/OM
-	+PQA3lsVHtbhU58tEHdzwEKnpCno2bUURbgPPPsVxZa9LtJwovE59mvws3bnw9qPbdoOwDjhNI5
-	8bdvKYC+ZWQbEBZabhEUc3tiKda1AXONChKuWZFxM0Fn50Y7NEyA9gTfRxwlloyEqpu/NHhTjvV
-	gXlfEG3DWiOeShcocYaQWqe5ke98V38d/Cgiwg5Z0TDkpycVn0bDaqU2nWiq65e0V9dUYkOVOgI
-	AwNNFk1U7mOvtxzg==
-X-Received: by 2002:a05:620a:46a7:b0:939:744:b5a3 with SMTP id af79cd13be357-939806da02cmr3861873885a.29.1788958470102;
-        Wed, 09 Sep 2026 05:54:30 -0700 (PDT)
-X-Received: by 2002:a05:620a:46a7:b0:939:744:b5a3 with SMTP id af79cd13be357-939806da02cmr3861863085a.29.1788958469107;
-        Wed, 09 Sep 2026 05:54:29 -0700 (PDT)
+        bh=tWjdSnjBpBHS8GMqCSo26G8pWVpbyLUFP7k8Dvq8K9A=;
+        b=F/YrGakYQG/9bFVLlO6uOTFDterokwzElksXqNzR0JuBCzO4XG0RKNJeesVcsC8f3K
+         1kFYk/Qx8GblOChgtWJdWSnj48oII4PqlV0+f9KhRmkArGRZ+SUaQCO72dj3ahKkxmQF
+         PeMh/gNWJ0VHmw/tc0NPzZXUXaW4RYnalJDMepv9EksAG8gehBiu9hDE02ODBHuW+ys6
+         1AYzEmYuJIFURmuDlcM303Zl2yDnhzulMOosgoC7muHEr/Q5DH/jptzgcY5EKqubtOni
+         px1qztWAE+MqTF3gBnaBvYum0N3RB8seSopo/fwqAu1VWo1dJepScjkZ/rFPLN1aPPs2
+         qKvA==
+X-Gm-Message-State: AFuF++lgF+HTw5r+GW+OjffaLEnsx99hf5Tww4LixbbGGZfoZUOH5cTD
+	NGzUj/Y6+3YRI51TGv82/qQVEY0DVzD1tRfbBRChM0mBjRsf+6E3gbmLBiAM46hOzTHUV/AVyOP
+	bIXHRQAFLOoG/ziFAitv+cm5xtOD2d0vjb0TE/tgFgeekVT8l70PUT2uBzbU1fzGgkjrccWvCSX
+	aV6l1tao+j7p2Zez7fsk0Tek+pWEqWA2R+JbhOfo+edRU5mvZOcg==
+X-Gm-Gg: AYBFou3/rTjIiSVWXPYl11CvJ6BiLpumP1tbDp73xkw+wenq9bfkyal9UGvU60wA9mU
+	cD7yEunyrIGJG+GoRr06C6qiqz9sGNpCaDKyk3vbTqNdziEzUX9a8mUiDTmPI9QqqwthI/EtXj+
+	1jHBHmBh9Zzojx36VIWXoWnqnEFyzZwFb3kh0yIR5yDTUQQEKrgTQ5TTm+c7oY4OiirpmpLavlk
+	DpGhN8t5rGcWIS1/9ez4zNYZHnjI4jpe1i2qaGS6+vihYG9BDc3iQfn0AJKsgRPHIcHI0g8EF2W
+	Fu3EKstBun+0mk71VmvDZdzR0dA3xcRrgxbB0IUjUIUNUjpRCFyTIYRXlMCO6st6V/28Pbhcwxe
+	3C4Gz1Af9RhBVr5BaqCpFFBWxM+ft49xJamYcmO4GUYG2oUVwdCXV4wZvq0u9tXRdIQwE18ex5v
+	njW8Xcux0JtN3ovA==
+X-Received: by 2002:a05:620a:aa09:b0:939:a45:8c96 with SMTP id af79cd13be357-9396e07a4d1mr2995304685a.19.1788958477662;
+        Wed, 09 Sep 2026 05:54:37 -0700 (PDT)
+X-Received: by 2002:a05:620a:aa09:b0:939:a45:8c96 with SMTP id af79cd13be357-9396e07a4d1mr2995299485a.19.1788958476964;
+        Wed, 09 Sep 2026 05:54:36 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-9399429b97esm1117852185a.29.2026.09.09.05.54.27
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-9399429b97esm1117852185a.29.2026.09.09.05.54.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Sep 2026 05:54:28 -0700 (PDT)
+        Wed, 09 Sep 2026 05:54:36 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: Ilya Dryomov <idryomov@gmail.com>,
 	Xiubo Li <xiubo.li@clyso.com>
-Subject: [PATCH v5 07/14] ceph: add Ceph BLOG scaffolding
-Date: Wed,  9 Sep 2026 12:54:09 +0000
-Message-Id: <20260909125416.3969532-8-amarkuze@redhat.com>
+Subject: [PATCH v5 13/14] ceph: convert capability and snapshot paths to bout
+Date: Wed,  9 Sep 2026 12:54:15 +0000
+Message-Id: <20260909125416.3969532-14-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260909125416.3969532-1-amarkuze@redhat.com>
 References: <20260909125416.3969532-1-amarkuze@redhat.com>
@@ -96,1196 +96,526 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Wire BLOG into CephFS: ceph_blog.h (journal_info, enter/exit, logging
-macros), blog_client.c (per-fsc context lifecycle, client-ID mapping,
-and blog_max_sources/blog_max_clients module parameters), super.h
-(blog_enabled, blog_ctx, debugfs_blog), libceph.h (blog_client_id),
-and Makefile (gate all BLOG objects on CONFIG_DEBUG_FS).
+Replace dout()/doutc() with bout()/boutc() only on MDS/VFS paths that
+already bind a BLOG context via ceph_blog_enter() (ceph_handle_caps and
+its handle_cap_* helpers, ceph_handle_snap/flush_snaps, ceph_fsync,
+ceph_write_inode).
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
 ---
- fs/ceph/Makefile               |   3 +
- fs/ceph/blog_client.c          | 641 +++++++++++++++++++++++++++++++++
- fs/ceph/super.c                |  58 ++-
- fs/ceph/super.h                |   7 +
- include/linux/ceph/ceph_blog.h | 292 +++++++++++++++
- include/linux/ceph/libceph.h   |   2 +
- 6 files changed, 992 insertions(+), 11 deletions(-)
- create mode 100644 fs/ceph/blog_client.c
- create mode 100644 include/linux/ceph/ceph_blog.h
+ fs/ceph/caps.c | 116 ++++++++++++++++++++++++++++++-------------------
+ fs/ceph/snap.c |  17 +++++---
+ 2 files changed, 83 insertions(+), 50 deletions(-)
 
-diff --git a/fs/ceph/Makefile b/fs/ceph/Makefile
-index ebb29d11ac22..2330229d9783 100644
---- a/fs/ceph/Makefile
-+++ b/fs/ceph/Makefile
-@@ -10,6 +10,9 @@ ceph-y := super.o inode.o dir.o file.o locks.o addr.o ioctl.o \
- 	mds_client.o mdsmap.o strings.o ceph_frag.o \
- 	debugfs.o util.o metric.o subvolume_metrics.o
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 8e582cbcfc6b..8e21abe6dce3 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -334,6 +334,7 @@ struct ceph_cap *ceph_get_cap(struct ceph_mds_client *mdsc,
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	struct ceph_cap *cap = NULL;
++	int count, total, use, resv, avail;
  
-+ceph-$(CONFIG_DEBUG_FS) += blog_core.o blog_module.o blog_batch.o \
-+	blog_pagefrag.o blog_des.o blog_client.o blog_debugfs.o
+ 	/* temporary, until we do something about cap import/export */
+ 	if (!ctx) {
+@@ -364,9 +365,11 @@ struct ceph_cap *ceph_get_cap(struct ceph_mds_client *mdsc,
+ 	}
+ 
+ 	spin_lock(&mdsc->caps_list_lock);
+-	doutc(cl, "ctx=%p (%d) %d = %d used + %d resv + %d avail\n", ctx,
+-	      ctx->count, mdsc->caps_total_count, mdsc->caps_use_count,
+-	      mdsc->caps_reserve_count, mdsc->caps_avail_count);
++	count = ctx->count;
++	total = mdsc->caps_total_count;
++	use = mdsc->caps_use_count;
++	resv = mdsc->caps_reserve_count;
++	avail = mdsc->caps_avail_count;
+ 	BUG_ON(!ctx->count);
+ 	BUG_ON(ctx->count > mdsc->caps_reserve_count);
+ 	BUG_ON(list_empty(&mdsc->caps_list));
+@@ -382,17 +385,21 @@ struct ceph_cap *ceph_get_cap(struct ceph_mds_client *mdsc,
+ 	BUG_ON(mdsc->caps_total_count != mdsc->caps_use_count +
+ 	       mdsc->caps_reserve_count + mdsc->caps_avail_count);
+ 	spin_unlock(&mdsc->caps_list_lock);
++	doutc(cl, "ctx=%p (%d) %d = %d used + %d resv + %d avail\n", ctx,
++	      count, total, use, resv, avail);
+ 	return cap;
+ }
+ 
+ void ceph_put_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap)
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
++	int total, use, resv, avail;
+ 
+ 	spin_lock(&mdsc->caps_list_lock);
+-	doutc(cl, "%p %d = %d used + %d resv + %d avail\n", cap,
+-	      mdsc->caps_total_count, mdsc->caps_use_count,
+-	      mdsc->caps_reserve_count, mdsc->caps_avail_count);
++	total = mdsc->caps_total_count;
++	use = mdsc->caps_use_count;
++	resv = mdsc->caps_reserve_count;
++	avail = mdsc->caps_avail_count;
+ 	mdsc->caps_use_count--;
+ 	/*
+ 	 * Keep some preallocated caps around (ceph_min_count), to
+@@ -410,6 +417,8 @@ void ceph_put_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap)
+ 	BUG_ON(mdsc->caps_total_count != mdsc->caps_use_count +
+ 	       mdsc->caps_reserve_count + mdsc->caps_avail_count);
+ 	spin_unlock(&mdsc->caps_list_lock);
++	doutc(cl, "%p %d = %d used + %d resv + %d avail\n", cap,
++	      total, use, resv, avail);
+ }
+ 
+ void ceph_reservation_status(struct ceph_fs_client *fsc,
+@@ -547,7 +556,7 @@ static void __cap_delay_requeue_front(struct ceph_mds_client *mdsc,
+ {
+ 	struct inode *inode = &ci->netfs.inode;
+ 
+-	doutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
++	boutc(mdsc->fsc->client, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 	spin_lock(&mdsc->cap_delay_lock);
+ 	set_bit(CEPH_I_FLUSH_BIT, &ci->i_ceph_flags);
+ 	if (!list_empty(&ci->i_cap_delay_list))
+@@ -872,6 +881,7 @@ static void __touch_cap(struct ceph_inode_info *ci, struct ceph_cap *cap)
+ 	struct ceph_mds_session *s = cap->session;
+ 	struct ceph_client *cl = s->s_mdsc->fsc->client;
+ 	static u8 skip_counter;
++	bool iterating;
+ 
+ 	if (data_race(++skip_counter))
+ 		/* skip this call most of the time to reduce lock
+@@ -881,15 +891,17 @@ static void __touch_cap(struct ceph_inode_info *ci, struct ceph_cap *cap)
+ 		return;
+ 
+ 	spin_lock(&s->s_cap_lock);
+-	if (!s->s_cap_iterator) {
++	iterating = !!s->s_cap_iterator;
++	if (!iterating)
++		list_move_tail(&cap->session_caps, &s->s_caps);
++	spin_unlock(&s->s_cap_lock);
 +
- ceph-$(CONFIG_CEPH_FSCACHE) += cache.o
- ceph-$(CONFIG_CEPH_FS_POSIX_ACL) += acl.o
- ceph-$(CONFIG_FS_ENCRYPTION) += crypto.o
-diff --git a/fs/ceph/blog_client.c b/fs/ceph/blog_client.c
-new file mode 100644
-index 000000000000..414d65c40df5
---- /dev/null
-+++ b/fs/ceph/blog_client.c
-@@ -0,0 +1,641 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Ceph client ID management for BLOG integration
-+ *
-+ * Maintains mapping between Ceph's fsid/global_id and BLOG client IDs
-+ */
-+
-+#include <linux/ceph/ceph_debug.h>
-+#include <linux/module.h>
-+#include <linux/slab.h>
-+#include <linux/spinlock.h>
-+#include <linux/string.h>
-+#include <linux/gfp.h>
-+#include <linux/preempt.h>
-+#include <linux/sched.h>
-+#include <linux/jump_label.h>
-+#include <linux/ceph/libceph.h>
-+#include <linux/ceph/ceph_blog.h>
-+#include "blog.h"
-+#include "blog_module.h"
-+
-+#include "super.h"
-+
-+DEFINE_STATIC_KEY_FALSE(ceph_blog_key);
-+
-+static int blog_max_sources = BLOG_DEFAULT_MAX_SOURCES;
-+static int blog_max_clients = BLOG_DEFAULT_MAX_CLIENTS;
-+
-+module_param_named(blog_max_sources, blog_max_sources, int, 0444);
-+MODULE_PARM_DESC(blog_max_sources,
-+		 "Maximum BLOG source IDs per logger (load-time, default 4096)");
-+module_param_named(blog_max_clients, blog_max_clients, int, 0444);
-+MODULE_PARM_DESC(blog_max_clients,
-+		 "Maximum BLOG client IDs (load-time, default 256)");
-+
-+int blog_param_max_sources(void)
-+{
-+	int n = READ_ONCE(blog_max_sources);
-+
-+	if (n < 2)
-+		n = 2;
-+	if (n > BLOG_MAX_SOURCE_IDS_CAP)
-+		n = BLOG_MAX_SOURCE_IDS_CAP;
-+	return n;
-+}
-+
-+int blog_param_max_clients(void)
-+{
-+	int n = READ_ONCE(blog_max_clients);
-+
-+	if (n < 2)
-+		n = 2;
-+	if (n > BLOG_MAX_CLIENT_IDS_CAP)
-+		n = BLOG_MAX_CLIENT_IDS_CAP;
-+	return n;
-+}
-+
-+/* Global client mapping state */
-+static struct {
-+	struct ceph_blog_client_info *client_map;
-+	/* Parallel to client_map: which ceph_client owns each slot. */
-+	struct ceph_client **owners;
-+	u32 max_clients;
-+	u32 next_client_id;
-+	spinlock_t lock;  /* protects client_map */
-+	bool initialized;
-+} ceph_blog_state = {
-+	.next_client_id = 1,  /* Start from 1, 0 is reserved */
-+	.lock = __SPIN_LOCK_UNLOCKED(ceph_blog_state.lock),
-+	.initialized = false,
-+};
-+
-+static bool ceph_blog_ids_match(const struct ceph_blog_client_info *entry,
-+				     const char *fsid, u64 global_id)
-+{
-+	if (!entry)
-+		return false;
-+	if (entry->global_id != global_id)
-+		return false;
-+	return !memcmp(entry->fsid, fsid, sizeof(entry->fsid));
-+}
-+
-+static bool ceph_blog_client_slot_free(const struct ceph_blog_client_info *entry)
-+{
-+	return !data_race(entry->global_id) &&
-+	       !data_race(memchr_inv(entry->fsid, 0, sizeof(entry->fsid)));
-+}
-+
-+int ceph_blog_init(void)
-+{
-+	u32 max_clients;
-+	int ret;
-+
-+	if (ceph_blog_state.initialized)
-+		return 0;
-+
-+	ret = blog_module_wq_init();
-+	if (ret)
-+		return ret;
-+
-+	max_clients = blog_param_max_clients();
-+	ceph_blog_state.client_map = kcalloc(max_clients,
-+					     sizeof(*ceph_blog_state.client_map),
-+					     GFP_KERNEL);
-+	if (!ceph_blog_state.client_map) {
-+		blog_module_wq_exit();
-+		return -ENOMEM;
-+	}
-+	ceph_blog_state.owners = kcalloc(max_clients,
-+					 sizeof(*ceph_blog_state.owners),
-+					 GFP_KERNEL);
-+	if (!ceph_blog_state.owners) {
-+		kfree(ceph_blog_state.client_map);
-+		ceph_blog_state.client_map = NULL;
-+		blog_module_wq_exit();
-+		return -ENOMEM;
-+	}
-+
-+	ceph_blog_state.max_clients = max_clients;
-+	ceph_blog_state.next_client_id = 1;
-+	ceph_blog_state.initialized = true;
-+
-+	pr_debug("ceph: BLOG client mapping initialized (max_clients=%u)\n",
-+		 max_clients);
-+	return 0;
-+}
-+
-+void ceph_blog_cleanup(void)
-+{
-+	void *client_map = NULL;
-+	void *owners = NULL;
-+
-+	blog_module_flush_frees();
-+
-+	if (ceph_blog_state.initialized) {
-+		spin_lock(&ceph_blog_state.lock);
-+		client_map = ceph_blog_state.client_map;
-+		ceph_blog_state.client_map = NULL;
-+		owners = ceph_blog_state.owners;
-+		ceph_blog_state.owners = NULL;
-+		ceph_blog_state.max_clients = 0;
-+		ceph_blog_state.next_client_id = 1;
-+		ceph_blog_state.initialized = false;
-+		spin_unlock(&ceph_blog_state.lock);
-+		kfree(client_map);
-+		kfree(owners);
-+		pr_debug("ceph: BLOG client mapping cleaned up\n");
-+	}
-+
-+	blog_module_wq_exit();
-+}
-+
-+int ceph_blog_fsc_init(struct ceph_fs_client *fsc)
-+{
-+	if (!fsc)
-+		return -EINVAL;
-+
-+	mutex_init(&fsc->blog_mutex);
-+	RCU_INIT_POINTER(fsc->blog_ctx, NULL);
-+	WRITE_ONCE(fsc->blog_enabled, false);
-+	return 0;
-+}
-+
-+int ceph_blog_set_enabled(struct ceph_fs_client *fsc, bool enabled)
-+{
-+	struct blog_module_context *ctx;
-+	bool was_enabled;
-+	int ret = 0;
-+
-+	if (!fsc)
-+		return -EINVAL;
-+
-+	mutex_lock(&fsc->blog_mutex);
-+	was_enabled = READ_ONCE(fsc->blog_enabled);
-+	ctx = rcu_dereference_protected(fsc->blog_ctx,
-+					lockdep_is_held(&fsc->blog_mutex));
-+	if (enabled && !ctx) {
-+		ctx = blog_module_init("ceph");
-+		if (!ctx) {
-+			pr_err("ceph: failed to initialize BLOG context for fs client\n");
-+			ret = -ENOMEM;
-+			goto out;
-+		}
-+		rcu_assign_pointer(fsc->blog_ctx, ctx);
-+	}
-+	WRITE_ONCE(fsc->blog_enabled, enabled);
-+	if (enabled && !was_enabled)
-+		static_branch_inc(&ceph_blog_key);
-+	else if (!enabled && was_enabled)
-+		static_branch_dec(&ceph_blog_key);
-+out:
-+	mutex_unlock(&fsc->blog_mutex);
-+	return ret;
-+}
-+
-+void ceph_blog_fsc_cleanup(struct ceph_fs_client *fsc)
-+{
-+	struct blog_module_context *ctx;
-+	bool was_enabled;
-+
-+	if (!fsc)
-+		return;
-+
-+	mutex_lock(&fsc->blog_mutex);
-+	was_enabled = READ_ONCE(fsc->blog_enabled);
-+	WRITE_ONCE(fsc->blog_enabled, false);
-+	if (was_enabled)
-+		static_branch_dec(&ceph_blog_key);
-+	ctx = rcu_replace_pointer(fsc->blog_ctx, NULL,
-+				  lockdep_is_held(&fsc->blog_mutex));
-+	mutex_unlock(&fsc->blog_mutex);
-+
-+	if (ctx) {
-+		synchronize_rcu();
-+		blog_module_put(ctx);
-+		blog_module_flush_frees();
-+	}
-+}
-+
-+bool ceph_blog_is_enabled(struct ceph_fs_client *fsc)
-+{
-+	struct blog_module_context *ctx;
-+	bool enabled = false;
-+
-+	if (!fsc || !READ_ONCE(fsc->blog_enabled))
-+		return false;
-+
-+	rcu_read_lock();
-+	ctx = rcu_dereference(fsc->blog_ctx);
-+	if (ctx && READ_ONCE(ctx->logger))
-+		enabled = true;
-+	rcu_read_unlock();
-+
-+	return enabled;
-+}
-+
-+struct blog_tls_ctx *ceph_blog_acquire_ctx(struct ceph_fs_client *fsc,
-+					   gfp_t gfp,
-+					   struct blog_module_context **held_mod)
-+{
-+	struct blog_module_context *ctx;
-+	struct blog_tls_ctx *tls_ctx = NULL;
-+
-+	if (held_mod)
-+		*held_mod = NULL;
-+
-+	if (!fsc || !READ_ONCE(fsc->blog_enabled))
-+		return NULL;
-+
-+	rcu_read_lock();
-+	ctx = rcu_dereference(fsc->blog_ctx);
-+	if (!ctx || !READ_ONCE(ctx->logger)) {
-+		rcu_read_unlock();
-+		return NULL;
-+	}
-+
-+	if (!gfpflags_allow_blocking(gfp)) {
-+		/*
-+		 * Non-blocking: reuse an existing per-task ctx only.  Do not
-+		 * pin the module until lookup hits. A miss must not call
-+		 * blog_module_put(), which can sleep in blog_module_free().
-+		 */
-+		tls_ctx = blog_lookup_tls_ctx(ctx);
-+		if (!tls_ctx || !refcount_inc_not_zero(&ctx->refcount)) {
-+			rcu_read_unlock();
-+			return NULL;
-+		}
-+		rcu_read_unlock();
-+		goto hold;
-+	}
-+
-+	if (!refcount_inc_not_zero(&ctx->refcount)) {
-+		rcu_read_unlock();
-+		return NULL;
-+	}
-+	rcu_read_unlock();
-+
-+	tls_ctx = blog_get_tls_ctx_ctx(ctx, gfp);
-+	if (!tls_ctx) {
-+		blog_module_put(ctx);
-+		return NULL;
-+	}
-+
-+hold:
-+	/* Keep the module ref for the enter-exit window; put via blog_mod. */
-+	if (held_mod)
-+		*held_mod = ctx;
++	if (!iterating)
+ 		doutc(cl, "%p %llx.%llx cap %p mds%d\n", inode,
+ 		      ceph_vinop(inode), cap, s->s_mds);
+-		list_move_tail(&cap->session_caps, &s->s_caps);
+-	} else {
 +	else
-+		blog_module_put(ctx);
-+
-+	return tls_ctx;
-+}
-+
-+void ceph_blog_module_put(struct blog_module_context *ctx)
-+{
-+	blog_module_put(ctx);
-+}
-+
-+struct ceph_blog_cpu_cache {
-+	struct task_struct *task;
-+	struct blog_tls_ctx *ctx;
-+};
-+
-+static DEFINE_PER_CPU(struct ceph_blog_cpu_cache, ceph_blog_cpu_cache);
-+
-+static void blog_cpu_cache_clear_slot(struct blog_tls_ctx *ctx, int cpu)
-+{
-+	struct ceph_blog_cpu_cache *c;
-+
-+	if (cpu < 0)
-+		return;
-+	c = per_cpu_ptr(&ceph_blog_cpu_cache, cpu);
-+	if (READ_ONCE(c->ctx) == ctx) {
-+		WRITE_ONCE(c->task, NULL);
-+		WRITE_ONCE(c->ctx, NULL);
-+	}
-+}
-+
-+/*
-+ * Drop published per-CPU slots for @ctx before GC/retire can free it.
-+ * With the single-slot invariant, clearing cache_cpu (and this CPU) is enough.
-+ */
-+void ceph_blog_cpu_clear(struct blog_tls_ctx *ctx)
-+{
-+	int cpu;
-+
-+	if (!ctx)
-+		return;
-+
-+	preempt_disable();
-+	cpu = READ_ONCE(ctx->cache_cpu);
-+	blog_cpu_cache_clear_slot(ctx, cpu);
-+	if (cpu != smp_processor_id())
-+		blog_cpu_cache_clear_slot(ctx, smp_processor_id());
-+	WRITE_ONCE(ctx->cache_cpu, -1);
-+	preempt_enable();
-+}
-+
-+void ceph_blog_cpu_bind(struct blog_tls_ctx *ctx)
-+{
-+	struct ceph_blog_cpu_cache *c;
-+	int cpu, prev_cpu;
-+
-+	if (!ctx)
-+		return;
-+
-+	/*
-+	 * Publish into the per-CPU cache under preempt_disable only.
-+	 * Do not migrate_disable() across the enter-exit window: on !RT
-+	 * that is preempt_disable and would leave preempt elevated for
-+	 * the whole VFS call.  Keep each ctx on at most one CPU slot:
-+	 * clear the prior publish before installing the new one.
-+	 */
-+	preempt_disable();
-+	WRITE_ONCE(ctx->enter_depth, READ_ONCE(ctx->enter_depth) + 1);
-+	cpu = smp_processor_id();
-+	prev_cpu = READ_ONCE(ctx->cache_cpu);
-+	if (prev_cpu >= 0 && prev_cpu != cpu)
-+		blog_cpu_cache_clear_slot(ctx, prev_cpu);
-+	c = this_cpu_ptr(&ceph_blog_cpu_cache);
-+	WRITE_ONCE(c->task, current);
-+	WRITE_ONCE(c->ctx, ctx);
-+	WRITE_ONCE(ctx->cache_cpu, cpu);
-+	preempt_enable();
-+}
-+
-+void ceph_blog_cpu_unbind(struct blog_tls_ctx *ctx)
-+{
-+	int cpu;
-+
-+	if (!ctx || !READ_ONCE(ctx->enter_depth))
-+		return;
-+
-+	preempt_disable();
-+	WRITE_ONCE(ctx->enter_depth, READ_ONCE(ctx->enter_depth) - 1);
-+	if (!READ_ONCE(ctx->enter_depth)) {
-+		cpu = READ_ONCE(ctx->cache_cpu);
-+		blog_cpu_cache_clear_slot(ctx, cpu);
-+		if (cpu != smp_processor_id())
-+			blog_cpu_cache_clear_slot(ctx, smp_processor_id());
-+		WRITE_ONCE(ctx->cache_cpu, -1);
-+	}
-+	preempt_enable();
-+}
-+
-+struct blog_tls_ctx *ceph_blog_get_cached_ctx(struct ceph_fs_client *fsc)
-+{
-+	struct ceph_blog_cpu_cache *c;
-+	struct blog_tls_ctx *ctx = NULL;
-+	struct blog_module_context *mod;
-+	struct ceph_journal_info *ji;
-+	struct blog_logger *want_logger;
-+	int cpu, prev_cpu;
-+
-+	if (!fsc)
-+		return NULL;
-+
-+	rcu_read_lock();
-+	mod = rcu_dereference(fsc->blog_ctx);
-+	want_logger = (mod && mod->logger) ? mod->logger : NULL;
-+	if (!want_logger) {
-+		rcu_read_unlock();
-+		return NULL;
-+	}
-+
-+	preempt_disable();
-+	c = this_cpu_ptr(&ceph_blog_cpu_cache);
-+	if (likely(READ_ONCE(c->task) == current) && READ_ONCE(c->ctx)) {
-+		ctx = READ_ONCE(c->ctx);
-+		if (READ_ONCE(ctx->task) == current &&
-+		    READ_ONCE(ctx->enter_depth) &&
-+		    ctx->logger == want_logger)
-+			; /* hit. Mount-scoped */
-+		else {
-+			WRITE_ONCE(c->task, NULL);
-+			WRITE_ONCE(c->ctx, NULL);
-+			ctx = NULL;
-+		}
-+	}
-+	preempt_enable();
-+	if (ctx) {
-+		rcu_read_unlock();
-+		return ctx;
-+	}
-+
-+	/*
-+	 * Cache miss after preemption.  Prefer the mount-scoped
-+	 * journal_info ctx when it matches @fsc so nested multi-mount
-+	 * work does not attach to another mount's logger.  Plain
-+	 * ceph_blog_enter() never installs journal_info. Recover only
-+	 * from @fsc's own task map (not a cross-mount module-list walk).
-+	 */
-+	ji = ceph_ji_from_current();
-+	if (ji && ceph_ji_matches_fsc(ji, fsc)) {
-+		if (ji->blog_ctx &&
-+		    READ_ONCE(ji->blog_ctx->enter_depth) &&
-+		    READ_ONCE(ji->blog_ctx->task) == current &&
-+		    ji->blog_ctx->logger == want_logger)
-+			ctx = ji->blog_ctx;
-+	} else {
-+		ctx = blog_lookup_tls_ctx(mod);
-+		if (ctx && !(READ_ONCE(ctx->enter_depth) &&
-+			     READ_ONCE(ctx->task) == current))
-+			ctx = NULL;
-+	}
-+	rcu_read_unlock();
-+
-+	if (ctx) {
-+		preempt_disable();
-+		cpu = smp_processor_id();
-+		prev_cpu = READ_ONCE(ctx->cache_cpu);
-+		if (prev_cpu >= 0 && prev_cpu != cpu)
-+			blog_cpu_cache_clear_slot(ctx, prev_cpu);
-+		c = this_cpu_ptr(&ceph_blog_cpu_cache);
-+		WRITE_ONCE(c->task, current);
-+		WRITE_ONCE(c->ctx, ctx);
-+		WRITE_ONCE(ctx->cache_cpu, cpu);
-+		preempt_enable();
-+		return ctx;
-+	}
-+
-+	return NULL;
-+}
-+
-+/**
-+ * ceph_blog_check_client_id - Check if a client ID matches the given fsid:global_id pair
-+ * @id: Client ID to check
-+ * @fsid: Client FSID to compare
-+ * @global_id: Client global ID to compare
-+ *
-+ * Returns the actual ID of the pair. If the given ID doesn't match, scans for
-+ * existing matches or allocates a new ID if no match is found.
-+ */
-+u32 ceph_blog_check_client_id(u32 id, const char *fsid, u64 global_id)
-+{
-+	u32 found_id = 0;
-+	u32 max_clients;
-+	struct ceph_blog_client_info *entry;
-+
-+	if (unlikely(!ceph_blog_state.initialized)) {
-+		WARN_ON_ONCE(1);
-+		return 0;
-+	}
-+
-+	spin_lock(&ceph_blog_state.lock);
-+	max_clients = ceph_blog_state.max_clients;
-+
-+	if (id != 0 && id < max_clients) {
-+		entry = &ceph_blog_state.client_map[id];
-+		if (ceph_blog_ids_match(entry, fsid, global_id)) {
-+			found_id = id;
-+			goto out;
-+		}
-+	}
-+
-+	for (id = 1; id < max_clients; id++) {
-+		entry = &ceph_blog_state.client_map[id];
-+		if (ceph_blog_ids_match(entry, fsid, global_id)) {
-+			found_id = id;
-+			goto out;
-+		}
-+	}
-+
-+	if (ceph_blog_state.next_client_id < max_clients) {
-+		found_id = ceph_blog_state.next_client_id++;
-+	} else {
-+		found_id = 0;
-+		for (id = 1; id < max_clients; id++) {
-+			entry = &ceph_blog_state.client_map[id];
-+			if (ceph_blog_client_slot_free(entry)) {
-+				found_id = id;
-+				break;
-+			}
-+		}
-+		if (!found_id) {
-+			pr_warn_once("ceph: BLOG client ID space exhausted\n");
-+			goto out;
-+		}
-+	}
-+
-+	entry = &ceph_blog_state.client_map[found_id];
-+	memset(entry, 0, sizeof(*entry));
-+	memcpy(entry->fsid, fsid, sizeof(entry->fsid));
-+	entry->global_id = global_id;
-+
-+out:
-+	spin_unlock(&ceph_blog_state.lock);
-+	return found_id;
-+}
-+
-+/**
-+ * ceph_blog_get_client_info - Get client info for a given ID
-+ * @id: Client ID
-+ *
-+ * Reads client_map[] without holding ceph_blog_state.lock.
-+ * Writers store fields under the lock. Callers accept the benign
-+ * race: a concurrent slot release and reuse may cause old log
-+ * entries to show a new client's identity; the impact is cosmetic.
-+ */
-+const struct ceph_blog_client_info *ceph_blog_get_client_info(u32 id)
-+{
-+	const struct ceph_blog_client_info *entry;
-+
-+	if (!READ_ONCE(ceph_blog_state.initialized) ||
-+	    id == 0 || id >= READ_ONCE(ceph_blog_state.max_clients))
-+		return NULL;
-+	entry = &ceph_blog_state.client_map[id];
-+	/* Freed/zeroed slots must not deserialize as a valid client. */
-+	if (ceph_blog_client_slot_free(entry))
-+		return NULL;
-+	return entry;
-+}
-+
-+int ceph_blog_client_des_callback(char *buf, size_t size, u8 client_id)
-+{
-+	const struct ceph_blog_client_info *info;
-+	char fsid[16];
-+	u64 global_id;
-+
-+	if (!buf || !size)
-+		return -EINVAL;
-+	if (client_id == 0)
-+		return 0;
-+
-+	info = ceph_blog_get_client_info(client_id);
-+	if (!info)
-+		return snprintf(buf, size, "[unknown_client_%u]", client_id);
-+
-+	global_id = data_race(info->global_id);
-+	data_race(memcpy(fsid, info->fsid, sizeof(fsid)));
-+	return snprintf(buf, size, "[%pU %llu] ", fsid, global_id);
-+}
-+
-+u32 ceph_blog_get_client_id(struct ceph_client *client)
-+{
-+	u32 cached;
-+	u32 id;
-+
-+	if (!client)
-+		return 0;
-+	if (!client->monc.auth)
-+		return 0;
-+
-+	cached = READ_ONCE(client->blog_client_id);
-+
-+	id = ceph_blog_check_client_id(cached,
-+				       client->fsid.fsid,
-+				       client->monc.auth->global_id);
-+	if (!id)
-+		return 0;
-+
-+	/*
-+	 * Record ownership of the (possibly new) slot.  On auth rekey do
-+	 * not clear the prior map entry: buffered records still carry the
-+	 * old client_id and resolve it lazily on readback.  All of this
-+	 * client's slots are freed in ceph_blog_release_client_id() before
-+	 * fsc cleanup tears down the buffers.
-+	 */
-+	spin_lock(&ceph_blog_state.lock);
-+	if (ceph_blog_state.initialized &&
-+	    id < ceph_blog_state.max_clients)
-+		ceph_blog_state.owners[id] = client;
-+	spin_unlock(&ceph_blog_state.lock);
-+
-+	if (cached != id)
-+		WRITE_ONCE(client->blog_client_id, id);
-+
-+	return id;
-+}
-+
-+/**
-+ * ceph_blog_release_client_id - Free a client's BLOG ID mapping slots
-+ * @client: Ceph client being torn down
-+ *
-+ * Clears the cached ID on @client and zeroes every global map entry this
-+ * client owns (including slots left behind by auth rekey) so the 8-bit
-+ * namespace can be reused after remounts / new auth sessions.
-+ */
-+void ceph_blog_release_client_id(struct ceph_client *client)
-+{
-+	u32 id;
-+
-+	if (!client)
-+		return;
-+
-+	WRITE_ONCE(client->blog_client_id, 0);
-+
-+	spin_lock(&ceph_blog_state.lock);
-+	if (!ceph_blog_state.initialized) {
-+		spin_unlock(&ceph_blog_state.lock);
-+		return;
-+	}
-+	for (id = 1; id < ceph_blog_state.max_clients; id++) {
-+		if (ceph_blog_state.owners[id] != client)
-+			continue;
-+		ceph_blog_state.owners[id] = NULL;
-+		memset(&ceph_blog_state.client_map[id], 0,
-+		       sizeof(*ceph_blog_state.client_map));
-+	}
-+	spin_unlock(&ceph_blog_state.lock);
-+}
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index c631844828d3..5c6405654b07 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -49,11 +49,15 @@ static LIST_HEAD(ceph_fsc_list);
- static void ceph_put_super(struct super_block *s)
- {
- 	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(s);
-+	struct ceph_journal_info __ji;
- 
--	doutc(fsc->client, "begin\n");
-+	ceph_blog_enter(fsc, &__ji);
-+
-+	boutc(fsc->client, "begin\n");
- 	ceph_fscrypt_free_dummy_policy(fsc);
- 	ceph_mdsc_close_sessions(fsc->mdsc);
--	doutc(fsc->client, "done\n");
-+	boutc(fsc->client, "done\n");
-+	ceph_blog_exit(&__ji);
+ 		doutc(cl, "%p %llx.%llx cap %p mds%d NOP, iterating over caps\n",
+ 		      inode, ceph_vinop(inode), cap, s->s_mds);
+-	}
+-	spin_unlock(&s->s_cap_lock);
  }
  
- static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
-@@ -64,8 +68,11 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
- 	struct ceph_statfs st;
- 	int i, err;
- 	u64 data_pool;
-+	struct ceph_journal_info __ji;
-+
-+	ceph_blog_enter(fsc, &__ji);
+ /*
+@@ -1234,7 +1246,7 @@ void ceph_remove_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+ 	struct ceph_fs_client *fsc;
  
--	doutc(fsc->client, "begin\n");
-+	boutc(fsc->client, "begin\n");
- 	if (fsc->mdsc->mdsmap->m_num_data_pg_pools == 1) {
- 		data_pool = fsc->mdsc->mdsmap->m_data_pg_pools[0];
- 	} else {
-@@ -73,8 +80,10 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	if (ceph_cap_is_removed(cap)) {
+-		doutc(mdsc->fsc->client, "inode is NULL\n");
++		doutc(mdsc->fsc->client, "cap already removed\n");
+ 		return;
  	}
  
- 	err = ceph_monc_do_statfs(monc, data_pool, &st);
--	if (err < 0)
-+	if (err < 0) {
-+		ceph_blog_exit(&__ji);
- 		return err;
-+	}
- 
- 	/* fill in kstatfs */
- 	buf->f_type = CEPH_SUPER_MAGIC;  /* ?? */
-@@ -121,7 +130,8 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
- 	/* fold the fs_cluster_id into the upper bits */
- 	buf->f_fsid.val[1] = monc->fs_cluster_id;
- 
--	doutc(fsc->client, "done\n");
-+	boutc(fsc->client, "done\n");
-+	ceph_blog_exit(&__ji);
- 	return 0;
- }
- 
-@@ -129,19 +139,24 @@ static int ceph_sync_fs(struct super_block *sb, int wait)
- {
- 	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(sb);
- 	struct ceph_client *cl = fsc->client;
-+	struct ceph_journal_info __ji;
-+
-+	ceph_blog_enter(fsc, &__ji);
- 
- 	if (!wait) {
--		doutc(cl, "(non-blocking)\n");
-+		boutc(cl, "(non-blocking)\n");
- 		ceph_flush_dirty_caps(fsc->mdsc);
- 		ceph_flush_cap_releases(fsc->mdsc);
--		doutc(cl, "(non-blocking) done\n");
-+		boutc(cl, "(non-blocking) done\n");
-+		ceph_blog_exit(&__ji);
- 		return 0;
+@@ -2495,7 +2507,7 @@ static int flush_mdlog_and_wait_inode_unsafe_requests(struct inode *inode)
+ 		kfree(sessions);
  	}
  
--	doutc(cl, "(blocking)\n");
-+	boutc(cl, "(blocking)\n");
- 	ceph_osdc_sync(&fsc->client->osdc);
- 	ceph_mdsc_sync(fsc->mdsc);
--	doutc(cl, "(blocking) done\n");
-+	boutc(cl, "(blocking) done\n");
-+	ceph_blog_exit(&__ji);
- 	return 0;
- }
- 
-@@ -872,12 +887,18 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 	hash_init(fsc->async_unlink_conflict);
- 	spin_lock_init(&fsc->async_unlink_conflict_lock);
- 
-+	err = ceph_blog_fsc_init(fsc);
-+	if (err)
-+		goto fail_cap_wq;
-+
- 	spin_lock(&ceph_fsc_lock);
- 	list_add_tail(&fsc->metric_wakeup, &ceph_fsc_list);
- 	spin_unlock(&ceph_fsc_lock);
- 
- 	return fsc;
- 
-+fail_cap_wq:
-+	destroy_workqueue(fsc->cap_wq);
- fail_inode_wq:
- 	destroy_workqueue(fsc->inode_wq);
- fail_client:
-@@ -907,6 +928,8 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
- 	ceph_mdsc_destroy(fsc);
- 	destroy_workqueue(fsc->inode_wq);
- 	destroy_workqueue(fsc->cap_wq);
-+	ceph_blog_release_client_id(fsc->client);
-+	ceph_blog_fsc_cleanup(fsc);
- 
- 	destroy_mount_options(fsc->mount_options);
- 
-@@ -1041,11 +1064,15 @@ static void __ceph_umount_begin(struct ceph_fs_client *fsc)
- void ceph_umount_begin(struct super_block *sb)
+-	doutc(cl, "%p %llx.%llx wait on tid %llu %llu\n", inode,
++	boutc(cl, "%p %llx.%llx wait on tid %llu %llu\n", inode,
+ 	      ceph_vinop(inode), req1 ? req1->r_tid : 0ULL,
+ 	      req2 ? req2->r_tid : 0ULL);
+ 	if (req1) {
+@@ -2522,13 +2534,17 @@ static int flush_mdlog_and_wait_inode_unsafe_requests(struct inode *inode)
+ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
  {
- 	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(sb);
+ 	struct inode *inode = file->f_mapping->host;
++	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	u64 flush_tid;
+ 	int ret, err;
+ 	int dirty;
 +	struct ceph_journal_info __ji;
 +
 +	ceph_blog_enter(fsc, &__ji);
  
--	doutc(fsc->client, "starting forced umount\n");
-+	boutc(fsc->client, "starting forced umount\n");
+-	doutc(cl, "%p %llx.%llx%s\n", inode, ceph_vinop(inode),
++	boutc(cl, "%p %llx.%llx%s\n", inode, ceph_vinop(inode),
+ 	      datasync ? " datasync" : "");
  
- 	fsc->mount_state = CEPH_MOUNT_SHUTDOWN;
- 	__ceph_umount_begin(fsc);
-+	ceph_blog_exit(&__ji);
- }
- 
- static const struct super_operations ceph_super_ops = {
-@@ -1663,10 +1690,16 @@ int ceph_force_reconnect(struct super_block *sb)
- 
- static int __init init_ceph(void)
- {
--	int ret = init_caches();
-+	int ret;
-+
-+	ret = ceph_blog_init();
- 	if (ret)
+ 	ret = file_write_and_wait_range(file, start, end);
+@@ -2540,7 +2556,7 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
  		goto out;
  
-+	ret = init_caches();
-+	if (ret)
-+		goto out_blog;
-+
- 	ceph_flock_init();
- 	ret = register_filesystem(&ceph_fs_type);
- 	if (ret)
-@@ -1678,6 +1711,8 @@ static int __init init_ceph(void)
+ 	dirty = try_flush_caps(inode, &flush_tid);
+-	doutc(cl, "dirty caps are %s\n", ceph_cap_string(dirty));
++	boutc(cl, "dirty caps are %s\n", ceph_cap_string(dirty));
  
- out_caches:
- 	destroy_caches();
-+out_blog:
-+	ceph_blog_cleanup();
+ 	err = flush_mdlog_and_wait_inode_unsafe_requests(inode);
+ 
+@@ -2561,8 +2577,9 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+ 	if (err < 0)
+ 		ret = err;
  out:
+-	doutc(cl, "%p %llx.%llx%s result=%d\n", inode, ceph_vinop(inode),
++	boutc(cl, "%p %llx.%llx%s result=%d\n", inode, ceph_vinop(inode),
+ 	      datasync ? " datasync" : "", ret);
++	ceph_blog_exit(&__ji);
  	return ret;
  }
-@@ -1687,6 +1722,7 @@ static void __exit exit_ceph(void)
- 	dout("exit_ceph\n");
- 	unregister_filesystem(&ceph_fs_type);
- 	destroy_caches();
-+	ceph_blog_cleanup();
+ 
+@@ -2574,19 +2591,25 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+  */
+ int ceph_write_inode(struct inode *inode, struct writeback_control *wbc)
+ {
++	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	u64 flush_tid;
+ 	int err = 0;
+ 	int dirty;
+ 	int wait = (wbc->sync_mode == WB_SYNC_ALL && !wbc->for_sync);
++	struct ceph_journal_info __ji;
++
++	ceph_blog_enter(fsc, &__ji);
+ 
+-	doutc(cl, "%p %llx.%llx wait=%d\n", inode, ceph_vinop(inode), wait);
++	boutc(cl, "%p %llx.%llx wait=%d\n", inode, ceph_vinop(inode), wait);
+ 	ceph_fscache_unpin_writeback(inode, wbc);
+ 	if (wait) {
+ 		err = ceph_wait_on_async_create(inode);
+-		if (err)
++		if (err) {
++			ceph_blog_exit(&__ji);
+ 			return err;
++		}
+ 		dirty = try_flush_caps(inode, &flush_tid);
+ 		if (dirty)
+ 			err = wait_event_interruptible(ci->i_cap_wq,
+@@ -2600,6 +2623,7 @@ int ceph_write_inode(struct inode *inode, struct writeback_control *wbc)
+ 			__cap_delay_requeue_front(mdsc, ci);
+ 		spin_unlock(&ci->i_ceph_lock);
+ 	}
++	ceph_blog_exit(&__ji);
+ 	return err;
  }
  
- static int param_set_metrics(const char *val, const struct kernel_param *kp)
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index d3dad07470ba..e4094b64134a 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -3,8 +3,11 @@
- #define _FS_CEPH_SUPER_H
+@@ -3501,7 +3525,7 @@ static void invalidate_aliases(struct inode *inode)
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
+ 	struct dentry *dn, *prev = NULL;
  
- #include <linux/ceph/ceph_debug.h>
-+#include <linux/ceph/ceph_blog.h>
- #include <linux/ceph/osd_client.h>
+-	doutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
++	boutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
+ 	d_prune_aliases(inode);
+ 	/*
+ 	 * For non-directory inode, d_find_alias() only returns
+@@ -3612,10 +3636,10 @@ static void handle_cap_grant(struct inode *inode,
+ 	if (IS_ENCRYPTED(inode) && size)
+ 		size = extra_info->fscrypt_file_size;
  
-+#include "blog.h"
-+
- #include <linux/unaligned.h>
- #include <linux/backing-dev.h>
- #include <linux/completion.h>
-@@ -173,6 +176,9 @@ struct ceph_fs_client {
- 	spinlock_t async_unlink_conflict_lock;
+-	doutc(cl, "%p %llx.%llx cap %p mds%d seq %d %s\n", inode,
++	boutc(cl, "%p %llx.%llx cap %p mds%d seq %d %s\n", inode,
+ 	      ceph_vinop(inode), cap, session->s_mds, seq,
+ 	      ceph_cap_string(newcaps));
+-	doutc(cl, " size %llu max_size %llu, i_size %llu\n", size,
++	boutc(cl, " size %llu max_size %llu, i_size %llu\n", size,
+ 	      max_size, i_size_read(inode));
  
- #ifdef CONFIG_DEBUG_FS
-+	bool blog_enabled;
-+	struct mutex blog_mutex;
-+	struct blog_module_context __rcu *blog_ctx;
- 	struct dentry *debugfs_dentry_lru, *debugfs_caps;
- 	struct dentry *debugfs_congestion_kb;
- 	struct dentry *debugfs_bdi;
-@@ -181,6 +187,7 @@ struct ceph_fs_client {
- 	struct dentry *debugfs_mds_sessions;
- 	struct dentry *debugfs_metrics_dir;
- 	struct dentry *debugfs_reset_dir;
-+	struct dentry *debugfs_blog;
- 	struct dentry *debugfs_subvolume_metrics;
- #endif
  
-diff --git a/include/linux/ceph/ceph_blog.h b/include/linux/ceph/ceph_blog.h
-new file mode 100644
-index 000000000000..82c64bc98972
---- /dev/null
-+++ b/include/linux/ceph/ceph_blog.h
-@@ -0,0 +1,292 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+/*
-+ * Ceph integration with BLOG (Binary LOGging)
-+ *
-+ * Provides a shared per-call context (struct ceph_journal_info) used for
-+ * the narrow MDS fill-trace window (mds_req in current->journal_info) and
-+ * optional BLOG TLS binding via Ceph-private per-task storage / CPU cache.
-+ */
-+#ifndef CEPH_BLOG_H
-+#define CEPH_BLOG_H
-+
-+#include <linux/sched/mm.h>
-+#include <linux/gfp.h>
-+#include <linux/jump_label.h>
-+
-+/* ---------- shared journal_info carrier ---------- */
-+
-+#define CEPH_JI_MAGIC	0xCE9B7081UL
-+#define CEPH_JI_TAG	3UL
-+#define CEPH_JI_TAG_MASK	3UL
-+
-+struct ceph_fs_client;
-+struct ceph_mds_request;
-+struct ceph_client;
-+struct blog_module_context;
-+struct blog_tls_ctx;
-+
-+/**
-+ * struct ceph_journal_info - per-call context stashed in journal_info
-+ * @magic: CEPH_JI_MAGIC, for safe type-checking when reading journal_info
-+ * @saved_ji: previous value of current->journal_info (restored on exit)
-+ * @fsc: filesystem client for this enter
-+ * @blog_ctx: BLOG TLS context for binary logging, or NULL
-+ * @blog_mod: module context ref held for @blog_ctx when this enter acquired
-+ *            it (NULL when ctx was inherited from a nested parent)
-+ * @mds_req: MDS request during ceph_fill_trace / readdir_prepopulate,
-+ *           or NULL.  Read by xattr.c to avoid deadlocking RPCs and
-+ *           to discover which capabilities were already fetched.
-+ *
-+ * Allocated on the caller's stack at every Ceph VFS entry point.
-+ * ceph_blog_enter_req() installs it in current->journal_info for MDS
-+ * fill-trace; plain ceph_blog_enter() binds BLOG without touching
-+ * journal_info.  ceph_blog_exit() restores journal_info when installed.
-+ */
-+struct ceph_journal_info {
-+	unsigned long		magic;
-+	void			*saved_ji;
-+	struct ceph_fs_client	*fsc;
-+	struct blog_tls_ctx	*blog_ctx;
-+	struct blog_module_context *blog_mod;
-+	struct ceph_mds_request	*mds_req;
-+};
-+
-+/**
-+ * ceph_ji_from_current - safely retrieve ceph_journal_info from journal_info
-+ *
-+ * Ceph tags its journal_info pointer so foreign filesystem state can be
-+ * rejected without dereferencing it.  Returns the decoded pointer if the
-+ * tag and magic match, NULL otherwise.
-+ */
-+static inline struct ceph_journal_info *ceph_ji_from_current(void)
-+{
-+	void *journal_info = current->journal_info;
-+	struct ceph_journal_info *ji;
-+
-+	if (((unsigned long)journal_info & CEPH_JI_TAG_MASK) != CEPH_JI_TAG)
-+		return NULL;
-+	ji = (void *)((unsigned long)journal_info & ~CEPH_JI_TAG_MASK);
-+	if (!ji)
-+		return NULL;
-+	if (READ_ONCE(ji->magic) == CEPH_JI_MAGIC)
-+		return ji;
-+	return NULL;
-+}
-+
-+static inline void *ceph_ji_encode(struct ceph_journal_info *ji)
-+{
-+	WARN_ON_ONCE((unsigned long)ji & CEPH_JI_TAG_MASK);
-+	return (void *)((unsigned long)ji | CEPH_JI_TAG);
-+}
-+
-+static inline bool ceph_ji_matches_fsc(const struct ceph_journal_info *ji,
-+				       struct ceph_fs_client *fsc)
-+{
-+	return ji && ji->fsc == fsc;
-+}
-+
-+/**
-+ * ceph_current_mds_request - get this mount's in-flight MDS request
-+ *
-+ * Same-fsc helper for request introspection (e.g. getattr mask).
-+ * Returns NULL outside fill-trace or when the tagged journal_info
-+ * belongs to a different ceph_fs_client.
-+ */
-+static inline struct ceph_mds_request *
-+ceph_current_mds_request(struct ceph_fs_client *fsc)
-+{
-+	struct ceph_journal_info *ji = ceph_ji_from_current();
-+
-+	return ceph_ji_matches_fsc(ji, fsc) ? ji->mds_req : NULL;
-+}
-+
-+/**
-+ * ceph_current_fill_trace_request - any in-flight Ceph fill-trace on this task
-+ *
-+ * Sync xattr recursion must stay task-scoped: a security hook on a
-+ * second Ceph mount during handle_reply() -> ceph_fill_trace() still
-+ * has to return -EBUSY.  Do not use the same-fsc helper for that guard.
-+ */
-+static inline struct ceph_mds_request *
-+ceph_current_fill_trace_request(void)
-+{
-+	struct ceph_journal_info *ji = ceph_ji_from_current();
-+
-+	return ji ? ji->mds_req : NULL;
-+}
-+
-+/* ---------- client ID mapping ---------- */
-+
-+struct ceph_blog_client_info {
-+	char fsid[16];
-+	u64 global_id;
-+};
-+
-+#ifdef CONFIG_DEBUG_FS
-+extern struct static_key_false ceph_blog_key;
-+
-+int  ceph_blog_init(void);
-+void ceph_blog_cleanup(void);
-+int  ceph_blog_fsc_init(struct ceph_fs_client *fsc);
-+void ceph_blog_fsc_cleanup(struct ceph_fs_client *fsc);
-+int  ceph_blog_set_enabled(struct ceph_fs_client *fsc, bool enabled);
-+u32  ceph_blog_check_client_id(u32 id, const char *fsid, u64 global_id);
-+u32  ceph_blog_get_client_id(struct ceph_client *client);
-+void ceph_blog_release_client_id(struct ceph_client *client);
-+const struct ceph_blog_client_info *ceph_blog_get_client_info(u32 id);
-+int  ceph_blog_client_des_callback(char *buf, size_t size, u8 client_id);
-+bool ceph_blog_is_enabled(struct ceph_fs_client *fsc);
-+struct blog_tls_ctx *ceph_blog_acquire_ctx(struct ceph_fs_client *fsc,
-+					   gfp_t gfp,
-+					   struct blog_module_context **held_mod);
-+void ceph_blog_module_put(struct blog_module_context *ctx);
-+void ceph_blog_cpu_bind(struct blog_tls_ctx *ctx);
-+void ceph_blog_cpu_unbind(struct blog_tls_ctx *ctx);
-+void ceph_blog_cpu_clear(struct blog_tls_ctx *ctx);
-+struct blog_tls_ctx *ceph_blog_get_cached_ctx(struct ceph_fs_client *fsc);
-+#else
-+/* CONFIG_DEBUG_FS=n: BLOG objects are not linked; stubs below. */
-+
-+static inline int ceph_blog_init(void) { return 0; }
-+static inline void ceph_blog_cleanup(void) {}
-+static inline int ceph_blog_fsc_init(struct ceph_fs_client *fsc) { return 0; }
-+static inline void ceph_blog_fsc_cleanup(struct ceph_fs_client *fsc) {}
-+static inline int ceph_blog_set_enabled(struct ceph_fs_client *fsc, bool enabled)
-+{
-+	return 0;
-+}
-+static inline u32 ceph_blog_check_client_id(u32 id, const char *fsid,
-+					    u64 global_id)
-+{
-+	return 0;
-+}
-+static inline u32 ceph_blog_get_client_id(struct ceph_client *client)
-+{
-+	return 0;
-+}
-+static inline void ceph_blog_release_client_id(struct ceph_client *client) {}
-+static inline const struct ceph_blog_client_info *
-+ceph_blog_get_client_info(u32 id)
-+{
-+	return NULL;
-+}
-+static inline int ceph_blog_client_des_callback(char *buf, size_t size,
-+						u8 client_id)
-+{
-+	return 0;
-+}
-+static inline bool ceph_blog_is_enabled(struct ceph_fs_client *fsc)
-+{
-+	return false;
-+}
-+static inline struct blog_tls_ctx *
-+ceph_blog_acquire_ctx(struct ceph_fs_client *fsc, gfp_t gfp,
-+		      struct blog_module_context **held_mod)
-+{
-+	if (held_mod)
-+		*held_mod = NULL;
-+	return NULL;
-+}
-+static inline void ceph_blog_module_put(struct blog_module_context *ctx) {}
-+static inline void ceph_blog_cpu_bind(struct blog_tls_ctx *ctx) {}
-+static inline void ceph_blog_cpu_unbind(struct blog_tls_ctx *ctx) {}
-+static inline void ceph_blog_cpu_clear(struct blog_tls_ctx *ctx) {}
-+static inline struct blog_tls_ctx *
-+ceph_blog_get_cached_ctx(struct ceph_fs_client *fsc)
-+{
-+	return NULL;
-+}
-+#endif
-+
-+/* ---------- entry / exit helpers ---------- */
-+
-+/**
-+ * ceph_blog_enter_req_gfp - bind optional BLOG ctx; install journal_info for MDS
-+ * @gfp: GFP_NOFS for sleepable VFS paths; GFP_ATOMIC (or any non-blocking
-+ *       combination) for callbacks that must not sleep.  Non-blocking
-+ *       acquires only reuse an existing per-task context; first-touch
-+ *       allocation is skipped and logging is a no-op for that enter.
-+ *
-+ * BLOG state lives in the per-task map and CPU cache.  Plain VFS enters
-+ * never publish into current->journal_info.  Only enter_req (MDS
-+ * fill-trace, which already runs under memalloc_nofs_save) installs the
-+ * tagged carrier so xattr paths can see mds_req.
-+ */
-+static inline void ceph_blog_enter_req_gfp(struct ceph_fs_client *fsc,
-+					   struct ceph_journal_info *ji,
-+					   struct ceph_mds_request *req,
-+					   gfp_t gfp)
-+{
-+	struct ceph_journal_info *parent = ceph_ji_from_current();
-+
-+	ji->magic    = CEPH_JI_MAGIC;
-+	ji->saved_ji = current->journal_info;
-+	ji->fsc      = fsc;
-+	ji->mds_req  = req;
-+	ji->blog_mod = NULL;
-+	ji->blog_ctx = ceph_ji_matches_fsc(parent, fsc) ? parent->blog_ctx : NULL;
-+
-+	if (!ji->blog_ctx && ceph_blog_is_enabled(fsc))
-+		ji->blog_ctx = ceph_blog_acquire_ctx(fsc, gfp, &ji->blog_mod);
-+
-+	if (ji->blog_ctx)
-+		ceph_blog_cpu_bind(ji->blog_ctx);
-+
-+	/* MDS fill-trace only: keep journal_info off reclaimable VFS paths. */
-+	if (req)
-+		current->journal_info = ceph_ji_encode(ji);
-+}
-+
-+static inline void ceph_blog_enter_req(struct ceph_fs_client *fsc,
-+				       struct ceph_journal_info *ji,
-+				       struct ceph_mds_request *req)
-+{
-+	ceph_blog_enter_req_gfp(fsc, ji, req, GFP_NOFS);
-+}
-+
-+static inline void ceph_blog_enter_gfp(struct ceph_fs_client *fsc,
-+				       struct ceph_journal_info *ji,
-+				       gfp_t gfp)
-+{
-+	struct ceph_journal_info *parent = ceph_ji_from_current();
-+	struct ceph_mds_request *req =
-+		ceph_ji_matches_fsc(parent, fsc) ? parent->mds_req : NULL;
-+
-+	ceph_blog_enter_req_gfp(fsc, ji, req, gfp);
-+}
-+
-+static inline void ceph_blog_enter(struct ceph_fs_client *fsc,
-+				   struct ceph_journal_info *ji)
-+{
-+	ceph_blog_enter_gfp(fsc, ji, GFP_NOFS);
-+}
-+
-+/**
-+ * ceph_blog_exit - call at every Ceph VFS exit point
-+ * @ji: the same struct passed to ceph_blog_enter()
-+ */
-+static inline void ceph_blog_exit(struct ceph_journal_info *ji)
-+{
-+	if (ji->blog_ctx)
-+		ceph_blog_cpu_unbind(ji->blog_ctx);
-+
-+	if (ji->blog_mod) {
-+		ceph_blog_module_put(ji->blog_mod);
-+		ji->blog_mod = NULL;
-+	}
-+
-+	if (current->journal_info == ceph_ji_encode(ji))
-+		current->journal_info = ji->saved_ji;
-+}
-+
-+/* ---------- debugfs ---------- */
-+
-+#ifdef CONFIG_DEBUG_FS
-+int  ceph_blog_debugfs_init(struct ceph_fs_client *fsc);
-+void ceph_blog_debugfs_cleanup(struct ceph_fs_client *fsc);
-+#else
-+static inline int  ceph_blog_debugfs_init(struct ceph_fs_client *fsc) { return 0; }
-+static inline void ceph_blog_debugfs_cleanup(struct ceph_fs_client *fsc) {}
-+#endif
-+
-+#endif /* CEPH_BLOG_H */
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index d800b30425bf..4d493a08faf5 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -135,6 +135,8 @@ struct ceph_client {
- 	struct ceph_osd_client osdc;
+@@ -3676,7 +3700,7 @@ static void handle_cap_grant(struct inode *inode,
+ 		inode->i_uid = make_kuid(&init_user_ns, le32_to_cpu(grant->uid));
+ 		inode->i_gid = make_kgid(&init_user_ns, le32_to_cpu(grant->gid));
+ 		ci->i_btime = extra_info->btime;
+-		doutc(cl, "%p %llx.%llx mode 0%o uid.gid %d.%d\n", inode,
++		boutc(cl, "%p %llx.%llx mode 0%o uid.gid %d.%d\n", inode,
+ 		      ceph_vinop(inode), inode->i_mode,
+ 		      from_kuid(&init_user_ns, inode->i_uid),
+ 		      from_kgid(&init_user_ns, inode->i_gid));
+@@ -3704,7 +3728,7 @@ static void handle_cap_grant(struct inode *inode,
+ 		u64 version = le64_to_cpu(grant->xattr_version);
  
- #ifdef CONFIG_DEBUG_FS
-+	u32 blog_client_id;
+ 		if (version > ci->i_xattrs.version) {
+-			doutc(cl, " got new xattrs v%llu on %p %llx.%llx len %d\n",
++			boutc(cl, " got new xattrs v%llu on %p %llx.%llx len %d\n",
+ 			      version, inode, ceph_vinop(inode), len);
+ 			if (ci->i_xattrs.blob)
+ 				ceph_buffer_put(ci->i_xattrs.blob);
+@@ -3756,7 +3780,7 @@ static void handle_cap_grant(struct inode *inode,
+ 
+ 	if (ci->i_auth_cap == cap && (newcaps & CEPH_CAP_ANY_FILE_WR)) {
+ 		if (max_size != ci->i_max_size) {
+-			doutc(cl, "max_size %lld -> %llu\n", ci->i_max_size,
++			boutc(cl, "max_size %lld -> %llu\n", ci->i_max_size,
+ 			      max_size);
+ 			ci->i_max_size = max_size;
+ 			if (max_size >= ci->i_wanted_max_size) {
+@@ -3771,7 +3795,7 @@ static void handle_cap_grant(struct inode *inode,
+ 	wanted = __ceph_caps_wanted(ci);
+ 	used = __ceph_caps_used(ci);
+ 	dirty = __ceph_caps_dirty(ci);
+-	doutc(cl, " my wanted = %s, used = %s, dirty %s\n",
++	boutc(cl, " my wanted = %s, used = %s, dirty %s\n",
+ 	      ceph_cap_string(wanted), ceph_cap_string(used),
+ 	      ceph_cap_string(dirty));
+ 
+@@ -3794,7 +3818,7 @@ static void handle_cap_grant(struct inode *inode,
+ 	if (cap->issued & ~newcaps) {
+ 		int revoking = cap->issued & ~newcaps;
+ 
+-		doutc(cl, "revocation: %s -> %s (revoking %s)\n",
++		boutc(cl, "revocation: %s -> %s (revoking %s)\n",
+ 		      ceph_cap_string(cap->issued), ceph_cap_string(newcaps),
+ 		      ceph_cap_string(revoking));
+ 		if (S_ISREG(inode->i_mode) &&
+@@ -3816,11 +3840,11 @@ static void handle_cap_grant(struct inode *inode,
+ 		cap->issued = newcaps;
+ 		cap->implemented |= newcaps;
+ 	} else if (cap->issued == newcaps) {
+-		doutc(cl, "caps unchanged: %s -> %s\n",
++		boutc(cl, "caps unchanged: %s -> %s\n",
+ 		      ceph_cap_string(cap->issued),
+ 		      ceph_cap_string(newcaps));
+ 	} else {
+-		doutc(cl, "grant: %s -> %s\n", ceph_cap_string(cap->issued),
++		boutc(cl, "grant: %s -> %s\n", ceph_cap_string(cap->issued),
+ 		      ceph_cap_string(newcaps));
+ 		/* non-auth MDS is revoking the newly grant caps ? */
+ 		if (cap == ci->i_auth_cap &&
+@@ -3972,7 +3996,7 @@ static void handle_cap_flush_ack(struct inode *inode, u64 flush_tid,
+ 		}
+ 	}
+ 
+-	doutc(cl, "%p %llx.%llx mds%d seq %d on %s cleaned %s, flushing %s -> %s\n",
++	boutc(cl, "%p %llx.%llx mds%d seq %d on %s cleaned %s, flushing %s -> %s\n",
+ 	      inode, ceph_vinop(inode), session->s_mds, seq,
+ 	      ceph_cap_string(dirty), ceph_cap_string(cleaned),
+ 	      ceph_cap_string(ci->i_flushing_caps),
+@@ -3996,16 +4020,16 @@ static void handle_cap_flush_ack(struct inode *inode, u64 flush_tid,
+ 					    &list_first_entry(&session->s_cap_flushing,
+ 							      struct ceph_inode_info,
+ 							      i_flushing_item)->netfs.inode;
+-				doutc(cl, " mds%d still flushing cap on %p %llx.%llx\n",
++				boutc(cl, " mds%d still flushing cap on %p %llx.%llx\n",
+ 				      session->s_mds, inode, ceph_vinop(inode));
+ 			}
+ 		}
+ 		mdsc->num_cap_flushing--;
+-		doutc(cl, " %p %llx.%llx now !flushing\n", inode,
++		boutc(cl, " %p %llx.%llx now !flushing\n", inode,
+ 		      ceph_vinop(inode));
+ 
+ 		if (ci->i_dirty_caps == 0) {
+-			doutc(cl, " %p %llx.%llx now clean\n", inode,
++			boutc(cl, " %p %llx.%llx now clean\n", inode,
+ 			      ceph_vinop(inode));
+ 			BUG_ON(!list_empty(&ci->i_dirty_item));
+ 			drop = true;
+@@ -4097,14 +4121,14 @@ static void handle_cap_flushsnap_ack(struct inode *inode, u64 flush_tid,
+ 	bool wake_ci = false;
+ 	bool wake_mdsc = false;
+ 
+-	doutc(cl, "%p %llx.%llx ci %p mds%d follows %lld\n", inode,
++	boutc(cl, "%p %llx.%llx ci %p mds%d follows %lld\n", inode,
+ 	      ceph_vinop(inode), ci, session->s_mds, follows);
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+ 	list_for_each_entry(iter, &ci->i_cap_snaps, ci_item) {
+ 		if (iter->follows == follows) {
+ 			if (iter->cap_flush.tid != flush_tid) {
+-				doutc(cl, " cap_snap %p follows %lld "
++				boutc(cl, " cap_snap %p follows %lld "
+ 				      "tid %lld != %lld\n", iter,
+ 				      follows, flush_tid,
+ 				      iter->cap_flush.tid);
+@@ -4113,7 +4137,7 @@ static void handle_cap_flushsnap_ack(struct inode *inode, u64 flush_tid,
+ 			capsnap = iter;
+ 			break;
+ 		} else {
+-			doutc(cl, " skipping cap_snap %p follows %lld\n",
++			boutc(cl, " skipping cap_snap %p follows %lld\n",
+ 			      iter, iter->follows);
+ 		}
+ 	}
+@@ -4166,7 +4190,7 @@ static bool handle_cap_trunc(struct inode *inode,
+ 	if (IS_ENCRYPTED(inode) && size)
+ 		size = extra_info->fscrypt_file_size;
+ 
+-	doutc(cl, "%p %llx.%llx mds%d seq %d to %lld truncate seq %d\n",
++	boutc(cl, "%p %llx.%llx mds%d seq %d to %lld truncate seq %d\n",
+ 	      inode, ceph_vinop(inode), mds, seq, truncate_size, truncate_seq);
+ 	queue_trunc = ceph_fill_file_size(inode, issued,
+ 					  truncate_seq, truncate_size, size);
+@@ -4205,7 +4229,7 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+ 		target = -1;
+ 	}
+ 
+-	doutc(cl, " cap %llx.%llx export to peer %d piseq %u pmseq %u\n",
++	boutc(cl, " cap %llx.%llx export to peer %d piseq %u pmseq %u\n",
+ 	      ceph_vinop(inode), target, t_issue_seq, t_mseq);
+ retry:
+ 	down_read(&mdsc->snap_rwsem);
+@@ -4240,7 +4264,7 @@ static void handle_cap_export(struct inode *inode, struct ceph_mds_caps *ex,
+ 		/* already have caps from the target */
+ 		if (tcap->cap_id == t_cap_id &&
+ 		    ceph_seq_cmp(tcap->seq, t_issue_seq) < 0) {
+-			doutc(cl, " updating import cap %p mds%d\n", tcap,
++			boutc(cl, " updating import cap %p mds%d\n", tcap,
+ 			      target);
+ 			tcap->cap_id = t_cap_id;
+ 			tcap->seq = t_issue_seq - 1;
+@@ -4347,7 +4371,7 @@ static void handle_cap_import(struct ceph_mds_client *mdsc,
+ 		peer = -1;
+ 	}
+ 
+-	doutc(cl, " cap %llx.%llx import from peer %d piseq %u pmseq %u\n",
++	boutc(cl, " cap %llx.%llx import from peer %d piseq %u pmseq %u\n",
+ 	      ceph_vinop(inode), peer, piseq, pmseq);
+ retry:
+ 	cap = __get_cap_for_mds(ci, mds);
+@@ -4374,7 +4398,7 @@ static void handle_cap_import(struct ceph_mds_client *mdsc,
+ 
+ 	ocap = peer >= 0 ? __get_cap_for_mds(ci, peer) : NULL;
+ 	if (ocap && ocap->cap_id == p_cap_id) {
+-		doutc(cl, " remove export cap %p mds%d flags %d\n",
++		boutc(cl, " remove export cap %p mds%d flags %d\n",
+ 		      ocap, peer, ph->flags);
+ 		if ((ph->flags & CEPH_CAP_FLAG_AUTH) &&
+ 		    (ocap->seq != piseq ||
+@@ -4467,10 +4491,13 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 	bool queue_trunc;
+ 	bool close_sessions = false;
+ 	bool do_cap_release = false;
++	struct ceph_journal_info __ji;
+ 
+ 	if (!ceph_inc_mds_stopping_blocker(mdsc, session))
+ 		return;
+ 
++	ceph_blog_enter(mdsc->fsc, &__ji);
 +
- 	struct dentry *debugfs_dir;
- 	struct dentry *debugfs_monmap;
- 	struct dentry *debugfs_osdmap;
+ 	/* decode */
+ 	end = msg->front.iov_base + msg->front.iov_len;
+ 	if (msg->front.iov_len < sizeof(*h))
+@@ -4567,7 +4594,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 
+ 	/* lookup ino */
+ 	inode = ceph_find_inode(mdsc->fsc->sb, vino);
+-	doutc(cl, " caps mds%d op %s ino %llx.%llx inode %p seq %u iseq %u mseq %u\n",
++	boutc(cl, " caps mds%d op %s ino %llx.%llx inode %p seq %u iseq %u mseq %u\n",
+ 	      session->s_mds, ceph_cap_op_name(op), vino.ino, vino.snap, inode,
+ 	      seq, issue_seq, mseq);
+ 
+@@ -4577,7 +4604,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 	mutex_lock(&session->s_mutex);
+ 
+ 	if (!inode) {
+-		doutc(cl, " i don't have ino %llx\n", vino.ino);
++		boutc(cl, " i don't have ino %llx\n", vino.ino);
+ 
+ 		switch (op) {
+ 		case CEPH_CAP_OP_IMPORT:
+@@ -4632,7 +4659,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 	spin_lock(&ci->i_ceph_lock);
+ 	cap = __get_cap_for_mds(ceph_inode(inode), session->s_mds);
+ 	if (!cap) {
+-		doutc(cl, " no cap on %p ino %llx.%llx from mds%d\n",
++		boutc(cl, " no cap on %p ino %llx.%llx from mds%d\n",
+ 		      inode, ceph_ino(inode), ceph_snap(inode),
+ 		      session->s_mds);
+ 		spin_unlock(&ci->i_ceph_lock);
+@@ -4690,6 +4717,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 		ceph_mdsc_close_sessions(mdsc);
+ 
+ 	kfree(extra_info.fscrypt_auth);
++	ceph_blog_exit(&__ji);
+ 	return;
+ 
+ flush_cap_releases:
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 8818fe481fa4..0b0205c0d53b 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -946,7 +946,7 @@ static void flush_snaps(struct ceph_mds_client *mdsc)
+ 	struct inode *inode;
+ 	struct ceph_mds_session *session = NULL;
+ 
+-	doutc(cl, "begin\n");
++	boutc(cl, "begin\n");
+ 	spin_lock(&mdsc->snap_flush_lock);
+ 	while (!list_empty(&mdsc->snap_flush_list)) {
+ 		ci = list_first_entry(&mdsc->snap_flush_list,
+@@ -961,7 +961,7 @@ static void flush_snaps(struct ceph_mds_client *mdsc)
+ 	spin_unlock(&mdsc->snap_flush_lock);
+ 
+ 	ceph_put_mds_session(session);
+-	doutc(cl, "done\n");
++	boutc(cl, "done\n");
+ }
+ 
+ /**
+@@ -1032,10 +1032,13 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 	int i;
+ 	int locked_rwsem = 0;
+ 	bool close_sessions = false;
++	struct ceph_journal_info __ji;
+ 
+ 	if (!ceph_inc_mds_stopping_blocker(mdsc, session))
+ 		return;
+ 
++	ceph_blog_enter(mdsc->fsc, &__ji);
++
+ 	/* decode */
+ 	if (msg->front.iov_len < sizeof(*h))
+ 		goto bad;
+@@ -1048,7 +1051,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 	trace_len = le32_to_cpu(h->trace_len);
+ 	p += sizeof(*h);
+ 
+-	doutc(cl, "from mds%d op %s split %llx tracelen %d\n", mds,
++	boutc(cl, "from mds%d op %s split %llx tracelen %d\n", mds,
+ 	      ceph_snap_op_name(op), split, trace_len);
+ 
+ 	down_write(&mdsc->snap_rwsem);
+@@ -1080,7 +1083,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 				goto out;
+ 		}
+ 
+-		doutc(cl, "splitting snap_realm %llx %p\n", realm->ino, realm);
++		boutc(cl, "splitting snap_realm %llx %p\n", realm->ino, realm);
+ 		for (i = 0; i < num_split_inos; i++) {
+ 			struct ceph_vino vino = {
+ 				.ino = le64_to_cpu(split_inos[i]),
+@@ -1105,12 +1108,12 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 			 */
+ 			if (ci->i_snap_realm->created >
+ 			    le64_to_cpu(ri->created)) {
+-				doutc(cl, " leaving %p %llx.%llx in newer realm %llx %p\n",
++				boutc(cl, " leaving %p %llx.%llx in newer realm %llx %p\n",
+ 				      inode, ceph_vinop(inode), ci->i_snap_realm->ino,
+ 				      ci->i_snap_realm);
+ 				goto skip_inode;
+ 			}
+-			doutc(cl, " will move %p %llx.%llx to split realm %llx %p\n",
++			boutc(cl, " will move %p %llx.%llx to split realm %llx %p\n",
+ 			      inode, ceph_vinop(inode), realm->ino, realm);
+ 
+ 			ceph_get_snap_realm(mdsc, realm);
+@@ -1169,6 +1172,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 
+ 	flush_snaps(mdsc);
+ 	ceph_dec_mds_stopping_blocker(mdsc);
++	ceph_blog_exit(&__ji);
+ 	return;
+ 
+ bad:
+@@ -1182,6 +1186,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 
+ 	if (close_sessions)
+ 		ceph_mdsc_close_sessions(mdsc);
++	ceph_blog_exit(&__ji);
+ 	return;
+ }
+ 
 -- 
 2.34.1
 
