@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBCA6581225;
-	Wed,  9 Sep 2026 14:18:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96B47569F2A;
+	Wed,  9 Sep 2026 14:20:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788963519; cv=none; b=BZjI6AXjnGFse/t1i/8OwjHiuTAs1He6DtluQKUKOwyQiQH3wJPk66egUlj16Iu5NS2bNl3uqJ0uFwjVGB5bnM8CA6qNod5iZ6+6BIP4N3fTZmaC446E5/aLiziOC+o8dCpR/YP6+ccJupgJtnj/rAzEIU29IRlkjFjwdQBWUWM=
+	t=1788963644; cv=none; b=gJ4pxddT/edX9hlMw8vtdcq8010umVJqLiX1Atjq+FLkj5ET3IXPXmCMbQhf6YLWGPGb9VvHw+QnI4CaI7qK+VMXnQ+WEuHoxbRNtrM2rOoOONbuRxd6OX0odBerAzJpO5s7cJOdgm0LrrXHFcoK7+mascTrvrJgCRbzDMRTw+Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788963519; c=relaxed/simple;
-	bh=KZQEJH1+p27ju92W7ORD1ObpdeNCRB/p3Fsm+EqdAdA=;
+	s=arc-20240116; t=1788963644; c=relaxed/simple;
+	bh=s7VQOlOU7AwSJjyzkINg2SJi2bbn+hMYGgE/73HTq+4=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=WauvejUfinSnX4ocjUnvUjWqSPjFIqwOH8yMLnw861fDDg8pt3tyv6d2kAvYs22YSp2iiap/Ah/CbFALi3BXG1MJ0G+M1fVjEon/mulAn+UYBbvuQO6Kl8GabUcoADu6Ac6SxqN89CApetQN84xXvYP/11VCXpBC8H7SkeNt3t8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jBV9vu/+; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=HbuwsLO+cfRfbzwPUpokRx4CctlagIKPqywv5Ki0hU1U41hVV81nkxbb3nhWTh99T5c76lYfSDkd9Ivvn+LuJvjQSkVKwoXUXBMeHgK1akAm8QO6xWOStc7s5sKvaXF5gTNHYkXp4VfTDimseBfxoehkWvIuQtxL0zEhFZu1RWY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lnHLaMAo; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jBV9vu/+"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51FC61F00AC4;
-	Wed,  9 Sep 2026 14:18:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lnHLaMAo"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 844AF1F00A3D;
+	Wed,  9 Sep 2026 14:20:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788963518;
-	bh=X08fjZM7RBobs8taxaav9ECpncRKwsgdKENAu88U/cw=;
+	s=k20260515; t=1788963643;
+	bh=pNa+R32oRzIlggZcI4nA479nmzN6Ja3e5lLkInWTr24=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=jBV9vu/+PUjSA8EfGZJHnTbzSojvvSdorQ5pRUDYPv/81JFP66GR/g5iYBWc1zq4e
-	 dOqm35fhJ3mhVN9bmhWeDeqC0pQ0ME2zXBkwXZy9PVITMLv5J623/DdYfiHBrtQKBb
-	 QqJKfqgW+oqcg2G5748bn/irz3p84Sap6TZn+9NFiXfS+Vf0NL6i5li10zDbJ76N3Q
-	 UW8LQRt+XvnbIZOFYoxPLFJ3jhjG5aU/1ukQ+cZ0/iCiVymnaMT4VgsOZfEyLsfOWb
-	 0f9fmig/kwTnVdp3VgSjvoAR3qRVdt+CoUdcQNzZtlSRGxDZnFPrFVR3eX0XZx3dG+
-	 Z274TGHNWTqvw==
-Message-ID: <afc196d8-8e17-4cdd-a6be-94b8816f2a57@kernel.org>
-Date: Wed, 9 Sep 2026 16:18:26 +0200
+	b=lnHLaMAopxlt4KS67LLWDWspk5zG17ntY3H9Pe2yIVsiFSE2BRoYW00yJg+xHoh10
+	 vuNVVQC2bfNK0nyBX1v9GN1Psf3WbkOKPt/kAIud/e0yPLkq0JCsdntmOD5i+4fY/Y
+	 Ml2/4whKkbL2iUhms0DZo9w4Hej2h47PsPoV74ZUvFvumYQzyJ4Z8ZXNQSLwcAc2a7
+	 kcdfu2aCv2kKeEPe/X0okGepxzVjumyPE0sHnCzfrTf8KARGjVRH66h7+/8ZjOKTGa
+	 kk2sXnk6fjbWqOFkprZPu77oQxxro0cxZu5khxthAUAiRK9hcw7Lb8/S3rgn407qQ6
+	 2GycK1VAQOOXA==
+Message-ID: <e31d07a6-52b3-46bd-8a1e-03238428a0d0@kernel.org>
+Date: Wed, 9 Sep 2026 16:20:30 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -35,8 +35,8 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 12/14] treewide: replace PagePrivate() with
- page_private()
+Subject: Re: [PATCH v3 13/14] treewide: adjust comments on PagePrivate and
+ PG_private
 To: Zi Yan <ziy@nvidia.com>, "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  Andrew Morton <akpm@linux-foundation.org>,
  Muchun Song <muchun.song@linux.dev>, Lorenzo Stoakes <ljs@kernel.org>,
@@ -51,13 +51,14 @@ To: Zi Yan <ziy@nvidia.com>, "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  Johannes Weiner <hannes@cmpxchg.org>, Qi Zheng <qi.zheng@linux.dev>,
  Shakeel Butt <shakeel.butt@linux.dev>, Kairui Song <kasong@tencent.com>
 Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org,
- Song Liu <song@kernel.org>, Yu Kuai <yukuai@fygo.io>,
  Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
- Viacheslav Dubeyko <slava@dubeyko.com>, Li Nan <magiclinan@didiglobal.com>,
- Xiao Ni <xiao@kernel.org>, linux-raid@vger.kernel.org,
- ceph-devel@vger.kernel.org
+ Viacheslav Dubeyko <slava@dubeyko.com>, Trond Myklebust
+ <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>,
+ Richard Weinberger <richard@nod.at>, Zhihao Cheng <chengzhihao1@huawei.com>,
+ ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org,
+ linux-mtd@lists.infradead.org
 References: <20260907-remove-pg_private-v3-0-6ae22f9d9272@nvidia.com>
- <20260907-remove-pg_private-v3-12-6ae22f9d9272@nvidia.com>
+ <20260907-remove-pg_private-v3-13-6ae22f9d9272@nvidia.com>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -104,45 +105,14 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <20260907-remove-pg_private-v3-12-6ae22f9d9272@nvidia.com>
+In-Reply-To: <20260907-remove-pg_private-v3-13-6ae22f9d9272@nvidia.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 9/8/26 04:56, Zi Yan wrote:
-> PG_private is going to be removed and its check is replaced by checking
-> page->private != NULL.
-> 
+> PG_private is going to be deleted. Adjust related comments to refer to
+> page/folio->private instead.
 
-You should likely clarify here that, for these users (the pages they deal with),
-PG_private is set if and only if page->private != NULL. Consequently, there is
-no functional change.
-
-> Replace page_buffers() with page_private() and delete page_buffers(),
-> since only two users left and both can be converted to use page_private().
-> 
-[...]
-
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 657c2cb0f8811..fad17df1d5082 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -70,9 +70,7 @@ static int ceph_netfs_check_write_begin(struct file *file, loff_t pos, unsigned
->  
->  static inline struct ceph_snap_context *page_snap_context(struct page *page)
->  {
-> -	if (PagePrivate(page))
-> -		return (void *)page->private;
-> -	return NULL;
-> +	return (void *)page->private;
->  }
-
-I'd even split this up into 2 (or even 3) patches:
-
-1) Remove PagePrivate usage in ceph
-
-2) Remove PagePrivate usage in md
-
-3) Inline page_buffers() and remove it
 
 Acked-by: David Hildenbrand (Arm) <david@kernel.org>
 
