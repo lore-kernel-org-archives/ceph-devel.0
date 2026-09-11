@@ -1,211 +1,137 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f180.google.com (mail-pf1-f180.google.com [209.85.210.180])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 272C13BE630
-	for <ceph-devel@vger.kernel.org>; Thu, 10 Sep 2026 22:03:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789077818; cv=none; b=QBX8sJ9lAltwUw2eYK1CePvlnVL8Ygudr2bV43Nhgjo7zbAHTQyS7KiaEWjz7RXSx96zXQQZyH8ESyZyLwQrQreIYgUztDICxK7oYKKJQa4M7R+cYlcwKKHSRS8N208D1lvv3JG7IUEtY03weuiHhVjGvn20/5Z5mJYxnoChq2M=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789077818; c=relaxed/simple;
-	bh=7N71QSfXG/oEAXTPRExhYle1NWxzGUIUZP0hY0cvi58=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=nWLERMrirWIhs/lhQfbB9RvwQbTOcZ6Z/bf4YqQlM4vkKVHWM7mKi85nYIyLnpdazMmHnsag4svTpLvgWWJglX+3lDudF9PmKdm6k03h74Cd3QxNBuMGg3qwxfiAc8C97Fk+l95sL3Ft9HFX0SiMYGdH2xqWER8/d2Lmgp5asMg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WjD30iS8; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26FB7214A84
+	for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2026 00:19:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.210.180
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789085950; cv=pass; b=TFOxm8+FyDs5UI+qZSjamEEx44KSJtK8XnYXJa7AfIm27i8oRyb71doG31rsZC+xFftBQbiq9u7N14RgHZSv8MKXT3ZvIrB4ro+gSe+Ber4X8ZaTyZGroOts1u3FbJwFli2c8wMOUjkyVqExnq4VDEjyG7ST+S6CoLCI7EC6K5w=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789085950; c=relaxed/simple;
+	bh=gN6p4BHMJu7wezAEoh+ZWimR6M9/A3O/vdPPB3p5BGk=;
+	h=From:MIME-Version:Date:Message-ID:Subject:To:Cc:Content-Type; b=JPdl9pfXHVE+BaVsNcu3sAcFk4N7R49soGhb8KL2Cc+Bf8oV3MxY6MCKhfUMSQOpZlNggy0t/iZinGsXQ6Jj3//RUXxcOtA+XojS6Fn7sXfO5DXBHXKXcrKMJ0aXoIX8Mo3sjGh6bUL2cSAJx0I//K6hhPGAyFt9CIHqCuDR6J8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=berkeley.edu; spf=pass smtp.mailfrom=berkeley.edu; dkim=pass (2048-bit key) header.d=berkeley.edu header.i=@berkeley.edu header.b=JAseW34j; arc=pass smtp.client-ip=209.85.210.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=berkeley.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=berkeley.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WjD30iS8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1789077815;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=4HeOV1ic1gSfi0+R6SuHSn3W0D1ksy23qGyWj8cUwq4=;
-	b=WjD30iS8Gde+fOdfeR19mnIduecSRjnm85iJZOV8DvAj76PuoXIaO79egsy/G7PhmT+LPq
-	kr1Ku/R7D8RhKmRT11GYWNe+H8mbuTlLFTV6nMk4yLkZWZrdzxJjn2xulZVs9sXy5n2x2j
-	lqIbc/dC0Ywq+dDROh085SRCIps442o=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-209-YoGHpsZjN12awYFG8sOJ1Q-1; Thu,
- 10 Sep 2026 18:03:32 -0400
-X-MC-Unique: YoGHpsZjN12awYFG8sOJ1Q-1
-X-Mimecast-MFC-AGG-ID: YoGHpsZjN12awYFG8sOJ1Q_1789077809
-Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id ABD481954B19;
-	Thu, 10 Sep 2026 22:03:29 +0000 (UTC)
-Received: from warthog.com (unknown [10.44.32.54])
-	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id EC1DB18004D4;
-	Thu, 10 Sep 2026 22:03:24 +0000 (UTC)
-From: David Howells <dhowells@redhat.com>
-To: Christian Brauner <christian@brauner.io>
-Cc: David Howells <dhowells@redhat.com>,
-	Paulo Alcantara <pc@manguebit.org>,
-	Matthew Wilcox <willy@infradead.org>,
-	Namjae Jeon <linkinjeon@kernel.org>,
-	Marc Dionne <marc.dionne@auristor.com>,
-	Stefan Metzmacher <metze@samba.org>,
-	Eric Van Hensbergen <ericvh@kernel.org>,
-	Dominique Martinet <asmadeus@codewreck.org>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	netfs@lists.linux.dev,
-	linux-afs@lists.infradead.org,
-	linux-cifs@vger.kernel.org,
-	linux-nfs@vger.kernel.org,
-	ceph-devel@vger.kernel.org,
-	v9fs@lists.linux.dev,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v12 5/5] cachefiles: Preset the state xattr when creating a new file
-Date: Thu, 10 Sep 2026 23:02:40 +0100
-Message-ID: <20260910220242.2165023-6-dhowells@redhat.com>
-In-Reply-To: <20260910220242.2165023-1-dhowells@redhat.com>
-References: <20260910220242.2165023-1-dhowells@redhat.com>
+	dkim=pass (2048-bit key) header.d=berkeley.edu header.i=@berkeley.edu header.b="JAseW34j"
+Received: by mail-pf1-f180.google.com with SMTP id d2e1a72fcca58-851cbd64814so260406b3a.1
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Sep 2026 17:19:07 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1789085947; cv=none;
+        d=google.com; s=arc-20260327;
+        b=e+7eCAeQI+64MPPvzu6kf1loMP6u5X09WZwUOYPw3Mo9K/JaEtLT+ENLTYCrB4SenE
+         szVdNPw48904g1JuaxobZLPjdQH0i14nc2BucgKV6t+dBWdNyI9H7+OFbk86csRXBFbQ
+         fp6ckVIxJ45DJ/3Rl2yHSCf628V7+Qq9W5EQQsy0Hbdykeph4DRawU+0fi7Wv7ZYqp7g
+         GSOWZX1GC/4wr6/KPPEu/qawiRsg4aMKCOSNxNPh5oSBmXy32nu7emRtVGM/vdMQvIpM
+         F83lUyKOZAnOFGf5zE6a+RfPNOwMArUmA8KL/u6TTXrRo27Rny1G5uXFxbUogro4ziRX
+         rvPA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:mime-version:from:dkim-signature;
+        bh=DRWY7TGKlrDE8BUJYREHI/zhjMrn8auFwGi8zbFwJIM=;
+        fh=jdSjtpPaKp/mCVMgfCvgcXA59WDCO1+lYfMoM1oRsmQ=;
+        b=m3gRdkDIkFtBBDFY9WHkI9WxeWcULzKx9YGb7fhMihk5tpvui5ZgiUfVoo7URo34Gj
+         dy/+F/JqKajMK1foJeOp4YXZgNy8gZC2bi91MkXAY24OjDwUDi55Ttt6UMMgzK3H5T4T
+         l8kPttlZFmusiX7Hdc45XhTvcbzXd57A51gtKqq048Q8dwpI0UWQfzZ9fLIUGaRmoC3h
+         2Pa80zaVjXThYTNs8p4xozyND2cgZzmcF2OYeWjMGk7CIb4Jg2CaY5E1N0QytwLIZdaw
+         JHEdE1iyPDC6RHX9ck/CSY1nnClcOBml44COLUD152mKOWhSg913rXiTpC5jWEMdAs9E
+         CX5g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=berkeley.edu; s=google; t=1789085947; x=1789690747; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:mime-version:from:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=DRWY7TGKlrDE8BUJYREHI/zhjMrn8auFwGi8zbFwJIM=;
+        b=JAseW34jbtEjb0h3l5jfliToWd1c7hzf6HPMG+cq/Dxu4IUVMZrtmlRw90ip0yyocJ
+         D4PGZU3wy289NXrEp4MaBiC1NtsMKh/W9Y0ntUL1U/d5ERaLEb82bjfkhAcUA15imlpD
+         Ee/HR0Ec0FswO7eDWwEShikaga554Rur7h6yb1CH6uNCv0VajhWHp7rD+alX0LxH5jE2
+         bbZWJY65btCbSND2f/O8doDrPZia4VyGoL+7iw+pd7QUcLLECnO3JN5nERqSJM1qEl0p
+         Pb5GblVJq+54p+smc6vEerSg+AKdpRXeVhMGXtVMevOj2oNRvBaslLvtTTVNhR+QYdW4
+         C5JA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789085947; x=1789690747;
+        h=content-type:cc:to:subject:message-id:date:mime-version:from
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=DRWY7TGKlrDE8BUJYREHI/zhjMrn8auFwGi8zbFwJIM=;
+        b=G9h83rv4r49WuaL7RpXIsVggSwjQ7soq1r+3ygxT5v+HWwfiqPdoFXknOriTQB7xNn
+         QEJ8cwhAfDjY/kz7uTc3zn1oHs2gh2O0qXuJEb7mlsBro3RNesZFbezRCA2VS+g3PKiv
+         U+yj+m2SbUc+fbBE/xvK6XbFzzLYuttHuJoTvAPRYJypM4tH1mRRHEZRer5E24firw33
+         oV1e6gOU14R1OBwVhOEHyUHJGrZJAhb81GWvv3ugujpXMAhjSCHQwP/jsOUSePTIox4N
+         r5xopEmXFqBOqDSwK05mhZUuKyBkhLjhnTe89ZE1kxga9M2/LAdkIJsV+JMI7eEJQ73q
+         u8fw==
+X-Forwarded-Encrypted: i=1; AKwUvBwjhurO0dQx2MNZSSTJBpGfn99T3NxoVtUpFAnttXi3qFR/iA6Z1HfIQ7k4R71B7EoxzO2Dl/xi4wJd@vger.kernel.org
+X-Gm-Message-State: AFuF++lQGrbcEmpfR847rzuTbvI7EGEm+/uDo8BNUa22YqfriBb6iwOv
+	aOQRMuc2XMrInSZJRs7DyDcvfwfh8QgynOAm5HPw1taAkS69YPPUMlprTreQzxaV6hv7Dh2h1mu
+	hTu9tR4qg9rongf5gBZ80u/skAFSWttV1H57pp0SD
+X-Gm-Gg: AYBFou2VlhD5v8QRgk3BxQ8/zEUuv+EYqOWsECRXH9dner2gln5sCTrYoBg/GAeB5/N
+	wRCxIwgJG+PvUIl9qvaMdGnbz2NF3UkfUUTqkfgw2lEyCmo8q8Im03ZSISTm9uWvf80pBhDBsGV
+	feO98oJc3J6ApQ3zIV/Wp5eGti8F2dezC8zPabA+DyY2L89gLsDq/2BkjnXgEum8jSlMj+C0EMi
+	6xVqCLPBg3Uhr0asaeI6Y0Py1ay3zksuV6lYD+x3OzGuPz1HialcpKlTdNuyBDkU9ydFiGooGvI
+	b5CBfuJ21P9bCajT9FTjrcn75IRnMAHjfie8qf2GsoMGAr/V9laiGi6x+X8dZ0e3Aa5Cyw3R0EK
+	6h4AZyBfRUaOChSqFWqd71ywiE/CNgGSFT/eUyYqtkN8=
+X-Received: by 2002:a05:6a00:889:b0:869:4484:ed98 with SMTP id
+ d2e1a72fcca58-86b336da391mr2179665b3a.20.1789085946510; Thu, 10 Sep 2026
+ 17:19:06 -0700 (PDT)
+Received: from 474444807712 named unknown by gmailapi.google.com with
+ HTTPREST; Fri, 11 Sep 2026 00:19:05 +0000
+Received: from 474444807712 named unknown by gmailapi.google.com with
+ HTTPREST; Fri, 11 Sep 2026 00:19:05 +0000
+From: Farhad Alemi <farhad.alemi@berkeley.edu>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
+Date: Fri, 11 Sep 2026 00:19:05 +0000
+X-Gm-Features: AcwNN1VhQHuDmyfmr7G_3qRfSsnT9lX_ogCYHM0LoLiDwCGK4kVN5SmNeoy2eZA
+Message-ID: <CA+0ovCiUaccnL7U89TZs2GOBGxp2E6OCfU_KMwre9Fnfv4BE4Q@mail.gmail.com>
+Subject: [PATCH] ceph: fix NULL dereference of filelock_reply in ceph_lock_message()
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: falemi@asu.edu, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-With a really small cache, cachefiles is likely to see a lot of writes
-hitting ENOSPC - and this can include setxattr that sets the state xattr on
-a cachefile - but we don't really want to successfully fill a cache file
-only to have to scrap it because we can't set the xattr.
+ceph_lock_message() dereferences req->r_reply_info.filelock_reply
+unconditionally once a CEPH_MDS_OP_GETFILELOCK request completes
+successfully, but a reply with a zero-length extra section leaves it NULL,
+because parse_reply_info() calls parse_reply_info_extra() only when that
+section is non-empty.  parse_reply_info_extra() also selects the parser
+from info->head->op, the opcode the MDS echoes back rather than the one the
+client sent, so a GETFILELOCK reply naming READDIR, LSSNAP, CREATE or
+GETVXATTR is parsed as that op and leaves filelock_reply either NULL or,
+since the extra results are a union, aliased onto the member that parser
+wrote.  Reject a successful GETFILELOCK reply that left filelock_reply
+NULL.  Select the parser from req->r_op instead, since only the op the
+client sent identifies the live member of that union.
 
-Instead, preset the xattr when we create the tmpfile we're going to use,
-and scrap the file at that point if we get ENOSPC.  Only if setxattr
-succeeds do we allow data to be written to the file.
-
-Note that there is a potential performance loss in that writes to the cache
-have to be delayed until this is completed - but we do the tmpfile/setxattr
-in parallel, starting when the file is opened and only have to wait once
-writeback occurs.
-
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: Marc Dionne <marc.dionne@auristor.com>
-cc: Paulo Alcantara <pc@manguebit.org>
-cc: netfs@lists.linux.dev
-cc: linux-fsdevel@vger.kernel.org
+Closes: https://lore.kernel.org/all/CA+0ovCgZoX5yG35yvU1S2D0Fc35TYeEZKAFUnO-tFMqeXubfdw@mail.gmail.com/
+Signed-off-by: Farhad Alemi <farhad.alemi@berkeley.edu>
 ---
- fs/cachefiles/internal.h |  1 +
- fs/cachefiles/namei.c    |  5 ++++
- fs/cachefiles/xattr.c    | 59 +++++++++++++++++++++++++++++++++++++++-
- 3 files changed, 64 insertions(+), 1 deletion(-)
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -822,7 +822,8 @@ static int parse_reply_info_extra(void **p, void *end,
+ 				  u64 features, struct ceph_mds_session *s)
+ {
+ 	struct ceph_mds_reply_info_parsed *info = &req->r_reply_info;
+-	u32 op = le32_to_cpu(info->head->op);
++	/* The extra section is a union; only our own op names the live member. */
++	u32 op = req->r_op;
 
-diff --git a/fs/cachefiles/internal.h b/fs/cachefiles/internal.h
-index b2605111fd56..664be64ab538 100644
---- a/fs/cachefiles/internal.h
-+++ b/fs/cachefiles/internal.h
-@@ -283,6 +283,7 @@ void cachefiles_withdraw_volume(struct cachefiles_volume *volume);
- /*
-  * xattr.c
-  */
-+int cachefiles_preset_object_xattr(struct cachefiles_object *object, struct file *file);
- extern int cachefiles_set_object_xattr(struct cachefiles_object *object);
- extern int cachefiles_check_auxdata(struct cachefiles_object *object,
- 				    struct file *file);
-diff --git a/fs/cachefiles/namei.c b/fs/cachefiles/namei.c
-index ca093840e577..ef656a319ede 100644
---- a/fs/cachefiles/namei.c
-+++ b/fs/cachefiles/namei.c
-@@ -450,6 +450,11 @@ struct file *cachefiles_create_tmpfile(struct cachefiles_object *object)
- 		pr_notice("Cache does not support read_iter and write_iter\n");
- 		goto err_unuse;
+ 	if (op == CEPH_MDS_OP_GETFILELOCK)
+ 		return parse_reply_info_filelock(p, end, info, features);
+@@ -872,6 +873,11 @@ static int parse_reply_info(struct
+ceph_mds_session *s, struct ceph_msg *msg,
+ 			goto out_bad;
  	}
-+
-+	/* Preallocate space for the xattr. */
-+	ret = cachefiles_preset_object_xattr(object, file);
-+	if (ret < 0)
-+		goto err_unuse;
- out:
- 	cachefiles_end_secure(cache, saved_cred);
- 	object->content_info = CACHEFILES_CONTENT_ALL;
-diff --git a/fs/cachefiles/xattr.c b/fs/cachefiles/xattr.c
-index 551a3b0069c2..8ebb713482e3 100644
---- a/fs/cachefiles/xattr.c
-+++ b/fs/cachefiles/xattr.c
-@@ -34,6 +34,57 @@ struct cachefiles_vol_xattr {
- 	__u8	data[];		/* netfs volume coherency data */
- } __packed;
- 
-+/*
-+ * Preset the state xattr on a cache file to allocate space for it.
-+ */
-+int cachefiles_preset_object_xattr(struct cachefiles_object *object, struct file *file)
-+{
-+	struct cachefiles_xattr *buf;
-+	struct dentry *dentry = file->f_path.dentry;
-+	unsigned int len = object->cookie->aux_len;
-+	int ret;
-+
-+	buf = kzalloc(sizeof(struct cachefiles_xattr) + min(len, sizeof(__be64)), GFP_KERNEL);
-+	if (!buf)
-+		return -ENOMEM;
-+
-+	buf->type		= CACHEFILES_COOKIE_TYPE_DATA;
-+	buf->content		= CACHEFILES_CONTENT_DIRTY;
-+
-+	ret = cachefiles_inject_write_error();
-+	if (ret == 0) {
-+		ret = mnt_want_write_file(file);
-+		if (ret == 0) {
-+			ret = vfs_setxattr(&nop_mnt_idmap, dentry,
-+					   cachefiles_xattr_cache, buf,
-+					   sizeof(struct cachefiles_xattr) + len, 0);
-+			mnt_drop_write_file(file);
-+		}
-+	}
-+	if (ret < 0) {
-+		trace_cachefiles_vfs_error(object, file_inode(file), ret,
-+					   cachefiles_trace_setxattr_error);
-+		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
-+					   object->object_size,
-+					   buf->data, buf->content,
-+					   cachefiles_coherency_set_fail);
-+		switch (ret) {
-+		case -ENOMEM:
-+		case -ENOSPC:
-+			break;
-+		default:
-+			cachefiles_io_error_obj(
-+				object,
-+				"Failed to set xattr with error %d", ret);
-+			break;
-+		}
-+	}
-+
-+	kfree(buf);
-+	_leave(" = %d", ret);
-+	return ret;
-+}
-+
- /*
-  * set the state xattr on a cache file
-  */
-@@ -82,10 +133,16 @@ int cachefiles_set_object_xattr(struct cachefiles_object *object)
- 		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
- 					   object_size, buf->data, buf->content,
- 					   cachefiles_coherency_set_fail);
--		if (ret != -ENOMEM)
-+		switch (ret) {
-+		case -ENOMEM:
-+			break;
-+		case -ENOSPC:
-+		default:
- 			cachefiles_io_error_obj(
- 				object,
- 				"Failed to set xattr with error %d", ret);
-+			break;
-+		}
- 	} else {
- 		trace_cachefiles_coherency(object, file_inode(file)->i_ino,
- 					   object_size, buf->data, buf->content,
 
++	/* ceph_lock_message() dereferences filelock_reply on a success reply. */
++	if (req->r_op == CEPH_MDS_OP_GETFILELOCK &&
++	    !le32_to_cpu(info->head->result) && !info->filelock_reply)
++		goto bad;
++
+ 	/* snap blob */
+ 	ceph_decode_32_safe(&p, end, len, bad);
+ 	info->snapblob_len = len;
