@@ -1,54 +1,55 @@
-Received: from smtp153-168.sina.com.cn (smtp153-168.sina.com.cn [61.135.153.168])
+Received: from mail3-164.sinamail.sina.com.cn (mail3-164.sinamail.sina.com.cn [202.108.3.164])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCEAF19D8BC
-	for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2026 13:58:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=61.135.153.168
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 071501A3160
+	for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2026 14:02:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.108.3.164
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789135097; cv=none; b=IeUS7zLp2wWUlz0s5oyrhM3BkgtPnkfIs71N89lOZ0UyEe2A1AFHWPaOSUjNVQK3bNuV0VdFHsv8Xcb8782aTfUSDI3zz2cJY/B2y4uvd8y9s9fQaxqYOoMUeMk5BChg+0Tjde6in6NKG4QoeYZzR+1M0+NbiLkhPtLUlnl7KZY=
+	t=1789135326; cv=none; b=ITAL4zUJcbuX/M/SOMVe3M5H/3iWZ72khDKZsUAjbAdr1hf61qq2M7CyQCdiUMpPGHKWGhZQTZO7oKyYQnBCYRn3rW/Kv3hL0H4KTAmqq6eStyRZNyv2b1v7h3axBvW77j5gLBTUfHayIFJfor8Zbv5ZodoG6DaFCTlb6P7Ip2s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789135097; c=relaxed/simple;
-	bh=5e7rbjCz+3YxIVToEiw98Io3Cj0lgTHKqDX6fKaN6/Y=;
+	s=arc-20240116; t=1789135326; c=relaxed/simple;
+	bh=WQemfS3+YoWxOOn1vLjyJiveqV4wGefGNjV15zTnag8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Emxc2kESpJkP5V1gbAwG0+/yzR+sNsOCsE5MQ2n76F2y90QGi0JV/0Nfa/QZNj42bh3mhau3fyl0tfwR1uHL5jgB3XjYFI5t8/5vcRiOI/71KmaF0C/281IKEPWkJwpF3ZV09vRdXI8D55pNb0VkOhNSBsTTaawaQERCT1xRQ6M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sina.com; spf=pass smtp.mailfrom=sina.com; dkim=pass (1024-bit key) header.d=sina.com header.i=@sina.com header.b=FVgh+RFu; arc=none smtp.client-ip=61.135.153.168
+	 MIME-Version; b=gi/HRAXUASe7yteWanZ0S/dX35v0SLQ7pKIEscGgAUH/FTxA3QX8dcM8RIum28vCaZioMWE+RhKklzQk04rSUMMqkegG8yx/XncH8eoLhxH0MA2ERWdvH/QEJa0+vt7bgvsnsNM1fjxgsSeowVryqWVGFCYO77aNyNbPIz8pGDQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sina.com; spf=pass smtp.mailfrom=sina.com; dkim=pass (1024-bit key) header.d=sina.com header.i=@sina.com header.b=H0ETdBxd; arc=none smtp.client-ip=202.108.3.164
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sina.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sina.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=sina.com header.i=@sina.com header.b="FVgh+RFu"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sina.com; s=201208; t=1789135091;
-	bh=KtLTgJmYgCgMjBJobKAo6lCs1IASf63I2XyeCDoH1sA=;
+	dkim=pass (1024-bit key) header.d=sina.com header.i=@sina.com header.b="H0ETdBxd"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sina.com; s=201208; t=1789135322;
+	bh=A1Al0oEmi9FS/HMks3AVF9haopiQhso4aa3qva+SAhQ=;
 	h=From:Subject:Date:Message-ID;
-	b=FVgh+RFuTrfODMc34N90AxLvxu/bueUZYTXfpbDGx+mcxdD0Un1X0BhWWp01S8h/Z
-	 sLGUhXhd41xhoVJzX/O6gQxMdbti64cSIQzFy1RvxVHV9a4zl8VXaSqIcjTb8kuf1y
-	 gahJ0DiB7Y5b6udQUjH8qgLH4GQK4IzDqUqt9iE8=
+	b=H0ETdBxdKFl7FNvdn74t0feD9grChLXIYds52cCVSscpvB/xw+NTEEf3R5oFEbEOu
+	 lXlpRutH9gG/ytrIt7dsAeVevROT1Hh6o0LJKzdeP2/kgGxNTOWWPo4JpzD61lC+Vj
+	 2LiFsCt6BN07Ic6I4bTbtkkKU3unp4XaBx+KUGlY=
 X-SMAIL-HELO: lxu-ped-host..
 Received: from unknown (HELO lxu-ped-host..)([111.198.231.89])
-	by sina.com (10.54.253.33) with ESMTP
-	id 6AA408BE000017B2; Fri, 11 Sep 2026 21:57:23 +0800 (CST)
+	by sina.com (10.54.253.32) with ESMTP
+	id 6AA409AA00002A27; Fri, 11 Sep 2026 22:01:21 +0800 (CST)
 X-Sender: eadavis@sina.com
 X-Auth-ID: eadavis@sina.com
 Authentication-Results: sina.com;
 	 spf=none smtp.mailfrom=eadavis@sina.com;
 	 dkim=none header.i=none;
 	 dmarc=none action=none header.from=eadavis@sina.com
-X-SMAIL-MID: 9867866685322
-X-SMAIL-UIID: 4528D04178E4406AB92BBF8A37E9D359-20260911-215723-1
+X-SMAIL-MID: 1090394456897
+X-SMAIL-UIID: 2B13AABE8E51442BB04E11A10E795460-20260911-220121-1
 From: Edward Adam Davis <eadavis@sina.com>
-To: syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com
+To: eadavis@sina.com
 Cc: amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
 	idryomov@gmail.com,
 	linux-kernel@vger.kernel.org,
+	sage@newdream.net,
 	slava@dubeyko.com,
-	syzkaller-bugs@googlegroups.com,
-	sage@newdream.net
-Subject: [PATCH] ceph: reject create client if no monitor
-Date: Fri, 11 Sep 2026 21:57:18 +0800
-Message-ID: <20260911135718.864217-1-eadavis@sina.com>
+	syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com,
+	syzkaller-bugs@googlegroups.com
+Subject: [PATCH v2] ceph: reject create client if no monitor
+Date: Fri, 11 Sep 2026 22:01:14 +0800
+Message-ID: <20260911140114.864756-1-eadavis@sina.com>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <6aa30f2a.f81106d8.2ab401.0013.GAE@google.com>
-References: <6aa30f2a.f81106d8.2ab401.0013.GAE@google.com>
+In-Reply-To: <20260911135718.864217-1-eadavis@sina.com>
+References: <20260911135718.864217-1-eadavis@sina.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -56,8 +57,6 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-
-From: Edward Adam Davis <eadavis@qq.com>
 
 During the resolution of monitor addresses, the failure to resolve the
 server name [1] resulted in no available monitors (i.e., the num_mon
@@ -83,8 +82,10 @@ Fixes: 16725b9d2a2e ("ceph: super.c")
 Reported-by: syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com
 Closes: https://syzkaller.appspot.com/bug?extid=1dbed5969931c19d3eb5
 Tested-by: syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com
-Signed-off-by: Edward Adam Davis <eadavis@qq.com>
+Signed-off-by: Edward Adam Davis <eadavis@sina.com>
 ---
+v1 -> v2: unified email address
+
  fs/ceph/super.c | 6 +++++-
  1 file changed, 5 insertions(+), 1 deletion(-)
 
