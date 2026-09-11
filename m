@@ -1,78 +1,54 @@
-Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp153-168.sina.com.cn (smtp153-168.sina.com.cn [61.135.153.168])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECC78476CD9
-	for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2026 13:31:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCEAF19D8BC
+	for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2026 13:58:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=61.135.153.168
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789133508; cv=none; b=aOuxlqTvToMQir3+ozs9KCYJiKwG9nF3TUrXDWaY6AaAmjpvzxd+MueFzP40tq7XWxLe00eg9Jsilkn/W+mgItuqYvTh9BERf3qjMtvZVP/iwUOGQiWkABrNYFzHhy6PRfpTfMj+scfSdGC23hR+M3LjscgccLfhaMYmi87sfzw=
+	t=1789135097; cv=none; b=IeUS7zLp2wWUlz0s5oyrhM3BkgtPnkfIs71N89lOZ0UyEe2A1AFHWPaOSUjNVQK3bNuV0VdFHsv8Xcb8782aTfUSDI3zz2cJY/B2y4uvd8y9s9fQaxqYOoMUeMk5BChg+0Tjde6in6NKG4QoeYZzR+1M0+NbiLkhPtLUlnl7KZY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789133508; c=relaxed/simple;
-	bh=xixb/irvDDTZ+1ALQQuckecjdupSCXFYvqi0iIQ8Dd8=;
+	s=arc-20240116; t=1789135097; c=relaxed/simple;
+	bh=5e7rbjCz+3YxIVToEiw98Io3Cj0lgTHKqDX6fKaN6/Y=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=tIFPiPicixmbaIdVbBFc8hLrkaedimflCnInWGhRyvBF0aYDDHjb1tEaaZuXvoHDMYL+9ldJUhyJguqP0aipyyTgZoMnD/HiUN6Vf1TpIO6iP6HKYUn3OU5ve5ZoAFZx2+bt9SZSQ9TuIqzPJRBOZnjypK9ARgpaENjuEf1uDSY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=rEheYlPI; arc=none smtp.client-ip=209.85.216.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 MIME-Version; b=Emxc2kESpJkP5V1gbAwG0+/yzR+sNsOCsE5MQ2n76F2y90QGi0JV/0Nfa/QZNj42bh3mhau3fyl0tfwR1uHL5jgB3XjYFI5t8/5vcRiOI/71KmaF0C/281IKEPWkJwpF3ZV09vRdXI8D55pNb0VkOhNSBsTTaawaQERCT1xRQ6M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sina.com; spf=pass smtp.mailfrom=sina.com; dkim=pass (1024-bit key) header.d=sina.com header.i=@sina.com header.b=FVgh+RFu; arc=none smtp.client-ip=61.135.153.168
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sina.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sina.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rEheYlPI"
-Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-39675172593so924155a91.2
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Sep 2026 06:31:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789133506; x=1789738306; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=7Z9QHqYcT1YWEzjyHufxn1J/JMrSvKtS/IwWIhbmHWM=;
-        b=rEheYlPIrxfemkmgL1yOkERCMoGNYVUhBVmlMVyv3JHWzdHiXi0e/2Nte+wYDtC3ZK
-         A9VgU782n/3ToERFmznfLmp3hNX9tq5QrXYLnNsb4NE7worrc+5h8KE+k9uHaIBp2c6n
-         /sMlxx+NRM2ZLUuHB3Bizw9syCavQe9KCpqr71BW0zn16svbFp+ljiwF1oNru3jkygjZ
-         d/c04uJ8hzHfI6I71SdTavvvy5aohcfQx/+BEd05mGXdqAVmo5WucTCskT+hASkka72W
-         ji22emXk+G61W+6Mx3v/3Q6FmmCnk5Zurqr/ukQ1S7UQuZ9LxglTHq3DS+PBuPsqtDL0
-         DNqQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789133506; x=1789738306;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=7Z9QHqYcT1YWEzjyHufxn1J/JMrSvKtS/IwWIhbmHWM=;
-        b=ag49RZL2SNOKgyh59A2jZEHvZdCUfVtL1IB8VKVSwd37kih5jMepWf4eHFVXlqritZ
-         7C8JxbwzurJZ+sFnX1Qu1w9IzO11Hi6ePuZOgzfi4bAUJhB0FhecXwFgkzhrpdaedjwx
-         3UqeALNKny9B5WyWa+k5EiigeG0yt1Cwrnuq2yU8Ju59yyUcQ670bdRVIPHXAd4qfLIg
-         R33vdkKdEtpQP00+ZT1jv7rVXd2i9zQfHo8ngVyjne0LqTwS3BHd6t8rukJdBsBl3GIy
-         vxF08dLjAnrsbW29O4Fv69PW19cP8sv+dgsPK3ZfpYIep77jdwgzpC3zp9XJuqvI0qFR
-         kIVw==
-X-Forwarded-Encrypted: i=1; AKwUvBx5T4GJJvBW+fopnqjenHe6ChAEHy6ndFrfImwoPCQHFLmpkMPa3/LF4qHFqWOVHRiwK+k2onbv9PS3@vger.kernel.org
-X-Gm-Message-State: AFuF++mHm6AR+xUE7tKm024Cug3tt5pzQ2GEUh+urDO9tLy1GkAUpZTS
-	RBx2WrlB7wD2FAsC3KOAEi0n1CdVN4lAo5wSJTj0IUzuGfv7KmjUorGW
-X-Gm-Gg: AYBFou2OVrCnSKbbJPyVI6Il8qnDsGYp+HMLBToqLS2S7cR6lSZqhR3j8CeYWBBFZz9
-	cWXAMlUhGRKLu9hzmHoNrpUDN9TNKy0uhYNyQH1yfIVidENHorj28PTyluFUIITvEcO1ZiC7agw
-	VSYKWPvG+f8Fh93HcLCSuRXbivgGZnSXI/MgUalAJTofFRYSHIwsNShX2EvnKF1TDyHJOwn9zJA
-	81D3zUienulY9iCnKa3CAy0lcMztKx5J1hxg4LZzEH7W2aGPdCnAdEHLt7Tjlh9wNTG4iGuFTny
-	pueHJU6Go7txoltXnvLQnY9fzi+OGRUJWJ7+k7sghG65Y91es0LYb9v+s/GGRYW4Um3oXH15L1T
-	3F5arLivpStRzaSVGqNQSWMN3soT9WpU9TuZSJ55WdyGNTn2UzOrWPLN5Rho46tZymQ80XXxW4w
-	ahzAOqCKXBGD0LD53eq0Y/Zvzeub5qgiNZmelzC8s3gcBSuOeSOKnu6AlKwA3DVQlTCMfej8F3W
-	uUHiQkt0MNCoxUbRonC1D+LnNd6em6kb9Y=
-X-Received: by 2002:a17:90b:1c8b:b0:398:9c00:29ee with SMTP id 98e67ed59e1d1-39d9c38fa48mr6908147a91.22.1789133506138;
-        Fri, 11 Sep 2026 06:31:46 -0700 (PDT)
-Received: from LAPTOP-450UDG4J ([223.185.135.143])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2dd2cfc5c7bsm11349015ad.51.2026.09.11.06.31.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 11 Sep 2026 06:31:45 -0700 (PDT)
-From: Yogesh Gaur <yogeshgaur.83@gmail.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>
-Cc: Viacheslav Dubeyko <slava@dubeyko.com>,
+	dkim=pass (1024-bit key) header.d=sina.com header.i=@sina.com header.b="FVgh+RFu"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sina.com; s=201208; t=1789135091;
+	bh=KtLTgJmYgCgMjBJobKAo6lCs1IASf63I2XyeCDoH1sA=;
+	h=From:Subject:Date:Message-ID;
+	b=FVgh+RFuTrfODMc34N90AxLvxu/bueUZYTXfpbDGx+mcxdD0Un1X0BhWWp01S8h/Z
+	 sLGUhXhd41xhoVJzX/O6gQxMdbti64cSIQzFy1RvxVHV9a4zl8VXaSqIcjTb8kuf1y
+	 gahJ0DiB7Y5b6udQUjH8qgLH4GQK4IzDqUqt9iE8=
+X-SMAIL-HELO: lxu-ped-host..
+Received: from unknown (HELO lxu-ped-host..)([111.198.231.89])
+	by sina.com (10.54.253.33) with ESMTP
+	id 6AA408BE000017B2; Fri, 11 Sep 2026 21:57:23 +0800 (CST)
+X-Sender: eadavis@sina.com
+X-Auth-ID: eadavis@sina.com
+Authentication-Results: sina.com;
+	 spf=none smtp.mailfrom=eadavis@sina.com;
+	 dkim=none header.i=none;
+	 dmarc=none action=none header.from=eadavis@sina.com
+X-SMAIL-MID: 9867866685322
+X-SMAIL-UIID: 4528D04178E4406AB92BBF8A37E9D359-20260911-215723-1
+From: Edward Adam Davis <eadavis@sina.com>
+To: syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com
+Cc: amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
+	idryomov@gmail.com,
 	linux-kernel@vger.kernel.org,
-	Yogesh Gaur <yogeshgaur.83@gmail.com>,
-	syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com
-Subject: [PATCH 2/2] ceph: don't keep a mon_addr= that failed to parse
-Date: Fri, 11 Sep 2026 19:01:10 +0530
-Message-ID: <20260911133110.2218-3-yogeshgaur.83@gmail.com>
-X-Mailer: git-send-email 2.55.0.windows.5
-In-Reply-To: <20260911133110.2218-1-yogeshgaur.83@gmail.com>
-References: <20260911133110.2218-1-yogeshgaur.83@gmail.com>
+	slava@dubeyko.com,
+	syzkaller-bugs@googlegroups.com,
+	sage@newdream.net
+Subject: [PATCH] ceph: reject create client if no monitor
+Date: Fri, 11 Sep 2026 21:57:18 +0800
+Message-ID: <20260911135718.864217-1-eadavis@sina.com>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <6aa30f2a.f81106d8.2ab401.0013.GAE@google.com>
+References: <6aa30f2a.f81106d8.2ab401.0013.GAE@google.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -81,61 +57,54 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-ceph_parse_mon_addr() stores the string in fsopt->mon_addr before handing
-it to ceph_parse_mon_ips(), and then returns that function's error. So
-after a mon_addr= that does not parse, fsconfig() reports the failure but
-the mount context keeps the rejected string.
+From: Edward Adam Davis <eadavis@qq.com>
 
-That matters because ceph_get_tree() uses fsopt->mon_addr as the "monitor
-addresses were supplied" test:
+During the resolution of monitor addresses, the failure to resolve the
+server name [1] resulted in no available monitors (i.e., the num_mon
+value in ceph_options was 0).
 
-	if (fsopt->new_dev_syntax && !fsopt->mon_addr)
-		return invalfc(fc, "No monitor address");
+This triggered the issue [2] when joining the Ceph cluster.
 
-Userspace is free to ignore the error from fsconfig(FSCONFIG_SET_STRING)
-and go straight to FSCONFIG_CMD_CREATE. The check then passes on a value
-that was rejected, and the mount continues with ceph_options::num_mon
-still 0 - which is how syzbot reached the BUG_ON() in pick_new_mon()
-fixed by the previous patch.
+Before creating the client, if the number of monitors specified in the
+options is invalid, the client creation process is aborted.
 
-Parse first and commit only on success. A failed mon_addr= now leaves any
-previously accepted value in place instead of replacing it with one that
-does not parse.
+[1]
+libceph: resolve '127.0.0.' (ret=-3): failed
 
+[2]
+kernel BUG at net/ceph/mon_client.c:211!
+Call Trace:
+ ceph_monc_open_session+0x46/0x60 net/ceph/mon_client.c:534
+ __ceph_open_session+0x135/0x590 net/ceph/ceph_common.c:798
+ ceph_real_mount fs/ceph/super.c:1173 [inline]
+ ceph_get_tree+0xd98/0x1fd0 fs/ceph/super.c:1362
+
+Fixes: 16725b9d2a2e ("ceph: super.c")
 Reported-by: syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com
 Closes: https://syzkaller.appspot.com/bug?extid=1dbed5969931c19d3eb5
-Fixes: 7b19b4db5add ("ceph: new device mount syntax")
-Assisted-by: LLM
-Signed-off-by: Yogesh Gaur <yogeshgaur.83@gmail.com>
+Tested-by: syzbot+1dbed5969931c19d3eb5@syzkaller.appspotmail.com
+Signed-off-by: Edward Adam Davis <eadavis@qq.com>
 ---
- fs/ceph/super.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+ fs/ceph/super.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 72935f665f11..9e0aee8f33ff 100644
+index 72935f665f11..0f20d6c5e4bd 100644
 --- a/fs/ceph/super.c
 +++ b/fs/ceph/super.c
-@@ -394,13 +394,18 @@ static int ceph_parse_mon_addr(struct fs_parameter *param,
+@@ -818,7 +818,11 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+ 					struct ceph_options *opt)
  {
- 	struct ceph_parse_opts_ctx *pctx = fc->fs_private;
- 	struct ceph_mount_options *fsopt = pctx->opts;
-+	int ret;
+ 	struct ceph_fs_client *fsc;
+-	int err;
++	int err, num_mon;
 +
-+	ret = ceph_parse_mon_ips(param->string, strlen(param->string),
-+				 pctx->copts, fc->log.log, '/');
-+	if (ret)
-+		return ret;
++	num_mon = opt->num_mon;
++	if (num_mon == 0 || num_mon > CEPH_MAX_MON)
++		return ERR_PTR(-EINVAL);
  
- 	kfree(fsopt->mon_addr);
- 	fsopt->mon_addr = param->string;
- 	param->string = NULL;
- 
--	return ceph_parse_mon_ips(fsopt->mon_addr, strlen(fsopt->mon_addr),
--				  pctx->copts, fc->log.log, '/');
-+	return 0;
- }
- 
- static int ceph_parse_mount_param(struct fs_context *fc,
+ 	fsc = kzalloc_obj(*fsc);
+ 	if (!fsc) {
 -- 
-2.55.0.windows.5
+2.43.0
 
