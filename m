@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0A3B3F6C55;
-	Mon, 14 Sep 2026 13:27:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9C8A47124E;
+	Mon, 14 Sep 2026 13:36:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789392428; cv=none; b=kdJCq4qpxRITy4f1ZndGuHbBnlFfxv1CHM3wL+mWRlUSHokXQFT0JONXJMvOikveCjlKKNnIdaOMDT3ScSXMgKmG/B5W6lFHjTuwpbt6T1VzLviIcWalIxt1XjJK8MpDUKowC/X6xN77Es6E2Lo80ylX4bhDec/X3dxJRj+MG1o=
+	t=1789392992; cv=none; b=Guc9eBVtuPXWWnvBrjNJmJBsAQ+n+cqSJoaBV4zdiVaRSEoKQiXgKet2chE5ddBv1sQu0ofMV46V9dvKK87BBDItnSArLN8LHjpU9gP0mEpkLQLcEobSFxDC0BGkwz73XJWzaa4pFyvNY1JYQ5SmVEJb8trnNiaualkKtCgOPe4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789392428; c=relaxed/simple;
-	bh=8INRKH2VRsUzVdernR3FNVDsQ225bILO96icfCTmJZg=;
+	s=arc-20240116; t=1789392992; c=relaxed/simple;
+	bh=dQC2lGVoba9+iHXvhR3+Q5cT9TWqGtd1Pt2k5/nMw9k=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=C4GuJrde1X7C9nK1cFLsMkC1xB/r0PQdrtsdM0rZGOTApOEHP7MUcvTlL7YR3wJdCHMGKhaRMe8tJUfDJS/sAkQtRCLRFjFFeaRLDS2Trx0yd92g6OxGLXOW+0K2+VpPXxoCbPqIvMCIvVXIdGJvbzwjK3NpPwhiSEj8LWUNCwU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RM84QL+o; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=Yu7H/ICbYwi2CzHclKBykDabIMzASAPQud0xltIBEprxjyjIFDzAiDVjhfqEtsrCy9Vn/1hKyZv92MH4KV110z9xFcpcZGNjbrzd87niYh9HNIxsFMH7231orzjSkteALeGuiqTaPz2N8waKyzIYH54D/8Y3VzqCKXoiLk+mxqU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CbRqgriI; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RM84QL+o"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4D871F00898;
-	Mon, 14 Sep 2026 13:27:00 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CbRqgriI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3DEF31F000FF;
+	Mon, 14 Sep 2026 13:36:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789392427;
-	bh=NpRwt7i/NEaYzQzVZpXNFvHSKbVAP8S8q6HFwAhP4SE=;
+	s=k20260515; t=1789392990;
+	bh=Xz1lKKAPTU49kJE/WKFp+pM2D18qghdO/ykaxL8bDYI=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=RM84QL+ofuLT8RnZxRCOTmGDby/HILSF7gI3BLkavXarGVjZVGkZbFv2ZE/xklBzo
-	 IYb6n0Yhq4hHj1tpt1f94HTkNr7MoBOPWNBkMKtHJ++0ZB+5IQT1rs1zWQJq1KxoxR
-	 w6NzOEsTtrnTfGdk7Os6BO4v4ovEMPVwyyfQoTltJSIoVDYTxMsE+g02X3PQkW3BSp
-	 5CVo2Pw2F50LICzm9KMOgLIbHIOVsdd1SnoxT31sj/CFkQpQYp49Ji0qy4zIZhO2zG
-	 IYRbL5bWln/utqSRWCr8FWtAjbDMYZaXwce501f9+8Y38DpYHdk1T9EMCCizwdS3cG
-	 09xVKy+80x49A==
-Message-ID: <29dd1adf-4d5e-4ac2-9df3-9174d4ced02d@kernel.org>
-Date: Mon, 14 Sep 2026 15:26:56 +0200
+	b=CbRqgriIm2+dHG7z6Akep3ysV1FyvxsE2dnAwFVmaoQQHtS5nlrG0D7rbFVWtzUoC
+	 K4kbWPgrM7PKtYOvf0MVr8HkY5u74RMXRBXQGbMazI+LLLvP+OnHmDOtATrBLYtiwt
+	 YV5N6bYLBsWjS+INkT1q9S/FfLMqFUdJhrvRLX0Mn8i6wM78b94MDbNesfrrio4IB9
+	 wlMOEJunVKOV9fu8xZqa2FVKfn2VOZUE0e39ujABM/NNfy+31kj/QhRxFZM299eFjx
+	 NMExfhQTHbGkO9gi7GzeJhfgmP9LUPL2WnBBvO+H6JcAWg4Pv9Ltj8wmL8mhd9PMJf
+	 L/NFO+JlD1uNw==
+Message-ID: <379c3f9a-6a07-4128-b776-1a0d17b674c3@kernel.org>
+Date: Mon, 14 Sep 2026 15:36:17 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -35,7 +35,8 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 12/16] ceph: replace PagePrivate() with page_private()
+Subject: Re: [PATCH v4 15/16] treewide: remove PagePrivate() and PG_private
+ from comments and docs
 To: Zi Yan <ziy@nvidia.com>, "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  Andrew Morton <akpm@linux-foundation.org>,
  Muchun Song <muchun.song@linux.dev>, Lorenzo Stoakes <ljs@kernel.org>,
@@ -51,9 +52,13 @@ To: Zi Yan <ziy@nvidia.com>, "Matthew Wilcox (Oracle)" <willy@infradead.org>,
  Shakeel Butt <shakeel.butt@linux.dev>, Kairui Song <kasong@tencent.com>
 Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org,
  Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
- Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org
+ Viacheslav Dubeyko <slava@dubeyko.com>, Trond Myklebust
+ <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>,
+ Richard Weinberger <richard@nod.at>, Zhihao Cheng <chengzhihao1@huawei.com>,
+ ceph-devel@vger.kernel.org, linux-nfs@vger.kernel.org,
+ linux-mtd@lists.infradead.org
 References: <20260913-remove-pg_private-v4-0-848550f7574e@nvidia.com>
- <20260913-remove-pg_private-v4-12-848550f7574e@nvidia.com>
+ <20260913-remove-pg_private-v4-15-848550f7574e@nvidia.com>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -100,24 +105,42 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <20260913-remove-pg_private-v4-12-848550f7574e@nvidia.com>
+In-Reply-To: <20260913-remove-pg_private-v4-15-848550f7574e@nvidia.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 9/14/26 04:24, Zi Yan wrote:
-> PagePrivate() is going to be removed along with PG_private and its
-> implementation is the same as page_private().
+> PG_private and PagePrivate() are no longer used. Adjust related comments
+> and documentations to refer to page/folio->private instead.
+> 
+> hugetlbfs_reserv.rst is outdated and left unchanged. It should be
+> rewritten.
 > 
 > Assisted-by: LLM
 > Signed-off-by: Zi Yan <ziy@nvidia.com>
 > To: Ilya Dryomov <idryomov@gmail.com>
 > To: Alex Markuze <amarkuze@redhat.com>
 > To: Viacheslav Dubeyko <slava@dubeyko.com>
+> To: Trond Myklebust <trondmy@kernel.org>
+> To: Anna Schumaker <anna@kernel.org>
+> To: Richard Weinberger <richard@nod.at>
+> To: Andrew Morton <akpm@linux-foundation.org>
+> To: David Hildenbrand <david@kernel.org>
+> Cc: Zhihao Cheng <chengzhihao1@huawei.com>
+> Cc: Lorenzo Stoakes <ljs@kernel.org>
+> Cc: "Liam R. Howlett" <liam@infradead.org>
+> Cc: Vlastimil Babka <vbabka@kernel.org>
+> Cc: Mike Rapoport <rppt@kernel.org>
+> Cc: Suren Baghdasaryan <surenb@google.com>
+> Cc: Michal Hocko <mhocko@suse.com>
 > Cc: ceph-devel@vger.kernel.org
 > Cc: linux-kernel@vger.kernel.org
+> Cc: linux-nfs@vger.kernel.org
+> Cc: linux-mtd@lists.infradead.org
+> Cc: linux-mm@kvack.org
 > ---
 
-Reviewed-by: David Hildenbrand (Arm) <david@kernel.org>
+Acked-by: David Hildenbrand (Arm) <david@kernel.org>
 
 -- 
 Cheers,
