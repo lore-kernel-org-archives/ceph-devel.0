@@ -1,127 +1,110 @@
-Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BADB33BB57;
-	Mon, 14 Sep 2026 04:21:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.50.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A94BF340406
+	for <ceph-devel@vger.kernel.org>; Mon, 14 Sep 2026 05:34:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789359701; cv=none; b=YoKTO25J78SgDdD0B8ynYQm7GTb0jIBxBpF12z6fQtxXJHtRv5d/B/zN+ivtEL4on80KNkuGOC2IlXgRHdsNNCTjVlHUmXOluZHvja40ftozplkkE1FgC/PfbZbEluCs6c09U5pDVTF+VnI/1qlTV1Fo4jds9oiamb3tV5pBM9c=
+	t=1789364045; cv=none; b=WL0YaSsVAnzobrVIlSKiRmeGklrksyecqnhfCOCzW6eIyQrliy3+pp61i4hmAhTqf+EEg0HyZ/s2J+45/D3XFIpso5uNCyArISA1z4JZDT0klYCt4V+OcjJ9oKVWclDPUqumIH+l5iajPvvEWfOIR4S+v64LlYAwefeA601pFjY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789359701; c=relaxed/simple;
-	bh=5yBImpPhXxVUThXrTXYsYs0uHEPA90uyj7jZucucxoA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IJpIFWEeEQBbGDfBYE8HItsPHn5Bc+nOAcgIJIKzTdCgW2KxhMIiA05mkKJcKxxe+gGUJvRwnuW04utsLpN6VxkYNfXdQ+RmNDcCDja81DeO7R3DSiQK0XYuGk4qnkT5ZkBAZqRWW4dNM2psZ8WCkFDWknLNXH81wOJ3l52Am/U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=pass smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=VHq/c8Pp; arc=none smtp.client-ip=90.155.50.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1789364045; c=relaxed/simple;
+	bh=inmEUQN4fUOcT+nRsjssmyjioe2I/qMOERdCK2sckQE=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=nMRPz9Y51b0an9pVwz8/c2nPcR03bRW6mcYFhNb836xwhpNpQNoAp/ImZYP8aIdmd0fGbNNoG6DVbCpmOJXJw7xmLzcd7iSX7VCD2SxDayDwBGqJD8T8ke10i5O622eIZ2S8UuIJC22gckco8vZ0Gy/9tIpfDJfP3jlS66hlKvg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=edyaDpE7; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=MnZ0z/sZ; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="VHq/c8Pp"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=XIa/QTT2Vtv8NiYChAuw57Ae+l0UAwkEY31SNMwQavs=; b=VHq/c8Pp7UCdPy63XwI1Y7/evy
-	Zs6wNzMUH3y9lsWgsWNb5RSGYeSQu3+dwRZdgXhGjQadm2skLDAn/gsZQSr0RPAMMeECDGpa+etFJ
-	GZ9W0qUhgJ+QpqD56J7NZ5uRTrraPD2HDAatD107Dp3uDh0n+iOUAQepIYxNbT07CT1OivKUu4rqR
-	9T7pMp18HVSaFbknP5sOsW0VTb6JH/cNVnoDNqHZ/wAn8VlL9cIRO8bUeAaRAYVhxkupw1SgasBjf
-	4D0IoMEvGnWlzdIMpEsme0E/QLtp6CUPuirl9Z1VPsWGxuq6MgoCtKLvy6o4mAhIx6zXHL2D24MjY
-	lZwDMIbg==;
-Received: from willy by casper.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1x5yBr-00000008huW-1WeH;
-	Mon, 14 Sep 2026 04:21:11 +0000
-Date: Mon, 14 Sep 2026 05:21:11 +0100
-From: Matthew Wilcox <willy@infradead.org>
-To: Zi Yan <ziy@nvidia.com>
-Cc: David Hildenbrand <david@kernel.org>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Muchun Song <muchun.song@linux.dev>,
-	Lorenzo Stoakes <ljs@kernel.org>,
-	"Liam R. Howlett" <liam@infradead.org>,
-	Vlastimil Babka <vbabka@kernel.org>,
-	Mike Rapoport <rppt@kernel.org>,
-	Suren Baghdasaryan <surenb@google.com>,
-	Michal Hocko <mhocko@suse.com>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Nico Pache <nico.pache@linux.dev>,
-	Ryan Roberts <ryan.roberts@arm.com>, Dev Jain <dev.jain@arm.com>,
-	Barry Song <baohua@kernel.org>, Lance Yang <lance.yang@linux.dev>,
-	Usama Arif <usama.arif@linux.dev>,
-	Gregory Price <gourry@gourry.net>,
-	Ying Huang <ying.huang@linux.alibaba.com>,
-	Alistair Popple <apopple@nvidia.com>,
-	Johannes Weiner <hannes@cmpxchg.org>, Qi Zheng <qi.zheng@linux.dev>,
-	Shakeel Butt <shakeel.butt@linux.dev>,
-	Kairui Song <kasong@tencent.com>, linux-mm@kvack.org,
-	linux-kernel@vger.kernel.org, Minchan Kim <minchan@kernel.org>,
-	Sergey Senozhatsky <senozhatsky@chromium.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Ingo Molnar <mingo@redhat.com>,
-	Arnaldo Carvalho de Melo <acme@kernel.org>,
-	Namhyung Kim <namhyung@kernel.org>,
-	Thomas Gleixner <tglx@kernel.org>, Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-	Mark Rutland <mark.rutland@arm.com>,
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-	Jiri Olsa <jolsa@kernel.org>, Ian Rogers <irogers@google.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	James Clark <james.clark@linaro.org>,
-	"H. Peter Anvin" <hpa@zytor.com>, linux-perf-users@vger.kernel.org,
-	Juergen Gross <jgross@suse.com>,
-	Stefano Stabellini <sstabellini@kernel.org>,
-	Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>,
-	xen-devel@lists.xenproject.org, Eric Biggers <ebiggers@kernel.org>,
-	"Theodore Y. Ts'o" <tytso@mit.edu>,
-	Jaegeuk Kim <jaegeuk@kernel.org>, linux-fscrypt@vger.kernel.org,
-	Oscar Salvador <osalvador@suse.de>, Chao Yu <chao@kernel.org>,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Tal Zussman <tz2294@columbia.edu>, Gao Xiang <xiang@kernel.org>,
-	Jan Kara <jack@suse.cz>, Yue Hu <zbestahu@gmail.com>,
-	Jeffle Xu <jefflexu@linux.alibaba.com>,
-	Sandeep Dhavale <dhavale@google.com>,
-	Hongbo Li <hongbohbli@tencent.com>,
-	Chunhai Guo <guochunhai@vivo.com>, linux-erofs@lists.ozlabs.org,
-	linux-fsdevel@vger.kernel.org, Steven Rostedt <rostedt@goodmis.org>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Matthew Brost <matthew.brost@intel.com>,
-	Joshua Hahn <joshua.hahnjy@gmail.com>, Rakie Kim <rakie.kim@sk.com>,
-	Byungchul Park <byungchul@sk.com>,
-	Axel Rasmussen <axelrasmussen@google.com>,
-	Yuanchu Xie <yuanchu@google.com>, Wei Xu <weixugc@google.com>,
-	linux-trace-kernel@vger.kernel.org,
-	Trond Myklebust <trondmy@kernel.org>,
-	Anna Schumaker <anna@kernel.org>, linux-nfs@vger.kernel.org,
-	Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org,
-	Song Liu <song@kernel.org>, Yu Kuai <yukuai@fygo.io>,
-	Li Nan <magiclinan@didiglobal.com>, Xiao Ni <xiao@kernel.org>,
-	linux-raid@vger.kernel.org, Richard Weinberger <richard@nod.at>,
-	Zhihao Cheng <chengzhihao1@huawei.com>,
-	linux-mtd@lists.infradead.org, Baoquan He <baoquan.he@linux.dev>,
-	Pasha Tatashin <pasha.tatashin@soleen.com>,
-	Pratyush Yadav <pratyush@kernel.org>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Dave Young <ruirui.yang@linux.dev>,
-	Shuah Khan <skhan@linuxfoundation.org>, kexec@lists.infradead.org,
-	linux-doc@vger.kernel.org
-Subject: Re: [PATCH v4 00/16] Remove PG_private by using page/folio->private
- checks instead
-Message-ID: <aqd2N1J3ui1llWWG@casper.infradead.org>
-References: <20260913-remove-pg_private-v4-0-848550f7574e@nvidia.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="edyaDpE7";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="MnZ0z/sZ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1789364043;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=4AOqMHBxhB9mtWXmsLwReqD268EPiROOnBHem+c6dbk=;
+	b=edyaDpE7g0PZGOLZZ935UGlBgJ2Q8XrMj+FYniUFCQRr0OjUhTQ55lLRv9d20/X3PWbtxk
+	AHGE1Hp0yt2jaev3MllwNMtrn50l/aBLWsjVyzpcTF0aG8S4jg9DuGH6EY32NU7vumlBMu
+	gDm8a4VuNG2tWCzHJbxtybP7skquV7U=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-246-87R6IP7RMVuPnqVrjSr_yA-1; Mon, 14 Sep 2026 01:34:02 -0400
+X-MC-Unique: 87R6IP7RMVuPnqVrjSr_yA-1
+X-Mimecast-MFC-AGG-ID: 87R6IP7RMVuPnqVrjSr_yA_1789364042
+Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-530256c61b4so61869751cf.3
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Sep 2026 22:34:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1789364042; x=1789968842; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=4AOqMHBxhB9mtWXmsLwReqD268EPiROOnBHem+c6dbk=;
+        b=MnZ0z/sZWh6GP7gIZMzSjSt0oadpghxtst50oQt/BD9Au+prFTQC6v0faWMq9B1fG5
+         AQ6uG7oBo2grtK01O4PvWmsOEmfcQ9NU9DE9uc5NR5hBEfwvKhB/kJYmkoWqsbGYho4Q
+         0zivQPZ3+jQGuiQ/a5oHn4zrhxYSJJbH5HOOVmxoqlx/sbWEg65AIzrA3RxpQplEATT+
+         sJ9hCvUOtmDCgJy6Tbt49Pf+PrKBVSqWs+Y7dj7jln/AnAoV2N/MwRy0Wwn1Yy08zk+G
+         BwSdLIFK+JgEQkeh9mUwJBsCQ2PQnmQ5BDrZ5MGj+ar+9KCehXr37/csZexZCcQSdxP/
+         yKfA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789364042; x=1789968842;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=4AOqMHBxhB9mtWXmsLwReqD268EPiROOnBHem+c6dbk=;
+        b=XQQlTouXaweosVCWawzYvCgwFemu6Hs6Gd3lv9iqvkBRgpMPuI2+J5NAh7AlJhckh3
+         NwD9XkVPCLyH3ue2PIh1uttXAaQADt/jOIulCPhO1ZvTcLGR1vRpSlMbj4UIT5x16P6U
+         2m54pLzqlNAKh6Mk392Nf5eIkHYXbrYzeASVOZd493pRt+T0jPU6zi/LO8kbczClzOBL
+         GrsEEqjbvNQG0ucDSH211lnxS6ZckU7qoDL9n4qlJcVYzo1bKrJ/effYibKz0dH83dxX
+         Seo7/RNyDEyCpqKoGWAd5NffsWuW4w1cgvMJF12jpSKE0c4+m3+iCQImb1N+QgZ98TZI
+         K4hA==
+X-Gm-Message-State: AFuF++nrAmirTKbkuqFRBt3gjh4G9z0AMBEnAyrg16cxcHkob3JdFrgd
+	H6sVBtZ51gGh2kVjMy8yXXWGPuVkdnJu7NP5rjNzVmM9FXCfEa0Z7bY/84F9VmNKY6yAcu1FgJx
+	tFg7obRg5NcTtUnEwujk8znC7IZlbxrEV2z7wbNadLN6YyfqLzeOxSDyva9Kj+kGIjgPjUIBMsA
+	==
+X-Gm-Gg: AYBFou0ktax7evTW0nimbYNGU3cDrVZYE9BxbYQISHjmX/L89YDK44oY3kinSmr+BsD
+	w25z4uss6BR/pBQtnKg8BWdYahMQiKBep6r8obcdtKWdfN3CE15YQAmeeDgXqcgj5jn9NthfoQH
+	x1zg/JI9xS2LOOdzN1aOP2QM6t5yO16YlEc3ph2h8RskoejSJel4ohhHWJEuIiJUZb8u8281BSv
+	B/wHYRqjOjYXDnH7CKcBrT3X92NLfI1nDCMaF57w+rrXkCXwfh5kG+gl4lwfUopGYoZcAgfdbBw
+	25/iymEYeWWHYHMfYJ7e3Nbf2ckS+5M7fXmXxN20TscLWVGzQ0aVSmCPja7D1WihF/gaSqJgsU6
+	iUOw9DvcHM3MrKEVQIGJS6AhiwWtmAX064kUqq3oM9VuIAD8N80ypGavRfHWJY0Tmk51bb3XOy1
+	bn1iFyjWzaC+T0ug==
+X-Received: by 2002:ac8:7c49:0:b0:530:80ba:effa with SMTP id d75a77b69052e-5310cff8e31mr14488961cf.34.1789364036816;
+        Sun, 13 Sep 2026 22:33:56 -0700 (PDT)
+X-Received: by 2002:ac8:7c49:0:b0:530:80ba:effa with SMTP id d75a77b69052e-5310cff8e31mr14488701cf.34.1789364036379;
+        Sun, 13 Sep 2026 22:33:56 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-530fe289627sm31838851cf.31.2026.09.13.22.33.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 13 Sep 2026 22:33:55 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: ceph: acquire write lock only if snap trace has really changed
+Date: Mon, 14 Sep 2026 05:33:53 +0000
+Message-Id: <20260914053353.132489-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260911185244.1420485-1-max.kellermann@ionos.com>
+References: <20260911185244.1420485-1-max.kellermann@ionos.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260913-remove-pg_private-v4-0-848550f7574e@nvidia.com>
+Content-Transfer-Encoding: 8bit
 
-On Sun, Sep 13, 2026 at 10:23:58PM -0400, Zi Yan wrote:
->       md/md-bitmap: replace PagePrivate() with page_private()
->       buffer: replace page_buffer() with page_private() and delete it
+Hi Max,
 
-Sorry, looks like I screwed up git send-email usage.  I'm proposing
-replacing these two patches wth the three I sent.
+NACK. Please respin.
+
+  1. fs/ceph/snap.c:963: Fast path rejects the global realm, so the write lock is never skipped
+     `get_snap_trace_if_unmodified()` treats a NULL `realm->parent` as
+     "must update".
+     Match `adjust_snap_realm_parent()` and compare `realm->parent_ino`
+     to `ri->parent`.
+
+-- 
+Alex Markuze
+
