@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 446003F825B;
-	Mon, 14 Sep 2026 13:11:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0A3B3F6C55;
+	Mon, 14 Sep 2026 13:27:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789391486; cv=none; b=tev52543Y0tNtm6pZpaAHuOAHliSf+1dN8HnvaNnV9m8b3NnUrzCbh80lrG8+Q3SdWnMt8gn662kDWlVDlg0bJCD9YJWnKt9nYUCrqvUKqfxPqgtkGcdAMv6w6velfDHNi3xn7uU13WNGqQTMvX1QhE9nzkbFc7GWWa8dy565J8=
+	t=1789392428; cv=none; b=kdJCq4qpxRITy4f1ZndGuHbBnlFfxv1CHM3wL+mWRlUSHokXQFT0JONXJMvOikveCjlKKNnIdaOMDT3ScSXMgKmG/B5W6lFHjTuwpbt6T1VzLviIcWalIxt1XjJK8MpDUKowC/X6xN77Es6E2Lo80ylX4bhDec/X3dxJRj+MG1o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789391486; c=relaxed/simple;
-	bh=/Y0M/Mcs/LEvCtigwMR4/2ly4WbaJ5SZOh1m2nSaoHE=;
+	s=arc-20240116; t=1789392428; c=relaxed/simple;
+	bh=8INRKH2VRsUzVdernR3FNVDsQ225bILO96icfCTmJZg=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=lTqk+Fy5+g3wG66izARun98FimdduMrUELrVpJ430f+jGxJtV0oTSPDk4cy5FgBC4LQY1WJ0lUo5dLUvukzJ28TpfNNKl5yLqvZ6tDuGE7q1R/xdDW/8Tadba9KB6buoQGHVknazpTXfhuGiTsArQ2qWvzAIyaH6ZAvAWXfjhac=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CJKJt+kI; arc=none smtp.client-ip=100.103.45.18
+	 In-Reply-To:Content-Type; b=C4GuJrde1X7C9nK1cFLsMkC1xB/r0PQdrtsdM0rZGOTApOEHP7MUcvTlL7YR3wJdCHMGKhaRMe8tJUfDJS/sAkQtRCLRFjFFeaRLDS2Trx0yd92g6OxGLXOW+0K2+VpPXxoCbPqIvMCIvVXIdGJvbzwjK3NpPwhiSEj8LWUNCwU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RM84QL+o; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CJKJt+kI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65F6B1F000FF;
-	Mon, 14 Sep 2026 13:11:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RM84QL+o"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4D871F00898;
+	Mon, 14 Sep 2026 13:27:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789391484;
-	bh=HMEr8VxikyVfU6qvEUZWpmfPP3XV/5sFL4uxF81JxCA=;
+	s=k20260515; t=1789392427;
+	bh=NpRwt7i/NEaYzQzVZpXNFvHSKbVAP8S8q6HFwAhP4SE=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=CJKJt+kIe+hjf+CMIokL8p95jJbZP9ztsmmxzZVo1NFVjWTN+jeWfJ8gkpM0krJT8
-	 Utjnt2XRl1o23z+XgGILQt1K7qKpVap9QKwfAQ3Pbw7Nb1qdciasZLG+bCxX6W8crk
-	 mB6ySTVDkFOyHlizGE9wPiKXzd5ZoeQzUUHq4GK3Az9uzbVLKJs+jLvaWj//Z7s9yJ
-	 26BLl4l4JsAZDlTiLo0F5mBC0VkJP+XRzFeBS+pwUeA7vgq+fA4Y2VALNJVCMnpA9v
-	 1Oa2VfL25A9Rb97s1Afe8qFm5GadjQrDawLd5iUENfXkRUR76/6j5S6iZTu65TIRWr
-	 3oGpW4Ax822zA==
-Message-ID: <066c3b3b-e5a7-4cbb-b077-26c78cfc07ac@kernel.org>
-Date: Mon, 14 Sep 2026 15:10:57 +0200
+	b=RM84QL+ofuLT8RnZxRCOTmGDby/HILSF7gI3BLkavXarGVjZVGkZbFv2ZE/xklBzo
+	 IYb6n0Yhq4hHj1tpt1f94HTkNr7MoBOPWNBkMKtHJ++0ZB+5IQT1rs1zWQJq1KxoxR
+	 w6NzOEsTtrnTfGdk7Os6BO4v4ovEMPVwyyfQoTltJSIoVDYTxMsE+g02X3PQkW3BSp
+	 5CVo2Pw2F50LICzm9KMOgLIbHIOVsdd1SnoxT31sj/CFkQpQYp49Ji0qy4zIZhO2zG
+	 IYRbL5bWln/utqSRWCr8FWtAjbDMYZaXwce501f9+8Y38DpYHdk1T9EMCCizwdS3cG
+	 09xVKy+80x49A==
+Message-ID: <29dd1adf-4d5e-4ac2-9df3-9174d4ced02d@kernel.org>
+Date: Mon, 14 Sep 2026 15:26:56 +0200
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -35,10 +35,9 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 00/16] Remove PG_private by using page/folio->private
- checks instead
-To: Matthew Wilcox <willy@infradead.org>, Zi Yan <ziy@nvidia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>,
+Subject: Re: [PATCH v4 12/16] ceph: replace PagePrivate() with page_private()
+To: Zi Yan <ziy@nvidia.com>, "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+ Andrew Morton <akpm@linux-foundation.org>,
  Muchun Song <muchun.song@linux.dev>, Lorenzo Stoakes <ljs@kernel.org>,
  "Liam R. Howlett" <liam@infradead.org>, Vlastimil Babka <vbabka@kernel.org>,
  Mike Rapoport <rppt@kernel.org>, Suren Baghdasaryan <surenb@google.com>,
@@ -49,53 +48,12 @@ Cc: Andrew Morton <akpm@linux-foundation.org>,
  Gregory Price <gourry@gourry.net>, Ying Huang
  <ying.huang@linux.alibaba.com>, Alistair Popple <apopple@nvidia.com>,
  Johannes Weiner <hannes@cmpxchg.org>, Qi Zheng <qi.zheng@linux.dev>,
- Shakeel Butt <shakeel.butt@linux.dev>, Kairui Song <kasong@tencent.com>,
- linux-mm@kvack.org, linux-kernel@vger.kernel.org,
- Minchan Kim <minchan@kernel.org>,
- Sergey Senozhatsky <senozhatsky@chromium.org>,
- Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@redhat.com>,
- Arnaldo Carvalho de Melo <acme@kernel.org>,
- Namhyung Kim <namhyung@kernel.org>, Thomas Gleixner <tglx@kernel.org>,
- Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>,
- x86@kernel.org, Mark Rutland <mark.rutland@arm.com>,
- Alexander Shishkin <alexander.shishkin@linux.intel.com>,
- Jiri Olsa <jolsa@kernel.org>, Ian Rogers <irogers@google.com>,
- Adrian Hunter <adrian.hunter@intel.com>, James Clark
- <james.clark@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>,
- linux-perf-users@vger.kernel.org, Juergen Gross <jgross@suse.com>,
- Stefano Stabellini <sstabellini@kernel.org>,
- Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>,
- xen-devel@lists.xenproject.org, Eric Biggers <ebiggers@kernel.org>,
- "Theodore Y. Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>,
- linux-fscrypt@vger.kernel.org, Oscar Salvador <osalvador@suse.de>,
- Chao Yu <chao@kernel.org>, linux-f2fs-devel@lists.sourceforge.net,
- Tal Zussman <tz2294@columbia.edu>, Gao Xiang <xiang@kernel.org>,
- Jan Kara <jack@suse.cz>, Yue Hu <zbestahu@gmail.com>,
- Jeffle Xu <jefflexu@linux.alibaba.com>, Sandeep Dhavale
- <dhavale@google.com>, Hongbo Li <hongbohbli@tencent.com>,
- Chunhai Guo <guochunhai@vivo.com>, linux-erofs@lists.ozlabs.org,
- linux-fsdevel@vger.kernel.org, Steven Rostedt <rostedt@goodmis.org>,
- Masami Hiramatsu <mhiramat@kernel.org>,
- Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
- Matthew Brost <matthew.brost@intel.com>,
- Joshua Hahn <joshua.hahnjy@gmail.com>, Rakie Kim <rakie.kim@sk.com>,
- Byungchul Park <byungchul@sk.com>, Axel Rasmussen
- <axelrasmussen@google.com>, Yuanchu Xie <yuanchu@google.com>,
- Wei Xu <weixugc@google.com>, linux-trace-kernel@vger.kernel.org,
- Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>,
- linux-nfs@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>,
- Alex Markuze <amarkuze@redhat.com>, Viacheslav Dubeyko <slava@dubeyko.com>,
- ceph-devel@vger.kernel.org, Song Liu <song@kernel.org>,
- Yu Kuai <yukuai@fygo.io>, Li Nan <magiclinan@didiglobal.com>,
- Xiao Ni <xiao@kernel.org>, linux-raid@vger.kernel.org,
- Richard Weinberger <richard@nod.at>, Zhihao Cheng <chengzhihao1@huawei.com>,
- linux-mtd@lists.infradead.org, Baoquan He <baoquan.he@linux.dev>,
- Pasha Tatashin <pasha.tatashin@soleen.com>,
- Pratyush Yadav <pratyush@kernel.org>, Jonathan Corbet <corbet@lwn.net>,
- Dave Young <ruirui.yang@linux.dev>, Shuah Khan <skhan@linuxfoundation.org>,
- kexec@lists.infradead.org, linux-doc@vger.kernel.org
+ Shakeel Butt <shakeel.butt@linux.dev>, Kairui Song <kasong@tencent.com>
+Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org,
+ Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
+ Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org
 References: <20260913-remove-pg_private-v4-0-848550f7574e@nvidia.com>
- <aqd2N1J3ui1llWWG@casper.infradead.org>
+ <20260913-remove-pg_private-v4-12-848550f7574e@nvidia.com>
 From: "David Hildenbrand (Arm)" <david@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=david@kernel.org; keydata=
@@ -142,23 +100,24 @@ Autocrypt: addr=david@kernel.org; keydata=
  3iyY2Nsd7JxfKu1PRhCGwXzRw5TlfEsoRI7V9A8isUCoqE2Dzh3FvYHVeX4Us+bRL/oqareJ
  CIFqgYMyvHj7Q06kTKmauOe4Nf0l0qEkIuIzfoLJ3qr5UyXc2hLtWyT9Ir+lYlX9efqh7mOY
  qIws/H2t
-In-Reply-To: <aqd2N1J3ui1llWWG@casper.infradead.org>
+In-Reply-To: <20260913-remove-pg_private-v4-12-848550f7574e@nvidia.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 9/14/26 06:21, Matthew Wilcox wrote:
-> On Sun, Sep 13, 2026 at 10:23:58PM -0400, Zi Yan wrote:
->>       md/md-bitmap: replace PagePrivate() with page_private()
->>       buffer: replace page_buffer() with page_private() and delete it
+On 9/14/26 04:24, Zi Yan wrote:
+> PagePrivate() is going to be removed along with PG_private and its
+> implementation is the same as page_private().
 > 
-> Sorry, looks like I screwed up git send-email usage.  I'm proposing
-> replacing these two patches wth the three I sent.
+> Assisted-by: LLM
+> Signed-off-by: Zi Yan <ziy@nvidia.com>
+> To: Ilya Dryomov <idryomov@gmail.com>
+> To: Alex Markuze <amarkuze@redhat.com>
+> To: Viacheslav Dubeyko <slava@dubeyko.com>
+> Cc: ceph-devel@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org
+> ---
 
-For everybody CCed wondering "which patches":
-
-https://lore.kernel.org/r/20260914041830.2072626-1-willy@infradead.org
-https://lore.kernel.org/r/20260914041830.2072626-2-willy@infradead.org
-https://lore.kernel.org/r/20260914041830.2072626-3-willy@infradead.org
+Reviewed-by: David Hildenbrand (Arm) <david@kernel.org>
 
 -- 
 Cheers,
