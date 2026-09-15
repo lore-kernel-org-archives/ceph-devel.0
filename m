@@ -1,74 +1,72 @@
-Received: from mail-pj2-f12.google.com (mail-pj2-f12.google.com [74.125.227.140])
+Received: from mail-ot1-f51.google.com (mail-ot1-f51.google.com [209.85.210.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89C5131ED81
-	for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2026 02:17:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.140
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 277C225B0BB
+	for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2026 04:43:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789438635; cv=none; b=X2L7UFtCicUuH/gywWxmjSv4MitWWi8UcjWEAzj1XMnSITiBzZJ6gWEN/qL0wYGCqw9fCMCniSh6MnhfOV0DH3xojic3O5sLIEXMmwDMvFscEQAj0vsk1hv8CTO6k48iHX1nimA9l4mbOcIsHwUysca5Lf9L6RpxAUYRPMACWNI=
+	t=1789447389; cv=none; b=QvqMYA1NZXt3ZZxT7PRhU119jf7thJ8ETqbbSzI+z97etWX0H4hpe4oVvYqj6KHAbTFe2R+hKN8UWS5/wrCmWFGHpMnGW+WPPFtaTTtpuz5yTF0Hu+nHkRuGNSl2kB26e9v3oNJ9ZDPbb5rFAhx9u3nyQjHOOSGW0+pBFcRZNoM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789438635; c=relaxed/simple;
-	bh=LFGXW1FblkTFshMQGaMsfdUloYw1kZsv9AVoUcndYZ4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aUDh2SIR9aLyIIsljbD+x0LtiyqAYrT8NqQ2sVvjRLxwEv1J35If73SQn9utaNX9M8FsUCNiMfeVX6Wm6aoQY1KJv1E8UYP+O6DRcad06CKR2A6rYman7kUJmPPuqtrkCkMN3CFa+G0fZ3Gdex3ARpTuDVhHzf17IZfgjKU+3XU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=asu.edu; spf=pass smtp.mailfrom=asu.edu; dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b=KOomrOLA; arc=none smtp.client-ip=74.125.227.140
+	s=arc-20240116; t=1789447389; c=relaxed/simple;
+	bh=XaEbPPT+UfU0uKbk1r/NwJlftCrBgRCD9xdXr8NWbWo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=F446aoxWWl5T+BbwidZOHiRHBaP+0R027lP5cJdM+S2yweX1R0rH/I1NfEK3EliGVxU5Z73sZyZXcXJhftvdS1wuZa9gMqJNNtQPw0RfnFhDMVuXz3qhdNGtEvobZ6gf5tMlJp/EkiY5/Q72EFpXVCyCciQa8Z11ntLlX7fwrOU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=asu.edu; spf=pass smtp.mailfrom=asu.edu; dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b=nevQm/Gt; arc=none smtp.client-ip=209.85.210.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=asu.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=asu.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b="KOomrOLA"
-Received: by mail-pj2-f12.google.com with SMTP id 98e67ed59e1d1-398c066106cso2301339a91.1
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Sep 2026 19:17:13 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b="nevQm/Gt"
+Received: by mail-ot1-f51.google.com with SMTP id 46e09a7af769-7f48c750afcso4036757a34.0
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Sep 2026 21:43:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=asu.edu; s=google; t=1789438633; x=1790043433; darn=vger.kernel.org;
+        d=asu.edu; s=google; t=1789447385; x=1790052185; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=D5fN54m/6l1dsqIXpSbFFXJyY0rw5CeeF8vOOOKH6SY=;
-        b=KOomrOLAUgNuIEYrBf0uQzmJ7MWLlSD/pWM8sG9JGIO/xNlCqhN6v81VGo1Yp/+ZWs
-         mWlmXNtSeLC3oE4eZQbKvqRQiNZEak2vxZUy8hlW5qcOopAQC6zZdoZpE5LuYhJ86Fx1
-         pActNagR+JHQYxD6iEI9rn00Nhb4j0v3Hr5iPdxazDie44fsUBU/yaSytLMJPdwEdFiA
-         eP5Bcgzt9toegWMgeGIoQ2GkwITiChJhqhWos9MUQy8w8f0zY+zPLcrvI7q63k900ACS
-         6fax+UE158MqKpkCnbbOIGvSIYYpsSRrUDSnezjHiVtwdeU+MeUurwWNfivVBe8g+07S
-         lAWQ==
+        bh=KecuzaS41v7LwLmE55yOH2pgb38r5HWPF0qMCrWrWdM=;
+        b=nevQm/GtUSnCLtD4uQDG47IfzExp6G4wl/QBkvQtVEyQBwSsjAtAFim5X7AoNTRJ3e
+         bgN9hQ2O3BI31qBsg6aFW9ZuRREaJVB+nZVecPOk3GezD+yk+7e0tgU1EAuZq/PNhZaN
+         3+UVAqP/mrfHf7ZakI7lPSpvoCgL+qapf3SXhuo550Fqo6Hz2pAOrjMGG+uR81FPYRnm
+         8NKTJucjfRx8Nb1akjZI5okyW41xmKYTPRNuhIe+pheG1d05RUTLfSDqN1J1uv0FxmFg
+         7JoBLagVnueieF3RVsWN6h7iMKxOzA16JePf4gyyGrGKAHVcO0rWwWQBFOO1+6vUABml
+         +LNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789438633; x=1790043433;
+        d=1e100.net; s=20260707; t=1789447385; x=1790052185;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=D5fN54m/6l1dsqIXpSbFFXJyY0rw5CeeF8vOOOKH6SY=;
-        b=FLLoW+SCm0/g2311UnZxdtSz0P8AohDhpBjx+GKf2MANp3HNlizfegIE2elV/lj969
-         jiHG3QU+Fjwsp5aQGZCrxFFMjYv5TQm3CNVPuWZ/svmEDeesbPW64OMrCSy09RrLiXU5
-         vJzUTz0vwE7ZQfFwOAZHcOAHEoKBYifJ0fu9xmmVmYupFw0bN/AN3LHCOxARxNVIO+4W
-         t2fZyr8fB6xrVZ34xxvGbxzxct/lBpNPItyhA7IJF9BkBcqqwwd1tywn3kikw9VNU9xG
-         c87sviLJ4/Q2WnPqAZYfyi1Go+NJEhHIcWNnHhQvNWGjqnICs0iUI084eeYQySqzlaH3
-         5BpQ==
-X-Forwarded-Encrypted: i=1; AKwUvBx5+mRc767cZycfJRFmqHq43sLCBMzyOk0pCjJomSXn/Tq7L1rnDQwPTM/L/001gprHoQtOqmtA6e/y@vger.kernel.org
-X-Gm-Message-State: AFuF++me5q24adbaavf0QYZ1HBwtDMoufXjVvAroVcT/kNXMxjbxmLsO
-	cZEU+Ek6NAjLCjkoC9NyXEYGR66LHjxI/6UdllNL52cOFbkE+Z2Ug3C7d9RCiGjHTA==
-X-Gm-Gg: AYBFou3RcrsSVA7Kxzwtn+zkwIlYxVqicLTHRI5J0VY+CMzKUIOg/6H/Tb7+ecUMk7S
-	uLo7o4o1ZmUoWwqI61KVe7Xurh+XHW5jD/I/fa5URkc9e8S1SBQqBp4oQuP2YWjH8qXJJycxPSW
-	2BTws4uZNIK6/rHDmKPWs1AQh1zHrYtNdcvhHm55OWE6yCmY+UAIuqg9cO9CR5Hhyu9TBSTmeiL
-	aG5Stddwo5t1sVYSJe43TtIPk8ORucrmNEqxvbtFoL3I5OV9Le2QuC437PnE7W0eU4qPVn8Opch
-	Wb7yFwgqc6yU6/G5GgdpR1OVWgdOdnI5EI3Jt/fw3GEdWvARAezc6PwfFPy/pchd03YAvrVGLzw
-	lLxBDCCL3/4qhCcxAt5B/kEAS3uLaS26QN1fYXIWgdg1SaDMZ6dwsJQ2OjeaA8UTbsRO4tWtjKF
-	f975Tt3LbMTTL78KSCiq3ekgjnt7RHTo1rYDhSnA6dwhj7nzblkf1fS7+pda4Kk7v639NLH1wHS
-	W3M+kLAcCZTDuS7nHZsLQd8XGKXeJ5Klq6Jng==
-X-Received: by 2002:a17:90b:534c:b0:39d:f08e:e6e7 with SMTP id 98e67ed59e1d1-39df08f09b2mr9956252a91.9.1789438632963;
-        Mon, 14 Sep 2026 19:17:12 -0700 (PDT)
+        bh=KecuzaS41v7LwLmE55yOH2pgb38r5HWPF0qMCrWrWdM=;
+        b=bxtpc7iHhbRlWDw/DDbw0TEYGZNngJKZa5aDdauT/ijtMhNFVnECj1oyokbSLJPqeK
+         +lsxrPwOUxL50/rL67nj2cgbq6tWXhmmg07NP+oS+stad31y3Arhb+acPU4WaVj9nx1u
+         3vZzjPxQSIurphP7aE/sb1U31VKi9okhOnnOJBFHHfbPauR39sVTnPCDzFAZaVMFejBi
+         zUVBY6fejsWe9yCocpeAUxSSR+7FcRfeultJjOFfEHDDoiBAj1fqlK6ir2UtN3k/QRgf
+         pDf0MgbtbOWgU2RRiBSYBkkuX4KhU5Xh3zZOr8X9s0mn1cpq1E+/EBeUShW3GdGeRb+X
+         RRDQ==
+X-Gm-Message-State: AFuF++nI70RlZagib1DYcSNrUIk5AdER6uhWrbNvJfrxd3gWuJGpyPdK
+	sq4qIPcfHlaQQ6+fRKhRx5Xc2/PyVvAEe42RjyBe46UfzD/+D+DZ1BkA0Qzg6zndtg==
+X-Gm-Gg: AYBFou2RjOpiB7qn63op7oAlErIQ188B0o3wUJ/q6SnSYw3+E8P0P3d+xU57lLqA569
+	4dlroQ+eJ/e9+7grcWb6d4fbGYdrDXs1Cih0Ppdb9rSoq064oAHBg2uzuvSUMhObs5ysbiwUbAl
+	AMjroXW5jQyqE/o5gBJgdI8pYIn++R87hUD2THSUU2jTsYMqD2hYEr3OCeTlvzRX1goEkSFcXGe
+	IykIOU1wnQK4kVkkdnv422fxVQwpa3BvRsgnAy3sCo6rI9d7HiNQfvULYUTNAA/AL1PA0/zk/az
+	QcLAMAll/pl+2G4CagiIgAGBpzpy+goolgLi64UbStzn5hj856bk2PlEMsCrX8V9PllE0dl+CgO
+	BBfizVeSWfaNrh8uVMxZxLdLoms7ROCP2+uHGlfYb/Ujd7wIawWK9fHiq4UHJf8disqsmdixT/C
+	vRGXecbhDNYuifUVIgSYi2JWTkPwjxub9uBDn6PWeVfz/UHJWxUMNzGDn0hPwXPO5pstRy5m0fJ
+	xj8NfiSrbrzR3f4tomtThtyt4rTZxjETNXeTg==
+X-Received: by 2002:a05:6820:f013:b0:6c2:e131:6760 with SMTP id 006d021491bc7-6c54214b322mr3376269eaf.3.1789447384973;
+        Mon, 14 Sep 2026 21:43:04 -0700 (PDT)
 Received: from p1.. (209-147-138-4.nat.asu.edu. [209.147.138.4])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-14390c0be29sm318965c88.9.2026.09.14.19.17.12
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-33bc03778c7sm20750472eec.9.2026.09.14.21.43.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 14 Sep 2026 19:17:12 -0700 (PDT)
+        Mon, 14 Sep 2026 21:43:04 -0700 (PDT)
 From: Xiang Mei <xmei5@asu.edu>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	slava@dubeyko.com,
-	ceph-devel@vger.kernel.org
-Cc: co+f92fbe44e3c6df69@bugs.sh,
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	Xiang Mei <xmei5@asu.edu>,
-	stable@vger.kernel.org
-Subject: [PATCH] ceph: require the dentry lease record to cover struct ceph_mds_reply_lease
-Date: Mon, 14 Sep 2026 19:17:10 -0700
-Message-ID: <20260915021710.386847-1-xmei5@asu.edu>
+	co+b0f93e29183ce737@bugs.sh,
+	Xiang Mei <xmei5@asu.edu>
+Subject: [PATCH] ceph: fix off-by-one NUL termination in decode_encrypted_symlink()
+Date: Mon, 14 Sep 2026 21:43:02 -0700
+Message-ID: <20260915044302.711802-1-xmei5@asu.edu>
 X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
@@ -78,60 +76,51 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-parse_reply_info_lease() reads a 32-bit struct_len off the wire and only
-checks that many bytes are present, without requiring struct_len to cover
-sizeof(struct ceph_mds_reply_lease) (10 bytes).  A malicious MDS can
-declare a shorter record and still get the pointer published: the
-following *p += sizeof(**lease) overshoot is undone by *p = lend, so
-nothing downstream rejects the reply.  ceph_fill_trace() ->
-update_dentry_lease() then reads 10 bytes through that pointer on any
-lookup on a mounted CephFS, running past the end of the message front.
+decode_encrypted_symlink() allocates enclen + 1 bytes but writes the NUL
+terminator at sym[declen + 1] instead of sym[declen].  A malicious MDS can
+report symlink_len == 0 for an encrypted inode, and base64_decode() returns
+0 for a zero-length input, so the store lands one byte past a kmalloc(1)
+allocation.
 
-Require the record to cover the structure, matching the sibling
-parse_reply_info_dir().  A conforming MDS always encodes the full 10
-bytes.
+Terminate at sym[declen], which is always within the allocation.
 
-  BUG: KASAN: slab-out-of-bounds in __update_dentry_lease.constprop.0 (fs/ceph/inode.c:1459)
-  Read of size 4 at addr ffff888026c63d65 by task kworker/0:3/2366
+  BUG: KASAN: slab-out-of-bounds in ceph_fill_inode (fs/ceph/inode.c:996)
+  Write of size 1 at addr ffff888020aad361 by task kworker/0:0/9
   Workqueue: ceph-msgr ceph_con_workfn
   Call Trace:
-   __update_dentry_lease.constprop.0 (fs/ceph/inode.c:1459)
-   ceph_fill_trace (fs/ceph/inode.c:1474 fs/ceph/inode.c:1823)
-   mds_dispatch (fs/ceph/mds_client.c:4229 fs/ceph/mds_client.c:7225)
+   kasan_report (mm/kasan/report.c:595)
+   ceph_fill_inode (fs/ceph/inode.c:996 fs/ceph/inode.c:1277)
+   ceph_fill_trace (fs/ceph/inode.c:1716)
    ceph_con_process_message (net/ceph/messenger.c:1424)
    ceph_con_v1_try_read (net/ceph/messenger_v1.c:1430)
    ceph_con_workfn (net/ceph/messenger.c:1576)
-   process_one_work (kernel/workqueue.c:3396)
-   worker_thread (kernel/workqueue.c:3479 kernel/workqueue.c:3560)
-   kthread (kernel/kthread.c:436)
-   ret_from_fork (arch/x86/kernel/process.c:158)
-   ret_from_fork_asm (arch/x86/entry/entry_64.S:245)
+   ...
+  The buggy address belongs to the object at ffff888020aad360
+   which belongs to the cache kmalloc-8 of size 8
+  The buggy address is located 0 bytes to the right of
+   allocated 1-byte region [ffff888020aad360, ffff888020aad361)
 
-  The buggy address is located 357 bytes inside of
-   allocated 360-byte region [ffff888026c63c00, ffff888026c63d68)
-
-Cc: stable@vger.kernel.org
-Fixes: 4ac4c23eaa38 ("ceph: decode alternate_name in lease info")
-Reported-by: co+f92fbe44e3c6df69@bugs.sh
+Fixes: 79f2f6ad878c ("ceph: create symlinks with encrypted and base64-encoded targets")
+Reported-by: co+b0f93e29183ce737@bugs.sh
 Assisted-by: LLM
 Signed-off-by: Xiang Mei <xmei5@asu.edu>
 ---
- fs/ceph/mds_client.c | 2 ++
- 1 file changed, 2 insertions(+)
+ fs/ceph/inode.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 085ae0cfb5f7..073d9f4a3adb 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -380,6 +380,8 @@ static int parse_reply_info_lease(void **p, void *end,
- 
- 	lend = *p + struct_len;
- 	ceph_decode_need(p, end, struct_len, bad);
-+	if (struct_len < sizeof(**lease))
-+		goto bad;
- 	*lease = *p;
- 	*p += sizeof(**lease);
- 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index d52e2b389e0b..79c4409f183e 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -993,7 +993,7 @@ static int decode_encrypted_symlink(struct ceph_mds_client *mdsc,
+ 		kfree(sym);
+ 		return -EIO;
+ 	}
+-	sym[declen + 1] = '\0';
++	sym[declen] = '\0';
+ 	*decsym = sym;
+ 	return declen;
+ }
 -- 
 2.43.0
 
