@@ -1,172 +1,121 @@
-Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B2E53876BB
-	for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2026 21:40:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789508441; cv=none; b=sQxNDLb+nHQIoH4Hn2YmwzwjqMDUPpLcxT5kYkCziHtdu4c0v1vapjyfG8yiizoacdSRUi2D0NMTe5xeV40jXWRODuYROEGBbLtIXJ0kYmTrHyRVQuOsjOTUH73qf6rpxftUhjq2N5SkOY/3u09Ep3Iyt0clxSq9on+mAtsZIWc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789508441; c=relaxed/simple;
-	bh=3vMP89IgAq10Nq+Ss39mGCvVdYNolsX9+u7Nd5404Pk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ldsAdAPMr7tpJsiFly+9RphXh99HLjqeDPU5WU5+crg0rS8hDYfl4IzrYeuUqn0jca/fwsvjayKEPo5gflCRW4wB2JrkDD0QBo3Kcg8qciGWkOmSPcCq+1EJg9mpsUtR3hMycdj3tA2yw9twcrzhf5guQ+G3orUeSOBPNgrVumw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=asu.edu; spf=pass smtp.mailfrom=asu.edu; dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b=N/SkJXHy; arc=none smtp.client-ip=209.85.214.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=asu.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=asu.edu
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E02983DB328
+	for <ceph-devel@vger.kernel.org>; Thu, 17 Sep 2026 08:37:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=170.10.133.124
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789634239; cv=pass; b=M6sRwJO1H2jRLRp2dYPng4hR7qHR3H7CJwe/kvUFY2BEyEYB0J7I9JVh5FDPZZcCRUo7NgRfS4YMD6npD5EgCW4yMzu11Q3e+V82lyMz5t+X8SQ90OF9l6eQr8UcgdWfzM5ZS5BOvvtW6GHQ4S2iDJJVccbCCrnWt9tOi7GHXFo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789634239; c=relaxed/simple;
+	bh=Urn5Ng9z6dNaZ0WRNEPP94QqBI/b5cPB4/z1cIItuTM=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Content-Type; b=L+LrLVvxLNc1b57VGb7AFAk4Qer9Je5fhHWnUz4y8jlu6M/pE15vEu3WyS+eNxBTlBsUq9Qw5Ip4mJ9qncaEqeKh7fZ4nwH2oHZMu6MPcKa1j0TNq4DYCO6DzykbtZZ0E8p/0T8SJUske3jLcn05Wjr0P2HoFL600DFVxieSbwo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VgstTtIf; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=U6JadtfE; arc=pass smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=asu.edu header.i=@asu.edu header.b="N/SkJXHy"
-Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-2dd1dcdcf95so12601545ad.1
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Sep 2026 14:40:39 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VgstTtIf";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="U6JadtfE"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1789634224;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:mime-version:mime-version:content-type:content-type;
+	bh=Urn5Ng9z6dNaZ0WRNEPP94QqBI/b5cPB4/z1cIItuTM=;
+	b=VgstTtIfydApeIgQYd65P+XQqKOe4VkyMfb8w6a/1fMR30hanllmyGdOktxbcEDx5DDWgz
+	Wp6w3ZG3sCcx7J2OCngzQ7ynuu/l1+wA16qeIUXH9WQFZLAje8935p1/KrRpja71XCv9if
+	ZqXz19bTxpmdX3i0yBNj/rLlrACb7Uo=
+Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com
+ [209.85.208.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-482-H897kRk-M5OGtnqhGMJAuQ-1; Thu, 17 Sep 2026 04:37:00 -0400
+X-MC-Unique: H897kRk-M5OGtnqhGMJAuQ-1
+X-Mimecast-MFC-AGG-ID: H897kRk-M5OGtnqhGMJAuQ_1789634219
+Received: by mail-ed1-f71.google.com with SMTP id 4fb4d7f45d1cf-6a18e266026so660092a12.3
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Sep 2026 01:36:59 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1789634219; cv=none;
+        d=google.com; s=arc-20260327;
+        b=MqBLIW6pnA4/bYJJdOTHbusAycGiSFOSRHXxJBsncwWi832ZznDUHbzhMUk3bNiAny
+         SxVd74VjdjG2jOC5kuD0xfqq65OigPFZh0B4Zze63Za6Np4GLsb/BAQBuQTS5s0wAdG/
+         1460xYUMNG3+VXXHe4Cm60MpsC6xRFXOmS11OaJKMf6jJAh91pIGDMDub8Y5jTiwXMEx
+         ecFCbaWqCBZamGYW7VFCzl/zDnCK47aU/F8kf9tJlhcAU/16Gec4ipEN6CrNLB1Mgniw
+         VthF+2vMMnhnE64hXFgN3ypwQnlIe8Do/eun7OTM6z1UjNTRq2eySn86j9fJN4vS5WiY
+         MH4Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=Urn5Ng9z6dNaZ0WRNEPP94QqBI/b5cPB4/z1cIItuTM=;
+        fh=a5jHHmAD6bJhN+pYoxhPe39944wfAFgUWuPDtRoW6RM=;
+        b=JcoFJKe1j4PJaro/3iqRtg6fnfSxguUxyiiP+/1g/dN0W6gYROKPV0LlMn/ISpWj6I
+         /YSQXRHD+0pJrGtHIWbfNrQ5zYQkb7hqpC0f6FsjJx1rNulBkAHDOb1cnk88MPM9wm/M
+         3uxYZhsU5hM/GO2tQB1qTF0E2lO4SayvTo3uAGppUW8O7jaoEIjM+to5kWApMUfBpZxE
+         +cqcWCJ9gwpppHmw+EAerlRx3JLSxlee3najONbsllrZiwM5+Ij7PDRjrxBezCNWAIEd
+         ZXJXaoPwER+XS2isW/cNSrfdO6nCiUunq859KWleZtLYdWTMwz1YW+cBAmbVan/XkUHy
+         g1aQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=asu.edu; s=google; t=1789508438; x=1790113238; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=+c8xCF6msCY4/3EPPq3dq+wZSxF7xobbUNc2NOhYkXM=;
-        b=N/SkJXHyDCLRfE4hjeyQRwz6Kg+vG35x52LvhN70VuJ524O8jZodMFxV5ZLkfl2RvC
-         ZzkRqqBZnM3lSzY4/wvQ2wbFBBMSSlkAWYfJbLa20q10ekK8fuXAK8s6hPrjQbgF/134
-         D1umsx1ukt3dLIrD6TKVoOVwYaIT9+hWkIAqbJOj1W8p6LeSEFF5NMMtg08DwhCUkPuU
-         gLPSJc4jk5Q+/6+ptveAJue6l91cRPWeNCrjsj1Z6JVgOWGA6aNCWJLYHuHwy0WVQHvz
-         Wly3gqo7tUI02jgPiXHPxiM/PemsmoHD/kwoIyq+JMYrlaHJOA/PYr+6Q3seJhaua3nT
-         y2dQ==
+        d=redhat.com; s=google; t=1789634219; x=1790239019; darn=vger.kernel.org;
+        h=content-type:to:subject:message-id:date:from:mime-version:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=Urn5Ng9z6dNaZ0WRNEPP94QqBI/b5cPB4/z1cIItuTM=;
+        b=U6JadtfEW3p0I1/13NQDIIn4hp6TCGQ9O1TcfsRG5Wd2p4afdPHRYkG+iASeW0NnTo
+         fisjmaL/3CiPDVUGBD7ksZPAY51V59DFPzSXOsAZ76EXqE0O63fxc/TYrkLkgiXRjlB4
+         mfnxAkEgsj82CTTfT6GUqKRlT7P/uhWQ7bLF1y5wehoNn81T/EGyh8mTJ+a9pgfFm9yv
+         w0m6ym+MeIhut9efNLwMsg9i+yuVWqQ/bqzR7KDUf71HOHb6o93qULkLR2wG276NE2iw
+         WyYpt8/QexqnCEe09qcY17Qw+aMZ0Un6aWHaBBU6Vdh5Ktnv+2HLpNjvgIrbZlhv4aXk
+         5B0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789508439; x=1790113239;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=+c8xCF6msCY4/3EPPq3dq+wZSxF7xobbUNc2NOhYkXM=;
-        b=L1CdVdC9cU2xiyJcv+jIOkNZBVMm1eel64COGhyWRGb49Jvqhd5CyVp1v3G2bXp71l
-         3a3tVq1BG/4BBfaZIg+PpsbVSfSz5yrZvEMGfw6SkdtQxvxKSyHRgaFUsh5VCncjrszq
-         n4ozGhzWG3ZDxkMmyA595ndtxVjVdjXCctlI8qMFfZloxd45KVhDTR0XpZiEplG8mqk5
-         ahcixpZGvKu3Q3ie3MCZMw4cyrFS8d7J5HgV30Fu6+r9EJSUOQ/hoA7SgwugWEmk1TQC
-         27jDlGffa0p/Lzy2o8SzpUK+RB971iRI08qjNFUc6uOrzpi2nWQOUN/E+3M9+NdIsKls
-         GIcA==
-X-Forwarded-Encrypted: i=1; AKwUvBx1lnc9qYnDKb1Msu3C+q6U2yY+94Kudv4KvJ44b23eYUpM9Q6Erih77g51ZXqZ5+VP3lUbfKhVidL7@vger.kernel.org
-X-Gm-Message-State: AFuF++lWW1hH0ZIjLh1jGoZCpoGr/fLOt/BBv1R6Y97RiTdRo+O9+rHT
-	Bd0c+09cc++gddYiHryeNnqpghDq8Pns6d1rj5YHrAXSFdmVhfi+Z5scun++vX1kNQ==
-X-Gm-Gg: AYBFou1SRLRPq8l97OLgvJr7xKqW+FdCRFbdOMZcy6cp36TsgotnBDpSWjO/yZ6gfJR
-	r/U9KGvBAbl6wcHRQ7Q5ebs0gf/gh+d/ASW3nfMuSpNUlDrtJ+koCTQx+u5ZVSI2Wr1X+AU3iRO
-	UpEUi702CbLFJtYPHzpSGOKVLCGLp82EKkB2yBBBg6AqjeVCyK0WGQNKFa8/RWhHNbLeCV9kZkj
-	b2NdiOlBhnNzxLjZc+TehBtHGWXrltrAfr36Qw1YGp8F4n2hTX98XMFkQ38an8L3q51zmDRViM7
-	4exZiTTbTlpZT0Mezezqp6H0f/RoKiyBKt7gOzmsyqI4u/iK7Pg7rZ/3aqQ5VHTVV0fXzr7YMUp
-	DgusIatHO4DS1bnpqO9/fjeY2JS0xanYhtHlsLBmJWloX8KwU9blwrP/DWmJftf0T3lUZVSgmjk
-	RyCcKvDVBV68IRS8UyvmicF7SNK/Z2cxUPZt/n+OSmBcnglwVvfMZuuOPC6KDrN+SlHRvWyDIQH
-	FUMb4Xw2ADyS8pF5vtOD1MwZic04+EUBjLKIQ==
-X-Received: by 2002:a17:902:d58a:b0:2d6:ee34:c043 with SMTP id d9443c01a7336-2dd76519cf2mr74246805ad.11.1789508438632;
-        Tue, 15 Sep 2026 14:40:38 -0700 (PDT)
-Received: from p1.. (209-147-138-4.nat.asu.edu. [209.147.138.4])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-33bf5ad6b9dsm1682223eec.21.2026.09.15.14.40.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Sep 2026 14:40:38 -0700 (PDT)
-From: Xiang Mei <xmei5@asu.edu>
-To: idryomov@gmail.com,
-	amarkuze@redhat.com,
-	slava@dubeyko.com,
-	ceph-devel@vger.kernel.org
-Cc: sage@newdream.net,
-	co+ecaada42f806f629@bugs.sh,
-	stable@vger.kernel.org,
-	Xiang Mei <xmei5@asu.edu>
-Subject: [PATCH] ceph: fix integer overflow in the snap trace bounds check
-Date: Tue, 15 Sep 2026 14:40:27 -0700
-Message-ID: <20260915214027.1415623-1-xmei5@asu.edu>
-X-Mailer: git-send-email 2.43.0
+        d=1e100.net; s=20260707; t=1789634219; x=1790239019;
+        h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=Urn5Ng9z6dNaZ0WRNEPP94QqBI/b5cPB4/z1cIItuTM=;
+        b=y8vhhB4TfcyMNXjv0Q3fCPv+IYYOXaKIdNYx6NtrOIaNlPnqfcVfXchngpa8MnRzob
+         lwPTJebkQldDk+Q2ZfW2BvViyus+DgnzOCbLZUi55p4athyfBYDzz4WnuPMrlmUcvDyE
+         0DVWi3IggL1SrxsThv8L6JHFZzsmGMKw0d6ODHLAeHtgLEIOatGGpLDH5Rih1CbVkAW1
+         bv27PIW+SGJBMljWrH3Vpk2liYXILzPxtmtEb1/mIygiXHNu5zWJeZ8XMdIfUdT5E1zX
+         mDFa3G2aLTJiQkWbZvc+vHSAfHC/uegZDuOtXulOsURz6fFpkJ/B/6hBcgZ1zOwuEMZN
+         yPqg==
+X-Gm-Message-State: AFuF++lEOczrjKX2SkVwsFZLoRQtaVM/fTQm1m1CW6kkPflhSCMl4sJ5
+	3AePbEyz8DFgdQX0TesiQSFhrDwwN0as6yTTqje2UUeaHO5OAHHPOppCZQs9AZkR+sM9ICiCrvH
+	G41xxHWDjUlw9tHoFj6uhh/rasfYqaiXTgCWq2AfJFWErU728Axt3f8LrxBViDlUrEW9O39r0I5
+	WMreE8J9Cxfjf7JpG9v6AvBSzn7A1OCDs346esotKm7OL6Sq2g
+X-Gm-Gg: AYBFou2YaSKOMuEu5bSk59IekWYCWkFt+veQfqDvpanoTbTAckneGEoPJO2KqGJG1hF
+	V/JNUnuFW5ZwrJ92jMoqr++uHr4FLMnfgExo/ffzSihCaaMmWBJJNHS4dhw58jM5REdvapRxHvr
+	TAWXDJst1phyfwGJLmhHYCoSb1v0lY1MSXNY1Ltbubudt7QavrHHWwlDerZHJ06jgYA5WqDUhyE
+	yCH5anC+B29gRc=
+X-Received: by 2002:a05:6402:4144:b0:6a9:948b:5190 with SMTP id 4fb4d7f45d1cf-6aa2241a320mr3855586a12.35.1789634218858;
+        Thu, 17 Sep 2026 01:36:58 -0700 (PDT)
+X-Received: by 2002:a05:6402:4144:b0:6a9:948b:5190 with SMTP id
+ 4fb4d7f45d1cf-6aa2241a320mr3855567a12.35.1789634218449; Thu, 17 Sep 2026
+ 01:36:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Yael Azulay <yazulay@redhat.com>
+Date: Thu, 17 Sep 2026 11:36:46 +0300
+X-Gm-Features: AcwNN1VwCK-klBrVItXjXJm8qtQpyHohyIyRcnNI2iQotnUIh5ijwDEjNPMjQQg
+Message-ID: <CAOCccuC+Z_MPiu5j1D8+yZWfQi0CEH7OiitnNfLnJ0q7nyw84w@mail.gmail.com>
+Subject: [Ceph Tracker] Account Merge / Ticket Reassignment Request (User ID 10351)
+To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-ceph_update_snap_trace() bounds the two encoded snapid arrays that follow a
-struct ceph_mds_snap_realm with sizeof(u64) * (num_snaps +
-num_prior_parent_snaps).  Both counts come straight off the wire as __le32,
-so the addition is evaluated in unsigned int and wraps before sizeof(u64)
-promotes it to size_t: an MDS sending num_snaps = 1 and
-num_prior_parent_snaps = 0xffffffff makes the sum zero and the check
-degenerates to ceph_decode_need(&p, e, 0, bad), which always passes.
-dup_array() then reads num_snaps * 8 bytes past the end of the message
-front, which ceph_msg_new2() allocates at exactly front_len bytes.  An
-unsolicited CEPH_MSG_CLIENT_SNAP reaches this from a malicious or
-compromised MDS with no client-side action, as do the snaptraces carried in
-an MDS reply and in a cap import.
+Hi Ceph Admins,
 
-Compute the length with size_add()/size_mul() so it saturates at SIZE_MAX
-instead of wrapping, in the style fs/ceph/mdsmap.c already uses for
-num_export_targets.
+Could you please assist with merging/reassigning my legacy Ceph
+Tracker account to my active Red Hat account?
 
-  BUG: KASAN: slab-out-of-bounds in dup_array (include/linux/unaligned.h:28 fs/ceph/snap.c:500)
-  Read of size 8 at addr ffff8880102a16c8 by task kworker/1:2/129
-  Workqueue: ceph-msgr ceph_con_workfn
-  Call Trace:
-   dump_stack_lvl (lib/dump_stack.c:94 lib/dump_stack.c:120)
-   print_report (mm/kasan/report.c:378 mm/kasan/report.c:482)
-   kasan_report (mm/kasan/report.c:595)
-   dup_array (include/linux/unaligned.h:28 fs/ceph/snap.c:500)
-   ceph_update_snap_trace (fs/ceph/snap.c:836)
-   ceph_handle_snap (fs/ceph/snap.c:1155)
-   mds_dispatch (fs/ceph/mds_client.c:7234)
-   ceph_con_process_message (net/ceph/messenger.c:1424)
-   ceph_con_v1_try_read (net/ceph/messenger_v1.c:1430)
-   ceph_con_workfn (net/ceph/messenger.c:1576)
-   process_one_work (kernel/workqueue.c:3396)
-   worker_thread (kernel/workqueue.c:3479 kernel/workqueue.c:3560)
-   kthread (kernel/kthread.c:436)
-   ret_from_fork (arch/x86/kernel/process.c:158)
-   ret_from_fork_asm (arch/x86/entry/entry_64.S:245)
-  ...
-  The buggy address is located 0 bytes to the right of
-   allocated 72-byte region [ffff8880102a1680, ffff8880102a16c8)
+Primary (Keep) Account: yazulay@redhat.com
 
-Cc: stable@vger.kernel.org
-Fixes: 963b61eb041e ("ceph: snapshot management")
-Reported-by: <co+ecaada42f806f629@bugs.sh>
-Assisted-by: LLM
-Signed-off-by: Xiang Mei <xmei5@asu.edu>
----
-The same (n + 1) shape exists at fs/ceph/mdsmap.c:289, in the pg_pools
-loop of ceph_mdsmap_decode():
+Legacy Account to Merge/Reassign: yael.azulay (User ID 10351)
 
-	ceph_decode_32_safe(p, end, n, bad);
-	m->m_data_pg_pools = kcalloc(n, sizeof(u64), GFP_NOFS);
-	if (!m->m_data_pg_pools)
-		goto nomem;
-	ceph_decode_need(p, end, sizeof(u64)*(n+1), bad);
+Action Needed: Please reassign all 18 tickets, reported issues, and
+project Developer roles from User ID 10351 to yazulay@redhat.com, then
+lock or disable User ID 10351.
 
-That one is not reachable: n is a signed int, so the only value making
-n + 1 wrap to 0 is -1, and kcalloc(-1, 8) promotes to SIZE_MAX, fails
-check_mul_overflow() in kmalloc_array() and returns NULL, so the decode
-takes goto nomem before reaching the bounds check.  Left alone here
-rather than mixed into a fix for a reachable bug.
+Thank you,
 
- fs/ceph/snap.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 9b79a5eaca93..5ba325aa147c 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -788,6 +788,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
- 	struct ceph_snap_realm *first_realm = NULL;
- 	struct ceph_snap_realm *realm_to_rebuild = NULL;
- 	struct ceph_client *client = mdsc->fsc->client;
-+	size_t snaps_len;
- 	int rebuild_snapcs;
- 	int err = -ENOMEM;
- 	int ret;
-@@ -802,8 +803,10 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
- 	ceph_decode_need(&p, e, sizeof(*ri), bad);
- 	ri = p;
- 	p += sizeof(*ri);
--	ceph_decode_need(&p, e, sizeof(u64)*(le32_to_cpu(ri->num_snaps) +
--			    le32_to_cpu(ri->num_prior_parent_snaps)), bad);
-+	snaps_len = size_mul(size_add(le32_to_cpu(ri->num_snaps),
-+				      le32_to_cpu(ri->num_prior_parent_snaps)),
-+			     sizeof(u64));
-+	ceph_decode_need(&p, e, snaps_len, bad);
- 	snaps = p;
- 	p += sizeof(u64) * le32_to_cpu(ri->num_snaps);
- 	prior_parent_snaps = p;
--- 
-2.43.0
+Yael Azulay
 
