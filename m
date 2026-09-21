@@ -1,91 +1,169 @@
-Received: from m16.mail.163.com (m16.mail.163.com [220.197.31.2])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed2-f35.google.com (mail-ed2-f35.google.com [74.125.228.99])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 007DD45C6E0;
-	Mon, 21 Sep 2026 08:56:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.2
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 833C54A0EF8
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Sep 2026 13:57:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.228.99
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789980994; cv=none; b=Upd9vZhgKP+KnpkdHY8Rvs+MeZCxysz4F+dpd8iJZF2UimS5L4fC5pgK1HKN7iFM/C99wbNtjT4giI4Zskjy4kWBWYSZa1FUe4fK8auRwW89U9aalMAGSu2nYXw5ujxwygbAMyOuCPqJhm0b9MpS/4ZgfVvYC/4nOGMbRja5kS4=
+	t=1789999042; cv=none; b=P25o6Lb4/jMZlXSwg0x5CtKoWfTGNVITBrK/slacmzV78mbR3a2mln9iezmkg701iwYI21BZu/ZhO0QuZDClczEk0OHLBVMeXt2udsX4pGZP6daC5gQapLm4YP749LhYKWp6ZoJqeNKdH2AxidZASY4RFxbC1Wy3bppXzpWHvQA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789980994; c=relaxed/simple;
-	bh=/DxlKT9T7MMO03kSkCLZfgdqBAp21kPuU2laLxaVsHM=;
-	h=Date:From:To:Cc:Subject:Content-Type:MIME-Version:Message-ID; b=aBvwa93LV2DKnw0hyGlJLJbNsV5T0J4a8T3cs6iC6FHEKc9CyqG/HEdVBs2XwplKtx9kN8qSjRt6IUke1Z97EJXX9SPqPFX0EOVe7tDPOUKUczZMskk4v/GZwQts4bZXKV9i9ejaTM8mdjqbybNGqN2/EgY4kxY1LHurClK/8Fk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com; spf=pass smtp.mailfrom=163.com; dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b=eF4sS4wZ; arc=none smtp.client-ip=220.197.31.2
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
+	s=arc-20240116; t=1789999042; c=relaxed/simple;
+	bh=05nQQn1fD5gOEpF/ULLHdZqTcDXLkNhHu9x2ubpJqaw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=QoRh/g2I4kUk6Gcm6UZcsrFYf3P31GjII7OmAPCGGyaH01HTpIMyvEfHOR/KazLuPG4FBlk771iJgEgmK6E2b+czvCwB0HKiymFfaUJEmJbtVSRDFdWuPfHBfxnRbaTSZb5lefV34+qKkV8CqITAZKleO9XkSCiRAk4LAhRQXVs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mzWI9N2G; arc=none smtp.client-ip=74.125.228.99
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b="eF4sS4wZ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
-	s=s110527; h=Date:From:To:Subject:Content-Type:MIME-Version:
-	Message-ID; bh=/DxlKT9T7MMO03kSkCLZfgdqBAp21kPuU2laLxaVsHM=; b=e
-	F4sS4wZG5wntkP1jVrIIg8QwB1v7fF3uoxQrvqrFq90E17d+z1yYuD3ytnR0FugD
-	ut5EY0/Rlyn5moAVaMxN73BdQkoWhV8LJUkwNOpVlETGYv+XZV85GEUlmQxqxL5j
-	IQqZp+7kuIYFn0RxvpCmlHVgDkDJeGqasrlcI6wnHg=
-Date: Mon, 21 Sep 2026 16:56:05 +0800 (CST)
-From: CJ <firefly0158@163.com>
-To: idryomov@gmail.com, jlayton@kernel.org, davem@davemloft.net,
-	kuba@kernel.org
-Cc: ceph-devel@vger.kernel.org, netdev@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [BUG] ceph: WARNING in ceph_con_v1_try_read (process_connect)
-X-Priority: 3
-X-Mailer: Coremail Webmail Server Version 2023.4-cmXT build
- 20260511(2e539873) Copyright (c) 2002-2026 www.mailtech.cn 163com
-X-NTES-SC: AL_Qu2TC/WTv0Et4yibbOkdmEsTju82UcS4ufQl245Xc/sEuADE1wYGfV5FGUX59tmTLwSKmzOZcTJQ8uBIdIhW1puIDMp93j1jxIkbYBwCFQ==
-Content-Transfer-Encoding: base64
-Content-Type: text/plain; charset=UTF-8
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mzWI9N2G"
+Received: by mail-ed2-f35.google.com with SMTP id 4fb4d7f45d1cf-6a9a2b95b72so4851304a12.2
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Sep 2026 06:57:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1789999037; x=1790603837; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ofpT4h/xZOk97T1LnY16xox+YwsLCtjUsNXPXQGc7Q0=;
+        b=mzWI9N2GG3yCh33wQMPJzyAje6/w1azTh4oUjAdlzJOreyc1TK6YMNTV/hQZ9TK3Gd
+         CEyFT6JaVuVjed/fVn+ehu8kPa8HNUOBbo0dKThcMYqAxQ33Sj3C6fOg7tWRzo9WCdYB
+         CgktU7m3qHBLqKFnkA5IBAlERt+FmUYJlBApJNKVhbQFFUR5JGgAq2NbcjsWbRyg6SFr
+         8Cqy4Q2D+SN+vgDtmn38CUCnH3wPIvBSzJNJo61M9aWxru9kd6n65Lm/HaoGXxtsYsZY
+         9ms6vbHcQFg4jHmo+4f1jqR7dpXme2eRW7XmPC1nlYjnriBkw/EB1U5QYlSftufCNk/N
+         jkGA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1789999037; x=1790603837;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=ofpT4h/xZOk97T1LnY16xox+YwsLCtjUsNXPXQGc7Q0=;
+        b=yoAlNBA66TBXFRJKj1tyfQfgQbLdTeohEKxtSDMOsAlOc8gClk0MH0e9Li9AaWUixu
+         QLEVGU/LU5O9VXYJU/BTxXuNW/XgMiPbcfRymtO1A3WUJGtEJq738sZdBhr4kPKLutRF
+         wV+pB61aNBS5j92X2Qzu0FcRWRA3NnUtyHTiKwvrv9aAMfmpU33L2z6M8AFLyU4lIvM9
+         1PHMFGS4rkpRBJp/ldtooN+421wEqUpGBoUFNl7uZAZMW9gmeOpc3cxkTwpXYgPcFOIo
+         +wSMB+G1565WC3VRtI8E7vNj9jnfrqCL3dP44gdQSU1fbefPXmSJl2nafZO5hlwUf9In
+         bW2Q==
+X-Forwarded-Encrypted: i=1; AKwUvBwc2+i/CF1jn+wpHSDnaQuvx0PFA8ykCJAME1dlzDZuB21nyaxn1D3x7r6TLSaRLiJ1SkTsbEn6Pgvd@vger.kernel.org
+X-Gm-Message-State: AFuF++nSNuGR3lIZCsI88Rzzrhbo7mdTMlsmODjwkEJe26UAGhrYrfuv
+	VT833sE8y72VAoNIUStvKZ0RzViEstA0M/AX4LVw6Ua9CDUEdDJlBPQe
+X-Gm-Gg: AYBFou3i2EbzrPR209K+cDZKzjalp0Hrrpgw7NMUcb6mTAnFF+BevNWEQkQUKIJFC00
+	jZzpxol3kH51Kdbx6ankteOd6c17FS/qfnbefoWxvDrsdhQ0ttlmFm+1+YUYUyb5mvQuOujX/vR
+	Yz9WseFD0jr0PY9ftc+fqyY+hGDHMiT3JLcqjwm2gyZINDY9asadvxIQ98V1eYwOqiuigU6GTXm
+	CSbrQ/5NyvnO+Oj56bYkS9Ht/GdZ20BauNPEVAcnJtVuxg5f6EhssDO2+bbJNPm2sjBXLwAmi/p
+	xFydAQFPMVlZ3qlQWtNeJI9McLsOlpXGxEd1cvJPqpFvHKBxYU9yWfOv+6skhaqjuKJszoz1Mlx
+	bCBPTMPpv9MF3fkSTBOfVfllr2MwraZ2KDvRlNDZgPyxn7DmQe7O7F6z25gRVoUem/K62zbZKF+
+	UupiNfvRLd/BCBLmHm1o3NUJKh52lpqI7eU/dVmdJk7WKqKaLzXhSF/QrohbBBj3sEUBn0vWgWb
+	+COGSQaxK0RQ8l8484XtQbpg5+cONHzbP5YRrYQ0V4ekEx//yEVOqX5Q66FDwZL85u0Igt/pZry
+	PG40PPNoFNSpZcFTNrjc2isFWhCvbKAoDyCL
+X-Received: by 2002:a05:6402:210f:b0:6a9:aead:4e98 with SMTP id 4fb4d7f45d1cf-6aa577f5cfdmr8215865a12.1.1789999036894;
+        Mon, 21 Sep 2026 06:57:16 -0700 (PDT)
+Received: from [10.54.182.141] (82-132-213-26.dab.02.net. [82.132.213.26])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6aa67e0d3c5sm4446691a12.22.2026.09.21.06.57.09
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 21 Sep 2026 06:57:14 -0700 (PDT)
+Message-ID: <a8b01e56-bc86-412b-862c-d6a3efef2e6d@gmail.com>
+Date: Mon, 21 Sep 2026 14:57:05 +0100
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Message-ID: <3f6316d7.86ce.1a0c32dfbd6.Coremail.firefly0158@163.com>
-X-Coremail-Locale: zh_CN
-X-CM-TRANSID:cSgvCgD3v1Mm8bBqOEVLAA--.43984W
-X-CM-SenderInfo: piluvw1o1qikqy6rljoofrz/xtbC3QZM-Wqw8SZ60gAA3P
-X-Coremail-Antispam: 1U5529EdanIXcx71UUUUU7vcSsGvfC2KfnxnUU==
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 01/14] dma-buf: introduce initial file I/O
+ infrastructure
+To: =?UTF-8?Q?Christian_K=C3=B6nig?= <christian.koenig@amd.com>,
+ Jens Axboe <axboe@kernel.dk>, Keith Busch <kbusch@kernel.org>,
+ Christoph Hellwig <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>,
+ linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-nvme@lists.infradead.org, linux-fsdevel@vger.kernel.org,
+ io-uring@vger.kernel.org, linux-media@vger.kernel.org,
+ dri-devel@lists.freedesktop.org, linaro-mm-sig@lists.linaro.org
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>,
+ Christian Brauner <brauner@kernel.org>,
+ Andrew Morton <akpm@linux-foundation.org>,
+ Sumit Semwal <sumit.semwal@linaro.org>, Nitesh Shetty
+ <nj.shetty@samsung.com>, Kanchan Joshi <joshi.k@samsung.com>,
+ Anuj Gupta <anuj20.g@samsung.com>, Tushar Gohad <tushar.gohad@intel.com>,
+ William Power <william.power@intel.com>, Phil Cayton
+ <phil.cayton@intel.com>, Jason Gunthorpe <jgg@nvidia.com>,
+ Damien Le Moal <dlemoal@kernel.org>, Alasdair Kergon <agk@redhat.com>,
+ Mike Snitzer <snitzer@kernel.org>, Mikulas Patocka <mpatocka@redhat.com>,
+ Benjamin Marzinski <bmarzins@redhat.com>,
+ Vishal Verma <vishal.l.verma@intel.com>, David Sterba <dsterba@suse.com>,
+ Ilya Dryomov <idryomov@gmail.com>, dm-devel@lists.linux.dev,
+ nvdimm@lists.linux.dev, linux-btrfs@vger.kernel.org,
+ ceph-devel@vger.kernel.org
+References: <cover.1785274111.git.asml.silence@gmail.com>
+ <bc20381e8daf85ac58811c344325d8192cde9d1e.1785274111.git.asml.silence@gmail.com>
+ <181b08be-04bc-4ae9-bb88-15321a82440f@amd.com>
+ <8285ede8-bebb-403a-8a37-b9987cd37a8f@gmail.com>
+ <0113c49a-a364-4df6-9ab4-681c789d9d3b@amd.com>
+Content-Language: en-US
+From: Pavel Begunkov <asml.silence@gmail.com>
+In-Reply-To: <0113c49a-a364-4df6-9ab4-681c789d9d3b@amd.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-CkhpLAoKCkkgYW0gcmVwb3J0aW5nIGFuIGlzc3VlIHRyaWdnZXJlZCBieSBhIHN5emthbGxlciBy
-ZXByb2R1Y2VyIG9uIExpbnV4CjcuMy4wLXJjMi4gVGhlIGlzc3VlIGlzIHJlcHJvZHVjaWJsZSB3
-aXRoIEhFQUQgY29tbWl0CmRmMjkwODA5MGNkYTM2OGIwMWZmNDM3MDlmNTE4OTAwNzZjNTYxNTcu
-CgoKVGhlIHJlcHJvZHVjZXIgY3JlYXRlcyBhIGxpc3RlbmluZyBUQ1Agc29ja2V0LCBjb25uZWN0
-cyBhIGNlcGggZmlsZXN5c3RlbSB0bwppdCB0aHJvdWdoIGZzY29uZmlnKCksIGFjY2VwdHMgdGhl
-IGNvbm5lY3Rpb24gaW4gdGhlIHJlcHJvZHVjZXIncyBvd24KcHJvY2VzcywgYW5kIHRoZW4gd3Jp
-dGVzIGEgY3JhZnRlZCBiYW5uZXIgYW5kIGhhbmRzaGFrZSByZXBseSBpbnRvIHRoYXQKc29ja2V0
-LiBUaGUgcmVwcm9kdWNlciBpcyBwbGF5aW5nIHRoZSBwYXJ0IG9mIHRoZSBwZWVyLCBzbyBpdCBj
-b250cm9scyB0aGUKY29ubmVjdCBzZXF1ZW5jZSBudW1iZXJzIHRoZSBjbGllbnQgc2Vlcy4KCgpX
-aGVuIHRoZSBjbGllbnQgcHJvY2Vzc2VzIHRoZSByZXBseSwgcHJvY2Vzc19jb25uZWN0KCkgY29t
-cGFyZXMgdGhlIGNvbm5lY3QKc2VxdWVuY2UgaXQgZXhwZWN0cyBhZ2FpbnN0IHRoZSBvbmUgaW4g
-dGhlIHJlcGx5IGFuZCBmaW5kcyB0aGVtIGRpZmZlcmVudC4KVGhlIFdBUk5fT04gZm9yIHRoYXQg
-bWlzbWF0Y2ggZmlyZXMsIGluIHRoZSBjZXBoLW1zZ3Igd29ya3F1ZXVlIHdvcmtlcgpydW5uaW5n
-IGNlcGhfY29uX3dvcmtmbigpIC0+IGNlcGhfY29uX3YxX3RyeV9yZWFkKCkuCgoKVGhpcyBsb29r
-cyBsaWtlIGEgcHJvdG9jb2wtY29uc2lzdGVuY3kgY2hlY2sgdGhhdCBpcyBvbmx5IGFibGUgdG8g
-cmVwb3J0IHRoZQptaXNtYXRjaCByYXRoZXIgdGhhbiByZWNvdmVyIGZyb20gaXQuIEEgcGVlciB0
-aGF0IHJldHVybnMgYSBjb25uZWN0X3NlcSB0aGUKY2xpZW50IGRvZXMgbm90IGV4cGVjdCBpcyBl
-eHRlcm5hbCBpbnB1dCwgc28gdHJlYXRpbmcgdGhlIGNvbmRpdGlvbiBhcyBhCmNvbm5lY3Rpb24g
-ZXJyb3IgYW5kIHJlc2V0dGluZyB0aGUgc2Vzc2lvbiB3b3VsZCBiZSBtb3JlIHVzZWZ1bCB0aGFu
-IGEKd2FybmluZy4gSSBoYXZlIG5vdCB3b3JrZWQgb3V0IHdoZXRoZXIgYW55IGxlZ2l0aW1hdGUg
-cmVjb25uZWN0aW9uIHNlcXVlbmNlCmNhbiBhbHNvIHByb2R1Y2UgdGhpcyBtaXNtYXRjaC4KCgpU
-aGlzIGZhaWx1cmUgd2FzIHJlcG9ydGVkIGVhcmxpZXIgYWdhaW5zdCB0aGUgbGludXgtNi4xIGxv
-bmd0ZXJtIHNlcmllcyBhdApodHRwczovL3N5emthbGxlci5hcHBzcG90LmNvbS9idWc/ZXh0aWQ9
-MmM0NTUyMjJiMzhlZjI0YTU2N2MsIGFuZCB0aGUKcmVwcm9kdWNlciBiZWxvdyBpcyB0aGUgb25l
-IGZyb20gdGhhdCByZXBvcnQuIEl0IHN0aWxsIHJlcHJvZHVjZXMgb24gdGhlCnRlc3RlZCBtYWlu
-bGluZSBrZXJuZWwuCgoKUmVwcm9kdWNlcjoKCgpzeXogcmVwcm9kdWNlcjoKVGhlIHJlcHJvZHVj
-ZXIgaXMgdGhlIHByb2dyYW0gYmVsb3csIHdoaWNoIHJlcXVpcmVzIG5vIGxhcmdlIGVuY29kZWQg
-aW1hZ2U6CgoKcjAgPSBzb2NrZXQkaW5ldF90Y3AoMHgyLCAweDEsIDB4MCkKYmluZCRpbmV0KHIw
-LCAmKDB4N2YwMDAwMDAwMDAwKT17MHgyLCAweDFhODUsIEBsb29wYmFja30sIDB4MTApCmxpc3Rl
-bihyMCwgMHg1KQpyMSA9IGZzb3BlbigmKDB4N2YwMDAwMDAwMTAwKT0nY2VwaFx4MDAnLCAweDAp
-CmZzY29uZmlnJEZTQ09ORklHX1NFVF9TVFJJTkcocjEsIDB4MSwgJigweDdmMDAwMDAwMDE0MCk9
-J3NvdXJjZVx4MDAnLCAmKDB4N2YwMDAwMDAwMTgwKT0nMTI3LjAuMC4xOjY3ODk6L1x4MDAnLCAw
-eDApCmZzY29uZmlnJEZTQ09ORklHX0NNRF9DUkVBVEUocjEsIDB4NiwgMHgwLCAweDAsIDB4MCkK
-cjIgPSBhY2NlcHQkaW5ldChyMCwgMHgwLCAweDApCndyaXRlKHIyLCAmKDB4N2YwMDAwMDAwMzAw
-KT0nY2VwaCB2MDI3XHgwMCcvMjc4LCAweDExOSkKd3JpdGUocjIsICYoMHg3ZjAwMDAwMDA4MDAp
-PSIwMWZmZmZmZmZmZmZmZmZmZmYwMCIvMjYsIDB4MWEpCgoKY29uc29sZSBvdXRwdXQ6wqBodHRw
-czovL3Bhc3RlYmluLmNvbS9yYXcvMmlpaEx1WlMKCgprZXJuZWwgY29uZmlnOiBodHRwczovL3N5
-emthbGxlci5hcHBzcG90LmNvbS90ZXh0P3RhZz1LZXJuZWxDb25maWcmeD04NzJjMDQ0NjYxNzk4
-MzNmCgoKS2VybmVsOgoKCkhFQUQgY29tbWl0OiBkZjI5MDgwOTBjZGEzNjhiMDFmZjQzNzA5ZjUx
-ODkwMDc2YzU2MTU3CmdpdCB0cmVlOiBtYWlubGluZQprZXJuZWwgdmVyc2lvbjogNy4zLjAtcmMy
-CnRlc3RlZCB0YWc6IHY3LjMtcmMyIChhbm5vdGF0ZWQgdGFnIG9iamVjdCA1ZTAzNmNlMTJkZTkx
-YzZmZDY3NGRhZDMzYjE2OWM2MTUwYmUyYTdhKQoKCkxldCBtZSBrbm93IGlmIHlvdSBuZWVkIG1v
-cmUgZGV0YWlscyBvciB0ZXN0aW5nLgoKCkJlc3QgcmVnYXJkcywKQ2hhbmdqaWFuIExpdQ==
+On 8/6/26 08:29, Christian König wrote:
+> On 8/5/26 12:59, Pavel Begunkov wrote:
+>> On 8/5/26 09:27, Christian König wrote:
+> 
+>>>> +
+>>>> +    dma_resv_lock(dmabuf->resv, NULL);
+>>>> +    ctx->dev_ops->unmap(ctx, map);
+>>>> +    dma_resv_unlock(dmabuf->resv);
+>>>> +
+>>>> +    dma_fence_put(&fence->base);
+>>>
+>>> You should probably set map->fence to NULL after that.
+>>
+>> The map is freed two lines below, but I can add it as
+>> a defensive measure.
+> 
+> In that case it's ok, I've just haven't seen the kfree(map) below.
+> 
+>> ...
+>>>> +    ret = dma_resv_reserve_fences(dmabuf->resv, 1);
+>>>> +    if (WARN_ON_ONCE(ret)) {
+>>>> +        struct dma_fence *fence = &map->fence->base;
+>>>> +
+>>>> +        dma_fence_get(fence);
+>>>> +        percpu_ref_kill(&map->refs);
+>>>> +        dma_fence_wait(fence, false);
+>>>> +        dma_fence_put(fence);
+>>>> +        return;
+>>>> +    }
+>>>> +
+>>>> +    dma_resv_add_fence(dmabuf->resv, &map->fence->base,
+>>>> +               DMA_RESV_USAGE_KERNEL);
+>>>
+>>> That sequence is clearly incorrect!
+>>>
+>>> The fence must be created after dma_resv_reserve_fences(), otherwise you definately have an illegal memory operation here.
+>>
+>> I'm not sure what you mean, can you elaborate? I only cared about
+>> pre-allocating it to avoid allocations here. We add / signal the fence
+>> only once, no reuse. The map is going to be killed here, and if we
+>> create a new map, it'll have its own fence.
+>>
+>> I can move the dma_fence_init() call here if that makes a difference?
+> 
+> Yeah that is a good start, but you might need a bit more.
+> 
+> Here is a summary of the usual procedure you need to follow when implementing a dma_fence backend:
+> 
+> 1. Allocate your operation object, in this case here it's your mapping I think.
+> 2. Prepare your operation, including all memory allocations.
+> 3. Call dma_resv_reserve_fences() to reserve a fence slot.
+> 4. Allocate and init your dma_fence object.
+
+Looks I forgot it reply here, sorry for that. I killed dma fences in
+v6 in favour of synchronous waiting, it turned to be less trouble even
+outside of these fencing rules as I can rely on dma-resv lock less in
+the code.
+
+-- 
+Pavel Begunkov
+
