@@ -1,146 +1,221 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from fout-b4-smtp.messagingengine.com (fout-b4-smtp.messagingengine.com [202.12.124.147])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4E6755C312;
-	Tue, 22 Sep 2026 15:31:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF0BE40BCB8;
+	Tue, 22 Sep 2026 21:17:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.147
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790091091; cv=none; b=eydvb8VjEs9Uur6DiQznYL9pJbJx2XMCBNuCAbHU/yvl1S8L4wBoCh+qZ613Ltusxt6ZQLOo9f8eY+YqilUetkhK9kjfNGN2JRInRg7GdxW1Ze8i4jvBc4a/qaPO5oIQbZsu6WbuwSfAEhhIg/wSawlWBIdgEmIoYO/MEKpwRdI=
+	t=1790111843; cv=none; b=k1ITHlQ2zl4KHrtPji2klllgwCWNvdcF6nAWk7/FvgfMVjICKXboITFPAirGbNwP3FPJdEDfrrmvPvUwroFOb7Cfe75laWrMT7jjdXgzQ9rkTI5SF4FAFwmqbCwsEbW85vXrrdDTBIg0bHSpQEmTcOjjhgcGrd19BofJ647KedY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790091091; c=relaxed/simple;
-	bh=NALfkOxOZukdaM9bPf10hwBO/x1kAs+vxmEyMf4s694=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GaZYUXX7pLzOKkV97cKsyoTrGWhkL96dOJR5Z+TdCfJtnOp/DDZ06gzxhoAqf6xX+f/e8KH9ydEWNoBCvspeerSfyfccGMYCcDR2DLFshMuFBFys2sBJxfMz1M9ZTFvT8djzeNSp4oDgHYJKzugYRZN5M6h9WX+Tc51KgAbMsuA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oxgbajWA; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790111843; c=relaxed/simple;
+	bh=pu3vMDlMomiPSoJNSyMb2SwHHzd7dOj2/34pD71ks+I=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=P3inwx+iSkBz3vrrlfQKZL2slwmiLN58d+g5CWCQQe3bowBnhruophoxH+69+St7MXG0W4q5HbyEQxI9vnh1BXFGnVMW1lDa+IOOsoXoMpJiQlU22UxctlgDvH5qsHipQv2q3L1AJGmuCWU6XnbjPAEfkg1yWDOYVFMxvVZGUT8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=e2vdmKoI; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=vNUDHWHE; arc=none smtp.client-ip=202.12.124.147
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oxgbajWA"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 971F71F00893;
-	Tue, 22 Sep 2026 15:31:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790091090;
-	bh=VFYj6sjedfWGEBuGl++9heS9zoD83sYWZIxoZFH52Mw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=oxgbajWAx+ewgz3EYGgJPYtZfNNrVy2jiDvlrL0XB6QieOmgNe9oJ8tWYTAmWkd4E
-	 40O1bShYyuGwabzOZg2yryGvTCOWVoLErNmP15TezU6CcK1+IP50a2puK4iDmaw6R3
-	 PCwUfPw/jYwdSq8HtaOBJAU/3KQvk7VOfDVSLU+W6MZTQuGVG14os2s8QuaTXuRpZy
-	 c1E7BQMp5Oh5V6N9yXEOXRU2Ns8Xz5BjaAREZfd68p1jzII0svn4YeEB6D4D+XgUXP
-	 mn6RKCk0xuOhAtFCkmd48wAcJ6k5w8jrTIJhK2olCjTjtXsHqi1z/Ac++TcJ8CKg7E
-	 LVSLUkJaZCs2w==
-Date: Tue, 22 Sep 2026 15:31:25 +0000
-From: Jaegeuk Kim <jaegeuk@kernel.org>
-To: Nanzhe Zhao <nzzhao.sigma@gmail.com>
-Cc: Zi Yan <ziy@nvidia.com>, Qi Zheng <qi.zheng@linux.dev>,
-	Matthew Brost <matthew.brost@intel.com>,
-	Alistair Popple <apopple@nvidia.com>, ceph-devel@vger.kernel.org,
-	Eric Biggers <ebiggers@kernel.org>, xen-devel@lists.xenproject.org,
-	Gregory Price <gourry@gourry.net>,
-	Arnaldo Carvalho de Melo <acme@kernel.org>,
-	linux-fscrypt@vger.kernel.org,
-	Shuah Khan <skhan@linuxfoundation.org>,
-	David Hildenbrand <david@kernel.org>,
-	Suren Baghdasaryan <surenb@google.com>,
-	linux-kernel@vger.kernel.org, Nico Pache <nico.pache@linux.dev>,
-	linux-perf-users@vger.kernel.org,
-	Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Jiri Olsa <jolsa@kernel.org>, linux-fsdevel@vger.kernel.org,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Trond Myklebust <trondmy@kernel.org>,
-	Mark Rutland <mark.rutland@arm.com>, linux-doc@vger.kernel.org,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	Hongbo Li <hongbohbli@tencent.com>,
-	Ying Huang <ying.huang@linux.alibaba.com>,
-	Stefano Stabellini <sstabellini@kernel.org>,
-	Vlastimil Babka <vbabka@kernel.org>,
-	Sergey Senozhatsky <senozhatsky@chromium.org>,
-	Byungchul Park <byungchul@sk.com>,
-	linux-trace-kernel@vger.kernel.org,
-	Lorenzo Stoakes <ljs@kernel.org>,
-	Joshua Hahn <joshua.hahnjy@gmail.com>,
-	Barry Song <baohua@kernel.org>, Kairui Song <kasong@tencent.com>,
-	"Theodore Y. Ts'o" <tytso@mit.edu>,
-	Muchun Song <muchun.song@linux.dev>,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Minchan Kim <minchan@kernel.org>, Lance Yang <lance.yang@linux.dev>,
-	Thomas Gleixner <tglx@kernel.org>, Anna Schumaker <anna@kernel.org>,
-	Pratyush Yadav <pratyush@kernel.org>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-	linux-mtd@lists.infradead.org, Chunhai Guo <guochunhai@vivo.com>,
-	Jonathan Corbet <corbet@lwn.net>, Dev Jain <dev.jain@arm.com>,
-	"Matthew Wilcox (Oracle)" <willy@infradead.org>,
-	Viacheslav Dubeyko <slava@dubeyko.com>,
-	Gao Xiang <xiang@kernel.org>, Wei Xu <weixugc@google.com>,
-	Baoquan He <baoquan.he@linux.dev>,
-	James Clark <james.clark@linaro.org>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Borislav Petkov <bp@alien8.de>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Shakeel Butt <shakeel.butt@linux.dev>,
-	Tal Zussman <tz2294@columbia.edu>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	Oscar Salvador <osalvador@suse.de>, linux-nfs@vger.kernel.org,
-	linux-mm@kvack.org, linux-erofs@lists.ozlabs.org,
-	Mike Rapoport <rppt@kernel.org>, Ian Rogers <irogers@google.com>,
-	Michal Hocko <mhocko@suse.com>, Jan Kara <jack@suse.cz>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Dave Young <ruirui.yang@linux.dev>,
-	Yuanchu Xie <yuanchu@google.com>,
-	"Liam R. Howlett" <liam@infradead.org>,
-	"H. Peter Anvin" <hpa@zytor.com>, Yue Hu <zbestahu@gmail.com>,
-	Rakie Kim <rakie.kim@sk.com>, Richard Weinberger <richard@nod.at>,
-	x86@kernel.org, Ingo Molnar <mingo@redhat.com>,
-	Axel Rasmussen <axelrasmussen@google.com>,
-	Ryan Roberts <ryan.roberts@arm.com>,
-	Pasha Tatashin <pasha.tatashin@soleen.com>,
-	Usama Arif <usama.arif@linux.dev>,
-	Jeffle Xu <jefflexu@linux.alibaba.com>,
-	Namhyung Kim <namhyung@kernel.org>, Juergen Gross <jgross@suse.com>,
-	kexec@lists.infradead.org, Adrian Hunter <adrian.hunter@intel.com>,
-	Johannes Weiner <hannes@cmpxchg.org>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
-Subject: Re: [f2fs-dev] [PATCH v5 00/17] Remove PG_private by using
- page/folio->private checks instead
-Message-ID: <arKfTXizFeTeKYDx@google.com>
-References: <20260920-remove-pg_private-v5-0-bb68b6a21869@nvidia.com>
- <20260922041600.1240429-1-zhaonanzhe@xiaomi.com>
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="e2vdmKoI";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="vNUDHWHE"
+Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
+	by mailfout.stl.internal (Postfix) with ESMTP id 2B99B1D000E5;
+	Tue, 22 Sep 2026 17:16:59 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-02.internal (MEProxy); Tue, 22 Sep 2026 17:16:59 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm1; t=
+	1790111819; x=1790198219; bh=7Hw9YNz2h/EeChhYu1wFGNtUB8DDFUueuj6
+	D+5FuZ4M=; b=e2vdmKoI2UfuzfwbATc6bU8Ld8MbjvDVv+dw1vclRzmToyAKVBR
+	2KY7gh/xXZFSNQyHusw3FmUhZ+NP248DlI2HoV9Kc3jz3aT7J2Itctk+H2gHHccZ
+	Tme2taRtXaqOOPRlRXeNWhPSAqbTtFRntgAOctQyGKgwVKmEjSBmMcYXXlg+3qy2
+	cBaqaBDXWGg9KXolDhjyJiXbNJs0RjIRDnihDAbLI3QKAO71ws7ULvqgcC57BWDG
+	p5G52yy8Da5qYyXToP9PggNL5GFSvpC649mfAYzE97qM02wAHevvLv9T5CQVNSGU
+	lRjqTmgCHkOoxopHPCCNCrOoPoVWI1YBTbQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1790111819; x=
+	1790198219; bh=7Hw9YNz2h/EeChhYu1wFGNtUB8DDFUueuj6D+5FuZ4M=; b=v
+	NUDHWHEu+JUdbP25sSYbFco+D4SF1RJ+3rbflZxNEsCXgylpxbYnterUI6AdC1ra
+	fhYGg1pLKHUHt0Qf//QojF/4rv3+5FAwrUVpQlOmmID3eC7jZgugYMdxBKZczb9l
+	oUGoH+TGQO8kEXBSPPvFiA/6TrMfBbT2mlRBkP8mkPMjamGZ3DbOS29EYv/vpmG2
+	CQ7UFBHtzaDTGO9Y4/SR8z/EW1bw0GEFl3s89RMKcsqeCw+S8CfcVHllcX/+cBNy
+	qJ3kq4TM8ZHcsFwjmAQlbPU0rM2H5EvoFcK/IWJvh03yDJhWp9kMUMjdnXhw55wN
+	D1bg3qrBNvXvSNMe6T7JA==
+X-ME-Sender: <xms:SvCyarGU77S3CAci5EoxCcgJjAG3oxIuQTIrk7A3CxyefH-H5WFl_Q>
+    <xme:SvCyaosJ1KSY__-MsAFHEhVJIAVTK4sdN9J3HBfZIDN5dRtr4YgENCXfKa9U4a8e4
+    2vq3qZDxcifMSEhVbwAxGHXSZJxCFXSHS-3TofNkZghmFQt46G7>
+X-ME-Received: <xmr:SvCyauT_uIOl53YkO5W9ekgR6HfJW_DOCcFp6jm-v3oVqRzro8heL7dJ99q9LRFNEYinkD1W5xDs1XGuzhh1me4HnIbq8b8>
+X-ME-Proxy-Cause: dmFkZTElOiHXUzQGTU4YDPoCB8evvf7R2NnkuH6G4Ttb62lBDPQ+5SKt9LMehyrWNIuN22
+    JEWmjZ9Kpu7u1ILeez51FgSB/iiQ3gHbBkOaNQQJ3E26OK4aQXPIfAM2dYEjcA+xZyrDXg
+    NaV5Q7Z1fqvDnO1h1p+B5NytNVf68qZQq0OYnaN0OXNRsADrWFXUW1+fR27wiMi3FCP64K
+    bp/eUvYZ4BCztLOPyOFirW9uE0JzfO26umPEGPozKQpDcGsU7IZlwWudXLNb8ITj5KtKx0
+    G0rwPGf6UyCCZ1s3hz4uGmk5rQmBVwOpEnqcJjKXOoLQaN5daF2zjioFEor8zvHWI6t5dn
+    YmOkUjaYIBz7BhGqtnpXq1RSvvlEJGxKrl4apispFbK80NYlNPii1grc6U16LGpNtiUAet
+    j+M/VSzcGoVA62DIxxpPbBE+KYRvbAjZ9gzFiAEOrg/XRTXm+CAZezUkft1lrAgbh733H+
+    RrAichRODbywM3j6XaSbu9tadULJzjN8c646FncJujbTh1jzo6k5ac/2LJIm12nCR00rme
+    aXJlK1J/2H+9uuzldWcmmtumojHMeTvqnFN9PGXers+vd2B8XgG0M2HblYmchink4B9ys6
+    r0ZLD3Yog4n98fPtSAMuW/e1CqG3mCu0ubQswatB870R/VpcvwwqVNJ6k0iA
+X-ME-Proxy: <xmx:SvCyalF9rYdrWgS07MDqydeFfGN4KkzMa5s3I8_0f2bZ82pLVhz6eA>
+    <xmx:SvCyagcmUAMsaBwwH_YqvD86Upmr5H9OtKGkfHx-8UFIUsP9vxjpeg>
+    <xmx:SvCyassiejY67mQidkvJIIzCM0PeLzOex2euip1IikcnHXOyPk8v6A>
+    <xmx:SvCyaufPjFCK5Ck1EwclVnNxTU0gevtMrVL8VZ0Nu3grnvVy05LG2A>
+    <xmx:S_Cyah5o4y2QeE_-adwKCQP1aZc9aQtuPuKXaXRvHYXLP1yuJyetLzpW>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 22 Sep 2026 17:16:52 -0400 (EDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260922041600.1240429-1-zhaonanzhe@xiaomi.com>
+From: NeilBrown <neilb@ownmail.net>
+To: "Andreas Gruenbacher" <agruenba@redhat.com>
+Cc: "Alexander Viro" <viro@zeniv.linux.org.uk>,
+ "Christian Brauner" <brauner@kernel.org>, "Chuck Lever" <cel@kernel.org>,
+ "Jeff Layton" <jlayton@kernel.org>, "Jori Koolstra" <jkoolstra@xs4all.nl>,
+ "Mateusz Guzik" <mjguzik@gmail.com>,
+ "Dorjoy Chowdhury" <dorjoychy111@gmail.com>,
+ "Trond Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
+ gfs2@lists.linux.dev, "Ilya Dryomov" <idryomov@gmail.com>,
+ "Alex Markuze" <amarkuze@redhat.com>,
+ "Viacheslav Dubeyko" <slava@dubeyko.com>, ceph-devel@vger.kernel.org,
+ "Paulo Alcantara" <pc@manguebit.org>, "Namjae Jeon" <linkinjeon@kernel.org>,
+ linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ linux-nfs@vger.kernel.org
+Subject: Re: [PATCH v2 03/14] gfs2: simplify atomic_open handling.
+In-reply-to:
+ <CAHc6FU4cD3fb13LE1-HOEnOoUNVdW1N3e892r7rFE9HJfztvhg@mail.gmail.com>
+References: <20260919022441.3305170-1-neilb@ownmail.net>
+  <20260919022441.3305170-4-neilb@ownmail.net>
+  <CAHc6FU4M59nodfn+NCDsr81Wdmvd1Ubw712FF56ekVWfe1+Nuw@mail.gmail.com>
+  <178985655280.37859.6894749467886035489@noble.neil.brown.name>
+  <CAHc6FU4cD3fb13LE1-HOEnOoUNVdW1N3e892r7rFE9HJfztvhg@mail.gmail.com>
+Date: Wed, 23 Sep 2026 07:16:50 +1000
+Message-id: <179011181059.37859.15377924679358209081@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
-On 09/22, Nanzhe Zhao wrote:
-> Hi Zi Yan,
-> 
-> Thanks for the series. The cleanup is a nice help for the f2fs
-> large-folio work -- it removes the page-based private-flag plumbing that
-> my series would otherwise have to carry itself.
-> 
-> My large-folio series v2 [1] can be rebased on top of this series. The
-> only overlap is the PAGE_PRIVATE_* flag helpers, which I can re-express
-> on top of the F2FS_FOLIO_PRIVATE_* names while keeping the
-> f2fs_folio_state indirection.
-> 
-> Jaegeuk, do you have a preference on the ordering here? My personal
-> suggestion would be to review and merge this series first, and I'll
-> rebase on top of it.
+On Mon, 21 Sep 2026, Andreas Gruenbacher wrote:
+> On Sun, Sep 20, 2026 at 12:22=E2=80=AFAM NeilBrown <neilb@ownmail.net> wrot=
+e:
+> > On Sun, 20 Sep 2026, Andreas Gruenbacher wrote:
+> > > Neil,
+> > >
+> > > On Sat, Sep 19, 2026 at 4:31=E2=80=AFAM NeilBrown <neilb@ownmail.net> w=
+rote:
+> > > > From: NeilBrown <neil@brown.name>
+> > > >
+> > > > gfs2 incorrectly returns -EFTYPE for any non-regular when __O_REGULAR=
+ is
+> > > > in force.  A symlink might not be an error, and nfsd needs to know if=
+ a
+> > > > directory was found.
+> > > >
+> > > > Neither this check, or the following check for a directory is needed.
+> > > > Both cases are handled correctly by instantiating the dentry and pass=
+ing
+> > > > it to finish_no_open() - the caller will interpret the type.
+> > > >
+> > > > Signed-off-by: NeilBrown <neil@brown.name>
+> > > > ---
+> > > >  fs/gfs2/inode.c | 17 ++++-------------
+> > > >  1 file changed, 4 insertions(+), 13 deletions(-)
+> > > >
+> > > > diff --git a/fs/gfs2/inode.c b/fs/gfs2/inode.c
+> > > > index f361876c5583..7aa92bb31cf4 100644
+> > > > --- a/fs/gfs2/inode.c
+> > > > +++ b/fs/gfs2/inode.c
+> > > > @@ -738,19 +738,10 @@ static int gfs2_create_inode(struct inode *dir,=
+ struct dentry *dentry,
+> > > >         inode =3D gfs2_dir_search(dir, &dentry->d_name, !S_ISREG(mode=
+) || excl);
+> > > >         error =3D PTR_ERR(inode);
+> > > >         if (!IS_ERR(inode)) {
+> > > > -               if (file && (file->f_flags & __O_REGULAR) &&
+> > > > -                   !S_ISREG(inode->i_mode)) {
+> > > > -                       iput(inode);
+> > > > -                       inode =3D NULL;
+> > > > -                       error =3D -EFTYPE;
+> > > > -                       goto fail_gunlock;
+> > > > -               }
+> > > > -               if (S_ISDIR(inode->i_mode)) {
+> > > > -                       iput(inode);
+> > > > -                       inode =3D NULL;
+> > > > -                       error =3D -EISDIR;
+> > > > -                       goto fail_gunlock;
+> > > > -               }
+> > >
+> > > as you note below, when the inode exists but it isn't a regular file,
+> > > we won't even get here (gfs2_dir_search() will have returned
+> > > ERR_PTR(-EEXIST)). So the above two if statements are dead code, which
+> > > contradicts the patch description. Could you please fix that?
+> >
+> > There are two different modes here: the "mode" that was requested and
+> > the "inode->i_mode" that was found.
+> > This branch will only be taken if "mode" is "S_IFREG", but the inode
+> > that is found could be anything.
+>=20
+> Ah right, we could be looking for a regular inode non-exclusively and
+> get back any inode type.
+>=20
+> > >
+> > > > +               /*
+> > > > +                * This can only happen if "S_ISREG(mode) && !excl" s=
+o "file"
+> > > > +                * cannot be NULL.
+> > > > +                */
+> > >
+> > > Is that comment useful without removing the below NULL check for file?
+> >
+> > Fair point.  I'll remove the NULL check.
+> >
+> > I'd feel more comfortable if gfs2_symlink(), gfs2_mkdir(), and
+> > gfs2_mknod() all passed "1" (or "true") for the "excl" arg.
+> > Then it would be even more obvious that we don't need to test
+> > for NULL, as all callers that pass a NULL file, pass a true excl.
+> > (you could remove the "!S_ISREG(mode) ||" which would make the code
+> > look cleaner).
+> >
+> > But that is beyond the scope of this patch.
+>=20
+> Yes, makes sense. I'll happily clean that up.
+>=20
+> In fact, could just remove the two if statements in this patch queue?
+> We can then clean up the rest on gfs2 for-next without causing a merge
+> conflict.
 
-Let's keep working on the f2fs tree, since we should not merge this in my tree.
-Later, we'd need to prepare how to address the merge conflict.
+I've changed the comment to not mention the !S_ISREG() || excl condition
+directly so it can be changed without confusion.  Instead it now says:
 
-> 
-> [1] https://lore.kernel.org/linux-f2fs-devel/20260915041909.2903887-1-zhaonanzhe@xiaomi.com/
-> 
+		/*
+		 * Above gfs2_dir_search() can only return an inode when
+		 * called from gfs2_so file cannot be NULL.
+		 */
+
+It shouldn't conflict with your patch.
+I'll repost shortly.
+
+Thanks,
+NeilBrown
+
+
+>=20
+> Feel free to send a cleanup, or let me know if I should write that.
+>=20
+> > hmm... you could even pass "!file || excl" to gfs2_dir_search() to make
+> > it impossible to use file if it were NULL :-)
+>=20
+> Right.
+>=20
 > Thanks,
-> Nanzhe
-> 
-> 
-> _______________________________________________
-> Linux-f2fs-devel mailing list
-> Linux-f2fs-devel@lists.sourceforge.net
-> https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel
+> Andreas
+>=20
+>=20
+
