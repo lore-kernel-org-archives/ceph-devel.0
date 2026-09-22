@@ -1,88 +1,93 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 027C13769EB
-	for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2026 14:00:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A553D3769EB
+	for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2026 14:01:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790085661; cv=none; b=GVwUZGrGmfQ7PJeCjsQ+Ax1sxdS4p7PqlTjqRb7ZmlIYtVBlwbe1rYl/eYjYNlYgct9o0004v+4HJlGuwUAs9cuj7ifbu/q7Ghz+DufusD9widoqGVrfhuSxx0rbiQCOckwbzRrOdthjmjiK0SVvqqIrH4Xbquq2F5/XYsNA/fA=
+	t=1790085665; cv=none; b=HLxQfnSNX2Zw8pK5Lk+Mf+NvmDSHun9w0q3S/B9dr35xT+qFvXOCDto3SaMVlxCD1qUtcelxEtnOF+sVgpwrDT++SU5jxHg6g/vMDdt4VvkHKfXBQS49VzXFgs7AiTkaAIV95xY7/2qKWgl9ni6dQKv1UVOL67HN0ZMXNJY3hIo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790085661; c=relaxed/simple;
-	bh=6V/AEA6NXf3UPKgXGvaUvpxq301jK5Wr/Cr0lNdykto=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Zvpn/1NJlQMUxgU7BUqDliay7c5Edt1M56Q+YOjjoybugZoXTHXskxTEazle6lx4BG25z/LWfWyaRhvKI5zCh0gkvosyVovlA++XqD05DZZjHsBC6qP9v8lZLWbcBQujYgwhs8Qc13/hCoKsB41OWT2yWyCYdEMuuUaq7aI5JDU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HZWdjLb3; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=JRqqU73G; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1790085665; c=relaxed/simple;
+	bh=rGYZudHnXB2kakW7ng20xVymOZf65arzyn8JpDXsaTc=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=CPp0DBtMH2GLhUxmezO6/QD+eXXAwIxU7gPzIdTZssVkivP735QxOQL++bYawMcShVcEgCkB8ByylEWrPxUYREqgRZYKxUXaegO5cLPgBMmHXw9d1Gk6pkCkPJyk/M3UxFFgQ4xB2eYbXFvqA9Dh5bm7t+Kin3X/651/v+27STk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RBfZLEqv; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=YrO+ZqwI; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HZWdjLb3";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="JRqqU73G"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RBfZLEqv";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="YrO+ZqwI"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1790085658;
+	s=mimecast20190719; t=1790085662;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=ZpSh7paRO2Hew2TD5JPyr9a2B/LhlPe+LuqyhLL5jZI=;
-	b=HZWdjLb36kBdUPMPx4mR/Sa2I+Slr6DrnBezQRjm0s/PmeS4C18hpxYrnTjhZj4hY4eyG4
-	y58TH27G3jPkFLkQeRgpiarKFo5uz0daLonvjEBsH24q189mnN0t9WHApPTlTzlMLkc3+l
-	0h7s0M/qX6YfDOBiQpEkIsB9xE/m7xo=
-Received: from mail-yx1-f71.google.com (mail-yx1-f71.google.com
- [74.125.224.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=pHt/oeY8nlOaXif4+wd1XaEmPdPd8hLUzUlRc8pfOlA=;
+	b=RBfZLEqvg1IhT0nwLCcmXXUC0zh1M9N6jNevnPn+pFD5gotQgSKGZ+sCk/7LrdCoIBNSZl
+	zNe+caTBh/FCr7Porku/7uRgfMDbB82GFT/FNgKRIlqFSpwPRZwKjFPLOj32O7l4H+SKSa
+	VTId4nWCjV0aM3a1L1bgAZecZPmrpIA=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-505-lICUAfMMP2K7rfm_KTwWIw-1; Tue, 22 Sep 2026 10:00:57 -0400
-X-MC-Unique: lICUAfMMP2K7rfm_KTwWIw-1
-X-Mimecast-MFC-AGG-ID: lICUAfMMP2K7rfm_KTwWIw_1790085657
-Received: by mail-yx1-f71.google.com with SMTP id 956f58d0204a3-66ce3040ea9so4386771d50.2
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2026 07:00:57 -0700 (PDT)
+ us-mta-295-njdOKOBkPm-cxJHr5slgZA-1; Tue, 22 Sep 2026 10:01:00 -0400
+X-MC-Unique: njdOKOBkPm-cxJHr5slgZA-1
+X-Mimecast-MFC-AGG-ID: njdOKOBkPm-cxJHr5slgZA_1790085660
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-93a01d1d1b6so621447885a.1
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2026 07:01:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1790085656; x=1790690456; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=ZpSh7paRO2Hew2TD5JPyr9a2B/LhlPe+LuqyhLL5jZI=;
-        b=JRqqU73GFLsHO0PDyzgN594LAqX4KK0+BW1colqiSIOYqqyIVdnpSBpiBtNjUilKfe
-         Ze/AUL8j/xBPzymCOrQmq1ntbPyotLpHQZFHAqbvA4FiUg5ebK4gyFZX1uvZenJLZ44s
-         MQAyoMxSY0LbnnKDNt2PpkP3QQ/sqVbNBIVwk4TuulprpqZ5byqLgzWDPLCVDOSfgdU7
-         jBLErQQ8hZPST/tbm9crDWfoT07Ns00ugD5Ylk1ZvPKpHDa8853KDVZ/H7maNcY47S3i
-         s5xarTbMpWdeIDSSBxxQxQIEXHXqRM3A5Ojh2tgqDMS8fD5ubwtEa0JtRENnr3N7noSU
-         0+tg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790085656; x=1790690456;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=redhat.com; s=google; t=1790085660; x=1790690460; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=ZpSh7paRO2Hew2TD5JPyr9a2B/LhlPe+LuqyhLL5jZI=;
-        b=0ZjF9CI9GCacXxkBSIqLAtiYVuzg1iqG5NNCpivVno0fGcfiVHKy1CCOQo0ZMOEfu9
-         pPiQYh8zYRymlXm8aG02vnMdFbqmb0l0pbdiO9YFQgfbG9iwzk9mjanqoIpIBo6vSq9G
-         NDt6nuZL5YXKD0ATntvyP6B9aTRfR3oMQZAkTCSTqPIFQ6Y51SH2jZPBVN8MeD/eSQLW
-         fIa1UmPzjvloUYphPKf4CTzkWdAqjTwbfs/YPS55k/I8puQ5DSI6EyzzES89E9qXSG/B
-         aKLSiAMLpIFUq3p0BQTHrerSgClcboVlcIfgtP04PSO0IBR3X9OSqueONqZfh1A0BPNL
-         IRMw==
-X-Gm-Message-State: AFuF++kF7LwF/4+Hyr/r+BjqvD70H1zl2ii4Yl6sDkVQd9pfZRNabJKe
-	VetmL/oU4TRn/Lwyxm8/eoisc5m50iyoEvxIK2smsrkk1RpnyEDi6W6p0hgsx1N080Vw6tOBWsR
-	5txGzjVOqW/QVOLq51LS5AztbOZD+071hlxU7n2IH3LPZHyPHuJVNhYVExP9JkT21FMfnn0Znvx
-	r09KYiduvAcnRz287j+2pH3LpXKuxK7tIrOvioixRCvN3b7Aiu3g==
-X-Gm-Gg: AYBFou2viZSBQMBQa2zV8Ja95mZoi9E5b/5/iu88MiDnPkVGaxnrbvM/EzHn4UQ1VPP
-	9GRBQ1T4GOCGuJ6JDg+OR8TH1BVSGUZcDFjPY+wfWJFgSg2N2hv+Lv+jyqIe4p+ryQOeSy5qCq0
-	LqVsgbytVuH/QErJIPl56/bQw1b7+/iE+BLh5HU+7AUr2HhwdZ10DUQPuen9yxl7r2VJ1Tfu4Y4
-	GlEwAbrHRW1UxKemfJW7VYv+2JcG1ZkUuAYWXmbTruDlQlJ3WBenRm5uCu3RDQ89h+P6T+5X1AX
-	pI9uqUj4uL2dAI9gU9892OgQx3Mov51sZfMP6pcRoFgJfRdgZ7/7vw/ox2dxpHcN99PF/NXIHaw
-	OlOOChgGyrOrvTeBU17Ba5Ro1+Lo7xZGNsg/cnKmMLlYa5+IA/MJ4yZW0I6VdXdApQBYRtdqqd3
-	Cy1+iY3vNdQyCO+A==
-X-Received: by 2002:a05:690e:4846:b0:672:99e0:ec03 with SMTP id 956f58d0204a3-67299e0ef74mr2436558d50.155.1790085656174;
-        Tue, 22 Sep 2026 07:00:56 -0700 (PDT)
-X-Received: by 2002:a05:690e:4846:b0:672:99e0:ec03 with SMTP id 956f58d0204a3-67299e0ef74mr2436289d50.155.1790085651807;
-        Tue, 22 Sep 2026 07:00:51 -0700 (PDT)
+        bh=pHt/oeY8nlOaXif4+wd1XaEmPdPd8hLUzUlRc8pfOlA=;
+        b=YrO+ZqwITG3/Kw6sj1dYaVwbktGrCyz8TkHn3V6I5hrUm605y8EHM8cLD5NXREuNqW
+         +Dtho821sz5RFf275fbTu673Dmufy3u9IaZnJbCeRl0EgISjqmLKX9+TMFs0mslul92j
+         36tAKnCuZAMpz+chiSlkG9VNBevdhE1bjsfqi3LNOS/Fqq92m6Lwz9ThkBhL3IK01G1p
+         JiGo9iVtOZzkPgbrhX8trXNUzzfwJsmljd0cGZXrFRgBoKM3o79n1I9oJZ9X+g7SJdDy
+         XE4KgdeQqrcf7ngF9eYkiV6/LqxivN5Of+JYkuKCMGdI2JF/7C6Q+07mibalBvybfWDR
+         wDNg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1790085660; x=1790690460;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=pHt/oeY8nlOaXif4+wd1XaEmPdPd8hLUzUlRc8pfOlA=;
+        b=esHjYkmrxUUIUfcOYFTTUzdE9Aq009K9qMqgMqt7ArEWKbXYULDrXSq91woxPt3uYz
+         jItsYqiUKgwS/E6x9ViYlNF6TiaSMhylxYEgfO1HXOm0Qfq1wOMy6sznhaWbrg9Ginca
+         grAcEdzaXl9ljqCYrxRSr253aXeDcrGlN8tkNsXSfSb3dyBqgI3/oZuoT7KXSSrXh7gU
+         LUqiEjf8qn5Z6RONuduaaRa+0VbjL1wYkRvGNw4d5YAfO3plKLsZNNaYSZvRxbqRVv7K
+         doqxxGo1tlZwT16ZTECCsOZGyJ9aVABo7BvsCHDMCHopiO+1GymZVeT0HSFNwA1GsqX/
+         aTKA==
+X-Gm-Message-State: AFuF++kRvqsiImNRFMlSlDLT+1wKdyOdORKDIB5tIA6ZkcnVAo1oHnui
+	iLDc/4nTQnjBdtEbQbfrndoQMcZEVVDdibJ0t5kn7KFP8vKg5jHg4GaMs2YqZQFRjnDTkr2Qolq
+	4vs0q/5rwXo9oxEb8MFzk9NRupwTn2Sc2CGqdb/Hea8/Y1pUyRojzBr1esi8PMT32GfmuvCdJe0
+	RsxovYOhgY4EHe/6pbjPJlz5Wbc8aAajo825DJiBkw+pC4446y3Q==
+X-Gm-Gg: AYBFou12RS992ZEHk1YBwllyHGlomhsB2W6T6ww4VDhqddTRTp8VS4wuUaSh7uzspwp
+	uPMIsSwqBkahTuJPRPSuH3LQFGTQlIQfko636BpDEtjZialGTUYMPUG8vHu+xsVU4CmjGg+7Vnq
+	crkIXzu2eRMJnIyvX9rap4geIJ7q5M6XqkHP9zZPwGNc7T1xxNYWwH6/70NWdduM7/dW5tsXj35
+	3Ih2U68StCzOVH/jO9KIqCykMgCFeBDaG0VmUE42NozI7IBZfdvYz5Y+GlTR2K46uQn0FSq7VvQ
+	ylya33Ig7SR0v2WBUgXYdjvxlpGiKrMHWYcvSRxTaQ5ajwcKFCM4JzWueWIl2o3+v5qqI2KVExr
+	e93zTNME9EQ24uOfzGl5ggDI9XOcsA268vvO30eFJZWVE2h5HWPT3Buxbt4B79AWxexYPd+nfet
+	bIcH2yagFvhk0DJQ==
+X-Received: by 2002:a05:620a:2607:b0:939:a0f3:6aef with SMTP id af79cd13be357-93c198c3be6mr371735285a.23.1790085659674;
+        Tue, 22 Sep 2026 07:00:59 -0700 (PDT)
+X-Received: by 2002:a05:620a:2607:b0:939:a0f3:6aef with SMTP id af79cd13be357-93c198c3be6mr371714985a.23.1790085657235;
+        Tue, 22 Sep 2026 07:00:57 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-93c1d03c47asm150009685a.13.2026.09.22.07.00.49
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-93c1d03c47asm150009685a.13.2026.09.22.07.00.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Sep 2026 07:00:50 -0700 (PDT)
+        Tue, 22 Sep 2026 07:00:56 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: Ilya Dryomov <idryomov@gmail.com>,
 	Xiubo Li <xiubo.li@clyso.com>
-Subject: [PATCH v6 00/14] ceph: add binary logging (BLOG) for CephFS
-Date: Tue, 22 Sep 2026 14:00:33 +0000
-Message-Id: <20260922140047.794405-1-amarkuze@redhat.com>
+Subject: [PATCH v6 02/14] ceph: add BLOG deserialization support
+Date: Tue, 22 Sep 2026 14:00:35 +0000
+Message-Id: <20260922140047.794405-3-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260922140047.794405-1-amarkuze@redhat.com>
+References: <20260922140047.794405-1-amarkuze@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -91,157 +96,357 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This series adds a per-mount binary flight recorder for CephFS debug
-messages. It stores typed arguments in per-task page-fragment buffers
-and reconstructs text through debugfs. BLOG complements the existing
-tracepoints by covering the changing corpus of internal debug messages.
+Add blog_des.c implementing the binary record deserialization engine
+used by the debugfs read paths.  Supports %d, %i, %u, %o, %x, %X,
+%s, %p, %c, and length modifiers (l, ll, h, hh, z).
 
-CONFIG_DEBUG_FS remains the only build gate. No new Kconfig option is
-added. Runtime enablement is per mount and defaults to off. When no
-binary context is available, logging falls back to the existing text
-debug path. Normal CephFS operation does not depend on BLOG availability.
-
-The per-task buffers, snapshot_mutex versus atomic-rotation split,
-clear_seq handshake and reference-pinned teardown are unchanged from
-v5. This 14-patch revision is based on testing commit 9015db49ecbf.
-
-Changes since v5:
-
-  - Select the optional context first, then choose binary or text
-    logging. Each boutc wrapper expands its doutc fallback only once,
-    avoiding duplicate dynamic-debug sites. Keep the per-task argument
-    scratch and noinline record emitter.
-  - Move readdir and unlink-conflict name snapshots, and cross-cluster
-    UUID formatting, into binary-only noinline helpers. Retain lazy
-    %pd/%pU text formatting and hold name snapshots through serialization.
-  - Replace the unrolled argument-fill macros with recursive expansion.
-    Preserve argument order and single evaluation without stack arrays.
-    Remove the unused initializer macro family.
-  - Allow normal CephFS initialization to continue if BLOG's global
-    allocations fail. Enabling unavailable BLOG returns -ENODEV. MDS
-    request tracking and xattr recursion protection remain available.
-  - Correct commit subjects and stale references to bout().
-  - Rebase the complete series onto current local testing, retaining its
-    lazyio support and subsequent CephFS/libceph fixes.
-
-Measurements use x86_64 GCC 11.4 with identical configurations:
-CEPH_FS=m, PREEMPT=y, DEBUG_FS=y, DYNAMIC_DEBUG=y,
-CEPH_LIB_PRETTYDEBUG=n and FS_ENCRYPTION=y. The baseline is 9015db49ecbf.
-Individual frame estimates from objdump | checkstack.pl, in bytes:
-
-                              testing    v6
-  write_folio_nounlock            1128  1144
-  __ceph_setattr                   568   616
-  ceph_readdir                     544   616
-  ceph_read_iter                   280   392
-  ceph_splice_read                  80   328
-  ceph_write_iter                  344   440
-
-These are individual frames, not worst-case call-chain measurements.
-All six v6 frames are unchanged by the rebases. Before rebasing, the
-same-base v5-to-v6 comparison reduced write_folio_nounlock from 1336 to
-1144 bytes and removed 43,303 bytes of text and 34,552 bytes of data.
-
-The current composite ceph.o text/data/bss sizes are:
-
-  testing: 496516 / 75790 /   976
-  v6:      692799 / 87305 / 16288
-
-Substantial DEBUG_FS=y build-size overhead remains: 196,283 bytes of
-text, 11,515 bytes of data and 15,312 bytes of bss above this baseline.
-
-Validation after rebase:
-
-  - GCC and Clang builds of fs/ceph/ceph.o and net/ceph/libceph.o.
-  - GCC builds of both objects with DEBUG_FS=n and with DYNAMIC_DEBUG=n.
-  - GCC/Clang host tests using actual serializer/request helper code
-    with kernel primitives stubbed: arities 0..32, argument order and
-    single evaluation, multi-argument macro expansion, bounded strings,
-    and nested/cross-mount request tracking with BLOG disabled/enabled.
-  - Host fault injection for each global BLOG allocation failure,
-    enable failure and ordinary CephFS initialization cleanup.
-  - All 14 formatted patches apply to the stated base and reproduce
-    the branch tree. Range-diff shows all 14 unchanged by this rebase.
-  - The 31 argument-fill checkpatch errors are gone. Full-series strict
-    checkpatch still reports 73 warnings and 45 checks, with no errors.
-
-These are composite-object builds and host tests, not full module links
-or booted-kernel/Ceph-cluster tests. No lockdep, KASAN or KCSAN run was
-performed for this revision.
-
-Known follow-up: existing %ptSp call sites still decode as pointer values
-on the binary path. Timestamp-by-value serialization and its format tests
-are deferred; text logging is unaffected.
-
-AI assistance was used for the v6 wrapper/macro changes, lazy logging
-helpers, optional-init failure handling, test harnesses and this cover
-letter. The substantive changes carry Assisted-by attribution.
-
-Alex Markuze (14):
-  ceph: add BLOG private headers
-  ceph: add BLOG deserialization support
-  ceph: add BLOG page-fragment allocator
-  ceph: add BLOG magazine batch allocator
-  ceph: add BLOG logger core
-  ceph: add BLOG per-module context management
-  ceph: add Ceph BLOG scaffolding
-  ceph: add boutc wrappers for BLOG
-  ceph: switch MDS request plumbing to struct ceph_journal_info
-  ceph: add BLOG debugfs interface
-  ceph: convert VFS inode and directory paths to BLOG logging
-  ceph: convert VFS data I/O paths to BLOG logging
-  ceph: convert capability and snapshot paths to BLOG logging
-  ceph: convert remaining helper paths to BLOG logging
-
- fs/ceph/Makefile                |   3 +
- fs/ceph/addr.c                  | 202 ++++---
- fs/ceph/blog.h                  | 216 +++++++
- fs/ceph/blog_batch.c            | 259 +++++++++
- fs/ceph/blog_batch.h            |  44 ++
- fs/ceph/blog_client.c           | 643 +++++++++++++++++++++
- fs/ceph/blog_core.c             | 297 ++++++++++
- fs/ceph/blog_debugfs.c          | 688 ++++++++++++++++++++++
- fs/ceph/blog_des.c              | 335 +++++++++++
- fs/ceph/blog_des.h              |  16 +
- fs/ceph/blog_module.c           | 995 ++++++++++++++++++++++++++++++++
- fs/ceph/blog_module.h           |  42 ++
- fs/ceph/blog_pagefrag.c         |  62 ++
- fs/ceph/blog_pagefrag.h         |  27 +
- fs/ceph/blog_ser.h              | 404 +++++++++++++
- fs/ceph/caps.c                  | 116 ++--
- fs/ceph/crypto.c                |  18 +-
- fs/ceph/debugfs.c               |  11 +-
- fs/ceph/dir.c                   | 329 ++++++++---
- fs/ceph/export.c                |  83 ++-
- fs/ceph/file.c                  | 287 ++++++---
- fs/ceph/inode.c                 | 256 ++++----
- fs/ceph/locks.c                 |  66 ++-
- fs/ceph/mds_client.c            | 369 +++++++-----
- fs/ceph/snap.c                  |  17 +-
- fs/ceph/super.c                 |  61 +-
- fs/ceph/super.h                 |   7 +
- fs/ceph/xattr.c                 | 104 ++--
- include/linux/ceph/ceph_blog.h  | 292 ++++++++++
- include/linux/ceph/ceph_debug.h |  81 ++-
- include/linux/ceph/libceph.h    |   2 +
- 31 files changed, 5676 insertions(+), 656 deletions(-)
- create mode 100644 fs/ceph/blog.h
- create mode 100644 fs/ceph/blog_batch.c
- create mode 100644 fs/ceph/blog_batch.h
- create mode 100644 fs/ceph/blog_client.c
- create mode 100644 fs/ceph/blog_core.c
- create mode 100644 fs/ceph/blog_debugfs.c
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+ fs/ceph/blog_des.c | 335 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 335 insertions(+)
  create mode 100644 fs/ceph/blog_des.c
- create mode 100644 fs/ceph/blog_des.h
- create mode 100644 fs/ceph/blog_module.c
- create mode 100644 fs/ceph/blog_module.h
- create mode 100644 fs/ceph/blog_pagefrag.c
- create mode 100644 fs/ceph/blog_pagefrag.h
- create mode 100644 fs/ceph/blog_ser.h
- create mode 100644 include/linux/ceph/ceph_blog.h
 
-
-base-commit: 9015db49ecbfdc2a96129342c5bc1a471e04882a
+diff --git a/fs/ceph/blog_des.c b/fs/ceph/blog_des.c
+new file mode 100644
+index 000000000000..b83212dee856
+--- /dev/null
++++ b/fs/ceph/blog_des.c
+@@ -0,0 +1,335 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * BLOG record deserialization.
++ */
++
++#include "blog_des.h"
++#include "blog.h"
++#include <linux/string.h>
++#include <linux/ctype.h>
++#include <linux/types.h>
++#include <linux/kernel.h>
++#include <linux/printk.h>
++#include <linux/align.h>
++#include <linux/unaligned.h>
++
++static inline void des_advance(int ret, char **out, size_t *remaining)
++{
++	if (ret > 0) {
++		if ((size_t)ret > *remaining)
++			ret = *remaining;
++		*out += ret;
++		*remaining -= ret;
++	}
++}
++
++/**
++ * blog_des_reconstruct - Reconstructs a formatted string from serialized values
++ * @fmt: Format string containing % specifiers
++ * @buffer: Buffer containing serialized values
++ * @size: Size of the buffer in bytes
++ * @out: Buffer to store the reconstructed string
++ * @out_size: Size of the output buffer
++ */
++int blog_des_reconstruct(const char *fmt, const void *buffer,
++			 size_t size, char *out, size_t out_size)
++{
++	const char *buf_start = (const char *)buffer;
++	const char *buf_ptr = buf_start;
++	const char *buf_end = buf_start + size;
++	const char *fmt_ptr = fmt;
++	char *out_ptr = out;
++	/* Payload budget; snprintf() is called with remaining + 1 so the
++	 * last character that still fits is not dropped for the NUL. */
++	size_t remaining = out_size - 1;
++	size_t arg_count = 0;
++	int ret;
++
++	if (!fmt || !buffer || !out || !out_size) {
++		pr_err_ratelimited("blog_des_reconstruct: invalid params fmt=%p buffer=%p out=%p out_size=%zu\n",
++			fmt, buffer, out, out_size);
++		return -EINVAL;
++	}
++
++	*out_ptr = '\0';
++
++	while (*fmt_ptr && remaining > 0) {
++		int is_long;
++		int is_long_long;
++		int alt_form = 0;
++		int dyn_width = -1;
++		int dyn_precision = -1;
++
++		if (*fmt_ptr != '%') {
++			*out_ptr++ = *fmt_ptr++;
++			remaining--;
++			continue;
++		}
++
++		fmt_ptr++;
++
++		if (*fmt_ptr == '%') {
++			*out_ptr++ = '%';
++			fmt_ptr++;
++			remaining--;
++			continue;
++		}
++
++		/* Skip flags (-+#0 space); remember '#' for hex/octal. */
++		while (*fmt_ptr && (*fmt_ptr == '-' || *fmt_ptr == '+' || *fmt_ptr == '#' ||
++				   *fmt_ptr == '0' || *fmt_ptr == ' ')) {
++			if (*fmt_ptr == '#')
++				alt_form = 1;
++			fmt_ptr++;
++		}
++
++		/* Consume field width: digits are format-only, * is serialized */
++		while (*fmt_ptr && (*fmt_ptr >= '0' && *fmt_ptr <= '9'))
++			fmt_ptr++;
++		if (*fmt_ptr == '*') {
++			if (buf_ptr + sizeof(int) > buf_end)
++				return -EBADMSG;
++			dyn_width = get_unaligned((int *)buf_ptr);
++			buf_ptr += sizeof(int);
++			fmt_ptr++;
++		}
++
++		/* Consume precision: digits are format-only, * is serialized */
++		if (*fmt_ptr == '.') {
++			fmt_ptr++;
++			while (*fmt_ptr && (*fmt_ptr >= '0' && *fmt_ptr <= '9'))
++				fmt_ptr++;
++			if (*fmt_ptr == '*') {
++				if (buf_ptr + sizeof(int) > buf_end)
++					return -EBADMSG;
++				dyn_precision = get_unaligned((int *)buf_ptr);
++				buf_ptr += sizeof(int);
++				fmt_ptr++;
++			}
++		}
++
++		/*
++		 * dyn_width: consumed from the buffer to keep offsets
++		 * aligned; output width-padding is not implemented.
++		 */
++		(void)dyn_width;
++
++		/* Parse length modifiers (l, ll, h, hh, z) */
++		is_long = 0;
++		is_long_long = 0;
++
++		if (*fmt_ptr == 'l') {
++			fmt_ptr++;
++			is_long = 1;
++			if (*fmt_ptr == 'l') {
++				fmt_ptr++;
++				is_long_long = 1;
++				is_long = 0;
++			}
++		} else if (*fmt_ptr == 'h') {
++			fmt_ptr++;
++			if (*fmt_ptr == 'h')
++				fmt_ptr++;
++		} else if (*fmt_ptr == 'z') {
++			fmt_ptr++;
++			if (sizeof(size_t) == sizeof(long long))
++				is_long_long = 1;
++			else
++				is_long = 1;
++		}
++
++		switch (*fmt_ptr) {
++		case 's': {
++			const char *str;
++			size_t str_len;
++			size_t out_len;
++			size_t max_scan_len;
++
++			if (buf_ptr >= buf_end) {
++				pr_err_ratelimited("blog_des_reconstruct: string arg %zu overruns buffer (no space)\n",
++					       arg_count);
++				return -EBADMSG;
++			}
++
++			str = buf_ptr;
++			max_scan_len = buf_end - buf_ptr;
++
++			str_len = strnlen(str, max_scan_len);
++			if (str_len == max_scan_len && str[str_len - 1] != '\0') {
++				pr_err_ratelimited("blog_des_reconstruct: unterminated string at arg %zu (fmt=%s)\n",
++					       arg_count, fmt);
++				return -EBADMSG;
++			}
++
++			buf_ptr += round_up(str_len + 1, 4);
++			if (buf_ptr > buf_end) {
++				pr_err_ratelimited("blog_des_reconstruct: string arg %zu overruns buffer after copy (fmt=%s)\n",
++					       arg_count, fmt);
++				return -EBADMSG;
++			}
++
++			out_len = str_len;
++			if (dyn_precision >= 0 && (size_t)dyn_precision < out_len)
++				out_len = (size_t)dyn_precision;
++			if (out_len > remaining)
++				out_len = remaining;
++			memcpy(out_ptr, str, out_len);
++			out_ptr += out_len;
++			remaining -= out_len;
++			break;
++		}
++		case 'd':
++		case 'i': {
++			if (is_long_long) {
++				long long val;
++
++				if (buf_ptr + sizeof(long long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((long long *)buf_ptr);
++				buf_ptr += sizeof(long long);
++				ret = snprintf(out_ptr, remaining + 1, "%lld", val);
++			} else if (is_long) {
++				long val;
++
++				if (buf_ptr + sizeof(long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((long *)buf_ptr);
++				buf_ptr += sizeof(long);
++				ret = snprintf(out_ptr, remaining + 1, "%ld", val);
++			} else {
++				int val;
++
++				if (buf_ptr + sizeof(int) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((int *)buf_ptr);
++				buf_ptr += sizeof(int);
++				ret = snprintf(out_ptr, remaining + 1, "%d", val);
++			}
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'u': {
++			if (is_long_long) {
++				unsigned long long val;
++
++				if (buf_ptr + sizeof(unsigned long long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long long);
++				ret = snprintf(out_ptr, remaining + 1, "%llu", val);
++			} else if (is_long) {
++				unsigned long val;
++
++				if (buf_ptr + sizeof(unsigned long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long);
++				ret = snprintf(out_ptr, remaining + 1, "%lu", val);
++			} else {
++				unsigned int val;
++
++				if (buf_ptr + sizeof(unsigned int) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned int *)buf_ptr);
++				buf_ptr += sizeof(unsigned int);
++				ret = snprintf(out_ptr, remaining + 1, "%u", val);
++			}
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'o':
++		case 'x':
++		case 'X': {
++			const char *num_fmt;
++
++			if (*fmt_ptr == 'o')
++				num_fmt = is_long_long ? (alt_form ? "%#llo" : "%llo") :
++					  is_long ? (alt_form ? "%#lo" : "%lo") :
++					  (alt_form ? "%#o" : "%o");
++			else if (*fmt_ptr == 'x')
++				num_fmt = is_long_long ? (alt_form ? "%#llx" : "%llx") :
++					  is_long ? (alt_form ? "%#lx" : "%lx") :
++					  (alt_form ? "%#x" : "%x");
++			else
++				num_fmt = is_long_long ? (alt_form ? "%#llX" : "%llX") :
++					  is_long ? (alt_form ? "%#lX" : "%lX") :
++					  (alt_form ? "%#X" : "%X");
++
++			if (is_long_long) {
++				unsigned long long val;
++
++				if (buf_ptr + sizeof(unsigned long long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long long);
++				ret = snprintf(out_ptr, remaining + 1, num_fmt, val);
++			} else if (is_long) {
++				unsigned long val;
++
++				if (buf_ptr + sizeof(unsigned long) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned long *)buf_ptr);
++				buf_ptr += sizeof(unsigned long);
++				ret = snprintf(out_ptr, remaining + 1, num_fmt, val);
++			} else {
++				unsigned int val;
++
++				if (buf_ptr + sizeof(unsigned int) > buf_end)
++					return -EBADMSG;
++				val = get_unaligned((unsigned int *)buf_ptr);
++				buf_ptr += sizeof(unsigned int);
++				ret = snprintf(out_ptr, remaining + 1, num_fmt, val);
++			}
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'p': {
++			void *ptr;
++
++			if (buf_ptr + sizeof(void *) > buf_end)
++				return -EBADMSG;
++
++			ptr = (void *)(unsigned long)get_unaligned((unsigned long *)buf_ptr);
++			buf_ptr += sizeof(void *);
++
++			/*
++			 * Skip kernel %p sub-specifiers (U, I, d, D, etc.).
++				 * boutc does not support %p extensions; call sites
++			 * must pre-format them with snprintf and pass %s.
++			 */
++			while (fmt_ptr[1] && isalnum(fmt_ptr[1]))
++				fmt_ptr++;
++
++			ret = snprintf(out_ptr, remaining + 1, "%p", ptr);
++			des_advance(ret, &out_ptr, &remaining);
++			break;
++		}
++		case 'c': {
++			char val;
++
++			if (buf_ptr + sizeof(int) > buf_end)
++				return -EBADMSG;
++
++			val = (char)get_unaligned((int *)buf_ptr);
++			buf_ptr += sizeof(int);
++
++			if (remaining > 0) {
++				*out_ptr++ = val;
++				remaining--;
++			}
++			break;
++		}
++		default:
++			pr_err_ratelimited("%s: unsupported format specifier '%%%c' at argument %zu\n",
++				       __func__, *fmt_ptr, arg_count);
++			return -EINVAL;
++		}
++
++		fmt_ptr++;
++		arg_count++;
++	}
++
++	*out_ptr = '\0';
++
++	return out_ptr - out;
++}
 -- 
 2.34.1
 
