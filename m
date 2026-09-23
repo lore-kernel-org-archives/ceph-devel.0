@@ -1,400 +1,239 @@
-Received: from mail-ej2-f43.google.com (mail-ej2-f43.google.com [74.125.228.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from GVXPR05CU001.outbound.protection.outlook.com (mail-swedencentralazon11023135.outbound.protection.outlook.com [52.101.83.135])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABE4930E82D
-	for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2026 10:55:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.228.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EAEB531AF9
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2026 13:54:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.83.135
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790160939; cv=pass; b=ZZOabL18lNSl9FO6icJ2xa9eCy4uDBJRqZStho1wGs9I6BVlSJEei6x7+2IUoPfNDbJxdT44dYkL4BT7jzT4h3E7sw/KyFqYfIA/cc8keH0N1mYxsdPCc28UFQpARg4tCdSNLRlDJWKujnj/Owmz6SAXOz3KVjkgm6P9et9UJy0=
+	t=1790171665; cv=fail; b=UMs1MY5RPJL/XLnMFbkyB22cklFbVX+0NdtttWRRfugLX0TntkPNnj5QRanIXz6yLB91O3b/0Yz0+2lRe4WyPAtvHLbxGgtcTQRSO+4Vdxre+jJSRF0yUzvFCPbcx/SwiL5UtA+iH/KEqk22x+/2EPEe1uGDSagTHXD9MJlMbAM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790160939; c=relaxed/simple;
-	bh=yK9iwFmZQ9c212Cy65Xp3ryUktREFY61FxLH61jOBfc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JQQWRkcRWS7hiUBWUwIORrxIGXwgmrYXBUejPSSM5cRwzOOmy1SyyTMO1UsvPmY6dN3VZ+epKSTFq+d7KtSg1E2F7Lb8/DmNLU8Qq0Wwi2MjzrrmnbVAv6jaYYCw+D86RrvfOZYP6URfDrRm3umxWZBxvrmaMVQdFz0ckARxoWM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com; spf=pass smtp.mailfrom=clyso.com; dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b=nWyz1rYm; arc=pass smtp.client-ip=74.125.228.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	s=arc-20240116; t=1790171665; c=relaxed/simple;
+	bh=eerdX55fKYhXT1081mNJqoS3vvOrS6DnEc/+eNtWt6A=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=FIrVvZIqyuGlDyRmRDh3Ngxgaqor4+yzLb9mQ+GrcyVKDDtaXOZ6frgDFa1HsDvSdEBptvHgrJPo45Zy6FIZzNErG764T9aiuCaafWt+q2aEJoTgkPDjNO/7b+oZq4+4jQncuHqEIGB0+wagrv8b1XHK5eTo2sAFFxOZ3+EjzTM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kx.com; spf=pass smtp.mailfrom=kx.com; dkim=pass (2048-bit key) header.d=kx.com header.i=@kx.com header.b=Oi6inFqj; arc=fail smtp.client-ip=52.101.83.135
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.b="nWyz1rYm"
-Received: by mail-ej2-f43.google.com with SMTP id a640c23a62f3a-c2a1f611461so54184266b.1
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2026 03:55:32 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1790160929; cv=none;
-        d=google.com; s=arc-20260327;
-        b=D1GcbZz1YBnSMEuZxDOIKsBYo/2G8VMXYGNPAFjTM+gFAj9shz0c7zkqJCzaXDxH0N
-         xk/gvTp4uicAuKXfJwcVyVxrgzcBdoFI1zGmpkYPfwPXOAIB+MMIF0Tqvof6diwi+Dtz
-         L+/jGVcMmT9qVhjjFOLqHtQsbodL41yuWH03An3lkgHlMfuH4z32elqog4RNpwd3ykZd
-         J88nUyJIHO+Qvrs0W9qqpnfECNY1eVPpFsEimU92RJPieOruPjJjjCZWCeJxzrJFiM+N
-         k62RDgjyXDh+8pX4uo2O5ichD6h3KBnjskrMWl0K4XOU3xZ2Fh7gRH2itXKjRhgGnJcf
-         sg4A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=5V+DQLQHaFEVoroOWDbf0mG5q3zv6h9DZ6FGtxrQ/GI=;
-        fh=fC59a5iCD/exGE8xC8ycBBm3A4XEz99srqGSt3uqUJw=;
-        b=IdeJr/WgJSmzs0mN1lDILFDkXZy6XmSpMV6qit1fiNgJ9suhK+MfecU2+Ryc+mTAF+
-         3DpihXj9hCXpHq+occnDPkxDGK3kuR/MY3q2+PG7gUyhxeGXgnLF5buWWYyVYTC114Bw
-         ow6Kvy5Gp+MazlqDqHvw87Mjwofvmw20oK07G38mljpxMrP2Ib63+WjGJjM/p3y28QYq
-         KH+kt2pShlQb4VZ7PEsZGzINKj6NBgF25Pmt6PhMIAXuLM+ERfpRiWSLtsaGFK01v7VU
-         SL3xN5DCZQafgJ8Q3vg4xeIXVgkOK6xMNeoRcVTaxSAYPdHfpBxjqDJWsdyKPeewHSXC
-         mT2Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1790160929; x=1790765729; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=5V+DQLQHaFEVoroOWDbf0mG5q3zv6h9DZ6FGtxrQ/GI=;
-        b=nWyz1rYmr9R2vtsFEQcicM9dloHGhNECaw5blN1cAcjCL7mMgrkpGQaiZ105JkxyCt
-         7UtC2ih52/sN6HMQTaJT8ORqfvF2Mr7Olgb5/zVo7xuXdajXkhX9A7DwGgcxG7iSRtpK
-         19XpHmSERRJeZ4xm9UANs8Aii8VOy+G3S3/moGyIa5xD8qm2hXnS1ndS+KhEbKaC+04P
-         oERiAEJCxiJ8l8wwA8DHhE5z3KfCWs7V5Fc8jdBEdBH4R4JdDJKn5qI9MAQ7jNFyNo9y
-         h96RtXRTxtQ44djKjAOVsEg1wKTWPVI/YVh2ygulwwSgA9X8XJWh/pBSW25NQAVBv9tV
-         Ne9Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790160929; x=1790765729;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=5V+DQLQHaFEVoroOWDbf0mG5q3zv6h9DZ6FGtxrQ/GI=;
-        b=T9L+f9l0HyCO7rE0XxxNjOqwaEwAFQRLdywsxaOjbrWNHkdBJ6ZLGipxJUGuOrJlEO
-         kp+eePMPRnSnt7tz5jjLAB8tQIaPe4ENbWeOaJQ/OsaOx4netg6lABNujSSV63KPdCm1
-         m93xeMgl669KrXQOyklMMzBCXTEm24mcgLuWuv41QTPRI0qVbwfpjbhdHECa+xKk9wMR
-         JARfHHxvKkopsr5NTTKBnKS8rugJzTlPHBR2HQQzWFh32S7KycSNMMD6Yu0r8CyL5rbi
-         98fqlQ9jJpFjn3tI86cu/FTpJnqAZug3uGV2/d0wttfsD08100whpdUcrI92/y4f/AEY
-         B6hA==
-X-Gm-Message-State: AFuF++nJg2KTfhflS5J7AFkeEAQ91rXSt7UvaUUAKFcoeLC2xUjMIy6I
-	dddfSGMcemjy4HYgvOKayNiFv+JQN3hFTAAgqdKJkBnbHGA+FaUKf/iE2eXx10uuQU2zyjSU2t0
-	shsojUtEqXtcgdgGGRSZJoTqyNbv6VvMf3WCaDQPHKPWd7MvKOC7hG4lhA1Pf
-X-Gm-Gg: AYBFou09f+NT1B6IRDwkbLF8uSTANc0izfm24su1t3XjH2oJrXk3jXNjVTeWAf1GA67
-	1gBgMJeHbhyXi04ks10H6hjWMljIGsY3eDqV7E08yDrLbSNpi15LKQK+mIVFKwYdq/D+mobITVq
-	IMhz7CQVDJVCXeHV+3zuNCHayWGAoctet+VWSPfgy3kQFzfK06FSaoSzhp/Rkx2E+WAP8oORofx
-	vSca6Mh2hHpq3k7NWRUcLUSrAbz5fGVC3iVA6iJ5Ih5Fh0l3fzKqn+jVG1HxitGcCO1ZZttoc7b
-	mbVbUxT0+dAkyY1H29nRRPqzfge6vbJmwMuCCjrMbdGjmiM8hU+o+6uDgUgcPn0t91dT
-X-Received: by 2002:a17:907:9729:b0:c15:a7b9:2ae1 with SMTP id
- a640c23a62f3a-c2aacdf9419mr211259366b.6.1790160928726; Wed, 23 Sep 2026
- 03:55:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kx.com header.i=@kx.com header.b="Oi6inFqj"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Fat6lZgqZD6AdAiAWnQgtANsXGD+el7qsXfN78ELQFVQ6ushnPw/ilgf7k70aYHhjfxkTRbjL0rVMTCpINoGmSiSGcse2rBuIriwGcLjiEvbpovmijKC7K47Nz+G3mXxavN76Z3jRAfh+lghNq2LXqONc6EKQ3ADnXI+WVaUgso/foGYLtD+nGg6EaLp7r757Yib797+tHn+Chckb8Xrt3kAffbXREQPx2jmmBAJLO2y4Ic1tHk3gtPN9/uGL16ZtEMw4L172WuJrymG6pBfdpKJZ3VtQYD6ccqEHpugmX2xIhySefFWzm6EWMR8frulVsffZyGfcwVyLwgwOCCFww==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=eerdX55fKYhXT1081mNJqoS3vvOrS6DnEc/+eNtWt6A=;
+ b=oeP4Icm1kng5yvPJ2kZHpjPTXPBWTSnJ5vnf/h3jbIFeb7fYlBAzdI6d7IQ8hf2INDB3Bm3nb8VBCqNCBjGhLqVz3zDv6cxX3s1FFsjymXzjfaQFSLflMfPqIeemNSjdQyqWV06zUUOqIW19Y4GMNRMyNdodLLq8UMJO3xlW0YMLNZWfEVonmqIuKVu88pJA8bC3fje9phLfmgnsKOGdK1FqlpN+z2XVP/uLrvltC4sHemrBDlpzlELNctjoawWNU3qbj55vbtASyo4O0aUbS0ruSjBT+b4qp8TRSpXWV2ll3ry6VrqjbanCFUSA26YJlQ7T8UA/fuHHPNLipxYeeA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=kx.com; dmarc=pass action=none header.from=kx.com; dkim=pass
+ header.d=kx.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kx.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=eerdX55fKYhXT1081mNJqoS3vvOrS6DnEc/+eNtWt6A=;
+ b=Oi6inFqj3nU3MYCqsGhqP8xDapzvvf3c36rGfzhdRKfaK1IuNvlDWyD8Ss9GIqTqSN9INlpEZ20HNg+n73lSNG+YekX3vzwbkDn1JpN7uystxV1pbxMXTZ9vvIZP/HytwkPXuwZpB1NRuqOtF0Dt4Vh7fOiFT0UnoASM6kvteNkp31SqsHV+cna1NjsXCpxHswMds66Hfs05FDy8Fbrg7tyLWyptQdcDkNrQioVqSY/X4OL7kjB5TkbtriCKlmrq8PvK07FviFRMUPibUMdjAoGaKso52Ja5yRz6Q+kCGLQgRsGO61FjIpkpdqw2dLEVxa2KYoEkJ5i1FP1I0qh+VA==
+Received: from GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:150:ae::7)
+ by AM0PR10MB115117.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:20b:7f6::18) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.17; Wed, 23 Sep
+ 2026 13:54:19 +0000
+Received: from GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
+ ([fe80::a82e:3f55:c85d:7542]) by GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
+ ([fe80::a82e:3f55:c85d:7542%2]) with mapi id 15.21.0451.014; Wed, 23 Sep 2026
+ 13:54:19 +0000
+From: Domhnall McGuigan <dmcguigan@kx.com>
+To: Alex Markuze <amarkuze@redhat.com>
+CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Liz Norris
+	<enorris@kx.com>, Brendan McAllister <bmcallister@kx.com>, Pavlo Piatkovskyi
+	<ppiatkovskyi@kx.com>, Pierre Kovalev <pierre@kx.com>, Oleg Finkelshteyn
+	<oleg@kx.com>
+Subject: RE: [BUG] cephfs kernel client 6.12.x: writes after ftruncate
+ occasionally being lost, leaving hole in files
+Thread-Topic: [BUG] cephfs kernel client 6.12.x: writes after ftruncate
+ occasionally being lost, leaving hole in files
+Thread-Index:
+ Ad1J453OFY2uoDx/ROiPZd0eA4o9DQAClFgAACVv1QAAAFGYoAAAfTwAAAAHsNAAALufQAAqP0+AAADnagAACw5e8A==
+Date: Wed, 23 Sep 2026 13:54:19 +0000
+Message-ID:
+ <GV2PR10MB6138AC7FB5C40F1A0C35496BDF822@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+References:
+ <GV2PR10MB61387727F5B89B621AD8307BDF842@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <CAJ4mKGYf8KDH368dfxp1d3GQ5boUcewYxcbdB1cWSt=JR8oy2A@mail.gmail.com>
+ <CAO8a2ShV8X+z1=FPUjZ+voQi2SCsSdauwv2a2wS9dBzt+bk1bA@mail.gmail.com>
+ <GV2PR10MB6138FA66DBC7CE7434418686DF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <CAO8a2Sj=iRe62a+pO-7wAdYUQa59KObRsop8zus+KXCxp9GF3g@mail.gmail.com>
+ <GV2PR10MB6138225665859A9E2054D4CADF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <GV2PR10MB613812F687DC650520DF45B8DF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <CAO8a2SjJ2u1BFPhnLohno9hy7qBgrFTb0rEHdHpBawQN+njb5Q@mail.gmail.com>
+ <CAO8a2Sie7eftzio6Dq6UWaTc3TLFa-tQvM2TSDnq_6saF0hqOA@mail.gmail.com>
+In-Reply-To:
+ <CAO8a2Sie7eftzio6Dq6UWaTc3TLFa-tQvM2TSDnq_6saF0hqOA@mail.gmail.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-GB
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=kx.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: GV2PR10MB6138:EE_|AM0PR10MB115117:EE_
+x-ms-office365-filtering-correlation-id: ba6b3c2f-9ac4-407a-bcec-08df197a2a2c
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|23010399003|366016|376014|19092799006|10067099003|11063799006|22082099003|18002099003|4143699003|56012099006|38070700021;
+x-microsoft-antispam-message-info:
+ B7+d5J6FM1ceV2ZX6G1M0JoPZkMlMrEBrufUVv/1F4Y/m49oEF0DCqXCNDWQ+IHC2rgwcwaZ/rwtt2slwTZXf4DfcfnooiJkk4/cOmz4Vyp4r8JzOCcgveg9/Zw5MZRAU7//YLntsiQ+TdnYNEt3P1wdOCLYRfpV4ZgsC2Bnsy1BDroBkDQD8QQqOzJ2czoaSBCMO/rYVgXWJZf6O4KdHkBQCxToVSNraCzOGCs1Rjy5DQXcQWZdi21FJojo8TEUHEssqipDodLL9ty9Kt822grgsli0HNw4Z3w4H3iv6uPEFL5/0tn9IHKRBJBwRATp/gIGivqNTIKeakcahoBN/XHfm2BUpMoqz11h3U6hdVjtosg6UmkVAnrN0WoNIftCnYjCmRD6J0MxMQgKR2jSN9LYrPjds+2lmMWEQ4Wk/DOQ9O3W8IcGE2DMC1BlTkTKaL1uwlIauIRRBvOOc5tLcIKKbKoQr3WksQnJL2wfzCAUgXyqUH0RBbxzA+vgB2QO2Igy8p3QNW3OppL/2FGU+DEfbjRCf8NZGvob3dKi6S3vVD6u07zECDUa6zrVAyuNH20z9IETgBHxZEVKOd61M+Nfkh5eUVTJ5GWlaP+f05LlAoLmtTdyMXjHO1KjmsNB2Nr+Ru5O/Cqel96Se3STIWV1BDCaHVVVLZc33xD0oEzpY9bvwS6/6FJRY+Ibk8Qb6htqNVkWKlsFKR818Z5gS6YJSSBu0DhyTwmDDgjIDus=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(366016)(376014)(19092799006)(10067099003)(11063799006)(22082099003)(18002099003)(4143699003)(56012099006)(38070700021);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?c0Q4VGdsVWFwS1o2SnBjaUd1alBhbTdnVXFMMDBhK25oMzZVWUVoalBPb3c2?=
+ =?utf-8?B?czlWd1QvQUFyNVdIY0pyWFdod2p4UXNkQ083eUx3bXc3SHRkaVY1NEZlYjNq?=
+ =?utf-8?B?MDAzWm95eVdLZ0FrdWJYWExnVEJwTC91U1J5ankxVEEyaEtNQTU0cTg4K1Nt?=
+ =?utf-8?B?SnhPWnBWb2twZDVHNktMeXRNd1lwQzh2K3pKaE5jQXRsaGUwbUs2UlJhS21M?=
+ =?utf-8?B?K0k0OFdIR0ozT2U0UVJ3Vm5iWEh3WDFoUzBUc0lsR29UdDNQd2kyTzNjTm1O?=
+ =?utf-8?B?a0thSnFuNFNJVHByM0hzc25maURxVTM3eDJzTWFKbU9iRC9LNmpWTFJSVFZI?=
+ =?utf-8?B?MWV3emt3Y1kwL1VZOCs0NkZXNW9yWjVLT2Y3WFFBMDBqVDNQdWZ2bFVEdUVJ?=
+ =?utf-8?B?UzZtVFlRTEtzanpWVGxiU0FxUzNWL05rY2RJajMxd1k4ZHdBakRscTRvYnh4?=
+ =?utf-8?B?MVhGWERvbHhISnhjODhUOS9YQ1BzZTJkUnArcjZyQ3ZNeFpoWW45MHBYUjRl?=
+ =?utf-8?B?MVdOdnFna3BUeUZCNktPbEFMdzRncUM5cmQybWRsdWVkNG9Kb0xOVTgvdEQw?=
+ =?utf-8?B?azZrNzFoTXp3NEdCWlhXZzNSdVkxV1BIMUtJMnpSWjZVNStoNWo3YlpMMjl2?=
+ =?utf-8?B?VStsbU5uUTYzQU9MeThvbC9jMjRjbkU3dkY1NDhKZ096NkFweTUrU3h6R2dK?=
+ =?utf-8?B?Qld6ejlDcWFIcFY5ZVg1UHVDYXRyVm05WHkyMnhjck9nZ0hKa242bjFJSjFR?=
+ =?utf-8?B?L0UxS0pobXEyYis3ajU4SDdvNUFkeFlpQUcvZHp4TGZPSVZXS0RHN0hDeVpE?=
+ =?utf-8?B?cUg0RGFQbHRnUXlRWUJlWnR6aFhleGt5VW1wVXZlaWYvVCs4bjJLL3hETVEv?=
+ =?utf-8?B?b1hMRGhrN0M1M2tvOEVMSlFSdDY4UjdjZ2Vxd0FQb1JZYTBaTFpiTlJBQWhW?=
+ =?utf-8?B?UUxDSFBmZEVVelJnOUlEWlFsZ2RZMi9GUmdac01oRTJLYVVPTFlNQ1ZxWUIy?=
+ =?utf-8?B?NU9UZXZuc013eVFnY0NWbVdxS2pseGgvM0xWVVp2ajRFWlg3OUVEZnJ0elJk?=
+ =?utf-8?B?RGM4UEFGVERoN0F4R05ZU3NVTlNjSXFpaXB0UXFlSDFXcldvem00N1M3d29l?=
+ =?utf-8?B?djFRM25ONi82WlVmT1BMVEVRNUYzMkVZMmZLRm9UbHZQeEduZjdwSEhuKytC?=
+ =?utf-8?B?aUdLZkRXcndpVFVZRWVGT2pHR2w5S0NmNVpMRHJaM2xTT0RIUHJna2hCYy9j?=
+ =?utf-8?B?QnlaV2JNSC9oenhsNGFlait0ZmkvZ0htMnkxTm1pU1JSMkM1ZG9lR1NVVzZY?=
+ =?utf-8?B?RFpQNm9EUi81d3RSTWFoa3dLQ0g4Z1RXV1dzYVFZWkpqY0Fsb29NRVFEcXp4?=
+ =?utf-8?B?dGwzL0ZZWDVMNFl2ZXRNWjN3R0t0bFlSZm5lVWhKRDBSalEzdG9RcVJoYUxz?=
+ =?utf-8?B?Ynk3OHN3VGtsdXlCMTNHZ3Jhb1NEd0kza2JVQ1RlOUtGcG1JdTdJQWp5Uks0?=
+ =?utf-8?B?bC9RM09pZldTTVF2dU9ocXZIZ1ArVnFvRGYrd1JzMWJBSlFzTmVUQ2NKQm45?=
+ =?utf-8?B?SFlBOEhZbEgrVVdlN2xuWW9NbndYZytrNWRnYkljM21GRVZSZGxjSnVGdERK?=
+ =?utf-8?B?cUc5aGV0ZXI1SmphV3B6TEJYbEZTc3RaSzFxak9EZjVIdlIrQ1N1MWhXL0V2?=
+ =?utf-8?B?L25rclNRcCtPTHhRTmVwcEFjUTl3UVpCVmRuMzZjeXBQWXFiUHVmZEJySGZR?=
+ =?utf-8?B?ditxc1FvanV3c1F1U1pyVnc4ejBCdUZYck5sWitWZ3hyVVBOUVJiWHJDajdw?=
+ =?utf-8?B?cWZpalY3RWl2a3NCVEdjMkxVbWNraEk5QUhFbGwzUHlpUWNhZmcrSU8xRnFT?=
+ =?utf-8?B?clNKZ1JhOXlYNEZydXNidXlnQUNBeGEvQm9lUXIyc0tjRkdxYkpMYmljZWhn?=
+ =?utf-8?B?dTNpZFVyRGpCQ2JqemxTeDViM3VzWGg2QVlpWEp0aFp1SkY0ek5Mc253OWV3?=
+ =?utf-8?B?Q1pyVTVlVUx3L1ZmeG5pRXBwQnloWGJ5Y0NCMWUyR2xMN08yUVJHaUpGYmNv?=
+ =?utf-8?B?NHdSR3I4ZVdDLzdOcU9jVVROL1VJU3JuSldvNHNFektJM2JxTnI1Rm5sN1Ar?=
+ =?utf-8?B?ck1ydDdtZElTeWtLMEVUcFcrSHVObXQ0SitkZWloL0lIbkdzbnNnb21UL3Jw?=
+ =?utf-8?B?d3hTRTJlcUpQK0pUN3NaYWRHU1kvMDkvbTY2WHY3bTRNUGlhWit4Ykl2Z0p2?=
+ =?utf-8?B?MFRIS1kyUHNvaloweU1XK1MxZEZpbURkMmRGdUl5bXI0bllIcmgxNEZYUk5q?=
+ =?utf-8?Q?NDS/iI0ksx7z6kpNXi?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260922140047.794405-1-amarkuze@redhat.com>
-In-Reply-To: <20260922140047.794405-1-amarkuze@redhat.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Wed, 23 Sep 2026 12:55:17 +0200
-X-Gm-Features: AclHuK-xupjAI-hI_5RwyJ-HANvwi3Oyi-16L_fqfdoICMtnVVbcvqWzJi8b0gA
-Message-ID: <CAOJNxRJTiUkSAW6diKfZA51mGMCeGdKsbcb5mdkYxqf+-+e8fQ@mail.gmail.com>
-Subject: Re: [PATCH v6 00/14] ceph: add binary logging (BLOG) for CephFS
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: kx.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: ba6b3c2f-9ac4-407a-bcec-08df197a2a2c
+X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Sep 2026 13:54:19.3607
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 8b006032-f7cd-404e-8f6f-4719f041417b
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: hesahtvM6dreDrS5bLDSo9pbnJTZfGiFiPzQLun+yERCWoBFgOKUx4yIfb7UfZizaoCHrAY0n0YXnYSQOl3qeA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM0PR10MB115117
 
-Hi Alex,
-
-I ran a thorough tests against V6 with a vstart cluster for 4 hours.
-
-Summary: one real use-after-free when BLOG is enabled, and one unbounded
-growth of empty magazines. Details below.
-
-Setup
-=====
-
-- x86_64 VM, GCC 16.1.1, CEPH_FS=m, DEBUG_FS=y, DYNAMIC_DEBUG=y,
-  KASAN=y (generic, inline), PROVE_LOCKING=y, DEBUG_ATOMIC_SLEEP=y,
-  booted with kasan_multi_shot.
-- vstart cluster: 1 MON, 3 OSD, 2 MDS (max_mds=1), msgr2 prefer-crc.
-
-1) KASAN slab-use-after-free in __ceph_destroy_xattrs() [patch 14/14]
-======================================================================
-
-With BLOG enabled, a listxattr after a snapshot triggers:
-
-  BUG: KASAN: slab-use-after-free in __ceph_destroy_xattrs+0x7ad/0xa50 [ceph]
-  Read of size 1 at addr ffff888112eb9f88 by task ls/11093
-  Call Trace:
-   __ceph_destroy_xattrs+0x7ad/0xa50 [ceph]
-   __build_xattrs+0x247/0xc80 [ceph]
-   ceph_listxattr+0x3c5/0xf20 [ceph]
-   vfs_listxattr+0xfb/0x190
-   ...
-  Allocated by task 5111:
-   __kvmalloc_node_noprof+0x31e/0xa30
-   ceph_buffer_new+0xd6/0x260 [libceph]
-   ceph_fill_inode+0x20e6/0x5590 [ceph]
-   ceph_fill_trace+0xbaf/0x67d0 [ceph]
-   handle_reply+0xe4a/0x2ba0 [ceph]
-  Freed by task 8150:
-   kfree+0x272/0x6e0
-   ceph_buffer_release+0x33/0x70 [libceph]
-   ceph_queue_cap_snap+0xf94/0x1840 [ceph]
-   queue_realm_cap_snaps.isra.0+0x251/0x640 [ceph]
-   ceph_update_snap_trace+0x845/0x12a0 [ceph]
-   ceph_handle_snap+0xcbe/0x2130 [ceph]
-
-Root cause: __build_xattrs() creates the index with
-__set_xattr(ci, name, ..., 0, 0, ...), so each xattr->name points into
-ci->i_xattrs.blob and is not copied. When the xattrs are dirty,
-ceph_queue_cap_snap() calls __ceph_build_xattrs_blob(), which swaps in
-prealloc_blob and returns the old blob. ceph_queue_cap_snap() then
-frees it with ceph_buffer_put(old_blob). The index nodes still point
-into the freed blob. Only i_xattrs.version++ keeps them from being
-used, because it forces the next __build_xattrs() to destroy the index
-first.
-
-__ceph_destroy_xattrs() is the one place that reads those stale names:
-
-    boutc_bounded(cl, "next p=%p (%.*s)\n",
-                  (p, xattr->name_len,
-                   BLOG_STR(xattr->name, xattr->name_len)),
-                  ...);
-
-The stale pointer already exists upstream. There the name is only read
-by doutc(), i.e. when dynamic debug is on for that site. With BLOG, the
-string is copied eagerly whenever BLOG is enabled, so the latent bug
-becomes a real UAF.
-
-Deterministic reproducer (20 iterations per case, original v6 ceph.ko):
-
-    mkdir d; touch d/f
-    setfattr -n user.aaaaaaaa -v 1 d/f
-    getfattr -d d/f          # build index from blob
-    setfattr -n user.bbbbbbbb -v 2 d/f   # xattrs dirty
-    mkdir d/.snap/s          # cap snap frees the old blob
-    getfattr -d d/f          # rebuild -> __ceph_destroy_xattrs()
-
-  BLOG off, dyndbg off                   : 0 reports
-  BLOG off, dyndbg on for that function  : 30 reports (in vsprintf string())
-  BLOG on,  dyndbg off                   : 23 reports in __ceph_destroy_xattrs
-                                           + 16 in blog_serialize_args
-
-Suggested fix: do not dereference xattr->name in that message, for
-example
-
-    boutc(cl, "next p=%p xattr=%p\n", p, xattr);
-
-With only that change I saw no further KASAN reports in the full run
-below.
-
-A related site in the same patch, in __copy_xattr_names():
-
-    boutc(cl, "dest=%s %p (%s) (%d/%d)\n", dest, xattr, xattr->name, ...);
-
-This uses %s on xattr->name, which is not NUL-terminated when it points
-into the blob. The doutc() had the same issue. On the binary path it
-can over-read. Printing dest (which is terminated) or using
-%.*s / BLOG_STR with name_len would avoid it.
-
-2) Empty magazines in alloc_batch are never reclaimed [patches 04/06]
-======================================================================
-
-The "Allocation Batch: Empty magazines" count in blog/stats grows with
-context churn and never goes down:
-
-  after blog_test basic/rotate/parallel : 321
-  after one 16-way fsstress run        : 6984  (first run: 318 -> 7439)
-
-The flow is one-way:
-
-- blog_module_rebalance_log_batch() moves whole full magazines from
-  log_batch to alloc_batch.full_magazines.
-- blog_batch_get() on alloc_batch drains them and parks the emptied
-  magazine on alloc_batch.empty_magazines.
-- Nothing returns those magazines to log_batch or frees them before
-  blog_batch_cleanup().
-- log_batch.empty_magazines therefore stays empty, and every
-  blog_batch_put() that fills a magazine calls
-  alloc_magazine(GFP_ATOMIC) for a new one.
-
-At 256 bytes per magazine this is about 1.8 MB after one fsstress run,
-and it keeps growing for the lifetime of the mount. The empties should
-either go back to log_batch or be trimmed like the full list.
-
-What passed (second run, with the one-line fix from (1), lockdep active)
-=========================================================================
-
-- blog/ debugfs layout, enabled defaults to 0, garbage writes to
-  "clear" are rejected.
-- fsstress 8 procs x 3000 ops with BLOG disabled.
-- BLOG enabled: basic ops (xattrs up to 600 bytes, flock, buffered and
-  O_DIRECT I/O, fsync, snapshots), readdir of 2000 entries forcing
-  rotation, and 70 concurrent tasks with 10 killed mid-flight.
-  entries decoded correctly (about 17k-22k records, 1000+ sources).
-- fsstress 16 procs with BLOG enabled, racing a continuous entries
-  reader, "clear" every 1s and enabled toggling every 3s. No splat and
-  no hang. It did not complete 16x8000 ops within 25 minutes under
-  lockdep+KASAN, so it was stopped by the timeout.
-- Dynamic debug and BLOG enabled at the same time.
-- Two mounts with noshare: separate blog/ directories and entries, and
-  a cross-mount copy.
-- umount + rmmod/modprobe ceph cycles with BLOG enabled.
-- xfstests with BLOG enabled on all mounts and a background entries
-  reader: generic/001 002 005 006 007 011 013 020 023 028 035 037 062
-  070 074 080 084 087 088 091 098 112 117 124 184 221 236 245 257 294
-  306 337 393 passed. 014, 024 and 258 were not run (ceph limitations).
-- No lockdep reports during the whole run.
-
-I did not include a performance comparison here.
-
-All the others LGTM.
-
-Thanks,
-Xiubo Li
-
-On Tue, 22 Sept 2026 at 16:00, Alex Markuze <amarkuze@redhat.com> wrote:
->
-> This series adds a per-mount binary flight recorder for CephFS debug
-> messages. It stores typed arguments in per-task page-fragment buffers
-> and reconstructs text through debugfs. BLOG complements the existing
-> tracepoints by covering the changing corpus of internal debug messages.
->
-> CONFIG_DEBUG_FS remains the only build gate. No new Kconfig option is
-> added. Runtime enablement is per mount and defaults to off. When no
-> binary context is available, logging falls back to the existing text
-> debug path. Normal CephFS operation does not depend on BLOG availability.
->
-> The per-task buffers, snapshot_mutex versus atomic-rotation split,
-> clear_seq handshake and reference-pinned teardown are unchanged from
-> v5. This 14-patch revision is based on testing commit 9015db49ecbf.
->
-> Changes since v5:
->
->   - Select the optional context first, then choose binary or text
->     logging. Each boutc wrapper expands its doutc fallback only once,
->     avoiding duplicate dynamic-debug sites. Keep the per-task argument
->     scratch and noinline record emitter.
->   - Move readdir and unlink-conflict name snapshots, and cross-cluster
->     UUID formatting, into binary-only noinline helpers. Retain lazy
->     %pd/%pU text formatting and hold name snapshots through serialization.
->   - Replace the unrolled argument-fill macros with recursive expansion.
->     Preserve argument order and single evaluation without stack arrays.
->     Remove the unused initializer macro family.
->   - Allow normal CephFS initialization to continue if BLOG's global
->     allocations fail. Enabling unavailable BLOG returns -ENODEV. MDS
->     request tracking and xattr recursion protection remain available.
->   - Correct commit subjects and stale references to bout().
->   - Rebase the complete series onto current local testing, retaining its
->     lazyio support and subsequent CephFS/libceph fixes.
->
-> Measurements use x86_64 GCC 11.4 with identical configurations:
-> CEPH_FS=m, PREEMPT=y, DEBUG_FS=y, DYNAMIC_DEBUG=y,
-> CEPH_LIB_PRETTYDEBUG=n and FS_ENCRYPTION=y. The baseline is 9015db49ecbf.
-> Individual frame estimates from objdump | checkstack.pl, in bytes:
->
->                               testing    v6
->   write_folio_nounlock            1128  1144
->   __ceph_setattr                   568   616
->   ceph_readdir                     544   616
->   ceph_read_iter                   280   392
->   ceph_splice_read                  80   328
->   ceph_write_iter                  344   440
->
-> These are individual frames, not worst-case call-chain measurements.
-> All six v6 frames are unchanged by the rebases. Before rebasing, the
-> same-base v5-to-v6 comparison reduced write_folio_nounlock from 1336 to
-> 1144 bytes and removed 43,303 bytes of text and 34,552 bytes of data.
->
-> The current composite ceph.o text/data/bss sizes are:
->
->   testing: 496516 / 75790 /   976
->   v6:      692799 / 87305 / 16288
->
-> Substantial DEBUG_FS=y build-size overhead remains: 196,283 bytes of
-> text, 11,515 bytes of data and 15,312 bytes of bss above this baseline.
->
-> Validation after rebase:
->
->   - GCC and Clang builds of fs/ceph/ceph.o and net/ceph/libceph.o.
->   - GCC builds of both objects with DEBUG_FS=n and with DYNAMIC_DEBUG=n.
->   - GCC/Clang host tests using actual serializer/request helper code
->     with kernel primitives stubbed: arities 0..32, argument order and
->     single evaluation, multi-argument macro expansion, bounded strings,
->     and nested/cross-mount request tracking with BLOG disabled/enabled.
->   - Host fault injection for each global BLOG allocation failure,
->     enable failure and ordinary CephFS initialization cleanup.
->   - All 14 formatted patches apply to the stated base and reproduce
->     the branch tree. Range-diff shows all 14 unchanged by this rebase.
->   - The 31 argument-fill checkpatch errors are gone. Full-series strict
->     checkpatch still reports 73 warnings and 45 checks, with no errors.
->
-> These are composite-object builds and host tests, not full module links
-> or booted-kernel/Ceph-cluster tests. No lockdep, KASAN or KCSAN run was
-> performed for this revision.
->
-> Known follow-up: existing %ptSp call sites still decode as pointer values
-> on the binary path. Timestamp-by-value serialization and its format tests
-> are deferred; text logging is unaffected.
->
-> AI assistance was used for the v6 wrapper/macro changes, lazy logging
-> helpers, optional-init failure handling, test harnesses and this cover
-> letter. The substantive changes carry Assisted-by attribution.
->
-> Alex Markuze (14):
->   ceph: add BLOG private headers
->   ceph: add BLOG deserialization support
->   ceph: add BLOG page-fragment allocator
->   ceph: add BLOG magazine batch allocator
->   ceph: add BLOG logger core
->   ceph: add BLOG per-module context management
->   ceph: add Ceph BLOG scaffolding
->   ceph: add boutc wrappers for BLOG
->   ceph: switch MDS request plumbing to struct ceph_journal_info
->   ceph: add BLOG debugfs interface
->   ceph: convert VFS inode and directory paths to BLOG logging
->   ceph: convert VFS data I/O paths to BLOG logging
->   ceph: convert capability and snapshot paths to BLOG logging
->   ceph: convert remaining helper paths to BLOG logging
->
->  fs/ceph/Makefile                |   3 +
->  fs/ceph/addr.c                  | 202 ++++---
->  fs/ceph/blog.h                  | 216 +++++++
->  fs/ceph/blog_batch.c            | 259 +++++++++
->  fs/ceph/blog_batch.h            |  44 ++
->  fs/ceph/blog_client.c           | 643 +++++++++++++++++++++
->  fs/ceph/blog_core.c             | 297 ++++++++++
->  fs/ceph/blog_debugfs.c          | 688 ++++++++++++++++++++++
->  fs/ceph/blog_des.c              | 335 +++++++++++
->  fs/ceph/blog_des.h              |  16 +
->  fs/ceph/blog_module.c           | 995 ++++++++++++++++++++++++++++++++
->  fs/ceph/blog_module.h           |  42 ++
->  fs/ceph/blog_pagefrag.c         |  62 ++
->  fs/ceph/blog_pagefrag.h         |  27 +
->  fs/ceph/blog_ser.h              | 404 +++++++++++++
->  fs/ceph/caps.c                  | 116 ++--
->  fs/ceph/crypto.c                |  18 +-
->  fs/ceph/debugfs.c               |  11 +-
->  fs/ceph/dir.c                   | 329 ++++++++---
->  fs/ceph/export.c                |  83 ++-
->  fs/ceph/file.c                  | 287 ++++++---
->  fs/ceph/inode.c                 | 256 ++++----
->  fs/ceph/locks.c                 |  66 ++-
->  fs/ceph/mds_client.c            | 369 +++++++-----
->  fs/ceph/snap.c                  |  17 +-
->  fs/ceph/super.c                 |  61 +-
->  fs/ceph/super.h                 |   7 +
->  fs/ceph/xattr.c                 | 104 ++--
->  include/linux/ceph/ceph_blog.h  | 292 ++++++++++
->  include/linux/ceph/ceph_debug.h |  81 ++-
->  include/linux/ceph/libceph.h    |   2 +
->  31 files changed, 5676 insertions(+), 656 deletions(-)
->  create mode 100644 fs/ceph/blog.h
->  create mode 100644 fs/ceph/blog_batch.c
->  create mode 100644 fs/ceph/blog_batch.h
->  create mode 100644 fs/ceph/blog_client.c
->  create mode 100644 fs/ceph/blog_core.c
->  create mode 100644 fs/ceph/blog_debugfs.c
->  create mode 100644 fs/ceph/blog_des.c
->  create mode 100644 fs/ceph/blog_des.h
->  create mode 100644 fs/ceph/blog_module.c
->  create mode 100644 fs/ceph/blog_module.h
->  create mode 100644 fs/ceph/blog_pagefrag.c
->  create mode 100644 fs/ceph/blog_pagefrag.h
->  create mode 100644 fs/ceph/blog_ser.h
->  create mode 100644 include/linux/ceph/ceph_blog.h
->
->
-> base-commit: 9015db49ecbfdc2a96129342c5bc1a471e04882a
-> --
-> 2.34.1
->
+VGhhbmtzLCBBbGV4LiBJJ20gZXhhbWluaW5nIHRoZXNlIG5vdzsgYW0gSSByaWdodCBpbiB0aGlu
+a2luZyB0aGF0IG1vc3Qgb3IgYWxsIG9mIHRoZXNlIGNvbW1pdHMgYXJlIGZpeGluZyBpc3N1ZXMg
+dGhhdCBhcm9zZSBkdWUgdG8gYSByZWZhY3RvciB0aGF0IGxhbmRlZCBhZnRlciA2LjEyLCBzbyB0
+aGV5IGRvbid0IGV4cGxhaW4gd2h5IHdlJ3JlIHNlZWluZyB0aGVzZSBidWdzIGluIDYuMTI/DQoN
+ClJlZ2FyZHMsIERvbWhuYWxsDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBB
+bGV4IE1hcmt1emUgPGFtYXJrdXplQHJlZGhhdC5jb20+DQpTZW50OiAyMyBTZXB0ZW1iZXIgMjAy
+NiAwOTozNg0KVG86IERvbWhuYWxsIE1jR3VpZ2FuIDxkbWNndWlnYW5Aa3guY29tPg0KQ2M6IGNl
+cGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBMaXogTm9ycmlzIDxlbm9ycmlzQGt4LmNvbT47IEJy
+ZW5kYW4gTWNBbGxpc3RlciA8Ym1jYWxsaXN0ZXJAa3guY29tPjsgUGF2bG8gUGlhdGtvdnNreWkg
+PHBwaWF0a292c2t5aUBreC5jb20+OyBQaWVycmUgS292YWxldiA8cGllcnJlQGt4LmNvbT47IE9s
+ZWcgRmlua2Vsc2h0ZXluIDxvbGVnQGt4LmNvbT4NClN1YmplY3Q6IFJlOiBbQlVHXSBjZXBoZnMg
+a2VybmVsIGNsaWVudCA2LjEyLng6IHdyaXRlcyBhZnRlciBmdHJ1bmNhdGUgb2NjYXNpb25hbGx5
+IGJlaW5nIGxvc3QsIGxlYXZpbmcgaG9sZSBpbiBmaWxlcw0KDQpDQVVUSU9OOiBUaGlzIGVtYWls
+IG9yaWdpbmF0ZWQgZnJvbSBvdXRzaWRlIG9mIHRoZSBvcmdhbmlzYXRpb24uIERvIG5vdCBjbGlj
+ayBsaW5rcyBvciBvcGVuIGF0dGFjaG1lbnRzIHVubGVzcyB5b3UgcmVjb2duaXNlIHRoZSBzZW5k
+ZXIgYW5kIGtub3cgdGhlIGNvbnRlbnQgaXMgc2FmZS4NCg0KDQpSZXNlbmRpbmcgaW4gcGxhaW4g
+dGV4dCBtb2RlLg0KSGVyZSBJcyBhIGxpc3Qgb2YgcGF0Y2hlcyB0aGF0IG1heWJlIHJlbGV2YW50
+DQoNCi0gIEFsZXgsIDIwMjUtMTItMTQgICAgIDBjYzAxNjksIDc4NmY1MTUNCi0gIEFsZXgsIDIw
+MjYtMDgtMTMgICAgIDY3YjIyMGENCi0gU2xhdmEsIDIwMjUtMDItMDQgICAgZjA4MDY4ZCwgY2U4
+MGI3NiwgMTU1MWVjNiwgZmQ3NDQ5ZA0KLSBTbGF2YSwgMjAyNS0wNy0zMCAgICA0MmRkM2Y3DQot
+IE1heCwgMjAyNS0wOC0yNyAgICAgIGNjZTdjMTUNCi0gTWF4LCAyMDI2LTA5LTA0ICAgICAgOTQ5
+ZDc0Yg0KDQoNCk9uIFdlZCwgU2VwIDIzLCAyMDI2IGF0IDExOjEw4oCvQU0gQWxleCBNYXJrdXpl
+IDxhbWFya3V6ZUByZWRoYXQuY29tPiB3cm90ZToNCj4NCj4gSGVyZSBJcyBhIGxpc3Qgb2YgcGF0
+Y2hlcyB0aGF0IG1heWJlIHJlbGV2YW50DQo+DQo+IC0gIEFsZXgsIDIwMjUtMTItMTQgICAgIDBj
+YzAxNjksIDc4NmY1MTUNCj4gLSAgQWxleCwgMjAyNi0wOC0xMyAgICAgNjdiMjIwYQ0KPiAtIFNs
+YXZhLCAyMDI1LTAyLTA0ICAgIGYwODA2OGQsIGNlODBiNzYsIDE1NTFlYzYsIGZkNzQ0OWQNCj4g
+LSBTbGF2YSwgMjAyNS0wNy0zMCAgICA0MmRkM2Y3DQo+IC0gTWF4LCAyMDI1LTA4LTI3ICAgICAg
+Y2NlN2MxNQ0KPiAtIE1heCwgMjAyNi0wOS0wNCAgICAgIDk0OWQ3NGINCj4NCj4gT24gVHVlLCBT
+ZXAgMjIsIDIwMjYgYXQgMzowMeKAr1BNIERvbWhuYWxsIE1jR3VpZ2FuIDxkbWNndWlnYW5Aa3gu
+Y29tPiB3cm90ZToNCj4+DQo+PiBTb3JyeSwgc2VuZGluZyB0aGlzIGJhY2sgdG8gdGhlIG1haWxp
+bmcgbGlzdCBiZWNhdXNlIEkgZm9yZ290IHRvIHVzZSByZXBseS1hbGwuDQo+Pg0KPj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IERvbWhuYWxsIE1jR3VpZ2FuIDxkbWNndWln
+YW5Aa3guY29tPg0KPj4gU2VudDogMjIgU2VwdGVtYmVyIDIwMjYgMTI6NTANCj4+IFRvOiBBbGV4
+IE1hcmt1emUgPGFtYXJrdXplQHJlZGhhdC5jb20+DQo+PiBTdWJqZWN0OiBSRTogW0JVR10gY2Vw
+aGZzIGtlcm5lbCBjbGllbnQgNi4xMi54OiB3cml0ZXMgYWZ0ZXINCj4+IGZ0cnVuY2F0ZSBvY2Nh
+c2lvbmFsbHkgYmVpbmcgbG9zdCwgbGVhdmluZyBob2xlIGluIGZpbGVzDQo+Pg0KPj4gV2UgaGF2
+ZW4ndCB5ZXQgYmVlbiBhYmxlIHRvIHJlcHJvZHVjZSB0aGUgaXNzdWUgdW5kZXIgY29udHJvbGxl
+ZCBjb25kaXRpb25zIGF0IGFsbDogdGhlIGJlc3Qgd2UgaGF2ZSBpcyBhIGRlcGxveW1lbnQgdGhh
+dCBzZWVtcyB0byBnZXQgYSBjb3JydXB0aW9uIGFib3V0IG9uY2UgYSBmb3J0bmlnaHQsIHdyaXRp
+bmcgNDBHaUIvZGF5LiBEbyB5b3UgaGF2ZSBsaW5rcyB0byB0aGUgdHJ1bmNhdGUtcmVsYXRlZCBm
+aXhlcyB5b3UgbWVudGlvbmVkPyBJJ20gZ2V0dGluZyBub3doZXJlIHRyeWluZyB0byBmaW5kIHRo
+ZW0gbXlzZWxmIGFuZCB0aGV5J2QgYmUgdmVyeSBoZWxwZnVsIHRvIHJlZmVyIHRvLg0KPj4NCj4+
+IFJlZ2FyZHMsIERvbWhuYWxsDQo+Pg0KPj4gRnJvbTogQWxleCBNYXJrdXplIDxhbWFya3V6ZUBy
+ZWRoYXQuY29tPg0KPj4gU2VudDogMjIgU2VwdGVtYmVyIDIwMjYgMTI6MzkNCj4+IFRvOiBEb21o
+bmFsbCBNY0d1aWdhbiA8ZG1jZ3VpZ2FuQGt4LmNvbT4NCj4+IFN1YmplY3Q6IFJlOiBbQlVHXSBj
+ZXBoZnMga2VybmVsIGNsaWVudCA2LjEyLng6IHdyaXRlcyBhZnRlcg0KPj4gZnRydW5jYXRlIG9j
+Y2FzaW9uYWxseSBiZWluZyBsb3N0LCBsZWF2aW5nIGhvbGUgaW4gZmlsZXMNCj4+DQo+PiBXZSBh
+cmUgdXNpbmcgcGF0Y2h3b3JrIGJ1dCBpdCdzIG5vdCBiZXR0ZXIgdGhhbiBqdXN0IGdvaW5nIHRo
+cm91Z2ggdGhlIHBhdGNoZXMgd2l0aCBnaXQgbG9nIC0tZm9sbG93Lg0KPj4NCj4+IEkgd291bGQg
+dHJ5IHJ1bm5pbmcgYSBmcmVzaCB1cHN0cmVhbSBrZXJuZWwgYnVpbGQgYW5kIHNlZSBpZiB0aGUg
+cHJvYmxlbSBwZXJzaXN0cy4gSWYgdGhlIHRlc3QgaXMgZmFzdCBhIGdpdCBiaXNlY3Qgd2lsbCBs
+YW5kIHlvdSBvbiB0aGUgcGF0Y2ggeW91IG5lZWQuDQo+Pg0KPj4gKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo+PiAq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioNCj4+ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqIFRoaXMgZW1haWws
+IGl0cyBjb250ZW50cyBhbmQgYW55IGZpbGVzDQo+PiBhdHRhY2hlZCBhcmUgYSBjb25maWRlbnRp
+YWwgY29tbXVuaWNhdGlvbiBhbmQgYXJlIGludGVuZGVkIG9ubHkgZm9yIHRoZSBuYW1lZCBhZGRy
+ZXNzZWVzIGluZGljYXRlZCBpbiB0aGUgbWVzc2FnZS4gSWYgeW91IGFyZSBub3QgdGhlIG5hbWVk
+IGFkZHJlc3NlZSBvciBpZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGVtYWlsIGluIGVycm9yLCB5
+b3UgbWF5IG5vdCwgd2l0aG91dCB0aGUgY29uc2VudCBvZiBLWCwgY29weSwgdXNlIG9yIHJlbHkg
+b24gYW55IGluZm9ybWF0aW9uIG9yIGF0dGFjaG1lbnRzIGluIGFueSB3YXkuIFBsZWFzZSBub3Rp
+ZnkgdGhlIHNlbmRlciBieSByZXR1cm4gZW1haWwgYW5kIGRlbGV0ZSBpdCBmcm9tIHlvdXIgZW1h
+aWwgc3lzdGVtLg0KPj4gVW5sZXNzIHNlcGFyYXRlbHkgYWdyZWVkLCBLWCBkb2VzIG5vdCBhY2Nl
+cHQgYW55IHJlc3BvbnNpYmlsaXR5IGZvciB0aGUgYWNjdXJhY3kgb3IgY29tcGxldGVuZXNzIG9m
+IHRoZSBjb250ZW50cyBvZiB0aGlzIGVtYWlsIG9yIGl0cyBhdHRhY2htZW50cy4gUGxlYXNlIG5v
+dGUgdGhhdCBhbnkgdmlld3MsIG9waW5pb24gb3IgYWR2aWNlIGNvbnRhaW5lZCBpbiB0aGlzIGNv
+bW11bmljYXRpb24gYXJlIHRob3NlIG9mIHRoZSBzZW5kaW5nIGluZGl2aWR1YWwgYW5kIG5vdCB0
+aG9zZSBvZiBLWCBhbmQgS1ggc2hhbGwgaGF2ZSBubyBsaWFiaWxpdHkgd2hhdHNvZXZlciBpbiBy
+ZWxhdGlvbiB0byB0aGlzIGNvbW11bmljYXRpb24gKG9yIGl0cyBjb250ZW50KSB1bmxlc3Mgc2Vw
+YXJhdGVseSBhZ3JlZWQuDQo+PiAqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioNCj4+ICoqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKg0KPj4gKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioNCg0KKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioNClRoaXMgZW1haWwsIGl0cyBjb250ZW50cyBhbmQg
+YW55IGZpbGVzIGF0dGFjaGVkIGFyZSBhIGNvbmZpZGVudGlhbCBjb21tdW5pY2F0aW9uIGFuZCBh
+cmUgaW50ZW5kZWQgb25seSBmb3IgdGhlIG5hbWVkIGFkZHJlc3NlZXMgaW5kaWNhdGVkIGluIHRo
+ZSBtZXNzYWdlLiBJZiB5b3UgYXJlIG5vdCB0aGUgbmFtZWQgYWRkcmVzc2VlIG9yIGlmIHlvdSBo
+YXZlIHJlY2VpdmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHlvdSBtYXkgbm90LCB3aXRob3V0IHRo
+ZSBjb25zZW50IG9mIEtYLCBjb3B5LCB1c2Ugb3IgcmVseSBvbiBhbnkgaW5mb3JtYXRpb24gb3Ig
+YXR0YWNobWVudHMgaW4gYW55IHdheS4gUGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHJldHVy
+biBlbWFpbCBhbmQgZGVsZXRlIGl0IGZyb20geW91ciBlbWFpbCBzeXN0ZW0uDQpVbmxlc3Mgc2Vw
+YXJhdGVseSBhZ3JlZWQsIEtYIGRvZXMgbm90IGFjY2VwdCBhbnkgcmVzcG9uc2liaWxpdHkgZm9y
+IHRoZSBhY2N1cmFjeSBvciBjb21wbGV0ZW5lc3Mgb2YgdGhlIGNvbnRlbnRzIG9mIHRoaXMgZW1h
+aWwgb3IgaXRzIGF0dGFjaG1lbnRzLiBQbGVhc2Ugbm90ZSB0aGF0IGFueSB2aWV3cywgb3Bpbmlv
+biBvciBhZHZpY2UgY29udGFpbmVkIGluIHRoaXMgY29tbXVuaWNhdGlvbiBhcmUgdGhvc2Ugb2Yg
+dGhlIHNlbmRpbmcgaW5kaXZpZHVhbCBhbmQgbm90IHRob3NlIG9mIEtYIGFuZCBLWCBzaGFsbCBo
+YXZlIG5vIGxpYWJpbGl0eSB3aGF0c29ldmVyIGluIHJlbGF0aW9uIHRvIHRoaXMgY29tbXVuaWNh
+dGlvbiAob3IgaXRzIGNvbnRlbnQpIHVubGVzcyBzZXBhcmF0ZWx5IGFncmVlZC4NCioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo=
