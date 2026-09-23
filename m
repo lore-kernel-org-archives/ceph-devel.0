@@ -1,83 +1,107 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2848E4334AD
-	for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2026 05:54:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECFC041684A
+	for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2026 06:12:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790142891; cv=none; b=EJ1GaNBw1sLCMm3WyovQ0peU+lmDCeM9vAv0RPSBzUq0xYq4GNFYKIxMlQdJD3MvzskNft0iw1tcYbHmXuPblXqFw6o216hMjfX/pVjzPVqYxihHHegAOptEcZf0tiiXyniroYEGhUfX5QeI4pcVKBPtEwlOF4y3PpFU7JGqOPs=
+	t=1790143944; cv=none; b=tW3MX9ho5hwSffrEIQ2haPJtGBmg3YUqRMRY/mImTuLrmL/RZhSqYG8OoNYIkNHr6jxyd23hUDEfXOBvbXE5zf7LlOlHPvlLxcdplAhGqK8dKmzC8DbsEM2AWe4O7dZYUPEUM9+7561bQF84Suku579sl2pZV+zkuQ/xU2+/xMw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790142891; c=relaxed/simple;
-	bh=LgWVLK6gvdnHJpUDwHlN4pWuYgqNDy3TE0yb4Pj2fOs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Ik5UUVYQULXVtA5mVlc94RGcxrwHwMnGVHViUAdXKkfmvxq92ZrUV+gjpKbQOISZa5tzKzjETTrbX7yv1OM9phSuzGkYx+sVQnBUNyMTL2Mq7kKDAob1fhGd86KPJXJGYxucxYkowU0Mbr6AQLPDaxsogvTtR4ymgz9yrxCnzvo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DSoIibtM; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790143944; c=relaxed/simple;
+	bh=pDG+LUYfWE/lg9GV3EwC7bNAC2luO8YmosElSYurcVo=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=tiPDI4Axem25uVPP+dZ/hBKxJSP1Y6TW3aN5eWG587c+AlPdTmG4PAEGbFnDSJApKiEaNHNyLGxGOTq1L9izYWUCtxdj6sPT8bfagIdGsEJ/6QfSSD3hTjEIEkzd9HNfegMzSqpY7Wr+eusfgMraHGST0HYSIgXAtYnPNNf5Dx0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WtU2xhN5; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=DXHdJRuU; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DSoIibtM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C75E51F00899
-	for <ceph-devel@vger.kernel.org>; Wed, 23 Sep 2026 05:54:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790142889;
-	bh=5PfmXhl6pDJmGcZOb1arBTuyqaLDSoD3cVhEOoKPAdQ=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=DSoIibtMXWwq7/HHqHROJh+DvTrgAhbDo+4G7g13PRQ0A/+/87G9oViX1MsZSUv0n
-	 Ipo1Fq+Sha/PccULMVkaVUaZ7XHl0uGysjEw2o8Xbr87plIMA54q+ZCElqYluSLWHs
-	 ljGpP8HV/CXtlSPLWRUMlr4FS7MBt4vtjKlnn/nkmSTrkJ/E5nNvUU+auhjYhJC4OD
-	 8KddNDN4XmWTXEK7Pi485sT7YZVx6lh3j0jNHvZsgUiqotLZv2GF41PDodeOaqE1P2
-	 zG4FcMGJDllnHmNbDtvSjxvvMOF+NAHSGguBDbiwO1QP3BnIexop4X1smJT1d4hbmN
-	 EKBECAMeWzaCQ==
-Received: by mail-ej2-f43.google.com with SMTP id a640c23a62f3a-c2a4fbc5586so70943466b.2
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2026 22:54:49 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AKwUvByrH5LwMc35DJSkxU0i2Uv7bMe+AaMgdd7B7T91B9FnM0BAHgaHWIbekABXWw8XzV0TLIfMAWjEA99H@vger.kernel.org
-X-Gm-Message-State: AFuF++krl7DJYdEYBllnZz0GSaIuTYhR57hdLCGnc3P2kEQA2tA+Y+OX
-	1EnH3NEkZJBhsqq7VBAPY0pmO+g0LW/v6mAzuOIHiwiJtel2GaGwVXc9l9/dNHIu6PuyS/qu8/X
-	F6EWbfa/YSo6BXuU8FWwhxy//SLx5Hck=
-X-Received: by 2002:a17:907:ea93:b0:c29:4490:50c8 with SMTP id
- a640c23a62f3a-c2aada6a9c9mr122986066b.8.1790142888439; Tue, 22 Sep 2026
- 22:54:48 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WtU2xhN5";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="DXHdJRuU"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1790143941;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=AZghb44QKWgY5PpxdFfd4Kvsv/MN9iR1QhBDgr3BDCM=;
+	b=WtU2xhN5CMzmL/Dt2AaD6hRLsx6r4HSYxhTfInv18cecnVSLMacILMe2/EjNUrewJ+i2Q3
+	ijUSBRFN3WTPRVtPFTCtDpq+sU+7S2F9u2rrgzUId22R3ZzJOmQEdLH5J9EgFOEGgWKEZr
+	7FSPL14UO7ZWdWmjqHRKEH9Eja1wL/0=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-30-InPzvfUWMcG-DMmPp3Uf0A-1; Wed, 23 Sep 2026 02:12:19 -0400
+X-MC-Unique: InPzvfUWMcG-DMmPp3Uf0A-1
+X-Mimecast-MFC-AGG-ID: InPzvfUWMcG-DMmPp3Uf0A_1790143939
+Received: by mail-qv1-f69.google.com with SMTP id 6a1803df08f44-90e87478402so14838656d6.1
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Sep 2026 23:12:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1790143938; x=1790748738; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=AZghb44QKWgY5PpxdFfd4Kvsv/MN9iR1QhBDgr3BDCM=;
+        b=DXHdJRuUfXskjEHY/gejvyHmMSxP6MWo3cnCp5knLxGl0PVYqMRE0b77+mpxYhWH2t
+         KlZohWRkvXRbk4N6Lo2QP19PR52ALjUrp1sslOpQhEgGWbDUDR2ZC6aw2uDhGlDJmMEE
+         Uac0FmhJpuBbrPNKh2uZM2xl+DyNL7xp7AwDUhdIYK9WG2LNfwuGgydRlzKPMr4gFFMa
+         wlwC/CQfux0zOF1OvsHjHS1cpaWTsqGrgfGGmygiSTYCZZvvCdKkqiZUkiSKlEoSwYzG
+         Bj/K5gtweDQRlgpxFb+R3shAUCGrvNrSgIgqVP9u23c8LeULFymp37gnmtLxAj0QK9W2
+         0faw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1790143938; x=1790748738;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=AZghb44QKWgY5PpxdFfd4Kvsv/MN9iR1QhBDgr3BDCM=;
+        b=rHgYgDm0n35Cb/kgsQR3DcMAxEsiIgDzyfNyZQGwydYbZsDIGSR8kAGt2FbwljxCZX
+         ZnRJfpn1Kk6u1hACnZgR7dFSXJfzyLFa/WFQimKTxt+wOe7xEiRNI74ZEbkh5aJ1bAm0
+         j3fMpIOrTuEh3FV5mlXLNU8O7vSWXyXeYGH5oF1rGM0XncANcG359zQEDoo7YYZ8RL+q
+         eBeDH8AlpON8KDz12RgAQkrkO8R75dN0bJWLdhG4iN/okwhdkPmtSJvytB21OZik12Or
+         zAtB02DKonguqXzCz7sFek7TL5sTNwdmy6Zcdv21A/xzOCp8ZO+7JeupvvO4TIzCPAVK
+         Ta/A==
+X-Forwarded-Encrypted: i=1; AKwUvBwd3xZXxBmTC/zLqWXWkSBUx3XfvVxOgqg964JYUKwiMBZfKkliisOFWRjgXHbcXejnp/vsVvfp17Ow@vger.kernel.org
+X-Gm-Message-State: AFuF++m2K9HgBnKzC69helHDX3oSNI4yBbBnv9nvghgnrfp/AIHJHvBJ
+	sDcLqsRY6TXQPQMd8C1nLC7QgrfIcoGK+HC1zQECYpOL/OQeIJj4P0WnUmFzRTUpVFLk9vFHoIS
+	5fcJ8Vq7O3weVZoTLCE8W/TdPo/DTIQMymU1PBVKX7vxyGh0/IOJRLf9h9CA83+8=
+X-Gm-Gg: AYBFou3ml+VRMPAz/XptSgSujNL3aas9OcBNp8mk5h4UgMsPBdiWlzCcvs7CKRV8frp
+	lj9rha5czzlxirK822lvr5F7WfybmrtRO1WbubPskknmxNMtxTj1dQlFlZU0E4swZmITBHLg0HY
+	dYm25IjY97M/4O4Z3JZ58ix2cqicvbuCr/I5uia7v6JArPZ0ywDyNG3aC1rP4Rk/+8MGIKoXqyf
+	guR+FAKOgZfRDAoca1iaW+Reg9tINCumzFIKV7VhfG3GR1k12A/nZ50uxb0LKWQZDjWrnzQkClR
+	OvxeMlq7X72BYNXp25AQnUufbb9pE+bG8kSiQLzsvrT2EM8wUMS88u0GOYxbDApUoN/oqjKH5Si
+	5FT3stRBT8NrdaUY/qe+xllnhFYEWxBVLmCQmRISY2g1dvgiPhZ2+Qxt/dy6pP62UWRJxIWPc60
+	ReOjEuZZQG73asmw==
+X-Received: by 2002:a05:622a:4d8b:b0:532:c1b0:299c with SMTP id d75a77b69052e-532eae344cemr26065271cf.60.1790143938678;
+        Tue, 22 Sep 2026 23:12:18 -0700 (PDT)
+X-Received: by 2002:a05:622a:4d8b:b0:532:c1b0:299c with SMTP id d75a77b69052e-532eae344cemr26065061cf.60.1790143938246;
+        Tue, 22 Sep 2026 23:12:18 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-532eb34f735sm13171051cf.20.2026.09.22.23.12.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 22 Sep 2026 23:12:17 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Xiang Mei <xmei5@asu.edu>
+Cc: Alex Markuze <amarkuze@redhat.com>,
+	ceph-devel@vger.kernel.org
+Subject: Re: ceph: fix integer overflow in the snap trace bounds check
+Date: Wed, 23 Sep 2026 06:12:15 +0000
+Message-Id: <20260923061215.844720-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260915214027.1415623-1-xmei5@asu.edu>
+References: <20260915214027.1415623-1-xmei5@asu.edu>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260919022441.3305170-1-neilb@ownmail.net> <20260919022441.3305170-6-neilb@ownmail.net>
-In-Reply-To: <20260919022441.3305170-6-neilb@ownmail.net>
-From: Namjae Jeon <linkinjeon@kernel.org>
-Date: Wed, 23 Sep 2026 14:54:36 +0900
-X-Gmail-Original-Message-ID: <CAKYAXd9W3O=Dsavu4=XUp+3SyFWOL3Bs7fbzg0YBFpwk4-TCAA@mail.gmail.com>
-X-Gm-Features: AclHuK8GYgU6BX6NCq2-6QNZx7GNKhZ3196sjTH0JZehxyF3dSZODayjCY9JTRw
-Message-ID: <CAKYAXd9W3O=Dsavu4=XUp+3SyFWOL3Bs7fbzg0YBFpwk4-TCAA@mail.gmail.com>
-Subject: Re: [PATCH v2 05/14] cifs: allow -EISDIR precedence over -EFTYPE in __cifs_do_create()
-To: NeilBrown <neil@brown.name>
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, 
-	Chuck Lever <cel@kernel.org>, Jeff Layton <jlayton@kernel.org>, Jori Koolstra <jkoolstra@xs4all.nl>, 
-	Mateusz Guzik <mjguzik@gmail.com>, Dorjoy Chowdhury <dorjoychy111@gmail.com>, 
-	Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>, 
-	Andreas Gruenbacher <agruenba@redhat.com>, gfs2@lists.linux.dev, 
-	Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	Paulo Alcantara <pc@manguebit.org>, linux-cifs@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Sat, Sep 19, 2026 at 11:25=E2=80=AFAM NeilBrown <neilb@ownmail.net> wrot=
-e:
->
-> From: NeilBrown <neil@brown.name>
->
-> If atomic_open is given __O_REGULAR, we now would prefer -EISDIR
-> if a directory was found.  So move the S_ISDIR() tests earlier.
->
-> Also don't return -EFTYPE for S_ISLNK() - that should get -ELOOP and only
-> if O_NOFOLLOW.
-Simply exempting symlinks from the __O_REGULAR check in cifs is not
-sufficient. Once this check allows the symlink through,
-cifs_atomic_open() still calls finish_open() on it, setting
-FMODE_OPENED. open_last_lookups() then skips symlink traversal, so
-do_open() returns -EFTYPE before may_open() can return -ELOOP. This
-path also reaches cifs_new_fileinfo(), which pins the symlink dentry
-with dget(). The symlink's file operations do not provide CIFS's
-.release handler, so the failed open does not call cifs_close() to
-release that reference.
+Hi Xiang,
+
+Thanks for the patch.
+
+Reviewed-by: Alex Markuze <amarkuze@redhat.com>
+
+-- 
+Alex Markuze
+
