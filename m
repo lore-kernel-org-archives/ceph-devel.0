@@ -1,753 +1,290 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from AM0PR02CU008.outbound.protection.outlook.com (mail-westeuropeazon11023111.outbound.protection.outlook.com [52.101.72.111])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E3A34A0130
-	for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 15:31:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790263877; cv=none; b=R28qDwD1ZGIfdVSi8+fAwK7S0mBNBj0ddonZK+BNKNm+PCG/MlOVQfIHAK7Yqb1ASjBnFpPJGieM3wZ4XaNZ/LidKmJ3f3rZFe5CHMz9fTxrGDLWo4W0MuTpiQyhk5kLSsUHN+SWNUsfBL3WHx130gG+WAgNSOBO/FFp0HKKBEo=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790263877; c=relaxed/simple;
-	bh=Ehnxt0GySVfSU0ycakgez33qzt/fItpgiBuToPa5i/s=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=uAA149QRCwy1hzd/b33BA9oan/i5s4wdPDzplTgguEiFT6rAWoPY56/5IinTxa+VjHnLRD/nNRKKXQHaw9e/1+mNISC0PJ3l8rmJJiOzwlDq3ydZW3C4vcwnXiUqxP9vRpvMuXtm8GXNRRx4l5lGcWwL2kGHw/t02rtKCBvHSUk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VXNVa0do; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=lc8Vj3/S; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D2994A5ED3
+	for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 15:57:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.72.111
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1790265461; cv=fail; b=pRgw81wyYo812mCBs5IPMKJabWetvILJoPfPhuKhJwsiqJVutlORgJPaBNd3kvF9pgNG9BPBYroCDfpH5GRYXlvG9fqL2DVCpbhoF6ZwpRxRULj6hSkgN5M4rUitVFkPsLZLXkDcWJJ2sKyHy1m2I/yzJzobTDzs/2qNbhiRrwo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1790265461; c=relaxed/simple;
+	bh=6ugINgE2RcmXGfsQaGz+BE4fiHW6pZzpYUMeqdyTREk=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=hkK49TqHv++h5PtUVsHyBSSMrml8xaBvqdd9kGkHDey2T4ruqQfbXko0fJPx60h2b9zWmqzyGErEU7jkIWb0Foxz+Jk67/b35qsb2w3jBchttynBHcOdHXa64UzJLD733ZoZXA2pVjLTkssevW45KdBeztjcrUAOUfp0CDTT9Bs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kx.com; spf=pass smtp.mailfrom=kx.com; dkim=pass (2048-bit key) header.d=kx.com header.i=@kx.com header.b=JApiJk2O; arc=fail smtp.client-ip=52.101.72.111
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VXNVa0do";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="lc8Vj3/S"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1790263874;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=U9NIb+PA+5f7OZn884FAK7TMBs9FAWKWFK4wcAGDXp4=;
-	b=VXNVa0dols59TOF3lHZoh/HZU3vT03Aao2BnCsWaVXKMkvmBuO5hfY1MiVA1MxzM8APg5e
-	piA34CNPKhUndwoZBSU+DOABvQbjPyNI2PpQsg6KFTwvlgFrN6pDKfRfjVBJeJ077fDl47
-	fiQE0lvdrnGSB08st0ggMJ26vbFPX28=
-Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
- [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-299-pv29XYhvNS6zWuozlaNoiw-1; Thu, 24 Sep 2026 11:31:12 -0400
-X-MC-Unique: pv29XYhvNS6zWuozlaNoiw-1
-X-Mimecast-MFC-AGG-ID: pv29XYhvNS6zWuozlaNoiw_1790263871
-Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-6aa734a7228so2611822a12.0
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 08:31:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1790263871; x=1790868671; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=U9NIb+PA+5f7OZn884FAK7TMBs9FAWKWFK4wcAGDXp4=;
-        b=lc8Vj3/SQarDKE1nu6pVRisss8K/zotLgXKVufi9F+0mxa2fT2HQ2nk6bga1ONl5pn
-         4y9P5EqKTDAcN0NzX4zIz5o61uj3WNLsTSbqu/OcczUcIZgym7RVheg0gJpaeejUySfp
-         DyT6ky3DWMJynvgdJaMLts+XFOtsh+RVbp3mTEujPWB2ROwf84uWgZjtVB+AnjJrpX2Q
-         8gLWFnr1JtAMQ8zjUA47KVTfa8Q4pjN/WoikI4dEqMbI5KHhI0W81Ez+PFEibcvEiqq5
-         GmqJhTPetB8EPaeBbQbP+Xt3fSC0NwgB3WfdJcic98fOz+W3rSSyNGi//lAp7HPt8+/V
-         hvvg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790263871; x=1790868671;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=U9NIb+PA+5f7OZn884FAK7TMBs9FAWKWFK4wcAGDXp4=;
-        b=XXufsYW97RmP5K1alE5NuNIAQ55xDWITVRGWs9lLeSEVHSxEDpj9A5u9xlxqReF7om
-         hiZADOSPQm+MxOlRxgqXoZYqOX5lQUAibWPDiu6xtZW6vDqyLZHHd/6TtqKF3JspiuR9
-         D0aIdHBfQWRhAZ+dLfr2WDh4eYpwv3TpzDvnMVv6SeiLgKTOPgNOW71N62Aft+9v332b
-         BotCmYhtdKBi9pLc3QkNyCHfmyqzJlZUipFX71UitATZPN9O8bwD6TyBGKymMIV6qctk
-         7nFTL73xVs1LuG53HuOsxBfUSkrNake0is4DW6Ia3H0OBKEhMLNBKFKY77EAgihYUVee
-         zz6Q==
-X-Gm-Message-State: AFuF++lClM+J1WJ5nUNFTmjLYgGPjSF2qUWcFaMLmXN6oIcLS+OZzpvP
-	YyMYzDnSObKaLI9l6JPSxDgzqNcptNARp05lKP58+QI2F80w3ke4CrkPz2G1dxfOsol5FfGhK7K
-	GRrRxyzU/AUHd8n5UEo8YDEF9qTejuz7YbP6TXJKXdwTYmeIpWFUI0G6fR2SZsaRQdHOgIk5jm3
-	7FdAuPngduBRjgQykxVeAl9Yc3lsNdfYBJDIcCkokLBMQna2uOQA==
-X-Gm-Gg: AYBFou0lsNAeVeXsXewigOvBE1yNey20yNwUmhPULDD59wly1ix+QxShOZqLPsMaO0B
-	ljY8qyh1Rs7Hoq3641kblrziHIJknaeyXM1ZSmWZwuZnL7hD10CY48gZCjmaXqaTKySiC5N9tR7
-	75SqkZpM5GgAoatYC8HhdzxVOgRjF7mcNRgmKNqZGU/WFXtDtIaSuZEXsY8DyrnT/XqfjFDag5S
-	zJ0PJrmG7Yp58BWEy7dVUfdkHBkiP1enWVM+WF1sQk3kfsYUfK701cakL53cfeh+Cj2JEmIHBzj
-	ICfMvMOAWcrcpjZGGnjZ9Xn2Z+6OgNXtJoAyiE+f2pT79XAffst5QGKtQwTWS9IYy5fMbiTgKu3
-	sQMeCPDRjLUSECgD44x+KUk0L8o60riCYQDy6jrvUJIl4t3EnbA5RTH6/f4Yb1my7BvKgIz+/7I
-	mhsxMCQUpINTBpDA==
-X-Received: by 2002:a05:6402:401a:b0:6aa:c767:ab47 with SMTP id 4fb4d7f45d1cf-6aacc856793mr2527168a12.35.1790263870377;
-        Thu, 24 Sep 2026 08:31:10 -0700 (PDT)
-X-Received: by 2002:a05:6402:401a:b0:6aa:c767:ab47 with SMTP id 4fb4d7f45d1cf-6aacc856793mr2527121a12.35.1790263869777;
-        Thu, 24 Sep 2026 08:31:09 -0700 (PDT)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6aab386e5b9sm3941908a12.8.2026.09.24.08.31.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Sep 2026 08:31:08 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: ceph-devel@vger.kernel.org
-Cc: idryomov@gmail.com,
-	xiubo.li@clyso.com
-Subject: [PATCH v7 14/14] ceph: convert remaining helper paths to BLOG logging
-Date: Thu, 24 Sep 2026 15:30:44 +0000
-Message-Id: <20260924153045.994784-15-amarkuze@redhat.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260924153045.994784-1-amarkuze@redhat.com>
-References: <20260924153045.994784-1-amarkuze@redhat.com>
+	dkim=pass (2048-bit key) header.d=kx.com header.i=@kx.com header.b="JApiJk2O"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=OzMjzU+mRsC8dGEkOYWjGXa92tls9M+h/3Z1DCBu0dxFekGYLQoc9//1OptHgQOwM1FlBd85fNwhNp+EO2qEqeSay0fQujjXNKGvc+mZ9SedXGx0+tvA+dWzkLTy+xFwVdz2HmWHqzVWqoCZFx6VYo4wSUT1wkPdbPfFsNgSWrz0o5P2AxuaaVstD96KlqTu6A9xdIq1X6fXyMeTrVGtYJstuienfTKHsUcBDuK4OURoX7kfmhBz3RmPIA40yChlG+B2IDZnxVQDftlX0V5vtudcZZLGeZ8QGnbvIJnSJOlebv/Epga34grAOxLuG9rCAUdnt/c7Xup/2s1zlxw0pw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=6ugINgE2RcmXGfsQaGz+BE4fiHW6pZzpYUMeqdyTREk=;
+ b=ED8sa3rmqKuUWwl8a/dLnY20b5nHTHFHBNL9oUW9TAH0sikT9YbqOmrss6r4L/yF9OHiRec4PDPGBZCUZmbGhShvqrGFV/f/KbHJVG7ije2iaEOWaSWwPRWKt+dytlcdFgbFLyo0TfDcnwFhWxT9wZy2NAgbYxeIMwkY5BU4oEY6Ir+Qjj0PteOabDEwunSVo7rtqPimK7D2qSRerju5MQD5mcO6cOI/NBUNYufQJNJqU0KR/DlsMES3CVBCRTLUqDYr6aiz2B+/NSevjJDaJWRvWyabUxwpLChX0daZF33Kfu5prYH0987iaSo2Q7wS4GUclh3mPH9BnzLfq+tQxQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=kx.com; dmarc=pass action=none header.from=kx.com; dkim=pass
+ header.d=kx.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kx.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=6ugINgE2RcmXGfsQaGz+BE4fiHW6pZzpYUMeqdyTREk=;
+ b=JApiJk2OEGFr5HT1qCYwxuurxZJRoerDKTjFOITjzET6WwYAkH6M+qOcIVOTEpIDzNqh5BpJSE7gm3gvXkltTH5UbVToUY38aBpITZLpeAHgpouTzx2xUD6sfbcSDMIduToAE32kdcV+WgCYnNq0PskkJeytfAPy1AmorTvGOXfTKO1rYPZQhziKAlXQi2siEUqixmUizs+j8uqpHQWrbmsK4GoMbbZgkvEEd/KXCjmHY5Fi8WXRIO3ZUKw2AIBwM5PzDudCuIHbBoSb5iIh2YgCu5wt1irkc6caBxwpxf3SVx+Zp7pw+BFxXXvlGLmR9jaKQmv06h+HRVAi2j00zw==
+Received: from GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:150:ae::7)
+ by GVXPR10MB9661.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:150:314::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.18; Thu, 24 Sep
+ 2026 15:57:33 +0000
+Received: from GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
+ ([fe80::a82e:3f55:c85d:7542]) by GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
+ ([fe80::a82e:3f55:c85d:7542%2]) with mapi id 15.21.0451.014; Thu, 24 Sep 2026
+ 15:57:33 +0000
+From: Domhnall McGuigan <dmcguigan@kx.com>
+To: Alex Markuze <amarkuze@redhat.com>
+CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Liz Norris
+	<enorris@kx.com>, Brendan McAllister <bmcallister@kx.com>, Pavlo Piatkovskyi
+	<ppiatkovskyi@kx.com>, Pierre Kovalev <pierre@kx.com>, Oleg Finkelshteyn
+	<oleg@kx.com>
+Subject: RE: [BUG] cephfs kernel client 6.12.x: writes after ftruncate
+ occasionally being lost, leaving hole in files
+Thread-Topic: [BUG] cephfs kernel client 6.12.x: writes after ftruncate
+ occasionally being lost, leaving hole in files
+Thread-Index:
+ Ad1J453OFY2uoDx/ROiPZd0eA4o9DQAClFgAACVv1QAAAFGYoAAAfTwAAAAHsNAAALufQAAqP0+AAADnagAACw5e8AAsvi8AAAh2RpA=
+Date: Thu, 24 Sep 2026 15:57:33 +0000
+Message-ID:
+ <GV2PR10MB613843B97C5B19FC3BA53526DF812@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+References:
+ <GV2PR10MB61387727F5B89B621AD8307BDF842@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <CAJ4mKGYf8KDH368dfxp1d3GQ5boUcewYxcbdB1cWSt=JR8oy2A@mail.gmail.com>
+ <CAO8a2ShV8X+z1=FPUjZ+voQi2SCsSdauwv2a2wS9dBzt+bk1bA@mail.gmail.com>
+ <GV2PR10MB6138FA66DBC7CE7434418686DF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <CAO8a2Sj=iRe62a+pO-7wAdYUQa59KObRsop8zus+KXCxp9GF3g@mail.gmail.com>
+ <GV2PR10MB6138225665859A9E2054D4CADF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <GV2PR10MB613812F687DC650520DF45B8DF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <CAO8a2SjJ2u1BFPhnLohno9hy7qBgrFTb0rEHdHpBawQN+njb5Q@mail.gmail.com>
+ <CAO8a2Sie7eftzio6Dq6UWaTc3TLFa-tQvM2TSDnq_6saF0hqOA@mail.gmail.com>
+ <GV2PR10MB6138AC7FB5C40F1A0C35496BDF822@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
+ <CAO8a2SiVduifBLiSW2fBUK+O8y1Efg5UU3RTfxVxpPFE1wf_iA@mail.gmail.com>
+In-Reply-To:
+ <CAO8a2SiVduifBLiSW2fBUK+O8y1Efg5UU3RTfxVxpPFE1wf_iA@mail.gmail.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-GB
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=kx.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: GV2PR10MB6138:EE_|GVXPR10MB9661:EE_
+x-ms-office365-filtering-correlation-id: 139ab291-e4bf-4c8a-04ab-08df1a548bb7
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|376014|1800799024|19092799006|366016|23010399003|22082099003|18002099003|38070700021|56012099006|11063799006|10067099003|4143699003;
+x-microsoft-antispam-message-info:
+ GKLIRq7K8rZZJ5eR7iA82leS32W9mEygmrhbHDITv7QgRWXm2gdIpfUjnlsFfjNrwg3h0DrrvbO24THUFUCeRQuo/J7xtPtq83EqtXuLEYqvAME4irVyImPlZGbpWtep1jRWcDhYyyf6U8AORBgOKHBH4/IDrVG8g93VK0fe5kPxb/l7fueXg8gvP+6neBn15bmNaoZFvWBVbH821YzjWKMB3dvgBspgiGJvAfbhF5gC1y42ZrzJRwWBNrYPqnwVuexmNmUD4/o7waEFiFtUBftq8oIDzZRFIEiNwHL+Pgmw3yqGcm6gdj00eKCxt1FMEFIUAOfQx5qIKYQELOWmy5hUJKaOxJ/H5xfK1NJ9bfEhy2icSnBgkavlYaPZPlPHgho1IEvyGFThEhjbDhhQZU1Jx+HVC76P1gwHw4RU6rJj3WPeqDRee/A7apl6HiaegCdQVUBrK7NPdfUSsKIilhCAm+r97VI5BTftP82VmG+Yt8MAwLGv+JZc94VafVDSDhrYKo0UtT+5ue3xa4FlM1CUuwu7ptJSs2ZOYJP3qEHdXoMTAQNfHh7l/5Gx81mO0h3XRZ8tmBd8yn1v4rgpI0fRZGJeXKkJMsKdFRUUgAV7d2q8M3KEoG5gFJxwpLG+1AjZLCxAhqz+Cefw6qpJoWxEpVP4O/WoLe5YNzfKCWqIndDO3pgZC/77C77Nq9Ue
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(19092799006)(366016)(23010399003)(22082099003)(18002099003)(38070700021)(56012099006)(11063799006)(10067099003)(4143699003);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?c21BcndQWXJNeTBhUzNmOXhxVWdVQUVGOFBtcjRQbCtqVm9JV1gxSkNOTnh3?=
+ =?utf-8?B?K2hOclE1MUxIU3JwbHk3aUduMlJFRFZRenNYVVdLRi8xOURuVDI3UE92eks3?=
+ =?utf-8?B?SDVVMXhnOXNQa2dEWXIzUWk4MGxrRStzNExDV0tBMGFJeWowWlM5SU95enhq?=
+ =?utf-8?B?a2M2VzAyT1pYbjRxS2NiNHgzb1BvWFV3aDFncHBSV0ZESXBQY0c5enU1N0t1?=
+ =?utf-8?B?UlY3enFwSHRJeEhjR1FEdFJMMWlIRkJsN1dmSkhIM0NQbTV5Vk50MVAzVHpM?=
+ =?utf-8?B?SXkxQk5GNGpIODhpb3BrOEZXN0ppcUlpaldtTndiRWFVZmhtV3ZvQU1aZkFS?=
+ =?utf-8?B?ZnlUdWxLMXB6Q0xkdlJvUUthUGgzeXBaS21DTWw0cS9OeU9lTnlCUXhhNWxB?=
+ =?utf-8?B?aktFZGtNVEszcVd1djFsTjZ5R3dBQ0dUSE1Ic01vekVIQkszNE03emduaTYy?=
+ =?utf-8?B?eklneUZqT1BjKzZUL1diSG5XeXhoLzhSZXRGMG1nZEg3Y0FmRVc2TUtxZURI?=
+ =?utf-8?B?ODM1V3ZodFRNdFNGNDg4Um4vaFQwYlhVTXYxeHRvd3VyeXA0dWlQWDJHZStH?=
+ =?utf-8?B?a2hYSDVzdENiRS9MQW1EZWkyTENyNzRPd2hEMnFydXdyT0d5Y1pkNU1oSU56?=
+ =?utf-8?B?R0craVpTQjhHTit4Tk5pZ3ZXMVQ4NDdQUWZ3MEw3SzE4TmU1WmdpUlpOL2ZC?=
+ =?utf-8?B?cS9Ca09ocU04OE91eDNlKzJYTzhyMUJxRFJja0orU3ZRc0RsV2c0VUcvVGt3?=
+ =?utf-8?B?MmJ6UVdIRldOTTkrTjdzMWhma08zMlgvWGprSE53eGd2bXd3ZkxBZ0NoeEl2?=
+ =?utf-8?B?OHNaWVZJcUtmMXA0TGZXdUp0QTFJOE1vK3NIakEzNHk1ejk2YnhzRUk3ejFq?=
+ =?utf-8?B?VjRaNys4RGFUUUlPUGgyQTIxWjFNVE80ZGwza0gwOVViYWpVYW41NjRJdWNj?=
+ =?utf-8?B?NVRRZmMvdlFWUW5Kc0NNZ1d6WXpZMjlOL3J6akpqbXprM3YrcHIxRUwxMDRy?=
+ =?utf-8?B?WU1FU3ROcFpzTGVYNkhBa3hSSDZLcldQUG9aUDlXNFA4aGZuL29Yc25JdFhp?=
+ =?utf-8?B?elEzcE1pMHJKMWpheXZCalBzWFJuR2RFQjJPdjZTcklYODRzdmFTdmdjRFZt?=
+ =?utf-8?B?M0VjMVhmd0pxenJFbFBFOE1zUXZDQ0dMQ3gza3pmTDZob3V6cEZBQjBEb0hQ?=
+ =?utf-8?B?RjlIOXFpeEtPS2JBbUh0dW9vbDZMRVA3UmtudTEyRytvNFRHWC90RWRXSzNI?=
+ =?utf-8?B?T2NLY0ZCMGFxU0IyMTlDbnpwbGt1SU1FM1ZIWHNQWGc0ZGFoNmNzQjZKQis5?=
+ =?utf-8?B?SWtqQmJ5N1RXZURyOEVpSkxWUzA3M3dxWUZJemZNc1dpZlJ1Q0JEM2VQVy81?=
+ =?utf-8?B?YVIvbmkzQ25xL3ZmU1hxelY3SUJFS3AwUTZFS29VNjZ6VXp2OU1GbkdqZDNR?=
+ =?utf-8?B?cDBHOWtnTHNnblY5Wnh6SVliV2lhNHlyWUlOREhaT3hkWUtuc24zeWRqWE1n?=
+ =?utf-8?B?SjgyK0IxeHVQQUNjczF0WDhhTFZzU2V1UUF6Mi9mcjhndTBtenljYUZaU0Jt?=
+ =?utf-8?B?clBXR2l1SmVkQVRBQ1NzamNmTyt4Sjl1eTJ5MmtvNENYcVZvMzN1ZnZvUGcw?=
+ =?utf-8?B?QVRKSllsT0c4c2pzZWdBdVFaQjVtUUhSNkhicnR5QWMzdUE3YVErd1lZMDF5?=
+ =?utf-8?B?Z2kxcXdpQzBYL1FHRm5aWC90Y3lSbjlnV1RQa3BMemJxeTR2di9uSmJReXk4?=
+ =?utf-8?B?Y2dTdVlBT3pjWWZxczRoMXFibEtVcnJLSkJEd3VyRUxTSFcrcUpIMXVMQUZV?=
+ =?utf-8?B?d2VEcDErQmlPdGZCRlVhQTFpd0dwcEFQeTU4QzFUT2FvR1ExcGFKYWFFTTlI?=
+ =?utf-8?B?b3NGQzBWNDBZV2dDN2V3UUtaUUFzci82a29YcUczYkk2S2NyODlrdUZiMXJJ?=
+ =?utf-8?B?OHlRS1U0ZlZsbG00aTgxS3VXUU84N2wwNTZPSXEycER3b0xUcW5wU1kwRVZk?=
+ =?utf-8?B?TEdSM2t6YlFZMy9HUWgvTFphOVFKWXlSUWlIdmgxRS8rR2lXcWJIRXQveVlz?=
+ =?utf-8?B?TGVGTHFId1RWaUhVbFVISlR1aDAzY1FjTjBPelFLcVA5V0VDZTg3aWZ2RXBD?=
+ =?utf-8?B?RmtXOUhrZ2xEQTBaazFsc25sOExvKzhHMU9TSkd5aDdjRzJBUEJJeUdFS21s?=
+ =?utf-8?B?bzVWQkhDdXhwd1BYRVRoQ3NqaTU2TjRycUtEb0I2eE1GaHg3L3Q1YmpVZVoz?=
+ =?utf-8?B?WGlIb21HVjFIRTNpVExQTTd6djltTDhOeitGeks3b3Y2SEwxRkZlZlg5T3Ir?=
+ =?utf-8?Q?wi7st6QB3YFO+mdx5z?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: kx.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: 139ab291-e4bf-4c8a-04ab-08df1a548bb7
+X-MS-Exchange-CrossTenant-originalarrivaltime: 24 Sep 2026 15:57:33.3079
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 8b006032-f7cd-404e-8f6f-4719f041417b
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: P453cndXaZFxGrxoNwnvbOJcheEBI6atM+JY3bORRCur4L4ORZBpvg9F0m66j2fU/otG2+eMBbVtCJ3wbiR8iQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GVXPR10MB9661
 
-Replace text debug logging with the boutc() wrappers in locks.c,
-xattr.c, and crypto.c.
-
-Do not log borrowed xattr names while destroying an invalidated
-index. Snapshot encoding can replace and free the backing blob
-before the index is destroyed, making even a bounded name read
-unsafe. Log only the live index-node pointers at that site.
-
-When copying xattr names, log the terminated destination and the
-xattr pointer. Names borrowed from the blob are length-delimited
-and must not be passed to an unbounded %s. Both text logging bugs
-predate BLOG; eager binary argument capture also exposes them.
-
-Keep encrypted-name logging within the supplied name bounds too.
-On a long snapshot-name lookup failure, log the existing terminated
-copy with its leading underscore restored, rather than the counted
-input. Base64 encoding does not append a terminator: use BLOG_STR
-with the encoded length, since format precision only bounds the
-text path and does not constrain binary argument capture.
-
-Reported-by: Xiubo Li <xiubo.li@clyso.com>
-Link: https://lore.kernel.org/ceph-devel/CAOJNxRJTiUkSAW6diKfZA51mGMCeGdKsbcb5mdkYxqf+-+e8fQ@mail.gmail.com/
-Signed-off-by: Alex Markuze <amarkuze@redhat.com>
-Assisted-by: LLM
----
- fs/ceph/crypto.c |  19 ++++-----
- fs/ceph/locks.c  |  66 ++++++++++++++++++++++---------
- fs/ceph/xattr.c  | 101 +++++++++++++++++++++++++++++++----------------
- 3 files changed, 124 insertions(+), 62 deletions(-)
-
-diff --git a/fs/ceph/crypto.c b/fs/ceph/crypto.c
-index a7883336e6a1..de349397fc47 100644
---- a/fs/ceph/crypto.c
-+++ b/fs/ceph/crypto.c
-@@ -181,7 +181,7 @@ static struct inode *parse_longname(const struct inode *parent,
- 		return ERR_PTR(-ENOMEM);
- 	name_end = strrchr(str, '_');
- 	if (!name_end) {
--		doutc(cl, "failed to parse long snapshot name: %s\n", str);
-+		boutc(cl, "failed to parse long snapshot name: %s\n", str);
- 		return ERR_PTR(-EIO);
- 	}
- 	*name_len = (name_end - str);
-@@ -194,7 +194,7 @@ static struct inode *parse_longname(const struct inode *parent,
- 	inode_number = name_end + 1;
- 	ret = kstrtou64(inode_number, 10, &vino.ino);
- 	if (ret) {
--		doutc(cl, "failed to parse inode number: %s\n", str);
-+		boutc(cl, "failed to parse inode number: %s\n", str);
- 		return ERR_PTR(ret);
- 	}
- 
-@@ -204,7 +204,7 @@ static struct inode *parse_longname(const struct inode *parent,
- 		/* This can happen if we're not mounting cephfs on the root */
- 		dir = ceph_get_inode(parent->i_sb, vino, NULL);
- 		if (IS_ERR(dir))
--			doutc(cl, "can't find inode %s (%s)\n", inode_number, name);
-+			boutc(cl, "can't find inode %s (_%s)\n", inode_number, str);
- 	}
- 	return dir;
- }
-@@ -275,7 +275,8 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
- 
- 	/* base64 encode the encrypted name */
- 	elen = base64_encode(cryptbuf, len, p, false, BASE64_IMAP);
--	doutc(cl, "base64-encoded ciphertext name = %.*s\n", elen, p);
-+	boutc_bounded(cl, "base64-encoded ciphertext name = %.*s\n",
-+		      (elen, BLOG_STR(p, elen)), (elen, (const char *)p));
- 
- 	/* To understand the 240 limit, see CEPH_NOHASH_NAME_MAX comments */
- 	WARN_ON(elen > 240);
-@@ -491,7 +492,7 @@ int ceph_fscrypt_decrypt_block_inplace(const struct inode *inode,
- {
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 
--	doutc(cl, "%p %llx.%llx len %u offs %u blk %llu\n", inode,
-+	boutc(cl, "%p %llx.%llx len %u offs %u blk %llu\n", inode,
- 	      ceph_vinop(inode), len, offs, lblk_num);
- 	return fscrypt_decrypt_block_inplace(inode, page, len, offs, lblk_num);
- }
-@@ -502,7 +503,7 @@ int ceph_fscrypt_encrypt_block_inplace(const struct inode *inode,
- {
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 
--	doutc(cl, "%p %llx.%llx len %u offs %u blk %llu\n", inode,
-+	boutc(cl, "%p %llx.%llx len %u offs %u blk %llu\n", inode,
- 	      ceph_vinop(inode), len, offs, lblk_num);
- 	return fscrypt_encrypt_block_inplace(inode, page, len, offs, lblk_num);
- }
-@@ -579,7 +580,7 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
- 
- 	/* Nothing to do for empty array */
- 	if (ext_cnt == 0) {
--		doutc(cl, "%p %llx.%llx empty array, ret 0\n", inode,
-+		boutc(cl, "%p %llx.%llx empty array, ret 0\n", inode,
- 		      ceph_vinop(inode));
- 		return 0;
- 	}
-@@ -603,7 +604,7 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
- 		}
- 		fret = ceph_fscrypt_decrypt_pages(inode, &page[pgidx],
- 						 off + pgsoff, ext->len);
--		doutc(cl, "%p %llx.%llx [%d] 0x%llx~0x%llx fret %d\n", inode,
-+		boutc(cl, "%p %llx.%llx [%d] 0x%llx~0x%llx fret %d\n", inode,
- 		      ceph_vinop(inode), i, ext->off, ext->len, fret);
- 		if (fret < 0) {
- 			if (ret == 0)
-@@ -612,7 +613,7 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
- 		}
- 		ret = pgsoff + fret;
- 	}
--	doutc(cl, "ret %d\n", ret);
-+	boutc(cl, "ret %d\n", ret);
- 	return ret;
- }
- 
-diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-index 677221bd64e0..a0c946e5890e 100644
---- a/fs/ceph/locks.c
-+++ b/fs/ceph/locks.c
-@@ -110,7 +110,7 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
- 
- 	owner = secure_addr(fl->c.flc_owner);
- 
--	doutc(cl, "rule: %d, op: %d, owner: %llx, pid: %llu, "
-+	boutc(cl, "rule: %d, op: %d, owner: %llx, pid: %llu, "
- 		    "start: %llu, length: %llu, wait: %d, type: %d\n",
- 		    (int)lock_type, (int)operation, owner,
- 		    (u64) fl->c.flc_pid,
-@@ -147,7 +147,7 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
- 
- 	}
- 	ceph_mdsc_put_request(req);
--	doutc(cl, "rule: %d, op: %d, pid: %llu, start: %llu, "
-+	boutc(cl, "rule: %d, op: %d, pid: %llu, start: %llu, "
- 	      "length: %llu, wait: %d, type: %d, err code %d\n",
- 	      (int)lock_type, (int)operation, (u64) fl->c.flc_pid,
- 	      fl->fl_start, length, wait, fl->c.flc_type, err);
-@@ -175,7 +175,7 @@ static int ceph_lock_wait_for_completion(struct ceph_mds_client *mdsc,
- 	if (!err)
- 		return 0;
- 
--	doutc(cl, "request %llu was interrupted\n", req->r_tid);
-+	boutc(cl, "request %llu was interrupted\n", req->r_tid);
- 
- 	mutex_lock(&mdsc->mutex);
- 	if (test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
-@@ -248,6 +248,7 @@ static int try_unlock_file(struct file *file, struct file_lock *fl)
- int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- {
- 	struct inode *inode = file_inode(file);
-+	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
-@@ -255,14 +256,21 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- 	u16 op = CEPH_MDS_OP_SETFILELOCK;
- 	u8 wait = 0;
- 	u8 lock_cmd;
-+	struct ceph_journal_info __ji;
- 
--	if (!(fl->c.flc_flags & FL_POSIX))
-+	ceph_blog_enter(fsc, &__ji);
-+
-+	if (!(fl->c.flc_flags & FL_POSIX)) {
-+		ceph_blog_exit(&__ji);
- 		return -ENOLCK;
-+	}
- 
--	if (ceph_inode_is_shutdown(inode))
-+	if (ceph_inode_is_shutdown(inode)) {
-+		ceph_blog_exit(&__ji);
- 		return -ESTALE;
-+	}
- 
--	doutc(cl, "fl_owner: %p\n", fl->c.flc_owner);
-+	boutc(cl, "fl_owner: %p\n", fl->c.flc_owner);
- 
- 	/* set wait bit as appropriate, then make command as Ceph expects it*/
- 	if (IS_GETLK(cmd))
-@@ -273,14 +281,17 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- 	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		if (op == CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(fl))
- 			posix_lock_file(file, fl, NULL);
-+		ceph_blog_exit(&__ji);
- 		return -EIO;
- 	}
- 
- 	/* Wait for reset to complete before acquiring new locks */
- 	if (op == CEPH_MDS_OP_SETFILELOCK && !lock_is_unlock(fl)) {
- 		err = ceph_mdsc_wait_for_reset(mdsc);
--		if (err)
-+		if (err) {
-+			ceph_blog_exit(&__ji);
- 			return err;
-+		}
- 	}
- 
- 	if (lock_is_read(fl))
-@@ -292,14 +303,16 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- 
- 	if (op == CEPH_MDS_OP_SETFILELOCK && lock_is_unlock(fl)) {
- 		err = try_unlock_file(file, fl);
--		if (err <= 0)
-+		if (err <= 0) {
-+			ceph_blog_exit(&__ji);
- 			return err;
-+		}
- 	}
- 
- 	err = ceph_lock_message(CEPH_LOCK_FCNTL, op, inode, lock_cmd, wait, fl);
- 	if (!err) {
- 		if (op == CEPH_MDS_OP_SETFILELOCK && F_UNLCK != fl->c.flc_type) {
--			doutc(cl, "locking locally\n");
-+			boutc(cl, "locking locally\n");
- 			err = posix_lock_file(file, fl, NULL);
- 			if (err) {
- 				/* undo! This should only happen if
-@@ -307,43 +320,55 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
- 				 * deadlock. */
- 				ceph_lock_message(CEPH_LOCK_FCNTL, op, inode,
- 						  CEPH_LOCK_UNLOCK, 0, fl);
--				doutc(cl, "got %d on posix_lock_file, undid lock\n",
-+				boutc(cl, "got %d on posix_lock_file, undid lock\n",
- 				      err);
- 			}
- 		}
- 	}
-+	ceph_blog_exit(&__ji);
- 	return err;
- }
- 
- int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
- {
- 	struct inode *inode = file_inode(file);
-+	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	struct ceph_mds_client *mdsc = ceph_sb_to_mdsc(inode->i_sb);
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	int err = 0;
- 	u8 wait = 0;
- 	u8 lock_cmd;
-+	struct ceph_journal_info __ji;
- 
--	if (!(fl->c.flc_flags & FL_FLOCK))
-+	ceph_blog_enter(fsc, &__ji);
-+
-+	if (!(fl->c.flc_flags & FL_FLOCK)) {
-+		ceph_blog_exit(&__ji);
- 		return -ENOLCK;
-+	}
- 
--	if (ceph_inode_is_shutdown(inode))
-+	if (ceph_inode_is_shutdown(inode)) {
-+		ceph_blog_exit(&__ji);
- 		return -ESTALE;
-+	}
- 
--	doutc(cl, "fl_file: %p\n", fl->c.flc_file);
-+	boutc(cl, "fl_file: %p\n", fl->c.flc_file);
- 
- 	if (test_bit(CEPH_I_ERROR_FILELOCK_BIT, &ci->i_ceph_flags)) {
- 		if (lock_is_unlock(fl))
- 			locks_lock_file_wait(file, fl);
-+		ceph_blog_exit(&__ji);
- 		return -EIO;
- 	}
- 
- 	/* Wait for reset to complete before acquiring new locks */
- 	if (!lock_is_unlock(fl)) {
- 		err = ceph_mdsc_wait_for_reset(mdsc);
--		if (err)
-+		if (err) {
-+			ceph_blog_exit(&__ji);
- 			return err;
-+		}
- 	}
- 
- 	if (IS_SETLKW(cmd))
-@@ -358,8 +383,10 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
- 
- 	if (lock_is_unlock(fl)) {
- 		err = try_unlock_file(file, fl);
--		if (err <= 0)
-+		if (err <= 0) {
-+			ceph_blog_exit(&__ji);
- 			return err;
-+		}
- 	}
- 
- 	err = ceph_lock_message(CEPH_LOCK_FLOCK, CEPH_MDS_OP_SETFILELOCK,
-@@ -370,10 +397,11 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
- 			ceph_lock_message(CEPH_LOCK_FLOCK,
- 					  CEPH_MDS_OP_SETFILELOCK,
- 					  inode, CEPH_LOCK_UNLOCK, 0, fl);
--			doutc(cl, "got %d on locks_lock_file_wait, undid lock\n",
-+			boutc(cl, "got %d on locks_lock_file_wait, undid lock\n",
- 			      err);
- 		}
- 	}
-+	ceph_blog_exit(&__ji);
- 	return err;
- }
- 
-@@ -399,7 +427,7 @@ void ceph_count_locks(struct inode *inode, int *fcntl_count, int *flock_count)
- 			++(*flock_count);
- 		spin_unlock(&ctx->flc_lock);
- 	}
--	doutc(cl, "counted %d flock locks and %d fcntl locks\n",
-+	boutc(cl, "counted %d flock locks and %d fcntl locks\n",
- 	      *flock_count, *fcntl_count);
- }
- 
-@@ -430,7 +458,7 @@ static int lock_to_ceph_filelock(struct inode *inode,
- 		cephlock->type = CEPH_LOCK_UNLOCK;
- 		break;
- 	default:
--		doutc(cl, "Have unknown lock type %d\n",
-+		boutc(cl, "Have unknown lock type %d\n",
- 		      lock->c.flc_type);
- 		err = -EINVAL;
- 	}
-@@ -455,7 +483,7 @@ int ceph_encode_locks_to_buffer(struct inode *inode,
- 	int seen_flock = 0;
- 	int l = 0;
- 
--	doutc(cl, "encoding %d flock and %d fcntl locks\n", num_flock_locks,
-+	boutc(cl, "encoding %d flock and %d fcntl locks\n", num_flock_locks,
- 	      num_fcntl_locks);
- 
- 	if (!ctx)
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 1da6deea2c24..39dbbcc287c0 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -70,7 +70,7 @@ static ssize_t ceph_vxattrcb_layout(struct ceph_inode_info *ci, char *val,
- 
- 	pool_ns = ceph_try_get_string(ci->i_layout.pool_ns);
- 
--	doutc(cl, "%p\n", &ci->netfs.inode);
-+	boutc(cl, "%p\n", &ci->netfs.inode);
- 	down_read(&osdc->lock);
- 	pool_name = ceph_pg_pool_name_by_id(osdc->osdmap, pool);
- 	if (pool_name) {
-@@ -627,7 +627,7 @@ static int __set_xattr(struct ceph_inode_info *ci,
- 		xattr->should_free_name = update_xattr;
- 
- 		ci->i_xattrs.count++;
--		doutc(cl, "count=%d\n", ci->i_xattrs.count);
-+		boutc(cl, "count=%d\n", ci->i_xattrs.count);
- 	} else {
- 		kfree(*newxattr);
- 		*newxattr = NULL;
-@@ -655,13 +655,19 @@ static int __set_xattr(struct ceph_inode_info *ci,
- 	if (new) {
- 		rb_link_node(&xattr->node, parent, p);
- 		rb_insert_color(&xattr->node, &ci->i_xattrs.index);
--		doutc(cl, "p=%p\n", p);
-+		boutc(cl, "p=%p\n", p);
- 	}
- 
--	doutc(cl, "added %p %llx.%llx xattr %p %.*s=%.*s%s\n", inode,
--	      ceph_vinop(inode), xattr, name_len, name, min(val_len,
--	      MAX_XATTR_VAL_PRINT_LEN), val,
--	      val_len > MAX_XATTR_VAL_PRINT_LEN ? "..." : "");
-+	boutc_bounded(cl, "added %p %llx.%llx xattr %p %.*s=%.*s%s\n",
-+		      (inode, ceph_vinop(inode), xattr, name_len,
-+		       BLOG_STR(name, name_len),
-+		       min(val_len, MAX_XATTR_VAL_PRINT_LEN),
-+		       BLOG_STR(val, min(val_len, MAX_XATTR_VAL_PRINT_LEN)),
-+		       val_len > MAX_XATTR_VAL_PRINT_LEN ? "..." : ""),
-+		      (inode, ceph_vinop(inode), xattr, name_len,
-+		       (const char *)name,
-+		       min(val_len, MAX_XATTR_VAL_PRINT_LEN), (const char *)val,
-+		       val_len > MAX_XATTR_VAL_PRINT_LEN ? "..." : ""));
- 
- 	return 0;
- }
-@@ -690,13 +696,16 @@ static struct ceph_inode_xattr *__get_xattr(struct ceph_inode_info *ci,
- 		else {
- 			int len = min(xattr->val_len, MAX_XATTR_VAL_PRINT_LEN);
- 
--			doutc(cl, "%s found %.*s%s\n", name, len, xattr->val,
--			      xattr->val_len > len ? "..." : "");
-+			boutc_bounded(cl, "%s found %.*s%s\n",
-+				      (name, len, BLOG_STR(xattr->val, len),
-+				       xattr->val_len > len ? "..." : ""),
-+				      (name, len, (const char *)xattr->val,
-+				       xattr->val_len > len ? "..." : ""));
- 			return xattr;
- 		}
- 	}
- 
--	doutc(cl, "%s not found\n", name);
-+	boutc(cl, "%s not found\n", name);
- 
- 	return NULL;
- }
-@@ -742,14 +751,14 @@ static char *__copy_xattr_names(struct ceph_inode_info *ci,
- 	struct ceph_inode_xattr *xattr = NULL;
- 
- 	p = rb_first(&ci->i_xattrs.index);
--	doutc(cl, "count=%d\n", ci->i_xattrs.count);
-+	boutc(cl, "count=%d\n", ci->i_xattrs.count);
- 
- 	while (p) {
- 		xattr = rb_entry(p, struct ceph_inode_xattr, node);
- 		memcpy(dest, xattr->name, xattr->name_len);
- 		dest[xattr->name_len] = '\0';
- 
--		doutc(cl, "dest=%s %p (%s) (%d/%d)\n", dest, xattr, xattr->name,
-+		boutc(cl, "dest=%s xattr=%p (%d/%d)\n", dest, xattr,
- 		      xattr->name_len, ci->i_xattrs.names_size);
- 
- 		dest += xattr->name_len + 1;
-@@ -767,13 +776,14 @@ void __ceph_destroy_xattrs(struct ceph_inode_info *ci)
- 
- 	p = rb_first(&ci->i_xattrs.index);
- 
--	doutc(cl, "p=%p\n", p);
-+	boutc(cl, "p=%p\n", p);
- 
- 	while (p) {
- 		xattr = rb_entry(p, struct ceph_inode_xattr, node);
- 		tmp = p;
- 		p = rb_next(tmp);
--		doutc(cl, "next p=%p (%.*s)\n", p, xattr->name_len, xattr->name);
-+		/* Names borrowed from an older blob may already be stale. */
-+		boutc(cl, "next p=%p xattr=%p\n", p, xattr);
- 		rb_erase(tmp, &ci->i_xattrs.index);
- 
- 		__free_xattr(xattr);
-@@ -802,7 +812,7 @@ static int __build_xattrs(struct inode *inode)
- 	int err = 0;
- 	int i;
- 
--	doutc(cl, "len=%d\n",
-+	boutc(cl, "len=%d\n",
- 	      ci->i_xattrs.blob ? (int)ci->i_xattrs.blob->vec.iov_len : 0);
- 
- 	if (ci->i_xattrs.index_version >= ci->i_xattrs.version)
-@@ -888,7 +898,7 @@ static int __get_required_blob_size(struct ceph_inode_info *ci, int name_size,
- 	int size = 4 + ci->i_xattrs.count*(4 + 4) +
- 			     ci->i_xattrs.names_size +
- 			     ci->i_xattrs.vals_size;
--	doutc(cl, "c=%d names.size=%d vals.size=%d\n", ci->i_xattrs.count,
-+	boutc(cl, "c=%d names.size=%d vals.size=%d\n", ci->i_xattrs.count,
- 	      ci->i_xattrs.names_size, ci->i_xattrs.vals_size);
- 
- 	if (name_size)
-@@ -912,7 +922,7 @@ struct ceph_buffer *__ceph_build_xattrs_blob(struct ceph_inode_info *ci)
- 	struct ceph_buffer *old_blob = NULL;
- 	void *dest;
- 
--	doutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
-+	boutc(cl, "%p %llx.%llx\n", inode, ceph_vinop(inode));
- 	if (ci->i_xattrs.dirty) {
- 		int need = __get_required_blob_size(ci, 0, 0);
- 
-@@ -951,7 +961,8 @@ struct ceph_buffer *__ceph_build_xattrs_blob(struct ceph_inode_info *ci)
- }
- 
- static inline int __get_request_mask(struct inode *in) {
--	struct ceph_mds_request *req = current->journal_info;
-+	struct ceph_mds_request *req =
-+		ceph_current_mds_request(ceph_sb_to_fs_client(in->i_sb));
- 	int mask = 0;
- 	if (req && req->r_target_inode == in) {
- 		if (req->r_op == CEPH_MDS_OP_LOOKUP ||
-@@ -1009,7 +1020,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 	req_mask = __get_request_mask(inode);
- 
- 	spin_lock(&ci->i_ceph_lock);
--	doutc(cl, "%p %llx.%llx name '%s' ver=%lld index_ver=%lld\n", inode,
-+	boutc(cl, "%p %llx.%llx name '%s' ver=%lld index_ver=%lld\n", inode,
- 	      ceph_vinop(inode), name, ci->i_xattrs.version,
- 	      ci->i_xattrs.index_version);
- 
-@@ -1019,7 +1030,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 		spin_unlock(&ci->i_ceph_lock);
- 
- 		/* security module gets xattr while filling trace */
--		if (current->journal_info) {
-+		if (ceph_current_fill_trace_request()) {
- 			pr_warn_ratelimited_client(cl,
- 				"sync %p %llx.%llx during filling trace\n",
- 				inode, ceph_vinop(inode));
-@@ -1052,7 +1063,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 
- 	memcpy(value, xattr->val, xattr->val_len);
- 
--	if (current->journal_info &&
-+	if (ceph_current_fill_trace_request() &&
- 	    !strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) &&
- 	    security_ismaclabel(name + XATTR_SECURITY_PREFIX_LEN))
- 		set_bit(CEPH_I_SEC_INITED_BIT, &ci->i_ceph_flags);
-@@ -1064,14 +1075,18 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
- {
- 	struct inode *inode = d_inode(dentry);
-+	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(inode->i_sb);
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	struct ceph_inode_info *ci = ceph_inode(inode);
- 	bool len_only = (size == 0);
- 	u32 namelen;
- 	int err;
-+	struct ceph_journal_info __ji;
-+
-+	ceph_blog_enter(fsc, &__ji);
- 
- 	spin_lock(&ci->i_ceph_lock);
--	doutc(cl, "%p %llx.%llx ver=%lld index_ver=%lld\n", inode,
-+	boutc(cl, "%p %llx.%llx ver=%lld index_ver=%lld\n", inode,
- 	      ceph_vinop(inode), ci->i_xattrs.version,
- 	      ci->i_xattrs.index_version);
- 
-@@ -1079,8 +1094,10 @@ ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
- 	    !__ceph_caps_issued_mask_metric(ci, CEPH_CAP_XATTR_SHARED, 1)) {
- 		spin_unlock(&ci->i_ceph_lock);
- 		err = ceph_do_getattr(inode, CEPH_STAT_CAP_XATTR, true);
--		if (err)
-+		if (err) {
-+			ceph_blog_exit(&__ji);
- 			return err;
-+		}
- 		spin_lock(&ci->i_ceph_lock);
- 	}
- 
-@@ -1101,6 +1118,7 @@ ssize_t ceph_listxattr(struct dentry *dentry, char *names, size_t size)
- 	err = namelen;
- out:
- 	spin_unlock(&ci->i_ceph_lock);
-+	ceph_blog_exit(&__ji);
- 	return err;
- }
- 
-@@ -1133,7 +1151,7 @@ static int ceph_sync_setxattr(struct inode *inode, const char *name,
- 			flags |= CEPH_XATTR_REMOVE;
- 	}
- 
--	doutc(cl, "name %s value size %zu\n", name, size);
-+	boutc(cl, "name %s value size %zu\n", name, size);
- 
- 	/* do request */
- 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
-@@ -1162,10 +1180,10 @@ static int ceph_sync_setxattr(struct inode *inode, const char *name,
- 	req->r_num_caps = 1;
- 	req->r_inode_drop = CEPH_CAP_XATTR_SHARED;
- 
--	doutc(cl, "xattr.ver (before): %lld\n", ci->i_xattrs.version);
-+	boutc(cl, "xattr.ver (before): %lld\n", ci->i_xattrs.version);
- 	err = ceph_mdsc_do_request(mdsc, NULL, req);
- 	ceph_mdsc_put_request(req);
--	doutc(cl, "xattr.ver (after): %lld\n", ci->i_xattrs.version);
-+	boutc(cl, "xattr.ver (after): %lld\n", ci->i_xattrs.version);
- 
- out:
- 	if (pagelist)
-@@ -1176,10 +1194,11 @@ static int ceph_sync_setxattr(struct inode *inode, const char *name,
- int __ceph_setxattr(struct inode *inode, const char *name,
- 			const void *value, size_t size, int flags)
- {
-+	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(inode->i_sb);
- 	struct ceph_client *cl = ceph_inode_to_client(inode);
- 	struct ceph_vxattr *vxattr;
- 	struct ceph_inode_info *ci = ceph_inode(inode);
--	struct ceph_mds_client *mdsc = ceph_sb_to_fs_client(inode->i_sb)->mdsc;
-+	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_cap_flush *prealloc_cf = NULL;
- 	struct ceph_buffer *old_blob = NULL;
- 	int issued;
-@@ -1235,7 +1254,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 	required_blob_size = __get_required_blob_size(ci, name_len, val_len);
- 	if ((ci->i_xattrs.version == 0) || !(issued & CEPH_CAP_XATTR_EXCL) ||
- 	    (required_blob_size > mdsc->mdsmap->m_max_xattr_size)) {
--		doutc(cl, "sync version: %llu size: %d max: %llu\n",
-+		boutc(cl, "sync version: %llu size: %d max: %llu\n",
- 		      ci->i_xattrs.version, required_blob_size,
- 		      mdsc->mdsmap->m_max_xattr_size);
- 		goto do_sync;
-@@ -1251,7 +1270,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 		}
- 	}
- 
--	doutc(cl, "%p %llx.%llx name '%s' issued %s\n", inode,
-+	boutc(cl, "%p %llx.%llx name '%s' issued %s\n", inode,
- 	      ceph_vinop(inode), name, ceph_cap_string(issued));
- 	__build_xattrs(inode);
- 
-@@ -1266,7 +1285,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 	 */
- 	required_blob_size = __get_required_blob_size(ci, name_len, val_len);
- 	if (required_blob_size > mdsc->mdsmap->m_max_xattr_size) {
--		doutc(cl, "sync (size too large): %d > %llu\n",
-+		boutc(cl, "sync (size too large): %d > %llu\n",
- 		      required_blob_size, mdsc->mdsmap->m_max_xattr_size);
- 		goto do_sync;
- 	}
-@@ -1277,7 +1296,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 
- 		spin_unlock(&ci->i_ceph_lock);
- 		ceph_buffer_put(old_blob); /* Shouldn't be required */
--		doutc(cl, " pre-allocating new blob size=%d\n",
-+		boutc(cl, " pre-allocating new blob size=%d\n",
- 		      required_blob_size);
- 		blob = ceph_buffer_new(required_blob_size, GFP_NOFS);
- 		if (!blob)
-@@ -1317,7 +1336,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 		up_read(&mdsc->snap_rwsem);
- 
- 	/* security module set xattr while filling trace */
--	if (current->journal_info) {
-+	if (ceph_current_fill_trace_request()) {
- 		pr_warn_ratelimited_client(cl,
- 				"sync %p %llx.%llx during filling trace\n",
- 				inode, ceph_vinop(inode));
-@@ -1346,9 +1365,16 @@ static int ceph_get_xattr_handler(const struct xattr_handler *handler,
- 				  struct dentry *dentry, struct inode *inode,
- 				  const char *name, void *value, size_t size)
- {
-+	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(inode->i_sb);
-+	struct ceph_journal_info __ji;
-+	int ret;
-+
- 	if (!ceph_is_valid_xattr(name))
- 		return -EOPNOTSUPP;
--	return __ceph_getxattr(inode, name, value, size);
-+	ceph_blog_enter(fsc, &__ji);
-+	ret = __ceph_getxattr(inode, name, value, size);
-+	ceph_blog_exit(&__ji);
-+	return ret;
- }
- 
- static int ceph_set_xattr_handler(const struct xattr_handler *handler,
-@@ -1357,9 +1383,16 @@ static int ceph_set_xattr_handler(const struct xattr_handler *handler,
- 				  const char *name, const void *value,
- 				  size_t size, int flags)
- {
-+	struct ceph_fs_client *fsc = ceph_sb_to_fs_client(inode->i_sb);
-+	struct ceph_journal_info __ji;
-+	int ret;
-+
- 	if (!ceph_is_valid_xattr(name))
- 		return -EOPNOTSUPP;
--	return __ceph_setxattr(inode, name, value, size, flags);
-+	ceph_blog_enter(fsc, &__ji);
-+	ret = __ceph_setxattr(inode, name, value, size, flags);
-+	ceph_blog_exit(&__ji);
-+	return ret;
- }
- 
- static const struct xattr_handler ceph_other_xattr_handler = {
--- 
-2.34.1
-
+SSd2ZSBtYW5hZ2VkIHRvIHByb2R1Y2UgYSBzaWxlbnQgd3JpdGUgZmFpbHVyZSByZXN1bHRpbmcg
+aW4gYSBob2xlIGluIHRlc3QgY29uZGl0aW9ucywgYnV0IGRvbid0IGdldCB0b28gZXhjaXRlZDog
+aXQgcmVxdWlyZXMgaW5kdWNpbmcgYSBQT09MX0ZVTEwgc3RhdGUgYnkgcmVkdWNpbmcgdGhlIHF1
+b3RhIGR1cmluZyBhIHdyaXRlLCBidXQgdGhlIGNvcnJ1cHRpb25zIHdlJ3ZlIHNlZW4gaW4gdGhl
+IGZpZWxkIGhhcHBlbmVkIG9uIHBvb2xzIHRoYXQgd2VyZSBhdCBhcm91bmQgOVRpQiBvdXQgb2Yg
+MTJUaUIgY2FwYWNpdHkuIFN0aWxsLCBpdCBzZWVtcyBsaWtlIGluY29ycmVjdCBiZWhhdmlvdXIg
+dG8gaGF2ZSBhIHN1Y2Nlc3NmdWwgZ2V0IGxvc3QgYW5kIHByb2R1Y2UgYSBob2xlLCBhbmQgbWF5
+YmUgdGhlIG1lY2hhbmlzbSdzIHJlbGF0ZWQuIEkndmUgYXR0YWNoZWQgYSBydW5ib29rIGFuZCBz
+Y3JpcHRzIGZvciByZXByb2R1Y3Rpb24gdG8gdGhlIHRyYWNrZXIgYXQgaHR0cHM6Ly90cmFja2Vy
+LmNlcGguY29tL2lzc3Vlcy84MDcwNCNub3RlLTINCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCkZyb206IEFsZXggTWFya3V6ZSA8YW1hcmt1emVAcmVkaGF0LmNvbT4NClNlbnQ6IDI0IFNl
+cHRlbWJlciAyMDI2IDEyOjE0DQpUbzogRG9taG5hbGwgTWNHdWlnYW4gPGRtY2d1aWdhbkBreC5j
+b20+DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IExpeiBOb3JyaXMgPGVub3JyaXNA
+a3guY29tPjsgQnJlbmRhbiBNY0FsbGlzdGVyIDxibWNhbGxpc3RlckBreC5jb20+OyBQYXZsbyBQ
+aWF0a292c2t5aSA8cHBpYXRrb3Zza3lpQGt4LmNvbT47IFBpZXJyZSBLb3ZhbGV2IDxwaWVycmVA
+a3guY29tPjsgT2xlZyBGaW5rZWxzaHRleW4gPG9sZWdAa3guY29tPg0KU3ViamVjdDogUmU6IFtC
+VUddIGNlcGhmcyBrZXJuZWwgY2xpZW50IDYuMTIueDogd3JpdGVzIGFmdGVyIGZ0cnVuY2F0ZSBv
+Y2Nhc2lvbmFsbHkgYmVpbmcgbG9zdCwgbGVhdmluZyBob2xlIGluIGZpbGVzDQoNCkNBVVRJT046
+IFRoaXMgZW1haWwgb3JpZ2luYXRlZCBmcm9tIG91dHNpZGUgb2YgdGhlIG9yZ2FuaXNhdGlvbi4g
+RG8gbm90IGNsaWNrIGxpbmtzIG9yIG9wZW4gYXR0YWNobWVudHMgdW5sZXNzIHlvdSByZWNvZ25p
+c2UgdGhlIHNlbmRlciBhbmQga25vdyB0aGUgY29udGVudCBpcyBzYWZlLg0KDQoNCkl0J3MganVz
+dCBhIG5vbiBjb250aWd1b3VzIHNldCBvZiBwYXRjaGVzIHRoYXQgbWF5IGhhdmUgZGlyZWN0bHkg
+b3IgaW5kaXJlY3RseSBpbXBhY3RlZCBmdHJhbmNhdGUuDQpJIGNhbid0IHNheSB0aGF0IGFueSBm
+dHJhbmNhdGUgaXNzdWUgaXMgcmVsYXRlZCB0byBhbnkgcmVmYWN0b3JpbmcuDQoNCk9uIFdlZCwg
+U2VwIDIzLCAyMDI2IGF0IDQ6NTTigK9QTSBEb21obmFsbCBNY0d1aWdhbiA8ZG1jZ3VpZ2FuQGt4
+LmNvbT4gd3JvdGU6DQo+DQo+IFRoYW5rcywgQWxleC4gSSdtIGV4YW1pbmluZyB0aGVzZSBub3c7
+IGFtIEkgcmlnaHQgaW4gdGhpbmtpbmcgdGhhdCBtb3N0IG9yIGFsbCBvZiB0aGVzZSBjb21taXRz
+IGFyZSBmaXhpbmcgaXNzdWVzIHRoYXQgYXJvc2UgZHVlIHRvIGEgcmVmYWN0b3IgdGhhdCBsYW5k
+ZWQgYWZ0ZXIgNi4xMiwgc28gdGhleSBkb24ndCBleHBsYWluIHdoeSB3ZSdyZSBzZWVpbmcgdGhl
+c2UgYnVncyBpbiA2LjEyPw0KPg0KPiBSZWdhcmRzLCBEb21obmFsbA0KPg0KPiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbGV4IE1hcmt1emUgPGFtYXJrdXplQHJlZGhhdC5j
+b20+DQo+IFNlbnQ6IDIzIFNlcHRlbWJlciAyMDI2IDA5OjM2DQo+IFRvOiBEb21obmFsbCBNY0d1
+aWdhbiA8ZG1jZ3VpZ2FuQGt4LmNvbT4NCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+OyBMaXogTm9ycmlzIDxlbm9ycmlzQGt4LmNvbT47IEJyZW5kYW4NCj4gTWNBbGxpc3RlciA8Ym1j
+YWxsaXN0ZXJAa3guY29tPjsgUGF2bG8gUGlhdGtvdnNreWkNCj4gPHBwaWF0a292c2t5aUBreC5j
+b20+OyBQaWVycmUgS292YWxldiA8cGllcnJlQGt4LmNvbT47IE9sZWcNCj4gRmlua2Vsc2h0ZXlu
+IDxvbGVnQGt4LmNvbT4NCj4gU3ViamVjdDogUmU6IFtCVUddIGNlcGhmcyBrZXJuZWwgY2xpZW50
+IDYuMTIueDogd3JpdGVzIGFmdGVyIGZ0cnVuY2F0ZQ0KPiBvY2Nhc2lvbmFsbHkgYmVpbmcgbG9z
+dCwgbGVhdmluZyBob2xlIGluIGZpbGVzDQo+DQo+IENBVVRJT046IFRoaXMgZW1haWwgb3JpZ2lu
+YXRlZCBmcm9tIG91dHNpZGUgb2YgdGhlIG9yZ2FuaXNhdGlvbi4gRG8gbm90IGNsaWNrIGxpbmtz
+IG9yIG9wZW4gYXR0YWNobWVudHMgdW5sZXNzIHlvdSByZWNvZ25pc2UgdGhlIHNlbmRlciBhbmQg
+a25vdyB0aGUgY29udGVudCBpcyBzYWZlLg0KPg0KPg0KPiBSZXNlbmRpbmcgaW4gcGxhaW4gdGV4
+dCBtb2RlLg0KPiBIZXJlIElzIGEgbGlzdCBvZiBwYXRjaGVzIHRoYXQgbWF5YmUgcmVsZXZhbnQN
+Cj4NCj4gLSAgQWxleCwgMjAyNS0xMi0xNCAgICAgMGNjMDE2OSwgNzg2ZjUxNQ0KPiAtICBBbGV4
+LCAyMDI2LTA4LTEzICAgICA2N2IyMjBhDQo+IC0gU2xhdmEsIDIwMjUtMDItMDQgICAgZjA4MDY4
+ZCwgY2U4MGI3NiwgMTU1MWVjNiwgZmQ3NDQ5ZA0KPiAtIFNsYXZhLCAyMDI1LTA3LTMwICAgIDQy
+ZGQzZjcNCj4gLSBNYXgsIDIwMjUtMDgtMjcgICAgICBjY2U3YzE1DQo+IC0gTWF4LCAyMDI2LTA5
+LTA0ICAgICAgOTQ5ZDc0Yg0KPg0KPg0KPiBPbiBXZWQsIFNlcCAyMywgMjAyNiBhdCAxMToxMOKA
+r0FNIEFsZXggTWFya3V6ZSA8YW1hcmt1emVAcmVkaGF0LmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBI
+ZXJlIElzIGEgbGlzdCBvZiBwYXRjaGVzIHRoYXQgbWF5YmUgcmVsZXZhbnQNCj4gPg0KPiA+IC0g
+IEFsZXgsIDIwMjUtMTItMTQgICAgIDBjYzAxNjksIDc4NmY1MTUNCj4gPiAtICBBbGV4LCAyMDI2
+LTA4LTEzICAgICA2N2IyMjBhDQo+ID4gLSBTbGF2YSwgMjAyNS0wMi0wNCAgICBmMDgwNjhkLCBj
+ZTgwYjc2LCAxNTUxZWM2LCBmZDc0NDlkDQo+ID4gLSBTbGF2YSwgMjAyNS0wNy0zMCAgICA0MmRk
+M2Y3DQo+ID4gLSBNYXgsIDIwMjUtMDgtMjcgICAgICBjY2U3YzE1DQo+ID4gLSBNYXgsIDIwMjYt
+MDktMDQgICAgICA5NDlkNzRiDQo+ID4NCj4gPiBPbiBUdWUsIFNlcCAyMiwgMjAyNiBhdCAzOjAx
+4oCvUE0gRG9taG5hbGwgTWNHdWlnYW4gPGRtY2d1aWdhbkBreC5jb20+IHdyb3RlOg0KPiA+Pg0K
+PiA+PiBTb3JyeSwgc2VuZGluZyB0aGlzIGJhY2sgdG8gdGhlIG1haWxpbmcgbGlzdCBiZWNhdXNl
+IEkgZm9yZ290IHRvIHVzZSByZXBseS1hbGwuDQo+ID4+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVz
+c2FnZS0tLS0tDQo+ID4+IEZyb206IERvbWhuYWxsIE1jR3VpZ2FuIDxkbWNndWlnYW5Aa3guY29t
+Pg0KPiA+PiBTZW50OiAyMiBTZXB0ZW1iZXIgMjAyNiAxMjo1MA0KPiA+PiBUbzogQWxleCBNYXJr
+dXplIDxhbWFya3V6ZUByZWRoYXQuY29tPg0KPiA+PiBTdWJqZWN0OiBSRTogW0JVR10gY2VwaGZz
+IGtlcm5lbCBjbGllbnQgNi4xMi54OiB3cml0ZXMgYWZ0ZXINCj4gPj4gZnRydW5jYXRlIG9jY2Fz
+aW9uYWxseSBiZWluZyBsb3N0LCBsZWF2aW5nIGhvbGUgaW4gZmlsZXMNCj4gPj4NCj4gPj4gV2Ug
+aGF2ZW4ndCB5ZXQgYmVlbiBhYmxlIHRvIHJlcHJvZHVjZSB0aGUgaXNzdWUgdW5kZXIgY29udHJv
+bGxlZCBjb25kaXRpb25zIGF0IGFsbDogdGhlIGJlc3Qgd2UgaGF2ZSBpcyBhIGRlcGxveW1lbnQg
+dGhhdCBzZWVtcyB0byBnZXQgYSBjb3JydXB0aW9uIGFib3V0IG9uY2UgYSBmb3J0bmlnaHQsIHdy
+aXRpbmcgNDBHaUIvZGF5LiBEbyB5b3UgaGF2ZSBsaW5rcyB0byB0aGUgdHJ1bmNhdGUtcmVsYXRl
+ZCBmaXhlcyB5b3UgbWVudGlvbmVkPyBJJ20gZ2V0dGluZyBub3doZXJlIHRyeWluZyB0byBmaW5k
+IHRoZW0gbXlzZWxmIGFuZCB0aGV5J2QgYmUgdmVyeSBoZWxwZnVsIHRvIHJlZmVyIHRvLg0KPiA+
+Pg0KPiA+PiBSZWdhcmRzLCBEb21obmFsbA0KPiA+Pg0KPiA+PiBGcm9tOiBBbGV4IE1hcmt1emUg
+PGFtYXJrdXplQHJlZGhhdC5jb20+DQo+ID4+IFNlbnQ6IDIyIFNlcHRlbWJlciAyMDI2IDEyOjM5
+DQo+ID4+IFRvOiBEb21obmFsbCBNY0d1aWdhbiA8ZG1jZ3VpZ2FuQGt4LmNvbT4NCj4gPj4gU3Vi
+amVjdDogUmU6IFtCVUddIGNlcGhmcyBrZXJuZWwgY2xpZW50IDYuMTIueDogd3JpdGVzIGFmdGVy
+DQo+ID4+IGZ0cnVuY2F0ZSBvY2Nhc2lvbmFsbHkgYmVpbmcgbG9zdCwgbGVhdmluZyBob2xlIGlu
+IGZpbGVzDQo+ID4+DQo+ID4+IFdlIGFyZSB1c2luZyBwYXRjaHdvcmsgYnV0IGl0J3Mgbm90IGJl
+dHRlciB0aGFuIGp1c3QgZ29pbmcgdGhyb3VnaCB0aGUgcGF0Y2hlcyB3aXRoIGdpdCBsb2cgLS1m
+b2xsb3cuDQo+ID4+DQo+ID4+IEkgd291bGQgdHJ5IHJ1bm5pbmcgYSBmcmVzaCB1cHN0cmVhbSBr
+ZXJuZWwgYnVpbGQgYW5kIHNlZSBpZiB0aGUgcHJvYmxlbSBwZXJzaXN0cy4gSWYgdGhlIHRlc3Qg
+aXMgZmFzdCBhIGdpdCBiaXNlY3Qgd2lsbCBsYW5kIHlvdSBvbiB0aGUgcGF0Y2ggeW91IG5lZWQu
+DQo+ID4+DQo+ID4+ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioNCj4gPj4gKioNCj4gPj4gKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKg0KPiA+PiAq
+Kg0KPiA+PiAqKioqKioqKioqKioqKioqKioqKioqKioqKioqKiBUaGlzIGVtYWlsLCBpdHMgY29u
+dGVudHMgYW5kIGFueQ0KPiA+PiBmaWxlcyBhdHRhY2hlZCBhcmUgYSBjb25maWRlbnRpYWwgY29t
+bXVuaWNhdGlvbiBhbmQgYXJlIGludGVuZGVkIG9ubHkgZm9yIHRoZSBuYW1lZCBhZGRyZXNzZWVz
+IGluZGljYXRlZCBpbiB0aGUgbWVzc2FnZS4gSWYgeW91IGFyZSBub3QgdGhlIG5hbWVkIGFkZHJl
+c3NlZSBvciBpZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGVtYWlsIGluIGVycm9yLCB5b3UgbWF5
+IG5vdCwgd2l0aG91dCB0aGUgY29uc2VudCBvZiBLWCwgY29weSwgdXNlIG9yIHJlbHkgb24gYW55
+IGluZm9ybWF0aW9uIG9yIGF0dGFjaG1lbnRzIGluIGFueSB3YXkuIFBsZWFzZSBub3RpZnkgdGhl
+IHNlbmRlciBieSByZXR1cm4gZW1haWwgYW5kIGRlbGV0ZSBpdCBmcm9tIHlvdXIgZW1haWwgc3lz
+dGVtLg0KPiA+PiBVbmxlc3Mgc2VwYXJhdGVseSBhZ3JlZWQsIEtYIGRvZXMgbm90IGFjY2VwdCBh
+bnkgcmVzcG9uc2liaWxpdHkgZm9yIHRoZSBhY2N1cmFjeSBvciBjb21wbGV0ZW5lc3Mgb2YgdGhl
+IGNvbnRlbnRzIG9mIHRoaXMgZW1haWwgb3IgaXRzIGF0dGFjaG1lbnRzLiBQbGVhc2Ugbm90ZSB0
+aGF0IGFueSB2aWV3cywgb3BpbmlvbiBvciBhZHZpY2UgY29udGFpbmVkIGluIHRoaXMgY29tbXVu
+aWNhdGlvbiBhcmUgdGhvc2Ugb2YgdGhlIHNlbmRpbmcgaW5kaXZpZHVhbCBhbmQgbm90IHRob3Nl
+IG9mIEtYIGFuZCBLWCBzaGFsbCBoYXZlIG5vIGxpYWJpbGl0eSB3aGF0c29ldmVyIGluIHJlbGF0
+aW9uIHRvIHRoaXMgY29tbXVuaWNhdGlvbiAob3IgaXRzIGNvbnRlbnQpIHVubGVzcyBzZXBhcmF0
+ZWx5IGFncmVlZC4NCj4gPj4gKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKg0KPiA+PiAqKg0KPiA+PiAqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo+
+ID4+ICoqDQo+ID4+ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo+DQo+ICoqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioNCj4gKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKg0KPiAqKioqKioqKioqKioqKioqKioqKioqKioqKiogVGhp
+cyBlbWFpbCwgaXRzIGNvbnRlbnRzIGFuZCBhbnkgZmlsZXMNCj4gYXR0YWNoZWQgYXJlIGEgY29u
+ZmlkZW50aWFsIGNvbW11bmljYXRpb24gYW5kIGFyZSBpbnRlbmRlZCBvbmx5IGZvciB0aGUgbmFt
+ZWQgYWRkcmVzc2VlcyBpbmRpY2F0ZWQgaW4gdGhlIG1lc3NhZ2UuIElmIHlvdSBhcmUgbm90IHRo
+ZSBuYW1lZCBhZGRyZXNzZWUgb3IgaWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlbWFpbCBpbiBl
+cnJvciwgeW91IG1heSBub3QsIHdpdGhvdXQgdGhlIGNvbnNlbnQgb2YgS1gsIGNvcHksIHVzZSBv
+ciByZWx5IG9uIGFueSBpbmZvcm1hdGlvbiBvciBhdHRhY2htZW50cyBpbiBhbnkgd2F5LiBQbGVh
+c2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcmV0dXJuIGVtYWlsIGFuZCBkZWxldGUgaXQgZnJvbSB5
+b3VyIGVtYWlsIHN5c3RlbS4NCj4gVW5sZXNzIHNlcGFyYXRlbHkgYWdyZWVkLCBLWCBkb2VzIG5v
+dCBhY2NlcHQgYW55IHJlc3BvbnNpYmlsaXR5IGZvciB0aGUgYWNjdXJhY3kgb3IgY29tcGxldGVu
+ZXNzIG9mIHRoZSBjb250ZW50cyBvZiB0aGlzIGVtYWlsIG9yIGl0cyBhdHRhY2htZW50cy4gUGxl
+YXNlIG5vdGUgdGhhdCBhbnkgdmlld3MsIG9waW5pb24gb3IgYWR2aWNlIGNvbnRhaW5lZCBpbiB0
+aGlzIGNvbW11bmljYXRpb24gYXJlIHRob3NlIG9mIHRoZSBzZW5kaW5nIGluZGl2aWR1YWwgYW5k
+IG5vdCB0aG9zZSBvZiBLWCBhbmQgS1ggc2hhbGwgaGF2ZSBubyBsaWFiaWxpdHkgd2hhdHNvZXZl
+ciBpbiByZWxhdGlvbiB0byB0aGlzIGNvbW11bmljYXRpb24gKG9yIGl0cyBjb250ZW50KSB1bmxl
+c3Mgc2VwYXJhdGVseSBhZ3JlZWQuDQo+ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioNCj4gKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKg0K
+PiAqKioqKioqKioqKioqKioqKioqKioqKioqKioNCg0KKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioNClRoaXMgZW1haWwsIGl0cyBjb250ZW50cyBh
+bmQgYW55IGZpbGVzIGF0dGFjaGVkIGFyZSBhIGNvbmZpZGVudGlhbCBjb21tdW5pY2F0aW9uIGFu
+ZCBhcmUgaW50ZW5kZWQgb25seSBmb3IgdGhlIG5hbWVkIGFkZHJlc3NlZXMgaW5kaWNhdGVkIGlu
+IHRoZSBtZXNzYWdlLiBJZiB5b3UgYXJlIG5vdCB0aGUgbmFtZWQgYWRkcmVzc2VlIG9yIGlmIHlv
+dSBoYXZlIHJlY2VpdmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHlvdSBtYXkgbm90LCB3aXRob3V0
+IHRoZSBjb25zZW50IG9mIEtYLCBjb3B5LCB1c2Ugb3IgcmVseSBvbiBhbnkgaW5mb3JtYXRpb24g
+b3IgYXR0YWNobWVudHMgaW4gYW55IHdheS4gUGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHJl
+dHVybiBlbWFpbCBhbmQgZGVsZXRlIGl0IGZyb20geW91ciBlbWFpbCBzeXN0ZW0uDQpVbmxlc3Mg
+c2VwYXJhdGVseSBhZ3JlZWQsIEtYIGRvZXMgbm90IGFjY2VwdCBhbnkgcmVzcG9uc2liaWxpdHkg
+Zm9yIHRoZSBhY2N1cmFjeSBvciBjb21wbGV0ZW5lc3Mgb2YgdGhlIGNvbnRlbnRzIG9mIHRoaXMg
+ZW1haWwgb3IgaXRzIGF0dGFjaG1lbnRzLiBQbGVhc2Ugbm90ZSB0aGF0IGFueSB2aWV3cywgb3Bp
+bmlvbiBvciBhZHZpY2UgY29udGFpbmVkIGluIHRoaXMgY29tbXVuaWNhdGlvbiBhcmUgdGhvc2Ug
+b2YgdGhlIHNlbmRpbmcgaW5kaXZpZHVhbCBhbmQgbm90IHRob3NlIG9mIEtYIGFuZCBLWCBzaGFs
+bCBoYXZlIG5vIGxpYWJpbGl0eSB3aGF0c29ldmVyIGluIHJlbGF0aW9uIHRvIHRoaXMgY29tbXVu
+aWNhdGlvbiAob3IgaXRzIGNvbnRlbnQpIHVubGVzcyBzZXBhcmF0ZWx5IGFncmVlZC4NCioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo=
