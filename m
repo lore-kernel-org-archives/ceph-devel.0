@@ -1,90 +1,90 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFA9E4A4825
-	for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 15:30:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C588A4A5EA7
+	for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 15:31:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790263861; cv=none; b=mzAFvvi0vJbhbC4N3c2pDaDjad4Ug9stAmqUl9VNe8abOZDqOT9NcQOCgB6dqeDnH8P81bFut8NO1qzJrdUGix5sf0gynymZTt5Fw8Hnzo6L7iRv92/fVtwX3k6pwBKxhwWf8gn+ocgb0xhahTzFeQsSQqJFPYqBZMs4Fzw0KyE=
+	t=1790263864; cv=none; b=Cl9yW4fseMEuHDGGSGv8bQK0Gdh0u8xYDqkhOGEVzy7/iTPXP3N60OlfPMUmEaWSltv/vkUtv5q/pAesaBNcKRjT2obyBydN/eDyRNQxj+Mh1C8pVgzmrichtSjqXx9dFl6CoczsDiJXFYPqgUOPPoUfcG/3cCBD7kEfsmEn+G4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790263861; c=relaxed/simple;
-	bh=zJJW6Ug6wkcIpc7hn5n4HTImnTjCzgM3Ky17nsuPcbg=;
+	s=arc-20240116; t=1790263864; c=relaxed/simple;
+	bh=TPluu+gMNl/X49ImtSeBB0gmoqAobBSWOyTihP7LEoQ=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=MSlI01Q8YfQ3eJBzR8YRR4ripJ50x7ge+81DKzlTnp0eAtGdOxqoXhhFMeWMov9hsmorpxF0MGtDPWbWHggz4bgJsFZ/lTmT+tCvCTwBGlOHQFAHvF7GhuWRQTIegOW1k5FhKShF19j51rxh7JxnCYjX6MkC3ALnp0FOHzCEXkY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=TUN7bxrY; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=KfHXmSSn; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=GltwVA4Tvt0FupTI5RdBX11AZZd+A33VNmE3ojrA9Vfg4oQAFS62nC+WN28RV9Ex/4B3x8Pz2kZ6FlivDMw0RkO0Yaka1zAW5i4ukrTRjliVZuUcfuFUmHz5AbZLsS74MQLITp8l98Bt/Xp7SzgTPWErxwmFnwjWB3Lru1T71MM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Nz9IYSMq; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=qDC46XtA; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TUN7bxrY";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="KfHXmSSn"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Nz9IYSMq";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="qDC46XtA"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1790263858;
+	s=mimecast20190719; t=1790263861;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=gmSw6Ni31zj7pByeFkFSHapvx5I70UMMXEya7lZFNuE=;
-	b=TUN7bxrY7w9RYKHFzFyMdVJa6scHaXxqM20TAAUCy2Q9HwESHkuXq3WxAOsq/AvyFAF2Rm
-	g3h2CPGdwmmlajE9QGqLunWBe3bZwmzvWef0EdHEimz2XwwgHSYyqeBcZW6wB/hW8ejkJh
-	QmR6FT+RWVm5uJlul5rwqfVBSBFoxH0=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=+5R1jYllZ8ZmtQtqDQN4pCmw0ibgldwFqJ4BaGYJO0Q=;
+	b=Nz9IYSMquJjCn8ELn9dv+kP7OJItpq7nJWjMxLSoz3YE9OsWulWYNuS2k/UYpicS+awThp
+	9NU4klj+zvme3j7Yc1LQCFUlx2cUus+4mCHrNdKGVp6eTL/ioYnEakOTQfZYlNEdy7UCDf
+	VhfVMs939DDzTL/Kz3vDvrZj9MwEH90=
+Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com
+ [209.85.208.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-107-jpHRMxRtOOeft5AoUS2kGA-1; Thu, 24 Sep 2026 11:30:56 -0400
-X-MC-Unique: jpHRMxRtOOeft5AoUS2kGA-1
-X-Mimecast-MFC-AGG-ID: jpHRMxRtOOeft5AoUS2kGA_1790263855
-Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-6aa5d0921fcso2624185a12.3
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 08:30:56 -0700 (PDT)
+ us-mta-515-07ItJvmWOw2en6L4wk09qA-1; Thu, 24 Sep 2026 11:31:00 -0400
+X-MC-Unique: 07ItJvmWOw2en6L4wk09qA-1
+X-Mimecast-MFC-AGG-ID: 07ItJvmWOw2en6L4wk09qA_1790263859
+Received: by mail-ed1-f71.google.com with SMTP id 4fb4d7f45d1cf-6a91d818528so2639514a12.3
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 08:30:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1790263855; x=1790868655; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1790263859; x=1790868659; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=gmSw6Ni31zj7pByeFkFSHapvx5I70UMMXEya7lZFNuE=;
-        b=KfHXmSSnvm6QcbCHi19Vh83d3j0ALsv3gmFsFZOKeVd1GPOZaYv+anQlpvO5Lasyul
-         thdSpJfxGhjeXiQj7rIC+FNbchfE9V/jDLKSfN+X5GAe05AIFOdC8IIjLJKtvPqtLSzZ
-         lsUYjt4kQk+IXusSO5n0esTJspe/HiWvoMoOAHgt1kDrx91duGPWY8fLVdcL7rNRnVXG
-         9LmFQBFQ35iwJK9zSDPefYGMr55CyTDOQCDS12UcrsrQexOjLQAn88mZ5gukuA8v5Noh
-         +4BlLUPrXmobXhAadUnYRbsspLXQrptgGLWb7XscKTsWNO4oG4zGyROxSmBGPjOGmjAg
-         08ag==
+        bh=+5R1jYllZ8ZmtQtqDQN4pCmw0ibgldwFqJ4BaGYJO0Q=;
+        b=qDC46XtAwGLSUkrYylsMTTPGcawpHGGMVgwZDVh2vHEpV07TI/rDm1roVK2XYyAMFA
+         kGYzonkerEHROmulaT6nyi8IktpzB45jAxiw59qxKs1QI6sIzbo421Afa4xMBXeILQyc
+         m3OvAmvLvDJPdY0P0kpISV2qHwLTRxBWhbyB/waFG0S/RKDBZA4DvJvZ+lKWWV4ro0Dz
+         ZszC8IDKP4DfUolSr5nCo/UqbGkIy0P/jNG1QHJcFanBLIPv9+/izEUMxquT5FmCyrKX
+         GghkiRm+tXwg+E5quZE8gaICvPB0+ulh+vb7bWD5epEf2ginz3e2YgHEmvcoMPoAv/xJ
+         EfYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790263855; x=1790868655;
+        d=1e100.net; s=20260707; t=1790263859; x=1790868659;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=gmSw6Ni31zj7pByeFkFSHapvx5I70UMMXEya7lZFNuE=;
-        b=e3fIVV+x2JSltRFH+roh+OJOOyzOPCsSNvbFTe+2brQCVDBdTsCTAz/FdjBOz25E2z
-         uIdmBBDLAtVQMhg2VTFkmGujHwWlM06RG7qVeCw/DyVAjve7QqFa9Rjms3xmjhoH5NV1
-         pIvbfvWP6kROAdWBezf4rJ8SluH2OCSBN+IaCGn7cNftUIUYra9QMfPRo6RMcFKyZkqY
-         px18vq5YzxfubbCUeihdd8/bclatAVKyM6bapovRm1nru9ixuUthNGrtYfqlFNZBSsEx
-         wxXZq5jvXkTuZQK2KIsoDn39H1CY2XonIELvTt1Ln4P9pJQfw+poyhdXfQf2QmguguLj
-         qP9Q==
-X-Gm-Message-State: AFuF++mVcN9LCPP5tiAt9IgeFxbSK6lmFgXmNrtbRw55oznMLw2Uor/n
-	HMebASECOGZ8int6bNUmFCoeF5F+7az+tf/TK/ljYhmSODb9Xm5Nyls2vZq7cboI2KOaPPdeqcS
-	HdutiRyQ0rydWVWsUXML+rBfAyIdpy9ptKvRnLU+CwJbIgBBpOLgRz8CXF64JSe+rOgdot68/p/
-	VQIb9gH5a62nRtXHRqXtYzLRr/eORAtO8e+4rIs+T6EI+nyDN5NQ==
-X-Gm-Gg: AYBFou3DG75NWEpYC+iTnZ3eYAGcpSMvELTe+5VOyVyXewpwqvJx/DqEydLZrx61Dtu
-	pbK3nEKABa5TmTw21qsTol69sAbgVpemSXh0UVGzq1ZFnJDAOQkWXu0gdobzHoE91W7s2gWQQRd
-	PnRR/CccMmyU9ZiiUXmD5VSc1LnPe5dq6OFvL6iSVylRW7AP4JAdJZcGFY+Gc6hp0DEG8HRCuE8
-	QzxNVtkNRofxUyH3iVDet4cLksUd3w1RuveCLf4WAjXnZStOkQyNHldddZCfAl9zGKg3Udu+RqG
-	BBtH7BIBXVFcN9A3TNKaeCHzbNoFNU0yDws/x7+c4o3J9MPv4rEExASrPhcO3ox1M2tOUZlYPQH
-	EcTDSJlqvLFSewlG9p+IptceoY3BsT2ykAwEUqpPP22hB29HIi8FvhtQOBUe6TatdpFLqfqNeNE
-	ygTXEMFRtq8ZqGiA==
-X-Received: by 2002:a05:6402:50c6:b0:6a8:d72a:3b21 with SMTP id 4fb4d7f45d1cf-6aac9108d83mr2336984a12.44.1790263855216;
-        Thu, 24 Sep 2026 08:30:55 -0700 (PDT)
-X-Received: by 2002:a05:6402:50c6:b0:6a8:d72a:3b21 with SMTP id 4fb4d7f45d1cf-6aac9108d83mr2336962a12.44.1790263854529;
-        Thu, 24 Sep 2026 08:30:54 -0700 (PDT)
+        bh=+5R1jYllZ8ZmtQtqDQN4pCmw0ibgldwFqJ4BaGYJO0Q=;
+        b=jwsAw/VjZOs+7e48Sav7060DNJ/vZmaHUYuM1r5SnROY+1ZU3otFoy7r39dlFAzNVn
+         Qy+BUVQaOxszPCCfFJCgLwoTpPO5XpN5T9CJS+9t8rQNDWmsaN7VIpdIExtrlosBWZPg
+         SET/EUgT44S9fIZndZXjWDmFmKxvP7kKtxVESitpVHTp1VgbaDzDrSC+6AUaopXkt6c9
+         FQFCq/9Ft2qbm1t+1NQ37a22C6wLYtJxF97blb1kAqdDQzXbNmTmMW/c0Ya/8LRlrCZY
+         mI//ePXgmLa51dSmRWVh+ZGWoxlGAaG/ils1bkH6wb0GURRRPehCAdbM9RRXsFOk55Wr
+         dqOg==
+X-Gm-Message-State: AFuF++mTytkG6hWP9MRtADyJmrBPyTpobOzKc1Qdb+jNk4tmFHm4u5WS
+	3BSDANrpd0wtss4i4MJZd5ZzbNttOVQ+2IIY4F284MDPqJQhEnk2qf7VudyaXrddf5Bk6BsrHJi
+	LGO03wqlflRoJi6gyYKGOrI6YPecFLD5HO5T3cuGdDfNhvtsoyh4c/QNj/lPzRz0eHYVl0zfU4m
+	1i0Y/bfkn0wJkbNlrae/AVKArIGy0PqYsf6kq/12QHF90u6Qwjbw==
+X-Gm-Gg: AYBFou38uTEz+NIf/cRwUCkL1L2YZCxpUMD5wS3Q/KWIkKEnUxRxClFwm393FMPwRFD
+	7GUHfjDYz03co3+NxyxwHNFV7eIAVL0fgddojlF+yjhe+7oA3XOQsV8ZHeQCTUOgVEavC3eOMDT
+	7EzXEnnEGrRKCOKBJCvrxkl/qY8ARlbz8isT0mLd7Kx8tl8abTttr+i5qclZfKEBMUJuJw7R6M5
+	SuepuYEhXO9AC8s6SsOJ0qQAxbbf3FqYqvCKf1Q5EEUx7XZbJdqb3gVryDhTJKn9goCZ7NG38P0
+	S8pEQd4k7UCyPaVQDrE/FOJycsfmXI6x97WojTGUu1ANMIsR28jizMEqO2itOUQiDaMQMT3up2a
+	0augRqo5Dbld3g9BIreQLhmUlBmUHGuNmZp5coA+y3uWvRSxIcg3Iny+9JR7+fbUSOJh64jjs8A
+	yqlVm2fxbIvwpWQQ==
+X-Received: by 2002:a05:6402:3552:b0:6aa:82f:8093 with SMTP id 4fb4d7f45d1cf-6aac90dc803mr2665570a12.37.1790263858802;
+        Thu, 24 Sep 2026 08:30:58 -0700 (PDT)
+X-Received: by 2002:a05:6402:3552:b0:6aa:82f:8093 with SMTP id 4fb4d7f45d1cf-6aac90dc803mr2665540a12.37.1790263858183;
+        Thu, 24 Sep 2026 08:30:58 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6aab386e5b9sm3941908a12.8.2026.09.24.08.30.53
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6aab386e5b9sm3941908a12.8.2026.09.24.08.30.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Sep 2026 08:30:54 -0700 (PDT)
+        Thu, 24 Sep 2026 08:30:57 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com,
 	xiubo.li@clyso.com
-Subject: [PATCH v7 05/14] ceph: add BLOG logger core
-Date: Thu, 24 Sep 2026 15:30:35 +0000
-Message-Id: <20260924153045.994784-6-amarkuze@redhat.com>
+Subject: [PATCH v7 08/14] ceph: add boutc wrappers for BLOG
+Date: Thu, 24 Sep 2026 15:30:38 +0000
+Message-Id: <20260924153045.994784-9-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260924153045.994784-1-amarkuze@redhat.com>
 References: <20260924153045.994784-1-amarkuze@redhat.com>
@@ -96,323 +96,139 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add blog_core.c: central logger, source-ID registry with per-callsite
-caching (smp_store_release/smp_load_acquire plus generation counter),
-circular entry buffer, and iteration API for debugfs consumers.
+Add boutc()/boutc_bounded()/boutc_formats() macros to ceph_debug.h as
+drop-in replacements for doutc().  When BLOG is enabled they serialize
+to binary; when disabled they fall back to doutc().
 
-blog_log_client_emit() is the noinline helper that writes a record
-from TLS argument scratch, so boutc() call sites do not allocate
-struct blog_arg[] on the VFS stack.
+Resolve the optional binary context before choosing the backend.
+Expand the doutc fallback only once per call site to avoid duplicate
+dynamic-debug metadata and excessive VFS stack frames.
 
 Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+Assisted-by: LLM
 ---
- fs/ceph/blog_core.c | 297 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 297 insertions(+)
- create mode 100644 fs/ceph/blog_core.c
+ include/linux/ceph/ceph_debug.h | 81 ++++++++++++++++++++++++++++-----
+ 1 file changed, 69 insertions(+), 12 deletions(-)
 
-diff --git a/fs/ceph/blog_core.c b/fs/ceph/blog_core.c
-new file mode 100644
-index 000000000000..3b5bca332625
---- /dev/null
-+++ b/fs/ceph/blog_core.c
-@@ -0,0 +1,297 @@
-+// SPDX-License-Identifier: GPL-2.0
+diff --git a/include/linux/ceph/ceph_debug.h b/include/linux/ceph/ceph_debug.h
+index 5f904591fa5f..e055091d5c3c 100644
+--- a/include/linux/ceph/ceph_debug.h
++++ b/include/linux/ceph/ceph_debug.h
+@@ -5,28 +5,22 @@
+ #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+ 
+ #include <linux/string.h>
++#include <linux/jump_label.h>
+ 
+ #ifdef CONFIG_CEPH_LIB_PRETTYDEBUG
+ 
+-/*
+- * wrap pr_debug to include a filename:lineno prefix on each line.
+- * this incurs some overhead (kernel size and execution time) due to
+- * the extra function call at each call site.
+- */
+-
+ # if defined(DEBUG) || defined(CONFIG_DYNAMIC_DEBUG)
+ #  define dout(fmt, ...)						\
+ 	pr_debug("%.*s %12.12s:%-4d : " fmt,				\
+ 		 8 - (int)sizeof(KBUILD_MODNAME), "    ",		\
+ 		 kbasename(__FILE__), __LINE__, ##__VA_ARGS__)
+ #  define doutc(client, fmt, ...)					\
+-	pr_debug("%.*s %12.12s:%-4d : [%pU %llu] " fmt,			\
++	pr_debug("%.*s %12.12s:%-4d : [%pU %llu] " fmt,		\
+ 		 8 - (int)sizeof(KBUILD_MODNAME), "    ",		\
+ 		 kbasename(__FILE__), __LINE__,				\
+ 		 &client->fsid, client->monc.auth->global_id,		\
+ 		 ##__VA_ARGS__)
+ # else
+-/* faux printk call just to see any compiler warnings. */
+ #  define dout(fmt, ...)					\
+ 		no_printk(KERN_DEBUG fmt, ##__VA_ARGS__)
+ #  define doutc(client, fmt, ...)				\
+@@ -38,16 +32,79 @@
+ 
+ #else
+ 
+-/*
+- * or, just wrap pr_debug
+- */
+ # define dout(fmt, ...)	pr_debug(" " fmt, ##__VA_ARGS__)
+ # define doutc(client, fmt, ...)					\
+-	pr_debug(" [%pU %llu] %s: " fmt, &client->fsid,			\
++	pr_debug(" [%pU %llu] %s: " fmt, &client->fsid,		\
+ 		 client->monc.auth->global_id, __func__, ##__VA_ARGS__)
+ 
+ #endif
+ 
 +/*
-+ * BLOG logger: source-ID registry and log iteration.
++ * boutc* -- binary-logging variants of doutc*.
++ *
++ * When Ceph BLOG tracing has been explicitly enabled and a BLOG context
++ * has been bound for the current task (via ceph_blog_enter()),
++ * these route through the BLOG serialization path. Otherwise they fall
++ * back to the traditional text-based doutc macros so that existing
++ * debug semantics remain unchanged.
++ *
++ * Must only be used from fs/ceph/ where client->private is a
++ * ceph_fs_client *.  Do not call from net/ceph or RBD; ->private is not
++ * an fsc there (ceph_blog_key stays false, but the cast is still wrong).
 + */
++#define __ceph_blog_args(...) __VA_ARGS__
++#if IS_ENABLED(CONFIG_CEPH_FS) && IS_ENABLED(CONFIG_DEBUG_FS)
++# include <linux/ceph/ceph_blog.h>
++# define boutc(client, fmt, ...) \
++	do { \
++		struct blog_tls_ctx *__ctx = NULL; \
++		if (static_branch_unlikely(&ceph_blog_key)) \
++			__ctx = ceph_blog_get_cached_ctx( \
++				(struct ceph_fs_client *)(client)->private); \
++		if (__ctx) \
++			CEPH_BLOG_LOG_CLIENT(__ctx, client, fmt, ##__VA_ARGS__); \
++		else \
++			doutc(client, fmt, ##__VA_ARGS__); \
++	} while (0)
++# define boutc_bounded(client, fmt, blog_args, text_args) \
++	do { \
++		struct blog_tls_ctx *__ctx = NULL; \
++		if (static_branch_unlikely(&ceph_blog_key)) \
++			__ctx = ceph_blog_get_cached_ctx( \
++				(struct ceph_fs_client *)(client)->private); \
++		if (__ctx) \
++			CEPH_BLOG_LOG_CLIENT(__ctx, client, fmt, \
++					     __ceph_blog_args blog_args); \
++		else \
++			doutc(client, fmt, __ceph_blog_args text_args); \
++	} while (0)
++# define boutc_formats(client, blog_fmt, text_fmt, blog_args, text_args) \
++	do { \
++		struct blog_tls_ctx *__ctx = NULL; \
++		if (static_branch_unlikely(&ceph_blog_key)) \
++			__ctx = ceph_blog_get_cached_ctx( \
++				(struct ceph_fs_client *)(client)->private); \
++		if (__ctx) \
++			CEPH_BLOG_LOG_CLIENT(__ctx, client, blog_fmt, \
++					     __ceph_blog_args blog_args); \
++		else \
++			doutc(client, text_fmt, __ceph_blog_args text_args); \
++	} while (0)
++#else
++# define boutc(client, fmt, ...) doutc(client, fmt, ##__VA_ARGS__)
++# define boutc_bounded(client, fmt, blog_args, text_args) \
++	do { \
++		(void)sizeof(#blog_args); \
++		doutc(client, fmt, __ceph_blog_args text_args); \
++	} while (0)
++# define boutc_formats(client, blog_fmt, text_fmt, blog_args, text_args) \
++	do { \
++		(void)sizeof(blog_fmt); \
++		(void)sizeof(#blog_args); \
++		doutc(client, text_fmt, __ceph_blog_args text_args); \
++	} while (0)
++#endif
 +
-+#include <linux/module.h>
-+#include <linux/kernel.h>
-+#include <linux/init.h>
-+#include <linux/slab.h>
-+#include <linux/string.h>
-+#include <linux/printk.h>
-+#include <linux/time.h>
-+#include <linux/percpu.h>
-+#include <linux/spinlock.h>
-+#include <linux/list.h>
-+#include <linux/sched.h>
-+#include <linux/hash.h>
-+
-+#include <linux/rhashtable.h>
-+#include "blog.h"
-+#include "blog_batch.h"
-+#include "blog_pagefrag.h"
-+#include "blog_ser.h"
-+#include "blog_des.h"
-+#include "blog_module.h"
-+
-+static bool blog_source_matches(const struct blog_source_info *info,
-+				const char *file, const char *func,
-+				unsigned int line, const char *fmt)
-+{
-+	return info->file && info->func && info->fmt &&
-+	       info->line == line && info->fmt == fmt &&
-+	       !strcmp(info->file, file) && !strcmp(info->func, func);
-+}
-+
-+static u32 blog_source_hash(const char *fmt, unsigned int line, u32 mask)
-+{
-+	return (hash_ptr((void *)fmt, 32) ^ line) & mask;
-+}
-+
-+/**
-+ * blog_get_source_id - Get or create a source ID for the given location
-+ * @logger: Logger instance to use
-+ * @file: Source file name
-+ * @func: Function name
-+ * @line: Line number
-+ * @fmt: Format string
-+ */
-+u32 blog_get_source_id(struct blog_logger *logger, const char *file,
-+		       const char *func, unsigned int line, const char *fmt)
-+{
-+	struct blog_source_info *info;
-+	u32 id, slot, first;
-+
-+	if (!logger || !logger->source_hash)
-+		return 0;
-+
-+	spin_lock(&logger->source_lock);
-+	slot = blog_source_hash(fmt, line, logger->source_hash_mask);
-+	first = slot;
-+	do {
-+		id = logger->source_hash[slot];
-+		if (!id)
-+			break;
-+		info = &logger->source_map[id];
-+		if (blog_source_matches(info, file, func, line, fmt))
-+			goto out_unlock;
-+		slot = (slot + 1) & logger->source_hash_mask;
-+	} while (slot != first);
-+
-+	id = logger->next_source_id;
-+	if (id >= logger->max_source_ids) {
-+		spin_unlock(&logger->source_lock);
-+		pr_warn_once("blog: source ID overflow\n");
-+		return 0;
-+	}
-+
-+	/* No empty slot in the hash table. */
-+	if (logger->source_hash[slot]) {
-+		spin_unlock(&logger->source_lock);
-+		pr_warn_once("blog: source hash full\n");
-+		return 0;
-+	}
-+
-+	logger->next_source_id = id + 1;
-+	info = &logger->source_map[id];
-+	info->file = file;
-+	info->func = func;
-+	info->line = line;
-+	info->fmt = fmt;
-+	info->warn_count = 0;
-+	logger->source_hash[slot] = id;
-+
-+out_unlock:
-+	spin_unlock(&logger->source_lock);
-+	return id;
-+}
-+
-+u32 blog_get_source_id_cached(struct blog_logger *logger,
-+			      struct blog_source_id_cache *cache,
-+			      const char *file, const char *func,
-+			      unsigned int line, const char *fmt)
-+{
-+	struct blog_logger *cached_logger;
-+	u64 generation;
-+	unsigned int seq;
-+	u32 sid;
-+
-+	if (!logger)
-+		return 0;
-+	if (!cache)
-+		return blog_get_source_id(logger, file, func, line, fmt);
-+
-+	/* Callsites are shared by mounts, so read one lockless snapshot. */
-+	do {
-+		seq = read_seqcount_begin(&cache->seq);
-+		sid = cache->id;
-+		cached_logger = cache->logger;
-+		generation = cache->generation;
-+	} while (read_seqcount_retry(&cache->seq, seq));
-+	if (sid && cached_logger == logger &&
-+	    generation == logger->generation)
-+		return sid;
-+
-+	spin_lock(&cache->lock);
-+	sid = cache->id;
-+	if (sid && cache->logger == logger &&
-+	    cache->generation == logger->generation)
-+		goto out;
-+
-+	sid = blog_get_source_id(logger, file, func, line, fmt);
-+	if (sid) {
-+		write_seqcount_begin(&cache->seq);
-+		cache->logger = logger;
-+		cache->generation = logger->generation;
-+		cache->id = sid;
-+		write_seqcount_end(&cache->seq);
-+	}
-+
-+out:
-+	spin_unlock(&cache->lock);
-+	return sid;
-+}
-+
-+struct blog_source_info *blog_get_source_info(struct blog_logger *logger, u32 id)
-+{
-+	if (!logger || unlikely(id == 0 || id >= logger->max_source_ids))
-+		return NULL;
-+	return &logger->source_map[id];
-+}
-+
-+void blog_log_iter_init(struct blog_log_iter *iter, struct blog_pagefrag *pf,
-+			u64 head_snapshot)
-+{
-+	if (!iter || !pf)
-+		return;
-+
-+	iter->pf = pf;
-+	iter->current_offset = 0;
-+	iter->end_offset = head_snapshot;
-+	iter->prev_offset = 0;
-+	iter->steps = 0;
-+}
-+
-+struct blog_log_entry *blog_log_iter_next(struct blog_log_iter *iter)
-+{
-+	struct blog_log_entry *entry;
-+
-+	if (!iter || iter->current_offset >= iter->end_offset)
-+		return NULL;
-+
-+	/* Ensure the entry header itself fits within the snapshot. */
-+	if (iter->current_offset + sizeof(struct blog_log_entry) >
-+	    iter->end_offset)
-+		return NULL;
-+
-+	entry = blog_pagefrag_get_ptr(iter->pf, iter->current_offset);
-+	if (!entry)
-+		return NULL;
-+
-+	/* Reject truncated / corrupt payloads before deserializing. */
-+	if (iter->current_offset + sizeof(*entry) + entry->len >
-+	    iter->end_offset)
-+		return NULL;
-+
-+	iter->prev_offset = iter->current_offset;
-+	iter->current_offset +=
-+		round_up(sizeof(struct blog_log_entry) + entry->len, 8);
-+	iter->steps++;
-+
-+	/*
-+	 * Clamp to the snapshot boundary: a corrupted entry->len could
-+	 * push current_offset past end_offset into garbage memory.
-+	 */
-+	if (iter->current_offset > iter->end_offset)
-+		iter->current_offset = iter->end_offset;
-+
-+	return entry;
-+}
-+
-+int blog_des_entry(struct blog_logger *logger, struct blog_log_entry *entry,
-+		   char *output, size_t out_size, blog_client_des_fn client_cb)
-+{
-+	int len = 0;
-+	struct blog_source_info *source;
-+
-+	if (!entry || !output)
-+		return -EINVAL;
-+
-+	if (client_cb) {
-+		len = client_cb(output, out_size, entry->client_id);
-+		if (len < 0)
-+			return len;
-+		if (len >= out_size)
-+			return len;
-+	}
-+
-+	source = blog_get_source_info(logger, entry->source_id);
-+	if (!source) {
-+		len += scnprintf(output + len, out_size - len,
-+				 "[unknown source %u]", entry->source_id);
-+		return len;
-+	}
-+
-+	/* Snapshot under source_lock (same pattern as blog_sources_show). */
-+	{
-+		const char *file, *func, *fmt;
-+		unsigned int line;
-+		int ret;
-+
-+		spin_lock(&logger->source_lock);
-+		file = source->file;
-+		func = source->func;
-+		line = source->line;
-+		fmt = source->fmt;
-+		spin_unlock(&logger->source_lock);
-+		if (!file) {
-+			len += scnprintf(output + len, out_size - len,
-+					 "[unknown source %u]",
-+					 entry->source_id);
-+			return len;
-+		}
-+
-+		len += scnprintf(output + len, out_size - len, "[%s:%s:%u] ",
-+				 file, func, line);
-+		if (len >= out_size)
-+			return len;
-+
-+		ret = blog_des_reconstruct(fmt, entry->buffer, entry->len,
-+					   output + len, out_size - len);
-+		if (ret < 0)
-+			return ret;
-+		len += ret;
-+	}
-+
-+	return len;
-+}
-+
-+noinline void blog_log_client_emit(struct blog_tls_ctx *ctx,
-+				   struct ceph_client *client,
-+				   struct blog_source_id_cache *cache,
-+				   const char *file, const char *func,
-+				   unsigned int line, const char *fmt,
-+				   size_t nargs)
-+{
-+	struct blog_logger *logger;
-+	struct blog_arg *args;
-+	size_t size;
-+	void *buffer;
-+	void *tmp;
-+	u32 sid;
-+	u32 client_id;
-+
-+	BUILD_BUG_ON(sizeof(struct blog_tls_pagefrag) >= BLOG_PAGEFRAG_SIZE);
-+
-+	if (unlikely(!ctx || !cache || nargs > BLOG_MAX_ARGS))
-+		return;
-+
-+	logger = ctx->logger;
-+	if (unlikely(!logger))
-+		return;
-+
-+	args = ctx->arg_scratch;
-+	sid = blog_get_source_id_cached(logger, cache, file, func, line, fmt);
-+	if (unlikely(!sid))
-+		return;
-+
-+	client_id = ceph_blog_get_client_id(client);
-+	size = blog_args_size(args, nargs);
-+	buffer = blog_log_with_ctx(logger, ctx, sid, client_id, size);
-+	if (!buffer)
-+		return;
-+
-+	tmp = buffer;
-+	buffer = blog_serialize_args(buffer, args, nargs);
-+	blog_log_commit_with_ctx(logger, ctx, buffer - tmp);
-+}
+ #define pr_notice_client(client, fmt, ...)				\
+ 	pr_notice("[%pU %llu]: " fmt, &client->fsid,			\
+ 		  client->monc.auth->global_id, ##__VA_ARGS__)
 -- 
 2.34.1
 
