@@ -1,290 +1,270 @@
-Received: from AM0PR02CU008.outbound.protection.outlook.com (mail-westeuropeazon11023111.outbound.protection.outlook.com [52.101.72.111])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from v54.v54282eed.euw1.send.eu.mailgun.net (v54.v54282eed.euw1.send.eu.mailgun.net [185.250.239.4])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D2994A5ED3
-	for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 15:57:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.72.111
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790265461; cv=fail; b=pRgw81wyYo812mCBs5IPMKJabWetvILJoPfPhuKhJwsiqJVutlORgJPaBNd3kvF9pgNG9BPBYroCDfpH5GRYXlvG9fqL2DVCpbhoF6ZwpRxRULj6hSkgN5M4rUitVFkPsLZLXkDcWJJ2sKyHy1m2I/yzJzobTDzs/2qNbhiRrwo=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790265461; c=relaxed/simple;
-	bh=6ugINgE2RcmXGfsQaGz+BE4fiHW6pZzpYUMeqdyTREk=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=hkK49TqHv++h5PtUVsHyBSSMrml8xaBvqdd9kGkHDey2T4ruqQfbXko0fJPx60h2b9zWmqzyGErEU7jkIWb0Foxz+Jk67/b35qsb2w3jBchttynBHcOdHXa64UzJLD733ZoZXA2pVjLTkssevW45KdBeztjcrUAOUfp0CDTT9Bs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kx.com; spf=pass smtp.mailfrom=kx.com; dkim=pass (2048-bit key) header.d=kx.com header.i=@kx.com header.b=JApiJk2O; arc=fail smtp.client-ip=52.101.72.111
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kx.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86ADB43CEC7
+	for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 16:16:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.250.239.4
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1790266567; cv=none; b=UDwdAKpVGXFH4VBXo43hQBZwBST82QjJLXrd+FVwl+N+ddYO3Nj49lWv+YsU1OezHGWbFYWMjyhodG1Rn95/Z+E2KIIUqFbXpwAGqqT04bDAEdZ3Qp+Y+pBSUlElU9JyUXIflN6F7yGsNU88szm2zc86B69zjDLsW+GqtX+pg5E=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1790266567; c=relaxed/simple;
+	bh=3lSz34lBEh+wPnHUFzARMwW2Vkq29Jh+JGyBEYAa8zA=;
+	h=From:Content-Type:Mime-Version:Subject:Message-Id:Date:Cc:To; b=h8tANroC6viQ0OmHC7/4B2u4GC6vYETYQgs1Td895mtMSMCtFF56JvLU4d9X0qlLx0WYLkmnTzJL8zZHcQhV1TIcR0HWVHhKztf0VT908Ij7skLVCxA4Oy9tfsk/tlgk5FHEK6aFOhsNzzBbfcLbRiHBZZaPK/ek8ENj0GjIe28=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=puzl.cloud; spf=pass smtp.mailfrom=puzl.cloud; dkim=pass (1024-bit key) header.d=puzl.cloud header.i=@puzl.cloud header.b=zmUq5lCU; dkim=fail (0-bit key) header.d=puzl.ee header.i=@puzl.ee header.b=az94e9n9 reason="unknown key version"; arc=none smtp.client-ip=185.250.239.4
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=puzl.cloud
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=puzl.cloud
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kx.com header.i=@kx.com header.b="JApiJk2O"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=OzMjzU+mRsC8dGEkOYWjGXa92tls9M+h/3Z1DCBu0dxFekGYLQoc9//1OptHgQOwM1FlBd85fNwhNp+EO2qEqeSay0fQujjXNKGvc+mZ9SedXGx0+tvA+dWzkLTy+xFwVdz2HmWHqzVWqoCZFx6VYo4wSUT1wkPdbPfFsNgSWrz0o5P2AxuaaVstD96KlqTu6A9xdIq1X6fXyMeTrVGtYJstuienfTKHsUcBDuK4OURoX7kfmhBz3RmPIA40yChlG+B2IDZnxVQDftlX0V5vtudcZZLGeZ8QGnbvIJnSJOlebv/Epga34grAOxLuG9rCAUdnt/c7Xup/2s1zlxw0pw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=6ugINgE2RcmXGfsQaGz+BE4fiHW6pZzpYUMeqdyTREk=;
- b=ED8sa3rmqKuUWwl8a/dLnY20b5nHTHFHBNL9oUW9TAH0sikT9YbqOmrss6r4L/yF9OHiRec4PDPGBZCUZmbGhShvqrGFV/f/KbHJVG7ije2iaEOWaSWwPRWKt+dytlcdFgbFLyo0TfDcnwFhWxT9wZy2NAgbYxeIMwkY5BU4oEY6Ir+Qjj0PteOabDEwunSVo7rtqPimK7D2qSRerju5MQD5mcO6cOI/NBUNYufQJNJqU0KR/DlsMES3CVBCRTLUqDYr6aiz2B+/NSevjJDaJWRvWyabUxwpLChX0daZF33Kfu5prYH0987iaSo2Q7wS4GUclh3mPH9BnzLfq+tQxQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=kx.com; dmarc=pass action=none header.from=kx.com; dkim=pass
- header.d=kx.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kx.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=6ugINgE2RcmXGfsQaGz+BE4fiHW6pZzpYUMeqdyTREk=;
- b=JApiJk2OEGFr5HT1qCYwxuurxZJRoerDKTjFOITjzET6WwYAkH6M+qOcIVOTEpIDzNqh5BpJSE7gm3gvXkltTH5UbVToUY38aBpITZLpeAHgpouTzx2xUD6sfbcSDMIduToAE32kdcV+WgCYnNq0PskkJeytfAPy1AmorTvGOXfTKO1rYPZQhziKAlXQi2siEUqixmUizs+j8uqpHQWrbmsK4GoMbbZgkvEEd/KXCjmHY5Fi8WXRIO3ZUKw2AIBwM5PzDudCuIHbBoSb5iIh2YgCu5wt1irkc6caBxwpxf3SVx+Zp7pw+BFxXXvlGLmR9jaKQmv06h+HRVAi2j00zw==
-Received: from GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:150:ae::7)
- by GVXPR10MB9661.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:150:314::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.451.18; Thu, 24 Sep
- 2026 15:57:33 +0000
-Received: from GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::a82e:3f55:c85d:7542]) by GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::a82e:3f55:c85d:7542%2]) with mapi id 15.21.0451.014; Thu, 24 Sep 2026
- 15:57:33 +0000
-From: Domhnall McGuigan <dmcguigan@kx.com>
-To: Alex Markuze <amarkuze@redhat.com>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Liz Norris
-	<enorris@kx.com>, Brendan McAllister <bmcallister@kx.com>, Pavlo Piatkovskyi
-	<ppiatkovskyi@kx.com>, Pierre Kovalev <pierre@kx.com>, Oleg Finkelshteyn
-	<oleg@kx.com>
-Subject: RE: [BUG] cephfs kernel client 6.12.x: writes after ftruncate
- occasionally being lost, leaving hole in files
-Thread-Topic: [BUG] cephfs kernel client 6.12.x: writes after ftruncate
- occasionally being lost, leaving hole in files
-Thread-Index:
- Ad1J453OFY2uoDx/ROiPZd0eA4o9DQAClFgAACVv1QAAAFGYoAAAfTwAAAAHsNAAALufQAAqP0+AAADnagAACw5e8AAsvi8AAAh2RpA=
-Date: Thu, 24 Sep 2026 15:57:33 +0000
-Message-ID:
- <GV2PR10MB613843B97C5B19FC3BA53526DF812@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
-References:
- <GV2PR10MB61387727F5B89B621AD8307BDF842@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
- <CAJ4mKGYf8KDH368dfxp1d3GQ5boUcewYxcbdB1cWSt=JR8oy2A@mail.gmail.com>
- <CAO8a2ShV8X+z1=FPUjZ+voQi2SCsSdauwv2a2wS9dBzt+bk1bA@mail.gmail.com>
- <GV2PR10MB6138FA66DBC7CE7434418686DF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
- <CAO8a2Sj=iRe62a+pO-7wAdYUQa59KObRsop8zus+KXCxp9GF3g@mail.gmail.com>
- <GV2PR10MB6138225665859A9E2054D4CADF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
- <GV2PR10MB613812F687DC650520DF45B8DF832@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
- <CAO8a2SjJ2u1BFPhnLohno9hy7qBgrFTb0rEHdHpBawQN+njb5Q@mail.gmail.com>
- <CAO8a2Sie7eftzio6Dq6UWaTc3TLFa-tQvM2TSDnq_6saF0hqOA@mail.gmail.com>
- <GV2PR10MB6138AC7FB5C40F1A0C35496BDF822@GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM>
- <CAO8a2SiVduifBLiSW2fBUK+O8y1Efg5UU3RTfxVxpPFE1wf_iA@mail.gmail.com>
-In-Reply-To:
- <CAO8a2SiVduifBLiSW2fBUK+O8y1Efg5UU3RTfxVxpPFE1wf_iA@mail.gmail.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-GB
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=kx.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: GV2PR10MB6138:EE_|GVXPR10MB9661:EE_
-x-ms-office365-filtering-correlation-id: 139ab291-e4bf-4c8a-04ab-08df1a548bb7
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|1800799024|19092799006|366016|23010399003|22082099003|18002099003|38070700021|56012099006|11063799006|10067099003|4143699003;
-x-microsoft-antispam-message-info:
- GKLIRq7K8rZZJ5eR7iA82leS32W9mEygmrhbHDITv7QgRWXm2gdIpfUjnlsFfjNrwg3h0DrrvbO24THUFUCeRQuo/J7xtPtq83EqtXuLEYqvAME4irVyImPlZGbpWtep1jRWcDhYyyf6U8AORBgOKHBH4/IDrVG8g93VK0fe5kPxb/l7fueXg8gvP+6neBn15bmNaoZFvWBVbH821YzjWKMB3dvgBspgiGJvAfbhF5gC1y42ZrzJRwWBNrYPqnwVuexmNmUD4/o7waEFiFtUBftq8oIDzZRFIEiNwHL+Pgmw3yqGcm6gdj00eKCxt1FMEFIUAOfQx5qIKYQELOWmy5hUJKaOxJ/H5xfK1NJ9bfEhy2icSnBgkavlYaPZPlPHgho1IEvyGFThEhjbDhhQZU1Jx+HVC76P1gwHw4RU6rJj3WPeqDRee/A7apl6HiaegCdQVUBrK7NPdfUSsKIilhCAm+r97VI5BTftP82VmG+Yt8MAwLGv+JZc94VafVDSDhrYKo0UtT+5ue3xa4FlM1CUuwu7ptJSs2ZOYJP3qEHdXoMTAQNfHh7l/5Gx81mO0h3XRZ8tmBd8yn1v4rgpI0fRZGJeXKkJMsKdFRUUgAV7d2q8M3KEoG5gFJxwpLG+1AjZLCxAhqz+Cefw6qpJoWxEpVP4O/WoLe5YNzfKCWqIndDO3pgZC/77C77Nq9Ue
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(19092799006)(366016)(23010399003)(22082099003)(18002099003)(38070700021)(56012099006)(11063799006)(10067099003)(4143699003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?c21BcndQWXJNeTBhUzNmOXhxVWdVQUVGOFBtcjRQbCtqVm9JV1gxSkNOTnh3?=
- =?utf-8?B?K2hOclE1MUxIU3JwbHk3aUduMlJFRFZRenNYVVdLRi8xOURuVDI3UE92eks3?=
- =?utf-8?B?SDVVMXhnOXNQa2dEWXIzUWk4MGxrRStzNExDV0tBMGFJeWowWlM5SU95enhq?=
- =?utf-8?B?a2M2VzAyT1pYbjRxS2NiNHgzb1BvWFV3aDFncHBSV0ZESXBQY0c5enU1N0t1?=
- =?utf-8?B?UlY3enFwSHRJeEhjR1FEdFJMMWlIRkJsN1dmSkhIM0NQbTV5Vk50MVAzVHpM?=
- =?utf-8?B?SXkxQk5GNGpIODhpb3BrOEZXN0ppcUlpaldtTndiRWFVZmhtV3ZvQU1aZkFS?=
- =?utf-8?B?ZnlUdWxLMXB6Q0xkdlJvUUthUGgzeXBaS21DTWw0cS9OeU9lTnlCUXhhNWxB?=
- =?utf-8?B?aktFZGtNVEszcVd1djFsTjZ5R3dBQ0dUSE1Ic01vekVIQkszNE03emduaTYy?=
- =?utf-8?B?eklneUZqT1BjKzZUL1diSG5XeXhoLzhSZXRGMG1nZEg3Y0FmRVc2TUtxZURI?=
- =?utf-8?B?ODM1V3ZodFRNdFNGNDg4Um4vaFQwYlhVTXYxeHRvd3VyeXA0dWlQWDJHZStH?=
- =?utf-8?B?a2hYSDVzdENiRS9MQW1EZWkyTENyNzRPd2hEMnFydXdyT0d5Y1pkNU1oSU56?=
- =?utf-8?B?R0craVpTQjhHTit4Tk5pZ3ZXMVQ4NDdQUWZ3MEw3SzE4TmU1WmdpUlpOL2ZC?=
- =?utf-8?B?cS9Ca09ocU04OE91eDNlKzJYTzhyMUJxRFJja0orU3ZRc0RsV2c0VUcvVGt3?=
- =?utf-8?B?MmJ6UVdIRldOTTkrTjdzMWhma08zMlgvWGprSE53eGd2bXd3ZkxBZ0NoeEl2?=
- =?utf-8?B?OHNaWVZJcUtmMXA0TGZXdUp0QTFJOE1vK3NIakEzNHk1ejk2YnhzRUk3ejFq?=
- =?utf-8?B?VjRaNys4RGFUUUlPUGgyQTIxWjFNVE80ZGwza0gwOVViYWpVYW41NjRJdWNj?=
- =?utf-8?B?NVRRZmMvdlFWUW5Kc0NNZ1d6WXpZMjlOL3J6akpqbXprM3YrcHIxRUwxMDRy?=
- =?utf-8?B?WU1FU3ROcFpzTGVYNkhBa3hSSDZLcldQUG9aUDlXNFA4aGZuL29Yc25JdFhp?=
- =?utf-8?B?elEzcE1pMHJKMWpheXZCalBzWFJuR2RFQjJPdjZTcklYODRzdmFTdmdjRFZt?=
- =?utf-8?B?M0VjMVhmd0pxenJFbFBFOE1zUXZDQ0dMQ3gza3pmTDZob3V6cEZBQjBEb0hQ?=
- =?utf-8?B?RjlIOXFpeEtPS2JBbUh0dW9vbDZMRVA3UmtudTEyRytvNFRHWC90RWRXSzNI?=
- =?utf-8?B?T2NLY0ZCMGFxU0IyMTlDbnpwbGt1SU1FM1ZIWHNQWGc0ZGFoNmNzQjZKQis5?=
- =?utf-8?B?SWtqQmJ5N1RXZURyOEVpSkxWUzA3M3dxWUZJemZNc1dpZlJ1Q0JEM2VQVy81?=
- =?utf-8?B?YVIvbmkzQ25xL3ZmU1hxelY3SUJFS3AwUTZFS29VNjZ6VXp2OU1GbkdqZDNR?=
- =?utf-8?B?cDBHOWtnTHNnblY5Wnh6SVliV2lhNHlyWUlOREhaT3hkWUtuc24zeWRqWE1n?=
- =?utf-8?B?SjgyK0IxeHVQQUNjczF0WDhhTFZzU2V1UUF6Mi9mcjhndTBtenljYUZaU0Jt?=
- =?utf-8?B?clBXR2l1SmVkQVRBQ1NzamNmTyt4Sjl1eTJ5MmtvNENYcVZvMzN1ZnZvUGcw?=
- =?utf-8?B?QVRKSllsT0c4c2pzZWdBdVFaQjVtUUhSNkhicnR5QWMzdUE3YVErd1lZMDF5?=
- =?utf-8?B?Z2kxcXdpQzBYL1FHRm5aWC90Y3lSbjlnV1RQa3BMemJxeTR2di9uSmJReXk4?=
- =?utf-8?B?Y2dTdVlBT3pjWWZxczRoMXFibEtVcnJLSkJEd3VyRUxTSFcrcUpIMXVMQUZV?=
- =?utf-8?B?d2VEcDErQmlPdGZCRlVhQTFpd0dwcEFQeTU4QzFUT2FvR1ExcGFKYWFFTTlI?=
- =?utf-8?B?b3NGQzBWNDBZV2dDN2V3UUtaUUFzci82a29YcUczYkk2S2NyODlrdUZiMXJJ?=
- =?utf-8?B?OHlRS1U0ZlZsbG00aTgxS3VXUU84N2wwNTZPSXEycER3b0xUcW5wU1kwRVZk?=
- =?utf-8?B?TEdSM2t6YlFZMy9HUWgvTFphOVFKWXlSUWlIdmgxRS8rR2lXcWJIRXQveVlz?=
- =?utf-8?B?TGVGTHFId1RWaUhVbFVISlR1aDAzY1FjTjBPelFLcVA5V0VDZTg3aWZ2RXBD?=
- =?utf-8?B?RmtXOUhrZ2xEQTBaazFsc25sOExvKzhHMU9TSkd5aDdjRzJBUEJJeUdFS21s?=
- =?utf-8?B?bzVWQkhDdXhwd1BYRVRoQ3NqaTU2TjRycUtEb0I2eE1GaHg3L3Q1YmpVZVoz?=
- =?utf-8?B?WGlIb21HVjFIRTNpVExQTTd6djltTDhOeitGeks3b3Y2SEwxRkZlZlg5T3Ir?=
- =?utf-8?Q?wi7st6QB3YFO+mdx5z?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=puzl.cloud header.i=@puzl.cloud header.b="zmUq5lCU";
+	dkim=fail reason="unknown key version" (0-bit key) header.d=puzl.ee header.i=@puzl.ee header.b="az94e9n9"
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=puzl.cloud; q=dns/txt; s=s1; t=1790266563; x=1790273763;
+ h=To: To: Cc: Date: Message-Id: Subject: Subject: Mime-Version: Content-Transfer-Encoding: Content-Type: From: From: Sender: Sender;
+ bh=dJxW40pPrhdijNEjIAhPEXLPM+hY1rBofmknsTTz61c=;
+ b=zmUq5lCU8AuVkd8L/ilU6YrCzzHmHOiAxPYEjIdoVOxcC/5NJwVQhIZrQmJMq1NQf+cD/zgQxNdcf7JToGdTSGmz1mul0KlCuQqm7GutsiXwto5ezn/MjLQAklLma4gN7hFr44eCJTLwvBoJp72m6pME1yROqZxjhBm1cEtu2gY=
+X-Mailgun-Sid: WyI3NDRhOSIsImNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnIiwiYmE0N2YiXQ==
+Received: from mail.puzl.ee (unknown [213.5.72.68]) by
+ 6e69c52d76b1515188a6828a7a6d45e98d9d830969faeb3478df8cee23296730 with SMTP id
+ 6ab54cc297e77d9961523bef (version=TLS1.3, cipher=TLS_AES_128_GCM_SHA256);
+ Thu, 24 Sep 2026 16:16:02 GMT
+X-Mailgun-Sending-Ip: 185.250.239.4
+Sender: monakhov@puzl.cloud
+Received: from mail.puzl.ee (mail.puzl.ee [127.0.0.1])
+	by mail.puzl.ee (Postfix) with ESMTP id C44C4501AA
+	for <ceph-devel@vger.kernel.org>; Thu, 24 Sep 2026 16:16:01 +0000 (UTC)
+Authentication-Results: mail.puzl.ee (amavisd-new); dkim=pass
+	reason="pass (just generated, assumed good)" header.d=puzl.ee
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=puzl.ee; h=
+	x-mailer:to:date:date:message-id:subject:subject:mime-version
+	:content-transfer-encoding:content-type:content-type:from:from;
+	 s=dkim; t=1790266546; x=1792858547; bh=3lSz34lBEh+wPnHUFzARMwW2
+	Vkq29Jh+JGyBEYAa8zA=; b=az94e9n91fb6x/YnNHPry9aSFkk6hwfdJpazkfqD
+	FhyLN2j4LdihNL+77hDhcqISL/Yk7IB3cAu7ADkWUFvaWZF/qra8ddepGJ8D3Zzv
+	9OpBqKYkIgTjM4NllLx8tX/BhqzKO0lBnsUBdCHYluFGruMOktMa/QuvFqBrkUgq
+	PYc=
+X-Virus-Scanned: Debian amavisd-new at mail.puzl.ee
+Received: from mail.puzl.ee ([127.0.0.1])
+	by mail.puzl.ee (mail.puzl.ee [127.0.0.1]) (amavisd-new, port 10026)
+	with ESMTP id pFRQbxB-jXHx for <ceph-devel@vger.kernel.org>;
+	Thu, 24 Sep 2026 16:15:46 +0000 (UTC)
+Received: from smtpclient.apple (62-8-190-90.sta.estpak.ee [90.190.8.62])
+	by mail.puzl.ee (Postfix) with ESMTPSA id 3CE51501AD;
+	Thu, 24 Sep 2026 16:15:46 +0000 (UTC)
+From: Sergei Monakhov <monakhov@puzl.cloud>
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-X-OriginatorOrg: kx.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: GV2PR10MB6138.EURPRD10.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: 139ab291-e4bf-4c8a-04ab-08df1a548bb7
-X-MS-Exchange-CrossTenant-originalarrivaltime: 24 Sep 2026 15:57:33.3079
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 8b006032-f7cd-404e-8f6f-4719f041417b
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: P453cndXaZFxGrxoNwnvbOJcheEBI6atM+JY3bORRCur4L4ORZBpvg9F0m66j2fU/otG2+eMBbVtCJ3wbiR8iQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: GVXPR10MB9661
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3826.700.81\))
+Subject: rbd/libceph: ceph-msgr/RBD workers blocked on con->mutex and
+ osd->lock under load
+Message-Id: <ED31993F-CDB1-4FDF-A1DF-93A12FF8B64D@puzl.cloud>
+Date: Thu, 24 Sep 2026 19:15:35 +0300
+Cc: linux-kernel@vger.kernel.org,
+ idryomov@gmail.com,
+ amarkuze@redhat.com,
+ max.kellermann@ionos.com,
+ carges@cloudflare.com
+To: ceph-devel@vger.kernel.org
+X-Mailer: Apple Mail (2.3826.700.81)
 
-SSd2ZSBtYW5hZ2VkIHRvIHByb2R1Y2UgYSBzaWxlbnQgd3JpdGUgZmFpbHVyZSByZXN1bHRpbmcg
-aW4gYSBob2xlIGluIHRlc3QgY29uZGl0aW9ucywgYnV0IGRvbid0IGdldCB0b28gZXhjaXRlZDog
-aXQgcmVxdWlyZXMgaW5kdWNpbmcgYSBQT09MX0ZVTEwgc3RhdGUgYnkgcmVkdWNpbmcgdGhlIHF1
-b3RhIGR1cmluZyBhIHdyaXRlLCBidXQgdGhlIGNvcnJ1cHRpb25zIHdlJ3ZlIHNlZW4gaW4gdGhl
-IGZpZWxkIGhhcHBlbmVkIG9uIHBvb2xzIHRoYXQgd2VyZSBhdCBhcm91bmQgOVRpQiBvdXQgb2Yg
-MTJUaUIgY2FwYWNpdHkuIFN0aWxsLCBpdCBzZWVtcyBsaWtlIGluY29ycmVjdCBiZWhhdmlvdXIg
-dG8gaGF2ZSBhIHN1Y2Nlc3NmdWwgZ2V0IGxvc3QgYW5kIHByb2R1Y2UgYSBob2xlLCBhbmQgbWF5
-YmUgdGhlIG1lY2hhbmlzbSdzIHJlbGF0ZWQuIEkndmUgYXR0YWNoZWQgYSBydW5ib29rIGFuZCBz
-Y3JpcHRzIGZvciByZXByb2R1Y3Rpb24gdG8gdGhlIHRyYWNrZXIgYXQgaHR0cHM6Ly90cmFja2Vy
-LmNlcGguY29tL2lzc3Vlcy84MDcwNCNub3RlLTINCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCkZyb206IEFsZXggTWFya3V6ZSA8YW1hcmt1emVAcmVkaGF0LmNvbT4NClNlbnQ6IDI0IFNl
-cHRlbWJlciAyMDI2IDEyOjE0DQpUbzogRG9taG5hbGwgTWNHdWlnYW4gPGRtY2d1aWdhbkBreC5j
-b20+DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IExpeiBOb3JyaXMgPGVub3JyaXNA
-a3guY29tPjsgQnJlbmRhbiBNY0FsbGlzdGVyIDxibWNhbGxpc3RlckBreC5jb20+OyBQYXZsbyBQ
-aWF0a292c2t5aSA8cHBpYXRrb3Zza3lpQGt4LmNvbT47IFBpZXJyZSBLb3ZhbGV2IDxwaWVycmVA
-a3guY29tPjsgT2xlZyBGaW5rZWxzaHRleW4gPG9sZWdAa3guY29tPg0KU3ViamVjdDogUmU6IFtC
-VUddIGNlcGhmcyBrZXJuZWwgY2xpZW50IDYuMTIueDogd3JpdGVzIGFmdGVyIGZ0cnVuY2F0ZSBv
-Y2Nhc2lvbmFsbHkgYmVpbmcgbG9zdCwgbGVhdmluZyBob2xlIGluIGZpbGVzDQoNCkNBVVRJT046
-IFRoaXMgZW1haWwgb3JpZ2luYXRlZCBmcm9tIG91dHNpZGUgb2YgdGhlIG9yZ2FuaXNhdGlvbi4g
-RG8gbm90IGNsaWNrIGxpbmtzIG9yIG9wZW4gYXR0YWNobWVudHMgdW5sZXNzIHlvdSByZWNvZ25p
-c2UgdGhlIHNlbmRlciBhbmQga25vdyB0aGUgY29udGVudCBpcyBzYWZlLg0KDQoNCkl0J3MganVz
-dCBhIG5vbiBjb250aWd1b3VzIHNldCBvZiBwYXRjaGVzIHRoYXQgbWF5IGhhdmUgZGlyZWN0bHkg
-b3IgaW5kaXJlY3RseSBpbXBhY3RlZCBmdHJhbmNhdGUuDQpJIGNhbid0IHNheSB0aGF0IGFueSBm
-dHJhbmNhdGUgaXNzdWUgaXMgcmVsYXRlZCB0byBhbnkgcmVmYWN0b3JpbmcuDQoNCk9uIFdlZCwg
-U2VwIDIzLCAyMDI2IGF0IDQ6NTTigK9QTSBEb21obmFsbCBNY0d1aWdhbiA8ZG1jZ3VpZ2FuQGt4
-LmNvbT4gd3JvdGU6DQo+DQo+IFRoYW5rcywgQWxleC4gSSdtIGV4YW1pbmluZyB0aGVzZSBub3c7
-IGFtIEkgcmlnaHQgaW4gdGhpbmtpbmcgdGhhdCBtb3N0IG9yIGFsbCBvZiB0aGVzZSBjb21taXRz
-IGFyZSBmaXhpbmcgaXNzdWVzIHRoYXQgYXJvc2UgZHVlIHRvIGEgcmVmYWN0b3IgdGhhdCBsYW5k
-ZWQgYWZ0ZXIgNi4xMiwgc28gdGhleSBkb24ndCBleHBsYWluIHdoeSB3ZSdyZSBzZWVpbmcgdGhl
-c2UgYnVncyBpbiA2LjEyPw0KPg0KPiBSZWdhcmRzLCBEb21obmFsbA0KPg0KPiAtLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbGV4IE1hcmt1emUgPGFtYXJrdXplQHJlZGhhdC5j
-b20+DQo+IFNlbnQ6IDIzIFNlcHRlbWJlciAyMDI2IDA5OjM2DQo+IFRvOiBEb21obmFsbCBNY0d1
-aWdhbiA8ZG1jZ3VpZ2FuQGt4LmNvbT4NCj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-OyBMaXogTm9ycmlzIDxlbm9ycmlzQGt4LmNvbT47IEJyZW5kYW4NCj4gTWNBbGxpc3RlciA8Ym1j
-YWxsaXN0ZXJAa3guY29tPjsgUGF2bG8gUGlhdGtvdnNreWkNCj4gPHBwaWF0a292c2t5aUBreC5j
-b20+OyBQaWVycmUgS292YWxldiA8cGllcnJlQGt4LmNvbT47IE9sZWcNCj4gRmlua2Vsc2h0ZXlu
-IDxvbGVnQGt4LmNvbT4NCj4gU3ViamVjdDogUmU6IFtCVUddIGNlcGhmcyBrZXJuZWwgY2xpZW50
-IDYuMTIueDogd3JpdGVzIGFmdGVyIGZ0cnVuY2F0ZQ0KPiBvY2Nhc2lvbmFsbHkgYmVpbmcgbG9z
-dCwgbGVhdmluZyBob2xlIGluIGZpbGVzDQo+DQo+IENBVVRJT046IFRoaXMgZW1haWwgb3JpZ2lu
-YXRlZCBmcm9tIG91dHNpZGUgb2YgdGhlIG9yZ2FuaXNhdGlvbi4gRG8gbm90IGNsaWNrIGxpbmtz
-IG9yIG9wZW4gYXR0YWNobWVudHMgdW5sZXNzIHlvdSByZWNvZ25pc2UgdGhlIHNlbmRlciBhbmQg
-a25vdyB0aGUgY29udGVudCBpcyBzYWZlLg0KPg0KPg0KPiBSZXNlbmRpbmcgaW4gcGxhaW4gdGV4
-dCBtb2RlLg0KPiBIZXJlIElzIGEgbGlzdCBvZiBwYXRjaGVzIHRoYXQgbWF5YmUgcmVsZXZhbnQN
-Cj4NCj4gLSAgQWxleCwgMjAyNS0xMi0xNCAgICAgMGNjMDE2OSwgNzg2ZjUxNQ0KPiAtICBBbGV4
-LCAyMDI2LTA4LTEzICAgICA2N2IyMjBhDQo+IC0gU2xhdmEsIDIwMjUtMDItMDQgICAgZjA4MDY4
-ZCwgY2U4MGI3NiwgMTU1MWVjNiwgZmQ3NDQ5ZA0KPiAtIFNsYXZhLCAyMDI1LTA3LTMwICAgIDQy
-ZGQzZjcNCj4gLSBNYXgsIDIwMjUtMDgtMjcgICAgICBjY2U3YzE1DQo+IC0gTWF4LCAyMDI2LTA5
-LTA0ICAgICAgOTQ5ZDc0Yg0KPg0KPg0KPiBPbiBXZWQsIFNlcCAyMywgMjAyNiBhdCAxMToxMOKA
-r0FNIEFsZXggTWFya3V6ZSA8YW1hcmt1emVAcmVkaGF0LmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBI
-ZXJlIElzIGEgbGlzdCBvZiBwYXRjaGVzIHRoYXQgbWF5YmUgcmVsZXZhbnQNCj4gPg0KPiA+IC0g
-IEFsZXgsIDIwMjUtMTItMTQgICAgIDBjYzAxNjksIDc4NmY1MTUNCj4gPiAtICBBbGV4LCAyMDI2
-LTA4LTEzICAgICA2N2IyMjBhDQo+ID4gLSBTbGF2YSwgMjAyNS0wMi0wNCAgICBmMDgwNjhkLCBj
-ZTgwYjc2LCAxNTUxZWM2LCBmZDc0NDlkDQo+ID4gLSBTbGF2YSwgMjAyNS0wNy0zMCAgICA0MmRk
-M2Y3DQo+ID4gLSBNYXgsIDIwMjUtMDgtMjcgICAgICBjY2U3YzE1DQo+ID4gLSBNYXgsIDIwMjYt
-MDktMDQgICAgICA5NDlkNzRiDQo+ID4NCj4gPiBPbiBUdWUsIFNlcCAyMiwgMjAyNiBhdCAzOjAx
-4oCvUE0gRG9taG5hbGwgTWNHdWlnYW4gPGRtY2d1aWdhbkBreC5jb20+IHdyb3RlOg0KPiA+Pg0K
-PiA+PiBTb3JyeSwgc2VuZGluZyB0aGlzIGJhY2sgdG8gdGhlIG1haWxpbmcgbGlzdCBiZWNhdXNl
-IEkgZm9yZ290IHRvIHVzZSByZXBseS1hbGwuDQo+ID4+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVz
-c2FnZS0tLS0tDQo+ID4+IEZyb206IERvbWhuYWxsIE1jR3VpZ2FuIDxkbWNndWlnYW5Aa3guY29t
-Pg0KPiA+PiBTZW50OiAyMiBTZXB0ZW1iZXIgMjAyNiAxMjo1MA0KPiA+PiBUbzogQWxleCBNYXJr
-dXplIDxhbWFya3V6ZUByZWRoYXQuY29tPg0KPiA+PiBTdWJqZWN0OiBSRTogW0JVR10gY2VwaGZz
-IGtlcm5lbCBjbGllbnQgNi4xMi54OiB3cml0ZXMgYWZ0ZXINCj4gPj4gZnRydW5jYXRlIG9jY2Fz
-aW9uYWxseSBiZWluZyBsb3N0LCBsZWF2aW5nIGhvbGUgaW4gZmlsZXMNCj4gPj4NCj4gPj4gV2Ug
-aGF2ZW4ndCB5ZXQgYmVlbiBhYmxlIHRvIHJlcHJvZHVjZSB0aGUgaXNzdWUgdW5kZXIgY29udHJv
-bGxlZCBjb25kaXRpb25zIGF0IGFsbDogdGhlIGJlc3Qgd2UgaGF2ZSBpcyBhIGRlcGxveW1lbnQg
-dGhhdCBzZWVtcyB0byBnZXQgYSBjb3JydXB0aW9uIGFib3V0IG9uY2UgYSBmb3J0bmlnaHQsIHdy
-aXRpbmcgNDBHaUIvZGF5LiBEbyB5b3UgaGF2ZSBsaW5rcyB0byB0aGUgdHJ1bmNhdGUtcmVsYXRl
-ZCBmaXhlcyB5b3UgbWVudGlvbmVkPyBJJ20gZ2V0dGluZyBub3doZXJlIHRyeWluZyB0byBmaW5k
-IHRoZW0gbXlzZWxmIGFuZCB0aGV5J2QgYmUgdmVyeSBoZWxwZnVsIHRvIHJlZmVyIHRvLg0KPiA+
-Pg0KPiA+PiBSZWdhcmRzLCBEb21obmFsbA0KPiA+Pg0KPiA+PiBGcm9tOiBBbGV4IE1hcmt1emUg
-PGFtYXJrdXplQHJlZGhhdC5jb20+DQo+ID4+IFNlbnQ6IDIyIFNlcHRlbWJlciAyMDI2IDEyOjM5
-DQo+ID4+IFRvOiBEb21obmFsbCBNY0d1aWdhbiA8ZG1jZ3VpZ2FuQGt4LmNvbT4NCj4gPj4gU3Vi
-amVjdDogUmU6IFtCVUddIGNlcGhmcyBrZXJuZWwgY2xpZW50IDYuMTIueDogd3JpdGVzIGFmdGVy
-DQo+ID4+IGZ0cnVuY2F0ZSBvY2Nhc2lvbmFsbHkgYmVpbmcgbG9zdCwgbGVhdmluZyBob2xlIGlu
-IGZpbGVzDQo+ID4+DQo+ID4+IFdlIGFyZSB1c2luZyBwYXRjaHdvcmsgYnV0IGl0J3Mgbm90IGJl
-dHRlciB0aGFuIGp1c3QgZ29pbmcgdGhyb3VnaCB0aGUgcGF0Y2hlcyB3aXRoIGdpdCBsb2cgLS1m
-b2xsb3cuDQo+ID4+DQo+ID4+IEkgd291bGQgdHJ5IHJ1bm5pbmcgYSBmcmVzaCB1cHN0cmVhbSBr
-ZXJuZWwgYnVpbGQgYW5kIHNlZSBpZiB0aGUgcHJvYmxlbSBwZXJzaXN0cy4gSWYgdGhlIHRlc3Qg
-aXMgZmFzdCBhIGdpdCBiaXNlY3Qgd2lsbCBsYW5kIHlvdSBvbiB0aGUgcGF0Y2ggeW91IG5lZWQu
-DQo+ID4+DQo+ID4+ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioNCj4gPj4gKioNCj4gPj4gKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKg0KPiA+PiAq
-Kg0KPiA+PiAqKioqKioqKioqKioqKioqKioqKioqKioqKioqKiBUaGlzIGVtYWlsLCBpdHMgY29u
-dGVudHMgYW5kIGFueQ0KPiA+PiBmaWxlcyBhdHRhY2hlZCBhcmUgYSBjb25maWRlbnRpYWwgY29t
-bXVuaWNhdGlvbiBhbmQgYXJlIGludGVuZGVkIG9ubHkgZm9yIHRoZSBuYW1lZCBhZGRyZXNzZWVz
-IGluZGljYXRlZCBpbiB0aGUgbWVzc2FnZS4gSWYgeW91IGFyZSBub3QgdGhlIG5hbWVkIGFkZHJl
-c3NlZSBvciBpZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGVtYWlsIGluIGVycm9yLCB5b3UgbWF5
-IG5vdCwgd2l0aG91dCB0aGUgY29uc2VudCBvZiBLWCwgY29weSwgdXNlIG9yIHJlbHkgb24gYW55
-IGluZm9ybWF0aW9uIG9yIGF0dGFjaG1lbnRzIGluIGFueSB3YXkuIFBsZWFzZSBub3RpZnkgdGhl
-IHNlbmRlciBieSByZXR1cm4gZW1haWwgYW5kIGRlbGV0ZSBpdCBmcm9tIHlvdXIgZW1haWwgc3lz
-dGVtLg0KPiA+PiBVbmxlc3Mgc2VwYXJhdGVseSBhZ3JlZWQsIEtYIGRvZXMgbm90IGFjY2VwdCBh
-bnkgcmVzcG9uc2liaWxpdHkgZm9yIHRoZSBhY2N1cmFjeSBvciBjb21wbGV0ZW5lc3Mgb2YgdGhl
-IGNvbnRlbnRzIG9mIHRoaXMgZW1haWwgb3IgaXRzIGF0dGFjaG1lbnRzLiBQbGVhc2Ugbm90ZSB0
-aGF0IGFueSB2aWV3cywgb3BpbmlvbiBvciBhZHZpY2UgY29udGFpbmVkIGluIHRoaXMgY29tbXVu
-aWNhdGlvbiBhcmUgdGhvc2Ugb2YgdGhlIHNlbmRpbmcgaW5kaXZpZHVhbCBhbmQgbm90IHRob3Nl
-IG9mIEtYIGFuZCBLWCBzaGFsbCBoYXZlIG5vIGxpYWJpbGl0eSB3aGF0c29ldmVyIGluIHJlbGF0
-aW9uIHRvIHRoaXMgY29tbXVuaWNhdGlvbiAob3IgaXRzIGNvbnRlbnQpIHVubGVzcyBzZXBhcmF0
-ZWx5IGFncmVlZC4NCj4gPj4gKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKg0KPiA+PiAqKg0KPiA+PiAqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo+
-ID4+ICoqDQo+ID4+ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo+DQo+ICoqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioNCj4gKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKg0KPiAqKioqKioqKioqKioqKioqKioqKioqKioqKiogVGhp
-cyBlbWFpbCwgaXRzIGNvbnRlbnRzIGFuZCBhbnkgZmlsZXMNCj4gYXR0YWNoZWQgYXJlIGEgY29u
-ZmlkZW50aWFsIGNvbW11bmljYXRpb24gYW5kIGFyZSBpbnRlbmRlZCBvbmx5IGZvciB0aGUgbmFt
-ZWQgYWRkcmVzc2VlcyBpbmRpY2F0ZWQgaW4gdGhlIG1lc3NhZ2UuIElmIHlvdSBhcmUgbm90IHRo
-ZSBuYW1lZCBhZGRyZXNzZWUgb3IgaWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBlbWFpbCBpbiBl
-cnJvciwgeW91IG1heSBub3QsIHdpdGhvdXQgdGhlIGNvbnNlbnQgb2YgS1gsIGNvcHksIHVzZSBv
-ciByZWx5IG9uIGFueSBpbmZvcm1hdGlvbiBvciBhdHRhY2htZW50cyBpbiBhbnkgd2F5LiBQbGVh
-c2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcmV0dXJuIGVtYWlsIGFuZCBkZWxldGUgaXQgZnJvbSB5
-b3VyIGVtYWlsIHN5c3RlbS4NCj4gVW5sZXNzIHNlcGFyYXRlbHkgYWdyZWVkLCBLWCBkb2VzIG5v
-dCBhY2NlcHQgYW55IHJlc3BvbnNpYmlsaXR5IGZvciB0aGUgYWNjdXJhY3kgb3IgY29tcGxldGVu
-ZXNzIG9mIHRoZSBjb250ZW50cyBvZiB0aGlzIGVtYWlsIG9yIGl0cyBhdHRhY2htZW50cy4gUGxl
-YXNlIG5vdGUgdGhhdCBhbnkgdmlld3MsIG9waW5pb24gb3IgYWR2aWNlIGNvbnRhaW5lZCBpbiB0
-aGlzIGNvbW11bmljYXRpb24gYXJlIHRob3NlIG9mIHRoZSBzZW5kaW5nIGluZGl2aWR1YWwgYW5k
-IG5vdCB0aG9zZSBvZiBLWCBhbmQgS1ggc2hhbGwgaGF2ZSBubyBsaWFiaWxpdHkgd2hhdHNvZXZl
-ciBpbiByZWxhdGlvbiB0byB0aGlzIGNvbW11bmljYXRpb24gKG9yIGl0cyBjb250ZW50KSB1bmxl
-c3Mgc2VwYXJhdGVseSBhZ3JlZWQuDQo+ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioNCj4gKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKg0K
-PiAqKioqKioqKioqKioqKioqKioqKioqKioqKioNCg0KKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioNClRoaXMgZW1haWwsIGl0cyBjb250ZW50cyBh
-bmQgYW55IGZpbGVzIGF0dGFjaGVkIGFyZSBhIGNvbmZpZGVudGlhbCBjb21tdW5pY2F0aW9uIGFu
-ZCBhcmUgaW50ZW5kZWQgb25seSBmb3IgdGhlIG5hbWVkIGFkZHJlc3NlZXMgaW5kaWNhdGVkIGlu
-IHRoZSBtZXNzYWdlLiBJZiB5b3UgYXJlIG5vdCB0aGUgbmFtZWQgYWRkcmVzc2VlIG9yIGlmIHlv
-dSBoYXZlIHJlY2VpdmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHlvdSBtYXkgbm90LCB3aXRob3V0
-IHRoZSBjb25zZW50IG9mIEtYLCBjb3B5LCB1c2Ugb3IgcmVseSBvbiBhbnkgaW5mb3JtYXRpb24g
-b3IgYXR0YWNobWVudHMgaW4gYW55IHdheS4gUGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHJl
-dHVybiBlbWFpbCBhbmQgZGVsZXRlIGl0IGZyb20geW91ciBlbWFpbCBzeXN0ZW0uDQpVbmxlc3Mg
-c2VwYXJhdGVseSBhZ3JlZWQsIEtYIGRvZXMgbm90IGFjY2VwdCBhbnkgcmVzcG9uc2liaWxpdHkg
-Zm9yIHRoZSBhY2N1cmFjeSBvciBjb21wbGV0ZW5lc3Mgb2YgdGhlIGNvbnRlbnRzIG9mIHRoaXMg
-ZW1haWwgb3IgaXRzIGF0dGFjaG1lbnRzLiBQbGVhc2Ugbm90ZSB0aGF0IGFueSB2aWV3cywgb3Bp
-bmlvbiBvciBhZHZpY2UgY29udGFpbmVkIGluIHRoaXMgY29tbXVuaWNhdGlvbiBhcmUgdGhvc2Ug
-b2YgdGhlIHNlbmRpbmcgaW5kaXZpZHVhbCBhbmQgbm90IHRob3NlIG9mIEtYIGFuZCBLWCBzaGFs
-bCBoYXZlIG5vIGxpYWJpbGl0eSB3aGF0c29ldmVyIGluIHJlbGF0aW9uIHRvIHRoaXMgY29tbXVu
-aWNhdGlvbiAob3IgaXRzIGNvbnRlbnQpIHVubGVzcyBzZXBhcmF0ZWx5IGFncmVlZC4NCioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQo=
+Hi,
+
+I'm debugging RBD stalls on a production workload. I don't have a small
+reproducer yet, so this is not a clean benchmark report. The data below =
+is from
+bpftrace while the issue was happening naturally.
+
+The affected host is on Ubuntu 6.14.0-35-generic. The path I captured is =
+msgr1
+/ ceph_con_v1_try_read().
+
+At first I assumed this was some receive-side problem, but the off-CPU =
+traces
+don't really support that. In many samples the reply has already been =
+received
+and dispatched, and the ceph-msgr worker is sleeping inside the RBD =
+completion
+callback:
+
+  ceph_con_v1_try_read
+    ceph_con_process_message
+      osd_dispatch
+        handle_reply
+          __complete_request
+            rbd_osd_req_callback
+              rbd_img_handle_request
+                mutex_lock
+
+The waiter there is blocked on the RBD image request state mutex. =
+Tracing the
+holder shows rbd_queue_workfn() holding that mutex while advancing the =
+RBD
+state machine and submitting follow-up OSD requests.
+
+I then traced nested mutex waits while rbd_img_handle_request() is =
+holding
+img_req->state_mutex. There are two classes.
+
+The first one is the messenger connection mutex:
+
+  rbd_queue_workfn
+    rbd_img_handle_request
+      rbd_img_advance
+        __rbd_obj_handle_request
+          rbd_obj_advance_write
+            rbd_osd_submit
+              ceph_osdc_start_request
+                __submit_request
+                  send_request
+                    ceph_con_send / ceph_msg_revoke
+                      mutex_lock(con->mutex)
+
+Example:
+
+  NESTED MUTEX WAIT CLASSIFY time=3D15:30:20 tid=3D1988383 =
+comm=3Dkworker/66:2
+    state_mutex=3D0xffff8aa3e36658d8
+    nested_lock=3D0xffff8aa319c47108
+    wait_us=3D153142
+    state_hold_so_far_us=3D153258
+    from_rbd_queue_workfn=3D1
+    osd_req=3D0xffff8a066e142580
+
+  CLASS con->mutex by callsite
+    con=3D0xffff8aa319c47030
+    paired_osd_lock=3D0xffff8aa319c477b0
+    delta=3D0x6a8
+
+  --- NESTED WAITER STACK ---
+
+    mutex_lock+1
+    send_request+332
+    __submit_request+541
+    ceph_osdc_start_request+53
+    rbd_osd_submit+30
+    rbd_obj_advance_write+820
+    __rbd_obj_handle_request+91
+    rbd_img_advance+254
+    rbd_img_handle_request+82
+    rbd_queue_workfn+597
+    process_one_work+379
+    worker_thread+734
+    kthread+254
+    ret_from_fork+71
+    ret_from_fork_asm+26
+
+This looks like the kind of issue that should be helped by Max =
+Kellermann's
+out_queue patch:
+
+  fs/ceph/messenger: add separate lock for `out_queue`
+  =
+https://lore.kernel.org/ceph-devel/20260703193803.3689912-1-max.kellermann=
+@ionos.com/
+
+The second class is more concerning. Multiple RBD workers block on the =
+same
+ceph_osd.lock while each is holding a different img_req->state_mutex. In =
+one
+captured episode, the waits were around 50-51 seconds.
+
+Example from that episode:
+
+  NESTED MUTEX WAIT CLASSIFY time=3D15:42:22 tid=3D1907557 =
+comm=3Dkworker/206:12
+    state_mutex=3D0xffff8aa34b09b598
+    nested_lock=3D0xffff8aa319cfb7b0
+    wait_us=3D51157147
+    state_hold_so_far_us=3D51157170
+    from_rbd_queue_workfn=3D1
+    osd_req=3D0xffff8acfb2b9b840
+
+  CLASS osd->lock by callsite
+    paired_con_mutex=3D0xffff8aa319cfb108
+    delta=3D0x6a8
+
+  --- NESTED WAITER STACK ---
+
+    mutex_lock+1
+    ceph_osdc_start_request+53
+    rbd_osd_submit+30
+    rbd_obj_advance_write+820
+    __rbd_obj_handle_request+91
+    rbd_img_advance+254
+    rbd_img_handle_request+82
+    rbd_queue_workfn+597
+    process_one_work+379
+    worker_thread+734
+    kthread+254
+    ret_from_fork+71
+    ret_from_fork_asm+26
+
+Several more workers were waiting on the same nested_lock address in the =
+same
+time window:
+
+  nested_lock=3D0xffff8aa319cfb7b0
+  paired_con_mutex=3D0xffff8aa319cfb108
+  delta=3D0x6a8
+
+  wait_us=3D51156869
+  wait_us=3D51156379
+  wait_us=3D51156066
+  wait_us=3D51155589
+  wait_us=3D51155104
+  wait_us=3D51148538
+  wait_us=3D50723956
+  wait_us=3D50723973
+  wait_us=3D50722959
+  wait_us=3D50690601
+  wait_us=3D50689346
+  wait_us=3D50676705
+  wait_us=3D50535020
+  wait_us=3D50534884
+
+All of these had the same waiter stack:
+
+  mutex_lock+1
+  ceph_osdc_start_request+53
+  rbd_osd_submit+30
+  rbd_obj_advance_write+820
+  __rbd_obj_handle_request+91
+  rbd_img_advance+254
+  rbd_img_handle_request+82
+  rbd_queue_workfn+597
+  process_one_work+379
+  worker_thread+734
+  kthread+254
+  ret_from_fork+71
+  ret_from_fork_asm+26
+
+A few questions:
+
+  1. Is the con->mutex class above expected to be fixed by the out_queue =
+lock
+     patch?
+
+  2. Is it expected that successful OSD replies run the RBD callback =
+inline
+     from the ceph-msgr worker? In this workload =
+rbd_img_handle_request() can
+     block on img_req->state_mutex for hundreds of milliseconds, and in =
+some
+     cases much longer.
+
+  3. Is holding img_req->state_mutex across
+     ceph_osdc_start_request()/__submit_request() intentional? The =
+traces show
+     many RBD workers holding their image request state mutex while =
+waiting on
+     the same ceph_osd.lock.
+
+I can send the bpftrace scripts and fuller logs if useful. The main =
+thing I
+wanted to check is whether this lock chain is known/expected.
+
+Thanks,
+Sergei=
