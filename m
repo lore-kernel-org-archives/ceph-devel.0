@@ -1,71 +1,86 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from fout-b8-smtp.messagingengine.com (fout-b8-smtp.messagingengine.com [202.12.124.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 879753B0AFA
-	for <ceph-devel@vger.kernel.org>; Fri, 25 Sep 2026 16:56:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C439133D6E6;
+	Fri, 25 Sep 2026 21:49:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790355415; cv=none; b=WiQfO1e0Vva1PiwmiBBExbPcqagDZ1WUaEwuOMGe0sfhhl5eXP+wnHosU6R3i++buCDmuuE0/3uUtUN3P4YDeo44NkR0F4zPPaP3sk3sIKMNzqBS8aQyXMFQCay6SD9mrUNMlTgGav1Ip5rAghBcIJz8ZTkQkCJaJ89Bu1FUdS4=
+	t=1790372992; cv=none; b=FqIo8oz8dyvW0Hn8jWnb2UOURZTbrdRjKcG3fQqzperuGz0XaNLWOl/F4+wAkLV0Bqada+/BDeWkG7DA5w0XZpb0UH7jt9JWf6FX9OHphfn2abgEjYPbtMUegwuNjFrvTgRxsmA2GcZFPSdggWTPzAJun55DSG2tF2vWJSC5J0s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790355415; c=relaxed/simple;
-	bh=7qiLBvkL5f31UPJ2GYjFxJoybPTdrvHnUyAGg0joyoM=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=u3nTPHNJLwPSj+Hv0ow8/3jRxcT7XadVcHLV2P4ySeq2zfh5+l4X9wW2eDVOhvShR3xmeO5SP6eTEvXEsVeuB0BDm9otMhuB3oaVwalb7ync1eEdJV4L1YNlY39hwewxq/Pje/GsHmoEiI6T/GpukiM6R6QbfRMOZUVhYQJu2Uc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V8pA+M6k; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790372992; c=relaxed/simple;
+	bh=ayu4Hcg/6WpBXPA4uGsEFgPTj+HZfH7v4xymNyztXPo=;
+	h=Content-Type:MIME-Version:From:To:Cc:Subject:In-reply-to:
+	 References:Date:Message-id; b=a/l/FvNtlDjg5Xir9vCCovlr5kO6hOhCwk9K7hPs2sP6s6Bcf/wEUc0x/+XJ5n/vQTw2G00pkfU7SCWV1onKpQ6lkNHwtoQGJV4yqE75K78QAd5P6RsmkLaik8motwATJQCa829e6Gk2OjJ7AWF6kk+KAAivkbHxCvGUPOzZehw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=ODEQ1r3H; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=eX/2N/Ik; arc=none smtp.client-ip=202.12.124.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V8pA+M6k"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3D641F00893;
-	Fri, 25 Sep 2026 16:56:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790355398;
-	bh=mtySRZfOGfyzWLw3A6sR7H3wATLXpdRhprJ1nem+O74=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=V8pA+M6k1zxkZfQB1M+nOoUv3HYgZjbVNr2fbYCv7aXvqHO0WB5acEPlTMwHmbtIZ
-	 OimiWtGMdAm5SUt3y+IX0sB3AAuPrrsg/0r46ajF2wg0gq1I0/C37cfeTv0fz/mTGU
-	 GXljzjVn3B3lvCxRbsdnhbQEj8iGko4hCWCxIxIMNHg+8qfvzC1Yvu9l3aYc8agAev
-	 lViXOPMt6DQIVf8WK5lCj+8k4pwZd4JjD8zBOiwFvHcLH6DQ9JyRv0AlMEW4FwhPAC
-	 1LPh7RxQX/GxHTc4v4VIIAWSxzQuvbVZoSbzCHwO5OH4u/91U/S1QpK5/g3doiaGit
-	 LZwEtb2G0YsKg==
-Received: from phl-compute-10.internal (phl-compute-10.internal [10.202.2.50])
-	by mailfauth.phl.internal (Postfix) with ESMTP id A42A0F40068;
-	Fri, 25 Sep 2026 12:56:36 -0400 (EDT)
-Received: from phl-imap-15 ([10.202.2.104])
-  by phl-compute-10.internal (MEProxy); Fri, 25 Sep 2026 12:56:36 -0400
-X-ME-Sender: <xms:xKe2apJq4vvrUbOoXR3IQkzHyDKbRQ8uznavo-KYiNL8UE1owhYaUg>
-    <xme:xKe2av9fTWFU2q8r4aZzjbClaHJEHdJXg8TknyYREd3c9xO4GevSrnitwGSJ0mryR
-    EC5RG7aPjVbGpx3VWSCuj3enJR3vaHUO-Awc-e0Bm9mMNDaIzzR0K63>
-X-ME-Proxy-Cause: dmFkZTE199OACx/5ZGmQOcqgj7GgW/wDsNF2qXaQx7rypS1ySEohTniwvIoRnu5gER2JKj
-    jHei6a2m+alk6AgHs9qI/Eq8KwIT3v5UEiAy68IBmy4jHPGruy8dsVjitWYF+kufX5JzFq
-    m74gM6jQiYubi3n2ZgAtqt4xEHg1Yy4C43X3u5kNMhKgBPb/mUyI1qH8YjxEOJsTYqn1je
-    pAbxBwWujsi++cGSB0r0HDiN6lBig4rNZ2FcnVQ9Cc10tv1HwreJysL/jxVb3XuQ7xdRkx
-    82bd1agSu1Dz6G2dwAwxeP77iGevNkeQ0d7ug9SHrwJQt7RsZsYbsXaxSf7m+mVdNQhYYH
-    +jyZmbkaNB67O5LquY0+PjPX3d9yxv/xVRCMtuH/V59IrJJvpgU/3QF7w8D47H78u6Le62
-    qlbJjgKLrU6DFiqe0fj1kLa9XnBADaEFXsv0B/96zocPFmlGIGU5WY9A92MPUeYqt31KkF
-    +jYBgO0+Bi+b/N4bXPD38LLFAgTbUMXRz1fYNmh1Z6txsRDvIesLRHO3Ct4bGo2Jy9AWup
-    zPUyTPuHrrvmQfdS51tf03gvkPZ4j7idqKxXZpkGvlTquR5cZZkJRYcCayZbSKYM/CmTCm
-    wX0uSqQT+IHQNSxVm18uUYHhrX1efZNtOaZevxzT0tz8Bq1GNAfjxDdE7fdA
-X-ME-Proxy: <xmx:xKe2avu8gZF8WFmuy9J-LVGnIWzZaVG_i9KGEa2SNyr2Dm-V45pHxw>
-    <xmx:xKe2ahyqPAOF-RbkB-Xmns0hFbRkkAh-I-yWEJ8spZ-qzEhUqmpYeg>
-    <xmx:xKe2anaaqJZqbMHNQrEcnTE_WMY7QJQcM2AWnz3K5HMXttX4g_urAQ>
-    <xmx:xKe2ag5wEwRUHRMy1tTQzZQg5V0p0p6k2laVPIlyxoS-QAf69UVXJA>
-    <xmx:xKe2am7nAOr3eqfmtAPH7_zRNhFJX0o_0syFG1-4IuldGMvw0wbQSmoC>
-Feedback-ID: ifa6e4810:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 6EB83780070; Fri, 25 Sep 2026 12:56:36 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="ODEQ1r3H";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="eX/2N/Ik"
+Received: from phl-compute-06.internal (phl-compute-06.internal [10.202.2.46])
+	by mailfout.stl.internal (Postfix) with ESMTP id 7ACC31D000CB;
+	Fri, 25 Sep 2026 17:49:49 -0400 (EDT)
+Received: from phl-frontend-04 ([10.202.2.163])
+  by phl-compute-06.internal (MEProxy); Fri, 25 Sep 2026 17:49:50 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to; s=fm1; t=
+	1790372989; x=1790459389; bh=Fl99L74aSVo3lpHjg0LcF5o/zXW8b0/0JCU
+	ZnYQejAU=; b=ODEQ1r3H/Bhi956K/Ns/bq8Zn4Q1no1zcPAmYJLKNDUT5qrgHMT
+	Sxkz8VwRlzZmI1+VoMD3Q9uC3CM/VAwBjyyWjeSuH/C43b1mDsADnlHfo2xxFzrk
+	QIVQ9/f7gS4eux0uE813k4piXObaZQO98yr9c8Vg9b6W8i1IkBdaQC+raoX3C/hv
+	LGIW7sN7NJcNEFpU1xoLvcfcY6zgFqM+/wRDNj8PCLRS/fCtCo4wy02vwHU2ePAx
+	09cTlAD3VNPyxOTbRGgmVAnm5RMlIX6UChERpniAM6EJEj1WWI5n+c7JTk+bQD24
+	elV7ANSlHEJ9BzpxqE11HbSRqf/nItaicaQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1790372989; x=
+	1790459389; bh=Fl99L74aSVo3lpHjg0LcF5o/zXW8b0/0JCUZnYQejAU=; b=e
+	X/2N/IkXcd7HeoS4F36Yn0MU0EB1pmtj0gVNxZ6jvhrxU7osMejdy46Nj9+w/HZ3
+	ddqjMuZ2gnO+egS1K/PldnCI+zf4aiLh3+enLV0ToSSbWvKbbRan0urpYKBbq1Xa
+	QyyL4/soZrBxgvqAaSfbGAxivFvNtqb+MqyuOqMwG1nZftlrlAKt0WYIDr7k1iek
+	LClB7WFumO7NTGwFUpN6wVaPCjJwrd7TaLxe279srD6BRwP62oJOMbgNgkGmPxzh
+	/BQsB4qF54XmjNDTma7u1HVdQ7jYiuDt3qBCHHQmsk90AejYkgHaIHD3qy6WIDSR
+	D0xx0eAoeWZxj/3i+YNyg==
+X-ME-Sender: <xms:fOy2ameB71hhibbHM-yRoO5ax-RjOVk5yT-dqVDFGn3Hdyirn0lLhA>
+    <xme:fOy2aglXP3O8UoaXg7l2EEJLp41amCKEr7c2LvHL57MkigD-mPUI9VemYk74axfU3
+    qsU6UqK_Wxn-a8bQXGpAoheqcU3QGLfG3Ms1b2_gGGlHSeIDw>
+X-ME-Received: <xmr:fOy2aooyMIOZhEcoixxaVZYsMRIaugssKDTLgI3GBcvGVT6OAC8rSG9omQi522uoHCKwJJbWnA0Z5qnMujmtQNGEHwyaDw8>
+X-ME-Proxy-Cause: dmFkZTGVU49mqyTays27zMayX0aGyFPBkK6jYscejpagkfBGl0SHfK5fAeXyIKq0WbjMOP
+    BBwmHQJvDHuEbi74FnO63wSleOTLyB/2OpP5bMawWC2zchjnaa77G20fzmF2XHaS0pT42O
+    O9R1Q/tmFsGUZ7bm7TENrI9tQgmWg2WJoF564og5Tg3Pfe24AERV+ikrZlHQdLtqXDpc9K
+    MYqMhaW4JNGKL6orrMru1J6rq42R6PPmiEk3yPz0kG2cKVB24dZuKnEV3ADgq313wPp5ts
+    WzMoY38Jmh1UZa+/7n5NcAaY1Tq/ACYJrQPZiaLYrU7zQPx3DQ6i2VVY9uiV4JJOT57SlW
+    5oCxx/PZg34nVpt9NTya6D5FQqwxYxLTiQZyD5agn/0lXWT9Q6HBh2NUS2rT0XSSwmZH3F
+    7eQ68SV3wYF5Ulf7vLc3GuB0RhnBZK9RQZtXYwJKIwcmVZ2a1X0eiDLfK4vO/bbJI0vDdB
+    VF5vQWvTREZCPwZzEFGgSvdblHaHhFtbqN1/p8p0HGsE6lN/dj8gvE+QIYF44ygxTL0f0p
+    C8tJqjU5//RoBwEPAQi3nG0YwQ4syuh3dNos2GJpoJ8hTp3+iSXYQ4wbh4Emx62Elh7ELt
+    7tTx/3SrNAl/QmfJkJJmG8kmXWLdF7A1HPJx9s7w3owTn6DcNk8vBIgkzv7Q
+X-ME-Proxy: <xmx:fOy2av8x9wlsI-k47MXUGd5t6vdoqAZxe6B5D8x3sd2hz-oSKLqrjA>
+    <xmx:fOy2ah1obinVKoEKExEq44i-T4mukIgis1amzE58_fp_zA3rx0Lxxw>
+    <xmx:fOy2aikKBKGAB71Y_BDn1gRujQT7zba_WaiI_uiNtvOPRKVpJL8_vg>
+    <xmx:fOy2au3GymG_u50eJGTdMfg4GbU7Sb3xESjox16DalRjGZGMKBkajQ>
+    <xmx:fey2asACya2AFZD6KK9Aa_iGHrFYF9fmiGkVX_FpXPcosnC04yFGhodL>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
+ 25 Sep 2026 17:49:43 -0400 (EDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: AeJzmHWrDZMJ
-Date: Fri, 25 Sep 2026 12:56:15 -0400
-From: "Chuck Lever" <cel@kernel.org>
-To: "Christian Brauner" <brauner@kernel.org>, NeilBrown <neil@brown.name>
+From: NeilBrown <neilb@ownmail.net>
+To: "Jeff Layton" <jlayton@kernel.org>
 Cc: "Alexander Viro" <viro@zeniv.linux.org.uk>,
- "Jeff Layton" <jlayton@kernel.org>, "Jori Koolstra" <jkoolstra@xs4all.nl>,
- "Mateusz Guzik" <mjguzik@gmail.com>,
+ "Christian Brauner" <brauner@kernel.org>, "Chuck Lever" <cel@kernel.org>,
+ "Jori Koolstra" <jkoolstra@xs4all.nl>, "Mateusz Guzik" <mjguzik@gmail.com>,
  "Dorjoy Chowdhury" <dorjoychy111@gmail.com>,
  "Trond Myklebust" <trondmy@kernel.org>, "Anna Schumaker" <anna@kernel.org>,
  "Andreas Gruenbacher" <agruenba@redhat.com>, gfs2@lists.linux.dev,
@@ -74,78 +89,87 @@ Cc: "Alexander Viro" <viro@zeniv.linux.org.uk>,
  "Paulo Alcantara" <pc@manguebit.org>, "Namjae Jeon" <linkinjeon@kernel.org>,
  linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
  linux-nfs@vger.kernel.org
-Message-Id: <a59cfd65-0491-4fe8-99d4-f48576185d5a@app.fastmail.com>
-In-Reply-To: <20260925-diavortrag-zueinander-komitee-6bb18933f480@brauner>
+Subject:
+ Re: [PATCH v2 04/14] ceph: simplify atomic_open to use finish_no_open()
+In-reply-to: <ca31c1deadab1bbe5c2f9040f1ccee17266d8027.camel@kernel.org>
 References: <20260919022441.3305170-1-neilb@ownmail.net>
- <20260925-diavortrag-zueinander-komitee-6bb18933f480@brauner>
-Subject: Re: [PATCH v2 01/14] fixes for vfs_lookup_open, and integration with nfsd
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+  <20260919022441.3305170-5-neilb@ownmail.net>
+  <ca31c1deadab1bbe5c2f9040f1ccee17266d8027.camel@kernel.org>
+Date: Sat, 26 Sep 2026 07:49:40 +1000
+Message-id: <179037298028.37859.3168205779174130691@noble.neil.brown.name>
+Reply-To: NeilBrown <neil@brown.name>
 
+On Thu, 24 Sep 2026, Jeff Layton wrote:
+> Another LLM review:
+>=20
+> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> > index bd3e3f5c269e..83ceb2906f85 100644
+> > --- a/fs/ceph/file.c
+> > +++ b/fs/ceph/file.c
+>=20
+> [ ... ]
+>=20
+> > @@ -977,33 +976,25 @@ int ceph_atomic_open(struct inode *dir, struct dent=
+ry *dentry,
+> >  	}
+> >  	if (err)
+> >  		goto out_req;
+> > -	if (dn || d_really_is_negative(dentry) || d_is_symlink(dentry)) {
+> > -		/* make vfs retry on splice, ENOENT, or symlink */
+> > -		doutc(cl, "finish_no_open on dn %p\n", dn);
+> > -		err =3D finish_no_open(file, dn);
+> > -	} else {
+> > -		if (IS_ENCRYPTED(dir) &&
+> > -		    !fscrypt_has_permitted_context(dir, d_inode(dentry))) {
+> > -			pr_warn_client(cl,
+> > -					"Inconsistent encryption context (parent %llx:%llx child %llx:%llx)=
+\n",
+> > -					ceph_vinop(dir), ceph_vinop(d_inode(dentry)));
+> > -			goto out_req;
+> > -		}
+> > +	if (IS_ENCRYPTED(dir) &&
+> > +	    !fscrypt_has_permitted_context(dir, d_inode(dentry))) {
+> > +		pr_warn_client(cl,
+> > +			       "Inconsistent encryption context (parent %llx:%llx child %llx:=
+%llx)\n",
+> > +			       ceph_vinop(dir), ceph_vinop(d_inode(dentry)));
+> > +		goto out_req;
+> > +	}
+>=20
+> The fscrypt check used to run only when the dentry was positive, not
+> a symlink, and had no alias. Now it runs unconditionally, but
+> d_inode() can still be NULL here: a lookup that found nothing leaves
+> a negative dentry with err =3D=3D 0, and when the MDS reply splices an
+> alias the original dentry is never instantiated.
+>=20
+> fscrypt_has_permitted_context() dereferences its child argument
+> without checking for NULL:
+>=20
+> fs/crypto/policy.c:fscrypt_has_permitted_context() {
+> 	...
+> 	if (!S_ISREG(child->i_mode) && !S_ISDIR(child->i_mode) &&
+> 	    !S_ISLNK(child->i_mode))
+> 		return 1;
+> 	...
+> }
+>=20
+> Every other in-tree caller passes a known inode, while this one can
+> pass NULL. An open of a name that does not exist in an encrypted
+> directory reaches this through lookup_open() -> atomic_open() ->
+> ceph_atomic_open().
+>=20
+> Could the fscrypt check stay behind the positive-dentry test, as
+> before?
 
+Alternately: can we simply remove the fscrypt check?  I don't know a
+whole lot about fscrypt, but it seems that ceph_open() does all
+necessary fscrypt checks, and we already didn't need this one before
+calling ceph_open().
 
-On Fri, Sep 25, 2026, at 12:04 PM, Christian Brauner wrote:
-> On Sat, Sep 19, 2026 at 12:06:04PM +1000, NeilBrown wrote:
->> Greetings.
->> 
->>  NFSv4 has an "OPEN" request which combines lookup and create and
->>  truncate and permission checks etc much like the open() syscall.  When
->>  nfsd implements this, I want it to share a much code as (reasonably)
->>  possible with the open() paths - in particular I want it to use lookup_open() 
->>  and so that it uses ->atomic_open() the same way that other code does.
->>  (Longer term I want to make some locking changes and having all the code
->>  central makes that easier.)
->>  vfs_lookup_open() is a step towards that  but it isn't quite ready yet.
->>  This series aims to make it ready, then use it.
->> 
->>  A particular issue is that using __O_REGULAR exactly meets the needs of
->>  nfsd (it doesn't want to open anything else) but the errors returned by
->>  __O_REGULAR aren't what nfsd needs.  nfsd needs to know if it was a
->>  directory, or a symlink, or something else.
->> 
->>  I don't think __O_REGULAR should cause symlinks to result in -EFTYPE.
->>  If a symlink is found, then it should be followed.  That is what
->>  happens with filesystems that don't support ->atomic_open, but some
->>  ->atomic_open handlers return -EFTYPE for symlinks when __O_REGULAR is
->>  present.  I think that O_NOFOLLOW can affect how symlink are handled,
->>  but where possible it is best to just return the symlink to the caller
->>  and let it figure out what to do.
->> 
->>  For directories, nfsd wants EISDIR rather than EFTYPE.  It may be that
->>  user-space could benefit from seeing EISDIR too, but that is a separate
->>  issue.  So I want ->atomic_open to return EISDIR (if it returns an
->>  error at all) rather than EFTYPE if a directory is found.  VFS code can
->>  then map that to EFTYPE if needed.
->> 
->>  So the first few patches in this series improve the documentation for
->>  atomic_open and then make changes to nfs, gfs2, ceph, cifs to better
->>  match this documentation.  I would appreciate an Ack-by (or whatever
->>  else might be appropriate) from fs maintainers for those.
->> 
->>  Subsequent patches make changes to vfs_lookup_open() and then to nfsd
->>  to use it.
->> 
->>  A significant change here is that opening a file with
->>  O_NONBLOCK|O_CREAT will result in -EWOULDBLOCK if a delegation
->>  exists on the parent directory - currently it blocks.
->>  Jeff - could you comment on that change (07/14)?
->> 
->>  There are quite a lot of changes here since my previous post,
->>  particularly the changes to various filesystems.
->>  I've stopped trying to return the dentry from vfs_lookup_open()
->>  in the error case - no-one liked that.
->> 
->>  Thanks for your time,
->
-> Neil, I'll take the vfs specific fixes onto vfs-7.4.lookup and then nfs
-> can pull that all in?
+You added this in
+  Commit: 94af0470924c ("ceph: add some fscrypt guardrails")
+but the commit doesn't explain why ceph_atomic_open() needed more that
+ceph_open() needed.
 
-There are outstanding review comments on the NFSD patches in this
-series, but once those are resolved I can merge vfs-7.4.lookup
-into nfsd-next and apply Neil's work.
-
-Let me know when I can merge your topic branch.
-
-
--- 
-Chuck Lever (Come to NFS bake-a-thon! https://nfsv4bat.org)
+Thanks,
+NeilBrown
