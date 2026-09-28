@@ -1,114 +1,172 @@
-Received: from mail-pj2-f40.google.com (mail-pj2-f40.google.com [74.125.227.168])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m155101.qiye.163.com (mail-m155101.qiye.163.com [101.71.155.101])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DCA5421A07
-	for <ceph-devel@vger.kernel.org>; Sun, 27 Sep 2026 17:44:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.168
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03F254AA579;
+	Mon, 28 Sep 2026 11:36:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.101
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790531072; cv=none; b=d0KkkrUnpHAnzLLxjBGkhXz2jhOCk5aKhV7onhPfKmRCXQZxK4AlPYwSqQL7oHuvCHz4JuXEPcD7BKLZmQ9k55kKgkZYg277iYi9nArH7gqacI3qMnKR7aYK3Ym3VQSEIE3YAEOLMlV9s4B1FpakEgexYGs5OZ1Xjea2xfkfWSg=
+	t=1790595413; cv=none; b=Vx6VlJcZcN4Sqs9JyhkKDWqzKGGMwRbHOH3ILD77z0wue0t0L19vCwUVH53EqW4aYub6qCIdeJ0oaTBFXKS7E32bfYQ2DWMOlpBY1e7qVdTI0EXFLtgnOygIRpNu5il/Fd9Bm9BhPh5OFy1RWcEUo2GFX3g18+GZEgMqiSt0qVE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790531072; c=relaxed/simple;
-	bh=IqWJg2agBE61Hwref8/QboYAZsi5aV6fYgmg8wjRCTo=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=oAllO7f98NA+k5lGMEJSTwTcmLqTrSp5R1cstmRiQhnWBwKRJsqvgrjaHKC26fQ6SqQtYMhw3VFvaAai8HiOT+nZKymji24+8ui7HzSKLXVQ8XuCf81T0i8j+rSyK5BOEfg0knpnicgcO7GqwpOO2xb7F1UveE9dpLsSDV+G4/c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=nebusec.ai; spf=pass smtp.mailfrom=nebusec.ai; dkim=pass (2048-bit key) header.d=nebusec.ai header.i=@nebusec.ai header.b=g0pkNGpg; arc=none smtp.client-ip=74.125.227.168
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=nebusec.ai
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nebusec.ai
+	s=arc-20240116; t=1790595413; c=relaxed/simple;
+	bh=T5IbdwHsw/qD2EPA4qspcbLgg6+Q2R18K4Hca4xmGAI=;
+	h=From:Content-Type:Mime-Version:Subject:Message-Id:Date:Cc:To; b=kNV18FcQ3w6Li3rK91zJWaK1NvkF5qF21nLIq72m2Cg1CTWf6Jq7Nn95YwBgaBAlVa5ind0hGP/F3/y69O3Bx9D/r5i35wAkMqOvqBEGGTxKf6uQkFnTPM0BOqVBQR5h7tgqdLCP0AIFdbgvGPJc+wAw43FFiElUMZQ3RmTCPI4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn; spf=pass smtp.mailfrom=stu.pku.edu.cn; dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b=A6miKgX7; arc=none smtp.client-ip=101.71.155.101
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=stu.pku.edu.cn
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=nebusec.ai header.i=@nebusec.ai header.b="g0pkNGpg"
-Received: by mail-pj2-f40.google.com with SMTP id 98e67ed59e1d1-3a0df0bb2d6so735184a91.3
-        for <ceph-devel@vger.kernel.org>; Sun, 27 Sep 2026 10:44:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=nebusec.ai; s=google; t=1790531070; x=1791135870; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=fH0GJVne8Jg+qyeTLAM/8ogcMcE+uAgM6MoLg0h42pg=;
-        b=g0pkNGpgbSxNw63FXHIsqDaIsPKjDJiQq7Pr38XWNKIWxahsdC47sk1xWvdJRlvgUy
-         ORztbmd7PgKrqaaGg9CodhNXTDqJrmH76Qqqmm2eQYGjxgREH/ES3Riz1l65uxc9kbNX
-         mniseILRA8IMl1dsYHMofn8OFc0Hju7WFQrBCpuzzJzEoAuy0oGC3Z6Ou2E13wJT9agW
-         M+GUuwkp7L3Pcjacs/8IL7cybfjLWn9yvZL7gPhOWfVHIW0EEoNZq4wJxZai/AGh0lvt
-         1lyRHjnTxM0b4L5UClbic4seepV2jCNNV/w7asd2tfSTCXuIsAoKWYyLJhnDfyly0JDR
-         Ypcw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790531070; x=1791135870;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=fH0GJVne8Jg+qyeTLAM/8ogcMcE+uAgM6MoLg0h42pg=;
-        b=fiIHCUvauBaDcr5s4s1GAFgPCCakMv8q7T5q+qkn973+mE0n3TIeIyRz9bkKVAtLAa
-         xZZ3bvPgW47fkHdn077X28C/OMWZN7XRs8jFEyRSJgVs8vLSSagMbMJBx5gJ9iNq35JC
-         SlF0YGd/fnIsp017gJ7FBe6Ln2pUwiE/vewJKGYU53QJqtSz2F9RrY8qUY6Yt2rsS2h5
-         gtbFnxzKDAC9tYzX8K5xAr3lAQ0sRFAwcCPnRq8oXQDuhgbS4XNEeAnF4LzrvcLiocfp
-         dxYTKUzkGcGtyzfbEJIXV2LtC3GNPDrqEyvRaVYM+w/h1m6WH5BvX2F+HjHclpKjmSOi
-         oQXw==
-X-Gm-Message-State: AFq9FYLyYXATpKw6mEnVVsBZWV13fgOnrm9WdZYwHwwNIn2a3DxRW6rl
-	W4JGs0UQnrBGQgls2a/8i3TjrgxAbMbM2SC0nMN8LngStrlZOYROIUojt5xM0+aRW4f3AQQf19W
-	RE3OPC33kth8=
-X-Gm-Gg: AYBFou1G2V6X3egh9m/s2p28YoAjfCcl6JnesbLsVGe5PWFpx3ZHADWV/P3bS5lzXEP
-	WEexP4liscGZ8wHWMUgiRaMw8FPy00QiPm4qI6BMszjdgoFrhFYpqCF38xQFKa72V3gTcuc4Tlj
-	2EkuuWD4vuq1Ry0T3zCCTiq/+aNfUXiHUgVc9BMH83vKrNXINz7fBJC9Alq3rgUrxVvNwfZYcOB
-	RRCh5yv7vD+RVpkAXj3+u0Zq2/Z4iAFs3CmkgCbB5u7+J68HqFVQN2HMIrRRRjZgveUhCKjc2O7
-	CqqJdzQwWoSGXKBL0Dp4wajDA5YLXMhMdMIo4V/hW71pAJHxLem9AMjY6C0EdreDfYMyPoZaMd7
-	RI6DMJOLoIxLFo++460/2rMgqCb+jgRF0yxluxBp0Kuhis0HOq+6I5mQVTgeRenHMEEzXJU+QSV
-	cqzvDPOlO6XyeIGvpXcVUOOUbe4+omnr04nh8crjHsCtoUvFcHJtfk+mCVnmwulfhdGXDyPwmpD
-	PP5KhC4mjA+MPxwIPI=
-X-Received: by 2002:a17:90b:35d0:b0:3a0:df61:3fe8 with SMTP id 98e67ed59e1d1-3a0df614b3emr3411764a91.13.1790531070516;
-        Sun, 27 Sep 2026 10:44:30 -0700 (PDT)
-Received: from enjou-Legion-Y7000P-2019 ([23.129.140.236])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3a0b9356f48sm16070056a91.6.2026.09.27.10.44.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 27 Sep 2026 10:44:29 -0700 (PDT)
-From: Ren Wei <weir@nebusec.ai>
-To: ceph-devel@vger.kernel.org,
-	Ilya Dryomov <idryomov@gmail.com>
-Cc: amarkuze@redhat.com,
-	slava@dubeyko.com,
-	vega@nebusec.ai,
-	zzyy19904204639@163.com,
-	weir@nebusec.ai
-Subject: [PATCH net-ceph 1/1] libceph: initialize CRUSH choose argument weights
-Date: Mon, 28 Sep 2026 01:44:22 +0800
-Message-ID: <e7db8a6e1dbedd5177b772b570674e8a00b23214.1790491709.git.zzyy19904204639@163.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <cover.1790491709.git.zzyy19904204639@163.com>
-References: <cover.1790491709.git.zzyy19904204639@163.com>
+	dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b="A6miKgX7"
+Received: from smtpclient.apple (unknown [IPV6:240e:305:1b9d:c000:658d:22e4:fce7:420c])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4f5ac1a9f;
+	Mon, 28 Sep 2026 19:36:40 +0800 (GMT+08:00)
+From: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.11\))
+Subject: [PATCH] ceph: bound the mon command wait
+Message-Id: <7412F740-8826-4790-8BEC-A590DB2BC2E4@stu.pku.edu.cn>
+Date: Mon, 28 Sep 2026 19:36:30 +0800
+Cc: ceph-devel@vger.kernel.org,
+ linux-kernel@vger.kernel.org,
+ stable@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>,
+ Alex Markuze <amarkuze@redhat.com>,
+ Viacheslav Dubeyko <slava@dubeyko.com>
+X-Mailer: Apple Mail (2.3901.100.1.1.11)
+X-HM-Tid: 0aa0e7cd833703a1kunmf2fcd2451f9292
+X-HM-MType: 10
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVkZT0pOVh4ZSxpPSh4fTktOTVYeHw
+	5VEwETFhoSFyQUDg9ZV1kYEgtZQVlJT0seQUhLTkFKGUIfQRhLS0tBTU5DH0FJSR5PQR0YHkxBT0
+	lLGFlXWRYaDxIVHRRZQVlPS0hVSktJSE5DQ1VKS0tVS1kG
+DKIM-Signature: a=rsa-sha256;
+	b=A6miKgX7OzTI5CY4V5dDBmqXRySp2CFYQoCBiD8wHLF+Oq4KdzRUVacZfODfltptUSluGh+XA/iNnCMP4L9KEaro/9hhJSTRMttOxUiaZdY2dLyAMjLqrH9kCyJBl1qVR+2JLjPHM6WfNK4zr4SMhZAZ9svb/0AuklXUWlRkU1c=; c=relaxed/relaxed; s=default; d=stu.pku.edu.cn; v=1;
+	bh=TvKf7SSMp0T++430PIKppvqUMsgRV/+IYvLvPLLFBgI=;
+	h=date:mime-version:subject:message-id:from;
 
-From: Darong Lu <zzyy19904204639@163.com>
+ceph_update_snap_trace() reacts to a corrupted snap trace by fencing
+the mount and blocklisting the client through ceph_monc_blocklist_add().
+That issues the "osd blocklist add" mon command and waits for the reply
+synchronously, from the messenger dispatch path, with session->s_mutex
+held.  Dispatch runs in a kworker, where no signal will ever arrive,
+and the wait has no timeout: a monitor that doesn't reply leaves that
+worker asleep holding the mutex for good.  ceph_cap_release_work() and
+anything else queued behind the session mutex pile up on it, and the
+WARN(1, "...do remount to continue") that is supposed to tell the admin
+to remount sits after the wait and never runs.
 
-Initialize the CRUSH choose argument weight-set array before decoding so
-entries start in a defined state while the decoder fills them.
+Bound the mon command wait with CEPH_MONC_PING_TIMEOUT (30s).  That is
+already how long an unanswered monitor keepalive may last before the
+session is reopened.  On timeout the existing error handling takes
+over: the blocklist failure is reported, the warning is issued and the
+mount stays fenced, so the admin can remount as intended.
 
-Fixes: 5cf9c4a9959b ("libceph, crush: per-pool crush_choose_arg_map for crush_do_rule()")
-Cc: stable@vger.kernel.org
-Reported-by: Vega <vega@nebusec.ai>
-Assisted-by: LLM
-Signed-off-by: Darong Lu <zzyy19904204639@163.com>
-Signed-off-by: Ren Wei <weir@nebusec.ai>
+The blocked worker on the unpatched kernel, trimmed:
+
+INFO: task kworker/0:1:11 blocked for more than 10 seconds.
+Workqueue: ceph-msgr ceph_con_workfn
+Call Trace:
+ <TASK>
+ __schedule+0x1850/0x4a80
+ schedule+0x7a/0x1f0
+ schedule_timeout+0x217/0x250
+ __wait_for_common+0x2af/0x460
+ wait_for_completion_interruptible+0x1f/0x40
+ wait_generic_request+0x1f/0x270
+ do_mon_command+0x4b6/0x600
+ ceph_monc_blocklist_add+0x88/0x1a0
+ ceph_update_snap_trace+0x222/0x3420
+ ceph_con_process_message+0x1e5/0x270
+ [...]
+ </TASK>
+
+INFO: task kworker/0:0:9 blocked for more than 10 seconds.
+Workqueue: ceph-cap ceph_cap_release_work
+ mutex_lock+0xce/0xe0
+ [...]
+
+With the watchdog set to panic this ends in "Kernel panic - not
+syncing: hung_task: blocked tasks"; with the production defaults it
+just stays there.  With this patch the same run prints:
+
+ceph: [client 1]: error -5
+ceph: [client 1]: failed to blocklist ...: -110
+[client.1] ceph_update_snap_trace do remount to continue after corrupted =
+snaptrace is fixed
+WARNING: fs/ceph/snap.c:926 at ceph_update_snap_trace+0x2d1/0x3420
+
+(thirty seconds after the snap trace error) and the pending requests
+on the fenced mount fail instead of hanging.
+
+Verified on 7.3-rc4-00537-ga3ff15db6820 with only this change applied:
+the blocklist failure and the warning arrive thirty seconds after the
+snap trace error, and the blocked worker returns.  An unresponsive
+monitor plus a corrupted snap trace used to wedge the mount for good;
+when the wait expires the blocklist attempt returns -ETIMEDOUT, the
+warning fires and the mount stays fenced until remount.
+
+Fixes: a68e564adcaa6 ("ceph: blocklist the kclient when receiving =
+corrupted snap trace")
+Signed-off-by: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
 ---
- net/ceph/osdmap.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ net/ceph/mon_client.c | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
 
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index cf34b35c9a90..2a9265653ed8 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -319,7 +319,7 @@ static int decode_choose_arg(void **p, void *end, struct crush_choose_arg *arg)
- 	if (arg->weight_set_size) {
- 		u32 i;
- 
--		arg->weight_set = kmalloc_objs(*arg->weight_set,
-+		arg->weight_set = kzalloc_objs(*arg->weight_set,
- 					       arg->weight_set_size, GFP_NOIO);
- 		if (!arg->weight_set)
- 			return -ENOMEM;
--- 
-2.53.0
-
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index c56457378d00e..435c7f851ab26 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -705,6 +705,24 @@ static int wait_generic_request(struct =
+ceph_mon_generic_request *req)
+ 	return ret;
+ }
+=20
++static int wait_generic_request_timeout(struct ceph_mon_generic_request =
+*req,
++					unsigned long timeout)
++{
++	long ret;
++
++	dout("%s greq %p tid %llu\n", __func__, req, req->tid);
++	ret =3D =
+wait_for_completion_interruptible_timeout(&req->completion,
++							timeout);
++	if (ret =3D=3D 0)
++		ret =3D -ETIMEDOUT;
++	if (ret < 0) {
++		cancel_generic_request(req);
++		return ret;
++	}
++
++	return req->result; /* completed */
++}
++
+ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
+ 					 struct ceph_msg_header *hdr,
+ 					 int *skip)
+@@ -1006,7 +1024,14 @@ int do_mon_command_vargs(struct ceph_mon_client =
+*monc, const char *fmt,
+ 	send_generic_request(monc, req);
+ 	mutex_unlock(&monc->mutex);
+=20
+-	ret =3D wait_generic_request(req);
++	/*
++	 * ceph_monc_blocklist_add() runs from messenger dispatch, in a
++	 * kworker, with session->s_mutex held.  No signal arrives =
+there.
++	 * CEPH_MONC_PING_TIMEOUT is how long an unanswered monitor
++	 * keepalive may last before the session is reopened; use that
++	 * so this worker cannot sleep for good.
++	 */
++	ret =3D wait_generic_request_timeout(req, =
+CEPH_MONC_PING_TIMEOUT);
+ out:
+ 	put_generic_request(req);
+ 	return ret;
+--=20
+2.43.0=
