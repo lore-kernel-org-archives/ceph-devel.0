@@ -1,178 +1,125 @@
-Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
+Received: from ewsoutbound.kpnmail.nl (ewsoutbound.kpnmail.nl [195.121.94.183])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D38692B9B7
-	for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2026 14:12:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.24.179.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13E31556B95
+	for <ceph-devel@vger.kernel.org>; Tue, 29 Sep 2026 15:19:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.121.94.183
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790691148; cv=none; b=s4QbW54u69g6LMBiEmgrUdDpAtzGGdUs/zdsMs+at8QPEzFok4Gb5jh/XGhHpa4E3eAyzF7NMfhQ7EAXfAnIKAkeC9yIPydCz33nNChVmRruaDCimlwfV71iJ+lCoC5IOiFL3wFOacb/1DUSHgfvsOoZ1Ht/AzCyRJEqN61CjRo=
+	t=1790695154; cv=none; b=fcB1ppVuiLR60fo3PrRNJpmcJ5qyb71I009G++eOHmHOPkVMjAwmawQNj1N9Bw8s+Tuph6KV3WTYCQqSi9cWAXJc4TX/wakEp8nHtR3I2bknRHWjDMYfOjc/l9JrTdSURE59h534Ka1j3gNguwDynj19jZ9O0RONTvCan1N2TvI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790691148; c=relaxed/simple;
-	bh=6E4596pydF75nPyiwylN7IN/FZNu7MBmB221GMR2UHQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aHAowKat20ibY/i5fX+Izk1hg9GyM2zqPT4UbUA0jvpGxFF9AKILPnYkXCsv2x59h9NiSwPrC7OBPpnjGOjon0vXRTQfp3geNXcTE18e2Y4Op/aae4mnLcLFR1914MFrTHx46VMt5KlYfFtw5i7cIM4gs+iDtY/iv/matIhBnRk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de; spf=pass smtp.mailfrom=tu-ilmenau.de; dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b=zYlQFH/D; arc=none smtp.client-ip=141.24.179.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+	s=arc-20240116; t=1790695154; c=relaxed/simple;
+	bh=POxNgs3Sk0smUjRTdny0WLN3IwiIFf9y/TxNt7OHXSQ=;
+	h=Date:From:To:Cc:Message-ID:In-Reply-To:References:Subject:
+	 MIME-Version:Content-Type; b=o7sY3LEP59Y9D8xzKrEfgJ1jcMFlnJSPs3Tuah4p11MzELUyrZTvYCtPT8+Al/SXxDQNY2D/dCPsH71TzJfh2jgKj1Z1ZISmomExSv52UogCY4OPkDIQ/WypOv9V0tICRS+GkrZDMvBjEEwP+h0NgWvV5CPaU8iwmAag/fygcoE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=xs4all.nl; spf=pass smtp.mailfrom=xs4all.nl; dkim=pass (2048-bit key) header.d=xs4all.nl header.i=@xs4all.nl header.b=kIgJPBzC; arc=none smtp.client-ip=195.121.94.183
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=xs4all.nl
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=xs4all.nl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.b="zYlQFH/D"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
- i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1790691064; h=from : to
- : cc : subject : date : message-id : mime-version :
- content-transfer-encoding : from;
- bh=6E4596pydF75nPyiwylN7IN/FZNu7MBmB221GMR2UHQ=;
- b=zYlQFH/DvQnB0FQY7eE9S6McX6/16XQbU1OihSTajMHpL375p2R1CEze/7njuMhPWY9Ye
- EHRXFbJMh9Pt16yzM4iEUhrr0nJ1nQPLVBRGkCnrgaSf50siNb2g+24XlSGNrrpYQ8WvPBc
- Fr954rVPzntUVK5U2ZDIm9BdAlZu8J/q1N87emvSsvIyaKSH7+Enc+WzyTI/G9/5JRRI0Q4
- wWX7LSaU2nniI1jvOkXbUqk2qCcU+uEmXWb54/g4CQdrgd9wMnrZbV0Wo2b74B85O49akkl
- QQfqYm/61PCahYNgWYQHtG1UkHXmOcG3D3c2+YCSw2sHLSBdhl1r3HNgVGEw==
-Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
-	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id 604D35FD4A;
-	Tue, 29 Sep 2026 16:11:04 +0200 (CEST)
-Received: from majestix.prakinf.tu-ilmenau.de (unknown [141.24.212.106])
-	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id 37E525FA49;
-	Tue, 29 Sep 2026 16:11:03 +0200 (CEST)
-From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-To: Ilya Dryomov <idryomov@gmail.com>,
+	dkim=pass (2048-bit key) header.d=xs4all.nl header.i=@xs4all.nl header.b="kIgJPBzC"
+X-KPN-MessageId: 1669baed-bc19-11f1-8f57-005056992ed3
+Received: from mta.kpnmail.nl (unknown [10.31.161.188])
+	by ewsoutbound.so.kpn.org (Halon) with ESMTPS
+	id 1669baed-bc19-11f1-8f57-005056992ed3;
+	Tue, 29 Sep 2026 17:18:56 +0200 (CEST)
+Received: from mtaoutbound.kpnmail.nl (unknown [10.128.135.190])
+	by mta.kpnmail.nl (Halon) with ESMTP
+	id 1668d7ff-bc19-11f1-ac16-00505699693e;
+	Tue, 29 Sep 2026 17:18:56 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=xs4all.nl; s=xs4all01;
+	h=content-type:mime-version:subject:message-id:to:from:date;
+	bh=ACDbdiVSBCu7/pMa28q8IG+OfHCoxEFwKjelrwVxaXo=;
+	b=kIgJPBzCNop8a7wcoqU8geEt3KueLJC8HCERj/V78bn7eUXjRqmdA644bvSv7EdS0MWjmYrh/UFxd
+	 tFiU2OLWUHxbpU2p6T83XLad/J99AS+469TyhklOophHku5FD15DOz7MP19VoAY/h3mbJduCxEgEwT
+	 XNdAzWxj6EQmWGbL91fvAQsFz6A+NtygULAHRIt2VCNoncS+tNrRc4HXavKEbzk1AT0sHCq89x37dN
+	 q2wbLjvoS0xq7JlftE/UgaOpfjS/3OUYYJCfhB0gg/gzF9ZVObwfnv1WM8+TwnNu4nMGX+1g0+VNw7
+	 B3R218MQ1kyHNTAiGeKf8OUkvw11t1A==
+X-KPN-MID: 33|VtfdXQ7XBA5Bw3zxqGdKWxVcQf+i4Kr3/piisen4KvftsHje7+hWv8iQzgUXMDK
+ 7JeBMbodJggf9I1eoncwpbKrrKhXu6MAJJbSoMVeWiZI=
+X-CMASSUN: 33|YNUny+R1v2qHD+kD8+nSA3o19Hx1QizAlwfuOS/xy4BMUe316Enrqn20iIYD+MH
+ qjZWeEaAK6ekHZ5+hj3Jgxw==
+X-KPN-VerifiedSender: Yes
+Received: from cpxoxapps-mh02 (cpxoxapps-mh02.personalcloud.so.kpn.org [10.128.135.208])
+	by mtaoutbound.kpnmail.nl (Halon) with ESMTPSA
+	id 165d89cd-bc19-11f1-916a-005056995d6c;
+	Tue, 29 Sep 2026 17:18:56 +0200 (CEST)
+Date: Tue, 29 Sep 2026 17:18:56 +0200 (CEST)
+From: Jori Koolstra <jkoolstra@xs4all.nl>
+To: NeilBrown <neil@brown.name>, NeilBrown <neilb@ownmail.net>,
+	Alexander Viro <viro@zeniv.linux.org.uk>,
+	Christian Brauner <brauner@kernel.org>, Chuck Lever <cel@kernel.org>,
+	Jeff Layton <jlayton@kernel.org>, Mateusz Guzik <mjguzik@gmail.com>,
+	Dorjoy Chowdhury <dorjoychy111@gmail.com>
+Cc: Trond Myklebust <trondmy@kernel.org>, Anna Schumaker <anna@kernel.org>,
+	Andreas Gruenbacher <agruenba@redhat.com>, gfs2@lists.linux.dev,
+	Ilya Dryomov <idryomov@gmail.com>,
 	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Subject: [PATCH] libceph: Only allocate new front segment for oversized reply messages
-Date: Tue, 29 Sep 2026 16:10:42 +0200
-Message-ID: <20260929141042.80544-1-raphael.zimmer@tu-ilmenau.de>
-X-Mailer: git-send-email 2.47.3
+	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org,
+	Paulo Alcantara <pc@manguebit.org>,
+	Namjae Jeon <linkinjeon@kernel.org>, linux-cifs@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org
+Message-ID: <113651329.602012.1790695136052@kpc.webmail.kpnmail.nl>
+In-Reply-To: <20260919022441.3305170-7-neilb@ownmail.net>
+References: <20260919022441.3305170-1-neilb@ownmail.net>
+ <20260919022441.3305170-7-neilb@ownmail.net>
+Subject: Re: [PATCH v2 06/14] vfs: add some allowed open flags to
+ vfs_lookup_open()
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Priority: 3
+Importance: Normal
 
-get_reply() and get_generic_reply() are used to get an already allocated
-message buffer for a reply message. Incoming messages with oversized
-front segments are handled by allocating a new message and replacing the
-previously allocated one. If the reply message previously contained data
-items, they are lost after this reallocation. CEPH_MSG_OSD_OPREPLY
-messages, handled in get_reply, often contain a data segment and are in
-this case always discarded after the message buffer is reallocated.
-Furthermore, the max_data_items value is set to zero in the newly
-allocated buffer, which can trigger a BUG_ON assertion in
-ceph_msg_data_add() when later attempting to resend the request.
 
-This patch fixes the issue by modifying the handling of oversized front
-segments in get_reply() and get_generic_reply(). Instead of allocating
-a new message, only a new front segment buffer is allocated to replace
-the one in the reply message.
+> Op 19-09-2026 04:06 CEST schreef NeilBrown <neilb@ownmail.net>:
+> 
+>  
+> From: NeilBrown <neil@brown.name>
+> 
+> vfs_lookup_open() must allow:
+>   O_LARGEFILE so that large files can be opened.
+>   O_NONBLOCK so that break_lease() can be asked to return -EWOULDBLOCK.
+> 
+> Also O_NOFOLLOW as we don't/can't handle symlinks.  In fact we
+> should enforce O_NOFOLLOW for the same reason we enforce __O_REGULAR.
 
-Fixes: c16e786927b9 ("ceph: use single osd op reply msg")
-Signed-off-by: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
----
- net/ceph/mon_client.c | 38 ++++++++++++++++++++------------------
- net/ceph/osd_client.c | 16 +++++++++++-----
- 2 files changed, 31 insertions(+), 23 deletions(-)
+I don't know all the NFS background, but: you can handle intermediate symlinks
+but not trailing ones? Why is that?
 
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index c83a868e0890..b6c2965bec56 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -721,17 +721,15 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
- 	struct ceph_mon_client *monc = con->private;
- 	struct ceph_mon_generic_request *req;
- 	u64 tid = le64_to_cpu(hdr->tid);
--	int type = le16_to_cpu(hdr->type);
- 	int front_len = le32_to_cpu(hdr->front_len);
- 	u32 data_len = le32_to_cpu(hdr->data_len);
--	struct ceph_msg *m;
-+	struct ceph_msg *m = NULL;
- 
- 	mutex_lock(&monc->mutex);
- 	req = lookup_generic_request(&monc->generic_request_tree, tid);
- 	if (!req) {
--		dout("get_generic_reply %lld dne\n", tid);
-+		dout("%s %lld dne\n", __func__, tid);
- 		*skip = 1;
--		m = NULL;
- 		goto out;
- 	}
- 
-@@ -739,7 +737,6 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
- 		pr_warn_ratelimited("mon generic reply tid %llu data %u > preallocated %zu, skipping\n",
- 				    tid, data_len, req->reply->data_length);
- 		*skip = 1;
--		m = NULL;
- 		goto out;
- 	}
- 
-@@ -748,22 +745,27 @@ static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
- 		pr_warn_ratelimited("tid %llu front %d > prealloc %d\n",
- 				    tid, front_len,
- 				    req->reply->front_alloc_len);
--		m = ceph_msg_new(type, front_len, GFP_NOFS, true);
--		if (m) {
--			ceph_msg_put(req->reply);
--			req->reply = m;
--			m = ceph_msg_get(req->reply);
-+		kvfree(req->reply->front.iov_base);
-+		req->reply->front.iov_base = kvmalloc(front_len, GFP_NOFS);
-+		if (!req->reply->front.iov_base) {
-+			dout("%s can't allocate %d bytes\n",
-+			     __func__, front_len);
-+			req->reply->front_alloc_len = 0;
-+			req->reply->front.iov_len = 0;
-+			goto out;
- 		}
--	} else {
--		dout("get_generic_reply %lld got %p\n", tid, req->reply);
--		m = ceph_msg_get(req->reply);
--		/*
--		 * we don't need to track the connection reading into
--		 * this reply because we only have one open connection
--		 * at a time, ever.
--		 */
-+		req->reply->front_alloc_len = front_len;
-+		req->reply->front.iov_len = front_len;
- 	}
- 
-+	dout("%s %lld got %p\n", __func__, tid, req->reply);
-+	m = ceph_msg_get(req->reply);
-+	/*
-+	 * we don't need to track the connection reading into
-+	 * this reply because we only have one open connection
-+	 * at a time, ever.
-+	 */
-+
- out:
- 	mutex_unlock(&monc->mutex);
- 	return m;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index ea0b49f1a231..5f2c561ff4e2 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -5497,12 +5497,18 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
- 		pr_warn("%s osd%d tid %llu front %d > preallocated %d\n",
- 			__func__, osd->o_osd, req->r_tid, front_len,
- 			req->r_reply->front_alloc_len);
--		m = ceph_msg_new(CEPH_MSG_OSD_OPREPLY, front_len, GFP_NOFS,
--				 false);
--		if (!m)
-+		kvfree(req->r_reply->front.iov_base);
-+		req->r_reply->front.iov_base = kvmalloc(front_len, GFP_NOFS);
-+		if (!req->r_reply->front.iov_base) {
-+			dout("%s can't allocate %d bytes\n",
-+			     __func__, front_len);
-+			req->r_reply->front_alloc_len = 0;
-+			req->r_reply->front.iov_len = 0;
-+			*skip = 0;
- 			goto out_unlock_session;
--		ceph_msg_put(req->r_reply);
--		req->r_reply = m;
-+		}
-+		req->r_reply->front_alloc_len = front_len;
-+		req->r_reply->front.iov_len = front_len;
- 	}
- 
- 	srlen = sparse_data_requested(req);
--- 
-2.47.3
+> 
+> Signed-off-by: NeilBrown <neil@brown.name>
+> ---
+>  fs/namei.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/fs/namei.c b/fs/namei.c
+> index 0f69abb3743b..a08f37aca3e1 100644
+> --- a/fs/namei.c
+> +++ b/fs/namei.c
+> @@ -4632,11 +4632,12 @@ struct file *vfs_lookup_open(struct path *parent, struct qstr *last,
+>  	int error = 0;
+>  
+>  	WARN_ONCE(mode & ~S_IALLUGO, "mode must only have permission bits");
+> -	WARN_ONCE(open_flag & ~(O_ACCMODE|O_CREAT|O_EXCL|O_TRUNC|__O_REGULAR),
+> +	WARN_ONCE(open_flag & ~(O_ACCMODE|O_CREAT|O_EXCL|O_TRUNC|__O_REGULAR|
+> +				O_NONBLOCK|O_LARGEFILE|O_NOFOLLOW),
+>  		  "open_flag has unsupported flags");
+>  
+>  	mode |= S_IFREG;
+> -	open_flag |= __O_REGULAR;
+> +	open_flag |= __O_REGULAR | O_NOFOLLOW;
 
+What does __O_REGULAR | O_NOFOLLOW do? Does __O_REGULAR only block opening
+if the final resolved thing is not a regular file, or does is also block
+trailing symlinks? Afaict, the former.
+
+>  
+>  	error = lookup_noperm_common(last, parent->dentry);
+>  	if (error)
+> -- 
+> 2.50.0.107.gf914562f5916.dirty
