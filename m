@@ -1,172 +1,124 @@
-Received: from mail-m155101.qiye.163.com (mail-m155101.qiye.163.com [101.71.155.101])
+Received: from fout-b8-smtp.messagingengine.com (fout-b8-smtp.messagingengine.com [202.12.124.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03F254AA579;
-	Mon, 28 Sep 2026 11:36:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.101
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 428343D9020;
+	Tue, 29 Sep 2026 02:54:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790595413; cv=none; b=Vx6VlJcZcN4Sqs9JyhkKDWqzKGGMwRbHOH3ILD77z0wue0t0L19vCwUVH53EqW4aYub6qCIdeJ0oaTBFXKS7E32bfYQ2DWMOlpBY1e7qVdTI0EXFLtgnOygIRpNu5il/Fd9Bm9BhPh5OFy1RWcEUo2GFX3g18+GZEgMqiSt0qVE=
+	t=1790650499; cv=none; b=monbpmMQJ9cZZJmMyM8hcFp+ypKf/bEQ3bad4YlpmLIALnNJksZrJqOWzazRfdxauqZLgwhc4xu3bEhZqEE9CGOlmAL05LAQAiAQqqG03TlehRsB56aUZDL1wSSciB/qhbk0bEwA/iPUixHcbJZqnuozRFZKu0NVMSfJz63gn4M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790595413; c=relaxed/simple;
-	bh=T5IbdwHsw/qD2EPA4qspcbLgg6+Q2R18K4Hca4xmGAI=;
-	h=From:Content-Type:Mime-Version:Subject:Message-Id:Date:Cc:To; b=kNV18FcQ3w6Li3rK91zJWaK1NvkF5qF21nLIq72m2Cg1CTWf6Jq7Nn95YwBgaBAlVa5ind0hGP/F3/y69O3Bx9D/r5i35wAkMqOvqBEGGTxKf6uQkFnTPM0BOqVBQR5h7tgqdLCP0AIFdbgvGPJc+wAw43FFiElUMZQ3RmTCPI4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn; spf=pass smtp.mailfrom=stu.pku.edu.cn; dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b=A6miKgX7; arc=none smtp.client-ip=101.71.155.101
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=stu.pku.edu.cn
+	s=arc-20240116; t=1790650499; c=relaxed/simple;
+	bh=2aVL+SXZI14MPqWr4ZREBusaGXB8h3+E5VS6tDB5C6E=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=E3xzkU74D8dN/ymq0E4h9R5WO6nnRld7OHPGPt/TTyZp6yzrvoPbXqdD5gPVVHowt1xSkI5x/s5BqaAjbGWO3U71f9OyIwlM6zFqXchW2TUR525TtWeyj0TLoMi+rihIpG+kIOMxRzAQiiPghMQhc+Dvl+pdBvBdDEu5sS4SCtI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=Wq7eCyF5; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=OuqOJLdR; arc=none smtp.client-ip=202.12.124.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b="A6miKgX7"
-Received: from smtpclient.apple (unknown [IPV6:240e:305:1b9d:c000:658d:22e4:fce7:420c])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4f5ac1a9f;
-	Mon, 28 Sep 2026 19:36:40 +0800 (GMT+08:00)
-From: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="Wq7eCyF5";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="OuqOJLdR"
+Received: from phl-compute-12.internal (phl-compute-12.internal [10.202.2.52])
+	by mailfout.stl.internal (Postfix) with ESMTP id 42A101D00125;
+	Mon, 28 Sep 2026 22:54:49 -0400 (EDT)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-12.internal (MEProxy); Mon, 28 Sep 2026 22:54:49 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to; s=fm1; t=1790650489; x=1790736889; bh=8IJSf5/6Ks
+	2blZlCFNMgZrCOrzB80hMogn3HmQlwUPI=; b=Wq7eCyF5bR2gxwEA6Cpu5zvWJI
+	7yaUSFhpPpkmqdmX0i4kiW5brwthzuxMjhdE29yDS+4ohjiPHLXOXS45EmFFT1Nx
+	s8cwJUYXSdDAP3urqmVhWu30A5cS90Wv/gpmKNOZ92RFzDbpglapkpVQ6H8h0UoY
+	Y6M5R1jGhLMYPe7CTyQOdbpU4xBtuQv0gwHWeBXZy0opb0iIXjWZUxDfztrgS0Dn
+	T9Bc7TWYC7jsbPgMbofW+6B8ZP6t9LHi26QPV4PSeNaJyA1aQUio/KwywQEMvwQI
+	oeRI0wfwY32Hfs6L07/MxKpXHSFXdpXUVJMHhVM00DkrZriXc8LTPWoc6ASw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:date:date:feedback-id:feedback-id:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1790650489; x=1790736889; bh=8IJSf5/6Ks2blZlCFNMgZrCOrzB8
+	0hMogn3HmQlwUPI=; b=OuqOJLdRLM6GrkUphVbQV3KUL6hFUPRgwEcONi7Iwm4a
+	2Oh0rzGqelPBUL8CHLELsfU3r6fngsawhnrLWwq3c92+9Ie/FnRKUTVw/H4lSAZt
+	7ZX8+6ws6zPGqS0wOwpI8PyU9SK9LbAcPp8ClJKYhBBREa0Ny+L+56b/NSMPdNvZ
+	azBzbukhE4Nrdv9/fRYJa7uyAHCs/X7+Y/bgHbIRgquoxf1MOAfIYv6HCGX0tOG7
+	b8ZIJ4qxw51J+5FS8LyIKx38FegBalqKotSIpE25sclQyJesCjO5ACyhif1cia7c
+	1NKTs008N/4POCs3gl9RhjM5r6FyJ2GtoHViC8AiIg==
+X-ME-Sender: <xms:eCi7amhYeyCYNioCdQhVotlfyycf7o9V_JSCbpAeLFEzKMW8mcr80g>
+    <xme:eCi7alSaSrht3uH5zOhdkToL-GbbF1kOpkgaD551FuH5JgN5Yx6kjf-JmbfGJsa_z
+    Q2tyU8uEa0hO5hHq7LC3xXac8yuEFPUAdMMm6hBCIU8tIkryGE>
+X-ME-Received: <xmr:eCi7anZxKZOwFqIkVn1qBBgarlOFExNwMP3isMAn2TA-TOW-btgVN3INrAYEC10r0H5sdEtOGQT5yoEkzpsrSjj9qCTa-L0>
+X-ME-Proxy-Cause: dmFkZTGa2GvpI0ntFIbOm4Ru6H4+Fc+J5+lg/jma+v3/7ggCRky6+zkaIHlc+Xr3emvaCz
+    g1sfb0PCjRLePWBfFIzFi4+78xQ8tgJ981GHS8YwZEBeekIsID3CIEwAKDSCP1wyJb+0d2
+    pjHZOIK9w/OUyq9nfQAyg6fkaFHHbtTtRpIrjsNJRWk95NGzxpv/sMAVO993w+p6Folj9M
+    S2RzWVToOb7atYVPNFUqSnMTjWQN2xh+6j9FGUl+bOGggCPy7B85VA+pasI1L576WU/8wS
+    o7HnjE+YxRfOrw5YA7r+hz/UJi6E+ZLeo8kRKmR7AbR6+XN9UN8Oo+1F6tJi3jRF+BeFfT
+    0NjmMTRZgmW+Qd7reu95g3vfgydWHhqNlHznoAZwrEdDW+pBnJlEXlsVuJhGcF80xoxwCd
+    or4QtEfHDAdT1dt55eCRBQe7i2f7f2Bi1X6PFLXdxJ5GiGiL3Dy85qwa95uu/jFtHdF+qM
+    +CvkYJodv65HaGcortT15BzVSLwF7V7E2fiauojaxcix5c3AaeRcfQD0JzvUTBScbtKxd3
+    xrhi0UDx2PgJdx905IaGprDGLmzscGKOAr/K1yLGMl/jtCiQ+QKYVzEwU8SalAd2oK007h
+    hDjXNi9t5siy6htZUxmryUPiv8Rv9LW/eIm11+DYMtFmrOArSt2I9EuFOa0A
+X-ME-Proxy: <xmx:eCi7aiQmQsh-QSaeuoVmX9CrfAZu8omp1KsRtAaYlU9zV63TUaylQw>
+    <xmx:eCi7am-waePWXw9iIa9D59kccs8RmRRA7w0QkXxrFEKU_r80rheLTw>
+    <xmx:eCi7aihECW4O7uZPJaQpMcGyKsmvaWnFHUNWDZAWLR_c-1wsw0se6Q>
+    <xmx:eCi7anYuX3o_mBFHnQZkIUwiZQ_KfFG_Q7NtIv7JkxP0XC9ZDDdJ9Q>
+    <xmx:eSi7asWuMhIIYyVzuDclAGynF54FFHZhfwFxcetHA31p8g1iUlpz-uxf>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 28 Sep 2026 22:54:45 -0400 (EDT)
+From: NeilBrown <neilb@ownmail.net>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	Alexander Viro <viro@zeniv.linux.org.uk>,
+	Christian Brauner <brauner@kernel.org>
+Cc: Jeff Layton <jlayton@kernel.org>,
+	Jan Kara <jack@suse.cz>,
+	linux-fsdevel@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 0/3] cephfs: prepare for changes to VFS locking
+Date: Tue, 29 Sep 2026 12:47:38 +1000
+Message-ID: <20260929025331.1436824-1-neilb@ownmail.net>
+X-Mailer: git-send-email 2.50.0.107.gf914562f5916.dirty
+Reply-To: NeilBrown <neil@brown.name>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.11\))
-Subject: [PATCH] ceph: bound the mon command wait
-Message-Id: <7412F740-8826-4790-8BEC-A590DB2BC2E4@stu.pku.edu.cn>
-Date: Mon, 28 Sep 2026 19:36:30 +0800
-Cc: ceph-devel@vger.kernel.org,
- linux-kernel@vger.kernel.org,
- stable@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>,
- Alex Markuze <amarkuze@redhat.com>,
- Viacheslav Dubeyko <slava@dubeyko.com>
-X-Mailer: Apple Mail (2.3901.100.1.1.11)
-X-HM-Tid: 0aa0e7cd833703a1kunmf2fcd2451f9292
-X-HM-MType: 10
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVkZT0pOVh4ZSxpPSh4fTktOTVYeHw
-	5VEwETFhoSFyQUDg9ZV1kYEgtZQVlJT0seQUhLTkFKGUIfQRhLS0tBTU5DH0FJSR5PQR0YHkxBT0
-	lLGFlXWRYaDxIVHRRZQVlPS0hVSktJSE5DQ1VKS0tVS1kG
-DKIM-Signature: a=rsa-sha256;
-	b=A6miKgX7OzTI5CY4V5dDBmqXRySp2CFYQoCBiD8wHLF+Oq4KdzRUVacZfODfltptUSluGh+XA/iNnCMP4L9KEaro/9hhJSTRMttOxUiaZdY2dLyAMjLqrH9kCyJBl1qVR+2JLjPHM6WfNK4zr4SMhZAZ9svb/0AuklXUWlRkU1c=; c=relaxed/relaxed; s=default; d=stu.pku.edu.cn; v=1;
-	bh=TvKf7SSMp0T++430PIKppvqUMsgRV/+IYvLvPLLFBgI=;
-	h=date:mime-version:subject:message-id:from;
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-ceph_update_snap_trace() reacts to a corrupted snap trace by fencing
-the mount and blocklisting the client through ceph_monc_blocklist_add().
-That issues the "osd blocklist add" mon command and waits for the reply
-synchronously, from the messenger dispatch path, with session->s_mutex
-held.  Dispatch runs in a kworker, where no signal will ever arrive,
-and the wait has no timeout: a monitor that doesn't reply leaves that
-worker asleep holding the mutex for good.  ceph_cap_release_work() and
-anything else queued behind the session mutex pile up on it, and the
-WARN(1, "...do remount to continue") that is supposed to tell the admin
-to remount sits after the wait and never runs.
+I am working on changes to directory locking.  The medium term goal is
+to lift d_alloc_parallel() locking above i_rwsem, so d_alloc_paralle()
+can be run unlocked, and consequently cannot be called when ->i_rwsem is
+held.
 
-Bound the mon command wait with CEPH_MONC_PING_TIMEOUT (30s).  That is
-already how long an unanswered monitor keepalive may last before the
-session is reopened.  On timeout the existing error handling takes
-over: the blocklist failure is reported, the warning is issued and the
-mount stays fenced, so the admin can remount as intended.
+The requires:
+ 1/ that d_alloc_parallel() not be called while i_rwsem is held and also
+    that d_alloc()/d_splice_alias() not be used (unless the filesystems
+    doesn't support creating objects).
+    cephfs uses d_alloc()/d_splice_alias() when priming the dcache from
+    the results of readdir.  A new interface d_alloc_trylock()
+    is now available and can be used instead.
 
-The blocked worker on the unpatched kernel, trimmed:
+ 2/ a dentry must not be d_drop()ed while an operation is ongoing, as an
+    unlocked d_alloc_parallel() would then be able to create a new
+    dentry with the same name.  cephfs calls d_drop() in couple of places
+    before d_splice_alias() but this is no longer needed as d_splice_alias()
+    handles spliced aliases now.
 
-INFO: task kworker/0:1:11 blocked for more than 10 seconds.
-Workqueue: ceph-msgr ceph_con_workfn
-Call Trace:
- <TASK>
- __schedule+0x1850/0x4a80
- schedule+0x7a/0x1f0
- schedule_timeout+0x217/0x250
- __wait_for_common+0x2af/0x460
- wait_for_completion_interruptible+0x1f/0x40
- wait_generic_request+0x1f/0x270
- do_mon_command+0x4b6/0x600
- ceph_monc_blocklist_add+0x88/0x1a0
- ceph_update_snap_trace+0x222/0x3420
- ceph_con_process_message+0x1e5/0x270
- [...]
- </TASK>
+Patch 3/3 isn't strictly needed here but I'd like to deprecate d_add()
+in favour of d_splice_alias() as the latter now does everything the
+former can do.  So the last patch removes uses of d_add() from fs/ceph.
 
-INFO: task kworker/0:0:9 blocked for more than 10 seconds.
-Workqueue: ceph-cap ceph_cap_release_work
- mutex_lock+0xce/0xe0
- [...]
+The patches depend on patches recently added to the vfs tree.  I would
+prefer these land in that tree too with an Acked-by or similar from cifs
+maintainers.
 
-With the watchdog set to panic this ends in "Kernel panic - not
-syncing: hung_task: blocked tasks"; with the production defaults it
-just stays there.  With this patch the same run prints:
+Thanks,
+NeilBrown
 
-ceph: [client 1]: error -5
-ceph: [client 1]: failed to blocklist ...: -110
-[client.1] ceph_update_snap_trace do remount to continue after corrupted =
-snaptrace is fixed
-WARNING: fs/ceph/snap.c:926 at ceph_update_snap_trace+0x2d1/0x3420
-
-(thirty seconds after the snap trace error) and the pending requests
-on the fenced mount fail instead of hanging.
-
-Verified on 7.3-rc4-00537-ga3ff15db6820 with only this change applied:
-the blocklist failure and the warning arrive thirty seconds after the
-snap trace error, and the blocked worker returns.  An unresponsive
-monitor plus a corrupted snap trace used to wedge the mount for good;
-when the wait expires the blocklist attempt returns -ETIMEDOUT, the
-warning fires and the mount stays fenced until remount.
-
-Fixes: a68e564adcaa6 ("ceph: blocklist the kclient when receiving =
-corrupted snap trace")
-Signed-off-by: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
----
- net/ceph/mon_client.c | 27 ++++++++++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
-
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index c56457378d00e..435c7f851ab26 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -705,6 +705,24 @@ static int wait_generic_request(struct =
-ceph_mon_generic_request *req)
- 	return ret;
- }
-=20
-+static int wait_generic_request_timeout(struct ceph_mon_generic_request =
-*req,
-+					unsigned long timeout)
-+{
-+	long ret;
-+
-+	dout("%s greq %p tid %llu\n", __func__, req, req->tid);
-+	ret =3D =
-wait_for_completion_interruptible_timeout(&req->completion,
-+							timeout);
-+	if (ret =3D=3D 0)
-+		ret =3D -ETIMEDOUT;
-+	if (ret < 0) {
-+		cancel_generic_request(req);
-+		return ret;
-+	}
-+
-+	return req->result; /* completed */
-+}
-+
- static struct ceph_msg *get_generic_reply(struct ceph_connection *con,
- 					 struct ceph_msg_header *hdr,
- 					 int *skip)
-@@ -1006,7 +1024,14 @@ int do_mon_command_vargs(struct ceph_mon_client =
-*monc, const char *fmt,
- 	send_generic_request(monc, req);
- 	mutex_unlock(&monc->mutex);
-=20
--	ret =3D wait_generic_request(req);
-+	/*
-+	 * ceph_monc_blocklist_add() runs from messenger dispatch, in a
-+	 * kworker, with session->s_mutex held.  No signal arrives =
-there.
-+	 * CEPH_MONC_PING_TIMEOUT is how long an unanswered monitor
-+	 * keepalive may last before the session is reopened; use that
-+	 * so this worker cannot sleep for good.
-+	 */
-+	ret =3D wait_generic_request_timeout(req, =
-CEPH_MONC_PING_TIMEOUT);
- out:
- 	put_generic_request(req);
- 	return ret;
---=20
-2.43.0=
+ [PATCH 1/3] cephfs: Use d_alloc_trylock() in
+ [PATCH 2/3] cephfs: Don't d_drop() before d_splice_alias()
+ [PATCH 3/3] cephfs: stop using d_add()
