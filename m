@@ -1,111 +1,133 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mail-m49197.qiye.163.com (mail-m49197.qiye.163.com [45.254.49.197])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1B7D282F2A;
-	Wed, 30 Sep 2026 01:59:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4B2A78F3A;
+	Wed, 30 Sep 2026 07:09:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.197
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790733594; cv=none; b=ZkvpXrQeofqXryqhWibGLPcsO7ZLWG1pHsOLPoFQEDgBeJzLIhrFIwdWXOmJ9vTSnKPubP9QPCuG7gwhxGepJM4TpTyC3Tt1r2pRd61tfS5eMf2ZDnJ6H8Z/w2AR1qAW2rJv7yi9ogWARYxr9DsEaynuwMpeic0kP6PKAsVJFW8=
+	t=1790752204; cv=none; b=MonIngzqY5UrhBrXXBwWhwLoYC4FIgCKiz1MrwLqAxRia6EXQuVX4u5iwt2hXngav9ZmPRzfb4LbsUeR9R3+O8je5VdURWhAz3De1pPqN4uCX93R5+Xpvx85moLjDuMySz1YzZ1cvj2PIQGRsS5LPY6nsDdW2BJ/cIwdojaBReQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790733594; c=relaxed/simple;
-	bh=1XZfKocU/lN5GfPuRrDk1+Frer+DxmS5rdeBz68W3/4=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=M8iRlLN4SbH19AbPui6B/x7sCHntBq1/a1v6Ue8lFquWiEN4T0faOO2zjy60TpQB+avn1bnG63o3ZpUz4DnuCPq4qZWHgVa1t/39gapGq1sSlaGvC5Wc6Gwlq2qJXHmz8MHVnd1JAiYMlVN+4AgI/CbBjixYynOMz3sCizcF5G4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O1welR2X; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790752204; c=relaxed/simple;
+	bh=MDPDxXr/HwSX2pavh2LwYaCQfmqbvXG0OAX42Imozoc=;
+	h=From:Content-Type:Mime-Version:Subject:Message-Id:Date:Cc:To; b=Gcmg1GgCBZFMBbqWZ52gltxe++ZmoYsBV2N4OlDPzcTXzQLevaP4sSw3h9hPPjudXouc0SseaZeMQk+1JBV15ZMpg99SOFUeNRyiG2AMcJKP7UZszQ5uPOmmD/KmerxtP1vhcNJXUhbA0IWC0leODSaSiyjKfGUJvz3l+1Y02cA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn; spf=pass smtp.mailfrom=stu.pku.edu.cn; dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b=DzfevVMI; arc=none smtp.client-ip=45.254.49.197
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=stu.pku.edu.cn
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O1welR2X"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 530171F000FF;
-	Wed, 30 Sep 2026 01:59:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790733593;
-	bh=DX9g4ivFVPNTKG/kBEx/zUz96+yiO19hM2X9UAqzp0o=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References;
-	b=O1welR2XYxDBYcQMymrp8H6LU8yzVjVEsXTqj+hE3Y6d384E20FR9whrky/Hlyvq8
-	 PJBgrnmt0uwt8QYwPmssrtdWFnj9TlvpkUOcLju5O3FJ9+ZO1qq4A3RQp9kbPSJ3JI
-	 AQvB1zRp2pyQRux8QZ6NS1/NHs7TRz8Ec101/R5TwolVHbJdIOa6AehLEpMX9RzcYp
-	 0/12MShIxqBagJhTZ5n1HD9WpixNqk7ruvokk+tWP/ZJLFstOnlRPsEKrX2BtUpdlO
-	 JsTn+twh2/J6S5QCngwhB61nx+6Ifhk+jqBTPr//Obogdmns5GmWCsQY5R9XKfbPgj
-	 PklpO8bvU1b8g==
-Message-ID: <3453cad85b6ec1d3b36398ba7565d053163a5929.camel@kernel.org>
-Subject: Re: [PATCH v3 net-next 4/9] rds: use sk_set_nospace()
-From: Allison Henderson <achender@kernel.org>
-To: Eric Dumazet <edumazet@kernel.org>, "David S . Miller"
- <davem@davemloft.net>,  Jakub Kicinski <kuba@kernel.org>, Paolo Abeni
- <pabeni@redhat.com>
-Cc: Simon Horman <horms@kernel.org>, Neal Cardwell <ncardwell@google.com>, 
- Kuniyuki Iwashima <kuniyu@google.com>, edumazet@google.com,
- netdev@vger.kernel.org, Alexander Aring <aahringo@redhat.com>, David
- Teigland <teigland@redhat.com>,  gfs2@lists.linux.dev, John Fastabend
- <john.fastabend@gmail.com>, Jakub Sitnicki <jakub@cloudflare.com>, Sabrina
- Dubroca <sd@queasysnail.net>, Jiayuan Chen <jiayuan.chen@linux.dev>,
- Matthieu Baerts <matttbe@kernel.org>, Mat Martineau <martineau@kernel.org>,
- Geliang Tang <geliang@kernel.org>,  mptcp@lists.linux.dev, Wen Gu
- <guwen@linux.alibaba.com>, Dust Li <dust.li@linux.alibaba.com>, "D. Wythe"
- <alibuda@linux.alibaba.com>, Chuck Lever <cel@kernel.org>, Jeff Layton
- <jlayton@kernel.org>, NeilBrown <neil@brown.name>, Olga Kornievskaia
- <okorniev@redhat.com>, Dai Ngo <Dai.Ngo@oracle.com>, Tom Talpey
- <tom@talpey.com>, Trond Myklebust <trondmy@kernel.org>, Anna Schumaker
- <anna@kernel.org>, linux-nfs@vger.kernel.org,  rds-devel@oss.oracle.com,
- Philipp Reisner <philipp.reisner@linbit.com>, Lars Ellenberg
- <lars.ellenberg@linbit.com>, Christoph =?ISO-8859-1?Q?B=F6hmwalder?=
- <christoph.boehmwalder@linbit.com>, Jens Axboe <axboe@kernel.dk>, 
- drbd-dev@lists.linux.dev, Keith Busch <kbusch@kernel.org>, Christoph
- Hellwig <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>, Chaitanya Kulkarni
- <kch@nvidia.com>, linux-nvme@lists.infradead.org, Ilya Dryomov
- <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, Viacheslav
- Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org
-Date: Tue, 29 Sep 2026 18:59:50 -0700
-In-Reply-To: <20260929071743.23624-5-edumazet@kernel.org>
-References: <20260929071743.23624-1-edumazet@kernel.org>
-	 <20260929071743.23624-5-edumazet@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+	dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b="DzfevVMI"
+Received: from smtpclient.apple (unknown [124.126.139.86])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 4f9bbcb4a;
+	Wed, 30 Sep 2026 15:09:55 +0800 (GMT+08:00)
+From: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
+Content-Type: text/plain;
+	charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.52.3-0ubuntu1.1 
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.11\))
+Subject: [PATCH] ceph: fail readdir when the MDS reply carries no dirfrag
+Message-Id: <912FC30C-9C0A-4D68-A49C-A13CE6C9DE8E@stu.pku.edu.cn>
+Date: Wed, 30 Sep 2026 15:09:45 +0800
+Cc: ceph-devel@vger.kernel.org,
+ linux-kernel@vger.kernel.org,
+ stable@vger.kernel.org,
+ "Yan, Zheng" <zheng.z.yan@intel.com>,
+ Sage Weil <sage@inktank.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+ Alex Markuze <amarkuze@redhat.com>,
+ Viacheslav Dubeyko <slava@dubeyko.com>
+X-Mailer: Apple Mail (2.3901.100.1.1.11)
+X-HM-Tid: 0aa0f12603cc03a1kunma877d13626e267
+X-HM-MType: 10
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVkaGklJVkJLQk5KQ08ZSElKT1YeHw
+	5VEwETFhoSFyQUDg9ZV1kYEgtZQVlKSU9VSklNVUpIQlVDTVlXWRYaDxIVHRRZQVlPS0hVSktISk
+	5MTlVKS0tVSkJLS1kG
+DKIM-Signature: a=rsa-sha256;
+	b=DzfevVMIlYUbfrU6/K6EgwiBU51vM473Pg3KLCxnO8SjA6hjUOh6vxOO8JqB0fXfWryr1pIZlzB0JlDFy5Q9fM5fhjExM2k1tBuJQgnDaybPet8oPglv1bNeOg8l0J7o8ZZw3gJ3xmLCu8lGjWoA9+tZ6QwEbCXxYA6XqWXgzJ0=; c=relaxed/relaxed; s=default; d=stu.pku.edu.cn; v=1;
+	bh=AkwvRPb3tHKPXkrgdAG82shJ9QGp21uHFh511UI8vbc=;
+	h=date:mime-version:subject:message-id:from;
 
-On Tue, 2026-09-29 at 07:17 +0000, Eric Dumazet wrote:
-> Use the new helpers instead of open coding the SOCK_NOSPACE
-> manipulation, so that TCP can later maintain a cheaper private
-> copy of this bit.
->=20
-> No functional change intended.
->=20
-> Reviewed-by: Kuniyuki Iwashima <kuniyu@google.com>
-> Signed-off-by: Eric Dumazet <edumazet@kernel.org>
+A ceph mount oopses in ceph_readdir() when the MDS answers a READDIR
+request with a reply whose extra blob is empty.  parse_reply_info()
+skips reply blobs whose length is zero, so parse_reply_info_readdir()
+never runs, r_reply_info.dir_dir stays NULL, and the reply still
+parses as successful.  ceph_mdsc_do_request() returns 0 and
+ceph_readdir() then reads rinfo->dir_dir->frag with no NULL check:
 
-Thank you!
-Acked-by: Allison Henderson <achender@kernel.org>
+	/* extra */
+	ceph_decode_32_safe(&p, end, len, bad);
+	if (len > 0) {
+		...
+		err =3D parse_reply_info_extra(&p, p + len, req, =
+features, s);
+		...
+	}
 
-> ---
->  net/rds/tcp_send.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
->=20
-> diff --git a/net/rds/tcp_send.c b/net/rds/tcp_send.c
-> index 7c52acc749cf4d4003c749a2646c2b4f87f207fe..824222c475119d91e333123c5=
-afc9291005a8696 100644
-> --- a/net/rds/tcp_send.c
-> +++ b/net/rds/tcp_send.c
-> @@ -100,7 +100,7 @@ int rds_tcp_xmit(struct rds_connection *conn, struct =
-rds_message *rm,
-> =20
->  	if (hdr_off < sizeof(struct rds_header)) {
->  		/* see rds_tcp_write_space() */
-> -		set_bit(SOCK_NOSPACE, &tc->t_sock->sk->sk_socket->flags);
-> +		sk_set_nospace(tc->t_sock->sk);
-> =20
->  		ret =3D rds_tcp_sendmsg(tc->t_sock,
->  				      (void *)&rm->m_inc.i_hdr + hdr_off,
-> @@ -221,6 +221,5 @@ void rds_tcp_write_space(struct sock *sk)
->  	 */
->  	write_space(sk);
-> =20
-> -	if (sk->sk_socket)
-> -		set_bit(SOCK_NOSPACE, &sk->sk_socket->flags);
-> +	sk_set_nospace(sk);
->  }
+The oops on v7.3.0-rc4-00537-ga3ff15db6820, one getdents64(2) on the
+mount root after an ms_mode=3Dlegacy mount, trimmed:
+
+BUG: KASAN: null-ptr-deref in range =
+[0x0000000000000000-0x0000000000000007]
+Oops: general protection fault, probably for non-canonical address =
+0xdffffc0000000000: 0000 [#1] SMP KASAN NOPTI
+CPU: 1 UID: 0 PID: 266 Comm: ls Tainted: G                 N  =
+7.3.0-rc4-00537-ga3ff15db6820 #1 PREEMPT(lazy)
+RIP: 0010:ceph_readdir+0xbff/0x3ea0
+Call Trace:
+ <TASK>
+ ? __pfx_ceph_readdir+0x10/0x10
+ wrap_directory_iterator+0xa2/0xe0
+ iterate_dir+0x1da/0x5d0
+ __x64_sys_getdents64+0x13b/0x2a0
+ do_syscall_64+0xdd/0x4a0
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+ </TASK>
+
+The unconditional frag read came in with 81c6aea5275ea ("ceph: handle
+frag mismatch between readdir request and reply"), so the bug is old.
+
+Treat a reply with no dirfrag as a protocol violation: warn once,
+drop the request and return -EIO, the same way ceph_readdir() already
+handles the two malformed-reply cases later in the function.
+
+Tested on v7.3.0-rc4-00537-ga3ff15db6820 (KASAN).  Unpatched, the
+getdents64(2) above takes the machine down (oops=3Dpanic) on the first
+READDIR reply.  With the patch it warns once and getdents64(2)
+returns -EIO, no oops, no hang.  A conformant reply for an empty
+directory =E2=80=94 dirfrag present, zero entries, =
+FRAG_END|FRAG_COMPLETE =E2=80=94
+still lists "." and ".." and returns EOF on both kernels, so normal
+readdir behavior is unchanged.  The oops is still present in
+v7.3-rc5 (72d3fcf802c45).
+
+Fixes: 81c6aea5275ea ("ceph: handle frag mismatch between readdir =
+request and reply")
+Cc: stable@vger.kernel.org
+Signed-off-by: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
+---
+ fs/ceph/dir.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 2e5c0ccb1b346..d7d48d3c3baf0 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -466,6 +466,10 @@ static int ceph_readdir(struct file *file, struct =
+dir_context *ctx)
+ 		      (int)req->r_reply_info.hash_order);
+=20
+ 		rinfo =3D &req->r_reply_info;
++		if (WARN_ON_ONCE(!rinfo->dir_dir)) {
++			ceph_mdsc_put_request(req);
++			return -EIO;
++		}
+ 		if (le32_to_cpu(rinfo->dir_dir->frag) !=3D frag) {
+ 			frag =3D le32_to_cpu(rinfo->dir_dir->frag);
+ 			if (!rinfo->hash_order) {
+--=20
+2.43.0
 
