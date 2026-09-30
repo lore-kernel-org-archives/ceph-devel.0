@@ -1,133 +1,252 @@
-Received: from mail-m49197.qiye.163.com (mail-m49197.qiye.163.com [45.254.49.197])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4B2A78F3A;
-	Wed, 30 Sep 2026 07:09:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.197
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD6704D1787
+	for <ceph-devel@vger.kernel.org>; Wed, 30 Sep 2026 12:53:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790752204; cv=none; b=MonIngzqY5UrhBrXXBwWhwLoYC4FIgCKiz1MrwLqAxRia6EXQuVX4u5iwt2hXngav9ZmPRzfb4LbsUeR9R3+O8je5VdURWhAz3De1pPqN4uCX93R5+Xpvx85moLjDuMySz1YzZ1cvj2PIQGRsS5LPY6nsDdW2BJ/cIwdojaBReQ=
+	t=1790772800; cv=none; b=DbYfjizivA0Tun6EyldYqzAp5wy409HrD1uaSCN7mr7vp1zGFVEXz3xWRccSrlMsQgOi59bm2PH4dezXhM43FoE3Z9K8Nl7CTKTeY1n6+naNedOu+BC1z4JV/uyBLZqftdngHK3jox5D6N829jATY3qL1k0OaHUlts9LgZj0c5g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790752204; c=relaxed/simple;
-	bh=MDPDxXr/HwSX2pavh2LwYaCQfmqbvXG0OAX42Imozoc=;
-	h=From:Content-Type:Mime-Version:Subject:Message-Id:Date:Cc:To; b=Gcmg1GgCBZFMBbqWZ52gltxe++ZmoYsBV2N4OlDPzcTXzQLevaP4sSw3h9hPPjudXouc0SseaZeMQk+1JBV15ZMpg99SOFUeNRyiG2AMcJKP7UZszQ5uPOmmD/KmerxtP1vhcNJXUhbA0IWC0leODSaSiyjKfGUJvz3l+1Y02cA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn; spf=pass smtp.mailfrom=stu.pku.edu.cn; dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b=DzfevVMI; arc=none smtp.client-ip=45.254.49.197
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=stu.pku.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=stu.pku.edu.cn
+	s=arc-20240116; t=1790772800; c=relaxed/simple;
+	bh=B7xG+aQYDK86UXE3XPqHVl/NYCscZ0PsgSv3PpmhsP4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=dGeTeCKqHIKsF3E057seyxbJ+aVZBEYKMzVwaVgT5uw1ZYi9ATuXKR2/t1ZdajWqw9pr4J0IonYZwhR17arGLnVO6IYADDg6eL5Znj3yT49xte3rK1/tcybgDPcsfXsqgdQVgHGaO3sr2QgwHobO0QWwjpSd1jrDFGhqRgNhJz8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dDuGlOqI; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=stu.pku.edu.cn header.i=@stu.pku.edu.cn header.b="DzfevVMI"
-Received: from smtpclient.apple (unknown [124.126.139.86])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 4f9bbcb4a;
-	Wed, 30 Sep 2026 15:09:55 +0800 (GMT+08:00)
-From: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
-Content-Type: text/plain;
-	charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dDuGlOqI"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1790772785;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=nVFUXCDetrutGMr/TSlAC1L9g7la/tYoO/yvXUUcUHM=;
+	b=dDuGlOqIlPyz6q1pVZM1efRN8S0yeFuZ3cDDQYnPWoRmtZccFFudMVXfGF82qE00c5nS6V
+	B0bSSDxVMdWTIdPssMuvQZOlsoS2qF8YntjdtXhG3ZMVE6dDAKr+oA/gdFCqsdFQEPFnzU
+	iPIc+fqWtRR0wWpbtPmTXoIbwEFo1BU=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-481--GF_FqMMPOSdygku3Jfcyg-1; Wed,
+ 30 Sep 2026 08:53:01 -0400
+X-MC-Unique: -GF_FqMMPOSdygku3Jfcyg-1
+X-Mimecast-MFC-AGG-ID: -GF_FqMMPOSdygku3Jfcyg_1790772779
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 2FC6E19540DC;
+	Wed, 30 Sep 2026 12:52:58 +0000 (UTC)
+Received: from warthog.com (unknown [10.44.32.54])
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 84CDF1800361;
+	Wed, 30 Sep 2026 12:52:50 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	Matthew Wilcox <willy@infradead.org>,
+	Namjae Jeon <linkinjeon@kernel.org>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Stefan Metzmacher <metze@samba.org>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v14 00/10] netfs, iov_iter: Use a chain of bio_vec arrays instead of folio_queue
+Date: Wed, 30 Sep 2026 13:52:35 +0100
+Message-ID: <20260930125247.3232130-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.11\))
-Subject: [PATCH] ceph: fail readdir when the MDS reply carries no dirfrag
-Message-Id: <912FC30C-9C0A-4D68-A49C-A13CE6C9DE8E@stu.pku.edu.cn>
-Date: Wed, 30 Sep 2026 15:09:45 +0800
-Cc: ceph-devel@vger.kernel.org,
- linux-kernel@vger.kernel.org,
- stable@vger.kernel.org,
- "Yan, Zheng" <zheng.z.yan@intel.com>,
- Sage Weil <sage@inktank.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
- Alex Markuze <amarkuze@redhat.com>,
- Viacheslav Dubeyko <slava@dubeyko.com>
-X-Mailer: Apple Mail (2.3901.100.1.1.11)
-X-HM-Tid: 0aa0f12603cc03a1kunma877d13626e267
-X-HM-MType: 10
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVkaGklJVkJLQk5KQ08ZSElKT1YeHw
-	5VEwETFhoSFyQUDg9ZV1kYEgtZQVlKSU9VSklNVUpIQlVDTVlXWRYaDxIVHRRZQVlPS0hVSktISk
-	5MTlVKS0tVSkJLS1kG
-DKIM-Signature: a=rsa-sha256;
-	b=DzfevVMIlYUbfrU6/K6EgwiBU51vM473Pg3KLCxnO8SjA6hjUOh6vxOO8JqB0fXfWryr1pIZlzB0JlDFy5Q9fM5fhjExM2k1tBuJQgnDaybPet8oPglv1bNeOg8l0J7o8ZZw3gJ3xmLCu8lGjWoA9+tZ6QwEbCXxYA6XqWXgzJ0=; c=relaxed/relaxed; s=default; d=stu.pku.edu.cn; v=1;
-	bh=AkwvRPb3tHKPXkrgdAG82shJ9QGp21uHFh511UI8vbc=;
-	h=date:mime-version:subject:message-id:from;
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
-A ceph mount oopses in ceph_readdir() when the MDS answers a READDIR
-request with a reply whose extra blob is empty.  parse_reply_info()
-skips reply blobs whose length is zero, so parse_reply_info_readdir()
-never runs, r_reply_info.dir_dir stays NULL, and the reply still
-parses as successful.  ceph_mdsc_do_request() returns 0 and
-ceph_readdir() then reads rinfo->dir_dir->frag with no NULL check:
+Hi Christian,
 
-	/* extra */
-	ceph_decode_32_safe(&p, end, len, bad);
-	if (len > 0) {
-		...
-		err =3D parse_reply_info_extra(&p, p + len, req, =
-features, s);
-		...
-	}
+Could you pull these patches please into your vfs-7.4.netfs branch?  This
+is the third of four (maybe five) batches, in this case replacing the
+folio_queue struct with a bvecq struct, and is based upon the
+aforementioned branch.  This was split from v11 of a larger netfslib
+series[1].  I've fixed some issues spotted by sashiko[5].
 
-The oops on v7.3.0-rc4-00537-ga3ff15db6820, one getdents64(2) on the
-mount root after an ms_mode=3Dlegacy mount, trimmed:
+This series adds a new type, struct bvecq.  This points to a bounded array
+of bio_vecs with information about how to clean up the memory they point
+to.  A number of bvecq structs can be linked together to form a chain and
+an iterator type, ITER_BVECQ, is provided that can be pointed at the chain
+and can walk it.  Netfslib is then switched to use the new type and
+folio_queue is removed along with ITER_FOLIOQ.
 
-BUG: KASAN: null-ptr-deref in range =
-[0x0000000000000000-0x0000000000000007]
-Oops: general protection fault, probably for non-canonical address =
-0xdffffc0000000000: 0000 [#1] SMP KASAN NOPTI
-CPU: 1 UID: 0 PID: 266 Comm: ls Tainted: G                 N  =
-7.3.0-rc4-00537-ga3ff15db6820 #1 PREEMPT(lazy)
-RIP: 0010:ceph_readdir+0xbff/0x3ea0
-Call Trace:
- <TASK>
- ? __pfx_ceph_readdir+0x10/0x10
- wrap_directory_iterator+0xa2/0xe0
- iterate_dir+0x1da/0x5d0
- __x64_sys_getdents64+0x13b/0x2a0
- do_syscall_64+0xdd/0x4a0
- entry_SYSCALL_64_after_hwframe+0x77/0x7f
- </TASK>
+This is intended as a more flexible replacement for struct folio_queue as
+the latter can only point to whole folios and cannot point to partial pages
+that might be extracted from an ITER_IOVEC/ITER_UBUF for direct or
+unbuffered I/O purposes.
 
-The unconditional frag read came in with 81c6aea5275ea ("ceph: handle
-frag mismatch between readdir request and reply"), so the bug is old.
+These patches make a more or less straight swap between struct folio_queue
+and struct bvecq.  The change is not quite trivial as the folio_queue
+struct contains a folio_batch struct and is basically a list of whole
+folios only, whereas the new bvecq struct is a chain of bio_vec arrays.
 
-Treat a reply with no dirfrag as a protocol violation: warn once,
-drop the request and return -EIO, the same way ceph_readdir() already
-handles the two malformed-reply cases later in the function.
+A further patchset will switch the netfslib unbuffered I/O code to using
+bvecqs and then the bvecqs will be passed down into the filesystem rather
+than passing an iterator.
 
-Tested on v7.3.0-rc4-00537-ga3ff15db6820 (KASAN).  Unpatched, the
-getdents64(2) above takes the machine down (oops=3Dpanic) on the first
-READDIR reply.  With the patch it warns once and getdents64(2)
-returns -EIO, no oops, no hang.  A conformant reply for an empty
-directory =E2=80=94 dirfrag present, zero entries, =
-FRAG_END|FRAG_COMPLETE =E2=80=94
-still lists "." and ".." and returns EOF on both kernels, so normal
-readdir behavior is unchanged.  The oops is still present in
-v7.3-rc5 (72d3fcf802c45).
+The primary reason behind making this change is so that bvecq chains can be
+used in the assembly of network filesystem messages.  Netfslib can furnish
+the filesystem with bvecq chains representing the data buffers that need to
+be read or written and then, for example, for a write RPC, the filesystem
+can add protocol headers and trailers onto the chain without the need to
+copy it and can also glue multiple buffers together to form compound
+operations and/or perform sparse operations.
 
-Fixes: 81c6aea5275ea ("ceph: handle frag mismatch between readdir =
-request and reply")
-Cc: stable@vger.kernel.org
-Signed-off-by: Yuanfu Xie <yuanfuxie@stu.pku.edu.cn>
----
- fs/ceph/dir.c | 4 ++++
- 1 file changed, 4 insertions(+)
+One option here is to add two more fields to the bvecq struct, one to
+increase the offset of the first bio_vec and one to decrease the length of
+the last, thereby allowing a bvecq struct to point at a slice of another
+bio_vec array without having to copy the array - but at the cost of adding
+one or two extra conditional ops when getting the offset or length of a
+segment.
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 2e5c0ccb1b346..d7d48d3c3baf0 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -466,6 +466,10 @@ static int ceph_readdir(struct file *file, struct =
-dir_context *ctx)
- 		      (int)req->r_reply_info.hash_order);
-=20
- 		rinfo =3D &req->r_reply_info;
-+		if (WARN_ON_ONCE(!rinfo->dir_dir)) {
-+			ceph_mdsc_put_request(req);
-+			return -EIO;
-+		}
- 		if (le32_to_cpu(rinfo->dir_dir->frag) !=3D frag) {
- 			frag =3D le32_to_cpu(rinfo->dir_dir->frag);
- 			if (!rinfo->hash_order) {
---=20
-2.43.0
+I have in-progress patch sets to rewrite the cifs transport[2] and the ceph
+and rbd transport[3] to make use of bvecq chains.  With the cifs transport,
+the idea is to extend the SMB message concept further up the stack and have
+the PDU creation routines attach individual RPC requests blobs that can
+then be automatically chained by the transport when a compound is being
+assembled for transmission.
+
+With the ceph transport, the idea is to convert all the different data
+containers it has into just passing around bvecqs.  These can then be
+chained together in order to transmit them.
+
+This improves efficiency in the TCP stack as we no longer need to cork the
+TCP socket, call sendmsg() multiple times and then uncork; rather we can
+preassemble the message in a bvecq chain and just send the entire messsage
+in one shot with a single sendmsg() and reduce the number of places doing
+loops.  This got an improvement in nfsd performance[4].
+
+I also have some changes on the TCP receive side for the cifs transport
+(which is also likely applicable to the ceph TCP transport) whereby the
+receive buffers are 'spliced' out into a bvecq in the cifs I/O thread
+rather than being copied.  Using a bvecq chain here is advantageous as we
+don't know in advance how many segments we're going to have.  This allows
+us firstly to avoid copying data with the socket lock held (thus holding up
+sendmsg) and secondly to avoid copying data in the I/O thread (copying can
+be offloaded to the app thread).  The last time I benchmarked this, it
+appeared to get fio reading tests on cifs a 5% speedup.
+
+Unfortunately, this doesn't help AFS much as that uses a UDP transport, but
+it might also help 9P, at least with its TCP transport.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-next-3
+
+Thanks,
+David
+
+Changes
+=======
+ver #14)
+- Fix issues from Sashiko[6]:
+  - In iter_bvecq_get_pages(), use folio_get() not get_pages.
+  - In netfs_read_set_unlock_at(), netfs_read_unlock_folios(),
+    netfs_pgpriv2_unlock_copied_folios() and
+    netfs_writeback_unlock_folios(), skip wholly unoccupied bvecqs.
+  - Remove some now-unused trace bits.
+
+ver #13)
+- Fix issues from Sashiko[5]:
+  - In iter_bvecq_get_pages(), need to add bv_offset when calling
+    want_pages_array().
+  - In iter_bvecq_get_pages(), make the getting of a ref on the page
+    dependent on the page being non-slab.
+  - In bvecq_alloc_one(), use mempool_alloc(), not
+     mempool_alloc_noreserve().
+  - In bvecq_expand_buffer(), don't apply __GFP_NORETRY|__GFP_WARN for
+    order 0 allocations.
+  - Drop the netfs_bv_slot tracepoint as it's not used in these patches.
+  - In afs_do_read_single(), afs_dir_get_block() and afs_do_read_symlink(),
+    use mapping_gfp_mask() rather than GFP_KERNEL.
+  - In netfs_writeback_single(), set ->submitted so that
+    netfs_wait_for_write() doesn't then just return -EIO.
+  - In netfs_unlock_abandoned_read_pages(), reset ->first_tail_slot when
+    moving on to next node.
+  - Remove netfs_folioq_trace(s) trace info enum and string set as their
+    tracepoint got removed.
+
+ver #12)
+- Split from v11 of "netfs: Keep track of folios in a segmented bio_vec[]
+  chain"[1]
+
+[1] https://lore.kernel.org/r/20260902173350.3468672-1-dhowells@redhat.com/
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=cifs-experimental
+[3] https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=ceph-iter
+[4] https://lore.kernel.org/netdev/168979108540.1905271.9720708849149797793.stgit@morisot.1015granger.net/
+[5] https://sashiko.dev/#/patchset/20260929075913.2740968-1-dhowells%40redhat.com
+[6] https://sashiko.dev/#/patchset/20260929103412.2807494-1-dhowells%40redhat.com
+
+David Howells (10):
+  Add a function to kmap one page of a multipage bio_vec
+  iov_iter: Add a segmented queue of bio_vec[]
+  netfs: Add some tools for managing bvecq chains
+  afs: Use a bvecq to hold dir content rather than folioq
+  cifs: Use a bvecq for buffering instead of a folioq
+  smbdirect: Support ITER_BVECQ in smbdirect_map_sges_from_iter()
+  netfs: Switch folioq to bvecq
+  smbdirect: Remove support for ITER_FOLIOQ from
+    smbdirect_map_sges_from_iter()
+  iov_iter: Remove ITER_FOLIOQ
+  netfs: Remove folio_queue
+
+ Documentation/core-api/folio_queue.rst      | 209 --------
+ Documentation/core-api/index.rst            |   1 -
+ Documentation/filesystems/netfs_library.rst |   2 +-
+ fs/afs/dir.c                                |  36 +-
+ fs/afs/dir_edit.c                           |  43 +-
+ fs/afs/dir_search.c                         |  33 +-
+ fs/afs/inode.c                              |   2 +-
+ fs/afs/internal.h                           |   6 +-
+ fs/afs/symlink.c                            |  38 +-
+ fs/netfs/Makefile                           |   1 +
+ fs/netfs/buffered_read.c                    |  34 +-
+ fs/netfs/bvecq.c                            | 346 +++++++++++++
+ fs/netfs/internal.h                         |   7 +-
+ fs/netfs/iterator.c                         |  33 +-
+ fs/netfs/main.c                             |  13 +-
+ fs/netfs/misc.c                             |  96 ----
+ fs/netfs/read_collect.c                     |  48 +-
+ fs/netfs/read_pgpriv2.c                     |  26 +-
+ fs/netfs/read_retry.c                       |  29 +-
+ fs/netfs/rolling_buffer.c                   | 189 +++----
+ fs/netfs/stats.c                            |   6 +-
+ fs/netfs/write_collect.c                    |  26 +-
+ fs/netfs/write_issue.c                      | 181 ++-----
+ fs/smb/client/cifsglob.h                    |   2 +-
+ fs/smb/client/smb2ops.c                     |  78 ++-
+ fs/smb/smbdirect/connection.c               | 135 +++--
+ include/linux/bvec.h                        |  18 +
+ include/linux/bvecq.h                       | 166 +++++++
+ include/linux/folio_queue.h                 | 282 -----------
+ include/linux/iov_iter.h                    |  87 ++--
+ include/linux/netfs.h                       |  14 +-
+ include/linux/rolling_buffer.h              |  42 +-
+ include/linux/uio.h                         |  17 +-
+ include/trace/events/netfs.h                |  37 +-
+ kernel/bpf/btf.c                            |   2 -
+ lib/iov_iter.c                              | 516 ++++++++++++++------
+ lib/scatterlist.c                           |  82 ++--
+ lib/tests/kunit_iov_iter.c                  | 131 +++--
+ 38 files changed, 1447 insertions(+), 1567 deletions(-)
+ delete mode 100644 Documentation/core-api/folio_queue.rst
+ create mode 100644 fs/netfs/bvecq.c
+ create mode 100644 include/linux/bvecq.h
+ delete mode 100644 include/linux/folio_queue.h
 
