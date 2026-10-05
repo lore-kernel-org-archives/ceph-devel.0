@@ -1,75 +1,67 @@
-Received: from mail-pj2-f13.google.com (mail-pj2-f13.google.com [74.125.227.141])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1865654707F
-	for <ceph-devel@vger.kernel.org>; Mon,  5 Oct 2026 00:19:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.141
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11F9336A01A
+	for <ceph-devel@vger.kernel.org>; Mon,  5 Oct 2026 07:12:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791159600; cv=none; b=a19Ar+eqwrZ/cZlCvKTNbuisuAxbqQt/tb/Ta3NVrZj8um0DCQJ2Xd5egfFIrB8+BKEJyT9hNIb8oJ+VNgZXOk1bsKw4B59MiYrgwsp2ot71jbFk9OZM4BJkx8KdqTqNuhTLjHXAbYESPhW4MvNlUROpTyx14zUKyCvTxdMXo+8=
+	t=1791184375; cv=none; b=FgixQz0LQbX4U995Dwj3o/juWwhDhAtn1Kfy4FIstjrGa4Mr/Ixcps3Yf9lNnmXVV9M3PFhBhGE9RsllRxEHEkO3dZCFoFF17S2fYBZ3cXOkjTxOX5IGQ6fUNdSI9dHReIK+b5GAhaq6Xg58wMCdYQUKhr0PS9bKUw9ref5Mlvk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791159600; c=relaxed/simple;
-	bh=/vqS67ZBm4z3Lyj7DyKHKo+hGK6JBe8Hby7kpXQmvhI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hBdt+BjnBy0BXnuEauve3cYZFZyoHplZI8zyE0fx8MwlY0nkZMfXif/ZgVpQmER+1cDrV0HyXMYoALoH+WpJvTo4ACwERN81bBDOxeG2QbczYbfNOp8rS2t7VkYYfn1HccisKkIYzR0ewlq8m3pj1ot9E/pI7aX4oTlcd64rjsw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ScXUzp5F; arc=none smtp.client-ip=74.125.227.141
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1791184375; c=relaxed/simple;
+	bh=0TFVNxlW3vvQr0CysToctEJKeYMjBvQLlIgyergyrlM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=b0NR46/XyrV74pPtmhB+B2IFKnG/5GXm2xegHXfG0Lu1PSLqZ1CABOZTxmIny/QnT8bmsOvbRMrHTAh1L7LO3LDPOePnYTDp6z+ISu6a2F33EDjIwp1y+LNHDl48m6IToE5Ttt9n9NWxTSso5QrT59dibp2HCs9ygwqvqjFVIf4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=T1+7FoiW; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ScXUzp5F"
-Received: by mail-pj2-f13.google.com with SMTP id d9443c01a7336-2d8fb334e72so2910795ad.1
-        for <ceph-devel@vger.kernel.org>; Sun, 04 Oct 2026 17:19:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791159598; x=1791764398; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=eyhjDtsive9z9y/5PUzMcRP2YBEJQnRy/rcYJL07i/E=;
-        b=ScXUzp5F/JAa9hHKYvOJGaC9R+D66EwOMZI/PpeMWP0f9KkoXEZ2LxveIai3lco+Bf
-         HWDq3n52NykVUAxaZRbSpr/NiozY/9W50IOoI19ibm4Iee3hIi52EswRNeSdOaS+nnar
-         pUlvrlYIQR8ZdN7zWU4Iq4jPur+mxNDYdBvTO5CBPw7Gj6GOQsT8JNYkySZgzNDcErsS
-         yP6eH2qL8XnkiJDVR0WaXWVSS0YchgZrAcCc/DWNLSmGDN01jP2eY3+O1J/N0EY/zXxi
-         0u3PAjTycDN+ZeC93wgH5DjGfyKc3mEDyzmDTPAvrfJB1Iq5hEbOXjVnMNV5gj1kgzS+
-         XRgw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791159598; x=1791764398;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=eyhjDtsive9z9y/5PUzMcRP2YBEJQnRy/rcYJL07i/E=;
-        b=uB3Bd82PsTa3CBC87UfIn1N/UJSYnX+OMRFSUnA02L+EsADvdlG6zb0f4kJS7GzCoT
-         CQDg4G+NdQqG2Rj/CmfeM0Mi/ojQ9ZZzG72nPpy7hEmbt0SrEwd8L/tRJu/T+xF+a4B6
-         npyNvWwO/DJZbJ+AIBGMXbUlcczyaygGn6nVQfxM1Ox45nrElY0ipw4wTG9fUt60SK2F
-         TERUIG5/e52W2Q9EgBB7UN/nODx3QiljMvw5EhV8cHnrMSFWNhfnCi8kM6a81S1yAGa7
-         7JmkiIkMlJGm6jjhsrnZcuS3ogqWstvOWe3uo85eYlhYpQHm3agQTfFb+2dGy146wY5B
-         AOVw==
-X-Gm-Message-State: AFq9FYLHy4JlNy3LcBJ1dPhCYOlCdlPP2nmUsfuSc444/RJoq8KoCnUm
-	y8SDsu06XO/cEMXZ1zSvNC9KD649JK6oJ4uykwZg6KXnSc4qqvoPCMBsQRJev3EG7KU=
-X-Gm-Gg: AYBFou3NkBJ5QDRGat2RIPM9+mdyNDyOH8iw3tqEVt2CF/pW+9HT8AZbUhCrPxmPQ7i
-	tMICTQr596f++TWgp/ylhTneR09shY/TxcVc8Ez2yGq4AP+v0feOCGkbEVgbVKW49M89OSsbToC
-	fb2V0T9YRzHb2JrCooBKjuOBdE9yYjAzlCy73HXok19YuD8jitkS+P+HxuRgMY+Qeh79IRxu4ZC
-	+pzMzbhvv6X/Jb0bALGn4GlbC6aD7Kz9dgxoHoNqlzyAQ1YluwCrE5gpWJWTFPZAYPVfLnA0ISt
-	7kF9gmKGO2ttEMpB4TlgsGdzi6SVL1UHxK14r/4UaR9GN19D0i+XXoGNwPWJOJ7G5KwDlVE+h9X
-	NNpY21cmY09ylSU4AQlnvI+NVR7n1wOZF4IXqJxxJLIGvH5y39qGQKWcdfWGaReBBSt0df7Ty74
-	5dm/fXZp1mMOOFFQEvLkUIaCEtEOz12jYeV1lnFdIAqpGBu0oKy1WlsQ1HLgyEh+gpAu3uc1io2
-	q+kGeNkrYX9I5GL943JMsHud/h6lFCY/pet40MQvpfDO1V8Kf9i4zQNlkwGO/DvINKcAt6uq2dB
-	lqgt+gEMy63geHzkOl6Dru7znFvWk+qmUtA/LtHTEfBWs2K8
-X-Received: by 2002:a17:902:da8d:b0:2e5:3972:7ba8 with SMTP id d9443c01a7336-2e539727cb8mr45845925ad.57.1791159598333;
-        Sun, 04 Oct 2026 17:19:58 -0700 (PDT)
-Received: from ryzen.lan ([2601:644:8000:7a86::e35])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3a7ae260f19sm3589351a91.4.2026.10.04.17.19.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Oct 2026 17:19:57 -0700 (PDT)
-From: Rosen Penev <rosenp@gmail.com>
-To: ceph-devel@vger.kernel.org
-Cc: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>,
-	Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-kernel@vger.kernel.org (open list),
-	linux-hardening@vger.kernel.org (open list:KERNEL HARDENING (not covered by other areas):Keyword:\b__counted_by(_le|_be|_ptr)?\b)
-Subject: [PATCH] ceph: use a flexible array for monitor addresses
-Date: Sun,  4 Oct 2026 17:19:55 -0700
-Message-ID: <20261005001955.589395-1-rosenp@gmail.com>
-X-Mailer: git-send-email 2.56.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T1+7FoiW"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1791184371;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=un0sOdMzGIB0ugj0c9sRuvRA31Lh2M8UPL/TEXn4uR4=;
+	b=T1+7FoiW1TDgfrbnaFaHJ/PgDSSCyECcW272jWH+BFMgYkFsaaciFwbJKWMgRNytOaHxJ/
+	UsUfzdl9Vc6j1VKe4WID1ZPOzIs2SbjjW7XZnJTBYWBKJl9zeEB/SNkmcHm531sVfGdaNH
+	/fn7wpLRGPalpm4IhK19x/IMO1uA/nc=
+Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-25-hbnd5JVLMZS7HNUkhIydkw-1; Mon,
+ 05 Oct 2026 03:12:47 -0400
+X-MC-Unique: hbnd5JVLMZS7HNUkhIydkw-1
+X-Mimecast-MFC-AGG-ID: hbnd5JVLMZS7HNUkhIydkw_1791184365
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 823841955BED;
+	Mon,  5 Oct 2026 07:12:44 +0000 (UTC)
+Received: from warthog.com (unknown [10.44.32.90])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 9D51D1956087;
+	Mon,  5 Oct 2026 07:12:37 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	Matthew Wilcox <willy@infradead.org>,
+	Namjae Jeon <linkinjeon@kernel.org>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Stefan Metzmacher <metze@samba.org>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v12 0/8] netfs: Use a bvecq chain position abstraction
+Date: Mon,  5 Oct 2026 08:12:17 +0100
+Message-ID: <20261005071227.147182-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -77,92 +69,87 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-ceph_alloc_options() allocates the monitor address array separately,
-always sized for CEPH_MAX_MON entries. Make it a flexible array member
-at the end of struct ceph_options and allocate both together with
-kzalloc_flex(). The array was already an 8 KiB slab object, so this
-only drops the separate allocation and its error path.
+Hi Christian,
 
-num_mon is the number of addresses in use, not the capacity, so the
-array cannot be annotated with __counted_by().
+Could you pull these patches please into your vfs-7.4.netfs branch?  This
+is the fourth of five batches.  The primary purpose of this batch is to add
+an abstraction for a position in a bvecq chain and make use of it.
 
-ceph_compare_options() memcmp()s the simple fields up to the first
-member that needs a custom comparison. With mon_addr gone from there,
-use num_mon as that boundary; the compared fields are unchanged.
-Document that num_mon has to stay first past that point.
+With that in mind, this patchset does the following:
 
-Assisted-by: LLM
-Signed-off-by: Rosen Penev <rosenp@gmail.com>
----
- include/linux/ceph/libceph.h |  7 ++++---
- net/ceph/ceph_common.c       | 11 ++---------
- 2 files changed, 6 insertions(+), 12 deletions(-)
+ (1) Add a struct, bvecq_pos, to refer to a position in a bvecq chain.
+     This is a tuple of ( bvecq pointer, slot and offset } and the position
+     struct holds (for now) a ref on the bvecq pointed to.
 
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index f92fdd853f1f..e585d6d11303 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -57,15 +57,16 @@ struct ceph_options {
- 	/*
- 	 * any type that can't be simply compared or doesn't need
- 	 * to be compared should go beyond this point,
--	 * ceph_compare_options() should be updated accordingly
-+	 * ceph_compare_options() should be updated accordingly.
-+	 * num_mon must stay the first member past this point, as
-+	 * ceph_compare_options() uses it as the end of the memcmp().
- 	 */
- 
--	struct ceph_entity_addr *mon_addr; /* should be the first
--					      pointer type of args */
- 	int num_mon;
- 	char *name;
- 	struct ceph_crypto_key *key;
- 	struct rb_root crush_locs;
-+	struct ceph_entity_addr mon_addr[];
- };
- 
- /*
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index a797c7360e3c..95dc18257056 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -133,7 +133,7 @@ int ceph_compare_options(struct ceph_options *new_opt,
- {
- 	struct ceph_options *opt1 = new_opt;
- 	struct ceph_options *opt2 = client->options;
--	int ofs = offsetof(struct ceph_options, mon_addr);
-+	int ofs = offsetof(struct ceph_options, num_mon);
- 	int i;
- 	int ret;
- 
-@@ -309,17 +309,11 @@ struct ceph_options *ceph_alloc_options(void)
- {
- 	struct ceph_options *opt;
- 
--	opt = kzalloc_obj(*opt);
-+	opt = kzalloc_flex(*opt, mon_addr, CEPH_MAX_MON);
- 	if (!opt)
- 		return NULL;
- 
- 	opt->crush_locs = RB_ROOT;
--	opt->mon_addr = kzalloc_objs(*opt->mon_addr, CEPH_MAX_MON);
--	if (!opt->mon_addr) {
--		kfree(opt);
--		return NULL;
--	}
--
- 	opt->flags = CEPH_OPT_DEFAULT;
- 	opt->osd_keepalive_timeout = CEPH_OSD_KEEPALIVE_DEFAULT;
- 	opt->mount_timeout = CEPH_MOUNT_TIMEOUT_DEFAULT;
-@@ -344,7 +338,6 @@ void ceph_destroy_options(struct ceph_options *opt)
- 		ceph_crypto_key_destroy(opt->key);
- 		kfree(opt->key);
- 	}
--	kfree(opt->mon_addr);
- 	kfree(opt);
- }
- EXPORT_SYMBOL(ceph_destroy_options);
--- 
-2.56.0
+ (2) Change unbuffered/DIO to extract the supplied user buffers into a
+     bvecq chain rather than a bio_vec[] up front.  This means that
+     netfslib then uses bvecq chains for everything.
+
+ (3) Add a folio count to the readahead_control struct and then makes
+     readahead pre-create its buffer using that count to determine how many
+     slots are required.
+
+ (4) Change netfslib to use the bvecq_pos struct to keep track of the whole
+     request buffer and various points in it where loading, dispatch and
+     collection are taking place and to also keep track of the slice given
+     to each subrequest.
+
+This was split from v11 of a larger netfslib series[1].
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-next-4
+
+Thanks,
+David
+
+Changes
+=======
+ver #12)
+- Split from v11 of "netfs: Keep track of folios in a segmented bio_vec[]
+  chain"[1]
+
+[1] https://lore.kernel.org/r/20260902173350.3468672-1-dhowells@redhat.com/
+
+David Howells (8):
+  mm: Make readahead store folio count in readahead_control
+  netfs: Add a function to extract from an iter into a bvecq
+  netfs: Make unbuffered/DIO read and write use bvecq
+  netfs: Add some tools for managing a position in a bvecq chain
+  netfs: Provide a func to load the readahead buffers into a bvecq chain
+  netfs: Use bvecq_pos to hold the buffer positions
+  netfs: Remove the rolling_buffer implementation
+  netfs: Remove netfs_extract_user_iter()
+
+ fs/afs/dir.c                   |   5 +-
+ fs/afs/symlink.c               |   6 +-
+ fs/cachefiles/io.c             |  12 -
+ fs/netfs/Makefile              |   1 -
+ fs/netfs/buffered_read.c       | 169 ++++++++------
+ fs/netfs/bvecq.c               | 310 ++++++++++++++++++++++++++
+ fs/netfs/direct_read.c         |  77 +++----
+ fs/netfs/direct_write.c        |  67 +++---
+ fs/netfs/internal.h            |   4 +-
+ fs/netfs/iterator.c            | 392 ++++++++++-----------------------
+ fs/netfs/misc.c                |  18 --
+ fs/netfs/objects.c             |  16 +-
+ fs/netfs/read_collect.c        |  92 ++++----
+ fs/netfs/read_pgpriv2.c        |  87 +++++---
+ fs/netfs/read_retry.c          |  86 ++++----
+ fs/netfs/read_single.c         |  16 +-
+ fs/netfs/rolling_buffer.c      | 182 ---------------
+ fs/netfs/write_collect.c       |  55 ++---
+ fs/netfs/write_issue.c         | 166 +++++++++-----
+ fs/netfs/write_retry.c         |  61 +++--
+ include/linux/bvecq.h          | 184 ++++++++++++++++
+ include/linux/netfs.h          |  25 ++-
+ include/linux/pagemap.h        |  10 +
+ include/linux/rolling_buffer.h |  47 ----
+ include/trace/events/netfs.h   |  32 ++-
+ mm/readahead.c                 |   5 +
+ 26 files changed, 1195 insertions(+), 930 deletions(-)
+ delete mode 100644 fs/netfs/rolling_buffer.c
+ delete mode 100644 include/linux/rolling_buffer.h
 
