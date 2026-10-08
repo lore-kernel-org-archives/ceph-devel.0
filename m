@@ -1,412 +1,301 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51D42768EA
-	for <ceph-devel@vger.kernel.org>; Wed,  7 Oct 2026 14:22:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E30BC2D97A6;
+	Thu,  8 Oct 2026 01:29:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791382937; cv=none; b=lIlkxpxsOdF7Nj7WxWAFORrMBfhRhAkB6/p+JCfDnaPlHay6QzMBQQHFRdKtqk3GI5yGyLQvsB/bhbq0qSqQjPE84POovJ6QcAWn23IAB3780OkLg1MHhgtr6KF6jo2QrygsatMMeAZSlEtJwzlmM81fDcr89qsZaBZ487Ulr6o=
+	t=1791422963; cv=none; b=PzKeey1jZl7aiAnWmwYnQatiJOqxl9vkpb2O3IL+rMkE/6aaIc0OKxHtONUdm8Ttx+qQMJ6/WkabT0+dya1YnZe4jvm6rwYxp3UevWYSCy8onaRkFVJ6882SRyDhaGDjCSolZphUt5lM6R1ABUyUx+bKTCq5mF4zawd32uQ/qrY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791382937; c=relaxed/simple;
-	bh=3VzU8OSwc8I9dOeKghpfaNNVgmsOeioWpFLGnulWduU=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rtLL2TdPhb3gJZYujDq/bDQ+1lSi5jcjp3MDuFTJIhf/K7jVALQrKibNyLxbR1+gUakAKhREMGU051yZvh57ER5uWp8MXN3uTtfSwZEPnuJ20w+VByS+4NKZWSLFGJQ61V9sU28sTdysddDzoWW2RelwiA+0xJ44maSpIqQ2Hk8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hlAgEXpR; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1791422963; c=relaxed/simple;
+	bh=yfDXx3ze8+BfqTcPwgZuz2Fb4cji2pJootKVZA4Ps0A=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=nndohW2Yl+ziOYnEpufEq4eZJ93VOfoIxYemSTfgEdYNkdoE79zkklCkxiRzdjMswtnelIb8Tfel18DMmT2O/iabg2vazHHOgDkg5YzGi1DkQlCI70V47ucLXRxMM4/4vFq0HPLLrz+bi2l7KYe7X4pQo9lL5Ubp8DIYKRiAoRY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YlHhpvVX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hlAgEXpR"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1791382927;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=RfaYpSEjeqw+u1OeVa7/ghhIqme1SDrkQyfqW/OnsvY=;
-	b=hlAgEXpRH7eX3Nb4HwyxE75ZBAF09Tnt1cQ65tmayLvETQtOJciiieNsYwvsrvvuD3Rdou
-	LQYRx/rpe2a83u0zqTpk01evvHSL4bBnKmVxvG3uwCjVjxG13lhumal3rwCZeRRHHyojPy
-	OcShSs8jEhueZirdC+g4OWtTaXodIyk=
-Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-317-nmCxd1ZRM_CUSHlv0XVnqw-1; Wed,
- 07 Oct 2026 10:22:02 -0400
-X-MC-Unique: nmCxd1ZRM_CUSHlv0XVnqw-1
-X-Mimecast-MFC-AGG-ID: nmCxd1ZRM_CUSHlv0XVnqw_1791382919
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 564DA18850D5;
-	Wed,  7 Oct 2026 14:21:12 +0000 (UTC)
-Received: from warthog.com (unknown [10.44.32.90])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 491561977454;
-	Wed,  7 Oct 2026 14:21:07 +0000 (UTC)
-From: David Howells <dhowells@redhat.com>
-To: Christian Brauner <christian@brauner.io>
-Cc: David Howells <dhowells@redhat.com>,
-	Paulo Alcantara <pc@manguebit.org>,
-	Matthew Wilcox <willy@infradead.org>,
-	Namjae Jeon <linkinjeon@kernel.org>,
-	Marc Dionne <marc.dionne@auristor.com>,
-	Stefan Metzmacher <metze@samba.org>,
-	Eric Van Hensbergen <ericvh@kernel.org>,
-	Dominique Martinet <asmadeus@codewreck.org>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	netfs@lists.linux.dev,
-	linux-afs@lists.infradead.org,
-	linux-cifs@vger.kernel.org,
-	linux-nfs@vger.kernel.org,
-	ceph-devel@vger.kernel.org,
-	v9fs@lists.linux.dev,
-	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v14 8/8] netfs: Remove netfs_extract_user_iter()
-Date: Wed,  7 Oct 2026 15:19:59 +0100
-Message-ID: <20261007142001.851620-9-dhowells@redhat.com>
-In-Reply-To: <20261007142001.851620-1-dhowells@redhat.com>
-References: <20261007142001.851620-1-dhowells@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YlHhpvVX"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 6BB70C2BCB9;
+	Thu,  8 Oct 2026 01:29:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1791422962;
+	bh=yfDXx3ze8+BfqTcPwgZuz2Fb4cji2pJootKVZA4Ps0A=;
+	h=From:Date:Subject:To:Cc:Reply-To:From;
+	b=YlHhpvVXj7Gb1JdCYHRTqr+yRyHiimr4zvSfSKkrT5YEcD9xbUkPgYHpKHtmIlN8v
+	 Vz4JYl/NY4TC9c3ArrE20bXdjo/iqfrQQrPSK/UJhLRYXyMiCcVut5p4jPp7oNwkyw
+	 fvyKNjEPltPoOkxpTuOeP38V8ajVwZnuHIx9+NP6Jq0a9facvgvCAWYm6swdqeAMbu
+	 5TebaQhwSoJ1/4VpPEolj2QyFFBnCdc9mK6HxYGHSfC5RHKD3c6tUHfNq8/oh9jcxF
+	 OTTDdeNPW22XBvA3GlVLDuB/v1dVl+pfMzaLryZM0s9K2x343R+Yq/VF2JLIirTsU+
+	 LSmkfg0FOL9pg==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46730CA6004;
+	Thu,  8 Oct 2026 01:29:22 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Thu, 08 Oct 2026 03:28:02 +0200
+Subject: [PATCH] ceph: check the caps of a closed file after
+ caps_wanted_delay_min
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20261008-ceph-cap-idle-release-v1-1-86e7a8bf36d0@clyso.com>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXM0QqCQBCF4VeRuW5glcjoVcSLcTybE2LLTkogv
+ ntbXX4Hzr+TIxucbtVOGZu5PZeC+lSRTrLcwTYWUxOaSx3ClRVpYpVU9hmcMUMcLGOM57aNqgI
+ q35QR7f3rdv3fvg4P6Osbo+P4ACg/dn95AAAA
+X-Change-ID: 20261008-ceph-cap-idle-release-adff477fccae
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1791422960; l=9360;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=OclocnO6rE4KxWh+A36R6LcdaImZDTRAwTsJ6wxrIfc=;
+ b=nEN2CbtzibM0U71oKuytrfYFNCuRvwdWj1ZxLT6YnFFctRMuyjLSzO/OM/XtrgNdB0DkdUz9e
+ SLxXlgiwPLLBSNwbB05rSb9EftWKIgyiCSnLDpFSVlztDVb4e0393ZW
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-Remove netfs_extract_user_iter() as it has been replaced with
-netfs_extract_iter().
+From: Xiubo Li <xiubo.li@clyso.com>
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: Paulo Alcantara <pc@manguebit.org>
-cc: Matthew Wilcox <willy@infradead.org>
-cc: netfs@lists.linux.dev
-cc: linux-fsdevel@vger.kernel.org
+__ceph_caps_file_wanted() stops wanting the caps of a closed file once
+its last read or write is caps_wanted_delay_min (5s) old, but nothing
+checks its caps again before caps_wanted_delay_max (60s): closing does
+not call ceph_check_caps(), and the inode waits on cap_delay_list,
+whose check has always come at caps_wanted_delay_max.
+
+Meanwhile the MDS keeps us the loner, so each stat from another client
+of a file we created first waits for the MDS to revoke our exclusive
+caps.  This is what makes mdtest-easy-stat in IO500 on kernel clients
+swing between 3.6k and 100k stats/s from run to run.
+
+Queue a regular file that still holds exclusive or write caps for a cap
+check caps_wanted_delay_min after its last close, on a list of its own,
+as cap_delay_list is in caps_wanted_delay_max order.  The check gives
+back what it already gives back at caps_wanted_delay_max (shared caps
+and the page cache caps stay), only earlier.  Directories and open
+files are not affected.
+
+Two noshare kernel mounts on one VM, 1 MDS: 20000 empty files created
+on A, statted by path on B after a wait.  Caps messages are the ones A
+sends, revokes are the ones the MDS sends A:
+
+  +--------+------+---------------+---------------+---------------+
+  |        |      | in the wait   | in the stat                   |
+  | kernel | wait | caps msgs     | stats/s       | revokes       |
+  +--------+------+---------------+---------------+---------------+
+  | before |  15s |             0 |     374 - 435 | 11164 - 11730 |
+  | after  |  15s |         20000 | 18680 - 24027 |             0 |
+  | before |   3s |             0 |     328 - 342 | 13727 - 14538 |
+  | after  |   3s |      0 - 3010 |   2238 - 3216 |     963 - 996 |
+  +--------+------+---------------+---------------+---------------+
+
+The caps go back in the background before the stat instead of one
+revoke per file during it; with a 3s wait most of them still go back
+while the stat runs.
+
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
- fs/netfs/iterator.c   | 297 ------------------------------------------
- include/linux/netfs.h |   5 -
- 2 files changed, 302 deletions(-)
+Tested on 7.2 against a vstart cluster with two noshare kernel mounts,
+see the numbers in the commit message.  The same stall shows up in the
+IO500 mdtest-easy-stat phase on kernel clients.
+---
+ fs/ceph/caps.c       | 95 ++++++++++++++++++++++++++++++++++++++++++++++------
+ fs/ceph/mds_client.c |  2 ++
+ fs/ceph/mds_client.h |  3 +-
+ 3 files changed, 88 insertions(+), 12 deletions(-)
 
-diff --git a/fs/netfs/iterator.c b/fs/netfs/iterator.c
-index adce75274993..ae2722bb4244 100644
---- a/fs/netfs/iterator.c
-+++ b/fs/netfs/iterator.c
-@@ -158,300 +158,3 @@ ssize_t netfs_extract_iter(struct iov_iter *orig, size_t max_len, size_t max_pag
- 
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 8e582cbcfc6b..b1e29e92920f 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -537,6 +537,42 @@ static void __cap_delay_requeue(struct ceph_mds_client *mdsc,
+ 	}
  }
- EXPORT_SYMBOL_GPL(netfs_extract_iter);
--
--#if 0 // TODO: Remove in subsequent patch
--/**
-- * netfs_extract_user_iter - Extract the pages from a user iterator into a bvec
-- * @orig: The original iterator
-- * @orig_len: The amount of iterator to copy
-- * @new: The iterator to be set up
-- * @extraction_flags: Flags to qualify the request
-- *
-- * Extract the page fragments from the given amount of the source iterator and
-- * build up a second iterator that refers to all of those bits.  This allows
-- * the original iterator to be disposed of.
-- *
-- * @extraction_flags can have ITER_ALLOW_P2PDMA set to request peer-to-peer DMA be
-- * allowed on the pages extracted.
-- *
-- * On success, the number of elements in the bvec is returned, the original
-- * iterator will have been advanced by the amount extracted.
-- *
-- * The iov_iter_extract_mode() function should be used to query how cleanup
-- * should be performed.
-- */
--ssize_t netfs_extract_user_iter(struct iov_iter *orig, size_t orig_len,
--				struct iov_iter *new,
--				iov_iter_extraction_t extraction_flags)
--{
--	struct bio_vec *bv = NULL;
--	struct page **pages;
--	unsigned int cur_npages;
--	unsigned int max_pages;
--	unsigned int npages = 0;
--	unsigned int i;
--	ssize_t ret = 0;
--	size_t count = orig_len, offset, len;
--	size_t bv_size, pg_size;
--
--	if (WARN_ON_ONCE(!iter_is_ubuf(orig) && !iter_is_iovec(orig)))
--		return -EIO;
--
--	max_pages = iov_iter_npages(orig, INT_MAX);
--	bv_size = array_size(max_pages, sizeof(*bv));
--	bv = kvmalloc(bv_size, GFP_KERNEL);
--	if (!bv)
--		return -ENOMEM;
--
--	/* Put the page list at the end of the bvec list storage.  bvec
--	 * elements are larger than page pointers, so as long as we work
--	 * 0->last, we should be fine.
--	 */
--	pg_size = array_size(max_pages, sizeof(*pages));
--	pages = (void *)bv + bv_size - pg_size;
--
--	while (count && npages < max_pages) {
--		ret = iov_iter_extract_pages(orig, &pages, count,
--					     max_pages - npages, extraction_flags,
--					     &offset);
--		if (unlikely(ret <= 0)) {
--			ret = ret ?: -EIO;
--			break;
--		}
--
--		if (WARN(ret > count,
--			 "%s: extract_pages overrun %zd > %zu bytes\n",
--			 __func__, ret, count)) {
--			ret = -EIO;
--			break;
--		}
--
--		cur_npages = DIV_ROUND_UP(offset + ret, PAGE_SIZE);
--		if (WARN(cur_npages > max_pages - npages,
--			 "%s: extract_pages overrun %u > %u pages\n",
--			 __func__, npages + cur_npages, max_pages)) {
--			ret = -EIO;
--			break;
--		}
--
--		count -= ret;
--		ret += offset;
--
--		for (i = 0; i < cur_npages; i++) {
--			len = ret > PAGE_SIZE ? PAGE_SIZE : ret;
--			bvec_set_page(bv + npages + i, *pages++, len - offset, offset);
--			ret -= len;
--			offset = 0;
--		}
--
--		npages += cur_npages;
--	}
--
--	/* Note: Don't try to clean up after EIO.  Either we got no pages, so
--	 * nothing to clean up, or we got a buffer overrun, memory corruption
--	 * and can't trust the stuff in the buffer (a WARN was emitted).
--	 */
--
--	if (ret < 0 && (ret == -ENOMEM || npages == 0)) {
--		for (i = 0; i < npages; i++)
--			unpin_user_page(bv[i].bv_page);
--		kvfree(bv);
--		return ret;
--	}
--
--	iov_iter_bvec(new, orig->data_source, bv, npages, orig_len - count);
--	return npages;
--}
--EXPORT_SYMBOL_GPL(netfs_extract_user_iter);
--
--/*
-- * Select the span of a bvec iterator we're going to use.  Limit it by both maximum
-- * size and maximum number of segments.  Returns the size of the span in bytes.
-- */
--static size_t netfs_limit_bvec(const struct iov_iter *iter, size_t start_offset,
--			       size_t max_size, size_t max_segs)
--{
--	const struct bio_vec *bvecs = iter->bvec;
--	unsigned int nbv = iter->nr_segs, ix = 0, nsegs = 0;
--	size_t len, span = 0, n = iter->count;
--	size_t skip = iter->iov_offset + start_offset;
--
--	if (WARN_ON(!iov_iter_is_bvec(iter)) ||
--	    WARN_ON(start_offset > n) ||
--	    n == 0)
--		return 0;
--
--	while (n && ix < nbv && skip) {
--		len = bvecs[ix].bv_len;
--		if (skip < len)
--			break;
--		skip -= len;
--		n -= len;
--		ix++;
--	}
--
--	while (n && ix < nbv) {
--		len = min3(n, bvecs[ix].bv_len - skip, max_size);
--		span += len;
--		nsegs++;
--		ix++;
--		if (span >= max_size || nsegs >= max_segs)
--			break;
--		skip = 0;
--		n -= len;
--	}
--
--	return min(span, max_size);
--}
--
--/*
-- * Select the span of a kvec iterator we're going to use.  Limit it by both
-- * maximum size and maximum number of segments.  Returns the size of the span
-- * in bytes.
-- */
--static size_t netfs_limit_kvec(const struct iov_iter *iter, size_t start_offset,
--			       size_t max_size, size_t max_segs)
--{
--	const struct kvec *kvecs = iter->kvec;
--	unsigned int nkv = iter->nr_segs, ix = 0, nsegs = 0;
--	size_t len, span = 0, n = iter->count;
--	size_t skip = iter->iov_offset + start_offset;
--
--	if (WARN_ON(!iov_iter_is_kvec(iter)) ||
--	    WARN_ON(start_offset > n) ||
--	    n == 0)
--		return 0;
--
--	while (n && ix < nkv && skip) {
--		len = kvecs[ix].iov_len;
--		if (skip < len)
--			break;
--		skip -= len;
--		n -= len;
--		ix++;
--	}
--
--	while (n && ix < nkv) {
--		len = min3(n, kvecs[ix].iov_len - skip, max_size);
--		span += len;
--		nsegs++;
--		ix++;
--		if (span >= max_size || nsegs >= max_segs)
--			break;
--		skip = 0;
--		n -= len;
--	}
--
--	return min(span, max_size);
--}
--
--/*
-- * Select the span of an xarray iterator we're going to use.  Limit it by both
-- * maximum size and maximum number of segments.  It is assumed that segments
-- * can be larger than a page in size, provided they're physically contiguous.
-- * Returns the size of the span in bytes.
-- */
--static size_t netfs_limit_xarray(const struct iov_iter *iter, size_t start_offset,
--				 size_t max_size, size_t max_segs)
--{
--	struct folio *folio;
--	unsigned int nsegs = 0;
--	uoff_t pos = iter->xarray_start + iter->iov_offset;
--	pgoff_t index = pos / PAGE_SIZE;
--	size_t span = 0, n = iter->count;
--
--	XA_STATE(xas, iter->xarray, index);
--
--	if (WARN_ON(!iov_iter_is_xarray(iter)) ||
--	    WARN_ON(start_offset > n) ||
--	    n == 0)
--		return 0;
--	max_size = min(max_size, n - start_offset);
--
--	rcu_read_lock();
--	xas_for_each(&xas, folio, ULONG_MAX) {
--		size_t offset, flen, len;
--		if (xas_retry(&xas, folio))
--			continue;
--		if (WARN_ON(xa_is_value(folio)))
--			break;
--		if (WARN_ON(folio_test_hugetlb(folio)))
--			break;
--
--		flen = folio_size(folio);
--		offset = offset_in_folio(folio, pos);
--		len = min(max_size, flen - offset);
--		span += len;
--		nsegs++;
--		if (span >= max_size || nsegs >= max_segs)
--			break;
--	}
--
--	rcu_read_unlock();
--	return min(span, max_size);
--}
--
--/*
-- * Select the span of a bvecq iterator we're going to use.  Limit it by both
-- * maximum size and maximum number of segments.  Returns the size of the span
-- * in bytes.
-- */
--static size_t netfs_limit_bvecq(const struct iov_iter *iter, size_t start_offset,
--				size_t max_size, size_t max_segs)
--{
--	const struct bvecq *bq = iter->bvecq;
--	unsigned int nsegs = 0;
--	unsigned int slot = iter->bvecq_slot;
--	size_t span = 0, n = iter->count;
--
--	if (WARN_ON(!iov_iter_is_bvecq(iter)) ||
--	    WARN_ON(start_offset > n) ||
--	    n == 0)
--		return 0;
--	max_size = umin(max_size, n - start_offset);
--
--	if (!bvecq_acquire_slot(bq, slot)) {
--		bq = bvecq_next(bq);
--		slot = 0;
--	}
--
--	start_offset += iter->iov_offset;
--	do {
--		size_t flen;
--
--		flen = bq->bv[slot].bv_len;
--		if (start_offset < flen) {
--			span += flen - start_offset;
--			nsegs++;
--			start_offset = 0;
--		} else {
--			start_offset -= flen;
--		}
--		if (span >= max_size || nsegs >= max_segs)
--			break;
--
--		slot++;
--		if (!bvecq_acquire_slot(bq, slot)) {
--			bq = bvecq_next(bq);
--			slot = 0;
--		}
--	} while (bq);
--
--	return umin(span, max_size);
--}
--
--size_t netfs_limit_iter(const struct iov_iter *iter, size_t start_offset,
--			size_t max_size, size_t max_segs)
--{
--	if (iov_iter_is_bvecq(iter))
--		return netfs_limit_bvecq(iter, start_offset, max_size, max_segs);
--	if (iov_iter_is_bvec(iter))
--		return netfs_limit_bvec(iter, start_offset, max_size, max_segs);
--	if (iov_iter_is_xarray(iter))
--		return netfs_limit_xarray(iter, start_offset, max_size, max_segs);
--	if (iov_iter_is_kvec(iter))
--		return netfs_limit_kvec(iter, start_offset, max_size, max_segs);
--	BUG();
--}
--EXPORT_SYMBOL(netfs_limit_iter);
--#endif
-diff --git a/include/linux/netfs.h b/include/linux/netfs.h
-index f3249d0573c4..0340c9ee587b 100644
---- a/include/linux/netfs.h
-+++ b/include/linux/netfs.h
-@@ -460,11 +460,6 @@ void netfs_put_subrequest(struct netfs_io_subrequest *subreq,
- ssize_t netfs_extract_iter(struct iov_iter *orig, size_t max_len, size_t max_pages,
- 			   struct bvecq **_bvecq_head,
- 			   iov_iter_extraction_t extraction_flags, gfp_t gfp);
--ssize_t netfs_extract_user_iter(struct iov_iter *orig, size_t orig_len,
--				struct iov_iter *new,
--				iov_iter_extraction_t extraction_flags);
--size_t netfs_limit_iter(const struct iov_iter *iter, size_t start_offset,
--			size_t max_size, size_t max_segs);
- void netfs_prepare_write_failed(struct netfs_io_subrequest *subreq);
- void netfs_write_subrequest_terminated(void *_op, ssize_t transferred_or_error);
  
++/*
++ * Queue the inode of a file that was just closed for a cap check
++ * caps_wanted_delay_min seconds from now, when __ceph_caps_file_wanted()
++ * stops wanting the caps it was opened for.  These inodes go on a list of
++ * their own, as cap_delay_list is in caps_wanted_delay_max order.
++ *
++ * Caller holds i_ceph_lock
++ *    -> we take mdsc->cap_delay_lock
++ */
++static void __cap_delay_requeue_idle(struct ceph_mds_client *mdsc,
++				     struct ceph_inode_info *ci)
++{
++	struct inode *inode = &ci->netfs.inode;
++	struct ceph_mount_options *opt = mdsc->fsc->mount_options;
++
++	if (mdsc->stopping)
++		return;
++	spin_lock(&mdsc->cap_delay_lock);
++	if (!list_empty(&ci->i_cap_delay_list)) {
++		if (ci->i_ceph_flags & CEPH_I_FLUSH)
++			goto no_change;
++		list_del_init(&ci->i_cap_delay_list);
++	}
++	/*
++	 * Round up, so that the check does not come before the last
++	 * read or write is caps_wanted_delay_min seconds old.
++	 */
++	ci->i_hold_caps_max = round_jiffies_up(jiffies +
++					       opt->caps_wanted_delay_min * HZ);
++	doutc(mdsc->fsc->client, "%p %llx.%llx at %lu\n", inode,
++	      ceph_vinop(inode), ci->i_hold_caps_max);
++	list_add_tail(&ci->i_cap_delay_list, &mdsc->cap_idle_delay_list);
++no_change:
++	spin_unlock(&mdsc->cap_delay_lock);
++}
++
+ /*
+  * Queue an inode for immediate writeback.  Mark inode with I_FLUSH,
+  * indicating we should send a cap message to flush dirty metadata
+@@ -4720,29 +4756,28 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ }
+ 
+ /*
+- * Delayed work handler to process end of delayed cap release LRU list.
++ * Process the expired end of one delayed cap list, whose entries were
++ * queued @hold jiffies before they expire.
+  *
+  * If new caps are added to the list while processing it, these won't get
+  * processed in this run.  In this case, the ci->i_hold_caps_max will be
+  * returned so that the work can be scheduled accordingly.
+  */
+-unsigned long ceph_check_delayed_caps(struct ceph_mds_client *mdsc)
++static unsigned long check_delayed_caps_list(struct ceph_mds_client *mdsc,
++					     struct list_head *list,
++					     unsigned long hold,
++					     unsigned long loop_start)
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	struct inode *inode;
+ 	struct ceph_inode_info *ci;
+-	struct ceph_mount_options *opt = mdsc->fsc->mount_options;
+-	unsigned long delay_max = opt->caps_wanted_delay_max * HZ;
+-	unsigned long loop_start = jiffies;
+ 	unsigned long delay = 0;
+ 
+-	doutc(cl, "begin\n");
+ 	spin_lock(&mdsc->cap_delay_lock);
+-	while (!list_empty(&mdsc->cap_delay_list)) {
+-		ci = list_first_entry(&mdsc->cap_delay_list,
+-				      struct ceph_inode_info,
++	while (!list_empty(list)) {
++		ci = list_first_entry(list, struct ceph_inode_info,
+ 				      i_cap_delay_list);
+-		if (time_before(loop_start, ci->i_hold_caps_max - delay_max)) {
++		if (time_before(loop_start, ci->i_hold_caps_max - hold)) {
+ 			doutc(cl, "caps added recently.  Exiting loop");
+ 			delay = ci->i_hold_caps_max;
+ 			break;
+@@ -4771,8 +4806,33 @@ unsigned long ceph_check_delayed_caps(struct ceph_mds_client *mdsc)
+ 			break;
+ 	}
+ 	spin_unlock(&mdsc->cap_delay_lock);
++
++	return delay;
++}
++
++/*
++ * Delayed work handler to process end of delayed cap release LRU lists:
++ * the closed files waiting for caps_wanted_delay_min, then the inodes
++ * waiting for caps_wanted_delay_max.
++ */
++unsigned long ceph_check_delayed_caps(struct ceph_mds_client *mdsc)
++{
++	struct ceph_client *cl = mdsc->fsc->client;
++	struct ceph_mount_options *opt = mdsc->fsc->mount_options;
++	unsigned long loop_start = jiffies;
++	unsigned long delay, idle_delay;
++
++	doutc(cl, "begin\n");
++	idle_delay = check_delayed_caps_list(mdsc, &mdsc->cap_idle_delay_list,
++					     opt->caps_wanted_delay_min * HZ,
++					     loop_start);
++	delay = check_delayed_caps_list(mdsc, &mdsc->cap_delay_list,
++					opt->caps_wanted_delay_max * HZ,
++					loop_start);
+ 	doutc(cl, "done\n");
+ 
++	if (idle_delay && (!delay || time_before(idle_delay, delay)))
++		delay = idle_delay;
+ 	return delay;
+ }
+ 
+@@ -4906,8 +4966,21 @@ void ceph_put_fmode(struct ceph_inode_info *ci, int fmode, int count)
+ 			is_closed = false;
+ 	}
+ 
+-	if (is_closed)
++	if (is_closed) {
+ 		percpu_counter_dec(&mdsc->metric.opened_inodes);
++		/*
++		 * A closed file stops wanting its caps once its last read
++		 * or write is caps_wanted_delay_min old, but nothing checks
++		 * its caps again before caps_wanted_delay_max runs out.
++		 * Until then the MDS keeps it the loner and has to revoke
++		 * the exclusive caps from us first when another client
++		 * looks at the file, e.g. stats a file we just created.
++		 * Check again after caps_wanted_delay_min instead.
++		 */
++		if (S_ISREG(ci->netfs.inode.i_mode) &&
++		    (__ceph_caps_issued(ci, NULL) & CEPH_CAP_ANY_WR))
++			__cap_delay_requeue_idle(mdsc, ci);
++	}
+ 	spin_unlock(&ci->i_ceph_lock);
+ }
+ 
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index baa9e4ad38c5..a1feae6bd9b6 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -6406,6 +6406,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 	INIT_DELAYED_WORK(&mdsc->delayed_work, delayed_work);
+ 	mdsc->last_renew_caps = jiffies;
+ 	INIT_LIST_HEAD(&mdsc->cap_delay_list);
++	INIT_LIST_HEAD(&mdsc->cap_idle_delay_list);
+ #ifdef CONFIG_DEBUG_FS
+ 	INIT_LIST_HEAD(&mdsc->cap_wait_list);
+ #endif
+@@ -6879,6 +6880,7 @@ void ceph_mdsc_close_sessions(struct ceph_mds_client *mdsc)
+ 		}
+ 	}
+ 	WARN_ON(!list_empty(&mdsc->cap_delay_list));
++	WARN_ON(!list_empty(&mdsc->cap_idle_delay_list));
+ 	mutex_unlock(&mdsc->mutex);
+ 
+ 	ceph_cleanup_snapid_map(mdsc);
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index d4d620fb8417..863cdb8d588a 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -540,8 +540,9 @@ struct ceph_mds_client {
+ 	struct delayed_work    delayed_work;  /* delayed work */
+ 	unsigned long    last_renew_caps;  /* last time we renewed our caps */
+ 	struct list_head cap_delay_list;   /* caps with delayed release */
++	struct list_head cap_idle_delay_list;  /* caps of closed files */
+ 	struct list_head cap_unlink_delay_list;  /* caps with delayed release for unlink */
+-	spinlock_t       cap_delay_lock;   /* protects cap_delay_list and cap_unlink_delay_list */
++	spinlock_t       cap_delay_lock;   /* protects the three lists above */
+ 	struct list_head snap_flush_list;  /* cap_snaps ready to flush */
+ 	spinlock_t       snap_flush_lock;
+ 
+
+---
+base-commit: c3112e7db4e561edeba02de2dca0ca620e44e84b
+change-id: 20261008-ceph-cap-idle-release-adff477fccae
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
+
 
