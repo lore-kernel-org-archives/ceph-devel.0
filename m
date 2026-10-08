@@ -1,63 +1,61 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 472A62F8E8F
-	for <ceph-devel@vger.kernel.org>; Thu,  8 Oct 2026 16:00:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C15504EFFA0
+	for <ceph-devel@vger.kernel.org>; Thu,  8 Oct 2026 18:16:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791475218; cv=none; b=MRYvN3s1B9mUWKEOZBoNFIZtoNlJPCpAzFBVR/gWTRL/CGJ2Ngy9vPYKRxAlOZveNypUvXDJa9YJfOAvlnXehXwN5dF6YFIcA+Pa7yzFhPRZk1Nent+PXJ5Gc+trQF5cpJhfyt2Ug/il9uFnDpObk7+A7FVGRwg85CKRTOPnhsA=
+	t=1791483411; cv=none; b=m3oo80ViYTZfg2gqImVqFTo8MNQRI1/8+lDxIgjbNpTu4nUQMfiBHFTd7pX0oCXv94EhSHxV1gf1UWgDax8qpzRmruz1uFHss5xQCtXkxK4Mm5BupxEtV2T29lQ+Ip2RoV010PfUVsN9B4TcRFnF84HxkarV7SLOsay1syaARy0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791475218; c=relaxed/simple;
-	bh=rHHfyKU+y9uG6X4mYuYwDWk6VJP8ahLFWyNIduWcOOk=;
-	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
-	 Content-Type:Date:Message-ID; b=kI3mdF929XsSiIzbb+EGGxj+po8jXnoghst4/Lz/3QboaFinJu+x578F9R1eTN/hTdBq2aTbUxbpDp5tyUtBeLQYpPZhCoPi65VhLxqTnjYSltbai8o1HoF2ASEvO/GH1p1SzQBJUJ2UfuB5ZvaJD9zwGBb/ZhhJxnQHCSA9L10=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W00qMsbu; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1791483411; c=relaxed/simple;
+	bh=cNJSPIjCLj7MbwGrrk8cS+o+HiNvnZO5wGnQfcCv/rw=;
+	h=From:To:cc:Subject:MIME-Version:Content-Type:Date:Message-ID; b=HpuB8sgNUsRCko0x914895a4Zc2B7LoUHyyOLleuNEteZSpgDsMuH+jiAa3EYRw7RAK6eKoQBupvmT8DFB+nsPPooYaO2uH0iQezLOxIFcsrU3w+2VQC7wQg4nil49o2iug9P15aL92FOwcRh8RfM2N2r2yD+Bft3QnpChBwATg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fzO3iS6b; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W00qMsbu"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fzO3iS6b"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1791475216;
+	s=mimecast20190719; t=1791483408;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=lCsUqcglH1KIjLocjMaxk5bfkL64y13HObwU0wWvIhw=;
-	b=W00qMsbuzfVPomaA+NVt9xcgTS0e/WhLK8LKQU86mRr8X5BBAxaL973Cjr+TZxpEvI8BBR
-	tJoOU+aWoH0r+Em4OwDcaL2NyoHLjx9TeBDPgNxDgO+325rlEsXqODhSGEUUaDgPsABRJx
-	mrQyUwfUDDI+ySnm2OKtzFdFPCnfRRw=
-Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=G3vfgec+pP8MnJ3aOHPVxDwxk/gUnXk3/B1GRHmcwpg=;
+	b=fzO3iS6bZgIayvqpDe4bzcrRksA7C/s9IhscMJw6WP9Ub5LpkmQrmpAkqMikrrHvt3fqj6
+	mGTH6PG1cAKk2KzsDZNWxyhKQUiTohE+J2yYPO4Bb/LDTkBmhSF4Zduf/IVYJxlxVGwqx9
+	N+ki/GPFL+QM+zwW2KiTc2Blx2vv8OA=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-302-xt2HwfwMMxebjcX32PsPnA-1; Thu,
- 8 Oct 2026 16:00:13 +0000
-X-MC-Unique: xt2HwfwMMxebjcX32PsPnA-1
-X-Mimecast-MFC-AGG-ID: xt2HwfwMMxebjcX32PsPnA_1791475211
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-418-TWp5OkP6PfWxbBRQiXBr8A-1; Thu,
+ 08 Oct 2026 14:16:45 -0400
+X-MC-Unique: TWp5OkP6PfWxbBRQiXBr8A-1
+X-Mimecast-MFC-AGG-ID: TWp5OkP6PfWxbBRQiXBr8A_1791483403
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 9DB01182E6A9;
-	Thu,  8 Oct 2026 16:00:11 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id EB0FF1955BD4;
+	Thu,  8 Oct 2026 18:16:41 +0000 (UTC)
 Received: from warthog.procyon.org.uk (unknown [10.44.32.90])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 11BD21956044;
-	Thu,  8 Oct 2026 16:00:07 +0000 (UTC)
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id D18A51956041;
+	Thu,  8 Oct 2026 18:16:35 +0000 (UTC)
 Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
 	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
 	Kingdom.
 	Registered in England and Wales under Company Registration No. 3798903
 From: David Howells <dhowells@redhat.com>
-In-Reply-To: <20260902-remove-wait-on-page-writeback-v5-0-0b512e77e75b@columbia.edu>
-References: <20260902-remove-wait-on-page-writeback-v5-0-0b512e77e75b@columbia.edu>
-To: Tal Zussman <tz2294@columbia.edu>
-Cc: dhowells@redhat.com, Ilya Dryomov <idryomov@gmail.com>,
+To: Christian Brauner <brauner@kernel.org>
+cc: dhowells@redhat.com, Marc Dionne <marc.dionne@auristor.com>,
+    Ilya Dryomov <idryomov@gmail.com>,
     Alex Markuze <amarkuze@redhat.com>,
     Viacheslav Dubeyko <slava@dubeyko.com>,
-    Christian Brauner <brauner@kernel.org>,
-    Jeff Layton <jlayton@kernel.org>,
-    "Matthew Wilcox (Oracle)" <willy@infradead.org>,
-    Zi Yan <ziy@nvidia.com>, ceph-devel@vger.kernel.org,
-    linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v5 00/10] ceph: convert writeback path to folios
+    Paulo Alcantara <pc@manguebit.org>,
+    Matthew Wilcox <willy@infradead.org>, v9fs@lists.linux.dev,
+    linux-afs@lists.infradead.org, ceph-devel@vger.kernel.org,
+    linux-cifs@vger.kernel.org, netfs@lists.linux.dev,
+    linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v3] fscache, cachefiles: Fix resize handling
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -65,44 +63,550 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-ID: <1043694.1791475206.1@warthog.procyon.org.uk>
-Date: Thu, 08 Oct 2026 17:00:06 +0100
-Message-ID: <1043695.1791475206@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+Content-ID: <1091806.1791483394.1@warthog.procyon.org.uk>
+Content-Transfer-Encoding: quoted-printable
+Date: Thu, 08 Oct 2026 19:16:34 +0100
+Message-ID: <1091807.1791483394@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-Hi Tal,
+Fix the resize handling in fscache and cachefiles by passing down a flag t=
+o
+indicate if the file is being shrunk as the cache's idea of how big the
+file should be may be stale and thus not useful in comparison to the
+object's size.
 
-Apologies for not reaching out to you before, but I keep getting diverted on
-to other thing - usually by AI patch reviews.
+The issue is that netfs_perform_write() updates the network filesystem's
+file's i_size as it adds data to the pagecache, but the cache isn't update=
+d
+until writeback flushes that data.  A truncation may then scrap that data
+and so the cache never sees it and doesn't update before it is told to
+resize.  In the resize, cachefiles was comparing the new size against the
+current cache size and then thinking the file was being expanded.
 
-Just to note that I have patches in the works to convert ceph to use netfslib
-and thus strip out all the dealing with pages/folios as much as possible -
-even getting down into the protocol and replacing the five different page
-carrying types with the same structure as is at the core of netfslib (bvecq
-chains) and pass the bvecq chains all the way into sendmsg() for transmission.
+Note that this is a bit more complicated for ceph than other filesystems a=
+s
+ceph splits the truncation of the local pagecache and fscache to after the
+RPC reply handler has updated the inode record - the reply handler
+communicates the need for the truncation finalisation through ceph inode
+flags.
 
-This also lets me remove ceph's use of the PG_private_2 flag which the MM
-people would really like back.  That's then replaced - transparently inside of
-netfslib - by setting a special ->private value on folios read from the
-server, marking them dirty and then having writeback write them to the cache.
+To this end, ceph is changed such that the outstanding truncation count in=
+ the
+inode turns into a bool and just set instead of being incremented (the cod=
+e
+only cares if it's zero or non-zero) and then a second bool is added to re=
+cord
+if the file was being shrunk.
 
-It's unfortunately stalled on getting some netfslib changes in, though there
-may be hope for making some progress in this merge window.
+Reported-by: Marc Dionne <marc.dionne@auristor.com>
+Fixes: 1a9fe4b6e787 ("cachefiles: Don't rely on backing fs storage map for=
+ most use cases")
+Signed-off-by: David Howells <dhowells@redhat.com>
+cc: Ilya Dryomov <idryomov@gmail.com>
+cc: Alex Markuze <amarkuze@redhat.com>
+cc: Viacheslav Dubeyko <slava@dubeyko.com>
+cc: Paulo Alcantara <pc@manguebit.org>
+cc: Matthew Wilcox <willy@infradead.org>
+cc: v9fs@lists.linux.dev
+cc: linux-afs@lists.infradead.org
+cc: ceph-devel@vger.kernel.org
+cc: linux-cifs@vger.kernel.org
+cc: netfs@lists.linux.dev
+cc: linux-fsdevel@vger.kernel.org
+---    =
 
-If you go to my tree here:
+ Changes
+ =3D=3D=3D=3D=3D=3D=3D
+ ver #3)
+ - Fix issues reported by sashiko[2]:
+   - In afs_setattr_edit_file(), get the "did it shrink" test the right wa=
+y
+     round.
+   - In ceph_alloc_inode(), initialised the i_truncate_shrank field.
+   - In __ceph_do_pending_vmtruncate(), read the i_truncate_shrank field
+     inside the lock.
+   - In cifs_precopy_set_eof(), assume no shrinkage of the cache file as
+     this func is used to expand the server file to cover a hole in the
+     pagecache.
+   - In cifs_file_copychunk_range(), assume no shrinkage of the file.
+   - In smb3_zero_range(), assume no shrinkage of the file.
+   - In smb3_collapse_range(), assume the file always shrinks.
+   - In smb3_insert_range(), assume no shrinkage of the file.
+ =
 
-	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/
+ ver #2)
+ - Fix issues reported by sashiko[1]:
+   - In cifs_file_copychunk_range(), use the old size of the target inode,
+     not the source inode.
+   - Switch to passing down a flag to indicate if the file shrank rather
+     than the old file size.
+   - In ceph, cache the truncate-shrank flag in the ceph inode.
+ =
 
-The netfs-next[12345] branches are the prerequisite patches I'm trying to get
-in at the moment, divided into five batches.
+ [1] https://sashiko.dev/#/patchset/938341.1791446974%40warthog.procyon.or=
+g.uk
+ [2] https://sashiko.dev/#/patchset/1029097.1791466484%40warthog.procyon.o=
+rg.uk
 
-On top of that is my netfs-crypt branch that has content crypto support
+ Documentation/filesystems/caching/backend-api.rst |    2 +-
+ Documentation/filesystems/caching/netfs-api.rst   |    2 +-
+ fs/9p/vfs_inode.c                                 |    6 +++++-
+ fs/9p/vfs_inode_dotl.c                            |    5 ++++-
+ fs/afs/inode.c                                    |    4 ++--
+ fs/cachefiles/interface.c                         |    8 ++++----
+ fs/ceph/cache.h                                   |    6 +++---
+ fs/ceph/inode.c                                   |   16 +++++++++++-----
+ fs/ceph/super.h                                   |    3 ++-
+ fs/netfs/fscache_io.c                             |    4 ++--
+ fs/smb/client/cifsfs.c                            |    6 +++---
+ fs/smb/client/inode.c                             |    2 +-
+ fs/smb/client/smb2ops.c                           |    9 +++++----
+ include/linux/fscache-cache.h                     |    2 +-
+ include/linux/fscache.h                           |   11 ++++++-----
+ 15 files changed, 51 insertions(+), 35 deletions(-)
 
-And then on top of that is my ceph-iter branch.  Note that it's not fully
-working as yet and I'm still testing and fixing bits of it.
+diff --git a/Documentation/filesystems/caching/backend-api.rst b/Documenta=
+tion/filesystems/caching/backend-api.rst
+index 3a199fc50828..df837531b3fd 100644
+--- a/Documentation/filesystems/caching/backend-api.rst
++++ b/Documentation/filesystems/caching/backend-api.rst
+@@ -339,7 +339,7 @@ pointers to methods to allow fscache to request manage=
+ment of the cache:
+    * Change the size of a data storage object [mandatory]::
+ =
 
-If you want to push these patches first, I can always adapt my patches to take
-account of them.
+ 	void (*resize_cookie)(struct netfs_cache_resources *cres,
+-			      loff_t new_size);
++			      loff_t new_size, bool shrank);
+ =
 
-David
+      This method is called to inform the cache backend of a change in siz=
+e of
+      the netfs file due to local truncation.  The cache backend should ma=
+ke all
+diff --git a/Documentation/filesystems/caching/netfs-api.rst b/Documentati=
+on/filesystems/caching/netfs-api.rst
+index 665b27f1556e..3154a1686480 100644
+--- a/Documentation/filesystems/caching/netfs-api.rst
++++ b/Documentation/filesystems/caching/netfs-api.rst
+@@ -226,7 +226,7 @@ If a network filesystem file is resized locally by tru=
+ncation, the following
+ should be called to notify the cache::
+ =
+
+ 	void fscache_resize_cookie(struct fscache_cookie *cookie,
+-				   loff_t new_size);
++				   loff_t new_size, bool shrank);
+ =
+
+ The caller must have first marked the cookie in-use.  The cookie and the =
+new
+ size are passed in and the cache is synchronously resized.  This is expec=
+ted to
+diff --git a/fs/9p/vfs_inode.c b/fs/9p/vfs_inode.c
+index 3829554ca369..2d33c53da8d9 100644
+--- a/fs/9p/vfs_inode.c
++++ b/fs/9p/vfs_inode.c
+@@ -1022,6 +1022,9 @@ static int v9fs_vfs_setattr(struct mnt_idmap *idmap,
+ 	struct v9fs_session_info *v9ses;
+ 	struct p9_fid *fid =3D NULL;
+ 	struct p9_wstat wstat;
++#ifdef CONFIG_9P_FSCACHE
++	uoff_t old_size =3D i_size_read(inode);
++#endif
+ =
+
+ 	p9_debug(P9_DEBUG_VFS, "\n");
+ 	retval =3D setattr_prepare(&nop_mnt_idmap, dentry, iattr);
+@@ -1086,7 +1089,8 @@ static int v9fs_vfs_setattr(struct mnt_idmap *idmap,
+ 		if (v9ses->cache & CACHE_FSCACHE) {
+ 			struct v9fs_inode *v9inode =3D V9FS_I(inode);
+ =
+
+-			fscache_resize_cookie(v9fs_inode_cookie(v9inode), iattr->ia_size);
++			fscache_resize_cookie(v9fs_inode_cookie(v9inode),
++					      iattr->ia_size, iattr->ia_size < old_size);
+ 		}
+ #endif
+ 	}
+diff --git a/fs/9p/vfs_inode_dotl.c b/fs/9p/vfs_inode_dotl.c
+index 116b29e95f21..dde0dbea2685 100644
+--- a/fs/9p/vfs_inode_dotl.c
++++ b/fs/9p/vfs_inode_dotl.c
+@@ -519,6 +519,9 @@ int v9fs_vfs_setattr_dotl(struct mnt_idmap *idmap,
+ 		.uid =3D INVALID_UID,
+ 		.gid =3D INVALID_GID,
+ 	};
++#ifdef CONFIG_9P_FSCACHE
++	uoff_t old_size =3D i_size_read(inode);
++#endif
+ =
+
+ 	p9_debug(P9_DEBUG_VFS, "\n");
+ =
+
+@@ -580,7 +583,7 @@ int v9fs_vfs_setattr_dotl(struct mnt_idmap *idmap,
+ #ifdef CONFIG_9P_FSCACHE
+ 		if (v9ses->cache & CACHE_FSCACHE)
+ 			fscache_resize_cookie(v9fs_inode_cookie(V9FS_I(inode)),
+-				iattr->ia_size);
++					      iattr->ia_size, iattr->ia_size < old_size);
+ #endif
+ 	}
+ =
+
+diff --git a/fs/afs/inode.c b/fs/afs/inode.c
+index 634fbf8eb212..75cb5cd8ba14 100644
+--- a/fs/afs/inode.c
++++ b/fs/afs/inode.c
+@@ -744,7 +744,7 @@ static void afs_setattr_edit_file(struct afs_operation=
+ *op)
+ 		if (size !=3D old) {
+ 			truncate_pagecache(inode, size);
+ 			netfs_resize_file(&vnode->netfs, size, true);
+-			fscache_resize_cookie(afs_vnode_cache(vnode), size);
++			fscache_resize_cookie(afs_vnode_cache(vnode), size, size < old);
+ 		}
+ 	}
+ }
+@@ -817,7 +817,7 @@ int afs_setattr(struct mnt_idmap *idmap, struct dentry=
+ *dentry,
+ 			truncate_setsize(inode, attr->ia_size);
+ 			netfs_resize_file(&vnode->netfs, size, false);
+ 			fscache_resize_cookie(afs_vnode_cache(vnode),
+-					      attr->ia_size);
++					      attr->ia_size, attr->ia_size < i_size);
+ 			ret =3D 0;
+ 			goto out_unlock;
+ 		}
+diff --git a/fs/cachefiles/interface.c b/fs/cachefiles/interface.c
+index 789ff6abe926..4a31904aaf0e 100644
+--- a/fs/cachefiles/interface.c
++++ b/fs/cachefiles/interface.c
+@@ -204,7 +204,7 @@ static bool cachefiles_shorten_object(struct cachefile=
+s_object *object,
+  * Resize the backing object.
+  */
+ static void cachefiles_resize_cookie(struct netfs_cache_resources *cres,
+-				     uoff_t new_size)
++				     uoff_t new_size, bool shrank)
+ {
+ 	struct cachefiles_object *object =3D cachefiles_cres_object(cres);
+ 	struct cachefiles_cache *cache =3D object->volume->cache;
+@@ -215,10 +215,10 @@ static void cachefiles_resize_cookie(struct netfs_ca=
+che_resources *cres,
+ =
+
+ 	_enter("%llu->%llu", object->object_size, new_size);
+ =
+
+-	/* If the file is being shrunk, we need to downsize the backing file
+-	 * and clear the end of the final block.
++	/* If the file shrank, we need to downsize the backing file and clear
++	 * the end of the final block.
+ 	 */
+-	if (new_size < object->object_size) {
++	if (shrank) {
+ 		if (new_size >=3D i_size)
+ 			goto out;
+ 		cachefiles_begin_secure(cache, &saved_cred);
+diff --git a/fs/ceph/cache.h b/fs/ceph/cache.h
+index 20efac020394..892b18c31741 100644
+--- a/fs/ceph/cache.h
++++ b/fs/ceph/cache.h
+@@ -31,14 +31,14 @@ static inline struct fscache_cookie *ceph_fscache_cook=
+ie(struct ceph_inode_info
+ 	return netfs_i_cookie(&ci->netfs);
+ }
+ =
+
+-static inline void ceph_fscache_resize(struct inode *inode, loff_t to)
++static inline void ceph_fscache_resize(struct inode *inode, loff_t to, bo=
+ol shrank)
+ {
+ 	struct ceph_inode_info *ci =3D ceph_inode(inode);
+ 	struct fscache_cookie *cookie =3D ceph_fscache_cookie(ci);
+ =
+
+ 	if (cookie) {
+ 		ceph_fscache_use_cookie(inode, true);
+-		fscache_resize_cookie(cookie, to);
++		fscache_resize_cookie(cookie, to, shrank);
+ 		ceph_fscache_unuse_cookie(inode, true);
+ 	}
+ }
+@@ -96,7 +96,7 @@ static inline struct fscache_cookie *ceph_fscache_cookie=
+(struct ceph_inode_info
+ 	return NULL;
+ }
+ =
+
+-static inline void ceph_fscache_resize(struct inode *inode, loff_t to)
++static inline void ceph_fscache_resize(struct inode *inode, loff_t to, bo=
+ol shrank)
+ {
+ }
+ =
+
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index d52e2b389e0b..8ed63659ae58 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -680,7 +680,8 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+ 	mutex_init(&ci->i_truncate_mutex);
+ 	ci->i_truncate_seq =3D 0;
+ 	ci->i_truncate_size =3D 0;
+-	ci->i_truncate_pending =3D 0;
++	ci->i_truncate_pending =3D false;
++	ci->i_truncate_shrank =3D false;
+ 	ci->i_truncate_pagecache_size =3D 0;
+ =
+
+ 	ci->i_max_size =3D 0;
+@@ -847,7 +848,9 @@ int ceph_fill_file_size(struct inode *inode, int issue=
+d,
+ 				       CEPH_CAP_FILE_BUFFER)) ||
+ 			    mapping_mapped(inode->i_mapping) ||
+ 			    __ceph_is_file_opened(ci)) {
+-				ci->i_truncate_pending++;
++				ci->i_truncate_pending =3D true;
++				if (size < isize)
++					ci->i_truncate_shrank =3D true;
+ 				queue_trunc =3D 1;
+ 			}
+ 		}
+@@ -2304,12 +2307,13 @@ void __ceph_do_pending_vmtruncate(struct inode *in=
+ode)
+ 	struct ceph_client *cl =3D ceph_inode_to_client(inode);
+ 	struct ceph_inode_info *ci =3D ceph_inode(inode);
+ 	u64 to;
++	bool shrank;
+ 	int wrbuffer_refs, finish =3D 0;
+ =
+
+ 	mutex_lock(&ci->i_truncate_mutex);
+ retry:
+ 	spin_lock(&ci->i_ceph_lock);
+-	if (ci->i_truncate_pending =3D=3D 0) {
++	if (!ci->i_truncate_pending) {
+ 		doutc(cl, "%p %llx.%llx none pending\n", inode,
+ 		      ceph_vinop(inode));
+ 		spin_unlock(&ci->i_ceph_lock);
+@@ -2333,18 +2337,20 @@ void __ceph_do_pending_vmtruncate(struct inode *in=
+ode)
+ 	/* there should be no reader or writer */
+ 	WARN_ON_ONCE(ci->i_rd_ref || ci->i_wr_ref);
+ =
+
++	shrank =3D ci->i_truncate_shrank;
+ 	to =3D ci->i_truncate_pagecache_size;
+ 	wrbuffer_refs =3D ci->i_wrbuffer_ref;
+ 	doutc(cl, "%p %llx.%llx (%d) to %lld\n", inode, ceph_vinop(inode),
+ 	      ci->i_truncate_pending, to);
+ 	spin_unlock(&ci->i_ceph_lock);
+ =
+
+-	ceph_fscache_resize(inode, to);
++	ceph_fscache_resize(inode, to, shrank);
+ 	truncate_pagecache(inode, to);
+ =
+
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (to =3D=3D ci->i_truncate_pagecache_size) {
+-		ci->i_truncate_pending =3D 0;
++		ci->i_truncate_shrank =3D false;
++		ci->i_truncate_pending =3D false;
+ 		finish =3D 1;
+ 	}
+ 	spin_unlock(&ci->i_ceph_lock);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 72d4e30304dc..e6eaf1647fe5 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -481,7 +481,8 @@ struct ceph_inode_info {
+ 	struct mutex i_truncate_mutex;
+ 	u32 i_truncate_seq;        /* last truncate to smaller size */
+ 	u64 i_truncate_size;       /*  and the size we last truncated down to */
+-	int i_truncate_pending;    /*  still need to call vmtruncate */
++	bool i_truncate_pending;   /*  still need to call vmtruncate */
++	bool i_truncate_shrank;		/* Truncate shrank the file */
+ 	/*
+ 	 * For none fscrypt case it equals to i_truncate_size or it will
+ 	 * equals to fscrypt_file_size
+diff --git a/fs/netfs/fscache_io.c b/fs/netfs/fscache_io.c
+index 056a2bae5d99..ea0b11807034 100644
+--- a/fs/netfs/fscache_io.c
++++ b/fs/netfs/fscache_io.c
+@@ -267,7 +267,7 @@ EXPORT_SYMBOL(__fscache_write_to_cache);
+ /*
+  * Change the size of a backing object.
+  */
+-void __fscache_resize_cookie(struct fscache_cookie *cookie, uoff_t new_si=
+ze)
++void __fscache_resize_cookie(struct fscache_cookie *cookie, uoff_t new_si=
+ze, bool shrank)
+ {
+ 	struct netfs_cache_resources cres;
+ =
+
+@@ -281,7 +281,7 @@ void __fscache_resize_cookie(struct fscache_cookie *co=
+okie, uoff_t new_size)
+ 		 * netfs's inode lock so that we're serialised with respect to
+ 		 * writes.
+ 		 */
+-		cookie->volume->cache->ops->resize_cookie(&cres, new_size);
++		cookie->volume->cache->ops->resize_cookie(&cres, new_size, shrank);
+ 		fscache_end_operation(&cres);
+ 	} else {
+ 		fscache_stat(&fscache_n_resizes_null);
+diff --git a/fs/smb/client/cifsfs.c b/fs/smb/client/cifsfs.c
+index 98b610b2a114..a60956a40aa9 100644
+--- a/fs/smb/client/cifsfs.c
++++ b/fs/smb/client/cifsfs.c
+@@ -1332,7 +1332,7 @@ static int cifs_precopy_set_eof(struct inode *src_in=
+ode, struct cifsInodeInfo *s
+ 		goto set_failed;
+ =
+
+ 	netfs_resize_file(&src_cifsi->netfs, src_end, true);
+-	fscache_resize_cookie(cifs_inode_cookie(src_inode), src_end);
++	fscache_resize_cookie(cifs_inode_cookie(src_inode), src_end, false);
+ 	return 0;
+ =
+
+ set_failed:
+@@ -1626,9 +1626,9 @@ ssize_t cifs_file_copychunk_range(unsigned int xid,
+ 		if (rc > 0 && destoff + rc > i_size_read(target_inode)) {
+ 			truncate_setsize(target_inode, destoff + rc);
+ 			netfs_resize_file(&target_cifsi->netfs,
+-					  i_size_read(target_inode), true);
++					  destoff + rc, true);
+ 			fscache_resize_cookie(cifs_inode_cookie(target_inode),
+-					      i_size_read(target_inode));
++					      destoff + rc, false);
+ 		}
+ 		if (rc > 0) {
+ 			spin_lock(&target_inode->i_lock);
+diff --git a/fs/smb/client/inode.c b/fs/smb/client/inode.c
+index f29555f3c7d0..fb1afe72e6d2 100644
+--- a/fs/smb/client/inode.c
++++ b/fs/smb/client/inode.c
+@@ -3097,7 +3097,7 @@ void cifs_resize_file_locked(struct inode *inode, lo=
+ff_t old_size,
+ 		return;
+ =
+
+ 	fscache_use_cookie(cookie, true);
+-	fscache_resize_cookie(cookie, offset);
++	fscache_resize_cookie(cookie, offset, offset < old_size);
+ 	cifs_fscache_unuse_inode_cookie(inode, true);
+ }
+ =
+
+diff --git a/fs/smb/client/smb2ops.c b/fs/smb/client/smb2ops.c
+index 1e9018880639..f53ba045ba82 100644
+--- a/fs/smb/client/smb2ops.c
++++ b/fs/smb/client/smb2ops.c
+@@ -3611,7 +3611,8 @@ static long smb3_zero_range(struct file *file, struc=
+t cifs_tcon *tcon,
+ 			if (offset < cifsi->netfs._zero_point)
+ 				netfs_write_zero_point(inode, offset);
+ 			spin_unlock(&inode->i_lock);
+-			fscache_resize_cookie(cifs_inode_cookie(inode), new_size);
++			fscache_resize_cookie(cifs_inode_cookie(inode),
++					      new_size, false);
+ 		}
+ 	}
+ =
+
+@@ -4146,7 +4147,7 @@ static long smb3_collapse_range(struct file *file, s=
+truct cifs_tcon *tcon,
+ 	netfs_resize_file(&cifsi->netfs, new_eof, true);
+ 	netfs_write_zero_point(inode, new_eof);
+ 	spin_unlock(&inode->i_lock);
+-	fscache_resize_cookie(cifs_inode_cookie(inode), new_eof);
++	fscache_resize_cookie(cifs_inode_cookie(inode), new_eof, true);
+ out_2:
+ 	filemap_invalidate_unlock(inode->i_mapping);
+ out:
+@@ -4206,9 +4207,9 @@ static long smb3_insert_range(struct file *file, str=
+uct cifs_tcon *tcon,
+ =
+
+ 	truncate_setsize(inode, new_eof);
+ 	spin_lock(&inode->i_lock);
+-	netfs_resize_file(&cifsi->netfs, i_size_read(inode), true);
++	netfs_resize_file(&cifsi->netfs, new_eof, true);
+ 	spin_unlock(&inode->i_lock);
+-	fscache_resize_cookie(cifs_inode_cookie(inode), i_size_read(inode));
++	fscache_resize_cookie(cifs_inode_cookie(inode), new_eof, false);
+ =
+
+ 	/*
+ 	 * Move [off, old_eof) right by len. The helper copies backwards if the
+diff --git a/include/linux/fscache-cache.h b/include/linux/fscache-cache.h
+index ee524c863fa9..2b83ffa4510e 100644
+--- a/include/linux/fscache-cache.h
++++ b/include/linux/fscache-cache.h
+@@ -67,7 +67,7 @@ struct fscache_cache_ops {
+ =
+
+ 	/* Change the size of a data object */
+ 	void (*resize_cookie)(struct netfs_cache_resources *cres,
+-			      uoff_t new_size);
++			      uoff_t new_size, bool shrank);
+ =
+
+ 	/* Invalidate an object */
+ 	bool (*invalidate_cookie)(struct fscache_cookie *cookie);
+diff --git a/include/linux/fscache.h b/include/linux/fscache.h
+index f2d958bd1f48..ecd14d645690 100644
+--- a/include/linux/fscache.h
++++ b/include/linux/fscache.h
+@@ -184,7 +184,7 @@ extern struct fscache_cookie *__fscache_acquire_cookie=
+(
+ extern void __fscache_use_cookie(struct fscache_cookie *, bool);
+ extern void __fscache_unuse_cookie(struct fscache_cookie *, const void *,=
+ const uoff_t *);
+ extern void __fscache_relinquish_cookie(struct fscache_cookie *, bool);
+-extern void __fscache_resize_cookie(struct fscache_cookie *, uoff_t);
++void __fscache_resize_cookie(struct fscache_cookie *cookie, uoff_t new_si=
+ze, bool shrank);
+ extern void __fscache_invalidate(struct fscache_cookie *, const void *, u=
+off_t, unsigned int);
+ extern int __fscache_begin_read_operation(struct netfs_cache_resources *,=
+ struct fscache_cookie *);
+ extern int __fscache_begin_write_operation(struct netfs_cache_resources *=
+, struct fscache_cookie *);
+@@ -394,8 +394,9 @@ void fscache_update_cookie(struct fscache_cookie *cook=
+ie, const void *aux_data,
+ =
+
+ /**
+  * fscache_resize_cookie - Request that a cache object be resized
+- * @cookie: The cookie representing the cache object
+- * @new_size: The new size of the object (may be NULL)
++ * @cookie: The cookie representing the cache object (may be NULL)
++ * @new_size: The new size of the object
++ * @shrank: True if the file shrank; false if it expanded
+  *
+  * Request that the size of an object be changed.
+  *
+@@ -403,10 +404,10 @@ void fscache_update_cookie(struct fscache_cookie *co=
+okie, const void *aux_data,
+  * description.
+  */
+ static inline
+-void fscache_resize_cookie(struct fscache_cookie *cookie, uoff_t new_size=
+)
++void fscache_resize_cookie(struct fscache_cookie *cookie, uoff_t new_size=
+, bool shrank)
+ {
+ 	if (fscache_cookie_enabled(cookie))
+-		__fscache_resize_cookie(cookie, new_size);
++		__fscache_resize_cookie(cookie, new_size, shrank);
+ }
+ =
+
+ /**
 
