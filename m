@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 691AD494A18
-	for <ceph-devel@vger.kernel.org>; Thu,  8 Oct 2026 10:23:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D04A1495522
+	for <ceph-devel@vger.kernel.org>; Thu,  8 Oct 2026 10:23:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791455004; cv=none; b=X3qpeKbHUjHhctBF9ucCzr+FCiSl+90LC1I9q51vQ4S+ejgxPyY5TdMpmDe1IL8Anx1K6PMrxgYrXBiBDcvyv0sKhhYIP5rArj5vv7uiO4Z+kb5ELAdE1PNR9tUDqkS+qZhckZXZwCOch9c+aj52YuaF3PbguVEc6s7yJqQ1ffM=
+	t=1791455015; cv=none; b=NPEHI07lAYMwwf58DtPwSNKZGy+3EQIh0x2KmLoiHdTNtZ6qByzMxqka9d0pFAsr8T+UMQpHxVK411BSbm7TxEzMDj/GTyxeD3mCKNYeHlI9f76ZI15HTq/adJebUEfE9LvtgmYtIAc7sIrFLsbq7MJ7xJ/Jxc1f1mlh0Fgl2fo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791455004; c=relaxed/simple;
-	bh=51Hnywow9m+EfGeBXFdD8++qMPUJ5/apgW0WCxsmTGE=;
+	s=arc-20240116; t=1791455015; c=relaxed/simple;
+	bh=sPtZ+yN9shpCVoqwt2RXAJS/54SQGRz1fY5Q7nGZQrk=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rnBpoi7b/O8Gd8AxfogXlhLQmCG4zpkluJrHaC50oSOMgGE+sdvfcZ5QEjXYye2vA+0EBPAq0spXSAUSCgOkF5eGTrZjnzCwRYmX5P3l+HXGPmmycGlwCt28glb2T9fvEwRTrXAzRRp1YJ7QXCJcmPi2+JLEyKBTQCd8wzsatvc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Xlid5P6Z; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=KbPhuY8xIV4A+ASVwE6vpOeg5XlFazNL/CnouCDgQjSH4z4NZP6xr7cnZD8RuyTqgmrMKaNhB9hTH2/gc75y5lne8PilBtWkyDjGfsHqP05JSLNhHrfFIylXbX91ORD0WDZgXPnEjxQ2xkHmLZToejTgoakT/ZYM3wVW094BerY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ES+S6VAY; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Xlid5P6Z"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ES+S6VAY"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1791455002;
+	s=mimecast20190719; t=1791455013;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=qex3q47o/llFp5icyZaFvcldeQl44QEXS98v350pNx0=;
-	b=Xlid5P6ZoCSWGYL/CU+mMYtNrIwle+HukPzsG99STa4yun7FHv9eAEit2N4bqRTsWHvMnb
-	NRAEInuWOZf6o8Fvaoo92jA47+1YPa9tOOn1AYkPXEm5ni67UkBLKE27K6fbJ7zSyibpod
-	kMRGJF+NZ9Q8JbuoxW8CWUmee1tm1Ns=
-Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+	bh=jMN0IlS8EIrypli+QxcpLH63aFUppXF0So/Ub+VN9hg=;
+	b=ES+S6VAYw+ryD6R4P4MXztZRRiolcSDOkUYqvJZzAoctxNA51dd7GRbF2NY6GKB3KuQ3hz
+	c0vT+906seubc1Uz4YQuLxqkZ69W1tPhridfEOi+eY9y6ItoqwYtT3BFSI7EyP3AUHDX4E
+	NjoOzinguzVfUiLLcrzF6LVZTCe+uEw=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-600-IuioQ6RDOdq2q_Ze0WKFkw-1; Thu,
- 08 Oct 2026 06:23:17 -0400
-X-MC-Unique: IuioQ6RDOdq2q_Ze0WKFkw-1
-X-Mimecast-MFC-AGG-ID: IuioQ6RDOdq2q_Ze0WKFkw_1791454994
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-479-4Lgsg8VfP4SyBsIDNIx2XQ-1; Thu,
+ 08 Oct 2026 06:23:29 -0400
+X-MC-Unique: 4Lgsg8VfP4SyBsIDNIx2XQ-1
+X-Mimecast-MFC-AGG-ID: 4Lgsg8VfP4SyBsIDNIx2XQ_1791455007
 Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 09BF4180AEA5;
-	Thu,  8 Oct 2026 10:23:13 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id BAB06195D00A;
+	Thu,  8 Oct 2026 10:23:26 +0000 (UTC)
 Received: from warthog.com (unknown [10.44.32.90])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 3BF581956086;
-	Thu,  8 Oct 2026 10:23:06 +0000 (UTC)
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id E82111956086;
+	Thu,  8 Oct 2026 10:23:21 +0000 (UTC)
 From: David Howells <dhowells@redhat.com>
 To: Christian Brauner <christian@brauner.io>
 Cc: David Howells <dhowells@redhat.com>,
@@ -60,11 +60,10 @@ Cc: David Howells <dhowells@redhat.com>,
 	ceph-devel@vger.kernel.org,
 	v9fs@lists.linux.dev,
 	linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mm@kvack.org
-Subject: [PATCH v17 1/8] mm: Make readahead store folio count in readahead_control
-Date: Thu,  8 Oct 2026 11:22:45 +0100
-Message-ID: <20261008102253.1003776-2-dhowells@redhat.com>
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v17 3/8] netfs: Make unbuffered/DIO read and write use bvecq
+Date: Thu,  8 Oct 2026 11:22:47 +0100
+Message-ID: <20261008102253.1003776-4-dhowells@redhat.com>
 In-Reply-To: <20261008102253.1003776-1-dhowells@redhat.com>
 References: <20261008102253.1003776-1-dhowells@redhat.com>
 Precedence: bulk
@@ -76,94 +75,205 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-Make readahead store folio count in readahead_control so that the
-filesystem can know in advance how many folios it needs to keep track of.
-
-This is cleared by read_pages() in case it is called from a loop.
-
-The count is accessed by the filesystem with readahead_folio_count().
+Make unbuffered and DIO read and write in netfslib use bvecq.  The idea is
+to only use bvecq in talking to the filesystem and not pass iterators at
+all as the filesystem may just end up extracting them.
 
 Signed-off-by: David Howells <dhowells@redhat.com>
-Reviewed-by: Paulo Alcantara (Red Hat) <pc@manguebit.org>
+Reviewed-by: Paulo Alcantara <pc@manguebit.org>
 cc: Matthew Wilcox <willy@infradead.org>
 cc: netfs@lists.linux.dev
-cc: linux-mm@kvack.org
 cc: linux-fsdevel@vger.kernel.org
 ---
- include/linux/pagemap.h | 10 ++++++++++
- mm/readahead.c          |  5 +++++
- 2 files changed, 15 insertions(+)
+ fs/netfs/direct_read.c  | 31 +++++++++++++------------------
+ fs/netfs/direct_write.c | 33 ++++++++++++++-------------------
+ fs/netfs/objects.c      | 11 +----------
+ fs/netfs/read_collect.c | 17 +++++++++++------
+ include/linux/netfs.h   |  4 +---
+ 5 files changed, 40 insertions(+), 56 deletions(-)
 
-diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
-index 0adfa6605653..b7154b81d0d7 100644
---- a/include/linux/pagemap.h
-+++ b/include/linux/pagemap.h
-@@ -1411,6 +1411,7 @@ struct readahead_control {
- 	struct file_ra_state *ra;
- /* private: use the readahead_* accessors instead */
- 	pgoff_t _index;
-+	unsigned int _nr_folios;
- 	unsigned int _nr_pages;
- 	unsigned int _batch_count;
- 	bool dropbehind;
-@@ -1590,6 +1591,15 @@ static inline size_t readahead_batch_length(const struct readahead_control *rac)
- 	return rac->_batch_count * PAGE_SIZE;
- }
- 
-+/**
-+ * readahead_folio_count - Get the number of folios in this readahead request.
-+ * @rac: The readahead request.
-+ */
-+static inline unsigned int readahead_folio_count(const struct readahead_control *rac)
-+{
-+	return rac->_nr_folios;
-+}
+diff --git a/fs/netfs/direct_read.c b/fs/netfs/direct_read.c
+index 8c15f3079723..2b8eeb2d3c06 100644
+--- a/fs/netfs/direct_read.c
++++ b/fs/netfs/direct_read.c
+@@ -177,25 +177,20 @@ ssize_t netfs_unbuffered_read_iter_locked(struct kiocb *iocb, struct iov_iter *i
+ 	 * buffer for ourselves as the caller's iterator will be trashed when
+ 	 * we return.
+ 	 *
+-	 * In such a case, extract an iterator to represent as much of the the
+-	 * output buffer as we can manage.  Note that the extraction might not
+-	 * be able to allocate a sufficiently large bvec array and may shorten
+-	 * the request.
++	 * Extract a buffer queue to represent as much of the output buffer as
++	 * we can manage.  The fragments are extracted into a bvecq which will
++	 * have sufficient nodes allocated to hold all the data, though this
++	 * may end up truncated if ENOMEM is encountered.
+ 	 */
+-	if (user_backed_iter(iter)) {
+-		ret = netfs_extract_user_iter(iter, rreq->len, &rreq->buffer.iter, 0);
+-		if (ret < 0)
+-			goto error_put;
+-		rreq->direct_bv = (struct bio_vec *)rreq->buffer.iter.bvec;
+-		rreq->direct_bv_count = ret;
+-		rreq->direct_bv_unpin = iov_iter_extract_will_pin(iter);
+-		rreq->len = iov_iter_count(&rreq->buffer.iter);
+-	} else {
+-		rreq->buffer.iter = *iter;
+-		rreq->len = orig_count;
+-		rreq->direct_bv_unpin = false;
+-		iov_iter_advance(iter, orig_count);
+-	}
++	ret = netfs_extract_iter(iter, rreq->len, INT_MAX,
++				 &rreq->direct_bq, 0, rreq->gfp);
++	if (ret < 0)
++		goto error_put;
 +
- static inline unsigned long dir_pages(const struct inode *inode)
++	rreq->len = ret;
++
++	iov_iter_bvec_queue(&rreq->buffer.iter, ITER_DEST, rreq->direct_bq,
++			    0, 0, rreq->len);
+ 
+ 	// TODO: Set up bounce buffer if needed
+ 
+diff --git a/fs/netfs/direct_write.c b/fs/netfs/direct_write.c
+index cc46b7d9321f..b3ec1900d7a4 100644
+--- a/fs/netfs/direct_write.c
++++ b/fs/netfs/direct_write.c
+@@ -222,10 +222,10 @@ static void netfs_unbuffered_write_async(struct work_struct *work)
+  * encrypted file.  This can also be used for direct I/O writes.
+  */
+ ssize_t netfs_unbuffered_write_iter_locked(struct kiocb *iocb, struct iov_iter *iter,
+-						  struct netfs_group *netfs_group)
++					   struct netfs_group *netfs_group)
  {
- 	return (unsigned long)(inode->i_size + PAGE_SIZE - 1) >>
-diff --git a/mm/readahead.c b/mm/readahead.c
-index 6e5563290287..196542fb1c93 100644
---- a/mm/readahead.c
-+++ b/mm/readahead.c
-@@ -188,6 +188,7 @@ static void read_pages(struct readahead_control *rac)
- 	if (unlikely(rac->_workingset))
- 		psi_memstall_leave(&rac->_pflags);
- 	rac->_workingset = false;
-+	rac->_nr_folios = 0;
- 
- 	BUG_ON(readahead_count(rac));
- }
-@@ -303,6 +304,7 @@ void page_cache_ra_unbounded(struct readahead_control *ractl,
- 		if (i == mark)
- 			folio_set_readahead(folio);
- 		ractl->_workingset |= folio_test_workingset(folio);
-+		ractl->_nr_folios++;
- 		ractl->_nr_pages += min_nrpages;
- 		i += min_nrpages;
- 	}
-@@ -473,6 +475,7 @@ static inline int ra_alloc_folio(struct readahead_control *ractl, pgoff_t index,
- 		return err;
- 	}
- 
-+	ractl->_nr_folios++;
- 	ractl->_nr_pages += 1UL << order;
- 	ractl->_workingset |= folio_test_workingset(folio);
- 	return 0;
-@@ -822,6 +825,7 @@ void readahead_expand(struct readahead_control *ractl,
- 			ractl->_workingset = true;
- 			psi_memstall_enter(&ractl->_pflags);
+ 	struct netfs_io_request *wreq;
+-	ssize_t ret, n;
++	ssize_t ret;
+ 	uoff_t start = iocb->ki_pos;
+ 	uoff_t end = start + iov_iter_count(iter);
+ 	size_t len = iov_iter_count(iter);
+@@ -261,25 +261,20 @@ ssize_t netfs_unbuffered_write_iter_locked(struct kiocb *iocb, struct iov_iter *
+ 		 * allocate a sufficiently large bvec array and may shorten the
+ 		 * request.
+ 		 */
+-		if (user_backed_iter(iter)) {
+-			n = netfs_extract_user_iter(iter, len, &wreq->buffer.iter, 0);
+-			if (n < 0) {
+-				ret = n;
+-				goto error_put;
+-			}
+-			wreq->direct_bv = (struct bio_vec *)wreq->buffer.iter.bvec;
+-			wreq->direct_bv_count = n;
+-			wreq->direct_bv_unpin = iov_iter_extract_will_pin(iter);
+-		} else {
+-			/* If this is a kernel-generated async DIO request,
+-			 * assume that any resources the iterator points to
+-			 * (eg. a bio_vec array) will persist till the end of
+-			 * the op.
+-			 */
+-			wreq->buffer.iter = *iter;
++		ssize_t n = netfs_extract_iter(iter, len, INT_MAX,
++					       &wreq->direct_bq, 0, wreq->gfp);
++
++		if (n < 0) {
++			ret = n;
++			goto error_put;
  		}
-+		ractl->_nr_folios++;
- 		ractl->_nr_pages += min_nrpages;
- 		ractl->_index = folio->index;
++		wreq->len = n;
++		_debug("dio-write %zx/%zx %u/%u",
++		       n, len, wreq->direct_bq->nr_slots,
++		       wreq->direct_bq->max_slots);
+ 
+-		wreq->len = iov_iter_count(&wreq->buffer.iter);
++		iov_iter_bvec_queue(&wreq->buffer.iter, ITER_SOURCE,
++				    wreq->direct_bq, 0, 0, wreq->len);
  	}
-@@ -851,6 +855,7 @@ void readahead_expand(struct readahead_control *ractl,
- 			ractl->_workingset = true;
- 			psi_memstall_enter(&ractl->_pflags);
+ 
+ 	__set_bit(NETFS_RREQ_USE_IO_ITER, &wreq->flags);
+diff --git a/fs/netfs/objects.c b/fs/netfs/objects.c
+index 4b8d20559b0e..f8a5b6a7a2a9 100644
+--- a/fs/netfs/objects.c
++++ b/fs/netfs/objects.c
+@@ -133,7 +133,6 @@ static void netfs_free_request_rcu(struct rcu_head *rcu)
+ static void netfs_deinit_request(struct netfs_io_request *rreq)
+ {
+ 	struct netfs_inode *ictx = netfs_inode(rreq->inode);
+-	unsigned int i;
+ 
+ 	trace_netfs_rreq(rreq, netfs_rreq_trace_free);
+ 
+@@ -148,15 +147,7 @@ static void netfs_deinit_request(struct netfs_io_request *rreq)
+ 		rreq->netfs_ops->free_request(rreq);
+ 	if (rreq->cache_resources.ops)
+ 		rreq->cache_resources.ops->end_operation(&rreq->cache_resources);
+-	if (rreq->direct_bv) {
+-		for (i = 0; i < rreq->direct_bv_count; i++) {
+-			if (rreq->direct_bv[i].bv_page) {
+-				if (rreq->direct_bv_unpin)
+-					unpin_user_page(rreq->direct_bv[i].bv_page);
+-			}
+-		}
+-		kvfree(rreq->direct_bv);
+-	}
++	bvecq_put(rreq->direct_bq);
+ 	rolling_buffer_clear(&rreq->buffer);
+ 
+ 	if (atomic_dec_and_test(&ictx->io_count))
+diff --git a/fs/netfs/read_collect.c b/fs/netfs/read_collect.c
+index 75c8874ec459..ab2f208cc8f9 100644
+--- a/fs/netfs/read_collect.c
++++ b/fs/netfs/read_collect.c
+@@ -422,12 +422,17 @@ static void netfs_rreq_assess_dio(struct netfs_io_request *rreq)
+ 
+ 	if (rreq->origin == NETFS_UNBUFFERED_READ ||
+ 	    rreq->origin == NETFS_DIO_READ) {
+-		for (i = 0; i < rreq->direct_bv_count; i++) {
+-			flush_dcache_page(rreq->direct_bv[i].bv_page);
+-			// TODO: cifs marks pages in the destination buffer
+-			// dirty under some circumstances after a read.  Do we
+-			// need to do that too?
+-			set_page_dirty(rreq->direct_bv[i].bv_page);
++		for (struct bvecq *bq = rreq->direct_bq; bq; bq = bvecq_next(bq)) {
++			unsigned int nr_slots = bvecq_nr_slots_acquire(bq);
++			/* Read the slot count before the slots. */
++
++			/* Mark the target buffers dirty. */
++			for (i = 0; i < nr_slots; i++) {
++				flush_dcache_page(bq->bv[i].bv_page);
++				if (bq->mem_type == BVECQ_MEM_GUP ||
++				    bq->mem_type == BVECQ_MEM_PAGECACHE)
++					set_page_dirty(bq->bv[i].bv_page);
++			}
  		}
-+		ractl->_nr_folios++;
- 		ractl->_nr_pages += min_nrpages;
- 		if (ra) {
- 			ra->size += min_nrpages;
+ 	}
+ 
+diff --git a/include/linux/netfs.h b/include/linux/netfs.h
+index aca192bc5675..aa305fe2d4e1 100644
+--- a/include/linux/netfs.h
++++ b/include/linux/netfs.h
+@@ -251,7 +251,7 @@ struct netfs_io_request {
+ 	wait_queue_head_t	waitq;		/* Processor waiter */
+ 	void			*netfs_priv;	/* Private data for the netfs */
+ 	void			*netfs_priv2;	/* Private data for the netfs */
+-	struct bio_vec		*direct_bv;	/* DIO buffer list (when handling iovec-iter) */
++	struct bvecq		*direct_bq;	/* DIO buffer list (when handling iovec-iter) */
+ 	uoff_t			submitted;	/* Amount submitted for I/O so far */
+ 	uoff_t			len;		/* Length of the request */
+ 	size_t			transferred;	/* Amount to be indicated as transferred */
+@@ -266,7 +266,6 @@ struct netfs_io_request {
+ 	uoff_t			abandon_to;	/* Position to abandon folios to */
+ 	const struct folio	*no_unlock_folio; /* Don't unlock this folio after read */
+ 	gfp_t			gfp;		/* GFP flags to use */
+-	unsigned int		direct_bv_count; /* Number of elements in direct_bv[] */
+ 	unsigned int		debug_id;
+ 	unsigned int		rsize;		/* Maximum read size (0 for none) */
+ 	unsigned int		wsize;		/* Maximum write size (0 for none) */
+@@ -274,7 +273,6 @@ struct netfs_io_request {
+ 	unsigned int		nr_group_rel;	/* Number of refs to release on ->group */
+ 	spinlock_t		lock;		/* Lock for queuing subreqs */
+ 	enum netfs_io_origin	origin;		/* Origin of the request */
+-	bool			direct_bv_unpin; /* T if direct_bv[] must be unpinned */
+ 	refcount_t		ref;
+ 	unsigned long		flags;
+ #define NETFS_RREQ_IN_PROGRESS		0	/* Unlocked when the request completes (has ref) */
 
