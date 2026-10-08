@@ -1,51 +1,67 @@
-Received: from mvsmtppost28.nm.naver.com (mvsmtppost28.nm.naver.com [61.247.196.240])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1413B3BED56
-	for <ceph-devel@vger.kernel.org>; Thu,  8 Oct 2026 06:17:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=61.247.196.240
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 841832F5A2D
+	for <ceph-devel@vger.kernel.org>; Thu,  8 Oct 2026 07:44:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791440252; cv=none; b=lmxLercoMOPe/w9SGj8B9H/cJZiX7q8hx1RDQRrKqiW8HPl0ne/slHAJL0XTg+OHNzxOlEqJCCGuc2EyDSY3oU0h1emvRJVatyC2XdJZM4DwAzcwDTc3neC2l/iyt+S+JGbbsf2AUJgzJX3956l/P7plx/ESEXfNHy+sbW6QAxM=
+	t=1791445447; cv=none; b=dPqfKfXMxFcmODoqzLp7CbQaZ7qeZQHb//MJqHptGMtoOZtaAQc6SlN0lqcqrzmjm+5U+1IAUU7VjrEdpZVdDuYpBBCb1yIvqvR3lgECoiMkv1xNUy/4yQHC1l2RiLBW5m+wlC/Z/a0RAjM4njb1IRr/9stNKl7ecdvj8edzU5M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791440252; c=relaxed/simple;
-	bh=VhDitJgCy7Mj/SSOwupcCv1OS3f4FZwihJJoOxw90J0=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=umsuuzIGKFs2qWNoIg+k5AEfHIABVc20+sYRXRSsit5nDhIxrGZmxBUEVacskdHlLpcn9L+1tgmysWQwCN0B5TsphVxJ7R2Y/QtXjXLkv99gzxaxijeh0MwWr2h6A8VrvVPOLIDeD+yETJF/AOgHyt2iD1IfhVH9vik5+1/MTeY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=naver.com; spf=pass smtp.mailfrom=naver.com; dkim=pass (2048-bit key) header.d=naver.com header.i=@naver.com header.b=Fqq3ZiQy; arc=none smtp.client-ip=61.247.196.240
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=naver.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=naver.com
+	s=arc-20240116; t=1791445447; c=relaxed/simple;
+	bh=MOyrkKu/Obwobegg9HsqVsEDQwbw8Pzz8rTRIjAqFj4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=UribJxbn9tMqpRWnH1qg+E55JiBkcrNc8AY7NbyHRHv4+Bx1WV9/+kuYZXLPWJ8e5eWyuUSNKWIG0sDPH0XIcZGV0NRWPXN46WdakexrrNJG3SkjR7fm53g3cia3K+eBmfZWhDksUkjCIdn6cxyHzLqyKrQ1dwifz2v2ZeTuNL0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=L5opAjjO; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=naver.com header.i=@naver.com header.b="Fqq3ZiQy"
-Received: from cvsendbo020.nm ([10.112.24.40])
-  by mvsmtppost28.nm.naver.com with ESMTP id PfWfcGjaQHyrw6jyvIKEwg
-  for <ceph-devel@vger.kernel.org>;
-  Thu, 08 Oct 2026 06:07:20 -0000
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=naver.com; s=s20171208;
-	t=1791439640; bh=VhDitJgCy7Mj/SSOwupcCv1OS3f4FZwihJJoOxw90J0=;
-	h=From:To:Subject:Date:Message-ID:From:Subject:Feedback-ID:
-	 X-Works-Security;
-	b=Fqq3ZiQyUdfDFFhbLsSBcr0xytZEGmZmxfMuJ+Y7p5uCGCdz31bOVqfi9BDKVCMV3
-	 r9S+MMkD5WH0zh5tXTNAN4UmSLTfEH4nbCzrHgg86R9B8SvdcljF1hfn6rLw9ZYxOb
-	 idWYZs3ez4xU/sLSbUaHyRRymjABebgfTWvpdVIT0raVe6h0ZeSV0pTpp5zP3NQuXr
-	 8JTQhE2VP1/DTDIQjkjv4zteXQ1NYgwH4NLZdrkA/SzhzTrz3mkXDpZWO11qq5wZGw
-	 F/6jc2FKQ9RHRAEZEX1O5gjLEet+2NHsNHzaNwivvuXPjvzIHA1X4gGRoSOeOSX6aR
-	 MvItzeiTInFxw==
-X-Session-ID: 70Hx9F0CQgq0vglQtmWbfQ
-X-Works-Send-Opt: OPFwpzGdjHmdKHFOMr39Ko3YKHmdjAudFqM9KqMqFxIYkEljxBmwjAg=
-X-Works-Smtp-Source: rZbmFAulFqJZ+HmmFAUX+6E=
-Received: from localhost.localdomain ([115.136.205.4])
-  by cvnsmtp002.nm.naver.com with ESMTP id 70Hx9F0CQgq0vglQtmWbfQ
-  for <multiple recipients>
-  (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384);
-  Thu, 08 Oct 2026 06:07:20 -0000
-From: sung byeongchan <tjdqudcks0424@naver.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: [PATCH] ceph: bound MDSMap name skips by the message end
-Date: Thu,  8 Oct 2026 15:07:14 +0900
-Message-ID: <20261008060714.182511-1-tjdqudcks0424@naver.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="L5opAjjO"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1791445444;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=tKpk0FswZIpSpMgoXKEPBZ20GyyjP1Zbx70jc89ehr4=;
+	b=L5opAjjOcPRfJmPdL7/dGjzPs7ebsF1xqljzNYlMgzrYsiSD1tfK1ywV9O/0ClNA3fE5YY
+	dbUCInGL7bragKxVFCj5JYaQ5SjGFM+0X16qNr7QAlK4GcPzB9Ds7OIiVCO4CC1lc+SYXJ
+	ANg2aI3KElW1R1qyYdCiqd6r6AGn03U=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-64-ioJiaHgXPOC2jxdNrGzlIg-1; Thu,
+ 8 Oct 2026 07:44:01 +0000
+X-MC-Unique: ioJiaHgXPOC2jxdNrGzlIg-1
+X-Mimecast-MFC-AGG-ID: ioJiaHgXPOC2jxdNrGzlIg_1791445438
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 414FA1955F37;
+	Thu,  8 Oct 2026 07:43:57 +0000 (UTC)
+Received: from warthog.com (unknown [10.44.32.90])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 541961956040;
+	Thu,  8 Oct 2026 07:43:49 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	Matthew Wilcox <willy@infradead.org>,
+	Namjae Jeon <linkinjeon@kernel.org>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Stefan Metzmacher <metze@samba.org>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v15 0/8] netfs: Use a bvecq chain position abstraction
+Date: Thu,  8 Oct 2026 08:43:36 +0100
+Message-ID: <20261008074346.936909-1-dhowells@redhat.com>
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -53,49 +69,125 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-ceph_mdsmap_decode() reads two remote u32 name lengths and advances its
-parser cursor without checking that either string remains in the message.
-On a 32-bit client, a sufficiently large length can wrap the cursor below
-`end`.  The following numerical bounds check then succeeds and dereferences
-the wrapped address.
+Hi Christian,
 
-Use ceph_decode_skip_n() for both names so the remaining bytes are checked
-before the cursor advances.
+Could you pull these patches please into your vfs-7.4.netfs branch?  This
+is the fourth of five batches.  The primary purpose of this batch is to add
+an abstraction for a position in a bvecq chain and make use of it.
 
-The issue produced a page fault in ceph_mdsmap_decode twice on the tested
-i386 baseline.  The same frame was rejected without a fault twice after
-this change, while a normal MDSMap continued to be accepted.
+With that in mind, this patchset does the following:
 
-Fixes: 2f2dc053404f ("ceph: MDS client")
-Assisted-by: LLM
-Signed-off-by: sung byeongchan <tjdqudcks0424@naver.com>
----
- fs/ceph/mdsmap.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ (1) Add a struct, bvecq_pos, to refer to a position in a bvecq chain.
+     This is a tuple of ( bvecq pointer, slot and offset } and the position
+     struct holds (for now) a ref on the bvecq pointed to.
 
-diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
-index 53079ef34c3a1..7e0c3cf985b46 100644
---- a/fs/ceph/mdsmap.c
-+++ b/fs/ceph/mdsmap.c
-@@ -205,7 +205,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(struct ceph_mds_client *mdsc, void **p,
- 		ceph_decode_need(p, end, sizeof(u64) + sizeof(u32), bad);
- 		*p += sizeof(u64);
- 		namelen = ceph_decode_32(p);  /* skip mds name */
--		*p += namelen;
-+		ceph_decode_skip_n(p, end, namelen, bad);
- 
- 		ceph_decode_32_safe(p, end, mds, bad);
- 		ceph_decode_32_safe(p, end, inc, bad);
-@@ -223,7 +223,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(struct ceph_mds_client *mdsc, void **p,
- 		laggy = laggy_since.tv_sec != 0 || laggy_since.tv_nsec != 0;
- 		*p += sizeof(u32);
- 		ceph_decode_32_safe(p, end, namelen, bad);
--		*p += namelen;
-+		ceph_decode_skip_n(p, end, namelen, bad);
- 		if (info_v >= 2) {
- 			ceph_decode_32_safe(p, end, num_export_targets, bad);
- 			export_targets_len = size_mul(num_export_targets,
--- 
-2.43.0
+ (2) Change unbuffered/DIO to extract the supplied user buffers into a
+     bvecq chain rather than a bio_vec[] up front.  This means that
+     netfslib then uses bvecq chains for everything.
+
+ (3) Add a folio count to the readahead_control struct and then makes
+     readahead pre-create its buffer using that count to determine how many
+     slots are required.
+
+ (4) Change netfslib to use the bvecq_pos struct to keep track of the whole
+     request buffer and various points in it where loading, dispatch and
+     collection are taking place and to also keep track of the slice given
+     to each subrequest.
+
+This was split from v11 of a larger netfslib series[1].
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-next-4
+
+Thanks,
+David
+
+Changes
+=======
+ver #15)
+- In netfs_extract_iter(), set BVECQ_MEM_EXTERNAL rather than
+  BVECQ_MEM_PAGECACHE for unpinned memory.
+- In netfs_clear_unread_dio(), don't need to update subreq->transferred
+  as the caller overwrites it after.
+- Fixed issues brought up by sashiko[3]:
+  - In netfs_extract_iter(), remove redundant max_len check.
+  - In bvecq_pos_nudge() make sure the recheck is checking the old bvecq,
+    not the new.
+  - In netfs_unlock_abandoned_read_pages(), start from collect_cursor.slot,
+    not from slot zero.
+  - In netfs_pgpriv2_copy_to_cache(), cancel the caching also if we fail to
+    allocate a bvecq.
+  - In netfs_retry_write_stream(), use the same superfluity detection as
+    the read side.
+  - In netfs_write_subrequest_terminated(), only set the RETRY flag on
+    short uploads, not short cache writes.
+
+ver #14)
+- Fixed issues brought up by sashiko[2]:
+  - In netfs_extract_iter(), limit the number of slots per bvecq to what
+    will fit inside a 4KiB allocation.
+  - In netfs_rreq_assess_dio(), only set the page dirty if it's from GUP or
+    it's from the pagecache.
+  - In bvecq_zero(), skip the call to bvec_zero() if part == 0.
+  - In bvecq_delete_spent(), prefer returning true because more slots got
+    added to returning false because we hit the chain end.
+  - In netfs_read_gaps(), fix a leak of already allocated sink folios if we
+    get OOM when allocating a sink folios.
+  - In netfs_clear_unread_dio(), fix double call to iov_iter_zero().
+
+ver #13)
+- Rebased on -rc6 to account for some conflicting fixes.
+- Fixed a bug in netfs_prepare_read_iterator() where comparison was being
+  made against the wrong thing when limiting a subreq's size.
+
+ver #12)
+- Split from v11 of "netfs: Keep track of folios in a segmented bio_vec[]
+  chain"[1]
+
+[1] https://lore.kernel.org/r/20260902173350.3468672-1-dhowells@redhat.com/
+[2] https://sashiko.dev/#/patchset/20261006205947.608356-1-dhowells%40redhat.com
+[3] https://sashiko.dev/#/patchset/20261007142001.851620-1-dhowells%40redhat.com
+
+David Howells (8):
+  mm: Make readahead store folio count in readahead_control
+  netfs: Add a function to extract from an iter into a bvecq
+  netfs: Make unbuffered/DIO read and write use bvecq
+  netfs: Add some tools for managing a position in a bvecq chain
+  netfs: Provide a func to load the readahead buffers into a bvecq chain
+  netfs: Use bvecq_pos to hold the buffer positions
+  netfs: Remove the rolling_buffer implementation
+  netfs: Remove netfs_extract_user_iter()
+
+ fs/afs/dir.c                   |   5 +-
+ fs/afs/symlink.c               |   6 +-
+ fs/cachefiles/io.c             |  12 -
+ fs/netfs/Makefile              |   1 -
+ fs/netfs/buffered_read.c       | 182 ++++++++-------
+ fs/netfs/bvecq.c               | 321 ++++++++++++++++++++++++++
+ fs/netfs/direct_read.c         |  77 +++----
+ fs/netfs/direct_write.c        |  67 +++---
+ fs/netfs/internal.h            |   4 +-
+ fs/netfs/iterator.c            | 398 ++++++++++-----------------------
+ fs/netfs/misc.c                |  18 --
+ fs/netfs/objects.c             |  16 +-
+ fs/netfs/read_collect.c        | 106 +++++----
+ fs/netfs/read_pgpriv2.c        |  88 +++++---
+ fs/netfs/read_retry.c          |  87 ++++---
+ fs/netfs/read_single.c         |  16 +-
+ fs/netfs/rolling_buffer.c      | 182 ---------------
+ fs/netfs/write_collect.c       |  73 +++---
+ fs/netfs/write_issue.c         | 166 +++++++++-----
+ fs/netfs/write_retry.c         |  73 +++---
+ include/linux/bvecq.h          | 185 +++++++++++++++
+ include/linux/netfs.h          |  25 ++-
+ include/linux/pagemap.h        |  10 +
+ include/linux/rolling_buffer.h |  47 ----
+ include/trace/events/netfs.h   |  32 ++-
+ mm/readahead.c                 |   5 +
+ 26 files changed, 1252 insertions(+), 950 deletions(-)
+ delete mode 100644 fs/netfs/rolling_buffer.c
+ delete mode 100644 include/linux/rolling_buffer.h
 
