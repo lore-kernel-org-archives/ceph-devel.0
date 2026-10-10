@@ -1,176 +1,186 @@
-Received: from mail-yx1-f46.google.com (mail-yx1-f46.google.com [74.125.224.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-00364e01.pphosted.com (mx0a-00364e01.pphosted.com [148.163.135.74])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9C363CB55C
-	for <ceph-devel@vger.kernel.org>; Fri,  9 Oct 2026 21:28:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2F9CF4F1
+	for <ceph-devel@vger.kernel.org>; Sat, 10 Oct 2026 00:16:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.135.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791581294; cv=none; b=sREyMbe8+RHLpj5uXkL45SftwCVlbVd45bvuyrjWqNDd0eWabGVbc4gN6tgu8Ik2Xt2AnZUkmigeY0hb+vXqo3gB9q+OHQ1a5w51o5DvQUuHhlNBO7MTiYtIU0flHZg9/Fz5QUs3E+5J/8kemnis/O9pJIFdP9hz+STdHWBgri0=
+	t=1791591395; cv=none; b=L+ZNYlChUQWKChrCGSu35FhF21rGhG6H5CkLjsntc6f2lYWQJ7rxwcOAq1Eo7lGYOMJiEztaTe1NS4YisPCyTjOZsjharYq6+qKnm+ld1V56upsKQ3P75O+yi20xW0UOsYiXYXxfo5Ew6Gebb7fSPEYDHkewArkEZNQxj8Gr73s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791581294; c=relaxed/simple;
-	bh=c7dVmUOHRRQdq+y8uJdt5ZzUgLmvGysOTMR8sQ17MDY=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=IPyfrr2pYV8+KijAYUIMqHAbp29th92j/fQRDrEk1GUH78iaMt+c9gowFIQzNGQqNeKt4srKnzdQxUiTrZ6mqL6OTUaFZip+KeMYGkBt/zzYBIWrCLOdH7P4t+eKKhQ0PqQiX32YV23pdjtF2yMFTgSOEN3I7X0kOrumhntcd2c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=eAl5Miki; arc=none smtp.client-ip=74.125.224.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
+	s=arc-20240116; t=1791591395; c=relaxed/simple;
+	bh=5kCbcaTTTqgxxt8BaTH10ihf7QJwDiWdRV2+3PkCxNw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=j1aCwv/rjsksDAnQbmJ1AusMhgard5w/DvjI2wLTefkNMk3xv0peGZhDFZ9YnCPPemikw4DS5fk1oBFJj2dmikJ7ioDZA4kujld127RDPrIwnNzk10ZsrJrH3vIfFo/j3oQT0p7AFZ6QKuRJYlBw23BjKlNOlnxwovI8ZN4Oy6o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=Kq0GhzJn; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=39QUCxuh; arc=none smtp.client-ip=148.163.135.74
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="eAl5Miki"
-Received: by mail-yx1-f46.google.com with SMTP id 956f58d0204a3-6768ced47aeso130696d50.1
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Oct 2026 14:28:11 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="Kq0GhzJn";
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="39QUCxuh"
+Received: from pps.filterd (m0167069.ppops.net [127.0.0.1])
+	by mx0a-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 699MZqMb801645
+	for <ceph-devel@vger.kernel.org>; Fri, 9 Oct 2026 20:16:33 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pps01; bh=Oxe4
+	FgcIrqZbXu5c8U3MHYqvLVmmx/Gg1O74bCce4C0=; b=Kq0GhzJnrSWzFX7TC8T+
+	aas1DtcC24NtpQYuLxHodd81bapodk5H+a6MJKlNc0gNZmnPIJM5Pdc3nBQdgjk9
+	lFZ2xidWLCgENj3xA8Zq7WzJK1pscsQorYQ8yILuqAcr9QeL7nJV1TiuHo4jR+P+
+	yQOpXghlCRiDphIHjuY8D1j6TmwjlNuktZxHNAg5CjxzmcO6p+0SHJDAZvlt727d
+	NBeRFE9+kHE0ocdJuybfSdv4BAJiw6QkZsvkhK0GTDQLGuZBiojKAbeNPgK1DIlt
+	VG6VFiLD0ZniGFcK5Tm9ak9dV5F3vETBs/XiPu1JnpmfzdME0F9cryHhx8F459pp
+	ng==
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com [209.85.219.72])
+	by mx0a-00364e01.pphosted.com (PPS) with ESMTPS id 4h74tdaks6-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Fri, 09 Oct 2026 20:16:32 -0400 (EDT)
+Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-9179d9cde17so4357346d6.0
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Oct 2026 17:16:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1791581290; x=1792186090; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=qJXewPYw8pbo3C9s2Rsn0kEPlBvxG+xIjSSh1bPBSYY=;
-        b=eAl5Miki/iTl6VIy0VbhjrdxELmCu36Qnkx0xwjP53pgnauwPA8LNg1Gz2+myztouG
-         BmElT8u1A3UdfAqJjvFSs6mwxX2ZqWtSvkr7bLNI2gNW68cJs+iLmraaOPSPBBE3CIl5
-         B2R3KlG5GgKDhQHb4wJAUzJi1Knhwo6Wob46Z69NF9JcGESWF3W7umN/TR+pxNGzbc/S
-         L5tq08V5gzgm9xqgUkJw31MNi/hwg0oRgAkt+If7CVCKJNTHwnKNG1cZw+ZeUY8a2QRs
-         qulct73Lvqb8OI3+eBcyZB9o8yn7SZMyVOdWZxAxsDE+gcHRlbvq4EMNoAks1JxI1YK9
-         xC5g==
+        d=columbia.edu; s=lionmail; t=1791591392; x=1792196192; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=Oxe4FgcIrqZbXu5c8U3MHYqvLVmmx/Gg1O74bCce4C0=;
+        b=39QUCxuhUWqJOfh/Z4HVohNwufbFEjwOPHoRRbvTk6qrXpdAnDJPu0mkGQ7W8Mv38D
+         AEJTS39kW8l+kjkV1TUFYUxfctau63uAX4AkAUSW/aZQV6+XD2IBmemQaO1pOjGLCAlb
+         LCH61+6ANRMoBoLsBvxy50NM6dRai5k+FVU0wwE76K+jjk+1902ylIFBMEpzO+34YhZc
+         Kf/7z6tHimzKULzbCA3Qg/sq7m7fPy5obR35ZKZdMg3usePgkKvmdqqpbd0H4nLkItJR
+         JxRAyWaBTfXbPSWVmvG5glknMnX8kvBJu6TT/8C4F3unu4b/V5Hn95uMmka0lO4VElx8
+         YawQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791581290; x=1792186090;
-        h=mime-version:user-agent:content-transfer-encoding:content-type
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=qJXewPYw8pbo3C9s2Rsn0kEPlBvxG+xIjSSh1bPBSYY=;
-        b=OhvEqaS34pfexiYq2FKPovgUuurZDjvMBY3UTYMPmw++8fc6C3UuSViMHYNGu4fALe
-         y3JKdiNRpIi5R0hEkXx9FWbZVlbRgj2TN4wpE9YVHMBHXP55NGlx1uZUwtiVIcx1pZDu
-         WnkD/FbHoog8Oje0Y/Qdjp2P39/4yWp1ciSl0bVj9qVvr7HJGGrfw+fOrIHx1vjoH79N
-         KC2vQrMF6WrkDvKQiz8X7rIzhoVIp5iwUSzp43vSHkHk4fOHajSOs4/e4HsvBNah8u+I
-         LOuado0RMJMfJ2rhCEZZsbirXPi+425ATCrX2kQSnYKkugK91KUyOxLIdAncWQjORQ80
-         4zow==
-X-Gm-Message-State: AFq9FYJk7wASeHf40fbYaYmRj4e1tVM091M+DWxc9THjXYILWFlVkJUa
-	TJSyCGNB1Sk34qoBiZp3Z6ZXzYrMpzScLgd607P3nKLVbPVj+pMtY7HmWF9bmoVwXto=
-X-Gm-Gg: AYBFou01Oe7vsgSB6eOLsBIw2n5R5q+g7n/geDDSl4FrTKeIeSfbz1V2hm2KQ5TdeCI
-	jSyHgZCkwH9tEseLJOh/Y5JUlaYvxGD5SlYXhPFzpoin76pFVuIp4ZGxU9+NZKbY2aWd6qqdqvW
-	cvZEuQAQEiid7gkzLeJEkqoh9VcTvXn+CL1zmKXUc2ZQ1s+5kSC94OW9AL1Di/6B9Aa3+FV9Pxz
-	N2KHvfVGKREESWluwmjZfvI5JxGeR2LnDVYhbm7r6AdsgxAvou/oREwWJB6P0PtfO/F3VTYsQMf
-	XEmRl3fGNfTntaiEM/besV2dsv7AszpofjMDlD5xJ3dc/sgszaM1FQcIoM8SJNBZth0j0qrI9ON
-	AYrcdpjT/3/5QgDORHJ4uVSjdp5HCcWyt45x6vmZNJXf3GDzk3lY3SSSrfsKYQaIjiytp8e6Qh7
-	jd7MeiSwIX3Mc8ea1UUgfTNq8I0PK2Le9yG3yKvVfd2RjdnKL7EemjRvwgBq1fK8hoSQQlkuTIc
-	2DL+4ETicfEOt0292HdQWRoeK7ut/xGaRRphE7fnZh/979paw9pUI9xyCQwuRaAGVlyFl2rtFUz
-	iIR3mshuw7TqqINwIeGctA==
-X-Received: by 2002:a53:ac9a:0:b0:677:ac2d:8aec with SMTP id 956f58d0204a3-6793606668dmr1132001d50.68.1791581290544;
-        Fri, 09 Oct 2026 14:28:10 -0700 (PDT)
-Received: from ?IPv6:2600:1700:6476:1430::48? ([2600:1700:6476:1430::48])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-8b07f1b7483sm12271467b3.11.2026.10.09.14.28.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Oct 2026 14:28:08 -0700 (PDT)
-Message-ID: <c6805683f4ceeca80f3129043c4359a45cbe41c6.camel@dubeyko.com>
-Subject: Re: [PATCH] MAINTAINERS: update ceph and libceph maintainers
-From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: xiubo.li@clyso.com, Ilya Dryomov <idryomov@gmail.com>, Alex Markuze
-	 <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Date: Fri, 09 Oct 2026 14:28:06 -0700
-In-Reply-To: <20261009-ceph-maintainers-v1-1-298e8158087f@clyso.com>
-References: <20261009-ceph-maintainers-v1-1-298e8158087f@clyso.com>
-Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
- keydata=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
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.60.1 (by Flathub.org) 
+        d=1e100.net; s=20260707; t=1791591392; x=1792196192;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=Oxe4FgcIrqZbXu5c8U3MHYqvLVmmx/Gg1O74bCce4C0=;
+        b=H8nY4yQRgmcu2piZhBdhTsHPGu0aqerks8VK+pGtHD58JJLxK3F3Syjy1I/yjjBEwn
+         C+EdCpYJAWwiro4+ixskGV7mZ5jNcHFm5xHPEtoQD8DMd2r3DvC5EcT63SyQbTydg+pe
+         B/yzzij9x7xmtdqehZvVlDKrt71rALLTDcvhxrmS8JEtRAqOK3u05JO0oX70hYas0TEJ
+         x1ZZnU8FY3rF5ogD7LabZU10HhyIb1NgJPG65AQO0g6TzbOXofs89LSGaMN+3xYTDgsL
+         4l/a6Cg9WEDnhL6FiXCkYOyXFuDWcekufgu2hH+it2Bg03XdAlqtOgxg3jqQ++ZyLQNO
+         nf0Q==
+X-Forwarded-Encrypted: i=1; AKwUvBy8gLLS6M2hBZIYU5J/FliHsi4t8il9GKvM9jfZQdB/Vwe5tGuCqWuqKG05iR1XT+NgDgHLKnkFTUe1@vger.kernel.org
+X-Gm-Message-State: AFq9FYLKyM3aUxH4ppd9PUAYUtYzExIz0mYDEVzddzHQ0aCFTAoNrWNc
+	fkgxQ5tI+g1Uq2IyG9Tdmbupo62VTGmFC1bselfOylu4kmo9OhKC7W3hsa31rkDxxOYVD1mVn1/
+	cXlHPwjVT+tErk0fy6jjn2z4Mx193UlbBHSpf3rckdd6aRYm98un+97eDx6M=
+X-Gm-Gg: AYBFou1MZ0iH5Uc+C6dWtckARmTFtPgNMQXKYTE4iEfLjUztxasAmz49+hXIlVBLPPh
+	bI7XEFUr5bSpPpLo5b3i4esSVIXEgxEMzq9rzMvI2nZMw6gttB2WDDnCIplhgtWRHxIfDEaJv2l
+	C934EUwjltKftQEXqGUO7N02iUMBydUG8yL75m0YR09CZVGYjQWUp0HGt47CqzGkCvxCGnhMoXw
+	dAiknbEuMJTtf9zBWUlOZjo9Qr33/slc+djJ8V20ROHQoBIjUMOINWQD35EwsKe1iJi7LjdNktJ
+	LnfonXcTYVTOoG0qPDmNmObHuStuTgXhr4r/oYv2RGH+J40fLgJBAmNECrJrYu6yZIoruSKGdnq
+	Zny57ruu+zmVI7NRwOWOKCeeULUznf6srfe+wTo9RDujq3wTS
+X-Received: by 2002:a05:620a:1a0e:b0:93a:2611:270f with SMTP id af79cd13be357-93ebd20ecaemr593316285a.13.1791591391933;
+        Fri, 09 Oct 2026 17:16:31 -0700 (PDT)
+X-Received: by 2002:a05:620a:1a0e:b0:93a:2611:270f with SMTP id af79cd13be357-93ebd20ecaemr593311785a.13.1791591391404;
+        Fri, 09 Oct 2026 17:16:31 -0700 (PDT)
+Received: from [10.207.9.0] (nat-128-59-178-194.net.columbia.edu. [128.59.178.194])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-93eb986c350sm305668885a.22.2026.10.09.17.16.30
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 09 Oct 2026 17:16:30 -0700 (PDT)
+Message-ID: <35f4d048-c858-471f-bf9f-24a976094f73@columbia.edu>
+Date: Fri, 9 Oct 2026 20:16:30 -0400
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 00/10] ceph: convert writeback path to folios
+To: David Howells <dhowells@redhat.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
+        Viacheslav Dubeyko <slava@dubeyko.com>,
+        Christian Brauner <brauner@kernel.org>,
+        Jeff Layton <jlayton@kernel.org>,
+        "Matthew Wilcox (Oracle)" <willy@infradead.org>,
+        Zi Yan <ziy@nvidia.com>, ceph-devel@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20260902-remove-wait-on-page-writeback-v5-0-0b512e77e75b@columbia.edu>
+ <1043695.1791475206@warthog.procyon.org.uk>
+Content-Language: en-US
+From: Tal Zussman <tz2294@columbia.edu>
+In-Reply-To: <1043695.1791475206@warthog.procyon.org.uk>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-GUID: fr9jEhAxJ6djeQFHuZjfJXtAHM920dka
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMDEwMDAwMCBTYWx0ZWRfX+PQ8C7Udz79w
+ eRGqVQXhb8aN6Hu4dxnVIEWCpZX/stuNN9yyCuzLM2StgEdpgMDzptOaSGolgc/SYUgdjYr4O2n
+ rm1R30/Pl8KELPepdGISD93yfZaOom2J9PeQAnrQYXyXwudHbfC/
+X-Authority-Analysis: v=2.4 cv=GrPXaU1C c=1 sm=1 tr=0 ts=6ac983e1 cx=c_pps
+ a=7E5Bxpl4vBhpaufnMqZlrw==:117 a=u0MKzLA9JmpizDwXU9Rxjg==:17
+ a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10 a=x7bEGLp0ZPQA:10 a=A0y_DWxS2BwA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=JR4YdQiviy7OQf72WyZ1:22
+ a=VwQbUJbxAAAA:8 a=D3aJNg95PxMWSXTfbh8A:9 a=QEXdDO2ut3YA:10
+ a=pJ04lnu7RYOZP9TFuWaZ:22
+X-Proofpoint-ORIG-GUID: fr9jEhAxJ6djeQFHuZjfJXtAHM920dka
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDEwMDAwMCBTYWx0ZWRfXx9UxcVaOuFHY
+ 3THlKbxc0IhbMu0p7CTv6ahPOCjktxzzxVJ+HqdEJaz2J6dAQi3EA376mlOSGA+bqEGYisTZmOy
+ pxmGp93d2kpMC8SbXOEkHZXGLe5IXGD/Jk/6e15RECGs2bWU5sZrBgoLeRVN4xBG9wzNn5C0FBY
+ Xk8L1j77+fS30zUjY2fPMJ+cDPbdKpzcJpHWfzuS+9ANBShuXnWw/bVs0itd2c6R7BkDCvbIgPv
+ 8exSanczi7nkp5x1kJiYH52LuKokHs0+mBEUhwmNqNZ8HYnPFShbIK9q42jiHt4RipGOG7Ntusc
+ j63Nsa9gU2AUvl5UY0b3t836FNfeddYjtnZBnyJY1774AVJk/I74OQbhAmL2vel8+f4bVgp4dN6
+ 0hfF5N4ttwY8DY460m69esfstvMyOFXeDRuN8buCwUVTJqpjwATZw09aLYX65M3Wp1GFlMAgHtb
+ ODRWlm8OMq1K/ntJKQA==
+X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11930
+ signatures=596817
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=10 priorityscore=1501 spamscore=0 lowpriorityscore=10
+ clxscore=1015 bulkscore=10 malwarescore=0 adultscore=0 suspectscore=0
+ phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2610080000
+ definitions=main-2610100000
 
-On Fri, 2026-10-09 at 04:04 +0200, Xiubo Li via B4 Relay wrote:
-> From: Xiubo Li <xiubo.li@clyso.com>
->=20
-> Add myself as a maintainer for the CephFS kernel client and the
-> libceph common code, and move Viacheslav Dubeyko from maintainer to
-> reviewer for both.
->=20
-> Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
-> ---
-> =C2=A0MAINTAINERS | 6 ++++--
-> =C2=A01 file changed, 4 insertions(+), 2 deletions(-)
->=20
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index c8d4b913f26c..d197c6928b08 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -5892,7 +5892,8 @@
-> F:	drivers/power/supply/cw2015_battery.c
-> =C2=A0CEPH COMMON CODE (LIBCEPH)
-> =C2=A0M:	Ilya Dryomov <idryomov@gmail.com>
-> =C2=A0M:	Alex Markuze <amarkuze@redhat.com>
-> -M:	Viacheslav Dubeyko <slava@dubeyko.com>
-> +M:	Xiubo Li <xiubo.li@clyso.com>
-> +R:	Viacheslav Dubeyko <slava@dubeyko.com>
-> =C2=A0L:	ceph-devel@vger.kernel.org
-> =C2=A0S:	Supported
-> =C2=A0W:	http://ceph.com/
-> @@ -5905,7 +5906,8 @@ F:	net/ceph/
-> =C2=A0CEPH DISTRIBUTED FILE SYSTEM CLIENT (CEPH)
-> =C2=A0M:	Ilya Dryomov <idryomov@gmail.com>
-> =C2=A0M:	Alex Markuze <amarkuze@redhat.com>
-> -M:	Viacheslav Dubeyko <slava@dubeyko.com>
-> +M:	Xiubo Li <xiubo.li@clyso.com>
-> +R:	Viacheslav Dubeyko <slava@dubeyko.com>
-> =C2=A0L:	ceph-devel@vger.kernel.org
-> =C2=A0S:	Supported
-> =C2=A0W:	http://ceph.com/
->=20
-> ---
-> base-commit: b5650e70565c380d52c36f6bd0e1a4b1bdb385cd
-> change-id: 20261008-ceph-maintainers-058bf128d126
->=20
-> Best regards,
-> --=C2=A0=20
-> Xiubo Li <xiubo.li@clyso.com>
->=20
+H
 
-Acked-by: Viacheslav Dubeyko <slava@dubeyko.com>
+On 10/8/26 12:00 PM, David Howells wrote:
+> Hi Tal,
+> 
+> Apologies for not reaching out to you before, but I keep getting diverted on
+> to other thing - usually by AI patch reviews.
+> 
+> Just to note that I have patches in the works to convert ceph to use netfslib
+> and thus strip out all the dealing with pages/folios as much as possible -
+> even getting down into the protocol and replacing the five different page
+> carrying types with the same structure as is at the core of netfslib (bvecq
+> chains) and pass the bvecq chains all the way into sendmsg() for transmission.
+> 
+> This also lets me remove ceph's use of the PG_private_2 flag which the MM
+> people would really like back.  That's then replaced - transparently inside of
+> netfslib - by setting a special ->private value on folios read from the
+> server, marking them dirty and then having writeback write them to the cache.
+> 
+> It's unfortunately stalled on getting some netfslib changes in, though there
+> may be hope for making some progress in this merge window.
+> 
+> If you go to my tree here:
+> 
+> 	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/
+> 
+> The netfs-next[12345] branches are the prerequisite patches I'm trying to get
+> in at the moment, divided into five batches.
+> 
+> On top of that is my netfs-crypt branch that has content crypto support
+> 
+> And then on top of that is my ceph-iter branch.  Note that it's not fully
+> working as yet and I'm still testing and fixing bits of it.
+> 
+
+That's great, I see it removes the ceph pagelist and with it the last couple
+callers of __page_cache_alloc(). I wasn't planning on sending additional ceph
+patches in the near future, as they would all require getting into the
+protocol, so it's great to hear you're working on this!
+
+> If you want to push these patches first, I can always adapt my patches to take
+> account of them.
+> 
+
+It'd be great to get this series in sooner rather than later. I think it's
+ready to be merged and it would let us remove five page wrappers of folio
+functions immediately. Hopefully since it's fairly small it won't cause you
+too much trouble.
 
 Thanks,
-Slava.
+Tal
