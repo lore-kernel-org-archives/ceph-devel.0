@@ -1,112 +1,178 @@
-Received: from mail-oa2-f11.google.com (mail-oa2-f11.google.com [74.125.231.75])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2069527FD74
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2026 14:32:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.231.75
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C229A3A1685
+	for <ceph-devel@vger.kernel.org>; Tue, 13 Oct 2026 07:55:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791815550; cv=none; b=lxi6IUqlZVh6vmIRZDDmfigDZTyAG1qlqRB9pyQ/zlJ8pHnK9sTqB6HIC3yI+kqlft+/7H/awzD5dx+g+NxG6mbTRd4uzw4A2VhrEwiTmeyJoJFy3pn4clECdUVRIshdTdCgJTReipIS3njircxqW9Q/KxZBJiCuThQIsxTpiBU=
+	t=1791878124; cv=none; b=WmXeOZPDBaD4ODSMbVu/hxCRAGhsyY+FEN8jysBBsRvxVIsPORm+JojQhMkCl5oQ5kRi+xxDk/AFOaCB8zBgmeK40CbZdKwR8e0y6xh5x3MtNtVgYcX0okrDHM1pBaUcFvms7IzdZGbll0SH1hWX+B/6Heo+P9vTq2NuqiFP6VU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791815550; c=relaxed/simple;
-	bh=e2fOhJrZ340BsVD9pUrjFaC9s7NoDhBvMGTtN3hwKpM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=WpPUljomvEX80jSPkd5crEA+0UXMWzWL4UMZxptlGc7sEX8/0cqlmtajtdDPhOMHx06kENWERmzKT9QS2A2Q03nMaP4cdoHkE1D+3zmA0pif2gHceHztf5SJBVK2PfottvWJvl82s844iHZBtyt/cTvTlAyBEDAzGF8p8F5MMCc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OOX44WZu; arc=none smtp.client-ip=74.125.231.75
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1791878124; c=relaxed/simple;
+	bh=RPlfzWYmM8FirW88IjwmpVbxiR/zbaOepgou5oQs+ac=;
+	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
+	 Content-Type:Date:Message-ID; b=dbS9hquYMQpf8OOnd9wlCaycrcj3aiapyclXEKiTPP1RtZxTpJ1kbFLe0lL+haQNWpiUrxDJi19gUWbBzgHKewQcqlJMaaCP+JApy4FP9XlJTZiuVGcfGVkz4UeyTd2V6zFMV+LGo/zKj24diBBe4p/OR7r1zlf7eVb7wvzlwMU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gGj6PS0s; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OOX44WZu"
-Received: by mail-oa2-f11.google.com with SMTP id 586e51a60fabf-49e2cb73ba3so751365fac.1
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Oct 2026 07:32:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791815548; x=1792420348; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=unxLWtZDs1Hx2NMfpZvXZ8snLJuNugXErlhhpg0Cpho=;
-        b=OOX44WZubmegOZIxaqGEetW5nW0bFfXYmvFHpX+jSSx0H0CfNuF33KNh1VQ0SJwoR+
-         iieszOtfzLlsZ2coXPyAG6Tn5y9amMYdrHBvJgPDH7BqQKu4dAQ4uglP8I2BiGDuEMZS
-         KP7kD+dsf9S/P8FGIJI7h8dNuZPeMz+9UbuRwKn6ZnUYocUsn2CaQP9AzUwovZ27jHcH
-         9gnANZ+mKamFpZzk6ZfDDPeizhHmZiKvMO1LlMGF5VBs92WWlYrTMBRn3TDzXqd+53id
-         QVO9IudiQO3UtdtXh0HFELFw8T6HUfZBeVnykhNsgCAxtPab35LGWYHAC2pybL6aS7XY
-         7sVQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791815548; x=1792420348;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=unxLWtZDs1Hx2NMfpZvXZ8snLJuNugXErlhhpg0Cpho=;
-        b=tu6H1dBAuVG4br2/vG2aai/wztbfOZJpZPwXJSfcnF9fxIOPy2mw/ycQvdHx4BODCN
-         n1OXBcSMTmZWIKFIaIf4phcX0dsxJS3u4gNi3qu7b7eKos0FDMJpls49i2qmlB5AHNi7
-         Cj4LG78ZLcm1kgqgs6CaD/4OHBmC8xXpKZwYviKLMnClnjGlshHt3GV1n5oYPhlh4zTD
-         kdayCI41I6WhEvx4nxYRpDTvmBBfcNW9ggt5wAfDQMf7TAoby865/9jwW1I2PEUM5d5M
-         xvgmDXnmh/4e6xOUdAYpZxIIhZEA2ryOUJOK4YVDMgRSv2DUe7bJ4SlzvVtKMtftSMJi
-         YplQ==
-X-Gm-Message-State: AFq9FYLwBvkdvvE2jEEaYiVx2lwZUnoi4COcxHHvi5G9jXYHni6s6UBP
-	iVDJmuYroLQsQCrSqlBcLGJTV3AWJbLO/JsB+cWvL5hZabk6U1lkHtGM
-X-Gm-Gg: AYBFou0CAEmUB8vZ+WkztBUBk+9cWdbIAfWm853bhapgP7d2iCXWYbfhUh7EjnL+SFK
-	QDyeXeOIZXamsYSkKM2wzBYHx0h+yrkAk73Fp3HTTjZ8CgRLE+Ue84lkIk8w9el1DawpzxzvaTR
-	vy+65DFzHcFeLKUePdOHrNCsBDKGexuUuINB0BSDLFjbDJWkQEC18vm7l2ydh62Jb4UKmEzo0K8
-	rgk0MswnoYMa8v4MWWITAIm5MKgHRtRD5jMJcF8Zl4YnyIIm7KwjqqWZrSIs0giXGfNqVZJ327m
-	oJFkl2EQ2BM+BIqyHIQhNbTflPvRHAI9McojnW/j4pXObU86+QlUV+WGgN7VHQ6dgzoZC46ktwd
-	yiyDvq+pKN49qtg2BulLIxtNYVrsZKO7r3GyTN7VMEXUsk4KMzymJgGwrZnAAxMU10Y9hrqCPB2
-	xax1lKBsCqkROLU8cuh2vr4zi3EuNGr16UUGgRVBAXcVzOPxCAoB8655M1qmgHV1R5weg4hqlfA
-	Nmnx1G+3aYyCmU7g1/Pn6kxA3ZVUlIb5A4o2yY=
-X-Received: by 2002:a05:6809:c1:10b0:50c:8007:8ef2 with SMTP id 5614622812f47-50c800790b7mr5438318b6e.68.1791815547936;
-        Mon, 12 Oct 2026 07:32:27 -0700 (PDT)
-Received: from localhost.localdomain ([14.116.239.37])
-        by smtp.gmail.com with ESMTPSA id 5614622812f47-50c1a325a38sm11578930b6e.12.2026.10.12.07.32.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Oct 2026 07:32:25 -0700 (PDT)
-From: Henry Martin <bsdhenrymartin@gmail.com>
-To: Alex Markuze <amarkuze@redhat.com>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] libceph: fix client panic on MDS message with data but no data items
-Date: Mon, 12 Oct 2026 22:32:10 +0800
-Message-ID: <20261012143210.1681034-1-bsdhenrymartin@gmail.com>
-X-Mailer: git-send-email 2.43.7
-In-Reply-To: <20261012072851.3431644-1-amarkuze@redhat.com>
-References: <20261012072851.3431644-1-amarkuze@redhat.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gGj6PS0s"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1791878121;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=CaDYtVwJjGFlT9vzY/XFr3IPNhGIGR2PZeK9wCQ1Tvk=;
+	b=gGj6PS0sNj6RbN1b9VfhrFSHp5DMI3NECxrObVQdkpL/xYKOPxweqDiXSkhrjytJiiiiKo
+	30HZSSqa0KSiLIzVyHItIX9enPcv3WImpQZdCKB0LjN5QF5o32zr6WUle3a/msB9YuQo2u
+	RKeTL5Hare5HHYBaAmIQt9/4ol+JjMA=
+Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-58-rUZAsi6DMcieVbVMGWpCBQ-1; Tue,
+ 13 Oct 2026 07:55:12 +0000
+X-MC-Unique: rUZAsi6DMcieVbVMGWpCBQ-1
+X-Mimecast-MFC-AGG-ID: rUZAsi6DMcieVbVMGWpCBQ_1791878109
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 972E618009D3;
+	Tue, 13 Oct 2026 07:55:06 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.44.48.11])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 3345430001B9;
+	Tue, 13 Oct 2026 07:54:59 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+	Kingdom.
+	Registered in England and Wales under Company Registration No. 3798903
+From: David Howells <dhowells@redhat.com>
+In-Reply-To: <20261011.cachefiles-partial-zeros.pchmelar@innovatrics.com>
+References: <20261011.cachefiles-partial-zeros.pchmelar@innovatrics.com> <20260910220242.2165023-1-dhowells@redhat.com> <20260910220242.2165023-5-dhowells@redhat.com>
+To: Petr Chmelar <petr.chmelar@innovatrics.com>
+Cc: dhowells@redhat.com, Christian Brauner <christian@brauner.io>,
+    Paulo Alcantara <pc@manguebit.org>,
+    Matthew Wilcox <willy@infradead.org>,
+    Namjae Jeon <linkinjeon@kernel.org>,
+    Marc Dionne <marc.dionne@auristor.com>,
+    Stefan Metzmacher <metze@samba.org>,
+    Eric Van Hensbergen <ericvh@kernel.org>,
+    Dominique Martinet <asmadeus@codewreck.org>,
+    Ilya Dryomov <idryomov@gmail.com>, netfs@lists.linux.dev,
+    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
+    linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+    v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
+    linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v12 4/5] cachefiles: Don't rely on backing fs storage map for most use cases
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <1655267.1791878098.1@warthog.procyon.org.uk>
+Content-Transfer-Encoding: quoted-printable
+Date: Tue, 13 Oct 2026 08:54:58 +0100
+Message-ID: <1655268.1791878098@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-Hi Alex,
+Petr Chmelar <petr.chmelar@innovatrics.com> wrote:
 
-Thanks for looking, but the skip you describe doesn't exist on the
-MDS path.
+> Reproducer: random 64 KiB reads covering half of a 256 MiB file of
+> random data, then a full read after dropping the page cache, compared
+> with the original per 64 KiB block:
+> =
 
-mds_alloc_msg() (fs/ceph/mds_client.c:7384) leaves *skip = 0
-unconditionally and never inspects hdr->data_len.  In v1,
-read_partial_message() calls prepare_message_data() whenever the
-on-wire data_len is non-zero (messenger_v1.c:1229); in v2,
-__handle_control() routes any non-zero data_len to
-prepare_read_data() (messenger_v2.c:1837).  Neither path compares
-data_len to msg->data_length anywhere; I also found no such guard
-in {mds,mon,osd}_client.c.
+>   fio --name=3Dhalf --filename=3D/mnt/part.bin --rw=3Drandread --bs=3D64=
+k \
+>       --ioengine=3Dpsync --fadvise_hint=3Drandom --size=3D256m --io_size=
+=3D128m \
+>       --randrepeat=3D1
+>   sync; echo 3 > /proc/sys/vm/drop_caches
+>   cmp /mnt/part.bin /path/to/original
 
-For an MDS message with data_len > 0 the first hit in
-ceph_msg_data_cursor_init() is actually BUG_ON(length >
-msg->data_length) with data_length == 0, one step before
-BUG_ON(!msg->num_data_items); either way the client panics.
+Unfortunately, I can't reproduce this.  Can you get me some tracing?
 
-The check you have in mind is the OSD-side one, 98c4bfe9d89b2
-("libceph: check reply num_data_items in setup_request_data()").
-It validates reply items against the OSD request's preallocated
-ops - MDS has no preallocated reply path at all, which is exactly
-the sibling gap this patch closes.
+echo 65536 >/sys/kernel/tracing/buffer_size_kb
+echo 1 >/sys/kernel/tracing/events/netfs/netfs_read/enable
+echo 1 >/sys/kernel/tracing/events/netfs/netfs_write/enable
+echo 1 >/sys/kernel/tracing/events/netfs/netfs_rreq/enable
+echo 1 >/sys/kernel/tracing/events/netfs/netfs_sreq/enable
+echo 1 >/sys/kernel/tracing/events/netfs/netfs_failure/enable
+echo 1 >/sys/kernel/tracing/events/cachefiles/cachefiles_coherency/enable
 
-Happy to move the rejection into mds_alloc_msg() (skip/reject
-data_len > 0 there) if you prefer that over messenger-level
-guards; I'd keep them since they also cover any future alloc_msg()
-that allocates no items.
+before running, then after running do:
 
-Regards,
-Henry
+cat /sys/kernel/tracing/trace | bzip2 -9 >/tmp/cachefiles-bug.trace.bz2
+
+When I do this and grep the trace output for 'WRITEBACK\|WRIT TERM\|cachef=
+iles'
+it all looks reasonable, looking something like:
+
+fio-5895 : netfs_write: R=3D00001301 WRITEBACK c=3D00000006 o=3D00000004 i=
+=3Dc6a742 by=3D0-ffffffffffffffff
+fio-5895 : netfs_sreq: R=3D00001301[2] WRIT TERM  f=3D100 s=3D0 100000/100=
+000 s=3D7 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[4] WRIT TERM  f=3D100 s=3D100000 10000=
+0/100000 s=3D15 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[6] WRIT TERM  f=3D100 s=3D200000 10000=
+0/100000 s=3D23 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[8] WRIT TERM  f=3D100 s=3D300000 10000=
+0/100000 s=3D0 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[a] WRIT TERM  f=3D100 s=3D400000 10000=
+0/100000 s=3D8 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[c] WRIT TERM  f=3D100 s=3D500000 10000=
+0/100000 s=3D16 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[e] WRIT TERM  f=3D100 s=3D600000 10000=
+0/100000 s=3D24 e=3D0
+...
+fio-5895 : netfs_sreq: R=3D00001301[1f4] WRIT TERM  f=3D100 s=3Df900000 10=
+0000/100000 s=3D15 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[1f6] WRIT TERM  f=3D100 s=3Dfa00000 10=
+0000/100000 s=3D23 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[1f8] WRIT TERM  f=3D100 s=3Dfb00000 10=
+0000/100000 s=3D0 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[1fa] WRIT TERM  f=3D100 s=3Dfc00000 10=
+0000/100000 s=3D8 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[1fc] WRIT TERM  f=3D100 s=3Dfd00000 10=
+0000/100000 s=3D16 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[1fe] WRIT TERM  f=3D100 s=3Dfe00000 10=
+0000/100000 s=3D24 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[200] WRIT TERM  f=3D100 s=3Dff00000 10=
+0000/100000 s=3D1 e=3D0
+ kworker : cachefiles_coherency: o=3D00000004 SET ok   B=3D46012e oz=3D100=
+00000 c=3D2 aux=3D0 dsk=3D0
+
+You can see the writes to the cache terminating and then the cache is set =
+c=3D2
+which is CACHEFILES_CONTENT_ALL indicating that the cache file has no hole=
+s in
+it.
+
+That happens pretty much as soon as fio lays out its file and then all fut=
+ure
+accesses are just reads from the cache.
+
+Looking at the UPLD lines is interesting:
+
+fio-5895 : netfs_sreq: R=3D00001301[185] UPLD TERM  f=3D110 s=3Dc1fedd0 ff=
+fe8/fffe8 s=3D8 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[187] UPLD TERM  f=3D110 s=3Dc2fedb8 ff=
+fe8/fffe8 s=3D16 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[189] UPLD TERM  f=3D110 s=3Dc3feda0 ff=
+fe8/fffe8 s=3D24 e=3D0
+fio-5895 : netfs_sreq: R=3D00001301[18b] UPLD TERM  f=3D110 s=3Dc4fed88 ff=
+fe8/fffe8 s=3D1 e=3D0
+
+I guess 9P can't quite squeeze 1M of data in a packet as metadata has to g=
+o in
+as well.
+
+One further question occurs to me: does the entire 256M file fit in the te=
+st
+VM's memory?
+
+Thanks,
+David
+
