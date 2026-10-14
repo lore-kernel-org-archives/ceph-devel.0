@@ -1,75 +1,99 @@
-Received: from canpmsgout04.his.huawei.com (canpmsgout04.his.huawei.com [113.46.200.219])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E8AD47A896;
-	Wed, 14 Oct 2026 09:15:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.219
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 523E6480DEF
+	for <ceph-devel@vger.kernel.org>; Wed, 14 Oct 2026 09:45:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791969359; cv=none; b=s9orJ1iTyfWR+Li0aFPpK85qwZX2zQQZ++lrKcoXPfpoyg30yEj0OackFOA18tNefPE9DkQLfI0hmAKFD8YNlSRnj1OhBvYNWFADq1l8YmnjuNB6/4yA9mzNlyKquFUlSTmxRLfSToG0RghP32y03/vYUrJ7kV4DiaeQfpSwnRE=
+	t=1791971151; cv=none; b=QHVBgpCtc7a5woZQwOEUHRleDR1BhqQBLoJhDGOLdBLJfi7z0cbav6fz1roeC5pGwWr9fjynRJuYELTkuVlA9njD6DJDvUXz6e2/SSLfqKWOLoSDlvPhsQMluAlVEja/KhqZ6y8CNm+vslrCvAhEya+QY69mRAitkPu+7FK6Tb4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791969359; c=relaxed/simple;
-	bh=e919eHiL2hk9s8y/2sLgNs+4hZlY0H7NUJCoZdoR0ys=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:CC:References:
-	 In-Reply-To:Content-Type; b=mPgU0qUzjuyTapyOsqcmKfr/pq+lAyGUToxY/fDDvakmCpRDbLS33Qiqe0aBzZ1nikbF6ESqPXSIVAidpkreTK/JhSpX6FSFg6dfWUniTrtyQOvvh9DChg+Y9DMJT+6sI+EDZaoLBzHmFKW3HBK2rNS8htTuwpwrhgzgDYOkgYc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=lo74346y; arc=none smtp.client-ip=113.46.200.219
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+	s=arc-20240116; t=1791971151; c=relaxed/simple;
+	bh=ID1YiJiWvOAG0AsnZJUSvdj0b+7VZeh7snBXhoGQ7yo=;
+	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
+	 Content-Type:Date:Message-ID; b=g20BWsr1yADLceYZzRt93+PM0D4XJN6U1Kh0FbpNg+0hgnyQ6cLJy3ESBBrZK4nebkrDGZkwJjv1UPbtHZsW+OwcyIFwf6WgW1sycZXu4yuEN//8QzWtvLS4ft/F+30Yx4a6/P03FoCFuCJkuOym+aHJYMtuXXkISW4HrOcrhSI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ce0t2mvH; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="lo74346y"
-dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
-	c=relaxed/relaxed; q=dns/txt;
-	h=From;
-	bh=c7h9NxStB8mf6X4Y/eI/3zCHuR0TNvRC4PQVRQV+NTM=;
-	b=lo74346yIJYG8jO9noful8X6rE1E05c49P+qSzFmhZuudFkeqsCHmy87zR2BWwGqo8IyUf/xj
-	qdatEVS0twwzejPi0q26La0Q4lKkkrkd/jhAdmamBqcMSxdK3AkpBujAS1WEI6i5fUSRTJyxJHx
-	fNUMKcf9bBeHvk4q59z5XKg=
-Received: from mail.maildlp.com (unknown [172.19.162.144])
-	by canpmsgout04.his.huawei.com (SkyGuard) with ESMTPS id 4j4QGq1H0kz1prM0;
-	Wed, 14 Oct 2026 17:03:31 +0800 (CST)
-Received: from whupemp100017.china.huawei.com (unknown [7.152.184.120])
-	by mail.maildlp.com (Postfix) with ESMTPS id D523D4056D;
-	Wed, 14 Oct 2026 17:15:50 +0800 (CST)
-Received: from [10.67.108.208] (10.67.108.208) by
- whupemp100017.china.huawei.com (7.152.184.120) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.45; Wed, 14 Oct 2026 17:15:49 +0800
-Message-ID: <b8c135bf-927e-454e-8bca-cbdbae133d51@huawei.com>
-Date: Wed, 14 Oct 2026 17:15:37 +0800
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ce0t2mvH"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1791971149;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=psHmh+mmjF/vIp3ChRxGhlRhpQq6TSm83eNrdquwHxw=;
+	b=ce0t2mvHOyeTF0Jw8nslh51i2po6uQ7cPw2SyfWkEKPwnehspOGbVDiyKhSLkVDjHyZGNR
+	qa+JDPuyY5GInc1wHy9ehkrGTSUuihSd5ZvTyM4642us48VwmSN985Eh3YlhNo7pFtP+RD
+	yAFhNWbs6gsZFBbVJ1JeTfkQkH6cclo=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-524-o3tIefQBPv-FG1zUwHrgIw-1; Wed,
+ 14 Oct 2026 09:45:38 +0000
+X-MC-Unique: o3tIefQBPv-FG1zUwHrgIw-1
+X-Mimecast-MFC-AGG-ID: o3tIefQBPv-FG1zUwHrgIw_1791971135
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 396ED19560B2;
+	Wed, 14 Oct 2026 09:45:34 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.44.48.11])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 696E830000E3;
+	Wed, 14 Oct 2026 09:45:27 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+	Kingdom.
+	Registered in England and Wales under Company Registration No. 3798903
+From: David Howells <dhowells@redhat.com>
+In-Reply-To: <20261013.cachefiles-partial-zeros-trace.pchmelar@innovatrics.com>
+References: <20261013.cachefiles-partial-zeros-trace.pchmelar@innovatrics.com> <20260910220242.2165023-1-dhowells@redhat.com> <20260910220242.2165023-5-dhowells@redhat.com> <20261011.cachefiles-partial-zeros.pchmelar@innovatrics.com> <1655268.1791878098@warthog.procyon.org.uk>
+To: Petr Chmelar <petr.chmelar@innovatrics.com>
+Cc: dhowells@redhat.com, Christian Brauner <christian@brauner.io>,
+    Paulo Alcantara <pc@manguebit.org>,
+    Matthew Wilcox <willy@infradead.org>,
+    Namjae Jeon <linkinjeon@kernel.org>,
+    Marc Dionne <marc.dionne@auristor.com>,
+    Stefan Metzmacher <metze@samba.org>,
+    Eric Van Hensbergen <ericvh@kernel.org>,
+    Dominique Martinet <asmadeus@codewreck.org>,
+    Ilya Dryomov <idryomov@gmail.com>, netfs@lists.linux.dev,
+    linux-afs@lists.infradead.org, linux-cifs@vger.kernel.org,
+    linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+    v9fs@lists.linux.dev, linux-fsdevel@vger.kernel.org,
+    linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v12 4/5] cachefiles: Don't rely on backing fs storage map for most use cases
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: "chenyuxi (D)" <chenyuxi19@huawei.com>
-Subject: Re: [PATCH v4 0/3] ceph: don't unregister an MDS session before
- removing its caps
-To: <max.kellermann@ionos.com>
-CC: <amarkuze@redhat.com>, <ceph-devel@vger.kernel.org>, <idryomov@gmail.com>,
-	<linux-kernel@vger.kernel.org>, <xiubo.li@clyso.com>
-References: <20260904150304.49104-1-max.kellermann@ionos.com>
-In-Reply-To: <20260904150304.49104-1-max.kellermann@ionos.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: kwepems100002.china.huawei.com (7.221.188.206) To
- whupemp100017.china.huawei.com (7.152.184.120)
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <1995692.1791971125.1@warthog.procyon.org.uk>
+Content-Transfer-Encoding: quoted-printable
+Date: Wed, 14 Oct 2026 10:45:25 +0100
+Message-ID: <1995693.1791971125@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-Hi Max,
+Does the attached fix the problem?
 
-Do you have any plans to move this series forward?
+David
+---
+diff --git a/fs/netfs/buffered_read.c b/fs/netfs/buffered_read.c
+index cc1b00f301d2..c0157f9a338d 100644
+--- a/fs/netfs/buffered_read.c
++++ b/fs/netfs/buffered_read.c
+@@ -379,7 +379,7 @@ static void netfs_read_to_pagecache(struct netfs_io_re=
+quest *rreq)
+ 		}
+ =
 
-Patch 1/3 completes the fix for CVE-2026-89654 (use-after-free
-in check_new_map()): the earlier fix ee611a750955 still leaves
-the UAF in place.  We are tracking this CVE in our
-downstream kernels, so we'd really like to see the series land
-in mainline.  The thread, however, has been quiet since
-Sep 8th, when 3/3 picked up Xiubo's Reviewed-by, and the
-patches are in neither the ceph-client testing branch nor
-mainline yet.
+ 		subreq->start	=3D start;
+-		subreq->len	=3D size;
++		subreq->len	=3D len;
+ 		if (copy)
+ 			__set_bit(NETFS_SREQ_COPY_TO_CACHE, &subreq->flags);
+ =
 
-Is there anything still holding the series back that we could
-help with?
-
-Thanks,
-Chen Yuxi
