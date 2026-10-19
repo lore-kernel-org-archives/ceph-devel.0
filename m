@@ -1,44 +1,45 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FABE56060E;
-	Mon, 19 Oct 2026 13:57:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 446C860708C;
+	Mon, 19 Oct 2026 14:03:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792418249; cv=none; b=cQQuVdgoCYoVsTnUSPx6XXzKgDr4gcdCPICVPVYli+L4osAqYnNHz8IES8VKWJj3KDgj56pR9DUfiit945xbCF4xI47pjy+KCcZNXT2YYQJrb6Hw4MTyMClMiIzevLfbOXZGzg92SQzkpFw4e6y6S1y08XUCEXdGoqJr/wtH5Vw=
+	t=1792418603; cv=none; b=X4PJLhZiUE6NRz/kshVSk/yxQF6n3t/WcHK/SllveR9h0aDM6B79IdrIDbOKhcIF7b2eOUZItdRKJPS/8GMfMPJgELA/UuQSCNJH8oWXekjguoSkMLJ7+sklKrLazz1q1pEarmH5wtgFCsrM88YByeu9ZIALNXNQ3CyeoRDmOOA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792418249; c=relaxed/simple;
-	bh=ZurOGsfyONY0BT3+yL2fwTxVMYH4sihGfdJZcmpDjUE=;
+	s=arc-20240116; t=1792418603; c=relaxed/simple;
+	bh=mBR0t3Ccnpt0fmE/sNKAu/ReGBjCM6IUh3bpOBw98UY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=q9dkYSMvUoXQyjz5gjenlPIjY5Y0+F5oy2QdP0+OEVutV0GOdaIfklAbm98JFRBaxbLmWx+sGOrRlz+y+GXczJooe3mvix8gtRRWQyeOWqN0DJn3KMuY2YHtsSI8QERgAXO13qrrjZqpl45d08hk83+7sWbFNeSXCh1yLB8Enyg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OYMNfXwf; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=lw0Df3lpBzeU5uCxeFN7pgwkDc2T8KPc934wTCuDSp7Kwi5EPZOTntm09ZuB1w66G1O+KNP6lAMuHyhUBOf3BzkVa6dhXrH0fsTHkg7xH9MLibby7iLkkru3EWSkfdYGQeg2UxlklQ3r3xVWFbgUGETQ8wXw2bdOeiF3I7CzZJY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D88nEK+U; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OYMNfXwf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8EA421F000C8;
-	Mon, 19 Oct 2026 13:57:25 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D88nEK+U"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C3C61F000C6;
+	Mon, 19 Oct 2026 14:03:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792418246;
-	bh=5dfLBhlJU9dTFBKNxV+OINhjJmjUkAJbcLNa6+f0iac=;
+	s=k20260515; t=1792418600;
+	bh=obvmpAGnxQTItHw8kIywl9jV5Uy0bs2+R1HEZSL6mAY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=OYMNfXwf00fBgkKpjK7W7IpbyBUm/LCuHowlQVX4p6qaPwyHMa/GvUq4xS6cP1NCu
-	 p2fmUVachrCDBVwPrcHx71F2xyfZlQoQviBkOTGOwHbGFj0xNDRDqkZOGW/f9MALYF
-	 77HkX+QUQ0JJV7R4fpldKnR4XSvRxuB+1oyebd3zosyWcY/KljTqsytLNUpDhFYL14
-	 HTn5XDJ5a7gIluaEEBSnQjSwtqn9xumPQz/gDm1w3iImb4Yrs7pii+ApqaJgoSLTYI
-	 RmBn6vWhQPpAWHneDYDZoy3EiWpVXali6cGjoUCxStY2QQrX/ZPoRkea0jbU97x6Ci
-	 xrsLZ3uLCpqBQ==
+	b=D88nEK+UAoUxZRQlWP3Gs0zmE42fx0tO/XFPon/gpDXXC2usHKnonE4T3VosVz3na
+	 SiLbUrfm8YfR38b1PakA7QnANa3kuXSwqvOFelUN2YJIgna1BOBQjFTb/9EMkOJJCJ
+	 EnZmE85An4DuHmJXcVw+bkyr/vwCKis889qvFIoU/zALGkMoNqqowVx4mZ3RXXbhAZ
+	 lYO7XtYzXvmp9JjsoVskjrX20zLu4EIb21Age4Hz6zSFOhVGtn2JIBaD2RzdKUQSE+
+	 b1MVAitqhEgIzxnZnaeMyO+AQNAcML1uMqJ1uftryj3GFIoYKJJdYwyAuPEm3F3AJg
+	 /j1oKoerGnrHw==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
 Cc: Xiubo Li <xiubo.li@clyso.com>,
+	Andras Pataki <apataki@flatironinstitute.org>,
 	Viacheslav Dubeyko <slava@dubeyko.com>,
 	Ilya Dryomov <idryomov@gmail.com>,
 	Sasha Levin <sashal@kernel.org>,
 	amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.18-6.6] ceph: fix use-after-dereference of NULL ci in __ceph_remove_cap()
-Date: Mon, 19 Oct 2026 09:46:47 -0400
-Message-ID: <20261019135441.1420968-116-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.18-5.10] ceph: do not cache negative dentries for snapped directories
+Date: Mon, 19 Oct 2026 09:50:54 -0400
+Message-ID: <20261019135441.1420968-363-sashal@kernel.org>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20261019135441.1420968-1-sashal@kernel.org>
 References: <20261019135441.1420968-1-sashal@kernel.org>
@@ -48,26 +49,35 @@ List-Id: <ceph-devel.vger.kernel.org>
 List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 X-stable: review
 X-Patchwork-Hint: Ignore
 X-stable-base: Linux 6.18.57
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 From: Xiubo Li <xiubo.li@clyso.com>
 
-[ Upstream commit a354d7eaa1a57f1532c8072a424cc2d339a73cc0 ]
+[ Upstream commit af59562a5b3d34fb3aa7753f2543393578d06dbf ]
 
-The NULL check for "ci" in __ceph_remove_cap() was dead code because
-ci was dereferenced via &ci->netfs.inode before the check, and
-cap->session was dereferenced via session->s_mdsc->fsc->client even
-earlier.  On a double-remove, both cap->ci and cap->session are set
-to NULL by the first call, so the second call would crash before
-ever reaching the guard.
+When a LOOKUP/LOOKUPSNAP in a snapped directory returns ENOENT
+without a trace, ceph_finish_lookup() creates a negative dentry
+via d_add(dentry, NULL).  For live directories this is fine — the
+dentry naturally expires.  But for snapped directories,
+ceph_d_revalidate() unconditionally trusts all cached dentries
+(valid = 1), so a negative dentry created by a transient error
+persists forever, hiding entries that genuinely exist in the
+snapshot.
 
-Move ci, session, cl, and inode initializations after the NULL check
-so that the early-return actually works.
+Only cache negative dentries for live (non-snapshotted) parent
+directories.  For snapped parents, skip the negative dentry so
+that VFS retries the lookup on the next access.  Since the
+conditions that trigger a negative dentry (MDS transient error,
+local ENOENT shortcut, or MDS null dentry lease) are all rare in
+snapped directories, the performance impact of this change is
+negligible.
 
+Link: https://tracker.ceph.com/issues/78529
+Reported-by: Andras Pataki <apataki@flatironinstitute.org>
 Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
@@ -76,410 +86,396 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
 
 LLM Generated explanations, may be completely bogus:
 
-I have enough to decide: this is a real NULL-deref regression in this
-6.12 tree, the hunk matches locally, and the original crash was
-production-confirmed.
+## Phase 1: Commit message forensics
 
-===============================================================
-PHASE 1: COMMIT MESSAGE FORENSICS
-===============================================================
+**Step 1.1: Subject line**
+- Record: `[ceph] [do not cache] negative dentries for snapped
+  directories`
+- Subsystem: CephFS kernel client (`fs/ceph/`)
+- Action: “do not cache” is a prevent/avoid-style fix, not a feature
 
-Step 1.1: PARSE THE SUBJECT LINE
-Record: [ceph] [fix] restore a dead NULL-ci guard in
-`__ceph_remove_cap()` so a second remove does not crash
+**Step 1.2: Tags**
+- `Link: https://tracker.ceph.com/issues/78529` (production bug tracker)
+- `Reported-by: Andras Pataki <apataki@flatironinstitute.org>` (real
+  CephFS user)
+- `Signed-off-by: Xiubo Li <xiubo.li@clyso.com>` (author; listed as Ceph
+  FS client maintainer)
+- `Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>`
+- `Signed-off-by: Ilya Dryomov <idryomov@gmail.com>` (Ceph maintainer
+  who merged it)
+- No `Fixes:` tag (expected; the `d_add(..., NULL)` path dates to 2009)
+- No `Cc: stable` (expected for this review pipeline)
+- Original submission also had `Closes:
+  https://tracker.ceph.com/issues/78529`; that was dropped at merge
+- Ignore pipeline `Signed-off-by: Sasha Levin` / `[Upstream commit ...]`
+  if present
 
-Step 1.2: PARSE ALL COMMIT MESSAGE TAGS
-Record:
-- Signed-off-by: Xiubo Li <xiubo.li@clyso.com> (author; Ceph FS
-  maintainer)
-- Reviewed-by: Viacheslav Dubeyko <slava@dubeyko.com>
-- Signed-off-by: Ilya Dryomov <idryomov@gmail.com> (Ceph maintainer who
-  applied it)
-- No Fixes: tag (expected for this review pipeline)
-- No Reported-by / Tested-by / Link / Cc: stable
-- Ignore any pipeline “Upstream commit” / “Signed-off-by: Sasha Levin”
-  markers; they are not part of this evaluation
+**Step 1.3: Body**
+- Record: [Bug] LOOKUP/LOOKUPSNAP on a snapped directory can return
+  `-ENOENT` with no trace. `ceph_finish_lookup()` then does
+  `d_add(dentry, NULL)`, caching a negative dentry.
+  `ceph_d_revalidate()` unconditionally trusts snapped dentries (`valid
+  = 1`), so that negative entry never expires.
+- [Symptom] Snapshot paths return `ENOENT` for files/dirs that exist.
+  `readdir` on the parent restores them.
+- [Version] Reporter hit it on kernel 6.18.32 with Ceph squid 19.2.3.
+  Same client caching logic is in this 6.12 tree.
+- [Root cause] Negative dentries in snapped dirs are sticky, so a
+  transient MDS `ENOENT` hides real snapshot entries forever.
 
-Step 1.3: ANALYZE THE COMMIT BODY TEXT
-Record:
-- Bug: the `if (!ci)` early-return in `__ceph_remove_cap()` is dead.
-  `ci` is used as `&ci->netfs.inode` before the check, and
-  `cap->session` is used as `session->s_mdsc->fsc->client` even earlier.
-- Symptom/failure mode: on a second remove, `cap->ci` (and often
-  `cap->session`) are already NULL, so the second call NULL-derefs and
-  oopses before the guard.
-- Version info in the message: none.
-- Root cause (author): initializers were placed before the NULL check,
-  so the check cannot run.
+**Step 1.4: Hidden bug fix?**
+- Record: Not hidden. Explicit correctness fix for stale negative
+  dentries. Not cleanup/refactor.
 
-Step 1.4: DETECT HIDDEN BUG FIXES
-Record: Not disguised. Explicit crash fix: move loads after the existing
-“already removed” guard.
+---
 
-===============================================================
-PHASE 2: DIFF ANALYSIS - LINE BY LINE
-===============================================================
+## Phase 2: Diff analysis
 
-Step 2.1: INVENTORY THE CHANGES
-Record:
-- File: `fs/ceph/caps.c` only (+10 / -7; net ~3 lines of real change)
-- Function: `__ceph_remove_cap()`
-- Scope: single-function surgical fix
+**Step 2.1: Inventory**
+- Record: `fs/ceph/dir.c` (+8/-2), `fs/ceph/inode.c` (+2/-1). Net
+  +10/-3.
+- Functions: `ceph_finish_lookup()`, `ceph_lookup()`,
+  `ceph_fill_trace()`.
+- Scope: single-subsystem surgical fix, three call sites that
+  instantiate negative dentries.
 
-Step 2.2: UNDERSTAND THE CODE FLOW CHANGE
-Record:
-- Before (this tree, `fs/ceph/caps.c` 1142–1155):
-  - `session = cap->session`
-  - `cl = session->s_mdsc->fsc->client`  (deref session)
-  - `ci = cap->ci`
-  - `inode = &ci->netfs.inode`           (deref ci)
-  - then `if (!ci) return;`
-- After:
-  - declare the locals
-  - `ci = cap->ci; if (!ci) return;`
-  - then load `session`, `cl`, `inode`
-- Path: second/concurrent remove of the same `struct ceph_cap`. Normal
-  first remove is unchanged.
+**Step 2.2: Code flow**
+1. `ceph_finish_lookup()`: on traceless `-ENOENT`, previously always
+   `d_add(dentry, NULL)` for unhashed negatives. After: only if parent
+   is missing or `ceph_snap(parent) == CEPH_NOSNAP`. Snapped parents
+   skip `d_add`; VFS retries next access.
+2. `ceph_lookup()` local ENOENT shortcut (`DCACHE` + complete dir +
+   `FILE_SHARED`): add `ceph_snap(dir) == CEPH_NOSNAP` so snapped dirs
+   never conclude ENOENT locally and cache it.
+3. `ceph_fill_trace()` null-dentry + lease path: `d_add(dn, NULL)` only
+   when parent is live (`CEPH_NOSNAP`).
 
-Step 2.3: IDENTIFY THE BUG MECHANISM
-Record:
-- Category: NULL pointer dereference (memory-safety), restoring a
-  race/double-remove guard
-- Mechanism: first `__ceph_remove_cap()` always does `cap->ci = NULL`
-  and, unless `s_cap_iterator == cap`, also `cap->session = NULL`. A
-  second call then hits NULL `session` or NULL `ci` during initializer
-  evaluation. Moving the check first makes the early-return real again.
+**Step 2.3: Bug mechanism**
+- Record: [Logic / dcache correctness]
+- Mechanism: sticky negative dentry + “always trust snapped dentries” in
+  `ceph_d_revalidate()` (this tree, `fs/ceph/dir.c` around the
+  `ceph_snap(dir) != CEPH_NOSNAP` / `valid = 1` path). Fix: do not
+  instantiate those negatives.
 
-Step 2.4: ASSESS THE FIX QUALITY
-Record:
-- Obviously correct: C initializers must not run before the pointer they
-  depend on is checked.
-- Minimal: only reorders existing locals; no API/lock/data-structure
-  change.
-- Regression risk: very low. The only behavioral change on the already-
-  removed path is dropping `doutc(cl, "inode is NULL\n")`, which could
-  not run safely anyway because `cl` comes from `session`.
-- Residual: `session` is still not NULL-checked after `ci` is confirmed
-  non-NULL. In this tree `cap->session` is only set to NULL in
-  `__ceph_remove_cap()` (non-iterator case) and in
-  `iterate_session_caps()` after `!cap->ci`, so session-NULL with ci-
-  non-NULL is not a current assignment pattern.
+**Step 2.4: Fix quality**
+- Record: Minimal and obviously correct. Live-dir behavior unchanged.
+  Regression risk is extra MDS lookups for true ENOENT in snapshots
+  (author: rare). No locking/API/data-structure changes. Skipping
+  `d_add` leaves the lookup dentry unhashed; VFS `d_lookup_done()` +
+  `dput()` frees it, so the next access looks up again.
 
-===============================================================
-PHASE 3: GIT HISTORY INVESTIGATION
-===============================================================
+---
 
-Step 3.1: BLAME THE CHANGED LINES
-Record:
-- Function exists since Sage Weil 2009 (`a8599bd821d084`).
-- Real NULL-ci guard added in `e5cafce3ad0f8` (“ceph: fix race in
-  concurrent __ceph_remove_cap invocations”, Luis Henriques, 2020; in
-  v5.11-rc1). That commit *moved* `mdsc` init *after* `if (!ci)` for
-  this exact crash.
-- Regression: `38d46409c4639` (“ceph: print cluster fsid and client
-  global_id in all debug logs”, Xiubo Li, 2023; in v6.7-rc1) added `cl =
-  session->s_mdsc->fsc->client` and `inode = &ci->netfs.inode` *before*
-  the check so `doutc()` could use them. That made the 2020 guard dead
-  again.
+## Phase 3: Git history
 
-Step 3.2: FOLLOW THE FIXES: TAG
-Record: no Fixes: tag. The commit that reintroduced the crash is
-`38d46409c4639`, which **is** an ancestor of this tree (`git merge-base
---is-ancestor` exit 0). Original 2020 fix `e5cafce3ad0f8` is also here.
+**Step 3.1: Blame**
+- Record: Negative `d_add` in `ceph_finish_lookup()` from Sage Weil
+  `2817b000b02c5f` (2009). Unconditional trust of snapped dentries also
+  from that era (`valid = 1` in `bf1c6aca96c9d2`, 2011). Present for the
+  life of this filesystem client, not new 6.13+ code.
+- Local wrappers `if (d_unhashed(dentry))` come from `4179cc390dace`
+  (`ceph: only d_add() negative dentries when they are unhashed`),
+  already in this tree.
 
-Step 3.3: CHECK FILE HISTORY FOR RELATED CHANGES
-Record:
-- `ea60ed6fcf29e` — UAF in `__ceph_remove_cap()` (rb_erase ordering);
-  already here.
-- `a76d0a9c288ea` — wrapper `ceph_remove_cap()` with its own `if (!ci)`
-  check; already here.
-- Recent `fs/ceph/caps.c` work is unrelated (revoke, UAF in
-  kick_flushing, deadcode).
-- Standalone; subject is not “patch X/Y”. A later mainline series
-  proposing `RB_CLEAR_NODE()` instead of `ci=NULL` is **not** in this
-  tree (`ceph_cap_is_removed` does not exist) and is not required for
-  this fix.
+**Step 3.2: Fixes: tag**
+- Record: None. Introducer is the original 2009 lookup path, which is in
+  this tree.
 
-Step 3.4: CHECK THE AUTHOR'S OTHER COMMITS
-Record: Xiubo Li is listed in MAINTAINERS for Ceph FS and is a regular
-`fs/ceph/` contributor in this history. Ilya Dryomov (other Ceph
-maintainer) committed it.
+**Step 3.3: File history**
+- Record: Recent related commit in this tree: `4179cc390dace` (hash-
+  corruption/RCU stall if `d_add` on already-hashed negatives). This fix
+  builds on that `d_unhashed` guard and applies cleanly.
+- Standalone; not `patch X/Y`. Mainline follow-ups on these files after
+  `af59562a5b3d3` are unrelated (`ceph_trim_dentries`, VFS mkdir/lookup
+  churn).
 
-Step 3.5: CHECK FOR DEPENDENT/PREREQUISITE COMMITS
-Record: none. It only reorders locals against code this tree already has
-(`ci->netfs.inode`, `doutc`, `lockdep_assert_held`). Applies standalone.
+**Step 3.4: Author**
+- Record: Xiubo Li is a listed maintainer of CEPH DISTRIBUTED FILE
+  SYSTEM CLIENT. Ilya Dryomov is co-maintainer and merged it. Strong
+  subsystem ownership.
 
-===============================================================
-PHASE 4: MAILING LIST AND EXTERNAL RESEARCH
-===============================================================
+**Step 3.5: Dependencies**
+- Record: Uses existing `ceph_snap()` / `CEPH_NOSNAP`. Needs the
+  `d_unhashed` guards for a clean apply; those are already here.
+  Standalone.
 
-Step 4.1: FIND THE ORIGINAL PATCH DISCUSSION
-Record:
-- Mainline SHA: `a354d7eaa1a57f1532c8072a424cc2d339a73cc0` (not an
-  ancestor of HEAD; object exists locally).
-- `b4 dig -c a354d7eaa1a5`: https://patch.msgid.link/20260714-ceph-fix-
-  remove-cap-v1-1-27b5bc6ee2f6@clyso.com
-- `b4 dig -a`: single v1, no v2/v3.
-- Thread is two messages: the patch and Dubeyko “Makes sense.” +
-  Reviewed-by. No NAK, no requested respin.
-- Applied by Ilya Dryomov (CommitDate Wed Aug 26 2026).
+Original mainline SHA: `af59562a5b3d34fb3aa7753f2543393578d06dbf` (not
+an ancestor of this HEAD).
 
-Step 4.2: CHECK WHO REVIEWED THE PATCH
-Record (`b4 dig -w`): Xiubo Li, Ilya Dryomov, Alex Markuze, Viacheslav
-Dubeyko, ceph-devel, linux-kernel. Right maintainers were on To/Cc.
+---
 
-Step 4.3: SEARCH FOR THE BUG REPORT
-Record:
-- This 2026 patch itself has no new syzbot/bugzilla link.
-- The guard it restores was for a **production oops**: Ceph tracker
-  43272, “unable to handle kernel NULL pointer at
-  `__ceph_remove_cap+0x2a`”. Stack: `trim_caps_cb` →
-  `iterate_session_caps` → `dispatch`, with `evict`/`destroy_inode` in
-  the trace; MDS reconnect/stale-caps workload. Ilya identified NULL
-  `cap->ci`. That is the same function and the same check
-  `e5cafce3ad0f8` added (Cc: stable).
+## Phase 4: Mailing list / external research
 
-Step 4.4: CHECK FOR RELATED PATCHES AND SERIES
-Record: standalone one-patch series (`change-id: 20260714-ceph-fix-
-remove-cap-cf7d8a7a242a`). Unrelated later `RB_CLEAR_NODE` RFC is not a
-prerequisite for 6.12.
+**Step 4.1: Original discussion**
+- Record: `b4 dig -c af59562a5b3d3` →
+  https://patch.msgid.link/20260723-b4-snap-negative-
+  dentry-v1-1-c78178117929@clyso.com
+- Only v1. Viacheslav Dubeyko: “Makes sense.” + `Reviewed-by`. No NAK,
+  no stable objection, no later revision that superseded the committed
+  diff.
 
-Step 4.5: CHECK STABLE MAILING LIST HISTORY
-Record: UNVERIFIED for lore.kernel.org/stable HTML (Anubis 403). Full
-review thread was recovered via `b4 dig -m`. No reviewer asked to skip
-stable; no NAK.
+**Step 4.2: Recipients (`b4 dig -w`)**
+- Record: Ilya Dryomov, Alex Markuze, Viacheslav Dubeyko, Dhairya
+  Parmar, `ceph-devel@`, `linux-kernel@`, reporter Andras Pataki. Right
+  maintainers/list.
 
-===============================================================
-PHASE 5: CODE SEMANTIC ANALYSIS
-===============================================================
+**Step 4.3: Bug report**
+- Tracker 78529: snapshot paths return ENOENT; `ls` of parent restores
+  visibility. Live tree had deleted the names after the snapshot.
+- ceph-users thread documents a real backup/copy workload across
+  parallel kernel mounts. Reproduced with `ls -ld` on snapshot paths.
+- Tracker notes MDS `path_traverse()` `is_complete()` shortcut as the
+  server-side trigger, and this kclient change as an independent defense
+  so a transient ENOENT is not cached forever.
 
-Step 5.1: IDENTIFY KEY FUNCTIONS IN THE DIFF
-Record: `__ceph_remove_cap()` only.
+**Step 4.4: Series**
+- Record: Single standalone patch. MDS/libcephfs fixes are userspace,
+  not kernel prerequisites.
 
-Step 5.2: TRACE CALLERS
-Record (this tree):
-- `ceph_remove_cap()` in `fs/ceph/caps.c` — wrapper; already has a safe
-  `if (!ci) return` using caller `mdsc`, then calls
-  `__ceph_remove_cap()`.
-- `ceph_purge_inode_cap()` in `fs/ceph/caps.c` — **direct** call, no
-  inner NULL check.
-- `ceph_purge_inode_cap()` callers: `remove_session_caps_cb()`
-  (`fs/ceph/mds_client.c`), `ceph_inode_shutdown()` (`fs/ceph/inode.c`).
-- Wrapper callers include `__ceph_remove_caps()` from
-  `ceph_evict_inode()`, `trim_caps_cb()`, and cap import/export in
-  `caps.c`.
-- Context: inode eviction, session teardown, cap trim, MDS dispatch /
-  `ceph_con_workfn` workqueue — not a one-time init path.
+**Step 4.5: stable@**
+- Record: UNVERIFIED. lore.kernel.org fetches returned 403. No evidence
+  in the ceph-devel mbox of a stable NAK.
 
-Step 5.3: TRACE CALLEES
-Record: `lockdep_assert_held`, `rb_erase`,
-`spin_lock(&session->s_cap_lock)`, `__ceph_queue_cap_release`,
-`ceph_put_cap`, `ceph_change_snap_realm`, `__cap_delay_cancel`.
-Unchanged by this patch.
+---
 
-Step 5.4: FOLLOW THE CALL CHAIN
-Record: reachable from CephFS runtime: MDS reconnect/trim
-(`trim_caps_cb` / `iterate_session_caps`) and inode eviction. Userspace
-mounts CephFS; MDS recovery and memory reclaim trigger cap trim.
-Unprivileged users do not need a special syscall beyond using a mounted
-CephFS.
+## Phase 5: Semantic analysis
 
-Step 5.5: SEARCH FOR SIMILAR PATTERNS
-Record: wrapper `ceph_remove_cap()` already does the check correctly.
-`__ceph_remove_cap()` is the remaining broken copy after
-`38d46409c4639`. Direct `ceph_purge_inode_cap()` still needs the inner
-guard.
+**Step 5.1: Functions**
+- Record: `ceph_finish_lookup`, `ceph_lookup`, `ceph_fill_trace`.
 
-===============================================================
-PHASE 6: CROSS-REFERENCING AGAINST THE LOCAL TREE
-===============================================================
+**Step 5.2: Callers**
+- `ceph_lookup` is `.lookup` for `ceph_dir_iops` and `ceph_snapdir_iops`
+  — every path walk, including `.snap/...`.
+- `ceph_finish_lookup` also from `ceph_atomic_open()` in
+  `fs/ceph/file.c`.
+- `ceph_fill_trace` processes MDS replies (lookup/link/unlink traces).
 
-Step 6.1: DOES THE BUGGY CODE EXIST IN THIS TREE?
-Record: YES. Local tree is **pending-6.12 / 6.12.111** (`git describe
-HEAD` = `p-6.12-3-gc504cf0baa3d8`, Makefile VERSION=6 PATCHLEVEL=12
-SUBLEVEL=111). Current `fs/ceph/caps.c:1142-1155` is exactly the pre-
-patch code. Candidate `a354d7eaa1a5` is **not** an ancestor of HEAD.
-Regression `38d46409c4639` (v6.7-rc1) **is** an ancestor.
+**Step 5.3: Callees**
+- Record: `d_add`/`d_unhashed`/`d_really_is_positive`, `ceph_snap()`,
+  `__ceph_dir_is_complete()`, lease updates. No alloc/lock changes.
 
-Step 6.2: CHECK FOR BACKPORT COMPLICATIONS
-Record: clean apply. The old hunk in this checkout matches the commit
-diff exactly (verified by matching the current function prologue). No
-`netfs.inode` mismatch.
+**Step 5.4: Reachability**
+- Record: Userspace-reachable via ordinary `stat`/`open`/`cp`/`ls` on
+  snapshot paths. Not an obscure config hook. `CONFIG_CEPH_FS` is the
+  only gate.
 
-Step 6.3: CHECK IF RELATED FIXES ARE ALREADY HERE
-Record: `e5cafce3ad0f8` is here but is ineffective because of
-`38d46409c4639`. No later equivalent reorder exists in this `caps.c`.
+**Step 5.5: Similar patterns**
+- Record: All three `d_add(..., NULL)` sites in `fs/ceph/` are patched.
+  No leftover sibling.
 
-===============================================================
-PHASE 7: SUBSYSTEM AND MAINTAINER CONTEXT
-===============================================================
+---
 
-Step 7.1: IDENTIFY THE SUBSYSTEM AND ITS CRITICALITY
-Record: [fs/ceph — CephFS client] [IMPORTANT: production distributed
-filesystem; not core VFS for every machine, but crash/data-path for all
-CONFIG_CEPH_FS users]
+## Phase 6: This tree (pending-6.12 / 6.12.111)
 
-Step 7.2: ASSESS SUBSYSTEM ACTIVITY
-Record: actively maintained (recent cap UAF/revoke fixes). This
-particular guard dates to 2020 and was broken by 2023 debug logging, not
-by new 6.12-only infrastructure.
+**Step 6.1: Buggy code present?**
+- Record: Yes.
+  - `fs/ceph/dir.c` `ceph_finish_lookup()`: unhashed negatives still
+    `d_add(dentry, NULL)` with no snap check.
+  - `ceph_lookup()` local ENOENT shortcut has no `ceph_snap(dir) ==
+    CEPH_NOSNAP`.
+  - `fs/ceph/inode.c` `ceph_fill_trace()`: `d_add(dn, NULL)` on null
+    dentry + lease, no snap check.
+  - `ceph_d_revalidate()` still: `if (ceph_snap(dir) != CEPH_NOSNAP)
+    valid = 1;`
+- `git merge-base --is-ancestor af59562a5b3d3 HEAD` → not an ancestor
+  (fix not already here).
 
-===============================================================
-PHASE 8: IMPACT AND RISK ASSESSMENT
-===============================================================
+**Step 6.2: Backport difficulty**
+- Record: `git show af59562a5b3d3 | git apply --check` succeeded
+  (inode.hunk offset −32). Clean apply.
 
-Step 8.1: DETERMINE WHO IS AFFECTED
-Record: CephFS client users (`CONFIG_CEPH_FS`). Enterprise/HPC/cloud
-deployments commonly run this.
+**Step 6.3: Related fixes already here?**
+- Record: `4179cc390dace` only prevents `d_add` on already-hashed
+  dentries (RCU stall). It does not skip snapped negatives. No duplicate
+  of this fix.
 
-Step 8.2: DETERMINE THE TRIGGER CONDITIONS
-Record: concurrent `__ceph_remove_cap()` on the same cap — historically
-`iterate_session_caps` (`trim_caps_cb` / `remove_session_caps_cb`) vs
-inode eviction, especially around MDS reconnect/stale caps. Timing-
-dependent; documented as a real oops, not a lab-only theory. Trigger is
-kernel Ceph client activity, not a raw unprivileged syscall to an unused
-subsystem.
+---
 
-Step 8.3: DETERMINE THE FAILURE MODE SEVERITY
-Record: NULL deref → kernel oops in `__ceph_remove_cap`. Severity
-**CRITICAL**. Tracker 43272 is exactly that oops.
+## Phase 7: Subsystem context
 
-Step 8.4: CALCULATE RISK-BENEFIT RATIO
-Record:
-- Benefit: high — restores a stable-worthy crash guard that 6.12 still
-  has on paper but cannot execute.
-- Risk: very low — ~10-line local reorder, no locking/API change, first-
-  remove path identical.
+**Step 7.1**
+- Record: [Subsystem] CephFS client (`fs/ceph/`). [Criticality]
+  IMPORTANT — not core VFS, but a production networked filesystem
+  (MAINTAINERS: Supported). Snapshot lookups are a real backup/restore
+  path.
+
+**Step 7.2**
+- Record: Mature client; this lookup/revalidate behavior has been stable
+  for years. Not a fix to brand-new 7.x-only code.
+
+---
+
+## Phase 8: Impact and risk
+
+**Step 8.1: Who is affected**
+- Record: CephFS (`CONFIG_CEPH_FS`) users accessing snapshot trees
+  (`.snap/...`), especially after live-tree deletes and MDS cache trim.
+  Reporter: parallel snapshot copies on kernel mounts.
+
+**Step 8.2: Trigger**
+- Record: LOOKUP of a snapshot name after MDS returns traceless ENOENT
+  (complete-dir shortcut / trim). Then every later lookup hits the
+  cached negative. Unprivileged users who can read the mount can trigger
+  it. Not a tiny race window; once cached, it sticks until
+  readdir/`d_invalidate`.
+
+**Step 8.3: Failure mode**
+- Record: Existing snapshot files/directories are invisible (`ENOENT`).
+  Backup/copy can skip or fail. Not a panic, but filesystem data-access
+  correctness. Severity: **HIGH**.
+
+**Step 8.4: Risk/benefit**
+- Benefit: high for CephFS snapshot users (broken snapshot access /
+  incomplete backups).
+- Risk: very low (10 lines, snap-only, no locks/APIs). Cost is extra
+  lookups for true snapshot ENOENT.
 - Ratio: strongly favors backport.
 
-===============================================================
-PHASE 9: FINAL SYNTHESIS
-===============================================================
+---
 
-Step 9.1: COMPILE THE EVIDENCE
+## Phase 9: Synthesis
+
+**Step 9.1: Evidence**
+
 FOR:
-- Real NULL deref / oops, not cleanup.
-- Production crash already recorded (tracker 43272); 2020 fix was Cc:
-  stable.
-- 6.12 contains the v6.7 debug-log regression that killed that guard.
-- Tiny, obviously correct, applies cleanly here.
-- Written and applied by Ceph maintainers; reviewed with no NAK.
-- Direct caller `ceph_purge_inode_cap()` still bypasses the wrapper
-  check.
+- Real production report (Flatiron Institute); tracker + ceph-users
+  thread with repro.
+- Sticky negative dentries make snapshot names disappear until readdir.
+- Same client logic is in this 6.12 tree.
+- Small, obviously correct, maintainer-authored and maintainer-merged.
+- Applies cleanly; no series dependency.
+- Independent of the MDS-side fix; still needed against older/unfixed
+  MDS.
 
 AGAINST:
-- No Fixes:/Cc: stable on this 2026 commit (not a negative under these
-  rules).
-- Affects only CephFS, not every kernel.
-- Double-remove is a race, not every cap remove.
+- Not a crash/UAF/deadlock; tracker severity “3 - minor”.
+- Primary trigger is MDS; workaround is `ls` on the parent.
+- Only CephFS snapshot lookups.
 
 UNRESOLVED:
-- lore.kernel.org/stable HTML search blocked (Anubis). Review mbox was
-  obtained via b4.
+- Whether stable@ already discussed this (lore HTTP 403).
 
-Step 9.2: APPLY THE STABLE RULES CHECKLIST
-1. Obviously correct and tested? **PASS** — reorder after the pointer
-   check; maintainer review + mainline apply.
-2. Fixes a real bug that affects users? **PASS** — oops; same class as
-   tracker 43272.
-3. Important issue (crash, security, corruption, deadlock)? **PASS** —
-   kernel NULL deref / oops.
-4. Small and contained? **PASS** — one function, one file, 17-line diff.
-5. No new features or APIs? **PASS**
-6. Can apply to the local tree? **PASS** — buggy code present; hunk
-   matches 6.12.111.
+**Step 9.2: Stable rules**
+1. Obviously correct and tested? **PASS** — reviewed, merged, matches
+   the described mechanism in this tree.
+2. Real bug affecting users? **PASS** — confirmed ENOENT for existing
+   snapshot paths.
+3. Important? **PASS** — filesystem returning ENOENT for data that
+   exists, breaking snapshot copy/backup.
+4. Small and contained? **PASS** — +10/-3, two files, three sites.
+5. No new features/APIs? **PASS**
+6. Applies to this tree? **PASS** — `git apply --check` clean; helpers
+   already present.
 
-Step 9.3: CHECK FOR EXCEPTION CATEGORIES
-Record: not an ID/quirk/DT/build/docs exception. Ordinary crash fix;
-qualifies on the main rules.
+**Step 9.3: Exceptions**
+- Record: Not ID/quirk/DT/build/docs. Ordinary correctness fix.
 
-Step 9.4: MAKE YOUR DECISION
-This 6.12 tree still evaluates `session->s_mdsc` and `&ci->netfs.inode`
-before `if (!ci)`. That is a crash on a second remove. The patch
-restores the 2020 guard with no extra dependencies. It should be
-backported.
+**Step 9.4: Decision**
+This tree should take it. The bug is here, the fix is surgical, and
+snapshot ENOENT-for-existing-files is a serious CephFS correctness issue
+for stable users still talking to MDS daemons that can emit that reply.
 
-What the commit solves and why it matters here:
-`__ceph_remove_cap()` is supposed to no-op when `cap->ci` is already
-NULL (first remove already ran, including the iterate_session_caps
-delayed-remove case). In 6.12 those loads happen first, so the second
-call oopses. CephFS hits this on cap trim/session teardown versus
-eviction.
+---
 
-Risk vs benefit: benefit is avoiding a Ceph client oops; risk is a few
-lines of initializer movement.
+### What it solves for this tree
+On 6.12 CephFS, a traceless snapshot LOOKUP ENOENT is cached as a
+negative dentry that `ceph_d_revalidate()` never invalidates. Users then
+cannot open snapshot files that still exist until someone does readdir.
+The patch stops caching those negatives for snapped parents.
 
-Concerns: none for this tree. No missing prerequisites; no conflicting
-`RB_CLEAR_NODE` conversion.
+### Risk vs benefit
+Benefit is restoring snapshot access for a documented production failure
+mode. Risk is confined to extra lookups on snapshot ENOENT, with live-
+directory caching unchanged.
+
+### Concerns
+None that block backport. MDS userspace should still be fixed
+separately; this kernel change is the client-side defense and does not
+require those patches.
+
+---
 
 Verification:
-- [Phase 1] Tags: author/reviewer/maintainer SOBs only; no
-  Fixes/Reported-by/Cc: stable
-- [Phase 2] Diff: `__ceph_remove_cap()` in `fs/ceph/caps.c`, +10/-7,
-  move ci/session/cl/inode after `if (!ci)`
-- [Phase 3] `git blame fs/ceph/caps.c` 1142–1160: guard from
-  `e5cafce3ad0f8` (v5.11); bad inits from `38d46409c4639` (v6.7-rc1)
-- [Phase 3] `git show e5cafce3ad0f8`: original stable-bound NULL-ci fix
-  moved mdsc after the check
-- [Phase 3] `git show 38d46409c4639`: added `cl = session->...` and
-  `inode = &ci->netfs.inode` before `if (!ci)`
-- [Phase 3] `git merge-base --is-ancestor 38d46409c4639 HEAD` → yes;
-  `e5cafce3ad0f8` → yes; `a354d7eaa1a5` → no
-- [Phase 4] `b4 dig -c a354d7eaa1a5`: lore
-  https://patch.msgid.link/20260714-ceph-fix-remove-
-  cap-v1-1-27b5bc6ee2f6@clyso.com
-- [Phase 4] `b4 dig -a`: v1 only
-- [Phase 4] `b4 dig -w`: Dryomov/Markuze/Dubeyko/ceph-devel CC’d
-- [Phase 4] mbox: Dubeyko Reviewed-by, no NAK
-- [Phase 4] tracker.ceph.com/issues/43272: production NULL deref in
-  `__ceph_remove_cap` from `trim_caps_cb`
-- [Phase 5] Callers: wrapper `ceph_remove_cap()` (safe) and
-  `ceph_purge_inode_cap()` (unsafe direct)
-- [Phase 6] `git describe HEAD`: p-6.12-3-gc504cf0baa3d8; `make
-  kernelversion`: 6.12.111; buggy prologue present at caps.c:1144–1155
-- [Phase 6] Current function text matches the patch’s old hunk exactly
-- [Phase 8] Failure mode: kernel oops on NULL session/ci, severity
-  CRITICAL
-- UNVERIFIED: lore.kernel.org/stable HTML search (Anubis); not used for
-  the verdict
+- [Phase 1] Parsed tags: Reported-by Andras Pataki, Link tracker 78529,
+  Reviewed-by Dubeyko, SOB Dryomov; no Fixes/Cc-stable
+- [Phase 1] Tracker 78529 and ceph-users thread confirm ENOENT on
+  snapshot paths, readdir workaround, kernel 6.18.32 / squid 19.2.3
+- [Phase 2] Diff: three `d_add(..., NULL)` sites; snap check + skip
+  cache; `ceph_lookup` local ENOENT gated on `CEPH_NOSNAP`
+- [Phase 2] Confirmed `ceph_d_revalidate()` in this tree sets `valid =
+  1` for `ceph_snap(dir) != CEPH_NOSNAP`
+- [Phase 3] `git describe HEAD` / Makefile: pending-6.12, 6.12.111
+- [Phase 3] `git merge-base --is-ancestor af59562a5b3d3 HEAD` → not
+  present
+- [Phase 3] Blame: `d_add` path from `2817b000b02c5f` (2009); snap trust
+  from 2009–2011
+- [Phase 3] Prerequisite `4179cc390dace` (`d_unhashed` before `d_add`)
+  is already in this tree
+- [Phase 4] `b4 dig -c af59562a5b3d3`: v1 only; lore msgid
+  `20260723-b4-snap-negative-dentry-v1-1-c78178117929@clyso.com`
+- [Phase 4] `b4 dig -a/-w/-m`: maintainer CC list; Dubeyko “Makes sense”
+  + Reviewed-by; no NAK
+- [Phase 4] WebFetch lore.kernel.org/patch.msgid.link: HTTP 403
+  (discussion recovered via `b4 dig -m`)
+- [Phase 5] Callers: `ceph_lookup` is dir and snapdir `.lookup`;
+  `ceph_finish_lookup` also from `ceph_atomic_open`
+- [Phase 6] `git apply --check` of `af59562a5b3d3` succeeded on this
+  tree
+- [Phase 6] All three local `d_add(..., NULL)` sites still lack the snap
+  guard
+- [Phase 7] MAINTAINERS: Ceph FS client Supported; author Xiubo Li is a
+  listed maintainer
+- [Phase 8] Failure mode: persistent ENOENT for existing snapshot names
+  → HIGH filesystem correctness
+- UNVERIFIED: stable@ mailing-list history (lore 403)
 
 **YES**
 
- fs/ceph/caps.c | 17 ++++++++++-------
- 1 file changed, 10 insertions(+), 7 deletions(-)
+ fs/ceph/dir.c   | 10 ++++++++--
+ fs/ceph/inode.c |  3 ++-
+ 2 files changed, 10 insertions(+), 3 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 7f4bb62df3def..91cb305815cbd 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1141,18 +1141,21 @@ int ceph_is_any_caps(struct inode *inode)
-  */
- void __ceph_remove_cap(struct ceph_cap *cap, bool queue_release)
- {
--	struct ceph_mds_session *session = cap->session;
--	struct ceph_client *cl = session->s_mdsc->fsc->client;
--	struct ceph_inode_info *ci = cap->ci;
--	struct inode *inode = &ci->netfs.inode;
-+	struct ceph_mds_session *session;
-+	struct ceph_client *cl;
-+	struct ceph_inode_info *ci;
-+	struct inode *inode;
- 	struct ceph_mds_client *mdsc;
- 	int removed = 0;
- 
- 	/* 'ci' being NULL means the remove have already occurred */
--	if (!ci) {
--		doutc(cl, "inode is NULL\n");
-+	ci = cap->ci;
-+	if (!ci)
- 		return;
--	}
-+
-+	session = cap->session;
-+	cl = session->s_mdsc->fsc->client;
-+	inode = &ci->netfs.inode;
- 
- 	lockdep_assert_held(&ci->i_ceph_lock);
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 24abe4dbf774d..a253286214fee 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -774,8 +774,13 @@ struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
+ 				d_drop(dentry);
+ 				err = -ENOENT;
+ 			} else {
+-				if (d_unhashed(dentry))
+-					d_add(dentry, NULL);
++				if (d_unhashed(dentry)) {
++					struct inode *parent =
++						d_inode(dentry->d_parent);
++					if (!parent ||
++					    ceph_snap(parent) == CEPH_NOSNAP)
++						d_add(dentry, NULL);
++				}
+ 			}
+ 		}
+ 	}
+@@ -840,6 +845,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 			    dentry->d_name.len) &&
+ 		    !is_root_ceph_dentry(dir, dentry) &&
+ 		    ceph_test_mount_opt(fsc, DCACHE) &&
++		    ceph_snap(dir) == CEPH_NOSNAP &&
+ 		    __ceph_dir_is_complete(ci) &&
+ 		    __ceph_caps_issued_mask_metric(ci, CEPH_CAP_FILE_SHARED, 1)) {
+ 			__ceph_touch_fmode(ci, mdsc, CEPH_FILE_MODE_RD);
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index b6c60d787692e..fddeeb9527fb3 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1783,7 +1783,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 				ceph_dir_clear_ordered(dir);
+ 				d_delete(dn);
+ 			} else if (have_lease) {
+-				if (d_unhashed(dn))
++				if (d_unhashed(dn) &&
++				    ceph_snap(dir) == CEPH_NOSNAP)
+ 					d_add(dn, NULL);
+ 			}
  
 -- 
 2.53.0
