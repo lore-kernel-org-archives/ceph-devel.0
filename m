@@ -1,38 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32B394E50D4;
-	Mon, 19 Oct 2026 11:34:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BF694DA548;
+	Mon, 19 Oct 2026 11:34:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792409655; cv=none; b=PvQlR7O8iwnT1wol5SUjrYfzsX0++BzdT/qQb6uxddS+MJygl7+J+9a8FW0RFKx3iSaVSwVABULxWtneiKtx8NapBzqig5hyc7gsilh15ppoQX/PIBF3xWH2naiCUSpLbgD6N1L8VEggB6m3Fr9DEj5bJlwGJZSqTMHPEYy7nug=
+	t=1792409655; cv=none; b=MCTOOeVJ8W9qKEz1mjSdp3Y2MCpxqmMzEkOIzOdB3LFz5VCOrta9urYn4diM5Kg7o0XPxivx8Jve0FWSnjBTL/qmjzPeR6FihDoYRWaP5w8Bb87XCM0+knGpvzs3scRTChTZ9o2Go1nAyx9d33KwWojwJUnNESSqRI18I679754=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1792409655; c=relaxed/simple;
-	bh=vVnTRYzCIxXjqhYevgdB5gW6MuvRqOmBdio78LPOP4k=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=jFFIETA5cCvFgJNsht+jIs0vcH78fMETCaNYroRWRaZb02h3UTx9Dwf7LlAvOVKaqI6JpdfoqPa7zIwG3qMVQGvo7L+PV9zv9IYEzsQSaY6mWjqzuQy4MDSoI9Nc5p/HeKe7XZIbDV1IK5mIjtlUgECgG7loqt6Ci7kskRdQM4E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hm0YrDHW; arc=none smtp.client-ip=10.30.226.201
+	bh=ED1YjREMoLBiQIUCRv/kKFoUKMamUrmEOR4X16KtTeQ=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=lrh4wT/XnL6XWm1ZhfP/TNrjyz/BpIO4Y7QiTxghKHWDCeHQrzPIYdioG6yXJ38Jz2U6Nkw7fu7qv8OG1Rfa44DjfYH96OhSZN+nhYcfUXWrEjlieUXNOL6XHkwa3qvz/x9wI/mU3c+BHElh+DHw0Cn/d/TdK9E+3jqsISl1v10=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DHNa573h; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hm0YrDHW"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 9D2B8C2BCF4;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DHNa573h"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id E90A1C2BD04;
 	Mon, 19 Oct 2026 11:34:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1792409654;
-	bh=vVnTRYzCIxXjqhYevgdB5gW6MuvRqOmBdio78LPOP4k=;
-	h=From:Subject:Date:To:Cc:Reply-To:From;
-	b=hm0YrDHW6y6PI1m7BnItIhrhJob9VoWNHQz2dZoCq53RAnLOc7rWpLjY8UBlApC0M
-	 opDZWIE/0hmalUJQYPdtemWuH0Z337bi2m0N0y1oDDiy7UabDFyby8UOMYfb1ItDSq
-	 5BE7I9F8oGKTXpz9gQEGoXWvsXHPlosnoOuOsIA5nNXwezCZR/4/60GYakqjLrsLWy
-	 VP58cS16zv5mNDwZASUrJgYLWKWDLF39Mh+lO7WiXgCzP7oKp0woIy6iaI2WPYehSO
-	 UP8/Ui9ROe72II+S1/83Jw7wkeBjIsX0KMznH1kHGtAzM2xg/ajFfjxgiRvBzoLXTg
-	 yWTTwFG7eeUrw==
+	bh=ED1YjREMoLBiQIUCRv/kKFoUKMamUrmEOR4X16KtTeQ=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=DHNa573hXTpNXPyWXFjWOaUN+fcXwB94xnQZrPyRKYE8JUpTcol4RGhtzTYbLGsVm
+	 iEUsv4lol69/hBjp98HP1zRwDI1J3MFwbloyIU3l7jjinP7hDmZBmgqD+xUuBFfwQx
+	 iTLA5SsHERxtY8WQciY8M9OOuHOrhkTSBHn9ctPeVrzgKnTS9HNB5VVbovhzmzW4Nn
+	 8serxrWlr70fmD924z13281iQAL0UWSglICU8P3M6Y0KgxrWgoV7gboXGUEiku6Gmd
+	 KmGuLbIdvv2kQoxNjnkwsB93ds0RlbKIKVTVjFiu8iIZBfgx/1JbeJrXK81d2GcGmR
+	 WmaHCQAmflyNQ==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C6C5CCF2DB;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D07A9CCF2D6;
 	Mon, 19 Oct 2026 11:34:14 +0000 (UTC)
 From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Subject: [PATCH v2 0/4] ceph: fix the buffered read size metric and make
- the subvolume metrics per CPU
-Date: Mon, 19 Oct 2026 13:33:26 +0200
-Message-Id: <20261019-ceph-metrics-percpu-v2-0-1fa5229b00b8@clyso.com>
+Date: Mon, 19 Oct 2026 13:33:30 +0200
+Subject: [PATCH v2 4/4] ceph: accumulate subvolume metrics per CPU
 Precedence: bulk
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
@@ -41,21 +40,19 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/32NSw6CQBAFr0J6bZuZkY9x5T0MC2gbaSPOZBqIh
- HB3AfcuK6lXbwblKKxwSWaIPIqKf6/gDglQW70fjHJfGZxxuTU2ReLQYsd9FFIMHCkMaKnOTFo
- 0hc0MrMsQuZHPXr2VP9ahfjL1W2ozWtHex2m/He3m/X8YLRo8nSmrXNow5Xyl16T+SL6DclmWL
- 1q2Tx3IAAAA
-X-Change-ID: 20261014-ceph-metrics-percpu-1cb5047f7150
+Message-Id: <20261019-ceph-metrics-percpu-v2-4-1fa5229b00b8@clyso.com>
+References: <20261019-ceph-metrics-percpu-v2-0-1fa5229b00b8@clyso.com>
+In-Reply-To: <20261019-ceph-metrics-percpu-v2-0-1fa5229b00b8@clyso.com>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
  Xiubo Li <xiubo.li@clyso.com>, Viacheslav Dubeyko <slava@dubeyko.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Dan van der Ster <dan.vanderster@clyso.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1792409634; l=3625;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1792409634; l=13757;
  i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=vVnTRYzCIxXjqhYevgdB5gW6MuvRqOmBdio78LPOP4k=;
- b=jbqguYpXcDsTHT4x/xvUqUYpY9T36RaZdbs7ZEjNVRoSGkeduh4xh+RoGsNLPKW1Ap8ybnSUJ
- Ff0bhnealKdDHiZIVKhk3EIh0/adOQgEBpRo+2Sy992nAGvOFczAYmd
+ bh=qHrut5Ipp+N8t3FxDd7eumO0FP64zxmgR6rrC/M1bHM=;
+ b=T7D1gUA1MDGsLhS0Rm0yTK4yXboz4Dr2txnYSA8UKUCBOzTTYBqrQ9Trhspc/omp6C9JVQKlU
+ vfW+2JnPZIOCPA2KeAgRs8bFWWD/7U+sgZ5r/4jkA+mDXsNa6MI/l6c
 X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
  pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
 X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
@@ -63,83 +60,409 @@ X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
 X-Original-From: Xiubo Li <xiubo.li@clyso.com>
 Reply-To: xiubo.li@clyso.com
 
-Two problems in the client I/O metrics, reported by Dan van der Ster
-while looking at IO500 runs on 144-core Grace clients.
+From: Xiubo Li <xiubo.li@clyso.com>
 
-Patch 1: metrics/size has reported 0 bytes for every page cache read
-since buffered reads moved to CEPH_OSD_DATA_TYPE_ITER, because
-finish_netfs_read() still reads osd_data->length, which only the page
-vector type sets.
+With subvolume metrics enabled, every OSD read and write completion
+takes the mount-wide tracker->lock and walks the rbtree of subvolumes
+to add one op to its entry.  On a client with many cores doing a
+large bandwidth, the completions of all its CPUs serialize on that
+spinlock and bounce its cache line.
 
-Patches 2-4: every OSD read and write completion updates the subvolume
-metrics through state shared by the whole mount.  Even with subvolume
-metrics disabled it bumped an atomic64 counter that nothing reads;
-with them enabled it took a mount-wide spinlock and searched an rbtree.
-Patch 2 drops the unused counters.  Patch 3 flushes the OSD completion
-workqueue before the mds client and its metrics are freed.  Patch 4
-accumulates the counters in a per-CPU slot and only folds them into the
-tree when the slot changes subvolume or when the metrics are sent or
-dumped.
+Give each CPU a slot holding the counters of one subvolume.  A
+completion only takes its own slot's lock and adds to it; it goes to
+the tree only when the slot held another subvolume, whose counters it
+then folds into the tree entry the old way.  The metrics sender and
+the debugfs dump fold every slot into the tree before they read it,
+so what they report is unchanged.  A client usually works in one
+subvolume at a time, so the tree is touched once per CPU and snapshot
+instead of once per I/O.
 
-Tested on a 12-vCPU x86_64 VM against a main MDS with SUBVOLUME_METRICS,
-with KASAN, lockdep and kmemleak enabled:
+The slot is looked up with raw_cpu_ptr() and protected by its own
+lock, so a task that migrates in between just updates another CPU's
+slot.  A fold takes the slot's lock inside tracker->lock and clears the
+slot only once the subvolume's entry is in the tree, so if that entry
+cannot be allocated the counters stay in the slot for the next fold.
+A completion for another subvolume then adds its single I/O to the tree
+directly, which drops it only when that allocation fails as well, as
+before.  ceph_subvolume_metrics_init() now allocates the per-CPU slots
+and can fail.
 
-- 12 fio jobs doing 4k direct I/O in one subvolume: the op and byte
-  totals the MDS received over all metrics sends match what fio issued.
-  Alternating between two subvolumes on every I/O, the MDS sees the
-  same totals as with the unpatched client.
-- The same with failslab failing half of the subvolume entry
-  allocations: in one subvolume v1 lost about 9% of the ops and this
-  version loses none; alternating between two subvolumes it drops 64
-  of 240k I/Os, those whose direct insert failed as well.
-- lock_stat over 20s of 12-job random reads in one subvolume:
-  tracker->lock goes from 90k acquisitions and 78 contentions to 316
-  and none; the per-CPU slot locks see no contention.
-- umount -f with the OSDs paused and I/O in flight, and MDS failover
-  and kill -9 under I/O: no KASAN, lockdep or kmemleak reports.  The
-  race patch 3 closes was not hit there: all 3840 aborted requests
-  completed before ceph_mdsc_destroy().
-
-Throughput on that VM is unchanged within noise: at 12 vCPUs the
-tracker lock is not a bottleneck, so the gain is only expected on
-large clients like the ones in the report.
-
+Reported-by: Dan van der Ster <dan.vanderster@clyso.com>
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
-Changes in v2:
-- Fold a per-CPU slot into the tree under the tracker lock and clear it
-  only once its entry is in the tree, so its counters are kept when the
-  entry allocation fails (Alex Markuze)
-- New patch 3: flush osdc->completion_wq in ceph_mdsc_destroy() before
-  the metrics are freed (Alex Markuze)
-- Link to v1: https://patch.msgid.link/20261014-ceph-metrics-percpu-v1-0-38c5a24fec6e@clyso.com
+ fs/ceph/mds_client.c        |   6 +-
+ fs/ceph/subvolume_metrics.c | 243 ++++++++++++++++++++++++++++++++++----------
+ fs/ceph/subvolume_metrics.h |   5 +-
+ 3 files changed, 199 insertions(+), 55 deletions(-)
 
-To: Ilya Dryomov <idryomov@gmail.com>
-To: Alex Markuze <amarkuze@redhat.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index b62291f0e351..fa6b57bb9120 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -6501,7 +6501,9 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 	err = ceph_metric_init(&mdsc->metric);
+ 	if (err)
+ 		goto err_mdsmap;
+-	ceph_subvolume_metrics_init(&mdsc->subvol_metrics);
++	err = ceph_subvolume_metrics_init(&mdsc->subvol_metrics);
++	if (err)
++		goto err_metric;
+ 	mutex_init(&mdsc->subvol_metrics_last_mutex);
+ 	mdsc->subvol_metrics_last = NULL;
+ 	mdsc->subvol_metrics_last_nr = 0;
+@@ -6533,6 +6535,8 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 	fsc->mdsc = mdsc;
+ 	return 0;
+ 
++err_metric:
++	ceph_metric_destroy(&mdsc->metric);
+ err_mdsmap:
+ 	kfree(mdsc->mdsmap);
+ err_mdsc:
+diff --git a/fs/ceph/subvolume_metrics.c b/fs/ceph/subvolume_metrics.c
+index 895878a49ea7..3c9479b5c14a 100644
+--- a/fs/ceph/subvolume_metrics.c
++++ b/fs/ceph/subvolume_metrics.c
+@@ -31,14 +31,36 @@ struct ceph_subvol_metric_rb_entry {
+ 	u64 write_latency_us;
+ };
+ 
++/**
++ * struct ceph_subvol_metric_pcpu - Per-CPU accumulator in front of the tree
++ * @lock: Protects @m; nests inside tracker->lock
++ * @m: Counters of one subvolume (@m.subvolume_id) not yet folded into the tree
++ *
++ * I/O completions add to the slot of the CPU they run on and only take
++ * tracker->lock when the slot holds another subvolume, or when a snapshot
++ * or a dump folds every slot into the tree.
++ */
++struct ceph_subvol_metric_pcpu {
++	spinlock_t lock;
++	struct ceph_subvol_metric_snapshot m;
++};
++
+ static struct kmem_cache *ceph_subvol_metric_entry_cachep;
+ 
+-void ceph_subvolume_metrics_init(struct ceph_subvolume_metrics_tracker *tracker)
++int ceph_subvolume_metrics_init(struct ceph_subvolume_metrics_tracker *tracker)
+ {
++	int cpu;
++
+ 	spin_lock_init(&tracker->lock);
+ 	tracker->tree = RB_ROOT_CACHED;
+ 	tracker->nr_entries = 0;
+ 	tracker->enabled = false;
++	tracker->pcpu = alloc_percpu(struct ceph_subvol_metric_pcpu);
++	if (!tracker->pcpu)
++		return -ENOMEM;
++	for_each_possible_cpu(cpu)
++		spin_lock_init(&per_cpu_ptr(tracker->pcpu, cpu)->lock);
++	return 0;
+ }
+ 
+ static struct ceph_subvol_metric_rb_entry *
+@@ -109,12 +131,28 @@ static void ceph_subvolume_metrics_clear_locked(
+ 	tracker->tree = RB_ROOT_CACHED;
+ }
+ 
++static void ceph_subvolume_metrics_clear_pcpu(
++		struct ceph_subvolume_metrics_tracker *tracker)
++{
++	int cpu;
++
++	for_each_possible_cpu(cpu) {
++		struct ceph_subvol_metric_pcpu *pc = per_cpu_ptr(tracker->pcpu, cpu);
++
++		spin_lock(&pc->lock);
++		memset(&pc->m, 0, sizeof(pc->m));
++		spin_unlock(&pc->lock);
++	}
++}
++
+ void ceph_subvolume_metrics_destroy(struct ceph_subvolume_metrics_tracker *tracker)
+ {
+ 	spin_lock(&tracker->lock);
+ 	ceph_subvolume_metrics_clear_locked(tracker);
+ 	tracker->enabled = false;
+ 	spin_unlock(&tracker->lock);
++	free_percpu(tracker->pcpu);
++	tracker->pcpu = NULL;
+ }
+ 
+ void ceph_subvolume_metrics_enable(struct ceph_subvolume_metrics_tracker *tracker,
+@@ -128,74 +166,168 @@ void ceph_subvolume_metrics_enable(struct ceph_subvolume_metrics_tracker *tracke
+ 		ceph_subvolume_metrics_clear_locked(tracker);
+ 	}
+ 	spin_unlock(&tracker->lock);
++	if (!enable)
++		ceph_subvolume_metrics_clear_pcpu(tracker);
+ }
+ 
+-void ceph_subvolume_metrics_record(struct ceph_subvolume_metrics_tracker *tracker,
+-				   u64 subvol_id, bool is_write,
+-				   size_t size, u64 latency_us)
++/*
++ * Add counters to their subvolume's entry in the tree: those held by the
++ * per-CPU slot @pc if it is given, else those in @d.  The slot is read and
++ * cleared under tracker->lock only once its entry is in the tree, so when
++ * the entry cannot be allocated its counters stay in the slot for the next
++ * fold instead of being lost.
++ */
++static void ceph_subvolume_metrics_fold(struct ceph_subvolume_metrics_tracker *tracker,
++					struct ceph_subvol_metric_pcpu *pc,
++					const struct ceph_subvol_metric_snapshot *d)
+ {
+ 	struct ceph_subvol_metric_rb_entry *entry, *new_entry = NULL;
+-	bool retry = false;
++	struct ceph_subvol_metric_snapshot m;
+ 
+-	/* CEPH_SUBVOLUME_ID_NONE (0) means unknown/unset subvolume */
+-	if (!READ_ONCE(tracker->enabled) ||
+-	    subvol_id == CEPH_SUBVOLUME_ID_NONE || !size || !latency_us)
+-		return;
+-
+-	/*
+-	 * Retry loop for lock-free allocation pattern:
+-	 * 1. First iteration: lookup under lock, if miss -> drop lock, alloc, retry
+-	 * 2. Second iteration: lookup again (may have been inserted), insert if still missing
+-	 * 3. On race (another thread inserted same key): free our alloc, retry
+-	 * All successful paths exit via return, so retry flag doesn't need reset.
+-	 */
+-	do {
++	for (;;) {
+ 		spin_lock(&tracker->lock);
++		/* disabling clears the tree and the slots */
+ 		if (!tracker->enabled) {
+ 			spin_unlock(&tracker->lock);
+-			if (new_entry)
+-				kmem_cache_free(ceph_subvol_metric_entry_cachep, new_entry);
+-			return;
++			break;
+ 		}
+ 
+-		entry = __lookup_entry(tracker, subvol_id);
+-		if (!entry) {
+-			if (!new_entry) {
+-				spin_unlock(&tracker->lock);
+-				new_entry = kmem_cache_zalloc(ceph_subvol_metric_entry_cachep,
+-						      GFP_NOFS);
+-				if (!new_entry)
+-					return;
+-				new_entry->subvolume_id = subvol_id;
+-				retry = true;
+-				continue;
+-			}
+-			entry = __insert_entry(tracker, new_entry);
+-			if (entry != new_entry) {
+-				/* raced with another insert */
+-				spin_unlock(&tracker->lock);
+-				kmem_cache_free(ceph_subvol_metric_entry_cachep, new_entry);
++		if (pc) {
++			spin_lock(&pc->lock);
++			m = pc->m;
++		} else {
++			m = *d;
++		}
++
++		entry = NULL;
++		if (m.read_ops || m.write_ops) {
++			entry = __lookup_entry(tracker, m.subvolume_id);
++			if (!entry && new_entry) {
++				new_entry->subvolume_id = m.subvolume_id;
++				entry = __insert_entry(tracker, new_entry);
+ 				new_entry = NULL;
+-				retry = true;
+-				continue;
+ 			}
+-			new_entry = NULL;
++			if (entry) {
++				entry->read_ops += m.read_ops;
++				entry->read_bytes += m.read_bytes;
++				entry->read_latency_us += m.read_latency_us;
++				entry->write_ops += m.write_ops;
++				entry->write_bytes += m.write_bytes;
++				entry->write_latency_us += m.write_latency_us;
++				if (pc)
++					pc->m = (struct ceph_subvol_metric_snapshot) {
++						.subvolume_id = m.subvolume_id,
++					};
++			}
+ 		}
+ 
+-		if (is_write) {
+-			entry->write_ops++;
+-			entry->write_bytes += size;
+-			entry->write_latency_us += latency_us;
+-		} else {
+-			entry->read_ops++;
+-			entry->read_bytes += size;
+-			entry->read_latency_us += latency_us;
+-		}
++		if (pc)
++			spin_unlock(&pc->lock);
+ 		spin_unlock(&tracker->lock);
+-		if (new_entry)
+-			kmem_cache_free(ceph_subvol_metric_entry_cachep, new_entry);
++
++		if (entry || (!m.read_ops && !m.write_ops))
++			break;
++
++		/* the key is set on insert, the slot may change meanwhile */
++		new_entry = kmem_cache_zalloc(ceph_subvol_metric_entry_cachep,
++					      GFP_NOFS);
++		if (!new_entry)
++			return;
++	}
++
++	if (new_entry)
++		kmem_cache_free(ceph_subvol_metric_entry_cachep, new_entry);
++}
++
++/* Move what every per-CPU slot holds into the tree. */
++static void ceph_subvolume_metrics_fold_pcpu(
++		struct ceph_subvolume_metrics_tracker *tracker)
++{
++	int cpu;
++
++	for_each_possible_cpu(cpu) {
++		struct ceph_subvol_metric_pcpu *pc = per_cpu_ptr(tracker->pcpu, cpu);
++
++		/* skip idle slots without taking tracker->lock */
++		if (!data_race(pc->m.read_ops) && !data_race(pc->m.write_ops))
++			continue;
++
++		/* on failure the slot keeps its counters for the next snapshot */
++		ceph_subvolume_metrics_fold(tracker, pc, NULL);
++	}
++}
++
++/*
++ * Make the slot hold @subvol_id, unless it still has counters of another
++ * subvolume.  Called with pc->lock held.
++ */
++static bool ceph_subvol_metric_pcpu_claim(struct ceph_subvol_metric_pcpu *pc,
++					  u64 subvol_id)
++{
++	if (likely(pc->m.subvolume_id == subvol_id))
++		return true;
++	if (pc->m.read_ops || pc->m.write_ops)
++		return false;
++	pc->m.subvolume_id = subvol_id;
++	return true;
++}
++
++void ceph_subvolume_metrics_record(struct ceph_subvolume_metrics_tracker *tracker,
++				   u64 subvol_id, bool is_write,
++				   size_t size, u64 latency_us)
++{
++	struct ceph_subvol_metric_pcpu *pc;
++
++	/* CEPH_SUBVOLUME_ID_NONE (0) means unknown/unset subvolume */
++	if (!READ_ONCE(tracker->enabled) ||
++	    subvol_id == CEPH_SUBVOLUME_ID_NONE || !size || !latency_us)
+ 		return;
+-	} while (retry);
++
++	/*
++	 * The slot of the CPU we start on; if we migrate, the lock still
++	 * keeps the update consistent and it just lands in another slot.
++	 */
++	pc = raw_cpu_ptr(tracker->pcpu);
++	spin_lock(&pc->lock);
++	if (unlikely(!ceph_subvol_metric_pcpu_claim(pc, subvol_id))) {
++		/* the slot holds another subvolume: hand its counters to the tree */
++		spin_unlock(&pc->lock);
++		ceph_subvolume_metrics_fold(tracker, pc, NULL);
++		spin_lock(&pc->lock);
++		if (!ceph_subvol_metric_pcpu_claim(pc, subvol_id)) {
++			struct ceph_subvol_metric_snapshot d = {
++				.subvolume_id = subvol_id,
++			};
++
++			/*
++			 * The fold could not allocate an entry, so the slot
++			 * keeps the old subvolume; add this I/O to the tree
++			 * directly, which drops it only if that fails too.
++			 */
++			spin_unlock(&pc->lock);
++			if (is_write) {
++				d.write_ops = 1;
++				d.write_bytes = size;
++				d.write_latency_us = latency_us;
++			} else {
++				d.read_ops = 1;
++				d.read_bytes = size;
++				d.read_latency_us = latency_us;
++			}
++			ceph_subvolume_metrics_fold(tracker, NULL, &d);
++			return;
++		}
++	}
++	if (is_write) {
++		pc->m.write_ops++;
++		pc->m.write_bytes += size;
++		pc->m.write_latency_us += latency_us;
++	} else {
++		pc->m.read_ops++;
++		pc->m.read_bytes += size;
++		pc->m.read_latency_us += latency_us;
++	}
++	spin_unlock(&pc->lock);
+ }
+ 
+ int ceph_subvolume_metrics_snapshot(struct ceph_subvolume_metrics_tracker *tracker,
+@@ -213,6 +345,8 @@ int ceph_subvolume_metrics_snapshot(struct ceph_subvolume_metrics_tracker *track
+ 	if (!READ_ONCE(tracker->enabled))
+ 		return 0;
+ 
++	ceph_subvolume_metrics_fold_pcpu(tracker);
++
+ 	spin_lock(&tracker->lock);
+ 	for (node = rb_first_cached(&tracker->tree); node; node = rb_next(node)) {
+ 		struct ceph_subvol_metric_rb_entry *entry =
+@@ -306,6 +440,9 @@ void ceph_subvolume_metrics_dump(struct ceph_subvolume_metrics_tracker *tracker,
+ 	struct rb_node *node;
+ 	bool found = false;
+ 
++	if (READ_ONCE(tracker->enabled))
++		ceph_subvolume_metrics_fold_pcpu(tracker);
++
+ 	spin_lock(&tracker->lock);
+ 	if (!tracker->enabled) {
+ 		spin_unlock(&tracker->lock);
+diff --git a/fs/ceph/subvolume_metrics.h b/fs/ceph/subvolume_metrics.h
+index 8b901ae05e00..b29d48e9a4f1 100644
+--- a/fs/ceph/subvolume_metrics.h
++++ b/fs/ceph/subvolume_metrics.h
+@@ -10,6 +10,7 @@
+ struct seq_file;
+ struct ceph_mds_client;
+ struct ceph_inode_info;
++struct ceph_subvol_metric_pcpu;
+ 
+ /**
+  * struct ceph_subvol_metric_snapshot - Point-in-time snapshot of subvolume metrics
+@@ -37,15 +38,17 @@ struct ceph_subvol_metric_snapshot {
+  * @tree: Red-black tree of per-subvolume entries, keyed by subvolume_id
+  * @nr_entries: Number of entries currently in @tree
+  * @enabled: Whether collection is enabled (requires MDS feature support)
++ * @pcpu: Per-CPU accumulators that I/O completions update without @lock
+  */
+ struct ceph_subvolume_metrics_tracker {
+ 	spinlock_t lock;
+ 	struct rb_root_cached tree;
+ 	u32 nr_entries;
+ 	bool enabled;
++	struct ceph_subvol_metric_pcpu __percpu *pcpu;
+ };
+ 
+-void ceph_subvolume_metrics_init(struct ceph_subvolume_metrics_tracker *tracker);
++int ceph_subvolume_metrics_init(struct ceph_subvolume_metrics_tracker *tracker);
+ void ceph_subvolume_metrics_destroy(struct ceph_subvolume_metrics_tracker *tracker);
+ void ceph_subvolume_metrics_enable(struct ceph_subvolume_metrics_tracker *tracker,
+ 				   bool enable);
 
----
-Xiubo Li (4):
-      ceph: report the requested length in the netfs read metrics
-      ceph: drop the unused subvolume metrics debug counters
-      ceph: flush the OSD completions before destroying the mds client
-      ceph: accumulate subvolume metrics per CPU
-
- fs/ceph/addr.c                  |   2 +-
- fs/ceph/mds_client.c            |   8 +-
- fs/ceph/subvolume_metrics.c     | 275 ++++++++++++++++++++++++++++------------
- fs/ceph/subvolume_metrics.h     |  26 +---
- include/linux/ceph/osd_client.h |   1 +
- net/ceph/osd_client.c           |  11 ++
- 6 files changed, 217 insertions(+), 106 deletions(-)
----
-base-commit: ed0502cb11f84fff29f374238e526ae94d9bdfde
-change-id: 20261014-ceph-metrics-percpu-1cb5047f7150
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
+-- 
+2.53.0
 
 
