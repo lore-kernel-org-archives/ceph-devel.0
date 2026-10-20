@@ -1,113 +1,121 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792493952;
-	b=ODEa8JexW58aQf+bbi2PtueBTX1jWmodbq5qBKWMLU58RtqIGsBB0Lito3hYenOv6wpM
-	 3xzasbw8P/BfO0Zt0cpKIw2Zu+QWLzvLESQA/Dg7KnivPZoGupFjCzueNUT6XinHjSfkb
-	 letlAJw7iX7/SkKghTajFcAfEgBPwqjXwJwXf/YO2EEH1nO4PwQPKveWCbzmSoi69WUi0
-	 jET9s8FpNyM8K9Lzw6MijhCZhDl6K0uf0SSXp2+zmGoZwpWLPeH20cROBpFizunUlcTov
-	 tLBv6jG2xyEnKsIH6k0WlELzOvdy8HCWtUeaCeWNw+gZ0fhR86WQlArSuGyHYHF/FLg==
+	t=1792500770;
+	b=p5s+M1gBhVT+FeiiQ8WGZEyj29+FXwCfIRy5+As6fzacK0Vla+MgVSsZdLOWNpjCbzms
+	 JijZFTL8K/L8+lcGdz1c8bCow/DOJAET8WWJARBp/gtuwFMvavDuwPe+bOLj5RNpoMlkc
+	 Lq635PoPnsVZUtpbxiDGFBjCLe1M8Q99PJj+AgeFGl5INWDaViq1iSk6SB4fz51OEBDbk
+	 PTQeVPcXQl7qJdVh5TBIxz6svnbEwAEjbz6ewGra4bkLIO3uvFY1y3/bcbHVS9cOV3UX8
+	 xS66Xi8IPUZEHOaLHSpxORkGPTIY+547hs2/NJuL59bP8g5Ky1q0kYfmaD+DXYLHnGg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792493952;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792500770;
 	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
 	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
-	 Subject:Date:Message-Id:X-Mailer:In-Reply-To:References:MIME-Version:
+	 Subject:Date:Message-Id:X-Mailer:MIME-Version:
 	 Content-Transfer-Encoding;
-	bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
-	b=cfmY23I08Z+mDnUuL/cNjEvySkRSKLnXkttOczgU47dncijjQRILQ4tZZuUt+AhYTtrm
-	 3YD6Y67MopGWCrTggtctBOcZipis8hM51nLBbUZgFzqCkjtjyCZEcBPufQ90ZpchvLNBN
-	 NEmomtRiXY5omR18O1szFWRBWxiWoh4heuq+j518HYKQ3ahOlcJt5nNLlVdHf6I6+HFXp
-	 s2aejJKQaLPCKphuhPlhc2CwP9ejHBRfjbhClBwPjT8yI9o2yab3i7PQ7YTEo3tCEjxp3
-	 tOc5XO3u6dctb39NYWFw6MNZj+hWdj1nYgJR4Llw6nJ/VlK4UaRrOumlVj1DgDm6JiQ==
+	bh=/4u1vmaSqipBM0zxv3OAa4p5s287MyrcxTiYmzVTx/k=;
+	b=iRbyNenG74Ordpo01z6W7fDmJ3DjJpMoXLYgknf16SHMoc2CqG8jDOA7ijQNyNfRhPwG
+	 NrxDyxcz5ilkidLb17sT3TYqJ7EHpJOSgHX2qVABOlDQeU4M6d9d80+a0jBwML0Jg2zUE
+	 Xr65FvG29+nqoxUandrdpJUhA9RBkEFm6ym4zmmBkkndUDFrnxRRrMFYfHt8kOEq9ZA0V
+	 VWagySCwYZ39baM8ArY5ayjJOrPdJhPCQKH5Ld2yzH09ys/5ZzLe53AqhTu3fhOdSKVY+
+	 QpMI6QF9KaxHJuroPW0709zE64QgoKTsAdiY/d5Q45xohV0cIpOq4zohhsvZpyiS5Xg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=redhat.com;
 	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=TW22jsbn;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=IFdjasgi;
-	arc=none smtp.remote-ip=170.10.133.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b="F/wHtwNC";
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=JA+2g4IK;
+	arc=none smtp.remote-ip=170.10.129.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FE39606A31B
-	for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 10:59:11 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9FE39606A31B
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D6C6606A326
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 12:52:49 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0D6C6606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=TW22jsbn;
-	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=IFdjasgi
+	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=F/wHtwNC;
+	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=JA+2g4IK
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1792493950;
+	s=mimecast20190719; t=1792500769;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
-	b=TW22jsbn5XMhMKvq5g7RtFXTQz3NzpCD8lVJyb3R+J5nVbAMAyDW3urPF2r7K1qoBBvlyz
-	tvOyBe3K6YNQR+R6r9c0gytbMB534ps4eanCopaHAY5gRsa4IpIVYZQqHQOYcqKTpm978W
-	Kx8ZwboBUdL+XpzeH2K/HyUmWm5NVQA=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=/4u1vmaSqipBM0zxv3OAa4p5s287MyrcxTiYmzVTx/k=;
+	b=F/wHtwNCHtpvA4YrgXHagstXJ8f9K3UgdPFglAVNbJxgmwNs7v0DSDIMMAD+En7DmITb30
+	lxs06FvEHjb7hvirfnIxweyKuSMCb0ff7ZBtk/A9372BqtBN0GVRhPDTfYVOjiHjH7g6CJ
+	txxsUZS0ws3P+byQbu2Lw1i04XcJNAc=
+Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
+ [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-122-lZfqffTLMcurF2sFIzfcHw-1; Tue, 20 Oct 2026 06:59:09 -0400
-X-MC-Unique: lZfqffTLMcurF2sFIzfcHw-1
-X-Mimecast-MFC-AGG-ID: lZfqffTLMcurF2sFIzfcHw_1792493948
-Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-c4069f03949so57999266b.0
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 03:59:08 -0700 (PDT)
+ us-mta-231-H3A4_jcJOkOGs-43AIYoqw-1; Tue, 20 Oct 2026 12:52:41 +0000
+X-MC-Unique: H3A4_jcJOkOGs-43AIYoqw-1
+X-Mimecast-MFC-AGG-ID: H3A4_jcJOkOGs-43AIYoqw_1792500760
+Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-6b1d818b501so3604311a12.0
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 05:52:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1792493948; x=1793098748; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
-        b=IFdjasgiTVyZbrhCZI3CMNxSm9DtypPTVb0UDd9XTgMdwGW/0wtThhdugLvRoJq90T
-         DclTkR7MzjaDkHzHewTKRYsNuyIoLt0/C6aulF81c1OnZeG3+iEeDiEI1P9dKhO6OOzJ
-         W4iyYv5v9xumYng0OfeQ4Ppuiz77Ek3y6oGXWwhz/vHs+BNflhzK2dNpbF0BhcR8cX9o
-         M4J+E8+9GDTfEYheDFEmYpaFFlZ8x7shyEpUNnH7anVKzB6PBsGPnrVF8gxYa4XbPsmV
-         Zk8VSxzoktP7OaIoHi2PhKThNhXg4450V6Es0Hg1+9F6BRrZuPFI/vJG3F6pcRAXcgK6
-         BROw==
+        d=redhat.com; s=google; t=1792500760; x=1793105560; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=/4u1vmaSqipBM0zxv3OAa4p5s287MyrcxTiYmzVTx/k=;
+        b=JA+2g4IKo1TpGTA0gXPRIyNRyC4/A95C2h9G8LbDi/kNLz/YZijJfR9D24SfengdgI
+         wM0HcIpHAyqvXQjr+YMZa6onoQl1o980Nys5bJ1ZaHZtCfUNsuGd7YOPkqIke4T/fUU0
+         3ANrxBXbesNuVmXU6KRqqF6BY1uyrL/ksjS4zifrlB+35OnqgFGUh+tiCgcXOiU7YAmQ
+         Xulq+HU4UtsHtdqEVe+enpi+SMk7FgHe/kC8uUXr/LzkmbiareBGL5pk0f/Z5rQpM2N/
+         /6Ktt3H7FjKUqshLaJE1wXiZZ7BJvYAFWKSp+NvQOB1Q/KYQ6mhh8EoiMEjzg0hvC2U/
+         ml3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792493948; x=1793098748;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
-        b=OHWYHUC2gF2i2Du8dTqwphs3+hMONEWa6BtmCg1Z4rw1SX6eSleu0lTR4yGN0avFwa
-         BhSVPc6NbVlkpLkYzg+kyx1lpRP5vbZpRNO4dkrOMlhSJMLO6tOwbZvefkLqfCM5EZbg
-         wZlfD2Ng0LiVQ+o2gAC87APy2ylZgxq6DimLZaWlKn9+boHEBKs61BrPWzTLFJWlf9l7
-         r1ivUbC1/khpIarTLYWX2I2p3zuwAQX6/hHBk7enoRmKjqhwweeDIrP7kgJBJldTY4/z
-         qEf2EN1HRJJvN7U+Hrgz3lZIyoAs8srUAoW9xdLvhMl4hesN3WE+fW9jz98sUHKSc8z3
-         pSGw==
-X-Gm-Message-State: AFq9FYKO5WaddYauD0JwsDBDSHeoa4SR3CD5LxGs1xdkDECGRFzJf5Yk
-	+KOgf4hnGH+LRWQcIqefLP/JRNuM3WHFfW8Kslyf21xDtYQ+pMFqezO7jI9qOSy3mVFDOqZ+gur
-	K/EVM3BsDUPCBb0Cbk6RvrwZ8cklKEx8VGntEXJK7dQqpODyhCncZfubbVSrlGssbZrS8I3C8oQ
-	==
-X-Gm-Gg: AYBFou1MglDqAdVBWvxjKtEknlopsopqRI2JWyFKeCItA9vutdVgCtSq1LdFc5647QC
-	spz/2lry+tvNrgA0lofXPnRkVdEyXvP/zRjUe7iX7h9RSMCNfrzl0k7sR21porSthDEmVtN0E3T
-	rFpinIAlEOaFoEdTRJ/NHa/sr33RFFtWQ7dg6Rk0Rb4uPtfjrrB6WYObwPJS2cdWRUGpm5EXJKZ
-	B+191eEL6Gmr+P0TgSf1GyUJvg7EopzsVe+Bmm8eFLIq77JX2DAH1kN5Q9+q8eEFNrGDTijTUT3
-	/fhjvyOJJwp763Td7dELYNymRQ6LMLtgsXSjdSKBBrJBjYztkBzY3LVrynr0NyzWUAFCG8GgufE
-	lHuJpsPdJsqexEMsTSqUz+NKLr4gD3HAq0NlNwZ2PzjCOX2aDkQxlMRffPczESrOThVPR9p/0iV
-	dSI0bAUS48yDSYbr5hf9UqHTPuGpv7EGrl/kx+ApJ905oao79zmkffSFXnQM2KiU7GJ2iUPtQMS
-	ig=
-X-Received: by 2002:a17:906:794f:b0:c2e:4397:7c82 with SMTP id a640c23a62f3a-c4601376d5bmr137802866b.6.1792493947886;
-        Tue, 20 Oct 2026 03:59:07 -0700 (PDT)
-X-Received: by 2002:a17:906:794f:b0:c2e:4397:7c82 with SMTP id a640c23a62f3a-c4601376d5bmr137801266b.6.1792493947473;
-        Tue, 20 Oct 2026 03:59:07 -0700 (PDT)
+        d=1e100.net; s=20260707; t=1792500760; x=1793105560;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=/4u1vmaSqipBM0zxv3OAa4p5s287MyrcxTiYmzVTx/k=;
+        b=0gKVcwEMeQ+M9EAkMSfoboKzUwfMMemf7ekMi/Q5qJ7aZHLKImIHJdjfAuFXmCgFPB
+         Lx3tzfvjn5FXRjM77n2XElZ9CF01SUUUsiJt5JoK3ZbV/uGCfBqmiWjrrXH7iARgguT+
+         lnv7oWbNu5XPrGiJagJZEWuZ3FjAz+VwdWj2Fp1p9AG2s5GcYY7VTgQKZbuQmgn3eX4V
+         wdV79IJONguI7oeWjuG5en2ZDuuQlQUCoFpt2W4Kb8ttu166yu2zuY1iNUg1KW8g3ssO
+         CeAKyPxLIoXZ7y0h39GFdekLHJYEZion/CFchyUM+vy3rowkTG9OYNwp0JxeJ6QgTcYi
+         UQqw==
+X-Gm-Message-State: AFq9FYKtYk2AYIgHN78PziX7vGN2TMJ4UeHqlLcOoM3ozxZPfsbCsQmk
+	hm/D7ShLz0FtBQA8vABzCxhS23cn9D0MSFQtUiWvFIgki2d6biyS/nFLn7/kPheK20hQzZ4mIq3
+	zjvCox7mjAeuDEy2rTPjRxXd0Nt8+/9qybqSejVmewPAgPbaNDIPt376gQygfRIVv+USrv0z2fo
+	14AZcuQBmw4AXEnBM/ITTNatbavuuWxHxcvwuXExf32SIjfBrT5g==
+X-Gm-Gg: AYBFou1vnuVpiN6p3A58Hc7EFhaQOFi3dGf5K0SGbRd3ucx558zxXBM+ta6NMyZ8zHi
+	9P2iz0N1VPuemKkK6vV1bz69wqnK9RYZx2p+rmsgGJ19GOojmrv0vV5WIjJzvouIowCEfWBXftP
+	vHQL2LYKMlJyGRZ5VZoT+iRPBRsvl90RV4KVuv/lfyyXISWL286ap5+1WKfVCxdo6uCK2Hjrgq5
+	t28r/wYcLhlX0aOKcPWbbnu0R0BQEpR9o6Ii8d0o3JqWFMzNrILOM4LNeXB3baGgDn9r296sNXC
+	SVan2VxgSWFHpZdqcSTJx2EddEIP4/z3xVVvl8hg/FM37DI4DWI0kWFAkhjQYne2U1KD+oTXjm3
+	8GpfrQX3q9wP0XWkdhIdfFdOMXmfL+ZsV7mA0SsroAqrU3WqbEnbSvd8db2KPFXV0q98xY4XqKT
+	pKsHjvMaY4FCoCKLd2spdQqKj4WiglCKrfneEcFM2+vEg9Sq2+nzxKztY9O+Adv0ErJ5x+3PuMW
+	Ak=
+X-Received: by 2002:a05:6402:11d1:b0:6b1:c5c3:9624 with SMTP id 4fb4d7f45d1cf-6b3a819086fmr6835234a12.22.1792500760268;
+        Tue, 20 Oct 2026 05:52:40 -0700 (PDT)
+X-Received: by 2002:a05:6402:11d1:b0:6b1:c5c3:9624 with SMTP id 4fb4d7f45d1cf-6b3a819086fmr6835205a12.22.1792500759746;
+        Tue, 20 Oct 2026 05:52:39 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c4091eb39a3sm467056566b.81.2026.10.20.03.59.06
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6b3c74eb8a7sm2982781a12.2.2026.10.20.05.52.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Oct 2026 03:59:07 -0700 (PDT)
+        Tue, 20 Oct 2026 05:52:39 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: [3/5] ceph: write back only the dirty bytes of a lazy I/O write
-Date: Tue, 20 Oct 2026 10:59:04 +0000
-Message-Id: <20261020105904.1326043-1-amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: Alex Markuze <amarkuze@redhat.com>,
+	idryomov@gmail.com,
+	xiubo.li@clyso.com,
+	slava@dubeyko.com,
+	viro@zeniv.linux.org.uk,
+	brauner@kernel.org,
+	jack@suse.cz,
+	linux-fsdevel@vger.kernel.org,
+	linux-fscrypt@vger.kernel.org,
+	ebiggers@kernel.org,
+	tytso@mit.edu,
+	jaegeuk@kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v4 0/5] ceph: support subvolume quarantine
+Date: Tue, 20 Oct 2026 12:52:32 +0000
+Message-Id: <cover.1792498351.git.amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20261020-b4-wip-ceph-lazyio-fix-v1-3-f4cc62459d37@clyso.com>
-References: <20261020-b4-wip-ceph-lazyio-fix-v1-3-f4cc62459d37@clyso.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -119,16 +127,99 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Hi Xiubo,
+CephFS subvolume quarantine isolates a subvolume while allowing recovery
+clients with q/Q MDS auth caps to access it. Advertise support only after
+cached data and metadata access paths can enforce quarantine.
 
-NACK. Please respin.
+This v4 combines the fscrypt symlink-cache prerequisite and the Ceph
+quarantine series as requested by Eric and Xiubo. The dcache export is
+retained. The generic fscrypt change precedes the Ceph patches, and its
+Ceph opt-in is folded into the patch adding the get_link checks.
 
-  1. fs/ceph/addr.c:302: Truncate past a lazy dirty range writes the stale prefix
-     Xiubo, a lazy write that dirtied only the tail of a folio must not
-     send the bytes in front of it.
-     If the clipped range is empty, drop dirty (detach snapc, put the
-     wrbuffer ref).
+Changes since v3:
+- Disable only the two fscrypt symlink-cache writers. Leave cache readers
+  unchanged and update fscrypt_symlink_getattr() kernel-doc. Explain the
+  held O_PATH descriptor / empty-path readlinkat() bypass and the allocation
+  and decryption cost of uncached encrypted symlink accesses.
+- Avoid unconditional snapshot RPCs only when the connected head inode is
+  the target's actual subvolume root, identified by its nonzero MDS-provided
+  subvolume ID, with a valid AUTH_SHARED cap from a quarantine-aware MDS and
+  no local quarantine marks. A snapshot P/.snap/S/V/file cannot use ancestor
+  P's cap to authorize access in V. Synthetic snapdirs inherit their parent's
+  subvolume ID. Unknown IDs, other head ancestors, expired root caps and
+  disconnected snapshots retain MDS checks. 32-bit clients also revalidate
+  because membership IDs use plain 64-bit READ/WRITE_ONCE accesses.
+- Wait interruptibly and retry unstable namespace generations or MDS
+  authorizations in blocking cap acquisition and revalidation. Preserve
+  nonblocking behavior. Track splice owners and reject recursive LSM hooks
+  with EBUSY, including hooks outside MDS reply processing.
+- Gate ACL cache suppression and namespace mutation bookkeeping on
+  negotiated quarantine support. Invalidate older cached ACLs when support
+  is first enabled and pair namespace tokens across that transition.
+- Remove the impossible NULL d_parent guards raised during VFS review.
 
--- 
-Alex Markuze
+Validation:
+Nine deterministic source-extraction regression runners pass, including
+ASan/UBSan/LSan checks of VFS readlink and fscrypt target ownership. A warm
+same-subvolume-root snapshot harness performs 1000 getattr calls, 1024 read
+authorizations and 52 snapdir checks without an MDS RPC. A depth-300
+harness completes 20000 blocking revalidations with injected namespace
+splices without EAGAIN. Additional cases cover feature activation, ACL
+cache invalidation, old-MDS caps, detached snapshots, epoch/rename races,
+interrupted waits, recovery permissions and stale cap messages. The ancestor
+snapshot regression fails on the earlier v4 draft and passes with the fix:
+zero local marks and a valid outside head cap still require per-operation
+MDS authorization for reads, cached stat and xattrs. Unknown IDs, non-root
+head caps and 32-bit clients also retain MDS revalidation.
+A complete W=1 kernel and module build passes with GCC 14.2.0 and the
+normalized x86_64-rhel-9.4 robot config: vmlinux, bzImage and all 2233
+configured modules, including ceph.ko and libceph.ko. MODPOST succeeds,
+and the GPL d_find_alias_rcu export resolves. Additional W=1 builds pass
+on x86-64 with ACL/encryption enabled and disabled, and on i386 with
+those features enabled. All five patches pass strict checkpatch and
+apply in order to reproduce the tested source tree.
+These are source harnesses, not live CephFS benchmark results. Live
+cluster, KASAN/lockdep, failover and snapshot throughput tests have not
+been rerun for v4. Xiubo's v3 runtime results are separate evidence.
+
+Remaining protocol limits:
+Already installed snapshot PTEs still need server notifications to revoke
+access without a new filesystem callback. Snapshots without proven coverage
+by a cap on their own subvolume root, and all 32-bit snapshot operations,
+still authorize each operation through the MDS.
+Disable messages carry no generation, so same-rank ordering relies on
+ordered delivery. Overlapping ordinary rw and q/Q grants still require
+server-side auth-cap filtering; Xiubo reproduced that with ceph-fuse too.
+
+v3: https://lore.kernel.org/r/cover.1792248177.33a6e2db0a.git.amarkuze@redhat.com/
+v2: https://lore.kernel.org/r/cover.1792074165.git.amarkuze@redhat.com/
+fscrypt discussion: https://lore.kernel.org/r/a01d0a297a3e174d21741a3ad586ce546327603e.1792081664.git.amarkuze@redhat.com/
+
+Alex Markuze (5):
+  dcache: export d_find_alias_rcu() for modular filesystems
+  fscrypt: allow filesystems to disable symlink target caching
+  ceph: add subvolume quarantine wire definitions
+  ceph: record subvolume quarantine from MDS cap updates
+  ceph: fail quarantined subvolume access with EACCES
+
+ fs/ceph/acl.c                |  33 +-
+ fs/ceph/addr.c               |  72 ++-
+ fs/ceph/caps.c               | 317 +++++++++++-
+ fs/ceph/crypto.c             |   1 +
+ fs/ceph/debugfs.c            |   1 +
+ fs/ceph/dir.c                |  54 +-
+ fs/ceph/file.c               | 112 ++++-
+ fs/ceph/inode.c              | 919 ++++++++++++++++++++++++++++++++++-
+ fs/ceph/ioctl.c              |  13 +
+ fs/ceph/mds_client.c         |  28 +-
+ fs/ceph/mds_client.h         |  30 +-
+ fs/ceph/super.c              |   4 +
+ fs/ceph/super.h              |  99 +++-
+ fs/ceph/xattr.c              |  54 +-
+ fs/crypto/hooks.c            |  28 +-
+ fs/dcache.c                  |   1 +
+ include/linux/ceph/ceph_fs.h |  13 +
+ include/linux/fscrypt.h      |   7 +
+ net/ceph/ceph_common.c       |   2 +
+ 19 files changed, 1676 insertions(+), 112 deletions(-)
 
