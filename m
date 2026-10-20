@@ -1,112 +1,113 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792489921;
-	b=S6tqDqIqeFpDVakbDx4P22b6K9w6eWvYLbctDvfDq+mv9LSdL4u0FYH+lyQailDpSY6J
-	 9wgre9uvY9m4UE5ZKT0xfRykR3Zbt4fzvTCkqX2l+heD4yNZ0BCs8HN5sjBadyZ9vVC/A
-	 RN0G6AFFY/nX68o/Yfr3ItusXY8xyYCnfUlmsO7V4KlrBSGJD92fiDVK2NLIQbcP3L7FL
-	 Ugsp8tWzwvzySG8PMdeCLiCo2lRnUgdakH8JUJas41Dgq7Z4duNE+s2RUFoaRoAF4VQo2
-	 0bfVM1GRvajvC6gnKzdTSGxgLsjfD3Nk4cOZWkNRGYm/6hIGUeWwVCidlMYTxUIvsCg==
+	t=1792493952;
+	b=ODEa8JexW58aQf+bbi2PtueBTX1jWmodbq5qBKWMLU58RtqIGsBB0Lito3hYenOv6wpM
+	 3xzasbw8P/BfO0Zt0cpKIw2Zu+QWLzvLESQA/Dg7KnivPZoGupFjCzueNUT6XinHjSfkb
+	 letlAJw7iX7/SkKghTajFcAfEgBPwqjXwJwXf/YO2EEH1nO4PwQPKveWCbzmSoi69WUi0
+	 jET9s8FpNyM8K9Lzw6MijhCZhDl6K0uf0SSXp2+zmGoZwpWLPeH20cROBpFizunUlcTov
+	 tLBv6jG2xyEnKsIH6k0WlELzOvdy8HCWtUeaCeWNw+gZ0fhR86WQlArSuGyHYHF/FLg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792489921;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792493952;
 	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
 	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
 	 Subject:Date:Message-Id:X-Mailer:In-Reply-To:References:MIME-Version:
 	 Content-Transfer-Encoding;
-	bh=cRylA35RBRWTIIYqjmlrtrqTvwS8SCTsW6a89L946vo=;
-	b=1VcQIXcBNs43hN+WbqkW55aZqqrGlBAbixjtxKiF5V1nNwrRZRmgUIxYZleFdDXH9nAo
-	 KtbJG1J4KqwfQ3if+qpgaVB3ctVXFV7KpCpHw3lmQJsvauyrj+lNMLhAFtexlPpJzfItS
-	 vy7nd1rTJ7OmvPfsPmSFd414D7WHJKkXLP/7TuWghLEogHi7goz0OFPv2SzJ5NVqfX9PI
-	 iSf/PLchFF/1avassUrCjN6gyZrapvdblfEy1T+ec9+wvMjoY2seKxKcKZRT9/2gNIFbJ
-	 yJbb4aLEIxsHLf3SPDBM/pVuHFBZ9lbBv5BjjbaJdI/8jHwJbDVcVAwPkc6FOGsEV6g==
+	bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
+	b=cfmY23I08Z+mDnUuL/cNjEvySkRSKLnXkttOczgU47dncijjQRILQ4tZZuUt+AhYTtrm
+	 3YD6Y67MopGWCrTggtctBOcZipis8hM51nLBbUZgFzqCkjtjyCZEcBPufQ90ZpchvLNBN
+	 NEmomtRiXY5omR18O1szFWRBWxiWoh4heuq+j518HYKQ3ahOlcJt5nNLlVdHf6I6+HFXp
+	 s2aejJKQaLPCKphuhPlhc2CwP9ejHBRfjbhClBwPjT8yI9o2yab3i7PQ7YTEo3tCEjxp3
+	 tOc5XO3u6dctb39NYWFw6MNZj+hWdj1nYgJR4Llw6nJ/VlK4UaRrOumlVj1DgDm6JiQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=redhat.com;
 	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=iRSSKwJg;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=tsIn+3KW;
-	arc=none smtp.remote-ip=170.10.129.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=TW22jsbn;
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=IFdjasgi;
+	arc=none smtp.remote-ip=170.10.133.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 990D1606A319
-	for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 09:52:00 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 990D1606A319
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FE39606A31B
+	for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 10:59:11 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9FE39606A31B
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=iRSSKwJg;
-	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=tsIn+3KW
+	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=TW22jsbn;
+	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=IFdjasgi
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1792489919;
+	s=mimecast20190719; t=1792493950;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=cRylA35RBRWTIIYqjmlrtrqTvwS8SCTsW6a89L946vo=;
-	b=iRSSKwJgvG+jYJ/eHKU6DMdt8N7dGqrLd0qG/ZR8okuR9wGYDETPPVYfVPrFbBs8QZyFo3
-	MfT9ZwHT7dyzjF4RxLJ8StAJYDX/jhkQfS800pLRBTnuzujWzUPjdh2hL4k9zwBXTSG6X6
-	YwBtf9xfp6uo8Ej4oySPkZGoQB0lvaQ=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
+	b=TW22jsbn5XMhMKvq5g7RtFXTQz3NzpCD8lVJyb3R+J5nVbAMAyDW3urPF2r7K1qoBBvlyz
+	tvOyBe3K6YNQR+R6r9c0gytbMB534ps4eanCopaHAY5gRsa4IpIVYZQqHQOYcqKTpm978W
+	Kx8ZwboBUdL+XpzeH2K/HyUmWm5NVQA=
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
+ [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-79-JmIYM5DLMRSueAA7LhHdnA-1; Tue, 20 Oct 2026 05:51:58 -0400
-X-MC-Unique: JmIYM5DLMRSueAA7LhHdnA-1
-X-Mimecast-MFC-AGG-ID: JmIYM5DLMRSueAA7LhHdnA_1792489918
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-5338c59f90dso9023611cf.1
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 02:51:58 -0700 (PDT)
+ us-mta-122-lZfqffTLMcurF2sFIzfcHw-1; Tue, 20 Oct 2026 06:59:09 -0400
+X-MC-Unique: lZfqffTLMcurF2sFIzfcHw-1
+X-Mimecast-MFC-AGG-ID: lZfqffTLMcurF2sFIzfcHw_1792493948
+Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-c4069f03949so57999266b.0
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 03:59:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1792489918; x=1793094718; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1792493948; x=1793098748; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=cRylA35RBRWTIIYqjmlrtrqTvwS8SCTsW6a89L946vo=;
-        b=tsIn+3KWHhB38SJMhJC+vS0yXSYMgp2CC36W+CouKdciVuGkd3SDyrKhRCo+/vrPbg
-         Tzr5ih8mMY8Hcu6iaWq2k9YHpzTNfEbUViSAA1ou+JpgX9wLB2r4aTouZKAkPXNegpjX
-         Mxvw/+WyhipZAvTiN01h6324v6pZjqLqM4XhW2xYU2yObidBJgKgTLQQvX++4hqMm1qh
-         qfW4kdpVmsGRo8y5/gsnmKbxmzUhleecT8inltwvN9B6UDmLlANOfNLxwqJFi/OqOR69
-         5w8vvU7E+Gzn7lvQzkqKo9z0TX92ZU+C9s2n1bcTJxVKFDd68Q9c8t2vMBQV65iqczW4
-         bjXg==
+        bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
+        b=IFdjasgiTVyZbrhCZI3CMNxSm9DtypPTVb0UDd9XTgMdwGW/0wtThhdugLvRoJq90T
+         DclTkR7MzjaDkHzHewTKRYsNuyIoLt0/C6aulF81c1OnZeG3+iEeDiEI1P9dKhO6OOzJ
+         W4iyYv5v9xumYng0OfeQ4Ppuiz77Ek3y6oGXWwhz/vHs+BNflhzK2dNpbF0BhcR8cX9o
+         M4J+E8+9GDTfEYheDFEmYpaFFlZ8x7shyEpUNnH7anVKzB6PBsGPnrVF8gxYa4XbPsmV
+         Zk8VSxzoktP7OaIoHi2PhKThNhXg4450V6Es0Hg1+9F6BRrZuPFI/vJG3F6pcRAXcgK6
+         BROw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792489918; x=1793094718;
+        d=1e100.net; s=20260707; t=1792493948; x=1793098748;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=cRylA35RBRWTIIYqjmlrtrqTvwS8SCTsW6a89L946vo=;
-        b=JS6WeXUk/cdF/aJ6jovPfLmq0XLuG13Te9r5BJD5hnTrsDoypx/4c9KTzMf7AK+9+I
-         zKO/P17DEmJmv1qEVwr2DYlufVoDiYpi1Fmi8PZZ/fC+edl+K+aKuT+JRUv9NR28ZSGO
-         ja8chkTmoXJjNTEnIWCu1WJehRW2svUpiulyGLptDcf9zX1Sjwz/l9bRsf8VEdHLSfit
-         Zz/Iy7nv4iSKP7qXeycIfs7JczZO1fF32lIN2QWsJ2YNsCThF+96ZPv4Szb/L7tIQvgM
-         COp7y5AfFfdzMZzPgO4zvUrUMatS0Dag97vQH3p+r4Urf4QUEmV684Vxx7rCvpN2gQX9
-         X6hw==
-X-Gm-Message-State: AFq9FYLSvRpFpBQgCvkT9FiFdmJInFXZJe0RAWCzz3Oy5FzoXlS8V8dp
-	NSLvSLRFex5BU36MAPRtEk9t+1hnz31UPvJTvBdlWR8Wqjngav06j95gTxivEekqiil1VDlBIRv
-	STuk7GF0xcYFGqobrNOVPkN+qwXWFRbU+PrlEC6/U2BoCmAPDxzKJMAItd4yVe9s=
-X-Gm-Gg: AYBFou3zNFNx2UEwH0cHa9Ml1j3tvDe5HFQzaRBPakb5RqmuUg9CYO9iYIglYF3bfRp
-	MuG9xAtvQa2nRgfD/oNgpFgsjjawja3oRuaQr4Gv/XflEuZhx2s1auK3YAtbCwS0KemxPCx+ebY
-	0anBOC3F9BNrgbD2xipfxZKpZp+8Qcbp+af2elAKS/dymfQzkMd5/MmxPhF2bymTk9tfgn4/WCT
-	tBsswxqiHn5h0g/lXQOIVQkuuSouAv8dh60oKMaREOuRn/FWuAvUQnfK/IGFnXJ/ZLZYCI+tqQk
-	41Qh47vAveHTP7f0lT2aeIYm20XvkBUbzLSt3DnEygoYmpwWr1zr5HyDyE7O8SbOvfS2zCcMGuj
-	NkLNYZLf7DdTIjDklW9SQnuc2leARuMZFt9TFF1Ej4CL+VUtosmVHXi44UeTHUGoVyIyTDnOjrz
-	lOesg4wUeQ01gtuy3zQtf7HZu95865iz+auXEvuZNDHIF3RXXl/ZjKvuBaoghfClchYQcbXalkV
-	vc=
-X-Received: by 2002:a05:622a:e159:20b0:535:f9dd:a3de with SMTP id d75a77b69052e-53686a4f96cmr14819211cf.23.1792489917850;
-        Tue, 20 Oct 2026 02:51:57 -0700 (PDT)
-X-Received: by 2002:a05:622a:e159:20b0:535:f9dd:a3de with SMTP id d75a77b69052e-53686a4f96cmr14819111cf.23.1792489917404;
-        Tue, 20 Oct 2026 02:51:57 -0700 (PDT)
+        bh=kfXjBjT8EwI6q2NIzcfFnMZrad6cZ2ffCbI1EX6N8OA=;
+        b=OHWYHUC2gF2i2Du8dTqwphs3+hMONEWa6BtmCg1Z4rw1SX6eSleu0lTR4yGN0avFwa
+         BhSVPc6NbVlkpLkYzg+kyx1lpRP5vbZpRNO4dkrOMlhSJMLO6tOwbZvefkLqfCM5EZbg
+         wZlfD2Ng0LiVQ+o2gAC87APy2ylZgxq6DimLZaWlKn9+boHEBKs61BrPWzTLFJWlf9l7
+         r1ivUbC1/khpIarTLYWX2I2p3zuwAQX6/hHBk7enoRmKjqhwweeDIrP7kgJBJldTY4/z
+         qEf2EN1HRJJvN7U+Hrgz3lZIyoAs8srUAoW9xdLvhMl4hesN3WE+fW9jz98sUHKSc8z3
+         pSGw==
+X-Gm-Message-State: AFq9FYKO5WaddYauD0JwsDBDSHeoa4SR3CD5LxGs1xdkDECGRFzJf5Yk
+	+KOgf4hnGH+LRWQcIqefLP/JRNuM3WHFfW8Kslyf21xDtYQ+pMFqezO7jI9qOSy3mVFDOqZ+gur
+	K/EVM3BsDUPCBb0Cbk6RvrwZ8cklKEx8VGntEXJK7dQqpODyhCncZfubbVSrlGssbZrS8I3C8oQ
+	==
+X-Gm-Gg: AYBFou1MglDqAdVBWvxjKtEknlopsopqRI2JWyFKeCItA9vutdVgCtSq1LdFc5647QC
+	spz/2lry+tvNrgA0lofXPnRkVdEyXvP/zRjUe7iX7h9RSMCNfrzl0k7sR21porSthDEmVtN0E3T
+	rFpinIAlEOaFoEdTRJ/NHa/sr33RFFtWQ7dg6Rk0Rb4uPtfjrrB6WYObwPJS2cdWRUGpm5EXJKZ
+	B+191eEL6Gmr+P0TgSf1GyUJvg7EopzsVe+Bmm8eFLIq77JX2DAH1kN5Q9+q8eEFNrGDTijTUT3
+	/fhjvyOJJwp763Td7dELYNymRQ6LMLtgsXSjdSKBBrJBjYztkBzY3LVrynr0NyzWUAFCG8GgufE
+	lHuJpsPdJsqexEMsTSqUz+NKLr4gD3HAq0NlNwZ2PzjCOX2aDkQxlMRffPczESrOThVPR9p/0iV
+	dSI0bAUS48yDSYbr5hf9UqHTPuGpv7EGrl/kx+ApJ905oao79zmkffSFXnQM2KiU7GJ2iUPtQMS
+	ig=
+X-Received: by 2002:a17:906:794f:b0:c2e:4397:7c82 with SMTP id a640c23a62f3a-c4601376d5bmr137802866b.6.1792493947886;
+        Tue, 20 Oct 2026 03:59:07 -0700 (PDT)
+X-Received: by 2002:a17:906:794f:b0:c2e:4397:7c82 with SMTP id a640c23a62f3a-c4601376d5bmr137801266b.6.1792493947473;
+        Tue, 20 Oct 2026 03:59:07 -0700 (PDT)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-5362a8e43cfsm119708731cf.5.2026.10.20.02.51.56
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c4091eb39a3sm467056566b.81.2026.10.20.03.59.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Oct 2026 02:51:57 -0700 (PDT)
+        Tue, 20 Oct 2026 03:59:07 -0700 (PDT)
 From: Alex Markuze <amarkuze@redhat.com>
 To: Xiubo Li <xiubo.li@clyso.com>
 Cc: ceph-devel@vger.kernel.org
-Subject: Re: ceph: read ahead along the stride of strided record reads
-Date: Tue, 20 Oct 2026 09:51:54 +0000
-Message-Id: <20261020095154.1312847-1-amarkuze@redhat.com>
+Subject: Re: [3/5] ceph: write back only the dirty bytes of a lazy I/O write
+Date: Tue, 20 Oct 2026 10:59:04 +0000
+Message-Id: <20261020105904.1326043-1-amarkuze@redhat.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20261020-b4-wip-ceph-ra-stride-v1-1-6314b013d3b8@clyso.com>
-References: <20261020-b4-wip-ceph-ra-stride-v1-1-6314b013d3b8@clyso.com>
+In-Reply-To: <20261020-b4-wip-ceph-lazyio-fix-v1-3-f4cc62459d37@clyso.com>
+References: <20261020-b4-wip-ceph-lazyio-fix-v1-3-f4cc62459d37@clyso.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -122,18 +123,11 @@ Hi Xiubo,
 
 NACK. Please respin.
 
-  1. fs/ceph/addr.c:257: pos+stride wrap makes next < isize true for a negative offset
-     `ceph_stride_readahead()` does `end = pos + stride * nr` and `next
-     = pos + stride` with no overflow check, then loops while `next <=
-     end && next < isize`.
-     Bail if `check_add_overflow(pos, stride, &next)` or
-     `check_mul_overflow`/`check_add_overflow` for `end` fails, and keep
-     `next >= 0` in the loop.
-  2. fs/ceph/addr.c:256: stride 0 never leaves the readahead loop
-     `window / len` and `next += stride` assume `len > 0` and `stride >
-     0`.
-     Return immediately on `!len || stride <= 0` before the divide and
-     the loop.
+  1. fs/ceph/addr.c:302: Truncate past a lazy dirty range writes the stale prefix
+     Xiubo, a lazy write that dirtied only the tail of a folio must not
+     send the bytes in front of it.
+     If the clipped range is empty, drop dirty (detach snapc, put the
+     wrbuffer ref).
 
 -- 
 Alex Markuze
