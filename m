@@ -1,98 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.43
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1792583406;
-	b=GRlw2qB2lDuKefOfZMsYEAgq13wZJgr7lDD84pbk03Z4kK2g6ZtKqXI9LQhD8AIRopHO
-	 +FwOunuG2thjFDjwZH8Ut4e+2KeHx901eUU2+dn4TvfFUpzX6FGPXGZDUfaKL6Aqzkjkp
-	 tygUicwPM7uham4oooN9buc8lhDhWoiy9W6pvfnIwwDohfRi2jaZsMQO5gH2ctC7w04L9
-	 ftuI8vOWdfL+ZhFx0POwJ744pT6hGfJYph6mgmJGyRvJSX39F1AZgyErapgYuwEtgJ+eK
-	 wD3SbS2RaoMTzbxxcCE6HBcXSAll1i5RGjLnC+onSlJInRc4a57O2C7yLqOpiTusHrw==
+	t=1792583556;
+	b=zSpisPl8IC9qvUIU9d8RcykC7wotL953MJLR90n7rCumivrXKyAUFaMgHkrV4qjb6Nqa
+	 mO02aDKIu+y7GDfkl8AUy+PPoGM5oAeOHarDls5jioU378LQ7VyAKDwAbN36+xgy9AkWZ
+	 IkGyUwnKsJTEbx/MzbzU44vL6XxE/pwK3ulSRJO/aYkC418mk+FRh3LM8EyDHy+5bqnEp
+	 aiTgEWMTxG1lZLpAjMrhBFQGNgIgEqNebAq/PA8opGL1MXxzTPHiV+a/aJX+ju1blyfY5
+	 otdhHobTs+jdaaRL4OmKw5kq3+eBQqCXV2M3Ooxqy2l81zccL34Tl0QRlmb2PaS0VWQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792583406;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
-	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
-	 Content-Type;
-	bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
-	b=WrVDKy3U0132sb44xv1zro+TzJs4EWt0pNuphg00+M7Nr5A7KidYPXp4PKYEFffQ7ifH
-	 6ZDlSEb5sa08gljk5btw9nUlvmhw9S70hzxTMQbG1jZR7aErce0hkybkFJreGk3p/Yk40
-	 LhSpiU0AfgAoKM0UGhnkNb6cfHQorKHKffPDgCxeDsobEwerCP0YuY/J9exakUDsadhrb
-	 NoPBVAIdDgEi5NQBAzxvBf6+397YtNAf2p0HzNyHGsNCGo56MpHxa53PAbBYOwTANYNNC
-	 UlSv0iAlLGy2iI6xEPT2501gcCfWiTzTI+qp+rv73Y+ph9DIs9Ubof8YJB12nJJ4lkQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792583556;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=l4FObfvQRMO41M3XPigHMXUMperNlJvjgYrcLSCu3rE=;
+	b=wBisYOWWCZz1mrJvzv81QZflOyrWrPj2jlnje/0zg4pvT+sKJ3F3JAmejGMm9iCVEIlk
+	 SSViBVSZW9o2pEkvoyXy74aVS8CqsbxEwoAX9bvWUMHnJooClqCro6/afoLstJ9+vDsAg
+	 jk7eGriWJmJTW5T7u+EbR+ZY0/2gmcv9CEKrYd13ZCe0jgPCLuRJ3dy8yf3mkXrDUBLSz
+	 aTGMtDW83eEu0vXNpLvxisZKmfa4ig5Kf7exH1y8cpUZXXV61Jj9rTcWnQrEBf6Dax5HE
+	 +B8Reevjrdq1HJml8LVy3squyAETO0/b8zDZbJSD4VThctr4ZfylRsAgRVX/5EsobNw==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=clyso.com;
-	spf=pass smtp.mailfrom=clyso.com;
-	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=FFdPnAGz;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.43
-Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UCtaQsK6;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7651606A329;
+	Wed, 21 Oct 2026 11:52:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=UCtaQsK6
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1792583555;
+	b=qR1ngFKxDUjktBJEOw5VPrL/6U2xHVXteBEbnCI+16AWtp2txowr/9WxlvoKCAIGEX1H
+	 j0uqGJNTl7OM2Y7Gy5i5o0LA2TROy9mCHOdzMkVsQ5sN8LHE9QCQcm2kKvxKg2CjvVBZ8
+	 TXlL8RPaRLodNWG8H2ZI9v0xRlqO9KKA7FXrGlGnoNmWtu1ZKlqKc/h0miV4e/yIMrkGY
+	 66M0+oXfpQ4AtTaPwXQU2kyPwvAPmPD+u5cHKdo0KRdXxpImKGzJeo930PsRWRmHF554h
+	 s0cJqLtMVmAdlMR+ode01f2FU6YOYmKCXKPn9v5UXiSWntQQ5m+SyMqaBa7cXC6FDrw==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1792583555;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=l4FObfvQRMO41M3XPigHMXUMperNlJvjgYrcLSCu3rE=;
+	b=ufi4pmicteziE0XqhQrvTDLW+hKyO5TeMBPtYnM8WVaBS94OHK8cTYYlxe7yqKEYkxQU
+	 McF/v+5TB7hF90wiCBxw1Eu0Q2Yh6ovfJbNa6iMezmboxKIbXAYhr4er6vXVxTtawsIta
+	 mk/MKMkaYhtFvf9ROFyhr9/XGBdSwSl41d+StdRSo6153dasnZ/jJP61zp0ebA4GA4+q5
+	 K+4DDKbObBdTBNooLG8nQq5WnCl67lDAxmjCrnVS8zpUTjHSFABmeHgUHxWppXCzM13Os
+	 0qmwMb+Iyw1ILHMwg4FD6OEeQd9ITenaJfL5YYuKzvYDsIRpv51NO/TsEJuD80xNvmA==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF407606A319
-	for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 11:50:00 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AF407606A319
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=FFdPnAGz
-Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-6b413b0a974so346670a12.2
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 04:50:00 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1792583399; cv=none;
-        d=google.com; s=arc-20260327;
-        b=sJRjPdCP3sdnb8G4ELeWIUe1Sh+/8Lv6jzC3JPRPF53woRAGSEmR6CQMV5aDAHkrbS
-         7c/A79aJccQB+dRe7AoytypbPVojzUodDw6SJCPG1WjElfOWo2xSh3/rFRr0VdFwVxcz
-         mxaYGB8Oi9NzsZrkhHtUgmDBna2HBwS9AUOde1E4ZcOu0koRCGn9Zj6F9L5Skw7pqbHm
-         /I4w2ftceaEP/5yN2UswEPHlBQY7aigAf/wqF4/5dVjr3la5H3DKoPxeNz2b4ppLdZOB
-         4EnRM5sRd5s20WzmhtulIkakEutbEB0Ai1oJ+L61rbICC4X+khlN/LQbHYpMtUKHhsQj
-         wX0Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
-        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
-        b=a8Or4ZnuMB5884QAXqGSBme1c7BQero1eZ0jkSTkxutt9yMWowlb8pfwopG0o6xhnv
-         GdQJdpgMPglhaHb+qHc3b7avih2SWFGRBauVQzPo3GG/nUIQL2cUJbAGqY1cpPwkWmqm
-         PugjHsJT5B8b6lxBsZN08hi0Af54q0obIx+qVwmLqvU7WQ8PADUtSXU2BO6Wz6/ft/xq
-         2ER24Bu8hvMswi122kLT7asWNZhQhxtpyKS62Apy3h4CMRoEmEjn82c2ze28khjlw0yr
-         j2/NgM+OzP76BWwNOeHP7YgmY2ixU9lHZKxj/9jBKQj34EiAFJfgv1dZnBGv51EucAy3
-         ty0A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1792583399; x=1793188199; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
-        b=FFdPnAGzDQVAlyHxVLTXYFe7m2p00njjA4/1IRTIl342rtecl0EQLDWiJibVXyM0p9
-         /CZFhrmoKemJhOJX095ocXbnt50rrz2SlLIEC2bdBGYB5ihQVIQBM+toxv6k372MGnBf
-         8RxGXFopJNX6C1FRIT0yhKqFym4C/lCv+IsJR7cpTEoeZzDIwUfE8obYCgIAhP37pWNd
-         zLjWxYMtPalT8BWmLJtWuCCBz5zyYfC/APG2qyszYTIJKBW2lS/b/j1RyozdvqZ+hPPV
-         B7hW/7Zgp5ZqNQ4XZO4iFeabYoe0R0u2RMINfUFTxuLBXjs26jYqozniWG7Oomp+nARi
-         63hw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792583399; x=1793188199;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
-        b=AjNsaiaXhsOGNo1rzX5R67WCdVhsXUaGPJeloY92xp1UA+Zq9ve6fwYukJNZacd6T1
-         tb00O8AiapbbHqT8Hrk5daNXraSi6L97qCVptXxCqOPAYdvcKTS53h6mhQpPR0yARLUP
-         ZGKUsBBzU7OxXQV99vWc/7kIWnYAe7sjitlI979MiPiok4NHiUdy1RTKdkPTU5pbPIvu
-         JNjqptSLJK8QG8wiwGvwoBVKiZiA+gom8oFfrj+WQ4u6wwjdy2XXGy62DStM872GxIm4
-         dcdFP9cQ6bH9cCQw2dZgLZLpD/TshhEmSi5d//ZMNHXnxLpvCbJ3Gdepe4CjJakWX2Si
-         MO0g==
-X-Gm-Message-State: AFq9FYKQfSgYS4N7uLB02p5Q0Lzkv6rYXE+rcUyjKftWO2mrz5lef1uK
-	7++4RJynYle+vFQ1mG/+t7R7yqC8/kK9TnW1SS0UNhWM9rwevTZBNw+F7r6eo4QbpmBr4ZHIuZQ
-	NbrtKFelnF/yLxaFdKo59wjrwNVOuMbE0HQFICMDeWxqTHgs3uEhqbWxMHQ==
-X-Gm-Gg: AYBFou3h8T0seiGL2cvm03WRZCgnlRmam0I1t2FkhagdufuDwL6HjdbConAhn1ZnXHU
-	3TYmMkxWPbXMT+DhfLuFW0zEZ57sgEO7VdcWBfaBkPJU1Y/P4n1rJ5tGEBl87umO0eUdx6vU5Uu
-	eQodl5qWcROe1sMjzvbPZq3sNubiq4+BPNcqH6nYZ7shRZAxqVHKuj9CBLG7Dy9EsyKbrS6pw7x
-	Ps1yy+Qdyjg2co0GNgO0MN3LnKOMoizMRmUKF6ZAo2f9AO2So9WKCSoZS9wB7T1K/cy6P/aYFNI
-	OYUe4JJ5yBYxF98B9tJMwixXOckmUyaiULlDIwEh1qg+luC4taUbt5no300WBE7p5sZul8KwhQn
-	/dkSZp3gs9GIdTNeL3Q2X9i8WNofSfJ78nxkOChY=
-X-Received: by 2002:a17:907:c22:b0:c2e:893:7010 with SMTP id
- a640c23a62f3a-c467976d92amr143494366b.37.1792583398660; Wed, 21 Oct 2026
- 04:49:58 -0700 (PDT)
+	by smtp.kernel.org (Postfix) with ESMTPS id BDAE31F000C9;
+	Wed, 21 Oct 2026 11:52:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1792583555;
+	bh=l4FObfvQRMO41M3XPigHMXUMperNlJvjgYrcLSCu3rE=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
+	b=UCtaQsK68kjr1Tn32fMOSCj50vZ33QBlxtzNeA91/r/A4vGVMhHv/gj6hoSFNrugY
+	 lUmUff8+2mL+KcxUo21cA69r7BiPS8URD5eS1OZaDCMPwDxxeKlJI0dpKxi1QNOZmn
+	 cJSkjqK/Wecf3YKtrWgikcnS+TtJNXKOzuFPSwzPiFPKGNODGf5ZV3GwB7EkmBlSZj
+	 uuD6E3A/yTW8d6pfd33IuO08m16gMiKTN32e02BcALaA1tgD+X8To78J9qAmpsPi+W
+	 vqT4q97CHT7/No/khiGYBuWxBPilgh41rpJtM9+/8AErEl/GMGA9sV5hARL+A5KQMP
+	 Y0M5KinK7pMMw==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id 42D0F43361;
+	Wed, 21 Oct 2026 11:52:33 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Wed, 21 Oct 2026 13:52:06 +0200
+Subject: [PATCH v2 4/5] ceph: ask for LAZYIO only once the MDS turns CACHE
+ or BUFFER down
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -102,40 +83,109 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261020-b4-wip-ceph-lazyio-fix-v1-3-f4cc62459d37@clyso.com> <20261020105904.1326043-1-amarkuze@redhat.com>
-In-Reply-To: <20261020105904.1326043-1-amarkuze@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Message-Id: <20261021-b4-wip-ceph-lazyio-fix-v2-4-25d28479d6ea@clyso.com>
+References: <20261021-b4-wip-ceph-lazyio-fix-v2-0-25d28479d6ea@clyso.com>
+In-Reply-To: <20261021-b4-wip-ceph-lazyio-fix-v2-0-25d28479d6ea@clyso.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1792583534; l=3543;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=vM1YJ8Qdb6EoK/7Y+Z2XaIpcesKUcnEvtBTos7L2Q+s=;
+ b=RY+hUl7AzJcIaofibMUXinOg/wSVf/LerXeXYMco53jx9J+I37npoSwxq2atvqAqwnsHVVZ2y
+ lznu/GXymJpBkKlxVW1zMOcGeb2EnslL/LXEJ7ZG/cvdaPSaTYjBhEw
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
+Content-Transfer-Encoding: 7bit
+
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Wed, 21 Oct 2026 13:49:47 +0200
-X-Gm-Features: AclHuK91ECfjTCxrCzRIPpOEF7OQCtpI7knrCD_1nTEa9S8mXnV2mbkwsS0WYbY
-Message-ID: <CAOJNxRLbN2BZXQf10y62jB5fa60762khjuLwe4+UgwNBM8E4FQ@mail.gmail.com>
-Subject: Re: [3/5] ceph: write back only the dirty bytes of a lazy I/O write
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
 
-Hi Alex,
+A lazy I/O open asked for LAZYIO with the other caps of its mode.  The
+MDS issues LAZYIO in LOCK_SYNC, but not in LOCK_SYNC_EXCL: an open for
+writing by the only client of a synced file makes that client the
+loner, and the MDS revokes the LAZYIO it has just issued on the way to
+LOCK_EXCL.  mdtest's "read" phase opens files O_RDWR (it passes
+O_RDONLY, 0, where the backend wants IOR_RDONLY), so with the lazyio
+mount option a file read can cost a revoke and its ack.  A reader whose
+caps came from a lookup also paid a cap message and a grant for LAZYIO
+it had no use for.
 
-Right, thanks.  The same fallback was also in
-ceph_check_folio_before_write() and write_folio_nounlock() (range
-beyond EOF).  Instead, I will drop the dirty state in all three places,
-via a helper that detaches the snapc, puts the wrbuffer ref and also
-decrements mdsc->dirty_folios.
+LAZYIO only stands in for CACHE (reads) and BUFFER (writes) when the
+MDS will not give those out, i.e. when the file goes mixed.  Ask for it
+once CACHE, or BUFFER for a writer, is in the wanted set the MDS knows
+of but not issued, and keep it while it is issued.  A lazy client of a
+file that goes mixed then gets LAZYIO one cap message later than it
+did.
 
-Thanks,
-Xiubo
+Reading 2000 files O_RDWR from a second client cost 930 revokes and
+2916 cap messages to the MDS before this change, and costs 0 revokes
+and 2000 cap messages with it, the same as without lazyio.  In an io500
+run the mdtest-hard-read phase still sees about one revoke per file
+with lazyio (2.5-2.7M); those go away only when mdtest opens the files
+read-only.
 
-On Tue, 20 Oct 2026 at 12:59, Alex Markuze <amarkuze@redhat.com> wrote:
->
-> Hi Xiubo,
->
-> NACK. Please respin.
->
->   1. fs/ceph/addr.c:302: Truncate past a lazy dirty range writes the stale prefix
->      Xiubo, a lazy write that dirtied only the tail of a folio must not
->      send the bytes in front of it.
->      If the clipped range is empty, drop dirty (detach snapc, put the
->      wrbuffer ref).
->
-> --
-> Alex Markuze
->
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+ fs/ceph/caps.c | 30 +++++++++++++++++++-----------
+ 1 file changed, 19 insertions(+), 11 deletions(-)
+
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index c063d3cf7d21..49e5c1c36b68 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1126,24 +1126,32 @@ static inline int ceph_adjust_caps_used_for_lazyio(struct ceph_inode_info *ci,
+ #define FMODE_WAIT_BIAS 1000
+ 
+ /*
+- * Does a lazy I/O open want LAZYIO?  A writer does, to keep buffering
+- * when the file goes mixed.  A reader whose cache is backed by CACHE
+- * gains nothing from it, and asking for it would cost a cap message to
+- * the MDS and a grant back for every open of a file that was looked up
+- * or stat'ed before: want it only once CACHE is gone, or keep it while
+- * it is still issued.
++ * Does a lazy I/O open want LAZYIO?  It stands in for CACHE (reads) and
++ * BUFFER (writes) when the MDS will not give those out, i.e. when the
++ * file goes mixed.  Until then it gains nothing, and asking for it costs:
++ * the MDS issues LAZYIO in LOCK_SYNC, but not in LOCK_SYNC_EXCL, so an
++ * open that makes the client the loner of a synced file (any open for
++ * writing by a single client, as mdtest's "read" phase does) gets the
++ * LAZYIO it asked for revoked again on the way to LOCK_EXCL: a revoke and
++ * its ack for every file opened.  A reader whose caps came from a lookup
++ * also paid a cap message and a grant for it.
++ *
++ * So want LAZYIO once the MDS has turned CACHE (BUFFER for a writer)
++ * down, i.e. it is in the wanted set the MDS knows of but not issued,
++ * and keep it while it is issued.
+  *
+  * Caller must hold i_ceph_lock.
+  */
+ bool __ceph_lazy_wants_lazyio(struct ceph_inode_info *ci, bool write)
+ {
+-	int issued;
++	int need = write ? CEPH_CAP_FILE_BUFFER : CEPH_CAP_FILE_CACHE;
++	int issued = __ceph_caps_issued(ci, NULL);
+ 
+-	if (write)
++	if (issued & CEPH_CAP_FILE_LAZYIO)
+ 		return true;
+-	issued = __ceph_caps_issued(ci, NULL);
+-	return !(issued & CEPH_CAP_FILE_CACHE) ||
+-	       (issued & CEPH_CAP_FILE_LAZYIO);
++	if (issued & need)
++		return false;
++	return __ceph_caps_mds_wanted(ci, true) & need;
+ }
+ 
+ /*
+
+-- 
+2.53.0
+
+
