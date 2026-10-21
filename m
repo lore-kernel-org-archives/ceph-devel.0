@@ -1,109 +1,98 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.49
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792564221;
-	b=tvq8arDUBZPAfZrUJp/F0oaHOFjfzDi5ytqYcsiaCT8yCWBODFmG1yosS0zNuOKj1n9I
-	 BSAUhchFXLobSqGosA7bp2jpWjvWK5UNuiQ3B3+uuYaASg+hQjxbSA3IydPzArSzox9iR
-	 rSLlUzy/+cggVMa46XG2RDHJ5XXEIGAy5dtX0xgKNVWT0lTDinrHMyYivdnWOXe0QaNUi
-	 /iOBhXCHYHkObpY3GcW5BswSb6TYEveR8ph5oq7UgWAmxu5PhxLsOQ5PHQD22aQHna+de
-	 uQSdpNHbR4+9ZSX0clpSkzAIl6i2JaJv1Fph/XA2lP58wsmrP4qsIrfhtqSLax9FatQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792564221;
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.43
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1792583406;
+	b=GRlw2qB2lDuKefOfZMsYEAgq13wZJgr7lDD84pbk03Z4kK2g6ZtKqXI9LQhD8AIRopHO
+	 +FwOunuG2thjFDjwZH8Ut4e+2KeHx901eUU2+dn4TvfFUpzX6FGPXGZDUfaKL6Aqzkjkp
+	 tygUicwPM7uham4oooN9buc8lhDhWoiy9W6pvfnIwwDohfRi2jaZsMQO5gH2ctC7w04L9
+	 ftuI8vOWdfL+ZhFx0POwJ744pT6hGfJYph6mgmJGyRvJSX39F1AZgyErapgYuwEtgJ+eK
+	 wD3SbS2RaoMTzbxxcCE6HBcXSAll1i5RGjLnC+onSlJInRc4a57O2C7yLqOpiTusHrw==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792583406;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Message-ID:In-Reply-To:References:Date:
-	 MIME-Version:Content-Type;
-	bh=L/PL4XjMYN8lulvNzXcbg/92o2tqbniVOi/bhb++huo=;
-	b=P3MZqG77n6Wk1SKT50a86A1OKruz4MKluwyi8IO5DeV5nx7orcABucb2g5a4ARIantAZ
-	 ITyFMaOOAQlYqyiO7axeRlVdcCWinfjHPy893Snr5Alyu3IzPpYO8KyZSHNVo6MS+gekM
-	 bEKMQqHed2ziYya+gGbhrGeOM35kzpROTEtjIWWoYb7Cg88zo9Nid7HYxTyuS/Nzmo9+I
-	 NDHzWhLk628aCGWeiSG+tj0dzC+XYlTlwwYoTEYUnlLsoXdQPnbrMnyl9n7aTomQcf5RK
-	 Rvz22Idse6x2Emu2bKpGFYmmCAVHINybUDjcF0p4nfJ1sa1MbRzN92Noj3YSQXvZyIQ==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=innovatrics.com;
-	spf=pass smtp.mailfrom=innovatrics.com;
-	dkim=pass header.d=innovatrics.com header.i=@innovatrics.com header.a=rsa-sha256 header.s=google header.b=gPH4sQHP;
-	arc=none smtp.remote-ip=209.85.128.49
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
+	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
+	 Content-Type;
+	bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
+	b=WrVDKy3U0132sb44xv1zro+TzJs4EWt0pNuphg00+M7Nr5A7KidYPXp4PKYEFffQ7ifH
+	 6ZDlSEb5sa08gljk5btw9nUlvmhw9S70hzxTMQbG1jZR7aErce0hkybkFJreGk3p/Yk40
+	 LhSpiU0AfgAoKM0UGhnkNb6cfHQorKHKffPDgCxeDsobEwerCP0YuY/J9exakUDsadhrb
+	 NoPBVAIdDgEi5NQBAzxvBf6+397YtNAf2p0HzNyHGsNCGo56MpHxa53PAbBYOwTANYNNC
+	 UlSv0iAlLGy2iI6xEPT2501gcCfWiTzTI+qp+rv73Y+ph9DIs9Ubof8YJB12nJJ4lkQ==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=clyso.com;
+	spf=pass smtp.mailfrom=clyso.com;
+	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=FFdPnAGz;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.43
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41F08606A322
-	for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 06:30:20 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 41F08606A322
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=innovatrics.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=innovatrics.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF407606A319
+	for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 11:50:00 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AF407606A319
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=innovatrics.com header.i=@innovatrics.com header.a=rsa-sha256 header.s=google header.b=gPH4sQHP
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-4a0286c981dso2844725e9.2
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Oct 2026 23:30:20 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=FFdPnAGz
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-6b413b0a974so346670a12.2
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 04:50:00 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1792583399; cv=none;
+        d=google.com; s=arc-20260327;
+        b=sJRjPdCP3sdnb8G4ELeWIUe1Sh+/8Lv6jzC3JPRPF53woRAGSEmR6CQMV5aDAHkrbS
+         7c/A79aJccQB+dRe7AoytypbPVojzUodDw6SJCPG1WjElfOWo2xSh3/rFRr0VdFwVxcz
+         mxaYGB8Oi9NzsZrkhHtUgmDBna2HBwS9AUOde1E4ZcOu0koRCGn9Zj6F9L5Skw7pqbHm
+         /I4w2ftceaEP/5yN2UswEPHlBQY7aigAf/wqF4/5dVjr3la5H3DKoPxeNz2b4ppLdZOB
+         4EnRM5sRd5s20WzmhtulIkakEutbEB0Ai1oJ+L61rbICC4X+khlN/LQbHYpMtUKHhsQj
+         wX0Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=a8Or4ZnuMB5884QAXqGSBme1c7BQero1eZ0jkSTkxutt9yMWowlb8pfwopG0o6xhnv
+         GdQJdpgMPglhaHb+qHc3b7avih2SWFGRBauVQzPo3GG/nUIQL2cUJbAGqY1cpPwkWmqm
+         PugjHsJT5B8b6lxBsZN08hi0Af54q0obIx+qVwmLqvU7WQ8PADUtSXU2BO6Wz6/ft/xq
+         2ER24Bu8hvMswi122kLT7asWNZhQhxtpyKS62Apy3h4CMRoEmEjn82c2ze28khjlw0yr
+         j2/NgM+OzP76BWwNOeHP7YgmY2ixU9lHZKxj/9jBKQj34EiAFJfgv1dZnBGv51EucAy3
+         ty0A==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=innovatrics.com; s=google; t=1792564218; x=1793169018; darn=vger.kernel.org;
-        h=content-type:mime-version:date:references:in-reply-to:message-id
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to
+        d=clyso.com; s=google; t=1792583399; x=1793188199; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=L/PL4XjMYN8lulvNzXcbg/92o2tqbniVOi/bhb++huo=;
-        b=gPH4sQHPR8Ev3TVe4fx2UbEXIw2xFCdfFLESBZJIfHyRD6RosT2aeApmPD5gBDI0sr
-         lxPezYiulqoMJf1XIuKlBuVvprLP1YH2CKpWkSU+T6z/MREzXgJrKrHBTaELJJ3i1oLV
-         qFGYptEiGS0CzhzxCFlN6CyVNGgIKXczC3xNs=
+        bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
+        b=FFdPnAGzDQVAlyHxVLTXYFe7m2p00njjA4/1IRTIl342rtecl0EQLDWiJibVXyM0p9
+         /CZFhrmoKemJhOJX095ocXbnt50rrz2SlLIEC2bdBGYB5ihQVIQBM+toxv6k372MGnBf
+         8RxGXFopJNX6C1FRIT0yhKqFym4C/lCv+IsJR7cpTEoeZzDIwUfE8obYCgIAhP37pWNd
+         zLjWxYMtPalT8BWmLJtWuCCBz5zyYfC/APG2qyszYTIJKBW2lS/b/j1RyozdvqZ+hPPV
+         B7hW/7Zgp5ZqNQ4XZO4iFeabYoe0R0u2RMINfUFTxuLBXjs26jYqozniWG7Oomp+nARi
+         63hw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792564218; x=1793169018;
-        h=content-type:mime-version:date:references:in-reply-to:message-id
-         :subject:cc:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=L/PL4XjMYN8lulvNzXcbg/92o2tqbniVOi/bhb++huo=;
-        b=k+QDNLc9cgmwIWbbb/S/HvgDwJBK5KFrFc1qgBb5oRJf3S33IAm2Y2C5SH0EzCyGw8
-         b3qwGMO/TCxHseiO+iCs+F8Sc3S1ualkyUW9HKwN4TRtyzW0PzyKX7cBV5ZCHaF9pWik
-         QelAAbOn1uJpQWraDVCvDYdcCc16njuiJ3Zf2wWzUitzvaZysshWSgBrMJGkDEIxmES+
-         mwWHVFl6AK4l2Ovaaeg7Sn3hcPCrAxNroZR+Cpnvx5v8e1JmcGraJ+2MejjQ7NGZP1t5
-         vOCA/DoFryZNtUvZEulMbET72kZ/LbUh0jFzRT+xYzWi2lxZlbS6OenqlpDaQof2oW8J
-         INwA==
-X-Forwarded-Encrypted: i=1; AKwUvBwYwElngWtXVpZBWgosIfNPBCu83UxR3hQ414WtJ3omiKjr3sLA7BmxncJmN3nrGmELR2uMOEzTOfjW@vger.kernel.org
-X-Gm-Message-State: AFq9FYJxtgOeABsl/WcIblAkQnQHpiOf4KzDODl1wNQEf2Y5Rb0H/5TY
-	fjtQK3EUw87Qa2b+WrTPuqN6uS4IBszd/78mLvh5vtJqh8CtrvtFcaEsyjCVCxY2EQ==
-X-Gm-Gg: AYBFou3Kx9FBr0SbzpEXqIpmyMM4r5U0fm/VhE8C00HtAN6gynNn0BkT4D+l1jMsnSW
-	8GZOdJFbxMTFprjicRPl+UxzWXgcNFdmqszSQbtaD0B8UzPHtP48myl7zkZhD1T1KHt69/waCAH
-	JiNmUgOTZXttB9Tctc+cw4oHUO3l0CYt2b/tLsvcpmQ18yR4cEtRmS6rQw0wrfO9ltpwRlPS3Bb
-	KgXjyXV7jINrEsF26a1m76UHNhIzQwqzckgIHraKzWkAB5Gd0rCKfLavsyrVEkf1oKtcYBxY0w0
-	VWbQuHdxxrZ9Ro6RvVzUj2op0uNX++RV/ZLj46YHbA6IdpiPlk3bVqHG1B0gEfAk8ILc/M1rGyT
-	aPw85twMpXHaPhoV0l2ihd3US79cJuu3Qk7Mn+BYw8ZdiIRmci3sbXA+5Q7O+VMFVe1aR6mnIu5
-	Rk8co+aRttx1/kqD8ga9xLmZla/9km7cE4urhIvk8VyninUQjZoNrnCadlk/AoIyQE3+rwGOvaH
-	GRoHRi8jPoOGLPGmR7LBoC22DOpiBNoU3eIcJGSAAxnndDUGT4I7cru9a+fhzMfqECGBOsGS3Hi
-	Qr6TNd5Os0ajXAx6TKJA7QP/OiZvG72MvORiKqNEYb3/BAHhgITF5v3vQlBaRNqwcsmBOT8OOVG
-	+O0mbv9MyHCCO
-X-Received: by 2002:a05:600c:34ca:b0:4a0:eae0:769a with SMTP id 5b1f17b1804b1-4a1fdd39e68mr18248775e9.28.1792564218396;
-        Tue, 20 Oct 2026 23:30:18 -0700 (PDT)
-Received: from [10.11.72.5] (bip-static-148.213-81-147.telecom.sk. [213.81.147.148])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a1f2d85a9bsm143305775e9.15.2026.10.20.23.30.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Oct 2026 23:30:17 -0700 (PDT)
-From: Petr Chmelar <petr.chmelar@innovatrics.com>
-To: David Howells <dhowells@redhat.com>
-Cc: Christian Brauner <christian@brauner.io>,
-    Paulo Alcantara <pc@manguebit.org>,
-    Matthew Wilcox <willy@infradead.org>,
-    Namjae Jeon <linkinjeon@kernel.org>,
-    Marc Dionne <marc.dionne@auristor.com>,
-    Stefan Metzmacher <metze@samba.org>,
-    Eric Van Hensbergen <ericvh@kernel.org>,
-    Dominique Martinet <asmadeus@codewreck.org>,
-    Ilya Dryomov <idryomov@gmail.com>,
-    netfs@lists.linux.dev,
-    linux-afs@lists.infradead.org,
-    linux-cifs@vger.kernel.org,
-    linux-nfs@vger.kernel.org,
-    ceph-devel@vger.kernel.org,
-    v9fs@lists.linux.dev,
-    linux-fsdevel@vger.kernel.org,
-    linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v12 0/5] netfs, cachefiles: Changes for next, primarily
- occupancy tracking-related
-Message-ID:
- <20261021.cachefiles-seekhole-granularity.pchmelar@innovatrics.com>
-In-Reply-To: <1655915.1791879248@warthog.procyon.org.uk>
-References: <20260910220242.2165023-1-dhowells@redhat.com>
- <20261011.cachefiles-seek-hole-walk.pchmelar@innovatrics.com>
- <1655915.1791879248@warthog.procyon.org.uk>
-Date: Wed, 21 Oct 2026 06:30:15 +0000
+        d=1e100.net; s=20260707; t=1792583399; x=1793188199;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=Cp/79PwyfE5T4Tg8H2grwuVOCFMA6czvzFC0rPchCKQ=;
+        b=AjNsaiaXhsOGNo1rzX5R67WCdVhsXUaGPJeloY92xp1UA+Zq9ve6fwYukJNZacd6T1
+         tb00O8AiapbbHqT8Hrk5daNXraSi6L97qCVptXxCqOPAYdvcKTS53h6mhQpPR0yARLUP
+         ZGKUsBBzU7OxXQV99vWc/7kIWnYAe7sjitlI979MiPiok4NHiUdy1RTKdkPTU5pbPIvu
+         JNjqptSLJK8QG8wiwGvwoBVKiZiA+gom8oFfrj+WQ4u6wwjdy2XXGy62DStM872GxIm4
+         dcdFP9cQ6bH9cCQw2dZgLZLpD/TshhEmSi5d//ZMNHXnxLpvCbJ3Gdepe4CjJakWX2Si
+         MO0g==
+X-Gm-Message-State: AFq9FYKQfSgYS4N7uLB02p5Q0Lzkv6rYXE+rcUyjKftWO2mrz5lef1uK
+	7++4RJynYle+vFQ1mG/+t7R7yqC8/kK9TnW1SS0UNhWM9rwevTZBNw+F7r6eo4QbpmBr4ZHIuZQ
+	NbrtKFelnF/yLxaFdKo59wjrwNVOuMbE0HQFICMDeWxqTHgs3uEhqbWxMHQ==
+X-Gm-Gg: AYBFou3h8T0seiGL2cvm03WRZCgnlRmam0I1t2FkhagdufuDwL6HjdbConAhn1ZnXHU
+	3TYmMkxWPbXMT+DhfLuFW0zEZ57sgEO7VdcWBfaBkPJU1Y/P4n1rJ5tGEBl87umO0eUdx6vU5Uu
+	eQodl5qWcROe1sMjzvbPZq3sNubiq4+BPNcqH6nYZ7shRZAxqVHKuj9CBLG7Dy9EsyKbrS6pw7x
+	Ps1yy+Qdyjg2co0GNgO0MN3LnKOMoizMRmUKF6ZAo2f9AO2So9WKCSoZS9wB7T1K/cy6P/aYFNI
+	OYUe4JJ5yBYxF98B9tJMwixXOckmUyaiULlDIwEh1qg+luC4taUbt5no300WBE7p5sZul8KwhQn
+	/dkSZp3gs9GIdTNeL3Q2X9i8WNofSfJ78nxkOChY=
+X-Received: by 2002:a17:907:c22:b0:c2e:893:7010 with SMTP id
+ a640c23a62f3a-c467976d92amr143494366b.37.1792583398660; Wed, 21 Oct 2026
+ 04:49:58 -0700 (PDT)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -113,301 +102,40 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6589919273872440461=="
+References: <20261020-b4-wip-ceph-lazyio-fix-v1-3-f4cc62459d37@clyso.com> <20261020105904.1326043-1-amarkuze@redhat.com>
+In-Reply-To: <20261020105904.1326043-1-amarkuze@redhat.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Wed, 21 Oct 2026 13:49:47 +0200
+X-Gm-Features: AclHuK91ECfjTCxrCzRIPpOEF7OQCtpI7knrCD_1nTEa9S8mXnV2mbkwsS0WYbY
+Message-ID: <CAOJNxRLbN2BZXQf10y62jB5fa60762khjuLwe4+UgwNBM8E4FQ@mail.gmail.com>
+Subject: Re: [3/5] ceph: write back only the dirty bytes of a lazy I/O write
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
---===============6589919273872440461==
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Hi Alex,
 
-David Howells <dhowells@redhat.com> wrote:
-
-> I have patches that store a bitmap in an xattr, with 1 bit per 256K block of
-> cachefile, for a 512 byte xattr able to map up to 1G of file size.  I need to
-> revisit this at some point soon.  It may be better to switch to storing an
-> extent list, but:
-[...]
-> Trying to store a million+ extent records in a single xattr would kind of
-> suck.  Now, it might be possible to collapse that somewhat if a lot of the
-> extents are virtually sequential within the file, since I don't care about
-> physical sequentiality.
->
-> Also, can you tell if you have a preferred cache granularity?  Would a 256K
-> granularity, say, use too much space?
-
-Sorry for the slow answer.  256K would be fine for us: our cache gets
-filled by random training reads of 64 to 256 KB.  The problem is the
-size of our files.  Many cached objects are hundreds of GB, the largest
-we've seen is 946 GB, so at 256K one object needs up to about 450 KB of
-bitmap - far more than a 512 byte xattr.
-
-An extent list would suit the case that hurts us.  An object only gets
-slow once it's fully or nearly fully cached, and then it's one virtually
-contiguous range, however many physical extents it has: for example
-569 GB in 2,528,439 extents.  While such an object is filling, though,
-it's scattered pieces at random offsets, so the list would stay long
-for weeks before it collapses.
-
-> > I can send the workaround if it's useful as a reference,
->
-> If you could, that would be great!
-
-Attached, as a reference only.  It's a naive implementation I wrote
-with the help of an LLM, just to confirm where the time goes - I don't
-know the netfs and cachefiles internals well enough to propose it as a
-fix, and nobody has reviewed it.  It keeps the last SEEK_DATA/SEEK_HOLE
-answer in the cachefiles object, so it's lost when the cookie is
-withdrawn - 10 s after the file is closed, or on reboot - and each new
-open pays one full walk again.  It also still asks the backing
-filesystem where the data is, the opposite of where you're taking
-cachefiles.  It's written against vfs-7.4.netfs at 9f8b64f66, on top of
-your v12 series (cachefiles_query_occupancy()), and was only tested in
-a VM.  We also have a port to the Ubuntu 6.8 kernel our nodes run,
-under test but not deployed.
-
-On our nodes we'll detect fragmented, fully cached objects and
-defragment them, and in the long run we'll move away from such large
-files, which aren't ideal for us in other ways either.  I'm still happy
-to test whatever you do for this case.
+Right, thanks.  The same fallback was also in
+ceph_check_folio_before_write() and write_folio_nounlock() (range
+beyond EOF).  Instead, I will drop the dirty state in all three places,
+via a helper that detaches the snapc, puts the wrbuffer ref and also
+decrements mdsc->dirty_folios.
 
 Thanks,
-Petr
+Xiubo
 
---===============6589919273872440461==
-Content-Type: text/x-patch; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
- filename="0001-cachefiles-Remember-known-data-to-avoid-repeated-SEE.patch"
-MIME-Version: 1.0
-
->From ec2bbf3bfaaa09af48a416eb12d389b245a28bed Mon Sep 17 00:00:00 2001
-From: Petr Chmelar <petr.chmelar@innovatrics.com>
-Date: Sat, 10 Oct 2026 23:14:20 +0000
-Subject: [PATCH] cachefiles: Remember known data to avoid repeated SEEK_HOLE
- walks
-
-cachefiles_query_occupancy() locates the cached data of a
-CACHEFILES_CONTENT_BACKFS_MAP object with SEEK_DATA followed by SEEK_HOLE.
-SEEK_HOLE has no upper bound: on XFS, iomap_seek_hole() calls
-xfs_seek_iomap_begin() once per extent until it reaches a hole, and in a
-fully populated object the first hole is EOF.  netfslib queries the
-occupancy for each read request, so a sequential read of such an object
-walks the rest of its extent list once per readahead batch.
-
-An object gets into that state when a netfs file is read at random
-offsets.  Each read is copied to the cache at its own offset, the object
-is marked BACKFS_MAP on the first discontiguous write and stays so once
-it has filled in, and when other files are being cached at the same time
-each piece gets its own extent.  Large data sets that are read randomly,
-such as training data on NFS, end up as objects with hundreds of
-thousands of extents.
-
-In a VM with an NFSv4.2 loopback mount using fsc, a 1 GiB object filled
-by random 64 KiB reads ends up with about 16,300 extents.  A sequential
-read of it after dropping the page cache makes 4,098 SEEK_HOLE calls
-that take 176 s in total, and runs at 4.3 MiB/s.
-
-Remember the most recent region that SEEK_DATA/SEEK_HOLE found to be
-contiguous data and answer queries that start inside it without seeking.
-Overlapping and abutting regions merge, so a sequential read pays for one
-walk instead of one per request.  The read above then makes one SEEK_HOLE
-call taking 61 ms, and runs at 17 MiB/s.
-
-Cachefiles only ever adds data to a backing file except where it removes
-data itself, so forget the region after each of those: the punch on low
-space in __cachefiles_prepare_write(), the padding clear and the
-truncation in cachefiles_collect_write(), cachefiles_shorten_object()
-and invalidation.  A sequence number sampled before the seeks stops a
-query that raced with a removal from recording what it saw before it,
-and the cookie's invalidation counter ties the region to the backing
-file that the operation was started on.
-
-Assisted-by: LLM
----
- fs/cachefiles/interface.c |  3 ++
- fs/cachefiles/internal.h  | 10 ++++++
- fs/cachefiles/io.c        | 69 ++++++++++++++++++++++++++++++++++++++-
- 3 files changed, 81 insertions(+), 1 deletion(-)
-
-diff --git a/fs/cachefiles/interface.c b/fs/cachefiles/interface.c
-index 789ff6abe9..a5eb874ce1 100644
---- a/fs/cachefiles/interface.c
-+++ b/fs/cachefiles/interface.c
-@@ -172,6 +172,7 @@ static bool cachefiles_shorten_object(struct cachefiles_object *object,
- 	ret = cachefiles_inject_remove_error();
- 	if (ret == 0)
- 		ret = vfs_truncate(&file->f_path, dio_size);
-+	cachefiles_forget_known_data(object);
- 	if (ret < 0) {
- 		trace_cachefiles_io_error(object, file_inode(file), ret,
- 					  cachefiles_trace_trunc_error);
-@@ -187,6 +188,7 @@ static bool cachefiles_shorten_object(struct cachefiles_object *object,
- 		if (ret == 0)
- 			ret = vfs_fallocate(file, FALLOC_FL_ZERO_RANGE,
- 					    new_size, dio_size - new_size);
-+		cachefiles_forget_known_data(object);
- 		if (ret < 0) {
- 			trace_cachefiles_io_error(object, file_inode(file), ret,
- 						  cachefiles_trace_fallocate_error);
-@@ -354,6 +356,7 @@ static bool cachefiles_invalidate_cookie(struct fscache_cookie *cookie)
- 	set_bit(FSCACHE_COOKIE_NEEDS_UPDATE, &object->cookie->flags);
- 
- 	spin_unlock(&object->lock);
-+	cachefiles_forget_known_data(object);
- 	_debug("subbed");
- 
- 	/* Allow I/O to take place again */
-diff --git a/fs/cachefiles/internal.h b/fs/cachefiles/internal.h
-index 664be64ab5..5e9394cadd 100644
---- a/fs/cachefiles/internal.h
-+++ b/fs/cachefiles/internal.h
-@@ -60,6 +60,15 @@ struct cachefiles_object {
- 	spinlock_t			lock;
- 	refcount_t			ref;
- 	enum cachefiles_content		content_info;	/* Info about content presence */
-+	/* Region of the backing file that SEEK_DATA/SEEK_HOLE last found to
-+	 * hold contiguous data, so that occupancy queries inside it don't have
-+	 * to walk the extent list of a fragmented file again.  Protected by
-+	 * ->lock.
-+	 */
-+	uoff_t				known_data_from;
-+	uoff_t				known_data_to;
-+	unsigned int			known_data_inval; /* cookie->inval_counter it applies to */
-+	unsigned int			known_data_seq;	/* Bumped when data is discarded */
- };
- 
- /*
-@@ -204,6 +213,7 @@ extern void cachefiles_put_object(struct cachefiles_object *object,
-  */
- extern bool cachefiles_begin_operation(struct netfs_cache_resources *cres,
- 				       enum fscache_want_state want_state);
-+extern void cachefiles_forget_known_data(struct cachefiles_object *object);
- extern int __cachefiles_prepare_write(struct cachefiles_object *object,
- 				      struct file *file,
- 				      uoff_t *_start, size_t *_len, size_t upper_len,
-diff --git a/fs/cachefiles/io.c b/fs/cachefiles/io.c
-index d050598222..a0a2835967 100644
---- a/fs/cachefiles/io.c
-+++ b/fs/cachefiles/io.c
-@@ -194,6 +194,46 @@ static int cachefiles_read(struct netfs_cache_resources *cres,
- 	return ret;
- }
- 
-+/*
-+ * Discard the record of where the backing file holds data.  This must be
-+ * called after anything that removes data from the backing file, so that an
-+ * occupancy query that raced with the removal can't record what it saw before.
-+ */
-+void cachefiles_forget_known_data(struct cachefiles_object *object)
-+{
-+	spin_lock(&object->lock);
-+	object->known_data_seq++;
-+	object->known_data_from = 0;
-+	object->known_data_to = 0;
-+	spin_unlock(&object->lock);
-+}
-+
-+/*
-+ * Record a region that SEEK_DATA/SEEK_HOLE found to hold contiguous data,
-+ * unless data has been discarded since the query sampled @seq.
-+ */
-+static void cachefiles_note_known_data(struct cachefiles_object *object,
-+				       struct netfs_cache_resources *cres,
-+				       unsigned int seq, uoff_t from, uoff_t to)
-+{
-+	spin_lock(&object->lock);
-+	if (object->known_data_seq != seq)
-+		goto out;
-+	if (object->known_data_inval == cres->inval_counter &&
-+	    from <= object->known_data_to &&
-+	    to >= object->known_data_from) {
-+		/* Overlapping or abutting regions of data merge. */
-+		object->known_data_from = umin(from, object->known_data_from);
-+		object->known_data_to = umax(to, object->known_data_to);
-+	} else {
-+		object->known_data_from = from;
-+		object->known_data_to = to;
-+		object->known_data_inval = cres->inval_counter;
-+	}
-+out:
-+	spin_unlock(&object->lock);
-+}
-+
- /*
-  * Query the occupancy of the cache in a region, returning the extent of the
-  * next two chunks of cached data and the next hole.
-@@ -205,6 +245,7 @@ static int cachefiles_query_occupancy(struct netfs_cache_resources *cres,
- 	struct inode *inode;
- 	struct file *file;
- 	uoff_t read_limit;
-+	unsigned int seq;
- 	loff_t ret;
- 	int i;
- 
-@@ -238,7 +279,28 @@ static int cachefiles_query_occupancy(struct netfs_cache_resources *cres,
- 		break;
- 	}
- 
--	for (i = 0; i < ARRAY_SIZE(occ->cached_from); i++) {
-+	/* SEEK_HOLE may have to walk every extent up to the next hole, which
-+	 * in a fully populated but fragmented backing file can be hundreds of
-+	 * thousands of them, so first check whether an earlier query already
-+	 * found data here.
-+	 */
-+	i = 0;
-+	spin_lock(&object->lock);
-+	seq = object->known_data_seq;
-+	if (object->known_data_inval == cres->inval_counter &&
-+	    occ->query_from >= object->known_data_from &&
-+	    occ->query_from < object->known_data_to) {
-+		occ->cached_type[0] = FSCACHE_EXTENT_DATA;
-+		occ->cached_from[0] = occ->query_from;
-+		occ->cached_to[0] = object->known_data_to;
-+		occ->query_from = object->known_data_to;
-+		i = 1;
-+	}
-+	spin_unlock(&object->lock);
-+	if (i > 0 && occ->query_from >= occ->query_to)
-+		goto done;
-+
-+	for (; i < ARRAY_SIZE(occ->cached_from); i++) {
- 		ret = cachefiles_inject_read_error();
- 		if (ret == 0)
- 			ret = vfs_llseek(file, occ->query_from, SEEK_DATA);
-@@ -263,6 +325,8 @@ static int cachefiles_query_occupancy(struct netfs_cache_resources *cres,
- 		}
- 		occ->cached_to[i] = ret;
- 		occ->query_from = ret;
-+		cachefiles_note_known_data(object, cres, seq,
-+					   occ->cached_from[i], ret);
- 		if (occ->query_from >= occ->query_to)
- 			break;
- 	}
-@@ -473,6 +537,7 @@ int __cachefiles_prepare_write(struct cachefiles_object *object,
- 	if (ret == 0)
- 		ret = vfs_fallocate(file, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
- 				    start, *_len);
-+	cachefiles_forget_known_data(object);
- 	if (ret < 0) {
- 		trace_cachefiles_io_error(object, file_inode(file), ret,
- 					  cachefiles_trace_fallocate_error);
-@@ -689,6 +754,7 @@ static void cachefiles_collect_write(struct netfs_io_request *wreq,
- 			ret = cachefiles_inject_remove_error();
- 			if (ret == 0)
- 				ret = vfs_truncate(&file->f_path, 0);
-+			cachefiles_forget_known_data(object);
- 			if (ret < 0) {
- 				trace_cachefiles_io_error(object, inode, ret,
- 							  cachefiles_trace_trunc_error);
-@@ -775,6 +841,7 @@ static void cachefiles_collect_write(struct netfs_io_request *wreq,
- 		if (ret == 0)
- 			ret = vfs_fallocate(file, FALLOC_FL_ZERO_RANGE,
- 					    data_to, old_size - data_to);
-+		cachefiles_forget_known_data(object);
- 		if (ret < 0) {
- 			trace_cachefiles_io_error(object, inode, ret,
- 						  cachefiles_trace_fallocate_error);
--- 
-2.52.0
-
-
---===============6589919273872440461==--
+On Tue, 20 Oct 2026 at 12:59, Alex Markuze <amarkuze@redhat.com> wrote:
+>
+> Hi Xiubo,
+>
+> NACK. Please respin.
+>
+>   1. fs/ceph/addr.c:302: Truncate past a lazy dirty range writes the stale prefix
+>      Xiubo, a lazy write that dirtied only the tail of a folio must not
+>      send the bytes in front of it.
+>      If the clipped range is empty, drop dirty (detach snapc, put the
+>      wrbuffer ref).
+>
+> --
+> Alex Markuze
+>
