@@ -1,98 +1,51 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.47
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1792588851;
-	b=IDYMaK1sBUoIiJc5oGJG3SWuL2PthysivHAnWVAK0gcwWzONzqCIJgQ6lLHKfJth8/A+
-	 DnRgh/chReawJZ1rhjgUd8iJ99/ORZE9eDBjxdH37UBJtfVsjsRUlg2Ydz+7sInpVeeFh
-	 WzU7SiwgY5fe0EMax6xDgVxA3ZVOzVkMa5WRjL9IDDKYZ5hhjwDR+uZ2CS9APIAKdEoDA
-	 /URW2Vy/DI+0Occiz1tUdvuzAa30zMYtaov1+v58uLldPJgxA7tSR/VAE+S6yxWNSHz6u
-	 7SBU0VJ676NdKUSmLGg3bva6H5V1jzB4iQBtbMitZNkQvICozXfIfd8TS6X9hcVNlkw==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792588851;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
-	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
-	 Content-Type;
-	bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
-	b=tFV6gs59vgR9rT16qJR8CTFWut7EEQOiJqdheo1ge0/i4CQEvFWZyfBzo7K8gDzfZEBE
-	 kVMTaDokKxavrnvBAgJSEfqqyfBzASr+tBrVzom4SUwUcSEluAvEKfn0bvIcBNdiBa4yS
-	 qgc9U4J9H4/0QKpUjL/CD0rsHt8dNzHf6hJa8mrHpIdLNWL+4lj5NpQfm3caTKSj0jE+x
-	 PEiAGrnimPT34T8sfnpw3Nzee8B2eSEvPc24rivZ1ABR8sRtWCP2Q3ji/Mpr72mkYRnC3
-	 Wgjfx/0S3D9WiZ41HMgHJ4JnRUyx/PKBFYjaM+ey+z2uIdQfrhHKUaXxNr5wXV/sAxQ==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=clyso.com;
-	spf=pass smtp.mailfrom=clyso.com;
-	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=QAXBHBmX;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.47
-Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com [209.85.208.47])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=159.226.251.25
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1792602391;
+	b=FoVFqQXifz5TaSVjrlGaZsQ8Drddy9jLZVAz3F1yh4C8P5nS4n6NgfmvgBmR8VXDBcMi
+	 GHpV+wSfpZp3OZE2gwdr8+S9WMFM37Ipe96Z9tmGOSRzlsGycy5KOdPiUR3vrN2zNKhSi
+	 ZmUMCnHpk9pRQDHDQG2mkpAP2oc+PTP5zdwtOvCC/Wl21hhrhRMDS6nf0aBhUbmXZEJg3
+	 ET0MZXRpe8o4P4mlOialYeKhSx6NpOnXPp0AVDcFIklYvngTi0b2dggK5UXZHuGcr/45Q
+	 CgnsR3LgUq+lXIm0LyY8zJcnS7Kgucy36guqqaq2+IQ7S/TsQRvvyYAOR/2JQPn5xfA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792602391;
+	h=DMARC-Filter:Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
+	 MIME-Version:Content-Transfer-Encoding:X-CM-TRANSID:
+	 X-Coremail-Antispam:X-Originating-IP:X-CM-SenderInfo;
+	bh=rkKKVnZv/kHJBrv3uwIvqeZA4Aam5alns9BT/D3usA8=;
+	b=uReTjyG0sK5telvFrn7pcrA8ucoM9xWhwkgRS0TX0tE+pa1e9wEA0ysSR/om8nfsf9UA
+	 sPz85zCTZ2nMsE0MZjoGdygHQoKtSiSmoXzky/6DxV2QOlPSvb96f8QDe+2G7H/13pPGz
+	 y7+J5Fs6mkT8jfp8mAj+nCFAu39EojBhnlEiB0j56pKbzcRrY0TJsMwlEfzEhCN4eI4tX
+	 KC3QxXNvOlVeR/Wi4lmzyUb+BDnVlW43Pc8Kp9t8NVvVDlPuVIloDng7bl2VbJOkWzyKB
+	 lSWZ/irmwVekNUwq1K3e8BNyNpfDcRI1yq/IIciC2EpnTyl+O7tEvjUyx6Eez2cVdsQ==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=none header.from=iscas.ac.cn;
+	spf=pass smtp.mailfrom=iscas.ac.cn;
+	arc=none smtp.remote-ip=159.226.251.25
+Received: from cstnet.cn (smtp25.cstnet.cn [159.226.251.25])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83ECA606A320
-	for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 13:20:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 83ECA606A320
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=QAXBHBmX
-Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-6b2232d8ef5so1015929a12.3
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 06:20:50 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1792588849; cv=none;
-        d=google.com; s=arc-20260327;
-        b=CZaLZcE3Zzzs6uq+x231MQkOs43SNPlb0NpcOntLAPnXhAQvaRnSge1gWDNlESLmnP
-         MW4TNZrLcqpHD2lqXMBPmdQQuEITtI/INdCugGrGKeJk410FmnYSd5zXpqBHptdB/7az
-         3mRlrDKF7UB06wnUuwcx6uBhLprf5WJioIhIagwtaQ10jjpNta6G4ClRu9JTVgeYBs/l
-         Nt7fCG+0LB0y77an4vh8UjTqd+WpXWkPPOz9TGse2cVtSJjpcxtWcKwzkZw2IFqfoZ26
-         LK1P8OTPMddk5O/OoMTrsnETLsRL4hOGv1P82Uimjp04yy99sKNr9hFp73bDvpfU59pa
-         cgvA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
-        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
-        b=iJG9ElMkWYO/QkaxPSB98jBCPEzUvqqv0CUcNewrkUPgIVmv9uPUHMlWlb+d1diqvO
-         mVJsZIOjSH02zkd8b7YAacCOQgKLgG72kNYK8Bd6WscMSP1W1hOhqs4W7I+Wla2hLwH/
-         YY0/H8+DbCIx716kiYMfwBdKOJGt2nLFDUiQCbLOSc+wE0g7P0/pkIp0xpqQn6egPXhT
-         ypV57EQfUGh//z67wYSW/haw0ieCdvNE8QJdl6yrl4Kyso7YQaMzm/qS22wKdeAHbV1h
-         EXsspcCGtr5BOPMmknECD+nTnOJU5aAp0+jVxs5xylVwi5RJ/dZlcZdKwEumTAfboBE1
-         84yg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1792588849; x=1793193649; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
-        b=QAXBHBmXi10oU/ykux/rv3Z2QX7ymp83CwvImhc0p+fx6u6Gx378Z2g3Fr1uFlSXip
-         W19q6FnUsQpZ+fibQZofSqFFT8nBFVL0XqOuWbWh0quH9dIQEQ1ybVu3xp6N3CG4b3Li
-         FuA5FG54pkTHFl/iK+jv84j6d5+Ucff9/G3SnrhCv+XBIArEVvcpgINvCJyqEjY9mOBK
-         ySTtrv5t6LcyyvegNj/XjBDqrG8HkPIeypZCafPbBRWgWXFfYc5eB6Q8Q1q9h3otivoX
-         v85I+quoHp5ySLpXrNr7caVXM3G/9pAcOOIHt+sJqueQ6flwcz92JrBBjP4veoPNFhLa
-         b6rQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792588849; x=1793193649;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
-        b=gzWwFyadoBd5G6pqDZGrXa8EfFLLHT8lFW6CYu6HinzeAr6kzrxMsNJQPB+m3L8Pj2
-         zeVVy1rdR7PFhxQzQo5KoGEE1CBU6KXdWBB4OJqyDIdhJn8ByaePGX6FhWfTZ2UcTKrS
-         3CMz9kRhbZ0UpYZuv8VIEdZEltOdNZeEDjbWCRVU6Ibe6npPPoZTO3OrSSijILJvqjCv
-         tfvAsmO2olVYpR87hQUqhLy9nolNf0BlbagAS3R0T0AKEciFUIKjIfdL+ztAtWRGm47U
-         7o8TEAZa9ZXsjooAFNF3KCLxpKE85REY6LJfGmtARraU2Kw6wEz7mVE4V/QqcPDL1Qig
-         cRGg==
-X-Gm-Message-State: AFq9FYKCOEj4nZ/HMH2I9Os/95mdRPyCyrEIb9+3Kr40DSJNvXLAzkUP
-	6+9LP4rqOz3gFD735Ihk1pwL90TooI61PeC/7rlz1L6ljYpiAIbnpp/AhFAJsB1sCbTMwgLYerq
-	8oZJ03v5mZaM5gk8puwzwUlyMnGIE11E1fBoHaGE8vumUQ0QoQNAe81+pjg==
-X-Gm-Gg: AYBFou2Ynb3RxrDrSmC1l+O2ktVjVWCJzMNTW4CpFWNRZPxky2PriF/v667aZmuhd6d
-	GdVCM1gy8ZHtBWty0mtiDtMu2rFp5S45dC3q3QKdxv3yPGOGYrSzKLgKeS7YWpVHtJB08olyq2N
-	PZ6prg+0SnD5kr6VP6WchuBck8QBGuADgHwGBYylazFLsY+K5hVy0WQ38b/beMwBGHTDRcm6p8s
-	7e19FXqodnBczcPnvXgJB4Fk4StHEpNqi0Y36f/73hq21LjuWJG0Wh8IrLxywRHDqaAizlpqYfs
-	Iyzu3BbLU1jEPPzWG7RoScgTk7K7dq5QLSpkcGfJwkMSydpTXU/EtXNhSkOuG4eQx5F6uGM+Nh2
-	IXg6XHsoGYR/yrVgLOeix0a/Fe0E1HpnBDEImfuc=
-X-Received: by 2002:a17:907:7f91:b0:c43:a881:3f4b with SMTP id
- a640c23a62f3a-c4679a3c145mr180203266b.47.1792588848463; Wed, 21 Oct 2026
- 06:20:48 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32A72606A320;
+	Wed, 21 Oct 2026 17:06:27 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 32A72606A320
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
+Received: from ar (unknown [42.86.112.99])
+	by APP-05 (Coremail) with SMTP id zQCowABnzzkF8dhqtPUEDA--.14779S2;
+	Thu, 22 Oct 2026 01:06:15 +0800 (CST)
+From: Sun Yuechi <sunyuechi@iscas.ac.cn>
+To: idryomov@gmail.com,
+	xiubo.li@clyso.com,
+	amarkuze@redhat.com
+Cc: slava@dubeyko.com,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Sun Yuechi <sunyuechi@iscas.ac.cn>,
+	stable@vger.kernel.org
+Subject: [PATCH] ceph: reconnect on peer reset even if the mdsmap says the MDS is active
+Date: Wed, 21 Oct 2026 10:06:13 -0700
+Message-ID: <20261021170613.1144381-1-sunyuechi@iscas.ac.cn>
+X-Mailer: git-send-email 2.56.0
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -102,95 +55,172 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261020-b4-wip-ceph-ra-stride-v1-1-6314b013d3b8@clyso.com> <20261020095154.1312847-1-amarkuze@redhat.com>
-In-Reply-To: <20261020095154.1312847-1-amarkuze@redhat.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Wed, 21 Oct 2026 15:19:38 +0200
-X-Gm-Features: AclHuK9upe9XQhcccNNiYLN-NJBUPiFYKyhCw_v4qMxO5RMGcbX8wwpKQdjGX-E
-Message-ID: <CAOJNxRK0HKWdbA2KkypabACRV81HQg8ap_zCrQeDGVd8mR5FZA@mail.gmail.com>
-Subject: Re: ceph: read ahead along the stride of strided record reads
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:zQCowABnzzkF8dhqtPUEDA--.14779S2
+X-Coremail-Antispam: 1UD129KBjvJXoW3Ary7ZF1kCF47Xw1UAF1xAFb_yoW7Cw1kpr
+	Zaka93Gr4kAw1xtrZrJa4DuFyvkr15ua13JrW0qF95Ga45ur1ftFWvyw1vgasrJr97Ca1F
+	9FW2qFZ5Aa1jv37anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUkl14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26r4j6ryUM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
+	6F4UM28EF7xvwVC2z280aVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv6xkF7I0E14v26r4j6r
+	4UJwAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0
+	I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r
+	4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwCY1x0262kKe7AKxVWU
+	AVWUtwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14
+	v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkG
+	c2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI
+	0_Jr0_Gr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4U
+	MIIF0xvEx4A2jsIEc7CjxVAFwI0_Jr0_GrUvcSsGvfC2KfnxnUUI43ZEXa7VUbSfO7UUUU
+	U==
+X-CM-SenderInfo: 5vxq53phfkxq5lvft2wodfhubq/1tbiCRUHAmrYx7xX1AAAsT
 
-Hi Alex,
+Since commit 39fe30315893 ("ceph: harden send_mds_reconnect and handle
+active-MDS peer reset"), mds_peer_reset() tears the session down instead
+of reconnecting when our mdsmap shows the rank past RECONNECT.
 
-On Tue, Oct 20, 2026 at 11:52 AM Alex Markuze wrote:
-> NACK. Please respin.
->
->   1. fs/ceph/addr.c:257: pos+stride wrap makes next < isize true for a negative offset
->      `ceph_stride_readahead()` does `end = pos + stride * nr` and `next
->      = pos + stride` with no overflow check, then loops while `next <=
->      end && next < isize`.
->      Bail if `check_add_overflow(pos, stride, &next)` or
->      `check_mul_overflow`/`check_add_overflow` for `end` fails, and keep
->      `next >= 0` in the loop.
+That map can be stale.  An MDS killed and restarted on the same address
+resets our connection before the monitors report the rank as failed, so
+the session is torn down while the map still says active.  When a
+standby then takes over the rank in up:reconnect, check_new_map() has
+no session left to reconnect, the new MDS evicts and blocklists us
+after mds_reconnect_timeout, and the mount returns EACCES until it is
+unmounted:
 
-You are right, and it is worse than a stray read at a negative offset.
-I reproduced it on v1 with strided reads near the end of a sparse file
-of almost LLONG_MAX bytes.  When end lands closer to LLONG_MAX than one
-stride, next += stride jumps over the exit window and wraps negative,
-which still satisfies next <= end && next < isize.  The loop then goes
-round the whole 64-bit range, adding folios far beyond EOF under the
-invalidate lock and without checking for signals.  The reader spun in
-page_cache_ra_unbounded() with SIGKILL pending and the VM had to be
-reset.
+  libceph: mds0 (2)10.89.20.12:6800 session reset
+  ceph: [...]: mds0 closed our session
+  (mds) evicting unresponsive client ceph-c1 (14900), after waiting
+        49.7175 seconds during MDS startup
 
-v2 computes end with check_mul_overflow() and check_add_overflow() and
-returns if either overflows.  It also keeps next >= 0 in the loop and
-breaks out when next + stride overflows.  I did not add a check for
-next = pos + stride itself: by then stride > 0, pos >= 0, nr >= 1 and
-pos + stride * nr did not overflow, so pos + stride <= end.  Happy to
-add it anyway if you prefer it spelled out.
+Send the reconnect and let the MDS decide, as before that commit.  A
+daemon restarted on the old address has a new nonce, so the reconnect
+does not get through, and check_new_map() reconnects once a map carries
+the rank's new address.  An MDS that really is active replies with
+CLOSE, and handle_session() unregisters the session so that new
+requests open a fresh one, which is what that commit intended.
 
-I also changed the end of each record from min(next + len, isize) to
-next + min(len, isize - next), so next + len cannot overflow either.
+Skip the warning for -ESTALE and -ENOENT: send_mds_reconnect() already
+logs those, and the removed code was silent for closed and rejected
+sessions.
 
->   2. fs/ceph/addr.c:256: stride 0 never leaves the readahead loop
->      `window / len` and `next += stride` assume `len > 0` and `stride >
->      0`.
->      Return immediately on `!len || stride <= 0` before the divide and
->      the loop.
+Tested on riscv64 (7.2.6 kernel, Ceph 21, one active MDS with a
+standby-replay): SIGKILL the active MDS while dropping the client's
+monitor traffic until it logs "closed our session".  Evicted in 4 of 4
+runs without the patch, "reconnect success" in 3 of 3 with it.  Eviction
+by an active MDS without blocklist still recovers with a new session,
+2 of 2 runs.
 
-Done, and pos < 0 is checked as well.  A single reader cannot get there,
-since a file is only marked strided after reads with len > 0 and
-stride >= len + PAGE_SIZE.  But every read on the file updates the
-stride detection without a lock, so a concurrent read on the same fd
-can change fi->ra_stride after another read has seen ra_strided set.
-v2 reads the stride once with READ_ONCE() and checks the value it
-actually uses.
+Fixes: 39fe30315893 ("ceph: harden send_mds_reconnect and handle active-MDS peer reset")
+Cc: stable@vger.kernel.org
+Signed-off-by: Sun Yuechi <sunyuechi@iscas.ac.cn>
+---
+ fs/ceph/mds_client.c | 84 +++++---------------------------------------
+ 1 file changed, 9 insertions(+), 75 deletions(-)
 
-Tested on a KASAN + lockdep + kmemleak kernel against base, v1 and v2:
-ior-hard style strided reads (data verified, OSD reads 1.05x of what is
-asked for, as with v1), sequential and random 4K reads (unchanged), 8
-threads sharing one fd with 0-byte, repeated and backward reads mixed
-in, strided reads and a fuzz near LLONG_MAX, and fsx.  v2 never read
-ahead past EOF and dmesg and kmemleak stayed clean.
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index d4ef8a355a48..d23250af0750 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -7236,7 +7236,7 @@ static void mds_peer_reset(struct ceph_connection *con)
+ {
+ 	struct ceph_mds_session *s = con->private;
+ 	struct ceph_mds_client *mdsc = s->s_mdsc;
+-	int session_state;
++	int rc;
+ 
+ 	pr_warn_client(mdsc->fsc->client, "mds%d closed our session\n",
+ 		       s->s_mds);
+@@ -7246,82 +7246,16 @@ static void mds_peer_reset(struct ceph_connection *con)
+ 		return;
+ 
+ 	/*
+-	 * Only reconnect if MDS is in its RECONNECT phase.  An MDS past
+-	 * RECONNECT (REJOIN, CLIENTREPLAY, ACTIVE) will reject reconnect
+-	 * attempts, so those states fall through to session teardown below.
++	 * Our mdsmap may be stale: an MDS restarted on the same address
++	 * resets the connection before we learn that the rank failed.
++	 * Send the reconnect and let the MDS decide; one that is past
++	 * RECONNECT replies with CLOSE and handle_session() closes the
++	 * session so that new requests open a fresh one.
+ 	 */
+-	if (ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) == CEPH_MDS_STATE_RECONNECT) {
+-		int rc = send_mds_reconnect(mdsc, s);
+-
+-		if (rc)
+-			pr_warn_client(mdsc->fsc->client,
+-				       "mds%d reconnect failed: %d\n",
+-				       s->s_mds, rc);
+-		return;
+-	}
+-
+-	/*
+-	 * MDS is active (past RECONNECT).  It will not accept a
+-	 * CLIENT_RECONNECT from us, so tear the session down locally
+-	 * and let new requests re-open a fresh session.
+-	 *
+-	 * Snapshot session state with READ_ONCE, then revalidate under
+-	 * mdsc->mutex before acting.  The subsequent mdsc->mutex
+-	 * section rechecks s_state to catch concurrent transitions, so
+-	 * the lockless snapshot here is safe.  s->s_mutex is taken
+-	 * separately for cleanup after unregistration, which avoids
+-	 * introducing a new s->s_mutex + mdsc->mutex nesting.
+-	 */
+-	session_state = READ_ONCE(s->s_state);
+-
+-	switch (session_state) {
+-	case CEPH_MDS_SESSION_RESTARTING:
+-	case CEPH_MDS_SESSION_RECONNECTING:
+-	case CEPH_MDS_SESSION_CLOSING:
+-	case CEPH_MDS_SESSION_OPEN:
+-	case CEPH_MDS_SESSION_HUNG:
+-	case CEPH_MDS_SESSION_OPENING:
+-		mutex_lock(&mdsc->mutex);
+-		if (s->s_mds >= mdsc->max_sessions ||
+-		    mdsc->sessions[s->s_mds] != s ||
+-		    s->s_state != session_state) {
+-			pr_info_client(mdsc->fsc->client,
+-				       "mds%d state changed to %s during peer reset\n",
+-				       s->s_mds,
+-				       ceph_session_state_name(s->s_state));
+-			mutex_unlock(&mdsc->mutex);
+-			return;
+-		}
+-
+-		ceph_get_mds_session(s);
+-		s->s_state = CEPH_MDS_SESSION_CLOSED;
+-		__unregister_session(mdsc, s);
+-		__wake_requests(mdsc, &s->s_waiting);
+-		mutex_unlock(&mdsc->mutex);
+-
+-		mutex_lock(&s->s_mutex);
+-		cleanup_session_requests(mdsc, s);
+-		remove_session_caps(s);
+-		mutex_unlock(&s->s_mutex);
+-
+-		wake_up_all(&mdsc->session_close_wq);
+-
+-		mutex_lock(&mdsc->mutex);
+-		kick_requests(mdsc, s->s_mds);
+-		mutex_unlock(&mdsc->mutex);
+-
+-		ceph_put_mds_session(s);
+-		break;
+-	case CEPH_MDS_SESSION_CLOSED:
+-	case CEPH_MDS_SESSION_REJECTED:
+-		break;
+-	default:
++	rc = send_mds_reconnect(mdsc, s);
++	if (rc && rc != -ESTALE && rc != -ENOENT)
+ 		pr_warn_client(mdsc->fsc->client,
+-			       "mds%d peer reset in unexpected state %s\n",
+-			       s->s_mds,
+-			       ceph_session_state_name(session_state));
+-		break;
+-	}
++			       "mds%d reconnect failed: %d\n", s->s_mds, rc);
+ }
+ 
+ static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+-- 
+2.56.0
 
-v2 is coming shortly.
-
-Thanks,
-Xiubo
-
-On Tue, 20 Oct 2026 at 11:52, Alex Markuze <amarkuze@redhat.com> wrote:
->
-> Hi Xiubo,
->
-> NACK. Please respin.
->
->   1. fs/ceph/addr.c:257: pos+stride wrap makes next < isize true for a negative offset
->      `ceph_stride_readahead()` does `end = pos + stride * nr` and `next
->      = pos + stride` with no overflow check, then loops while `next <=
->      end && next < isize`.
->      Bail if `check_add_overflow(pos, stride, &next)` or
->      `check_mul_overflow`/`check_add_overflow` for `end` fails, and keep
->      `next >= 0` in the loop.
->   2. fs/ceph/addr.c:256: stride 0 never leaves the readahead loop
->      `window / len` and `next += stride` assume `len > 0` and `stride >
->      0`.
->      Return immediately on `!len || stride <= 0` before the divide and
->      the loop.
->
-> --
-> Alex Markuze
->
