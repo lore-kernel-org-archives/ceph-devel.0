@@ -1,79 +1,98 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.47
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1792588616;
-	b=HLOPjXrlQB674miWkk1Xh49/Tn3DoSI3/oNqoh2dX8aHHf8FgHjpXIYhYkhD0i96acX9
-	 PjIKuWfQWnlnT13JewgbcjcDiXl/BcHpAvNk99GARlhTSs1a5665bIdzK2HFsh7gqwWOP
-	 F1pgrnBHMXpaSJf34JJXzg44JXdrzOdgFT4/FWa0H+5YnB+zoy5l7f3bHSiM5j98E2R7F
-	 1WJJpIFjaVCLG4TSXEku7I5x2M+VLpGADc7LJNl1tJ4u8BqCxsdHaMWvy0VGF2P2X2Kdw
-	 Gj+K7bryXzHEMoDgJfEm8XAH0Xcj9vS+QXiHlRFj0MI4EbtKA3SpxOpv1sEJxs1ohmw==
+	t=1792588851;
+	b=IDYMaK1sBUoIiJc5oGJG3SWuL2PthysivHAnWVAK0gcwWzONzqCIJgQ6lLHKfJth8/A+
+	 DnRgh/chReawJZ1rhjgUd8iJ99/ORZE9eDBjxdH37UBJtfVsjsRUlg2Ydz+7sInpVeeFh
+	 WzU7SiwgY5fe0EMax6xDgVxA3ZVOzVkMa5WRjL9IDDKYZ5hhjwDR+uZ2CS9APIAKdEoDA
+	 /URW2Vy/DI+0Occiz1tUdvuzAa30zMYtaov1+v58uLldPJgxA7tSR/VAE+S6yxWNSHz6u
+	 7SBU0VJ676NdKUSmLGg3bva6H5V1jzB4iQBtbMitZNkQvICozXfIfd8TS6X9hcVNlkw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792588616;
-	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
-	 Content-Type:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=iv6M1ZvG89TO96suw89Jb9/qZHmoOeuS/BTcKH1aNX0=;
-	b=5ZPpsiY4dEpUnRoMgSWODUy5C1Hp784tD+B8nz14Vd4a28IQJ+lS1ESFn7JfMxw+Ecev
-	 QMSUhQvNqlP0vuODRPh1dB53GKshL55K2S5QYiHZdYXjuF52JHmFDQOT0uWzy+FEfG+6B
-	 F/quA6heGQbQYJvf9KHEBUjM9DmaGrcWRJHMXK95FHRLaUutqkP4uHACsqsM+8pVhoM1C
-	 kMwLH/BDNxZB1xvhWx8FqGIrFMXqnyXyRWIbudfEonJXTgTPCHhVhdBePzCI7ETg1E8b6
-	 R9ws7LXXy+BYigU4cNC7mDd3ShKccc1XAviSYoLfALKEgswWsii1a6kwhx5PsUGWxKw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792588851;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
+	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
+	 Content-Type;
+	bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
+	b=tFV6gs59vgR9rT16qJR8CTFWut7EEQOiJqdheo1ge0/i4CQEvFWZyfBzo7K8gDzfZEBE
+	 kVMTaDokKxavrnvBAgJSEfqqyfBzASr+tBrVzom4SUwUcSEluAvEKfn0bvIcBNdiBa4yS
+	 qgc9U4J9H4/0QKpUjL/CD0rsHt8dNzHf6hJa8mrHpIdLNWL+4lj5NpQfm3caTKSj0jE+x
+	 PEiAGrnimPT34T8sfnpw3Nzee8B2eSEvPc24rivZ1ABR8sRtWCP2Q3ji/Mpr72mkYRnC3
+	 Wgjfx/0S3D9WiZ41HMgHJ4JnRUyx/PKBFYjaM+ey+z2uIdQfrhHKUaXxNr5wXV/sAxQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FO1Jlt7J;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D29C606A31E;
-	Wed, 21 Oct 2026 13:16:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FO1Jlt7J
-Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
-ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1792588615;
-	b=cTVGMQ0Hy8tNX8G8N0z20H97GiP1fD5kF2P6cauLuECJMlFOWVY5qiwI4efB4eugodKa
-	 oyuobPHFs+ZwwoCQ0o/wyUH9ywyW3tS2/30ASd6+oXbqdkWDfZETSZEHyATFaTonqJq70
-	 JVSDhfQZDqhNECGazwRunq/AiFTldlEmP8aLcTvTpTNmZuRG5dW01xn9KD5bcyuXhts89
-	 g5CQC/oWHor2SSMUlhnXvWgUy5tMpDZmbOPG+FH2llWh3NfdUGWVqmXbewjBc0pZMO12m
-	 9EKxHcIsLSLTnQzfI39NngFMzAj5IBxZsI+iIcqO/wlBwKmkK+E0ZfiKaY4QVdJuH0Q==
-ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1792588615;
-	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
-	 Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=iv6M1ZvG89TO96suw89Jb9/qZHmoOeuS/BTcKH1aNX0=;
-	b=UaaRh60FC5iqwpe08Q4L3bAwdpADOuohbO4daW05MLLo9g9xw4/iBejWgu+Zhda2vjOh
-	 nkZ0ckd9JPSyWtY48hySvxJnBejXzmQy3H5VIV0jekHXpQBRj4wZ6c63KGJy7AJUNKcbI
-	 PM5qFgWjd6bzNehcCKA8O8K8QWW7HvQFl1IsObkAeUlCsWZZWWoldcTbvYIcNPv1SBItt
-	 HpT4aVyFAnJdMYhb35cNjSFkEmHQprSWA+H57vBIP+9nbS0cvnHPc7Kh0uiGEUbUqBLjz
-	 iZcQ3PO0NIMxdSbxuStpoKDOBNM9ZCdLN8Luxa6pBE8S/CxUF242+jV+Co7o8w5sJKQ==
-ARC-Authentication-Results: i=1; smtp.kernel.org; 
-	arc=none smtp.remote-ip=100.80.115.77
-Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=clyso.com;
+	spf=pass smtp.mailfrom=clyso.com;
+	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=QAXBHBmX;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.47
+Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com [209.85.208.47])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id C9D4A1F000C4;
-	Wed, 21 Oct 2026 13:16:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792588615;
-	bh=iv6M1ZvG89TO96suw89Jb9/qZHmoOeuS/BTcKH1aNX0=;
-	h=From:Date:Subject:To:Cc:Reply-To;
-	b=FO1Jlt7JhAvnmC59khcQpNX7E0Z8quCx2o0Q5cvFv5PIg+UQI9jZWeJkeDOkDZeEA
-	 dCaBkIP7MBahjHjS74a4f9dZLetRClUPUVfR2WbfjnsEDp7Wm2yMAnng7dfVmcd2fg
-	 ZeYrsGmG6sP25A7xjRPovHK24Qk6EDYTjbimfPikyIuh/KryqYNguFnoo4AsLtjLTE
-	 txQWHDn6ikSS7RDKyhdhYTYfTkTwmjrHhdBNRwAp588FE/5qECwxw5aN17EuHApTU7
-	 LkL4locu76Z5L5aHPcLn3ZvLQ0pQE8cXyizrVMW3eX+mu97Q5DwyeIY8540OHzJFYf
-	 XQt9aOIW/RE/g==
-Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 271A043376;
-	Wed, 21 Oct 2026 13:16:54 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Wed, 21 Oct 2026 15:10:51 +0200
-Subject: [PATCH v2] ceph: read ahead along the stride of strided record
- reads
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83ECA606A320
+	for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 13:20:50 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 83ECA606A320
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=QAXBHBmX
+Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-6b2232d8ef5so1015929a12.3
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 06:20:50 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1792588849; cv=none;
+        d=google.com; s=arc-20260327;
+        b=CZaLZcE3Zzzs6uq+x231MQkOs43SNPlb0NpcOntLAPnXhAQvaRnSge1gWDNlESLmnP
+         MW4TNZrLcqpHD2lqXMBPmdQQuEITtI/INdCugGrGKeJk410FmnYSd5zXpqBHptdB/7az
+         3mRlrDKF7UB06wnUuwcx6uBhLprf5WJioIhIagwtaQ10jjpNta6G4ClRu9JTVgeYBs/l
+         Nt7fCG+0LB0y77an4vh8UjTqd+WpXWkPPOz9TGse2cVtSJjpcxtWcKwzkZw2IFqfoZ26
+         LK1P8OTPMddk5O/OoMTrsnETLsRL4hOGv1P82Uimjp04yy99sKNr9hFp73bDvpfU59pa
+         cgvA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=iJG9ElMkWYO/QkaxPSB98jBCPEzUvqqv0CUcNewrkUPgIVmv9uPUHMlWlb+d1diqvO
+         mVJsZIOjSH02zkd8b7YAacCOQgKLgG72kNYK8Bd6WscMSP1W1hOhqs4W7I+Wla2hLwH/
+         YY0/H8+DbCIx716kiYMfwBdKOJGt2nLFDUiQCbLOSc+wE0g7P0/pkIp0xpqQn6egPXhT
+         ypV57EQfUGh//z67wYSW/haw0ieCdvNE8QJdl6yrl4Kyso7YQaMzm/qS22wKdeAHbV1h
+         EXsspcCGtr5BOPMmknECD+nTnOJU5aAp0+jVxs5xylVwi5RJ/dZlcZdKwEumTAfboBE1
+         84yg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=clyso.com; s=google; t=1792588849; x=1793193649; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
+        b=QAXBHBmXi10oU/ykux/rv3Z2QX7ymp83CwvImhc0p+fx6u6Gx378Z2g3Fr1uFlSXip
+         W19q6FnUsQpZ+fibQZofSqFFT8nBFVL0XqOuWbWh0quH9dIQEQ1ybVu3xp6N3CG4b3Li
+         FuA5FG54pkTHFl/iK+jv84j6d5+Ucff9/G3SnrhCv+XBIArEVvcpgINvCJyqEjY9mOBK
+         ySTtrv5t6LcyyvegNj/XjBDqrG8HkPIeypZCafPbBRWgWXFfYc5eB6Q8Q1q9h3otivoX
+         v85I+quoHp5ySLpXrNr7caVXM3G/9pAcOOIHt+sJqueQ6flwcz92JrBBjP4veoPNFhLa
+         b6rQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792588849; x=1793193649;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=G0laI3dLJ0QV9Fz739Dic8Wi6qKrKKIFkDkJ/waQe5Q=;
+        b=gzWwFyadoBd5G6pqDZGrXa8EfFLLHT8lFW6CYu6HinzeAr6kzrxMsNJQPB+m3L8Pj2
+         zeVVy1rdR7PFhxQzQo5KoGEE1CBU6KXdWBB4OJqyDIdhJn8ByaePGX6FhWfTZ2UcTKrS
+         3CMz9kRhbZ0UpYZuv8VIEdZEltOdNZeEDjbWCRVU6Ibe6npPPoZTO3OrSSijILJvqjCv
+         tfvAsmO2olVYpR87hQUqhLy9nolNf0BlbagAS3R0T0AKEciFUIKjIfdL+ztAtWRGm47U
+         7o8TEAZa9ZXsjooAFNF3KCLxpKE85REY6LJfGmtARraU2Kw6wEz7mVE4V/QqcPDL1Qig
+         cRGg==
+X-Gm-Message-State: AFq9FYKCOEj4nZ/HMH2I9Os/95mdRPyCyrEIb9+3Kr40DSJNvXLAzkUP
+	6+9LP4rqOz3gFD735Ihk1pwL90TooI61PeC/7rlz1L6ljYpiAIbnpp/AhFAJsB1sCbTMwgLYerq
+	8oZJ03v5mZaM5gk8puwzwUlyMnGIE11E1fBoHaGE8vumUQ0QoQNAe81+pjg==
+X-Gm-Gg: AYBFou2Ynb3RxrDrSmC1l+O2ktVjVWCJzMNTW4CpFWNRZPxky2PriF/v667aZmuhd6d
+	GdVCM1gy8ZHtBWty0mtiDtMu2rFp5S45dC3q3QKdxv3yPGOGYrSzKLgKeS7YWpVHtJB08olyq2N
+	PZ6prg+0SnD5kr6VP6WchuBck8QBGuADgHwGBYylazFLsY+K5hVy0WQ38b/beMwBGHTDRcm6p8s
+	7e19FXqodnBczcPnvXgJB4Fk4StHEpNqi0Y36f/73hq21LjuWJG0Wh8IrLxywRHDqaAizlpqYfs
+	Iyzu3BbLU1jEPPzWG7RoScgTk7K7dq5QLSpkcGfJwkMSydpTXU/EtXNhSkOuG4eQx5F6uGM+Nh2
+	IXg6XHsoGYR/yrVgLOeix0a/Fe0E1HpnBDEImfuc=
+X-Received: by 2002:a17:907:7f91:b0:c43:a881:3f4b with SMTP id
+ a640c23a62f3a-c4679a3c145mr180203266b.47.1792588848463; Wed, 21 Oct 2026
+ 06:20:48 -0700 (PDT)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -83,294 +102,95 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261021-b4-wip-ceph-ra-stride-v2-1-59a582388197@clyso.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/4WNQQ6CMBBFr0K6dkynRYKuuIdhQcsgY5SSDqKEc
- HcBD+DyJe+/PyuhyCTqkswq0sjCoVvBHBLl26q7EXC9sjLaZKiNBpfCm3vw1LcQK5Ahck1wsro
- 5I+WWKqvWbR+p4c/evZY/lpe7kx+22Ga0LEOI03484ub9+xgREDKLqdNoa+vywj8mCUcfnqpcl
- uULCkKLjswAAAA=
-X-Change-ID: 20261020-b4-wip-ceph-ra-stride-530f91e83ea3
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1792588609; l=11139;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=uSPBSx6rh7V7WSpF5269sB8OhGg5CXhr1LVboUmzz7k=;
- b=BQeHRmsDTr+T8EGJB5mquhuZR61yYlYltZG+/gPrPGEQrgXsP85sdMWwNWatrjnJKYnxtxSy2
- Vrv150OzKizCrAkvIup0oaO3ln2RAWrRltuY1meWynZ7qWmYwnhRUcZ
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
-Content-Transfer-Encoding: 7bit
-
+References: <20261020-b4-wip-ceph-ra-stride-v1-1-6314b013d3b8@clyso.com> <20261020095154.1312847-1-amarkuze@redhat.com>
+In-Reply-To: <20261020095154.1312847-1-amarkuze@redhat.com>
 From: Xiubo Li <xiubo.li@clyso.com>
+Date: Wed, 21 Oct 2026 15:19:38 +0200
+X-Gm-Features: AclHuK9upe9XQhcccNNiYLN-NJBUPiFYKyhCw_v4qMxO5RMGcbX8wwpKQdjGX-E
+Message-ID: <CAOJNxRK0HKWdbA2KkypabACRV81HQg8ap_zCrQeDGVd8mR5FZA@mail.gmail.com>
+Subject: Re: ceph: read ahead along the stride of strided record reads
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-ceph_netfs_expand_readahead() rounds every readahead request out to the
-stripe unit, 4 MiB by default.  When several clients read interleaved
-records of a shared file, a record that misses the page cache drags in
-the whole object around it, and most of that are records the other
-clients read.  IO500's ior-hard-read does exactly this: 16 reader
-processes spread over 4 clients read 47008-byte records, each process
-every 16th record.  Every client ends up reading the whole file: the
-OSDs return 4x the data that is asked for and the read runs at a third
-of what the disks can do.
+Hi Alex,
 
-Simply not expanding such a read is not enough.  The generic readahead
-sees each record as a small random read and reads it as is, so every
-record becomes a synchronous round trip; with one reader process per
-client that is half as fast as the over-reading it replaces.
+On Tue, Oct 20, 2026 at 11:52 AM Alex Markuze wrote:
+> NACK. Please respin.
+>
+>   1. fs/ceph/addr.c:257: pos+stride wrap makes next < isize true for a negative offset
+>      `ceph_stride_readahead()` does `end = pos + stride * nr` and `next
+>      = pos + stride` with no overflow check, then loops while `next <=
+>      end && next < isize`.
+>      Bail if `check_add_overflow(pos, stride, &next)` or
+>      `check_mul_overflow`/`check_add_overflow` for `end` fails, and keep
+>      `next >= 0` in the loop.
 
-So detect the pattern and read ahead along it:
+You are right, and it is worse than a stray read at a negative offset.
+I reproduced it on v1 with strided reads near the end of a sparse file
+of almost LLONG_MAX bytes.  When end lands closer to LLONG_MAX than one
+stride, next += stride jumps over the exit window and wraps negative,
+which still satisfies next <= end && next < isize.  The loop then goes
+round the whole 64-bit range, adding folios far beyond EOF under the
+invalidate lock and without checking for signals.  The reader spun in
+page_cache_ra_unbounded() with SIGKILL pending and the VM had to be
+reset.
 
- - ceph_read_iter() notes, per open file, the position and length of
-   every buffered read.  A read of the same length as the previous one,
-   starting as far after it as that one did after its predecessor, with
-   at least a page left out in between, for the second time in a row,
-   marks the file as strided.  The detection looks at the read() calls
-   and not at the page cache misses, because which reads miss depends on
-   what readahead already brought in.  Sequential reads leave no gap and
-   random reads have no fixed stride, so neither is affected.
+v2 computes end with check_mul_overflow() and check_add_overflow() and
+returns if either overflows.  It also keeps next >= 0 in the loop and
+breaks out when next + stride overflows.  I did not add a check for
+next = pos + stride itself: by then stride > 0, pos >= 0, nr >= 1 and
+pos + stride * nr did not overflow, so pos + stride <= end.  Happy to
+add it anyway if you prefer it spelled out.
 
- - While a file is strided, ceph_netfs_expand_readahead() leaves its
-   requests alone, and ceph_stride_readahead() reads the next records of
-   the stride ahead, about a readahead window of them (at most 64), each
-   on its own with page_cache_ra_unbounded(), so that the records in
-   between are never read.
+I also changed the end of each record from min(next + len, isize) to
+next + min(len, isize - next), so next + len cannot overflow either.
 
-Quick ior-hard runs, 28 GiB, 3 OSDs, ior-hard-read MiB/s.  Each client
-is a separate kernel client mount (its own client instance):
+>   2. fs/ceph/addr.c:256: stride 0 never leaves the readahead loop
+>      `window / len` and `next += stride` assume `len > 0` and `stride >
+>      0`.
+>      Return immediately on `!len || stride <= 0` before the divide and
+>      the loop.
 
-  +--------------------------------+---------+--------+-------+
-  | Readers                        | Mount   | Before | After |
-  +--------------------------------+---------+--------+-------+
-  | 16 processes on 4 clients      | default |    487 |  2364 |
-  | 16 processes on 4 clients      | lazyio  |    468 |  2388 |
-  | 1 process on each of 4 clients | lazyio  |    732 |  1354 |
-  +--------------------------------+---------+--------+-------+
+Done, and pos < 0 is checked as well.  A single reader cannot get there,
+since a file is only marked strided after reads with len > 0 and
+stride >= len + PAGE_SIZE.  But every read on the file updates the
+stride detection without a lock, so a concurrent read on the same fd
+can change fi->ra_stride after another read has seen ra_strided set.
+v2 reads the stride once with READ_ONCE() and checks the value it
+actually uses.
 
-The OSDs now read about the data that is asked for instead of 3.6-4x.
-ior-easy-read (sequential) and ior-rnd4K-easy-read (random 4 KiB) are
-unchanged, and no read of either was taken as strided.
+Tested on a KASAN + lockdep + kmemleak kernel against base, v1 and v2:
+ior-hard style strided reads (data verified, OSD reads 1.05x of what is
+asked for, as with v1), sequential and random 4K reads (unchanged), 8
+threads sharing one fd with 0-byte, repeated and backward reads mixed
+in, strided reads and a fuzz near LLONG_MAX, and fsx.  v2 never read
+ahead past EOF and dmesg and kmemleak stayed clean.
 
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
-Changes in v2:
-- ceph_stride_readahead(): return early on a zero length, a stride that
-  is not positive or a negative position, before the divide and the
-  loop.  Every read on the file updates the stride detection without a
-  lock, so a concurrent read can leave behind a stride other than the
-  one that marked the file strided. (Alex)
-- Compute the end of the window with check_mul_overflow() and
-  check_add_overflow(), stop the loop when next + stride overflows, and
-  keep next >= 0.  In v1 a large stride near the end of a huge file let
-  next wrap around and walk the whole 64-bit range: it added folios far
-  beyond EOF, under the invalidate lock and without checking for
-  signals, so the reader could not be killed. (Alex)
-- Bound the last page of a record with min(len, isize - next), so that
-  next + len cannot overflow either.
-- Link to v1: https://patch.msgid.link/20261020-b4-wip-ceph-ra-stride-v1-1-6314b013d3b8@clyso.com
----
- fs/ceph/addr.c  | 64 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/file.c  | 29 ++++++++++++++++++++++++++
- fs/ceph/super.h | 15 ++++++++++++++
- 3 files changed, 108 insertions(+)
+v2 is coming shortly.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index dd2bd8ed2424..94fc9d40411f 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -196,6 +196,15 @@ static void ceph_netfs_expand_readahead(struct netfs_io_request *rreq)
- 		else
- 			max_pages = priv->file_ra_pages;
- 
-+		/*
-+		 * A file read in records at a fixed stride: the records in
-+		 * between are typically read by other clients, so rounding
-+		 * the request out to the stripe unit would mostly read data
-+		 * this client never uses.  ceph_stride_readahead() reads the
-+		 * next records of the stride ahead instead.
-+		 */
-+		if (priv->file_ra_strided)
-+			return;
- 	}
- 
- 	/* Readahead is disabled */
-@@ -221,6 +230,60 @@ static void ceph_netfs_expand_readahead(struct netfs_io_request *rreq)
- 	}
- }
- 
-+/*
-+ * Read ahead for a file that is read in records at a fixed stride, as
-+ * several clients reading interleaved records of a shared file do.  The
-+ * generic readahead sees each record as a small random read and reads it
-+ * as is, and ceph_netfs_expand_readahead() leaves strided files alone, so
-+ * without this each record would be a synchronous round trip to the OSDs.
-+ * Read the next records of the stride ahead instead, about a readahead
-+ * window of them, each on its own so that the records in between are not
-+ * read.  page_cache_ra_unbounded() skips the pages that are already cached.
-+ *
-+ * The caller holds the read caps and has registered its rw context.
-+ */
-+void ceph_stride_readahead(struct file *filp, struct ceph_file_info *fi,
-+			   loff_t pos, size_t len)
-+{
-+	struct address_space *mapping = filp->f_mapping;
-+	loff_t isize = i_size_read(mapping->host);
-+	unsigned long window = (unsigned long)filp->f_ra.ra_pages << PAGE_SHIFT;
-+	/*
-+	 * Reads sharing this file update the stride detection without a
-+	 * lock, so the stride may not be the one that marked the file as
-+	 * strided: check it here rather than rely on that.
-+	 */
-+	loff_t stride = READ_ONCE(fi->ra_stride), next, end;
-+	unsigned int nr;
-+
-+	if (!fi->ra_strided || !window || (filp->f_mode & FMODE_RANDOM))
-+		return;
-+	if (!len || stride <= 0 || pos < 0)
-+		return;
-+	nr = clamp_t(unsigned long, window / len, 1, CEPH_STRIDE_RA_MAX);
-+	if (check_mul_overflow(stride, (loff_t)nr, &end) ||
-+	    check_add_overflow(pos, end, &end))
-+		return;
-+	/* continue after the records already read ahead */
-+	next = READ_ONCE(fi->ra_stride_next);
-+	if (next <= pos || next > end)
-+		next = pos + stride;
-+
-+	filemap_invalidate_lock_shared(mapping);
-+	while (next >= 0 && next <= end && next < isize) {
-+		pgoff_t first = next >> PAGE_SHIFT;
-+		pgoff_t last = (next + min_t(loff_t, len, isize - next) - 1) >>
-+			       PAGE_SHIFT;
-+		DEFINE_READAHEAD(ractl, filp, &filp->f_ra, mapping, first);
-+
-+		page_cache_ra_unbounded(&ractl, last - first + 1, 0);
-+		if (check_add_overflow(next, stride, &next))
-+			break;
-+	}
-+	filemap_invalidate_unlock_shared(mapping);
-+	fi->ra_stride_next = next;
-+}
-+
- static void finish_netfs_read(struct ceph_osd_request *req)
- {
- 	struct inode *inode = req->r_inode;
-@@ -525,6 +588,7 @@ static int ceph_init_request(struct netfs_io_request *rreq, struct file *file)
- 	if (fi) {
- 		priv->file_ra_pages = file->f_ra.ra_pages;
- 		priv->file_ra_disabled = file->f_mode & FMODE_RANDOM;
-+		priv->file_ra_strided = READ_ONCE(fi->ra_strided);
- 
- 		/*
- 		 * ceph_read_iter() and ceph_filemap_fault() hold caps and
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 856710c63765..8b8f0a458993 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -2203,6 +2203,33 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
-  *
-  * Hmm, the sync read case isn't actually async... should it be?
-  */
-+/*
-+ * Is this file read in records at a fixed stride?  Look at the read()
-+ * calls themselves, not at the page cache misses: those depend on what
-+ * readahead has already brought in.  A read of the same length as the
-+ * previous one, starting as far after it as that one did after its
-+ * predecessor, with at least a page left out in between, for the second
-+ * time in a row.  Sequential reads leave no gap and random reads have no
-+ * fixed stride, so neither matches.
-+ */
-+static void ceph_note_read_stride(struct ceph_file_info *fi, loff_t pos,
-+				  size_t len)
-+{
-+	loff_t stride = pos - fi->ra_prev_pos;
-+
-+	if (fi->ra_prev_len && len == fi->ra_prev_len &&
-+	    stride >= (loff_t)len + PAGE_SIZE && stride == fi->ra_stride) {
-+		if (fi->ra_stride_hits < 2)
-+			fi->ra_stride_hits++;
-+	} else {
-+		fi->ra_stride_hits = 0;
-+	}
-+	fi->ra_stride = stride;
-+	fi->ra_prev_pos = pos;
-+	fi->ra_prev_len = len;
-+	WRITE_ONCE(fi->ra_strided, fi->ra_stride_hits >= 2);
-+}
-+
- static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- {
- 	struct file *filp = iocb->ki_filp;
-@@ -2278,7 +2305,9 @@ static ssize_t ceph_read_iter(struct kiocb *iocb, struct iov_iter *to)
- 		boutc(cl, "async %p %llx.%llx %llu~%u got cap refs on %s\n",
- 		      inode, ceph_vinop(inode), iocb->ki_pos, (unsigned)len,
- 		      ceph_cap_string(got));
-+		ceph_note_read_stride(fi, iocb->ki_pos, len);
- 		ceph_add_rw_context(fi, &rw_ctx);
-+		ceph_stride_readahead(filp, fi, iocb->ki_pos, len);
- 		ret = generic_file_read_iter(iocb, to);
- 		ceph_del_rw_context(fi, &rw_ctx);
- 	}
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 458fd63dd79f..f10520a3422a 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -69,6 +69,7 @@
-  * CEPH_MSG_MAX_DATA_LEN should be small enough. */
- #define CEPH_MAX_WRITE_SIZE		CEPH_MSG_MAX_DATA_LEN
- #define CEPH_RASIZE_DEFAULT             (8192*1024)    /* max readahead */
-+#define CEPH_STRIDE_RA_MAX              64             /* records read ahead on a stride */
- #define CEPH_MAX_READDIR_DEFAULT        1024
- #define CEPH_MAX_READDIR_BYTES_DEFAULT  (512*1024)
- #define CEPH_SNAPDIRNAME_DEFAULT        ".snap"
-@@ -567,6 +568,9 @@ struct ceph_netfs_request_data {
- 
- 	/* Set it if fadvise disables file readahead entirely */
- 	bool file_ra_disabled;
-+
-+	/* Set it if the file is read in records at a fixed stride */
-+	bool file_ra_strided;
- };
- 
- static inline struct ceph_inode_info *
-@@ -893,6 +897,9 @@ static inline bool __ceph_is_any_real_caps(const struct ceph_inode_info *ci)
- }
- 
- extern int __ceph_caps_issued(struct ceph_inode_info *ci, int *implemented);
-+struct ceph_file_info;
-+extern void ceph_stride_readahead(struct file *filp, struct ceph_file_info *fi,
-+				  loff_t pos, size_t len);
- extern int __ceph_caps_issued_mask(struct ceph_inode_info *ci, int mask, int t);
- extern int __ceph_caps_issued_mask_metric(struct ceph_inode_info *ci, int mask,
- 					  int t);
-@@ -987,6 +994,14 @@ struct ceph_file_info {
- 	struct list_head rw_contexts;
- 
- 	u32 filp_gen;
-+
-+	/* stride detection of buffered reads, see ceph_note_read_stride() */
-+	loff_t ra_prev_pos;
-+	loff_t ra_stride;
-+	size_t ra_prev_len;
-+	unsigned int ra_stride_hits;
-+	bool ra_strided;
-+	loff_t ra_stride_next;	/* next record to read ahead */
- };
- 
- struct ceph_dir_file_info {
+Thanks,
+Xiubo
 
----
-base-commit: ed0502cb11f84fff29f374238e526ae94d9bdfde
-change-id: 20261020-b4-wip-ceph-ra-stride-530f91e83ea3
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
-
-
+On Tue, 20 Oct 2026 at 11:52, Alex Markuze <amarkuze@redhat.com> wrote:
+>
+> Hi Xiubo,
+>
+> NACK. Please respin.
+>
+>   1. fs/ceph/addr.c:257: pos+stride wrap makes next < isize true for a negative offset
+>      `ceph_stride_readahead()` does `end = pos + stride * nr` and `next
+>      = pos + stride` with no overflow check, then loops while `next <=
+>      end && next < isize`.
+>      Bail if `check_add_overflow(pos, stride, &next)` or
+>      `check_mul_overflow`/`check_add_overflow` for `end` fails, and keep
+>      `next >= 0` in the loop.
+>   2. fs/ceph/addr.c:256: stride 0 never leaves the readahead loop
+>      `window / len` and `next += stride` assume `len > 0` and `stride >
+>      0`.
+>      Return immediately on `!len || stride <= 0` before the divide and
+>      the loop.
+>
+> --
+> Alex Markuze
+>
