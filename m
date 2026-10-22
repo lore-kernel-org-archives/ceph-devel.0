@@ -1,99 +1,119 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.44
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1792638185;
-	b=3ls3ZrLsGxef4t9FTQIjL1jfHumZSUSLBk1Ikgrasd0KdgJwgh8mx4Ud0BD4KKuz7NM/
-	 d1jccg9FTHBckrVrFbeQv7uBQsPA35aKz6wvUoqEr7uxrVH+Akdw5+C+CKsO0AaYkizaN
-	 22ckgM4UZ10b1Rc4jetmcujMJD22hvKoBXIQH8TOSqO4EHVE1+oY3F4YfyztLfv+O81F+
-	 lviscLW/6ynl1G9c0rSv64MOsC4f29EHzU1OOXXz/hjd8FW2nMM355t6nZmrC2pxV1KXU
-	 f2c3Lr40Xm5gNf+jzoxyHLoPzIoxwapBmVgdLX3RgQkAcuoIEkm2QbTDssTo6xTmNdA==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792638185;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
-	 MIME-Version:References:In-Reply-To:From:Date:X-Gm-Features:
-	 Message-ID:Subject:To:Cc:Content-Type;
-	bh=eqWdgaTceNT3JTDi/LY16DDScdb29oYTmDXWPTVKTb8=;
-	b=RC5z7+zvsHaUqZtPiqTD5Sln8CdLLb64Lmhb5PwoTSocSUylZQsizkODvmY5fyc0vwse
-	 hyYusgYQM/fk61nGrA4FLBrLEv/n2p9RAwwcUhsROhQKifvu25KprCxdVYn3Dzwa4ddZ+
-	 o/AlbxzULE9F6pSF/KKmEgPNzp4DoC39ZAHhENAlE4n9hSOtvYYj8ufHv9xX/5w5U+RSH
-	 58CwM4HrQR4OJyMD0TvQFnY6svTUVUcnar23VuipfkPcymkqrtPbgxWoEtfcpiPxruG3e
-	 TrjiHrwigGPHHpz/0TBy6blt1ZTArtPT34PJ8CE2gi84kuJNgSIZn9i3hKU/Pvmqx6Q==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=clyso.com;
-	spf=pass smtp.mailfrom=clyso.com;
-	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=H7GaxLru;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.44
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com [209.85.218.44])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1792649801;
+	b=R8Db2MYAwAntjrxHkTSkKqhKhU2ZXuKrQc7j8Lcy9lA9cJUbFILS31F/ITghhbvIBo5I
+	 v88J/bkF3CmBgl/PxlzZW2/XNfxZU44lwG6e3Ypx77X5d960gIo9GLK0fELS9t42bf0ey
+	 x2l4FFqdnc3zvfUv/dvay0EWcKobqVCC/tDr2B5ra1jcp07TbQbfkWmHHte7D251o/RS2
+	 pMz64G07jyyDNpWBkydYUfgmkICDagkdeVDpV8DR3HLWAOVNvXFr8dvutDEx8ky75sp5c
+	 CatWEVUZzrdxwvla2SeBKUCrDwsfT+aLn5b4Yd+DjyzalD7LiTqXNKUxez4W9NZKJLg==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792649801;
+	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
+	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
+	 Subject:Date:Message-Id:X-Mailer:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=XzPvf2iKkhaJifauJB0mvXhkikmUxEgqKqnn9ElV/ss=;
+	b=Fuxk8bUyBDzfett6+6MgQkZzw8TXpLxsJMksaP0ZVNQlstVqtVsmkpJ9Bn2H9PhcE6ML
+	 5Fkyr3k9bv/Bc1OlDNtTR7ij5LZGbVBHVqnhBruEq5s7K9a4whKj6Q5Yca/HDpi5z6DnK
+	 Mq+jsU4oE6+X2fb5NrO/ds8nY2bQ9AHvqbt9QmsXPxf0vhzTMbtHO0VuAwgH7lpiZp4v3
+	 c7UXnG0/Uu7xwqrMg4s9Wxw2/RjqMe3OTtknueJdLR2pijDzE7SiJWTVXFN8Hwh+nSbEh
+	 y/UkC/bNXP9WJ0MG6nx6LL440aSQDLB1dYs7x83O9R4Af5L+OwAu3TEWrMuDfpGVQuw==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=redhat.com;
+	spf=pass smtp.mailfrom=redhat.com;
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=N6gnSPcu;
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b="VW/N9Vxp";
+	arc=none smtp.remote-ip=170.10.133.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88CCD606A31A
-	for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2026 03:03:03 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 88CCD606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CE96606A32A
+	for <ceph-devel@vger.kernel.org>; Thu, 22 Oct 2026 06:16:40 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4CE96606A32A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=H7GaxLru
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-c4677aad67bso146846566b.0
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 20:03:02 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1792638181; cv=none;
-        d=google.com; s=arc-20260327;
-        b=fx5WqmwTNY82G59PLKFoUwy4UHmuzN9pbqW9roBJbCm0kQbCRgDU7zxtsWSRzbtGPR
-         wcKpkOdLgss6gu/7x3VWBJlazy2UKAI6BBbwOV4oLlBxvBzwbVUvK3rnBatn6x6CsW0B
-         Lvud/3kRryLuLrwyF8DhP0FncmnhJ9N8Us1nqldwT+kv++UoVhbO+kL9eK7GNeixcyxC
-         +GvFx/ronlOkdYMl+/Lsj9q5cuJ0CWt560uTHBLfJbPCHznPIltOBjSfWBcBG5PDDLFf
-         l1dO23RCubXFrHQIwWKHQoyuW92tBSkbfFDc8OP+HKimpLeOzpqNGHh2shJc6QmtMYQd
-         sWJw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=eqWdgaTceNT3JTDi/LY16DDScdb29oYTmDXWPTVKTb8=;
-        fh=2t4h4+3GuPRKfZrC6MZVdjO8OAbrcd0OWBVFg0ohRoA=;
-        b=JkXLe8W7qfhnf/bRpQzVDDMGMtIAWMpOab7PdVHwzkX3ajnxYQQWMNPxFnzPhnJrNv
-         S2MOS/cqmeCA52VpgmQWAtzl9DuJx2KKHupYJMTC+Q27Ri1rtOrooeODKOtoE854JtPy
-         MnvlvMMQRTzKrDEsWvgiggbF9OWFs/xN0DUeWhzDbaFOM2b0BCnVD2b73D7m3Ldwcxs/
-         ErlMkDaSCO+Ev8X7wwaNhYOqruEqFCNQGUwdUncYGukLihRv6iD77abJ4WxB42iZVDrN
-         +cil0FFs2hnBeZtRAPQqvteKo4sTNa1wkIPqeq9zgX+6RvmI12FFdoU4VqrKq9bOXS4F
-         TH2A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=N6gnSPcu;
+	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=VW/N9Vxp
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1792649799;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=XzPvf2iKkhaJifauJB0mvXhkikmUxEgqKqnn9ElV/ss=;
+	b=N6gnSPculM2QKalriDwDcqWp5+4wcYWrjB8iJJ+tR8NikZINPGfWaKxpJAzSusKu3YrSaS
+	jrbsnOBu9sB+wvlTGWscYFoOjvrlSYWznp2ShjFuZ0io01iCJ3x2toGbR3CNB4k6kzmWUH
+	9DM4t1HWvcTXTGnwA2bLRUN23YUYmeU=
+Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
+ [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-224-xqKzcvbTONeCwXYedg8y8Q-1; Thu, 22 Oct 2026 02:16:37 -0400
+X-MC-Unique: xqKzcvbTONeCwXYedg8y8Q-1
+X-Mimecast-MFC-AGG-ID: xqKzcvbTONeCwXYedg8y8Q_1792649796
+Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-6aff6a8ee69so1326363a12.1
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Oct 2026 23:16:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1792638181; x=1793242981; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=eqWdgaTceNT3JTDi/LY16DDScdb29oYTmDXWPTVKTb8=;
-        b=H7GaxLruOseJUgK9SLX7ZGvMVOeS6F8IXC+Noiy5jhFCOauHyBMhcBWW/Kjc2KHArH
-         Oam2yxuVkPNC7dMAMf8ovHzaRVM3cSsAyEOFhe5M5yybGLL6S54FJxdM/C4AXWy2bo71
-         pNNC3IyumbfHGZIYGJl4Z5eHGFT6jM8fm/BqYsCLX/o8qUNoh4MbtbWsFforxdQkIK7H
-         e6ehoVmjBWGVrmgVgbxZWHMoaMDtzfXmMBerCw4tchyJtIs/sq908R571BxBfbBa4tFk
-         VYYUnlCVwRGA/fS8JEI9qIPtmaghcGgAOXd7mUaMPOr5rqtKkbRpkfUTGucborA/wlBU
-         sc8w==
+        d=redhat.com; s=google; t=1792649796; x=1793254596; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=XzPvf2iKkhaJifauJB0mvXhkikmUxEgqKqnn9ElV/ss=;
+        b=VW/N9Vxp2raQAHQNSwRoFrBhwa285z3SMGCv3BZSS/TDut4Gp0xfvk3YaWtI0d2AOC
+         r8fppI1Zx4EBpTUwAJgT0HEFboRfDT5BGRJgKxJYPtiJI+AC8oNep7DVQAv33dA2OtPE
+         HhpgcbMJ5nx3RXLIWEuBa045qZtZveQ/aQ/H0fGH24DCbfapHthUvhKCE1BvXz6NFuU3
+         4LRf6TRMpgFIRZDQGxdHLS4IVvlQgoiXlhH7Ua9gF7jnBDXPzNaZ3JpaQ9I585a2UGLx
+         NE6V7Hx+Wgu6uQFZEi5yF3WThPuU36mMA7L6IzYCAmQCT4yYlwhgk1ebyre0xLGJVSbn
+         yywQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792638181; x=1793242981;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=eqWdgaTceNT3JTDi/LY16DDScdb29oYTmDXWPTVKTb8=;
-        b=R4lIFDGGlsNWmLyTordxQmJURns9myJWNpLl9DEGfPc3Hd1uyUwr5CqwkLUVNQSv2o
-         gF4Yu3rhe4grGAuPGSzmBFwKGjydPHXDFlucEh/pyoP0P9bQnurNt3zqq35GdKX7my4n
-         zDVlLkuEQ65pIg92EfB5RPdOaf3HiAfDTPBT86VirFZLeBVRBumK/k3TFH32BXAOINtX
-         mybNOwULS/8UKzR2WK4wlryDp6Lf5k76aLeez600kxne2hLj3uornpK2kUMDT8ansmnE
-         Y+uayfHodQkOb2V4BMAsOkxwiiDnu02niilS+BkFx2Qqfw616EGucMqvr10parqguxqj
-         TvpA==
-X-Forwarded-Encrypted: i=1; AKwUvBxCPH3y+hm4rgMeH3/bKlhSKgVgxI5+A2zuLWJot0kF+NDTlTMXX6zGNa554JAiZvB+/WPyqHUe+ra7@vger.kernel.org
-X-Gm-Message-State: AFq9FYI6tjBz1RhPZoqz/R0d65APn6HYSH1tK4bcrkoZQCn4j6aDxps9
-	cBRbPev7R1RVI6sujw9ecs2Rt/r4dRfYU+JD1uaO4U4ACPe1OHHi5AHQQIqD3zGSO4Rke0zswC2
-	SzJ0jn4Pj66R5p/axKh1N4IWj3ygPi1RmDFouwy1pwA==
-X-Gm-Gg: AYBFou1PdISd/RnUlm3Gai+mxd2lNd5Fiy5bIYqLnpHejYjNyTqSLi6kTR3vWThbJgw
-	VdzLcR+N0e6hh5xZHLNQXeJgyjcU4whIBh38GCTNkfu7M4sO2frZLXD1hC7mqEk96E9V9t8FKvn
-	S2+nMNJskX3XQjaXR3JIi/r4aQYyy/DlYkYkSRJkyJgD8Q20yA2fL5LICuM/TOVsu2g5fNJrHRA
-	hdwpysomAaSzuHl5KHbzb+XsCctX+WKVi1vs/oA2lwgtORWRi7jnrG3fyyWrxI3veL8H7GAuVNQ
-	xm7GJ7gzvRUm4m/5TP2qfaJF34LDhWy6iW+Fxb9JH/wOpcwOwZZKhTxH4acIH0CIVFP8WxbRHf+
-	Rwa5EY0qOY6oeFVPT/gve++soFmepXgYd13RqUxM=
-X-Received: by 2002:a17:907:c317:b0:c41:6de7:7dee with SMTP id
- a640c23a62f3a-c46791a97f8mr354514966b.7.1792638181499; Wed, 21 Oct 2026
- 20:03:01 -0700 (PDT)
+        d=1e100.net; s=20260707; t=1792649796; x=1793254596;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=XzPvf2iKkhaJifauJB0mvXhkikmUxEgqKqnn9ElV/ss=;
+        b=SnompQOQEWCiL3iVXLbBdGq5Ihs9p1Wvby/dh3qzQqXbUc1Vblo7C8kZg8kPTxndL1
+         OyI3ybr9oHOkRoU3g53TvTUvXYEzEc6Bf/KkR4gecVzVQvkVMp8rI7agczBRNTfylGtC
+         snjlIBfl1ZJtMpc/cjlK2VqnN6OkkTA7XDa3mWVnClhBjmmenrHzZQImDkbFTpsZMTgS
+         W32zTkDgqBsxieQZYfARXNJ6YfX+z/gzvMFGYglqOHkVJOEjFgCEkz5ZQUevtsTWGo4Z
+         nJFJpAjn1X+2rLIGW78QzCShimJumKMqZE28HJXIYYHLaU0QGCJ8CcLduunjkYZHRbO/
+         8ELg==
+X-Gm-Message-State: AFq9FYJgJuHLFryzZ+2mx7ONGQMyQMiCv7IEVCELnp0loZskqWsJQye5
+	YQDXF1o9kVkwGPZpcu/yWZMP6fEKekb9bZansRDcYuDgzNTiLlOGo+f+wQujFsx3FvpClrxAB96
+	g0ZFkLHNbHzxFXkm8PkNAaatk62a7/YfJzY0qRSLCKORY5oCMt98Rjf2HtofmIJw61JfZhBCj4X
+	87a904cuPqaLv/IlguWEbfQk+fPf7AaOg46SW3cPljlby3W74=
+X-Gm-Gg: AYBFou37BiHousotuy2Wej43UNOtECoXxDu0xV5U8lqqlxoZ2Oo3XjXNt9WtPHEQH0S
+	AxcNiZZJOY+owK/Mb2LcxFHZOEUWT34FUdOgmeE4FG3E/cZfgNiunq5CcZVCnPrbBWKwG/Vxi4T
+	4dHBPzQdaDMKzbK0d1aXbKcJRkYY2Sk68UnVaI4NgdZLDF1QX/j3UStes1F+dFSNnQEZVn9QTCf
+	nWp5lFKEoZryQm8jtS3IHktg/pYQmb/LpUFekbeyVDvGYKG7qyQVZk8jfqydP8uyCrN8U+Yl24q
+	1xkmllLDC2RK11FjUi9tGxELJ7L38uTITyf64nyPEVhgqXJR0a0bSMQCnfgIwf/gdQA4LiGj/8+
+	GQwx9wRd4hZsqbVCPxD9SMbWp9+AxF4c458tWa8x465kAG2GqtP3mlDWHYe7rD9e4/MiZ3I9+Ix
+	Uv3ElthDhRBNMwrakuAK7rBB5+84SwtuA4S3gD7QLZPthv/Ycx26D5t9euuijnOvewoprYbPsyH
+	2I=
+X-Received: by 2002:a05:6402:4018:b0:6ac:62c2:bd35 with SMTP id 4fb4d7f45d1cf-6b408ea5bb6mr3557260a12.13.1792649796255;
+        Wed, 21 Oct 2026 23:16:36 -0700 (PDT)
+X-Received: by 2002:a05:6402:4018:b0:6ac:62c2:bd35 with SMTP id 4fb4d7f45d1cf-6b408ea5bb6mr3557232a12.13.1792649795809;
+        Wed, 21 Oct 2026 23:16:35 -0700 (PDT)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6b4030db05esm1525188a12.10.2026.10.21.23.16.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 21 Oct 2026 23:16:34 -0700 (PDT)
+From: Alex Markuze <amarkuze@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: Alex Markuze <amarkuze@redhat.com>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	Xiubo Li <xiubo.li@clyso.com>,
+	Xiubo Li <xiubli@kernel.org>,
+	Venky Shankar <vshankar@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	Vaishnavi Deshpande <vadeshpa@redhat.com>
+Subject: [PATCH] ceph: unlock an abandoned file-lock grant from its reply
+Date: Thu, 22 Oct 2026 06:16:30 +0000
+Message-Id: <20261022061630.1832692-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <CAOuZWzxd85AzOGGh_DQduVRbGLnDrfyQ0ZJXcWEDJmVEVZPdcg@mail.gmail.com>
+References: <20261015064202.62886-2-vshankar@redhat.com> <20261015155808.140236-1-amarkuze@redhat.com> <CAOuZWzxd85AzOGGh_DQduVRbGLnDrfyQ0ZJXcWEDJmVEVZPdcg@mail.gmail.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -103,266 +123,219 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261021170613.1144381-1-sunyuechi@iscas.ac.cn>
-In-Reply-To: <20261021170613.1144381-1-sunyuechi@iscas.ac.cn>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Thu, 22 Oct 2026 05:02:50 +0200
-X-Gm-Features: AclHuK_rJLQFSxHqbVLM_IjCoLrCiui5eY0DXoL0WX29TvTRda1lVx23utsbBJg
-Message-ID: <CAOJNxR+bfs_g7t4qkZyfcWJAd2W51LH0skzzOpSztSZqCjuqeg@mail.gmail.com>
-Subject: Re: [PATCH] ceph: reconnect on peer reset even if the mdsmap says the
- MDS is active
-To: Sun Yuechi <sunyuechi@iscas.ac.cn>
-Cc: idryomov@gmail.com, amarkuze@redhat.com, slava@dubeyko.com, 
-	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Wed, Oct 21, 2026 at 19:06, Sun Yuechi wrote:
-> Since commit 39fe30315893 ("ceph: harden send_mds_reconnect and handle
-> active-MDS peer reset"), mds_peer_reset() tears the session down instead
-> of reconnecting when our mdsmap shows the rank past RECONNECT.
->
-> That map can be stale.  An MDS killed and restarted on the same address
-> resets our connection before the monitors report the rank as failed, so
-> the session is torn down while the map still says active.
+Venky Shankar's "ceph: don't drop a lock grant that races with an
+interrupt" keeps a sent SETFILELOCK registered and waits for the MDS
+reply, so a grant is not dropped. Xiubo Li pointed out that
+wait_for_completion() leaves a killed task in D state, and that a
+failed interrupt request still aborts a request the MDS may already
+have granted.
 
-Agreed.  The local teardown trusts a map that the peer reset itself
-says is out of date.  Once the session has been unregistered,
-check_new_map() has nothing to reconnect, and the new rank 0 evicts us.
+After the interrupt is sent, wait with wait_for_completion_killable().
+If that wait is killed, or the interrupt request fails with -ENOMEM,
+-EIO, -ETIMEDOUT, or -ERESTARTSYS, leave the original request
+registered and mark it abandoned. ceph_mdsc_wait_request() returns
+that error instead of aborting or reporting a late grant as success.
+The reply callback sends an unlock when the result is a grant.
 
-> Send the reconnect and let the MDS decide, as before that commit.  A
-> daemon restarted on the old address has a new nonce, so the reconnect
-> does not get through, and check_new_map() reconnects once a map carries
-> the rank's new address.
+Suggested-by: Xiubo Li <xiubli@kernel.org>
+Cc: Venky Shankar <vshankar@redhat.com>
+Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+---
+Base: https://github.com/ceph/ceph-client.git testing
+797fedea5c2bc44fc6d92526999fd4242052a4ee ("ceph: fix uninitialized err in ceph_netfs_issue_read()")
 
-I checked this path.  The session stays in RECONNECTING, but
-check_new_map() compares the whole ceph_entity_addr, nonce included.
-So both a standby taking over and the same daemon coming back on the
-old ip:port end up in ceph_con_close(), RESTARTING and a fresh
-send_mds_reconnect().  Nothing is left stuck in RECONNECTING.
+ fs/ceph/locks.c      | 119 +++++++++++++++++++++++++++++++++----------
+ fs/ceph/mds_client.c |  11 +++-
+ fs/ceph/mds_client.h |   1 +
+ 3 files changed, 102 insertions(+), 29 deletions(-)
 
-> An MDS that really is active replies with
-> CLOSE, and handle_session() unregisters the session so that new
-> requests open a fresh one, which is what that commit intended.
+diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+index 4bd96d0beba4..308de4c4f31a 100644
+--- a/fs/ceph/locks.c
++++ b/fs/ceph/locks.c
+@@ -163,6 +163,66 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
+ 	return err;
+ }
+ 
++/*
++ * The waiter was killed, or the interrupt request failed, after the
++ * original SETFILELOCK was sent. The MDS may still grant it. Unlock a
++ * grant so the lock is not left held by a caller that already returned
++ * an error and did not record it locally.
++ */
++static void ceph_lock_orphan_cb(struct ceph_mds_client *mdsc,
++				struct ceph_mds_request *req)
++{
++	struct ceph_client *cl = mdsc->fsc->client;
++	struct ceph_mds_request *unlock;
++	struct inode *inode = req->r_inode;
++	int result, err;
++
++	if (!req->r_reply_info.head)
++		return;
++	result = le32_to_cpu(req->r_reply_info.head->result);
++	if (result)
++		return;
++
++	unlock = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SETFILELOCK,
++					  USE_AUTH_MDS);
++	if (IS_ERR(unlock)) {
++		pr_warn_ratelimited_client(cl,
++			"abandoned lock grant on %llx.%llx could not be unlocked: %ld\n",
++			ceph_vinop(inode), PTR_ERR(unlock));
++		return;
++	}
++
++	unlock->r_inode = inode;
++	ihold(inode);
++	unlock->r_num_caps = 1;
++	unlock->r_args.filelock_change = req->r_args.filelock_change;
++	unlock->r_args.filelock_change.type = CEPH_LOCK_UNLOCK;
++	unlock->r_args.filelock_change.wait = 0;
++
++	err = ceph_mdsc_submit_request(mdsc, inode, unlock);
++	if (err)
++		pr_warn_ratelimited_client(cl,
++			"abandoned lock grant on %llx.%llx could not be unlocked: %d\n",
++			ceph_vinop(inode), err);
++	ceph_mdsc_put_request(unlock);
++}
++
++/* mdsc->mutex held. The request has been sent and has no result yet. */
++static int ceph_lock_abandon(struct ceph_mds_client *mdsc,
++			     struct ceph_mds_request *req, int err)
++{
++	lockdep_assert_held(&mdsc->mutex);
++
++	if (test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags))
++		return 0;
++
++	req->r_args.filelock_change.wait = 0;
++	req->r_callback = ceph_lock_orphan_cb;
++	req->r_err = err;
++	set_bit(CEPH_MDS_R_ABANDONED, &req->r_req_flags);
++	return err;
++}
++
+ static int ceph_lock_wait_for_completion(struct ceph_mds_client *mdsc,
+                                          struct ceph_mds_request *req)
+ {
+@@ -191,12 +251,11 @@ static int ceph_lock_wait_for_completion(struct ceph_mds_client *mdsc,
+ 		err = 0;
+ 	} else if (!req->r_session) {
+ 		/*
+-		 * haven't sent the request, so the MDS can't have granted
+-		 * the lock: abort it.
+-		 *
+-		 * ensure we aren't running concurrently with
+-		 * ceph_fill_trace or ceph_readdir_prepopulate, which
+-		 * rely on locks (dir mutex) held by our caller.
++		 * Not sent, so the MDS cannot have granted the lock:
++		 * abort it. Take r_fill_mutex so this does not run
++		 * concurrently with ceph_fill_trace or
++		 * ceph_readdir_prepopulate, which rely on locks held
++		 * by our caller.
+ 		 */
+ 		mutex_lock(&req->r_fill_mutex);
+ 		req->r_err = err;
+@@ -223,32 +282,38 @@ static int ceph_lock_wait_for_completion(struct ceph_mds_client *mdsc,
+ 
+ 	intr_req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SETFILELOCK,
+ 					    USE_AUTH_MDS);
+-	if (IS_ERR(intr_req))
+-		return PTR_ERR(intr_req);
+-
+-	intr_req->r_inode = inode;
+-	ihold(inode);
+-	intr_req->r_num_caps = 1;
++	if (!IS_ERR(intr_req)) {
++		intr_req->r_inode = inode;
++		ihold(inode);
++		intr_req->r_num_caps = 1;
+ 
+-	intr_req->r_args.filelock_change = req->r_args.filelock_change;
+-	intr_req->r_args.filelock_change.rule = lock_type;
+-	intr_req->r_args.filelock_change.type = CEPH_LOCK_UNLOCK;
++		intr_req->r_args.filelock_change = req->r_args.filelock_change;
++		intr_req->r_args.filelock_change.rule = lock_type;
++		intr_req->r_args.filelock_change.type = CEPH_LOCK_UNLOCK;
+ 
+-	err = ceph_mdsc_do_request(mdsc, inode, intr_req);
+-	ceph_mdsc_put_request(intr_req);
+-
+-	if (err && err != -ERESTARTSYS)
+-		return err;
++		err = ceph_mdsc_do_request(mdsc, inode, intr_req);
++		ceph_mdsc_put_request(intr_req);
++	} else {
++		err = PTR_ERR(intr_req);
++	}
+ 
+ 	/*
+-	 * Once it has handled the interrupt, the MDS replies to the
+-	 * original request: 0 if the lock was granted first, -EINTR if
+-	 * the wait was cancelled. Wait for that reply even with a fatal
+-	 * signal pending, so that the caller records a granted lock and
+-	 * the lock gets released when the file is closed.
++	 * The MDS replies to the original request after the interrupt:
++	 * 0 if the lock was granted first, -EINTR if the wait was
++	 * cancelled. A fatal signal must not turn this into an
++	 * uninterruptible sleep. If this wait is killed, or the
++	 * interrupt request never went out, leave the original request
++	 * registered. Its reply callback unlocks a late grant.
+ 	 */
+-	wait_for_completion(&req->r_completion);
+-	return 0;
++	if (!err)
++		err = wait_for_completion_killable(&req->r_completion);
++	if (!err)
++		return 0;
++
++	mutex_lock(&mdsc->mutex);
++	err = ceph_lock_abandon(mdsc, req, err);
++	mutex_unlock(&mdsc->mutex);
++	return err;
+ }
+ 
+ static int try_unlock_file(struct file *file, struct file_lock *fl)
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index d4ef8a355a48..f485beb3584b 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -4076,8 +4076,15 @@ int ceph_mdsc_wait_request(struct ceph_mds_client *mdsc,
+ 	boutc(cl, "do_request waited, got %d\n", err);
+ 	mutex_lock(&mdsc->mutex);
+ 
+-	/* only abort if we didn't race with a real reply */
+-	if (test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
++	/*
++	 * The caller was killed or the interrupt request failed after
++	 * this request was sent. Leave it registered. A late grant is
++	 * unlocked by r_callback; do not turn that grant into success
++	 * for a caller that has already given up.
++	 */
++	if (test_bit(CEPH_MDS_R_ABANDONED, &req->r_req_flags)) {
++		err = req->r_err;
++	} else if (test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
+ 		err = le32_to_cpu(req->r_reply_info.head->result);
+ 		if (err > 0 || err < -MAX_ERRNO) {
+ 			/*
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 863cdb8d588a..e198ede629fd 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -360,6 +360,7 @@ struct ceph_mds_request {
+ #define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
+ #define CEPH_MDS_R_ASYNC		(8) /* async request */
+ #define CEPH_MDS_R_FSCRYPT_FILE		(9) /* must marshal fscrypt_file field */
++#define CEPH_MDS_R_ABANDONED		(10) /* caller left; reply unlocks a grant */
+ 	unsigned long	r_req_flags;
+ 
+ 	struct mutex r_fill_mutex;
 
-Yes.  Server::handle_client_reconnect() denies a reconnect outside the
-reconnect window, or for a closed session, by sending
-CEPH_SESSION_CLOSE ("denied reconnect attempt").  A sessionless
-reconnect gets CEPH_SESSION_REJECT.  So the "reject or ignore" premise
-in 39fe30315893 does not hold for the ignore part.  The client side then
-unregisters the session, removes its caps and kicks the waiting
-requests.
+base-commit: 797fedea5c2bc44fc6d92526999fd4242052a4ee
+-- 
+2.34.1
 
-A few nits, none of them blocking:
-
-1. It would help to say in the changelog that this is a partial revert:
-   only the mds_peer_reset() half of 39fe30315893 goes away, and the
-   send_mds_reconnect() hardening stays.  Please also mention that the
-   active MDS denies the reconnect with CLOSE.
-
-2. The reproducer needs the client to send no MDS request between the
-   peer reset and the new map.  If a request is issued in that window,
-   it registers a new session.  check_new_map() then reconnects that
-   session when the address changes, so the bug is hidden.  Even then,
-   39fe30315893 has already dropped all of the client's caps with
-   remove_session_caps(), while a real reconnect keeps them.  That seems
-   worth a sentence too.
-
-> -       if (rc)
-> +       rc = send_mds_reconnect(mdsc, s);
-> +       if (rc && rc != -ESTALE && rc != -ENOENT)
-
-3. check_new_map() still warns on every non-zero return of
-   send_mds_reconnect().  Its -ESTALE/-ENOENT cases are logged by
-   send_mds_reconnect() itself, just like here.  Not for this patch,
-   but the two callers could be made consistent in a follow-up.
-
-> +        * Send the reconnect and let the MDS decide; one that is past
-> +        * RECONNECT replies with CLOSE and handle_session() closes the
-
-4. Nit: "replies with CLOSE (or REJECT if it has no session for us)".
-
-Tested on x86_64 with a 7.3.0-rc1 based kernel (KASAN, lockdep,
-kmemleak) against a vstart cluster from Ceph main: 1 MON, 3 OSDs, and
-two MDSes with allow_standby_replay set (one active plus one
-standby-replay).  Only ceph.ko was swapped between the runs; libceph.ko
-was identical.
-
-Each run did the following.  A writer keeps a file open and stops
-issuing requests during the window.  iptables drops the kernel client's
-established monitor connection.  The active MDS gets SIGKILL and is
-restarted on the same address with --public_addrv.  Once the client logs
-"closed our session", the block is lifted.  After the takeover the run
-checks ls, a new write, a read and further writes on the held fd.
-
-  stale map, MDS restarted on the old address:
-    without the patch: 4 of 4 runs evicted ("session blocklisted",
-                       "rejected session"), EACCES afterwards
-    with the patch:    3 of 3 runs "reconnect start" ->
-                       "reconnect success" -> "recovery completed",
-                       no errors from the writer
-
-  "client evict" by the active MDS, mds_session_blocklist_on_evict=false:
-    without the patch: 2 of 2 recover with a new session
-    with the patch:    2 of 2 "reconnect denied", then a new session,
-                       I/O fine
-
-No KASAN, lockdep or kmemleak reports.
-
-Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
-Tested-by: Xiubo Li <xiubo.li@clyso.com>
-
-Thanks,
-- Xiubo
-
-On Wed, 21 Oct 2026 at 19:06, Sun Yuechi <sunyuechi@iscas.ac.cn> wrote:
->
-> Since commit 39fe30315893 ("ceph: harden send_mds_reconnect and handle
-> active-MDS peer reset"), mds_peer_reset() tears the session down instead
-> of reconnecting when our mdsmap shows the rank past RECONNECT.
->
-> That map can be stale.  An MDS killed and restarted on the same address
-> resets our connection before the monitors report the rank as failed, so
-> the session is torn down while the map still says active.  When a
-> standby then takes over the rank in up:reconnect, check_new_map() has
-> no session left to reconnect, the new MDS evicts and blocklists us
-> after mds_reconnect_timeout, and the mount returns EACCES until it is
-> unmounted:
->
->   libceph: mds0 (2)10.89.20.12:6800 session reset
->   ceph: [...]: mds0 closed our session
->   (mds) evicting unresponsive client ceph-c1 (14900), after waiting
->         49.7175 seconds during MDS startup
->
-> Send the reconnect and let the MDS decide, as before that commit.  A
-> daemon restarted on the old address has a new nonce, so the reconnect
-> does not get through, and check_new_map() reconnects once a map carries
-> the rank's new address.  An MDS that really is active replies with
-> CLOSE, and handle_session() unregisters the session so that new
-> requests open a fresh one, which is what that commit intended.
->
-> Skip the warning for -ESTALE and -ENOENT: send_mds_reconnect() already
-> logs those, and the removed code was silent for closed and rejected
-> sessions.
->
-> Tested on riscv64 (7.2.6 kernel, Ceph 21, one active MDS with a
-> standby-replay): SIGKILL the active MDS while dropping the client's
-> monitor traffic until it logs "closed our session".  Evicted in 4 of 4
-> runs without the patch, "reconnect success" in 3 of 3 with it.  Eviction
-> by an active MDS without blocklist still recovers with a new session,
-> 2 of 2 runs.
->
-> Fixes: 39fe30315893 ("ceph: harden send_mds_reconnect and handle active-MDS peer reset")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Sun Yuechi <sunyuechi@iscas.ac.cn>
-> ---
->  fs/ceph/mds_client.c | 84 +++++---------------------------------------
->  1 file changed, 9 insertions(+), 75 deletions(-)
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index d4ef8a355a48..d23250af0750 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -7236,7 +7236,7 @@ static void mds_peer_reset(struct ceph_connection *con)
->  {
->         struct ceph_mds_session *s = con->private;
->         struct ceph_mds_client *mdsc = s->s_mdsc;
-> -       int session_state;
-> +       int rc;
->
->         pr_warn_client(mdsc->fsc->client, "mds%d closed our session\n",
->                        s->s_mds);
-> @@ -7246,82 +7246,16 @@ static void mds_peer_reset(struct ceph_connection *con)
->                 return;
->
->         /*
-> -        * Only reconnect if MDS is in its RECONNECT phase.  An MDS past
-> -        * RECONNECT (REJOIN, CLIENTREPLAY, ACTIVE) will reject reconnect
-> -        * attempts, so those states fall through to session teardown below.
-> +        * Our mdsmap may be stale: an MDS restarted on the same address
-> +        * resets the connection before we learn that the rank failed.
-> +        * Send the reconnect and let the MDS decide; one that is past
-> +        * RECONNECT replies with CLOSE and handle_session() closes the
-> +        * session so that new requests open a fresh one.
->          */
-> -       if (ceph_mdsmap_get_state(mdsc->mdsmap, s->s_mds) == CEPH_MDS_STATE_RECONNECT) {
-> -               int rc = send_mds_reconnect(mdsc, s);
-> -
-> -               if (rc)
-> -                       pr_warn_client(mdsc->fsc->client,
-> -                                      "mds%d reconnect failed: %d\n",
-> -                                      s->s_mds, rc);
-> -               return;
-> -       }
-> -
-> -       /*
-> -        * MDS is active (past RECONNECT).  It will not accept a
-> -        * CLIENT_RECONNECT from us, so tear the session down locally
-> -        * and let new requests re-open a fresh session.
-> -        *
-> -        * Snapshot session state with READ_ONCE, then revalidate under
-> -        * mdsc->mutex before acting.  The subsequent mdsc->mutex
-> -        * section rechecks s_state to catch concurrent transitions, so
-> -        * the lockless snapshot here is safe.  s->s_mutex is taken
-> -        * separately for cleanup after unregistration, which avoids
-> -        * introducing a new s->s_mutex + mdsc->mutex nesting.
-> -        */
-> -       session_state = READ_ONCE(s->s_state);
-> -
-> -       switch (session_state) {
-> -       case CEPH_MDS_SESSION_RESTARTING:
-> -       case CEPH_MDS_SESSION_RECONNECTING:
-> -       case CEPH_MDS_SESSION_CLOSING:
-> -       case CEPH_MDS_SESSION_OPEN:
-> -       case CEPH_MDS_SESSION_HUNG:
-> -       case CEPH_MDS_SESSION_OPENING:
-> -               mutex_lock(&mdsc->mutex);
-> -               if (s->s_mds >= mdsc->max_sessions ||
-> -                   mdsc->sessions[s->s_mds] != s ||
-> -                   s->s_state != session_state) {
-> -                       pr_info_client(mdsc->fsc->client,
-> -                                      "mds%d state changed to %s during peer reset\n",
-> -                                      s->s_mds,
-> -                                      ceph_session_state_name(s->s_state));
-> -                       mutex_unlock(&mdsc->mutex);
-> -                       return;
-> -               }
-> -
-> -               ceph_get_mds_session(s);
-> -               s->s_state = CEPH_MDS_SESSION_CLOSED;
-> -               __unregister_session(mdsc, s);
-> -               __wake_requests(mdsc, &s->s_waiting);
-> -               mutex_unlock(&mdsc->mutex);
-> -
-> -               mutex_lock(&s->s_mutex);
-> -               cleanup_session_requests(mdsc, s);
-> -               remove_session_caps(s);
-> -               mutex_unlock(&s->s_mutex);
-> -
-> -               wake_up_all(&mdsc->session_close_wq);
-> -
-> -               mutex_lock(&mdsc->mutex);
-> -               kick_requests(mdsc, s->s_mds);
-> -               mutex_unlock(&mdsc->mutex);
-> -
-> -               ceph_put_mds_session(s);
-> -               break;
-> -       case CEPH_MDS_SESSION_CLOSED:
-> -       case CEPH_MDS_SESSION_REJECTED:
-> -               break;
-> -       default:
-> +       rc = send_mds_reconnect(mdsc, s);
-> +       if (rc && rc != -ESTALE && rc != -ENOENT)
->                 pr_warn_client(mdsc->fsc->client,
-> -                              "mds%d peer reset in unexpected state %s\n",
-> -                              s->s_mds,
-> -                              ceph_session_state_name(session_state));
-> -               break;
-> -       }
-> +                              "mds%d reconnect failed: %d\n", s->s_mds, rc);
->  }
->
->  static void mds_dispatch(struct ceph_connection *con, struct ceph_msg *msg)
-> --
-> 2.56.0
->
