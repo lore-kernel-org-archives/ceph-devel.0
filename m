@@ -1,111 +1,98 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793204948;
-	b=NZH2ILYBWTpj30SnApXI/XY54daMt3IuhA1p5VPN+UZIw/we54UmzIxH6o8qGFa6gojM
-	 dgi761HJzdrdP2InVD+py5+Mx4GIRJvsgYLYM01RBVH7Sh37eWZbZSiBjWCcWqvybrQmJ
-	 Tt8SMku5F9ibeZjlCpUX2iGWoplPFURKjINZCigklnWX4+/imT6iXIPEFI6ayoKKs3w7/
-	 un6tfgMPc/uVxt7IdYYHUZB61mXs7BBHRManTY6pPFUe/+/WR4UnkrExp9ADR4kpOGUcV
-	 SoICFDBGmUX6TmgkAlRL0J40R1fQWww3RQmbno/2QP7B0yBFtdWGjepX5JPDaR6fnZQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793204948;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
-	 Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=Jz2njDAimzaZ7BVL6rE5Qsvpikag4q3XQYpg9cVtMz4=;
-	b=mt6UeT3l6A1OyzUP38yctTe1JY7USkruvLnUMzJk/dP2fLlfk36KtTZpfh7W0IL2ukWN
-	 i2GXZSXv1PwBObfQv4qQ9DpzsyBdB++aIffsfYSikMSI8prEdCuLz/xyW1OYSjmkQdQkv
-	 eR1hSG8e8vyZkoWTBmczlAj4q5MHwFUM+MjlI+Vy8AuWWhggE8vpvZW79ukwh6ISdN7oh
-	 mFiUpx0W1FUD1rf8r8pewvc3/UUHPUnY8i/xeNO6ISFucgXBTRdP5r2Ge65lrv6C9d8kU
-	 oFrmHVENUgBf7LmIDI9LBt7zpvWq0nsJiPGNNh/L58mBVqb7gxY42AY6cb73DOdIwMA==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=redhat.com;
-	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=AqNl9pdv;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=G7vFEIu6;
-	arc=none smtp.remote-ip=170.10.129.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.42
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1793346900;
+	b=2ulE8+nJtonu5y5KyuFr2qH47xxdvn4Jm2vLdeqkVqJxwtdAHhGCJicqMN4b7A7/aTyx
+	 tJmh5RJ45zLYhogt2sk3Seb2NH4tkSnGQJkqfq0rOAXLA44e8w4mTrLG+CTuTf0MiJMtA
+	 cVoEy/22CtfTjWFKwW95ZS2g2ZxXPRdBdEJGpRakVSkZ9bIpyZB7IdUmU/Pejw7gS+nAF
+	 RTeUoUeMAtkKMulatfQUpsf6lrnF8SyfJXqM2Oir7CaZ1XkCDafxL22uomgf27+VsnPn+
+	 MZebAKCK3ZvG/cUg5PnbrX+pdFiopfIjjaCB+5Obn7o9jqqV6IEiF6LX7v71ql/tIog==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793346900;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
+	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
+	 Content-Type;
+	bh=jtaaIcAIydXlXOXw1jzOh056nqIYk2N51HGIAEOOFM8=;
+	b=AKovRp0IKFYrA5d9yUP4bBYsw5xo28ZPg03WsRSdMYVIqRnUCTBxRKJYvaV4x38Ki5Gc
+	 Cnnv9/HTCpWNz8Ioq6DN7EyyYZH7jUtJVUA4prFRtQyeJh3uExCui/t063+wu7qMu9sfh
+	 TdUMClFpQJX7C3YMbLhhGKx9G9nHioev9mQK7kgWrZv5ZYx8AYy87vm2OnfGjI/7n4xdm
+	 hnbKVpOg5P29whWIu9tq1dLA4M4WGNOw8GmEcdhWHHMI7X1zlPR0vTDFFP1pnALFiZ7PH
+	 vpQuG7fX3rGOnFuDKEgySMA0ZZ2s4LHEqsH2bXoAVre8x6Ssugyt3gTCdJDGuuDebxQ==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=clyso.com;
+	spf=pass smtp.mailfrom=clyso.com;
+	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=nq5E0qRM;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.42
+Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D50AC606A327
-	for <ceph-devel@vger.kernel.org>; Wed, 28 Oct 2026 16:29:07 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D50AC606A327
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9420606A31A
+	for <ceph-devel@vger.kernel.org>; Fri, 30 Oct 2026 07:54:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E9420606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=AqNl9pdv;
-	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=G7vFEIu6
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1793204946;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Jz2njDAimzaZ7BVL6rE5Qsvpikag4q3XQYpg9cVtMz4=;
-	b=AqNl9pdvpfq4ooNeCvUetxbKKmYrF3mEJbMSSE23FBg7ojN7cazeNN2wJb/XojW8CMzs2S
-	tt/7b9+XiWBUa+rhObBISkML7HPOSH68PiP44WKDPPR172KXguWZJ9W8ch3VWdX/qQgxAg
-	oqFucu3K4KIsQJ9AL7b7w3Ecw5Li1+0=
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
- [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-159-xVOl5rt1NIqle70KOH__yQ-1; Wed, 28 Oct 2026 12:29:05 -0400
-X-MC-Unique: xVOl5rt1NIqle70KOH__yQ-1
-X-Mimecast-MFC-AGG-ID: xVOl5rt1NIqle70KOH__yQ_1793204944
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-c3613c35145so126503366b.3
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Oct 2026 09:29:05 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=nq5E0qRM
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-6b413b0a974so550790a12.2
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Oct 2026 00:54:58 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1793346897; cv=none;
+        d=google.com; s=arc-20260327;
+        b=ExnBVy0VSBD0nyocQXDbr9SIMNIr0RBJUu4OCmwul5u/56EdpLQRfMZCSmWV7NbjLe
+         Iark8TPBFPKZ+968gT23Q9XAtERq/P91eSJF5x6ZhPYsxTf+0Z0QP4b32Y3Fi4tPojae
+         bzmhJ9pGs+wr0E+QT8UC0IfcdvkyrZ+HdkCmyg/3aPEHF/3vaFJ56XJxYYANqKzJpH2L
+         4qQQQM/l/9BBkDmelRcRtKg69zIID5+hLLNIShqFUyK74f7bvrt3XLnOwR6gdFFFiJG/
+         kLbfpZWN2tDTF1/PdM3NCNQFegkRXv/ksm8k8Y1U71CtJwD3Akp3E9FC08CTXpHYXnaD
+         wr/A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=jtaaIcAIydXlXOXw1jzOh056nqIYk2N51HGIAEOOFM8=;
+        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
+        b=I2zHn95vVYXtVksgRS6C3nJ2fv5bzL1vZfBasWhGzX3lrpuOq3u5Y6Y7qTFErunVdL
+         ajlF6pzYOlBd7pzbj84/vsGy3Amy+A84tN93CsVumC6aK83rfh1TdM49FKtftk8Id+49
+         2+0x+sPyTwvDsamNUwKcM++gLJEFmOn7IqqdRWeRepy4VLOPefI4uhlmtrKVX90+wSef
+         mvPszIhJ7tEj2alGVUtaF+l9u0KyXpUDqLqQugy8cOHv06ImTGB7yLT/EUIjA3l0xFwj
+         oRYcQpQzzEeZ4AnmjE09luRjiNZQ73dAsEU6bfrz0WVO2Bveu+Ma+4KQS0WAi/Pkazfs
+         meQg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1793204944; x=1793809744; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=Jz2njDAimzaZ7BVL6rE5Qsvpikag4q3XQYpg9cVtMz4=;
-        b=G7vFEIu6fOTSJdZdLDXzryCdYCGmsFzY3f5uTb41xd+D3zM8SxVYMzxMtLepwG9xmL
-         MqeAlRLW2OFTKpyW1S/hb0zLr/oS3lMRXQuPSKbYmkOtqjo6HVXAWWnDqyPsCbsVllsS
-         Y0K+WoeYf8S38Eew8OAtOKfVD5TDccqIKE+xRVsEQ6iI4dTDQyHCecZ90PBJdxk9i5pz
-         YenX9qBOdiFWc4D/ubrXAab2dKA66oKC/FUH2zP53qIwRVqV1q0R/LEDM+uBftL0XBVk
-         njjXsnsJmhnl4PUTdKbP5+B52BBbBQ9laOkKRm530qkqXvyzV8L1AnG6u56bJ/GsC+Ao
-         K06g==
+        d=clyso.com; s=google; t=1793346897; x=1793951697; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=jtaaIcAIydXlXOXw1jzOh056nqIYk2N51HGIAEOOFM8=;
+        b=nq5E0qRMbmmMk63rqTbtVG3scWeMGZtjnSBUrSr+H0EzoWy0dgICSdnI0eOLr9IE/g
+         xh44gF9s5sVL2Hbxs5H/ZUeJce0FeAMr7pzl6P3594tVfb/45UH1spW2HTYIbvgrn53m
+         oz/DY93cPfKkHjzkyWF6vjqcI9Z6PGOVrUGwMqXU0YcQnnjSpE4oSVFcywwUXnKBb8B1
+         VIK7YJdwXlBqsXCHAw7OJGTGsHKGskPwxTThWfuIhmwcN3nFurELP30CJAbEYVPH3LJk
+         A0Tu5CKvTAQ8IJwHMC843BNVpjL/h73+GPuB8eV0KsqWCB7ETNSRPOuwLuppnCPQrERS
+         wmow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793204944; x=1793809744;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Jz2njDAimzaZ7BVL6rE5Qsvpikag4q3XQYpg9cVtMz4=;
-        b=ihGGgB406BbUwuekdsASdmz1oh+YBVh3QgrNYRG/u4QTtd6pLsuvcoJSc6ioE03LsM
-         8OBschZeMV8y7a4lfc6ADzzP+xvq1fGfX72yYZ9GtpMcWiHqwlW6glXWH0jVt3OoYYUl
-         aCk4tSSYOzUz/0dYLGhqYP748Q6TDHyToZSxcNDg1w+N+fDcgDEpJVDnAAXKpoeS8/I4
-         hgBrk1He5GFTy+52kap8+AgasjJpENOAWy1ZpfyFqyqGaqOm0S/bsYOmujlONoa/+bEn
-         BYULujsqyPpfkZeSyzvjHcn179D+HRBCI8O73YC0eEN24/8qEyt4HWCOoPWh58N9GMM4
-         fIDQ==
-X-Gm-Message-State: AFq9FYLUDNACpQigZBs1Diwd+ZHdWwiP58Xts28JrX73jle+XM72uhxY
-	wjk0QLPLlJolEaWYa5oe+2GuCHQg4IrUEwsTe5f5Gau4hIhPcejxgSExBpTu7aulyNkS0hqPXXJ
-	i0vE8ECUK7lFYlnMnA5wMJ2XVR/5+eRdGVUHHcOiBfNr3xilYsyVbphp7+V4XefRH2fc/6sw=
-X-Gm-Gg: AYBFou3X2l5v6Mpq7I9Z/IoPTXXx1mBKU3hmzqudoaFdKunPvEbATvnSc+5LvCrTbP/
-	G5s5ix4PhoblL3kgPqSS+znJgKdfq0KZkTpIrQoMTSHEA22nQfmoeNx+YYCH5VnYtgheesvbaga
-	O6Mxvze5BxHnpN4vU1Ky15uxlIeywWudzA3EO/yW0BRp17Dvsq/4zQslh+RQ7Jysbp8av3j8Gdd
-	htHE9MnxLYhPlW1HGIQjsNuIFdcTLJa/XezSYJi9Gq0aLCewUNMnn3vbBJ8nq4KoE8zVxMGBqp3
-	Y8TDnpmOcLUt1VMyWVvmOrskl8g/qDfsMg63kBcsBIf5bguqgydXj1eGjuKCV8XrXCqKfbIXkyW
-	xa9G5oqOPjb93aPJ8VLAJIwj9P6oZ9lJySyseh22cVumWMs2RiU/vf5mShE6PCdy/xW1i0xiJpy
-	2NOFuFvvP8OhrNEuma6AfJyV6shdpl6hTivkM9qks5xF+J5udBwLXFQNMzBmcJud8a/kQvX8kRo
-	pnU64HAZdYoVZSVBXceR+ECIxczLVPB/QFj3UlrwhG8BoIaoe1p
-X-Received: by 2002:a17:907:9723:b0:c46:7b40:1af4 with SMTP id a640c23a62f3a-c49bdb636acmr244406066b.6.1793204944003;
-        Wed, 28 Oct 2026 09:29:04 -0700 (PDT)
-X-Received: by 2002:a17:907:9723:b0:c46:7b40:1af4 with SMTP id a640c23a62f3a-c49bdb636acmr244405366b.6.1793204943648;
-        Wed, 28 Oct 2026 09:29:03 -0700 (PDT)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c49a53bdcdcsm305467666b.53.2026.10.28.09.29.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Oct 2026 09:29:03 -0700 (PDT)
-From: Alex Markuze <amarkuze@redhat.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v3 3/5] ceph: write back only the dirty bytes of a lazy I/O write
-Date: Wed, 28 Oct 2026 16:29:01 +0000
-Message-Id: <179320481135.91990.18372101872369607474.ceph-lazyio-v3-nack@redhat.com>
-In-Reply-To: <20261027-b4-wip-ceph-lazyio-fix-v3-3-df2926c30867@clyso.com>
-References: <20261027-b4-wip-ceph-lazyio-fix-v3-0-df2926c30867@clyso.com> <20261027-b4-wip-ceph-lazyio-fix-v3-3-df2926c30867@clyso.com>
+        d=1e100.net; s=20260707; t=1793346897; x=1793951697;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=jtaaIcAIydXlXOXw1jzOh056nqIYk2N51HGIAEOOFM8=;
+        b=hqU8nBDNLOZrK/9/XbcipE9NwueobOsNZ/QCa478KALnk3L/4th/mMHlkTyuni0S5X
+         rB5sFLVoPgZzllt4t/EAMcXRupqzCieqZNOP24TdETLrkT+VbSDHJmaF/ki/TywYd6rU
+         7A3+neeyXyzOJ4lO/mQ8W/maxMqsBPuD08PagFaIgrWcZFcO9blxYmhjk5VZA0Kmshij
+         vc5BG/3xwuvcIN3GqYmu8l14H+is+h5eQkcXGgAjqd3uo52ZY+gCkW2DmVSz5Kln4Djs
+         SZpVBCKqQM9YP3O46qBNXwiwjociP8X5j+SuDml/KjCfzDuBO3CFGZRRIe16gYmaJK5O
+         Ni7w==
+X-Gm-Message-State: AFq9FYKdRkzcMnQxs2OOxK/amhzgFyhUPia+aSiuJssndHUikQjOMdZ2
+	qSX88ByShuR6nDkGakGRBX989NFYzxJL4TNCJsXAwTDTB4E62pRVbPWvwpDAH3PXtevI6f4ehd8
+	jhCjyd6bskRS3bpL2dFaYziVKb14XTLs9pN31IEklIA==
+X-Gm-Gg: AYBFou1Z1TvG8zDvU/VlcwQ4Wwou4M2S76jxrTMenovSZnk+NS5u+QZ/hmgQBSiIqY9
+	yKxtztPLIzhL9M/0vvv7OWw3knXDy6skoYN/XchR72WeMT46OaBQIsKqCDl0D4iePPJBASKza5b
+	LNwfKoNcT4T6jdNLmkHCNomoxS36rXQkx6hNO6003c4dbaCO5Re2jCDf5ke/hyxfraLUdDsRhH3
+	S4DsyzlsdFMIgdb3jA2rmQS35WmgBuSh8VvDnsStMuKLEEMrRfUCS2z0OYkYKK/CgyWO4wxMVu8
+	0KyEFN8ftpOV2KLsk3iuFZATzGOMt5icQA/T2WWjkXHl8AMAxYG8tMysVBINCdbe0AxQHaUMDZo
+	Rz/QfLSZu6xqDlg9MnvB/f+tALYy6NHWydIkKG1A=
+X-Received: by 2002:a17:907:6e8a:b0:c3f:d912:ff8e with SMTP id
+ a640c23a62f3a-c4ca7a15d8bmr121492466b.16.1793346897022; Fri, 30 Oct 2026
+ 00:54:57 -0700 (PDT)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -115,38 +102,72 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20261027-b4-wip-ceph-lazyio-fix-v3-0-df2926c30867@clyso.com>
+ <20261027-b4-wip-ceph-lazyio-fix-v3-3-df2926c30867@clyso.com> <179320481135.91990.18372101872369607474.ceph-lazyio-v3-nack@redhat.com>
+In-Reply-To: <179320481135.91990.18372101872369607474.ceph-lazyio-v3-nack@redhat.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Fri, 30 Oct 2026 08:54:44 +0100
+X-Gm-Features: AclHuK97HdXvF7XLr3WUvukcp2D-enZAzFgHWiQbie0aOpajwzurvoQaEV6CLIg
+Message-ID: <CAOJNxR+w_MsnoFz1wJdigriJyhwzkJyBjHoaN2Uap-er2V3MuQ@mail.gmail.com>
+Subject: Re: [PATCH v3 3/5] ceph: write back only the dirty bytes of a lazy
+ I/O write
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Xiubo,
+Hi Alex,
 
-NACK for v3 as it stands. Patch 3 still has a lost-write race, and its
-partial writeback can leave stale FS-Cache data readable.
+Thanks, both are real and both reproduce.
 
-The pin check protects a pin that remains held through the check, but
-there is a release window. A process_vm_writev() pin can survive an
-initial writeback that cleans and write-protects the shared PTE. After a
-later lazy pwrite() marks the folio dirty, the pin holder can finish its
-copy outside the pwrite range and unpin before ceph_folio_note_write().
-unpin_user_pages_dirty_lock() sees the folio already dirty and skips both
-locking and re-dirtying it. The pin check then sees no pin and records
-only the pwrite range. The pinned copy uses a kernel mapping, so it does
-not dirty the already-clean userspace PTE. With no later store through
-the shared mapping, the next writeback need not widen the range, and a
-successful fsync can omit the completed process_vm_writev() bytes.
+1. v3 checked for the pin after folio_mark_dirty(), so an unpin in
+   between skipped the folio and was gone before the check.  With a
+   test-only delay in that window, v3 loses the pinned bytes.  v4
+   checks before dirtying the folio, with the folio locked, so an unpin
+   either still holds the pin or has already dirtied the folio whole.
 
-With lazyio,fsc and a populated active cache extent, an overwrite at page
-offset +1 passes that unaligned start to FS-Cache. CacheFiles rejects it
-with -ENOBUFS before updating the extent, and
-ceph_fscache_write_terminated() explicitly ignores that error. OSD
-writeback can succeed while the old cache data survives. With CACHE
-retained, evicting the clean folio and reading again on the same open fd
-can return the old byte. Marking the cache object LOCAL_WRITE does not
-invalidate its active data. The rejected update needs to leave the old
-extent unreadable, without widening the OSD write to stale neighbours.
+2. The unaligned cache write fails with -ENOBUFS, which is ignored, and
+   a read on the same fd returns the old byte.  v4 keeps the OSD write
+   to the dirty range but rounds the cache write down to the page, so
+   the cache gets whole pages as before.  The cache only serves this
+   client and is invalidated with its page cache.
 
-These findings are from source inspection, not runtime reproductions.
-Could you address them in v4?
+Both tests fail 3 of 3 on v3 and pass 3 of 3 on v4. I will send the v4 later.
 
--- 
-Alex Markuze
+Thanks,
+Xiubo
 
+On Wed, 28 Oct 2026 at 17:29, Alex Markuze <amarkuze@redhat.com> wrote:
+>
+> Hi Xiubo,
+>
+> NACK for v3 as it stands. Patch 3 still has a lost-write race, and its
+> partial writeback can leave stale FS-Cache data readable.
+>
+> The pin check protects a pin that remains held through the check, but
+> there is a release window. A process_vm_writev() pin can survive an
+> initial writeback that cleans and write-protects the shared PTE. After a
+> later lazy pwrite() marks the folio dirty, the pin holder can finish its
+> copy outside the pwrite range and unpin before ceph_folio_note_write().
+> unpin_user_pages_dirty_lock() sees the folio already dirty and skips both
+> locking and re-dirtying it. The pin check then sees no pin and records
+> only the pwrite range. The pinned copy uses a kernel mapping, so it does
+> not dirty the already-clean userspace PTE. With no later store through
+> the shared mapping, the next writeback need not widen the range, and a
+> successful fsync can omit the completed process_vm_writev() bytes.
+>
+> With lazyio,fsc and a populated active cache extent, an overwrite at page
+> offset +1 passes that unaligned start to FS-Cache. CacheFiles rejects it
+> with -ENOBUFS before updating the extent, and
+> ceph_fscache_write_terminated() explicitly ignores that error. OSD
+> writeback can succeed while the old cache data survives. With CACHE
+> retained, evicting the clean folio and reading again on the same open fd
+> can return the old byte. Marking the cache object LOCAL_WRITE does not
+> invalidate its active data. The rejected update needs to leave the old
+> extent unreadable, without widening the OSD write to stale neighbours.
+>
+> These findings are from source inspection, not runtime reproductions.
+> Could you address them in v4?
+>
+> --
+> Alex Markuze
+>
