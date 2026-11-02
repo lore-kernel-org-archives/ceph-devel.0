@@ -1,100 +1,101 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.217.43
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.221.176
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793653278;
-	b=ReUl8YKHV8P4QiSqVxg3858DArMeL5pItU2PrJpZ0ff4LupqLdw0nOvNM+Pm5hk6YK42
-	 PmIWWH32ZrF7I5HKWEE6va6xdDlbATizbRbSAZhQgKxKev5VCus0UvdxvmosxYrGRwLBr
-	 sgYOCbKCLsnrmdEh71tP5YFoKGnNOXE2T+Hx148GJFqyyIFZuhkmQ4qPh7ylvM/yMgoWp
-	 p9Z4+y2Ql2NtQ7GKdCZ3Kxh8Dzc1VdqbjU799om+R3BRQiMFMjVSX4P8wec4DI+/xBzFD
-	 CQUMbIFoewXjNw+h2m6hCSunWb8fiH/9wPYL2PWo96YpmBQypAYFfDI8AVTQS46zkMg==
+	t=1793653737;
+	b=DvfWjz2pnV2+whvTByQC4pEVmblHZPueiiV1/NzqtGQxb5r8cZ/p4V96YLTOnCQP2qDj
+	 syltM0SOJ0hd7UqD9Z2fSXDpb+bi77e6Vp5JAydK7SYLI+v5wBezxS1U30j/Xh2AQE8VN
+	 it1iW3pfBbKt0Z4ujot3JDd7EiqnvaGti7RwHiD3URAI9wMGkLTaa+dBiWm7wNl6q52cx
+	 qRuD/V5hbNt3SMMoDqmZdFEwlw2mOalUeeHzs+TWiqEOfseNhlcqMjNCU/BdR+U7gCmbm
+	 F3iPtq/pzrzwqVsDDg0r2HHtllVVb13EbfX31rAxO6tYKomNrRdtxneGTP1TWTn1o1g==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793653278;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793653737;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
 	 MIME-Version:References:In-Reply-To:From:Date:X-Gm-Features:
 	 Message-ID:Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=AzGy7urIpGHew7dVJqO61fkpD1EwpGhPhtimR7hndxE=;
-	b=QSD+fc02lfm1Pd7xAon7rfB+FarCl8Xv6YONPxkJHfWnfGLp1dyu8EQ5nzcNk81P4zyd
-	 +ZMVXlh+ihDAkuCL+2KDyw82e6OlMXtb3jkKfa0XqTxBEYpRaJpDsIRmf8/EE5avWJMR+
-	 AO1xlBcYsBsrmIrgxHJ1bBENTVg/AiMbpOZDJ1oYyyYDp/swIlK4dH4jvviSIbAInVqgM
-	 l53SIdH7VlAxFysMPPqbhbmrhzjzFrJeZyFcHipa2M0JdSoltbzcSW0pBekyLK+OzDNz2
-	 KXTGjphJjIc0xaU1Ph5/7LFAckItiKRRjZ3vti04CPyyyGHZlVtwqvkyByy/P5fQWJw==
+	bh=QGD7MhFVk1bv3I3FAIE488QygLRtUHvj1HzdJadYoHA=;
+	b=tMvp4jjdFTzFxm4giRM6gI5prOgWGT4xNrVKQABHmu7RFBprmx3HFvzPxVGI1EsjNwUZ
+	 2Hbn7OzTVSY3jvEkbuTLBAjKeEAvAbnmIYVdIhJbe8hJZ09thKXXFXoRuJr+jtWKoPP3g
+	 SioH0GrM3+cZXj3pD3M9kX0/zZIkIun3DS2j1EpL0b/Vx0i2zBfIzAZ2kDCx7x0sg2ttz
+	 Mz6X94otF+OJUUa+NRvHnTXgBOoZrtXnhGu0UOUmZqztNH/prEN75qP3cl/B8XN97MwFo
+	 uzj/93hjbt0MTLNb1LbTAaxnnSZ6VtTMewrG3XBXtQkqClpZT/jEpj9VO68yO4JuG8g==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=FBfI2ztt;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.217.43
-Received: from mail-vs1-f43.google.com (mail-vs1-f43.google.com [209.85.217.43])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Je2WuyDY;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.221.176
+Received: from mail-vk1-f176.google.com (mail-vk1-f176.google.com [209.85.221.176])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5583A606A32C
-	for <ceph-devel@vger.kernel.org>; Mon,  2 Nov 2026 21:01:18 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5583A606A32C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3562606A324
+	for <ceph-devel@vger.kernel.org>; Mon,  2 Nov 2026 21:08:56 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B3562606A324
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=FBfI2ztt
-Received: by mail-vs1-f43.google.com with SMTP id ada2fe7eead31-7ce645a1c6aso2288944137.3
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2026 13:01:18 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1793653277; cv=none;
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Je2WuyDY
+Received: by mail-vk1-f176.google.com with SMTP id 71dfb90a1353d-5eac319a6c2so2792423e0c.0
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Nov 2026 13:08:56 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1793653736; cv=none;
         d=google.com; s=arc-20260327;
-        b=qRkcoK5sT9YeqY8/1r2gYawY6HKCOMvu/nYAXAfmb1Hqmmc6ldr4duJzKX1dHXOnKm
-         F/HgXocqLIB3wGVwFFxDN51lAYPM6Yin3nfi1V1GLYszPwzimEgMlbQlrXwZ/H3Md6ng
-         lJtoZacZipZt5944CeVBxD9U6QTEra90b0niUr3os7F4UZgfIVBy+tMZz4g2GUhxiJhm
-         jLqu5Wx+GT35wK29OEYkKJbFUF8dn3+rGB0jfnwBtBrEfxb9CxVJrWeDlXdH7aQauFQv
-         Bz7fSjrR+QZDlQnU36bjJtxCqaY5Fiaz/Wl6MXwyXmakFJqHJKvt0PUqMLqhY8fWpv2z
-         q/BQ==
+        b=sitifFthj6V/Uj9e7VYKTGDxDm4vMWIOOuNfpkOaPgJnawxqR5l+tm8vs4R5vJEuJx
+         Y5dmuJJ62YzxWnO5jYOuWywkEvNwEpfpYYne2ooYyfm07hwmPECO1wUgqF+V2RZ10ubr
+         RmGxZ37971oRq6Xj1KBmmJlrgQvc3LyUr/yU7yV9MtEVcTTGSt3V2d4IsJ2nmYnoPGAm
+         tx4uQ49VmLL9vxx+w0HAkKq++U0MibHOI0EurWZacNQ0l/Tr2ECuY25E8v03FIlOdea7
+         5LPhj9aBACnaYY7Kq8mocN1BZ9x5ffSWDNdBphgNcvQywJD3OMg8hYJNd00cMDZD/5gg
+         ZG0g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=AzGy7urIpGHew7dVJqO61fkpD1EwpGhPhtimR7hndxE=;
-        fh=MW8v9vT16ndla24RvcABfdNXoTq2BQR1B9VifOjW1Ho=;
-        b=R6/Kr2HWNmMD5BPplQg2yKH3FnQzh691/TlommukNacLBNi9I5oO1cVuKvUljXtYjL
-         Z7OInMQ2R+bh4rL5H2oEHvMgBCsLgVQpzLpFskLHZvaXWZst0+9vKiSWSs3s6pspycEL
-         h6T1ogCMQP5vAbK1tbds/5a2P6VvgI7Q2XvLIEAvpVkS8rNB2KPfgwLRxA+TOpt0j5IN
-         7iATw9Zu2EX/Q9hTBQirNPX84R6/wYw4E2iOvn7EB6RTtr0pi9BqcpTTCsPnpPitEEEU
-         BDc3DvXU7HaO+++eh+Fr5fw0rIPMlcTWSnI8lzifa1mxeIFWAh+6e0Za6m+VxLb1E9BW
-         O1sw==;
+        bh=QGD7MhFVk1bv3I3FAIE488QygLRtUHvj1HzdJadYoHA=;
+        fh=MHoHWJmjPDkxNhu32OO1ftvZRlSVFVLeQPzPuVQg0PM=;
+        b=Pq3shDAvEt+KtsPzHAJr/eU7n3xMawx2Umce3F1uKiNGoCnlgmTrkpnpcIawAH7Opi
+         MfPohv0gP9cfobBVRMQuVy7Kn9RB50M0VUEpb42VOswf/8msN2M0W4Gx0Z0iujaO7pOs
+         YzICy7MB2iDVAcIrQEesc1iqHlm5PyBOCU61bVjXqABgHKbu6P0s3nPcQSCVtu+gQJSX
+         W7t1nOObYexJ6DkB8reFftoRl4Y1VT35wGkQZOVnpBNdK43nUNhMGpIKJM3RKLxnmH/1
+         U+HA0qXxogrG4tUlElgO9bzbn1o7+rGA26JvXzP3UNDHDx95jnFFNfD8v3IRP7MY8YbR
+         hp6Q==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793653277; x=1794258077; darn=vger.kernel.org;
+        d=gmail.com; s=20260707; t=1793653736; x=1794258536; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=AzGy7urIpGHew7dVJqO61fkpD1EwpGhPhtimR7hndxE=;
-        b=FBfI2zttRykbqqNw8z4HxKujtiV24G4bOxEEs5/kej5apLbtjvnvYOBc+nF5msb0tr
-         wpFZv2PyUKsW+dAhcTzl2EUePlx/KlMAZbEZ+V9pWxIJrRI7PN+/g5CKhcSj45lSSMCH
-         BBUMM+RaDARP02KWS8ROuyOTDeznVnRCw87a7EP0D6+5rKL/U8B+MBJLRkjIF3AHq/g/
-         CDKCIwW+Nf98qaz2WYB4KT6oc+6mI0okbGWx4hScMOU3Rx0HOEgOVjnSL/Zcg+hZplaL
-         Lk+wdHscQT6TCk8dIPg5bYAbnlExR1UM4Pbku3Q2p8D3bnzF7tKSShDOqzrNwdkUVCai
-         lkVA==
+        bh=QGD7MhFVk1bv3I3FAIE488QygLRtUHvj1HzdJadYoHA=;
+        b=Je2WuyDYanAdaei3Z5xuc+nZGwnpXpv4gtbnKDQvC6+EFqCMGjJGyb5sgtLcg9luLx
+         3wXA6QEMykjZcOPbssGQuAJ37FHrDPX8/mvyUctntwQt6buhIx4n0o4qSN8hyqX/SFIj
+         HEtdvcVrSOAWfnPIv2uxn5MlDz34wTVmtbki7Gl5TKHAo0UhGDZBFuJIU5Bu4+NDCDtW
+         a1CEA8LZ04DxNRmmywtPCIJhWZcHqf8vBOgDeSNC0BABBzk5ojhjBU9Xcp4Rv8IheR5N
+         yyh4G+hQwBpJy4HE/viMR4TOeBHlcQu5qgTbwFfsYalQ3cskOxMUzMjOYAwgHSlWLxpF
+         rtXQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793653277; x=1794258077;
+        d=1e100.net; s=20260707; t=1793653736; x=1794258536;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=AzGy7urIpGHew7dVJqO61fkpD1EwpGhPhtimR7hndxE=;
-        b=rlYbvsNNc0ao0RA2Jmgt59krCI0/mpbV0Skh6/TYLv6VWVMFkCFQGUDPVmqf0guKIZ
-         YHa+TDrzL6MhUrEGKTELTvDC+kR1imU66BG1jd2bQxHx2c+2NoBrYo+dkY+FCahyMRE6
-         eDOeaG//C4osHrcuGEMitVNPyE7sm1jKMjTwVzuF+jso6SNLUz086xuQrkusJXOxFjK5
-         whBty38a+ulO3KQg288mNkJ+ISLFdyLaq8l48n6RqiI/wF/1m6GJf8ie5QMR56CNY+BU
-         T+9qrnd2gKTVAGIpmeXnHgjRU+ITCWaW9x26rhuAZBxUR0gx6B3DHZi5wHXDiz/bhr4T
-         VInw==
-X-Forwarded-Encrypted: i=1; AKwUvBw4dJFQrnGeFnVhqwEdCd/st0SfvM991upZAmDaIWtLA4bIAhlQUaimxxE7DSonnslZwvZUGdIG48zf@vger.kernel.org
-X-Gm-Message-State: APuU4Z+qz5FK9YfI9jY7V2QHGJm9kCeALXqIRuWPo3lPgI83OnNcsItA
-	LYMHo9T+O1BgJqvkD95E2LopOAk+cwzLTkexiua31Ozs6es5xm9yCryqhts0osnIQMIB1L/qXvh
-	6V5SiOYBRdYvReAAv/+PbOD6vuJoJ84M=
-X-Gm-Gg: AYBFou2KCpCp6oUwO95dzdPem3m0rY8qnx/3c4b3RZhp2W5TadOJZNMhG0KXASbWv8i
-	v3uIO6sKLL+TBDYtDAWg+vOiYjlK87Y8zk/Udb3HfTMR2HbFyXkB/ZolFk0AYxo5YlPIlmKYh3b
-	jbHWvki08LA+rdz637QeidTU8+4c2li76OBV2vvqY347ctRHrk6zB3h1Xx0pYIjA2e2IUUfcGC5
-	mkmineoe53co8jYGcysIfyxZMK/3BTPJDq5Nro8qcvzc4vKqiZz9BK25sAo9OFlnUSeTThpJFtX
-	qzR/uEzY1Hbsy465wT141yl0FL+XjEaYF+YrzbqNxoXB6s7Srrh5ZvG2MGc19Ej0iXMWtEBv6yC
-	rQNjmNFs0mZz2kKNfkTvA8qgFq4NcH0BGKAVqmyfE8JesjDUFespeyGXSzKv/ME/78uTKaHo=
-X-Received: by 2002:a05:6102:5811:b0:7c3:b15:a981 with SMTP id
- ada2fe7eead31-7d072c305d3mr5019729137.15.1793653276174; Mon, 02 Nov 2026
- 13:01:16 -0800 (PST)
+        bh=QGD7MhFVk1bv3I3FAIE488QygLRtUHvj1HzdJadYoHA=;
+        b=LfU0YtAJKiyJRqGoCorwTCWweZxk/WxGZ0C+cQLPFXG26RRA6SSOjx4neMQOZdDuUI
+         s2LkqfUj10XyQoEfAEJaiJsVhU4yVVLR9pvYZdQW7u2vaHaHwgKTFOQJLkYyhULu2X+w
+         FnSUdnf6JqziFmU6FWdDJAb4glebq+WTqwwOqcqWUzhsEGhjWKEqOQeSuegKvLzBKXH4
+         S8Fdr2HUI2twViFihE8BsCZKprjj15nN6yETANn93i+6W2T8HPYQUi9P71wp+RI2WfS7
+         kaANbEs7lGurLPiDL6Ic/GDAhmfN2fj5aais4oYPd1aYLhaT0y7jrQsxZEyve7iYLcu1
+         eB/A==
+X-Forwarded-Encrypted: i=1; AKwUvBzzbsjJmd9pEESrNFWL5yAujmM7uSguakhRA5qBOtkxxZti+l1p6vRsqb3STO2ITErHse5g7IYKXLpr@vger.kernel.org
+X-Gm-Message-State: APuU4Z+QiGR5BI0lZCmiIfkKICeLRznONGzRXyOg83i68Fel/LsLL4Vb
+	UeNvzBdJUksJZZfj26ylrUYdQgdT+e62yuqkuGutpK9H3lxeJB6tNHJf6XLLfedpshihhr/TkZz
+	bmpPhCdeOc48/ofUYaVW3vJFX2sRql4MLj0rVYGw=
+X-Gm-Gg: AYBFou2HSC1gQ5qoR596BnwCxrbIHeDSwiczNfk9SYozeEf9HZkYNhgKcGFLd4qtZY1
+	ZFu/aEl13Pn7714li3PzA+HAXP8XjzEI8MxIHvvubZJe9ucsLjvHuMaycVRdSJOmezUPZqAPFE1
+	vMtdkSXI8sGQk+KoLSybSBh2buEobpkL+nZQQ77ZM7xY2ort74P4+OqpBMgpfMFteL6GZC/Ugcn
+	mQX4NHl4MlO7S6vcyNjhDTnG6inLhlydE+1Kuc8Yb1BPb+JbU4oCFL/nghck81DdhniY2izWslE
+	uM2H9+ILDUOXKqCxrMe4t7VH7qYbskbix59bTXVZRNAB7U2iT3rh8bUbeGqLY0BNH4d2HodIFOo
+	ZVB4jq03LedYb+usGY3jE3q61jOOFdMiFxkV45gb8LU6LMfLMpTyCqU29PtKFLUJvA6vEPSw7H/
+	VoNWf8WvWpRI0XrMtOzA==
+X-Received: by 2002:a05:6102:370e:b0:7c3:2168:d603 with SMTP id
+ ada2fe7eead31-7d071f40bc7mr4465939137.0.1793653735698; Mon, 02 Nov 2026
+ 13:08:55 -0800 (PST)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -104,81 +105,136 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20260902124026.1774575-1-max.kellermann@ionos.com> <CAOJNxRJ9rUZ4JRwcqEtOPu97D3NNsjwV1mniM6LdNytRYiA54w@mail.gmail.com>
-In-Reply-To: <CAOJNxRJ9rUZ4JRwcqEtOPu97D3NNsjwV1mniM6LdNytRYiA54w@mail.gmail.com>
+References: <20260910123951.1241279-1-max.kellermann@ionos.com>
+In-Reply-To: <20260910123951.1241279-1-max.kellermann@ionos.com>
 From: Ilya Dryomov <idryomov@gmail.com>
-Date: Mon, 2 Nov 2026 22:01:04 +0100
-X-Gm-Features: AclHuK_u-vaHTlw45n1B7ztDg1G2EXvymWObtejqyMF3Kk8CGrlA6DuBbpPPY8o
-Message-ID: <CAOi1vP-yKSeBwA=269uACaXmmfX+Bpjwk_x_uJNOtRtohH=ybQ@mail.gmail.com>
-Subject: Re: [PATCH] ceph: acquire caps for read_folio requests without an rw context
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: Max Kellermann <max.kellermann@ionos.com>, amarkuze@redhat.com, 
-	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org
+Date: Mon, 2 Nov 2026 22:08:43 +0100
+X-Gm-Features: AclHuK_PiPKWF4q2Nwn7LD0p5r5C2AXzqyrRzuUqyoEaVhZH22H5uFHAPxl8LHk
+Message-ID: <CAOi1vP9mrDMaABV=KtLRwrGVkBrPrGGBU8mUUnfm6wpdn_rM7Q@mail.gmail.com>
+Subject: Re: [PATCH] net/ceph/messenger: print TCP connect error
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: amarkuze@redhat.com, xiubo.li@clyso.com, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Sep 4, 2026 at 6:55=E2=80=AFAM Xiubo Li <xiubo.li@clyso.com> wrote:
+On Thu, Sep 10, 2026 at 2:39=E2=80=AFPM Max Kellermann <max.kellermann@iono=
+s.com> wrote:
 >
-> Hi Max,
+> A non-blocking connect() usually returns `-EINPROGRESS` and fails
+> later, asynchronously; the actual error is then only visible as
+> `sk->sk_err` in the sk_state_change() callback and was silently
+> dropped.  All the user got was:
 >
-> The fix mechanism looks right: a NETFS_READPAGE request issued via
-> read_mapping_folio() with no rw context should acquire caps, blocking,
-> before hitting the OSD, so it can't race a writer that hasn't flushed
-> yet. Two things though:
+>  libceph: mon4 (1)192.168.1.42:6789 socket closed (con state V1_BANNER)
 >
-> There is one existing Ceph-internal caller that now lands in the new
-> blocking branch: ceph_uninline_data() calls
-> read_mapping_folio(inode->i_mapping, 0, file) from ceph_init_file_info()
-> (fs/ceph/file.c:262) at open() time, with no rw context. On an
-> O_WRONLY open of an inline-data file with no recent readers, RD isn't
-> part of the file's wanted caps (__ceph_caps_file_wanted() derives them
-> from the used fmode), so __ceph_get_caps(RD) takes the -EUCLEAN path
-> into ceph_renew_caps(), which raises the wanted set via
-> __ceph_touch_fmode() and issues a synchronous MDS open request. Such an
-> open now pays an extra sync MDS round-trip, and open() can newly fail on
-> MDS errors. This read also doesn't need caps: the OSD object is not
-> created until the uninline CREATE, and this path intentionally relies
-> on the -ENOENT -> zero-fill behavior. Could you handle this internal
-> caller explicitly (e.g. have ceph_uninline_data()'s read bypass the caps
-> check), rather than making every cap-less READPAGE unconditionally
-> block?
->
-> The blocking acquisition now happens with the folio locked
-> (read_folio contract), inverting the usual caps-before-folio-lock order
-> of ceph_read_iter()/ceph_filemap_fault(). I checked the obvious cycles
-> and didn't find one: a folio that reaches read_folio is clean (dirty =3D>
-> uptodate =3D> read_folio is never called, and netfs_read_folio() diverts
-> dirty folios to netfs_read_gaps() before the request is allocated), so
-> the Fb-revoke flush/writeback never needs to lock it, and the truncate
-> path uses folio_trylock. But please document that invariant in a
-> comment, since it's what makes waiting for caps under the folio lock
-> safe.
->
-> Minor: the new branch hardcodes want =3D CEPH_CAP_FILE_CACHE, while the
-> other read paths add CEPH_CAP_FILE_LAZYIO for lazyio files
-> (ceph_filemap_fault(), ceph_splice_read()); it may also be worth
-> aligning.
->
-> It might also help stable reviewers if the commit message notes that
-> current mainline erofs fileio reads via vfs_iocb_iter_read() ->
-> ceph_read_iter(), so the trigger is gone there and the patch mainly
-> matters for stable kernels and future direct read_mapping_folio()
-> callers.
+> Save the error in the new field `ceph_connection.error_code` and let
+> con_fault() print it next to `error_msg`:
 
 Hi Max,
 
-Did you get a chance to follow up on Xiubo's comments?  Particularly on
-whether the data corruption aspect is indeed gone with EROFS switching
-away from read_mapping_folio() in the upcoming release:
-
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?=
-id=3De587a984d332b76ab89fab546f1594f61f73d5f6
-
-If so, I don't think the Fixes tag applies anymore (although it was
-questionable to begin with as this patch is fixing an oversight in
-CephFS, not in EROFS).
+I wonder if saving the error that way is actually needed.  Can
+con_fault() just reap it with sock_error() at the time it runs?
 
 Thanks,
 
                 Ilya
+
+>
+>  libceph: mon4 (1)192.168.1.42:6789 socket closed (con state V1_BANNER) (=
+-ECONNREFUSED)
+>
+> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+> ---
+>  include/linux/ceph/messenger.h |  1 +
+>  net/ceph/messenger.c           | 23 ++++++++++++++++++-----
+>  2 files changed, 19 insertions(+), 5 deletions(-)
+>
+> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenge=
+r.h
+> index 6aa4c6478c9f..f3aa977d7886 100644
+> --- a/include/linux/ceph/messenger.h
+> +++ b/include/linux/ceph/messenger.h
+> @@ -482,6 +482,7 @@ struct ceph_connection {
+>
+>         unsigned long flags;  /* CEPH_CON_F_* */
+>         const char *error_msg;  /* error message, if any */
+> +       int error_code;  /* errno (negative), if any */
+>
+>         struct ceph_entity_name peer_name; /* peer name */
+>         struct ceph_entity_addr peer_addr; /* peer address */
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 212e7797f9e4..f989e043686d 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -398,6 +398,7 @@ static void ceph_sock_state_change(struct sock *sk)
+>         case TCP_CLOSE_WAIT:
+>                 dout("%s TCP_CLOSE_WAIT\n", __func__);
+>                 con_sock_state_closing(con);
+> +               WRITE_ONCE(con->error_code, -READ_ONCE(sk->sk_err));
+>                 ceph_con_flag_set(con, CEPH_CON_F_SOCK_CLOSED);
+>                 queue_con(con);
+>                 break;
+> @@ -448,8 +449,10 @@ int ceph_tcp_connect(struct ceph_connection *con)
+>         ret =3D sock_create_kern(read_pnet(&con->msgr->net), ss.ss_family=
+,
+>                                SOCK_STREAM, IPPROTO_TCP, &sock);
+>         memalloc_noio_restore(noio_flag);
+> -       if (ret)
+> +       if (ret) {
+> +               con->error_code =3D ret;
+>                 return ret;
+> +       }
+>         sock->sk->sk_allocation =3D GFP_NOFS;
+>         sock->sk->sk_use_task_frag =3D false;
+>
+> @@ -467,9 +470,9 @@ int ceph_tcp_connect(struct ceph_connection *con)
+>                      ceph_pr_addr(&con->peer_addr),
+>                      sock->sk->sk_state);
+>         } else if (ret < 0) {
+> -               pr_err("connect %s error %d\n",
+> -                      ceph_pr_addr(&con->peer_addr), ret);
+>                 sock_release(sock);
+> +               /* reported by con_fault() */
+> +               con->error_code =3D ret;
+>                 return ret;
+>         }
+>
+> @@ -501,6 +504,7 @@ int ceph_con_close_socket(struct ceph_connection *con=
+)
+>          * shut the socket down.
+>          */
+>         ceph_con_flag_clear(con, CEPH_CON_F_SOCK_CLOSED);
+> +       con->error_code =3D 0;
+>
+>         con_sock_state_closed(con);
+>         return rc;
+> @@ -1613,12 +1617,21 @@ static void ceph_con_workfn(struct work_struct *w=
+ork)
+>   */
+>  static void con_fault(struct ceph_connection *con)
+>  {
+> +       int error_code;
+> +
+>         dout("fault %p state %d to peer %s\n",
+>              con, con->state, ceph_pr_addr(&con->peer_addr));
+>
+> -       pr_warn("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
+> -               ceph_pr_addr(&con->peer_addr), con->error_msg);
+> +       error_code =3D READ_ONCE(con->error_code);
+> +       if (error_code)
+> +               pr_warn("%s%lld %s %s (%pe)\n", ENTITY_NAME(con->peer_nam=
+e),
+> +                       ceph_pr_addr(&con->peer_addr), con->error_msg,
+> +                       ERR_PTR(error_code));
+> +       else
+> +               pr_warn("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
+> +                       ceph_pr_addr(&con->peer_addr), con->error_msg);
+>         con->error_msg =3D NULL;
+> +       con->error_code =3D 0;
+>
+>         WARN_ON(con->state =3D=3D CEPH_CON_S_STANDBY ||
+>                 con->state =3D=3D CEPH_CON_S_CLOSED);
+> --
+> 2.47.3
+>
