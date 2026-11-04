@@ -1,60 +1,48 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=159.226.251.21
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793722986;
-	b=wTcigA/d4mHH3wCfnUaBB4LDj47nYnl6uQzsg8xQlkIueoZBe8HGYWq9inUpTvkZyNHX
-	 re3z1TjQB865zdZkd21j63sWOfENKrjQf2GcNzeNHAKHm0wF04hvKmXeHCfyULcMvxnyd
-	 PBNdVMd0hvIADshzOsW3jebXqH5GLoJicRMs6t/yJFK22JScCVrbjRWsjVK6yDC89No5h
-	 PKPafoIjeLFA9pmt15+2qTokFgBSfEFHt/gHUpR8vLPIR8uBeY3hOO+Runq2kbRpfwHEp
-	 sddiOhs60KWCDYuzED2h+nNPa87j90Yz0gBwpPEloHwS8MKxELi/ua0S2/moifL5NbA==
+	t=1793758526;
+	b=DGS5Hj6KdJQhGPE6nFi5NtQUJop2hAXVLAXP/V1Sic6VQrD+2KUiLHp62uMiagRuEfEn
+	 np/04Oy52+CcaM31Vl8DTXC7uThR/FE3kWeohDs4NaopOJhfaWPYol+g9th2IdGjd4Yys
+	 6QJ0RGxGG3EDUf7hKInKkSXAwTgzM3Fueiq0wziJ6f/mdnY3MklG0U9Pu25ym72hrJIaM
+	 UxxYUlZj1lAp2bZZWsqJCwHbd/W1b+LrSHkgKmmMIOPZPFVx3p7o8l4OyB8KdtJmJbWKY
+	 iWaH4Ae2UxLMdbNEoEDthz+LqDEVscp/3Y2zvYVTisd0EXzbp+G0/GqE/IrvdIZ8jkw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793722986;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 MIME-Version:X-Developer-Signature:X-Developer-Key:
-	 Content-Transfer-Encoding;
-	bh=93riYcJlLAnFynJurIkyvUiaXMItBgFK98KFEK7jbvc=;
-	b=T37104evkDCeKG8kHKSjWOUnLkjJ7mlYMEgzDxpB3shC+Iwy6ITOJzc5ofWN2TUQFXJV
-	 9f1fgBc748ykpNvDt8K7x/M63mYPkQNLp2ltfBGTZsKYLGqeI+x47jwMHp20mEsyy+dMq
-	 y0CjtP2lgGbNX21bqwRbszJBbUZWjYJcH2cJ1DtAPjC/dD47mABP5J6B5gRLOq/RdbuQl
-	 Cw4TkyL8Z1wHy5nuATnKQAvUOTFqI+/IVgQ943igdwMBqJeTNoLjbnXO6v0LnmRA0PPOs
-	 T0SeQa2MF9Ezm0Akj99vEhMW4f52R/TTlxeYK8vr0CZZc5MDnrsgVFP0KZYlIPbdmoA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793758526;
+	h=DMARC-Filter:Received:From:To:Cc:Subject:Date:Message-Id:X-Mailer:
+	 MIME-Version:Content-Transfer-Encoding:X-CM-TRANSID:
+	 X-Coremail-Antispam:X-Originating-IP:X-CM-SenderInfo;
+	bh=XUNAuMt7YUTIvzRWXrcL8Z2SWrDWnGJd/db01OpiegE=;
+	b=wc8NkNu1+OvhG9cAORVnHoQXFcvIB5TnH703Aw4r/bm4T43U1KirYzD0nBxht53FMtTM
+	 +EZNzfXsSwGDoc8MePY15VMOAdOzoUu9FbU8Pnck/Gofv5WWrTw3Sm6Wcpf5d8krprNgT
+	 iY19se2cDaarrRpA3CWZA6sV/GaZVhxgQQRqGvrabtYwHcbQze7r5oT2TW8Kw3gMDsK9h
+	 6Xi0vRZ+dklP0lfqIbvSWewih6ULydRvDcGP5+82mnOX19E+mDEOBQFhc0O7UY/eR4xhe
+	 fVqmRpdRwGIRzvxRFQ1Dog7mPuT9vSjaEs66HYKdCZDtIgdreJdcgMHDwfLZGIcRfoQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PHbst4bj;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=none header.from=iscas.ac.cn;
+	spf=pass smtp.mailfrom=iscas.ac.cn;
+	arc=none smtp.remote-ip=159.226.251.21
+Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87B48606A324;
-	Tue,  3 Nov 2026 16:23:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PHbst4bj
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 762F91F00919;
-	Tue,  3 Nov 2026 16:23:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793722986;
-	bh=93riYcJlLAnFynJurIkyvUiaXMItBgFK98KFEK7jbvc=;
-	h=From:To:Cc:Subject:Date;
-	b=PHbst4bjxWvYbgLPWOEMm1vMooIlQtLl1xzM5j2rfP0bf8QBJ527wdNHU4ED5fcZo
-	 Jzo7K0K2GGxn/Gf4qzEceickif0Bx3bUNmxLiBX5Mc1n7u95llvXmdKMrnINDKWha5
-	 aKkJIWHEbDrZ5r/jYDl5LJ5cWH26eGpmit6eITCDv2wTUZKxZT7tmeamiXEMzvtkcW
-	 qID3i0BBozoIR7HLSJF2v3Br3uhsLG3HDuaBNraWnZQCcQ/dZDC6MYxgrmns8xMFbs
-	 1aygxfkUHSKR4+YAFVgr5YO3VevuaTX31YP08V49vAHlcfB/GJw0NORVjAifm3LGXQ
-	 qSCaRW0osdrdA==
-From: Thorsten Blum <blum@kernel.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 948BB606A326
+	for <ceph-devel@vger.kernel.org>; Wed,  4 Nov 2026 02:15:25 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 948BB606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
+Received: from dfae2b116770.home.arpa (unknown [36.110.52.2])
+	by APP-01 (Coremail) with SMTP id qwCowAC33vg4lepqmXc+AA--.9339S2;
+	Wed, 04 Nov 2026 10:15:20 +0800 (CST)
+From: Wentao Liang <vulab@iscas.ac.cn>
 To: Ilya Dryomov <idryomov@gmail.com>,
 	Alex Markuze <amarkuze@redhat.com>,
 	Xiubo Li <xiubo.li@clyso.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>,
-	Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: Thorsten Blum <blum@kernel.org>,
-	ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-hardening@vger.kernel.org
-Subject: [PATCH] libceph: Annotate crush_rule::steps with __counted_by()
-Date: Tue,  3 Nov 2026 17:22:28 +0100
-Message-ID: <20261103162226.433523-3-blum@kernel.org>
-X-Mailer: git-send-email 2.56.0
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: [PATCH] ceph: drop the mds request if the inline read getattr fails
+Date: Wed,  4 Nov 2026 02:15:29 +0000
+Message-Id: <20261104021529.1468722-1-vulab@iscas.ac.cn>
+X-Mailer: git-send-email 2.34.1
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -64,28 +52,65 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=722; i=blum@kernel.org; h=from:subject; bh=4dEsgy5eXGD2Hw0EYUQ8J0Mbzw0Qy8DSrJ00SHPTElQ=; b=owGbwMvMwCUWt7pQ4caZUj3G02pJDFmvuJw++HxSyF52ivnW9JTStZe+V5qGMli8nGDz/KRli BHf4mbfjlIWBjEuBlkxRZYHs37M8C2tqdxkErETZg4rE8gQBi5OAZiIxmRGhrklBmVzrMWzT3FJ brC92Sg6KeLflTyrIuM3zs+/Rm2frsrwz0T01Rb3F95Sn3fxNm0xO3FqbkrMw1qOoKQvB/fO7mC t4QUA
-X-Developer-Key: i=blum@kernel.org; a=openpgp; fpr=1D60735E8AEF3BE473B69D84733678FD8DFEEAD4
 Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:qwCowAC33vg4lepqmXc+AA--.9339S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7Ar1kuw17tF4fAw1UKF15Jwb_yoW8Xr1Upr
+	W8WFZrKrW5XF4xZF17JF1Uuw1Fkr4akFyfCrWUta1Sk3Z5X3929r12q390qF13ArW8C390
+	gr1qvws8ur1jkrJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUvmb7Iv0xC_Kw4lb4IE77IF4wAFc2x0x2IEx4CE42xK8VAvwI8I
+	cIk0rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2
+	AK021l84ACjcxK6xIIjxv20xvE14v26F1j6w1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v2
+	6r4UJVWxJr1l84ACjcxK6I8E87Iv67AKxVWxJr0_GcWl84ACjcxK6I8E87Iv6xkF7I0E14
+	v26rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xf
+	McIj6xIIjxv20xvE14v26rWY6Fy7McIj6I8E87Iv67AKxVW8Jr0_Cr1UMcvjeVCFs4IE7x
+	kEbVWUJVW8JwACjcxG0xvY0x0EwIxGrwCY1x0262kKe7AKxVWUAVWUtwCF04k20xvY0x0E
+	wIxGrwCF04k20xvE74AGY7Cv6cx26r48ZrWUJr1UMxC20s026xCaFVCjc4AY6r1j6r4UMI
+	8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AK
+	xVWUAVWUtwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26F1j6w1UMIIF0xvE2Ix0cI
+	8IcVCY1x0267AKxVW8Jr0_Cr1UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E
+	87Iv67AKxVW8JVWxJwCI42IY6I8E87Iv6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2KfnxnU
+	UI43ZEXa7IUYbiStUUUUU==
+X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiCRUBA2rqY-m42wABsm
 
-Add __counted_by() to crush_rule::steps to improve access bounds
-checking via CONFIG_UBSAN_BOUNDS and CONFIG_FORTIFY_SOURCE.
+ceph_netfs_issue_op_inline() creates an MDC request with
+ceph_mdsc_create_request(), which returns it with the caller's
+reference, and hands it to ceph_mdsc_do_request().  The reference is
+dropped with ceph_mdsc_put_request() on every path that uses the reply,
+but the error return of ceph_mdsc_do_request() jumps straight to the
+out label.
 
-Signed-off-by: Thorsten Blum <blum@kernel.org>
+A failed getattr - a killed MDS session, an interrupted request or a
+reply parsing error - therefore leaks the request and everything it
+holds, including the inode reference it took, on each inline read of a
+small file.
+
+Release the request on that path as the other callers of
+ceph_mdsc_do_request() do.
+
+Fixes: 5b19f1eba459 ("ceph: make ceph_netfs_issue_op() handle inlined data")
+Cc: stable@vger.kernel.org
+Assisted-by: DeepSeek-V4.1-Flash and OpenAI Codex
+Signed-off-by: Wentao Liang <vulab@iscas.ac.cn>
 ---
- include/linux/crush/crush.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ fs/ceph/addr.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 30dba392b730..7d243b9b1093 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -87,7 +87,7 @@ struct crush_rule_mask {
- struct crush_rule {
- 	__u32 len;
- 	struct crush_rule_mask mask;
--	struct crush_rule_step steps[];
-+	struct crush_rule_step steps[] __counted_by(len);
- };
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 01f62683a0b2..aa5dcbd69404 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -310,8 +310,10 @@ static bool ceph_netfs_issue_op_inline(struct netfs_io_subrequest *subreq)
  
- #define crush_rule_size(len) (sizeof(struct crush_rule) + \
+ 	trace_netfs_sreq(subreq, netfs_sreq_trace_submit);
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
+-	if (err < 0)
++	if (err < 0) {
++		ceph_mdsc_put_request(req);
+ 		goto out;
++	}
+ 
+ 	rinfo = &req->r_reply_info;
+ 	iinfo = &rinfo->targeti;
+-- 
+2.34.1
+
