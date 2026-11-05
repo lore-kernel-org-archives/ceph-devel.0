@@ -1,55 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=219.143.121.9
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793849128;
-	b=O2kqnoHXJsCHzCiaICOE4DJ8VfjRrPGlYyGZqghL4ak2b1cwgQ5zfMLUeUdeW7LOAM+d
-	 GPGosYBrwPqLqo4MikGko/bZYrkE5JUZpjXzKKOrXobarOGflxoGcPbPorDRkaHpS6jQd
-	 +eMstXKhp0awb2c2qsjB1gv62CJWHEhhUPcxASoPPsCYHkmIS+nlbLlVdwQYUJzROXSmo
-	 BbSs6ZcW8g050jgu2HWVO4jPsFj64XfO5kn+CdvRFhWJaFyjmnO3F3HSR7myA9A8/v4yF
-	 xynSwkpVC/7HYGMQwdIJRVKZIb1VE7Ax8BPZ09lZfnWC1TA4dsEfwGxKRLUWAYago2A==
+	t=1793858047;
+	b=SSGCaC9H3NpSju8HuFLTIy2feU4RzyE3BPWG3zh57rjoeqMMttNp3/iU8s3AkH49cle1
+	 LLD4PUivASp9yJtttFWrjfxvNIzq/VYknNcedUoGa/I5dIP6QwB6b0AxzvSGcU5lnydib
+	 27Lt0NsopeTVu7FlTNkwVm3qRHUk1knKrdN3RCDamxVj8E9wzKkBTbR4359iBFxByo0e6
+	 tw8Ca4XWnOUzQCyEECwqxmxdsuYh8IT22PLWLVmU5ChpHyJB/JAqVBz0K6QeKTffJM7EN
+	 dJje0RjvxXU04OEV8egdX8ipGGHdwnus2jRZF2IpKMbmAaSWeCY3Ln20KOmbGzCaczg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793849128;
-	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=DFRZ7QXKXPAVQTwjKmq6RCiErLGdMEwaLBPGPazQE7A=;
-	b=grkiHCwfe2XK21t4zvqxgKjv80O3hWcyz1pPGdZID0ffy5mCVu1420P1KHUjj22v9MdJ
-	 X7tTStgqpgN1pfY3A2CF1XXexky6GISWRklZoaZw2/XqzW/n43oGMkwGXBSIFURT/R2cY
-	 UNUggeIm5FjnSP7Uato0Zw9vLmX3vdozoKKMMQx/h17PnvlpqPqtC2/VaVTQBxkevGfoK
-	 G/ge9y+QtD2cjlIcdX12EMIs+uaByMEImijTmukVugZHf6bTTM+1mB0rDht+v9iW3uHdk
-	 i0Q2upQWAs4Y2WfxJ5ajMfxQB4vqz/lagbssiP2A2e5ACadDJywdK2Iewhtn6JjdM4g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793858047;
+	h=DMARC-Filter:Received:From:To:Cc:Subject:Date:X-Mailer:MIME-Version:
+	 Content-Transfer-Encoding:X-TLS:X-ENVELOPE-SENDER:X-SOURCE-IP:
+	 X-FangMail-Miltered:X-FangMail-Envelope:X-FangMail-Bounce-Flag:
+	 X-FangMail-Outinfo:X-CLEAN:Message-Id:X-Fangmail-Anti-Spam-Filtered:
+	 X-Fangmail-MID-QID;
+	bh=VDXls04qQSI4HIp6mJhgcpmi+rXfyrJwAbauaHnqrtc=;
+	b=hXighX1+TheLB/BIIpWavL8qu1pAtWNpPK5qXnxqYm7zZI2wAxRLR+hWHfll73ezVi/t
+	 O8ZAbSQuj9SX9XDL0HSJVfu+3frss2NbCnf2+d9ABenPsaX641Tqh/hCjcGXypuaxNHz5
+	 M9sXAchXsebiyBOfXKKxxxNe/OgZZnrNDsrGcWgCIEdSgGL3Fdl7sCxeKYfK35rj5H1HE
+	 KtUmw7aI8Hnoj6GCDFLkcBuyZ7jAoOp7ZpnlD4XxjwBEC7CypquJUHeALMUoMQGYpJXU2
+	 BZPzPd9BaHbeLiBJC/Ev5gbikRhGmLHwJ8/RzY7EGhOpiLHJhmAXCEaQabdh5HXEHnQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KFRPOa8v;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=isoftstone.com;
+	spf=pass smtp.mailfrom=isoftstone.com;
+	arc=none smtp.remote-ip=219.143.121.9
+Received: from spam.isoftstone.com (smg.isoftstone.com [219.143.121.9])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCCCC606A33B
-	for <ceph-devel@vger.kernel.org>; Thu,  5 Nov 2026 03:25:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KFRPOa8v
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 62B9C1F00A02
-	for <ceph-devel@vger.kernel.org>; Thu,  5 Nov 2026 03:25:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793849127;
-	bh=DFRZ7QXKXPAVQTwjKmq6RCiErLGdMEwaLBPGPazQE7A=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=KFRPOa8vKidxfknkfWYdWtFWhdGgDILXr/LpGwlTMuPUGRO9lV9p0wRwWaF54QN70
-	 4DKRT0c3mvKU6nhUedhQgwsIdVKI9SE/98GlzNRgmxaMfOaEBS1YgIoebv9BU0wvCe
-	 Fszcu+DRuceUWHowBmokByklB/TBTHkhYihCuh6rVkQc9msjGavp7d5VLwkq39SrT2
-	 6300BJxhF8T4Cvj5v/1jBji+kw1g6r65QEiJFCdscSSAKDCVsPjx2cZRCItVy/YE3f
-	 VLlFjGLAJLSV+/F1zEfQvvVAIe06QvW9AFk7kraaJNyxPFaXMmFdgfuba75vJo4j8m
-	 +s7riBgiw5AdA==
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5bcb1f1358aso1122308e87.1
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Nov 2026 19:25:27 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AKwUvBzo3/1AZGfJXPSNcV/+orGANonJkEfsY/shpeppZxljXbdWmbqGuwbdXnvl1Kc3ce0+uSJhnD7eBxiZ@vger.kernel.org
-X-Gm-Message-State: APuU4Z8tlPkeblkmh99ggo9NENbqkRgfLSn6i0B/Ox/5dASJd1Sop3Kl
-	bhMAvUTKk1ZW7+ZjFGAUdezmfa/W7yGte64LpdlRFBz3NDGH5JReqALbz6NlAH8rBSlZsmDnLKQ
-	jaRzq0OqChhdxWBmpXXgRz8kQmCQUFJ4=
-X-Received: by 2002:a05:6512:3e19:b0:5bc:c325:1260 with SMTP id
- 2adb3069b0e04-5bfd957e7d6mr5933625e87.55.1793849126127; Wed, 04 Nov 2026
- 19:25:26 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 738A2606A330;
+	Thu,  5 Nov 2026 05:54:05 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 738A2606A330
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=isoftstone.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isoftstone.com
+Received: from ldzh.. (unknown [221.226.109.28])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: dlzhangak@isoftstone.com)
+	by spam.isoftstone.com (FangMail) with ESMTPSA id 4jKs1y00vLz3CgW;
+	Thu, 05 Nov 2026 13:53:57 +0800 (CST)
+From: zhangdaolong <dlzhangak@isoftstone.com>
+To: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	zhangdaolong <dlzhangak@isoftstone.com>
+Subject: [PATCH] ceph: fix inode and i_filelock_ref leak on file lock rollback
+Date: Thu,  5 Nov 2026 13:53:57 +0800
+X-Mailer: git-send-email 2.48.1
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -59,81 +58,74 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20260910123951.1241279-1-max.kellermann@ionos.com>
- <CAOi1vP9mrDMaABV=KtLRwrGVkBrPrGGBU8mUUnfm6wpdn_rM7Q@mail.gmail.com> <CAKPOu+82TXE2PqXSmSa2hPdj1X-AtP3BVACsBEhn=EKuOdjSRg@mail.gmail.com>
-In-Reply-To: <CAKPOu+82TXE2PqXSmSa2hPdj1X-AtP3BVACsBEhn=EKuOdjSRg@mail.gmail.com>
-From: Xiubo Li <xiubli@kernel.org>
-Date: Thu, 5 Nov 2026 04:25:14 +0100
-X-Gmail-Original-Message-ID: <CAOuZWzy1MQ8WNvZbfQj-vaN83kiZzuKuyV3yxM-W8aBLsz2e8w@mail.gmail.com>
-X-Gm-Features: AclHuK-E-HFu7aurtBFFGXkXEBaOQEk070VBg_Ma8mHsee35kyST0vbL8Ms1-gg
-Message-ID: <CAOuZWzy1MQ8WNvZbfQj-vaN83kiZzuKuyV3yxM-W8aBLsz2e8w@mail.gmail.com>
-Subject: Re: [PATCH] net/ceph/messenger: print TCP connect error
-To: Max Kellermann <max.kellermann@ionos.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, amarkuze@redhat.com, xiubo.li@clyso.com, 
-	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-TLS: YES
+X-ENVELOPE-SENDER: dlzhangak@isoftstone.com
+X-SOURCE-IP: 221.226.109.28 unknown Thu, 05 Nov 2026 13:53:58 +0800
+X-FangMail-Miltered: at fangwg01 with ID 6AEC19F5.003 by FangMail milter!
+X-FangMail-Envelope: 1793858038/4jKs1y00vLz3CgW/6AEC19F5.003/221.226.109.28/[221.226.109.28]/ldzh../<dlzhangak@isoftstone.com>
+X-FangMail-Bounce-Flag: 1793858038.6AEC19F5.003
+X-FangMail-Outinfo: 1793858038/6AEC19F5.003/4jKs1y00vLz3CgW/dlzhangak@isoftstone.com/1
+X-CLEAN: YES
+Message-Id: <1793858040.6AEC19F5.003.4jKs1y00vLz3CgW@fangwg01>
+X-Fangmail-Anti-Spam-Filtered: true
+X-Fangmail-MID-QID: 6AEC19F5.003/4jKs1y00vLz3CgW
 
-On Tue, Nov 3, 2026 at 8:06 AM Max Kellermann <max.kellermann@ionos.com> wr=
-ote:
-> On Mon, Nov 2, 2026 at 10:08 PM Ilya Dryomov <idryomov@gmail.com> wrote:
-> > I wonder if saving the error that way is actually needed.  Can
-> > con_fault() just reap it with sock_error() at the time it runs?
->
-> Maybe that would be possible.  I wasn't sure if sk_err (from
-> ceph_sock_state_change()) would remain untouched until con_fault() was
-> eventually called, or if it somebody would clear it in the meantime.
+When ceph_lock() or ceph_flock() succeeds in acquiring a file lock on
+the MDS via ceph_lock_message() but fails to install the lock locally in
+VFS (for example when posix_lock_file() returns -EAGAIN or -EDEADLK, or
+locks_lock_file_wait() is interrupted), it sends a CEPH_LOCK_UNLOCK
+rollback request to the MDS reusing the same struct file_lock instance.
 
-It does get cleared, by ceph_con_workfn() itself.  SOCK_CLOSED is only
-checked at the top of the loop, so if the error arrives after that
-check, the ceph_tcp_sendmsg()/recvmsg() in the same pass reaps sk_err
-via sock_error() and con_fault() later sees 0.
+Because ceph_lock_message() unconditionally invokes
+fl->fl_ops->fl_copy_lock(fl, NULL) for every CEPH_MDS_OP_SETFILELOCK
+operation, the rollback call increments ci->i_filelock_ref a second time
+and overwrites fl->fl_u.ceph.inode with a second igrab(inode) reference.
+When the caller subsequently frees or releases the request file_lock,
+ceph_fl_release_lock() only runs once, permanently leaking one
+i_filelock_ref count and one inode reference per rollback and causing
+'VFS: Busy inodes after unmount of ceph' on unmount.
 
-I tried both on a 7.3-rc1 kernel.  Reaping in con_fault() works for the
-remote ECONNREFUSED and ECONNRESET cases, but with a refused connect on
-loopback (ms_mode=3Dlegacy and crc) the error was lost every time:
+Fix this by:
+1. Skipping fl_copy_lock() in ceph_lock_message() when cmd is
+   CEPH_LOCK_UNLOCK, since unlocking does not add a file_lock to the
+   inode.
+2. Guarding ceph_fl_copy_lock() against being called when
+   dst->fl_u.ceph.inode is already set, ensuring a single file_lock
+   never acquires multiple inode references across retries or rollbacks.
 
-  state_change sk_state 7 sk_err 111
-  try_write ret -111, sk_err 0
-  con_fault: sock_error() =3D 0
-  libceph: mon0 (1)127.0.0.1:1 socket error on write
+Fixes: 89aa59301013 ("ceph: keep auth cap when inode has flocks or posix locks")
+Fixes: 8e1858710d9a ("ceph: avoid use-after-free in ceph_fl_release_lock()")
+Link: https://tracker.ceph.com/issues/81372
+Signed-off-by: zhangdaolong <dlzhangak@isoftstone.com>
+---
+ fs/ceph/locks.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-With this patch the same case prints "socket error on write
-(-ECONNREFUSED)".  Using the try_read/try_write return value instead
-doesn't work well either, because msgr1 returns -1 for protocol
-errors.  So saving the error in ceph_sock_state_change() looks like the
-simpler option to me.
+diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+index 677221bd64e0..17b893c234d3 100644
+--- a/fs/ceph/locks.c
++++ b/fs/ceph/locks.c
+@@ -34,6 +34,10 @@ void __init ceph_flock_init(void)
+ static void ceph_fl_copy_lock(struct file_lock *dst, struct file_lock *src)
+ {
+ 	struct inode *inode = file_inode(dst->c.flc_file);
++
++	if (dst->fl_u.ceph.inode)
++		return;
++
+ 	atomic_inc(&ceph_inode(inode)->i_filelock_ref);
+ 	dst->fl_u.ceph.inode = igrab(inode);
+ }
+@@ -81,7 +85,7 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
+ 	u64 length = 0;
+ 	u64 owner;
+ 
+-	if (operation == CEPH_MDS_OP_SETFILELOCK) {
++	if (operation == CEPH_MDS_OP_SETFILELOCK && cmd != CEPH_LOCK_UNLOCK) {
+ 		/*
+ 		 * increasing i_filelock_ref closes race window between
+ 		 * handling request reply and adding file_lock struct to
+-- 
+2.48.1
 
-A normal FIN-close prints no error code, and a synchronous connect
-failure prints "connect error (-ENETUNREACH)".
-
-Nit: msgr2 still prints "ceph_tcp_connect failed: %d" in
-prepare_read_banner_prefix()'s caller, which is now redundant.
-
-Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
-
-Thanks
-- Xiubo
-
-Max Kellermann <max.kellermann@ionos.com> =E4=BA=8E2026=E5=B9=B411=E6=9C=88=
-3=E6=97=A5=E5=91=A8=E4=BA=8C 08:06=E5=86=99=E9=81=93=EF=BC=9A
->
-> On Mon, Nov 2, 2026 at 10:08=E2=80=AFPM Ilya Dryomov <idryomov@gmail.com>=
- wrote:
-> > I wonder if saving the error that way is actually needed.  Can
-> > con_fault() just reap it with sock_error() at the time it runs?
->
-> Maybe that would be possible.  I wasn't sure if sk_err (from
-> ceph_sock_state_change()) would remain untouched until con_fault() was
-> eventually called, or if it somebody would clear it in the meantime.
->
-> --
-> Max Kellermann
-> Principal Architect
-> Hosting Technology
->
-> cm4all | Im Mediapark 6a | 50670 K=C3=B6ln | Germany
-> General information about the company can be found here:
-> https://www.cm4all.com/impressum
-> A member of the IONOS Group
->
