@@ -1,54 +1,56 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=219.143.121.9
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793931199;
-	b=VuFcIkzZlKBUK9/yr/hsOHy/YfqOpRaIYfsgGix4DtMbeTppWGWzuchmsR/79Q2a2Q86
-	 tOo7rcBlW4D22OvUKcp9/Xx5/BMMXCaE3AOisbG1kEXZFgs8ggRXVsmW66gjtrgesevYL
-	 kcPC7h353VXslC0aukQJ6Oim80RfTkmjXWt1jBtucjjiJxrGK3M+eQs8nwbrXCQjY+AHh
-	 7zM9rxCBwdka6Js1WnyMvwAvbEgFXk65IKVR53HXKP7zMfG2mqvGN8yiqR75Cx+L13jEO
-	 snNhYbRmkUkFrpeZKdpikdrfAYJqPEeo03i/QRDQGSQ98k4iRFLavlYsV98Wq1k63+Q==
+	t=1793955521;
+	b=x8W/hoa5WdYcTdjueFiQdQH8XwTmlfyaAI8+2ITl3cnyiB0PCDCwuihGFua6SLuzGdvN
+	 ubgl8jFclmBcrS66aFYWPdvCIFzsXQHmzToBWrbqTDtajK6F7SWFA6+af3ztLnEhWuABY
+	 loNhFVHFpZXx8pF7reWMRBrskpBen0OypqvCGCSGaXNGrjAOa8ePzdgnc4Gyr1Y4lPel/
+	 jlvwNPo/4qhD+46MxiksTvt2R5kdyQPzTnzNmMGWLJloQAbJmY6BSLji12/VXwty6a3Pg
+	 u0/ZaogIrmEQX/Ne83wwg/+sXYCI3Ep8DY0+2bUxdy7eeDwGVf8gYdQzjn/Cq/6zFsw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793931199;
-	h=DMARC-Filter:Received:From:To:Cc:Subject:Date:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding:X-TLS:X-ENVELOPE-SENDER:X-SOURCE-IP:
-	 X-FangMail-Miltered:X-FangMail-Envelope:X-FangMail-Bounce-Flag:
-	 X-FangMail-Outinfo:X-CLEAN:Message-Id:X-Fangmail-Anti-Spam-Filtered:
-	 X-Fangmail-MID-QID;
-	bh=IXDbLD8+07I3K03p4PVRKPsQ8QqKTTPpkBAUsJipFic=;
-	b=Y0tCiMZ8HdmUofDvfvPLzDkZvB/O6eSgFwzxxw63IsJ4hW1X2GoVSpbiWTlfx4gVNwCT
-	 qVBrozJox0U4EQilX1kanG3jmf0wtuZJxqR/bJYqWQQmiT2uN+xGMf4buJgogAQmJEszp
-	 DY/rIKxDNxg287UdZmcJcQK1CiLfBVfRTkD1g4SbpxYcfczSEFMzXcdZpUIio8zHrgtSa
-	 mkRKLTMt2OTelhHBr1PH+jAOkED4oC9P/xXbmZGpqFEr/iI08Ql3yl+wYuQJp9yoI4W3a
-	 QABTlVGniISt8oSuYCvjz8tULf7Pof/WvedcIlKOIrosThal6MX0+pevzGqo/S1cEpQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793955521;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=uY2z+WiMRycCgSzTLuJYpDAs4u+e3hUofoi4yXknU0A=;
+	b=zbNnj5AMGnAt+65R8Ue0kTsklqbOJBKOiTDudMyMZaJOTOQTc78UGg8myaVQVPQxsCmQ
+	 onP2yGFkZp0Bu+qOCZuMcA6LPH3kkclObc1S2a8OZ7iY4fUfJGKyBNsrU7cHriNb90BAL
+	 dOGsXzMKi8b/o89Wj0CWq0Zgeu0ZnB+3H2Rfxg1qwKbDjyERioTIfNWagMRLUAyEEj3Nb
+	 mLQL1dkb0YbRRlYwPVT58FwnKOwleMDLbYEIUtcfwALIIxtgV8j052iskJArf7LNPMA5N
+	 7hGPzGWFtViXnrBTgsF1q2XGdXCgOrARFb6aOnSKYGnRazjK3fCU4E1Q9Yzc/qjJ7vg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=isoftstone.com;
-	spf=pass smtp.mailfrom=isoftstone.com;
-	arc=none smtp.remote-ip=219.143.121.9
-Received: from spam.isoftstone.com (smg.isoftstone.com [219.143.121.9])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SRZTvbqG;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C98C5606A31B;
-	Fri,  6 Nov 2026 02:13:17 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C98C5606A31B
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=isoftstone.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isoftstone.com
-Received: from ldzh.. (unknown [221.226.109.28])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: dlzhangak@isoftstone.com)
-	by spam.isoftstone.com (FangMail) with ESMTPSA id 4jLN4k2qrnz23wX;
-	Fri, 06 Nov 2026 10:13:10 +0800 (CST)
-From: zhangdaolong <dlzhangak@isoftstone.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	zhangdaolong <dlzhangak@isoftstone.com>
-Subject: [PATCH] ceph: revalidate dentries under snapdir to drop stale snapshots
-Date: Fri,  6 Nov 2026 10:13:10 +0800
-X-Mailer: git-send-email 2.48.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F820606A326;
+	Fri,  6 Nov 2026 08:58:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SRZTvbqG
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F5321F0089F;
+	Fri,  6 Nov 2026 08:58:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793955521;
+	bh=uY2z+WiMRycCgSzTLuJYpDAs4u+e3hUofoi4yXknU0A=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=SRZTvbqGRZtPITJdrVmBB6ut8PxEml+amDCfjRlMqLHhHzWnewWetimD2z6K4VKbs
+	 2mTZfC7lyqh+0VszDh3wDoklo//2DVSIUh1kGzcDVL534K9089SmsDHGvFC86QqCW5
+	 +6mbiyMP7KAy6FFkUWCEnHJyYfZVIOp+XhNUQ55uXVVleMrfzAY9/HDUyHVgBOeRcS
+	 sZ7oq7rsRqFZCS0m6pIj3dMMBj/FuKGHFl7NfvoyLxHeLNJJ7ekGB2lG1s3LCEtPwo
+	 8RBhMB1NgLF51czy0ADTopSm/wZ92l4M0mztjZ0wFoKc/szcwgOYBN2DQxKN/RqvYs
+	 r68lOqDqP7Ynw==
+Date: Fri, 6 Nov 2026 09:58:35 +0100
+From: Christian Brauner <brauner@kernel.org>
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org, idryomov@gmail.com, xiubo.li@clyso.com, 
+	slava@dubeyko.com, viro@zeniv.linux.org.uk, jack@suse.cz, 
+	linux-fsdevel@vger.kernel.org, linux-fscrypt@vger.kernel.org, ebiggers@kernel.org, 
+	tytso@mit.edu, jaegeuk@kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v6 1/5] dcache: export d_find_alias_rcu() for modular
+ filesystems
+Message-ID: <20261106-server-lautlos-hufeisen-0fc0ec477472@brauner>
+References: <cover.20261025T182649Z.ca9ae7a18449.git.amarkuze@redhat.com>
+ <99467b57d12e5b671246aa5e216ddce3a7dc3923.20261025T182649Z.ca9ae7a18449.git.amarkuze@redhat.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -58,66 +60,31 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TLS: YES
-X-ENVELOPE-SENDER: dlzhangak@isoftstone.com
-X-SOURCE-IP: 221.226.109.28 unknown Fri, 06 Nov 2026 10:13:10 +0800
-X-FangMail-Miltered: at fangwg01 with ID 6AED37B6.000 by FangMail milter!
-X-FangMail-Envelope: 1793931190/4jLN4k2qrnz23wX/6AED37B6.000/221.226.109.28/[221.226.109.28]/ldzh../<dlzhangak@isoftstone.com>
-X-FangMail-Bounce-Flag: 1793931190.6AED37B6.000
-X-FangMail-Outinfo: 1793931190/6AED37B6.000/4jLN4k2qrnz23wX/dlzhangak@isoftstone.com/1
-X-CLEAN: YES
-Message-Id: <1793931193.6AED37B6.000.4jLN4k2qrnz23wX@fangwg01>
-X-Fangmail-Anti-Spam-Filtered: true
-X-Fangmail-MID-QID: 6AED37B6.000/4jLN4k2qrnz23wX
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <99467b57d12e5b671246aa5e216ddce3a7dc3923.20261025T182649Z.ca9ae7a18449.git.amarkuze@redhat.com>
 
-When a snapshot is deleted on one client node, its corresponding
-'.snap/<snapname>' dentry cached in the VFS dcache on other client nodes
-never gets invalidated. As a result, recreating a snapshot with the same
-name on another node fails with -EEXIST, and removing it fails with
--ENOENT while still leaving the stale positive dentry in the dcache.
+On Sun, Oct 25, 2026 at 06:42:41PM +0000, Alex Markuze wrote:
+> CephFS subvolume quarantine needs a dentry alias for its RCU ancestry
+> walk without acquiring a dentry reference. d_find_alias_rcu() provides
+> that lookup, but is unavailable to a modular Ceph client.
+> 
+> Export d_find_alias_rcu() to GPL modules. The Ceph quarantine state
+> handling patch uses the export with the helper's RCU lifetime rules.
+> 
+> Signed-off-by: Alex Markuze <amarkuze@redhat.com>
+> ---
+>  fs/dcache.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/fs/dcache.c b/fs/dcache.c
+> index 1b1a81f10da67c608704383086c3facb64ee3b3b..13ba553081b33a54fd8d1cac5cbc55d0149e4ad7 100644
+> --- a/fs/dcache.c
+> +++ b/fs/dcache.c
+> @@ -1248,6 +1248,7 @@ struct dentry *d_find_alias_rcu(struct inode *inode)
+>  	spin_unlock(&inode->i_lock);
+>  	return de;
+>  }
+> +EXPORT_SYMBOL_GPL(d_find_alias_rcu);
 
-In ceph_d_revalidate(), the condition 'if (ceph_in_snap(dir))' matches
-both immutable snapped directories (ceph_snap(dir) <= CEPH_MAXSNAP) and
-the mutable virtual '.snap' directory itself (ceph_snap(dir) ==
-CEPH_SNAPDIR). Because it unconditionally sets valid = 1 when dir is
-CEPH_SNAPDIR, the CEPH_MDS_OP_LOOKUPSNAP revalidation path below inside
-'if (!valid)' is rendered unreachable dead code.
-
-Fix this by excluding CEPH_SNAPDIR from the unconditional trust check in
-ceph_d_revalidate() so that cached dentries directly under '.snap' are
-revalidated via CEPH_MDS_OP_LOOKUPSNAP. Additionally, drop the dentry in
-ceph_unlink() when the MDS returns -ENOENT.
-
-Fixes: 200fd27c8fa2 ("ceph: use lookup request to revalidate dentry")
-Link: https://tracker.ceph.com/issues/81579
-Signed-off-by: zhangdaolong <dlzhangak@isoftstone.com>
----
- fs/ceph/dir.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 6eb5b1cb039b..9f84beac189e 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1475,6 +1475,8 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
- 		err = ceph_mdsc_do_request(mdsc, dir, req);
- 		if (!err && !req->r_reply_info.head->is_dentry)
- 			d_delete(dentry);
-+		else if (err == -ENOENT)
-+			d_drop(dentry);
- 	}
- 
- 	ceph_mdsc_put_request(req);
-@@ -2003,7 +2005,7 @@ static int ceph_d_revalidate(struct inode *dir, const struct qstr *name,
- 	mdsc = ceph_sb_to_fs_client(dir->i_sb)->mdsc;
- 
- 	/* always trust cached snapped dentries, snapdir dentry */
--	if (ceph_in_snap(dir)) {
-+	if (ceph_in_snap(dir) && ceph_snap(dir) != CEPH_SNAPDIR) {
- 		doutc(cl, "%p '%pd' inode %p is SNAPPED\n", dentry,
- 		      dentry, inode);
- 		valid = 1;
--- 
-2.48.1
-
+Please use EXPORT_SYMBOL_FOR_MODULES() and restrict this to ceph for now.
