@@ -1,55 +1,85 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794025041;
-	b=c3lyVVMdvYciCbHkOj8c6ztgYhAX1RBtApWrgp9gln6pgxjMgLws2g0j6KW7eitKEU5Y
-	 tWpxjnPuagjwPjLpNC9Ds2DedsgMCh4vrGiaheB+dTUrLpEd7ZLonjfs4Bt06MwOK1IDw
-	 8BHjjta4Bm8/Aa4Lmo2EMLYOmgXCG8MuZjn6bt0uMGoJvQ6a85zHx0x+Iks7rpa1dSZUB
-	 FeEWpRo4Fk3iwANsn+BnoBX5+3ysiXszvnNQJ9DfZKq4gd8ShR5J2zn1F29YKfxOJ4tX0
-	 l5oOKvxl6hGcsgKk3Uoj7APsPIGpo5U6F2MnEUliOC0Hrf65EdOvqTc2vkxHUSSFycQ==
+	t=1794067719;
+	b=hsQXP9aOccRvcgs6es7kfkHJaPA75vyhiV6vbh3d6381xb6vpM7MOag3oOjFcyB35vi/
+	 XwjeNjqzcVbCVvDjwIz6zN0zgySoNpGTqiLe4cNmwmfQXZCMK4vgpyEmkFsgqjoZKTr+s
+	 saIsZIVDLPLRv2BErjVAFc5xEDTZJ8Jp9dpwmMWbB7W0jZP+wkjxgDJTq26hSSR0gaX2L
+	 50jggQIanYjkVYOdHLX9mGQ/Du6mOu20vpohOJX8GkeG+rxroopB9f0/I1wSjxPXfRbpF
+	 Twe75xdzyvKCLYGAkWrf5GB2m39WWCao8dOryC6pirP5LeoP3UmICJtxmSfBcXKXjwA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794025041;
-	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=RTJ54tG+Gpt5tWtqaAvuvNbLYhFtkH+xR5r12FE3tHg=;
-	b=A0RLvzgNvDi5lwAclwRYJwdFZG5csgSSXCGgQjX1Yc6Tb1JFfSbc22Gnqn61XWSqIPum
-	 xYN+EXbE5uwZ4ZWsCyi0B3K6SDBeuiIPEITbAQLwwZFh8K5TqQUYKq43+abvcEGjaexH6
-	 hpv6ib4Jckv126pr+djSB0L4LAQktpMjsynLul2APiUPp1J3LBG+c0rG/2EU9GuEs3mRV
-	 DcLvMcGwcYGDihH0YU3KbfD4TuBCu5/48f0zbtz7tw8I5MZwIaISiy12Vg+Zz0xcAqzd7
-	 UUtsBGI4CjTM368/m81cxPIwp3q5ZqC+R89SRawNyFlFJbco9UhvhMbivdhypIZAp8g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794067719;
+	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
+	 X-Mimecast-MFC-AGG-ID:Received:Received:From:To:Cc:Subject:Date:
+	 Message-ID:MIME-Version:Content-Transfer-Encoding:X-Scanned-By;
+	bh=AkggF1IZMKELF6PrvsMx3bviXaYutAqrhI39oo9RDTg=;
+	b=KCF5z+wYZoQ1cX67i+1rFyEQapZkQGWdZhKf7lbrKirCJ43h53+nQCD1/srt2qNr85tp
+	 2shP8eCeDB+00eYNhoAuwsCvZguyx9v+07sKufhQMmW9AP2eWqLS18LvsnQ6VtRF6W5eF
+	 9IKqFiFG0LwnIQeQG0MP4JfgiUwmkOS3TirV9R2+FEfZQm2vt8oEF9dmAz5w3QWauMvBz
+	 /kG+o5yYTD3l2D9C/vbdoUf/FFZcJkLTKz4nWmQKhKFQFjs9mpiYRfp7Q/GGlSs9m0hkD
+	 icoKYH4uEuTjDI5c0ScJl9yDRNwWYzrakdLo6RxFvH7PCzckW0ftd/TiCXOFOUbJvDA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=I78gEhlc;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=redhat.com;
+	spf=pass smtp.mailfrom=redhat.com;
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b="S5/m/wxI";
+	arc=none smtp.remote-ip=170.10.133.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5ECAF606A326
-	for <ceph-devel@vger.kernel.org>; Sat,  7 Nov 2026 04:17:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3ACFE606D80E
+	for <ceph-devel@vger.kernel.org>; Sat,  7 Nov 2026 16:08:39 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3ACFE606D80E
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=I78gEhlc
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EAC311F0089F
-	for <ceph-devel@vger.kernel.org>; Sat,  7 Nov 2026 04:17:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794025040;
-	bh=RTJ54tG+Gpt5tWtqaAvuvNbLYhFtkH+xR5r12FE3tHg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=I78gEhlcHJDP0Bz5xQrZAc4pcrjZYI27oSxR/tWVNx85q5wGXIbX/K4GXBsSj99Nq
-	 wUQMuWQtsF/1GuXKmCl1gKu7NYDy4WP2CegjJUCR+e1bn5x158VwCXXdzAw88HvU1A
-	 vFCBC+8czUWIUM4gtvyqjoPbS4RXYz5bzn396hlv+14b6manVEi2N8UangdKHiSaug
-	 MvX4vuw5aoidbW9uY5f0QluQhnsfqF/x0RFeW116hs9HbCOl8TB/ZnmnIYg7GVhpwM
-	 wQqmP19ZhoWVlydxzjk1Is5RvPuKHuSUwLoCl0B8PoKVfYxlkROSbiK/cySk8gvEiM
-	 9zYtZfgt34x5g==
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5be3cff0f6cso957998e87.0
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Nov 2026 20:17:19 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AL+hErFrtpwgbO+X3GgMbOjxTLZymhp0uZbfyIKXX7bROv5FM6OGyuCcJN4x0XobrGpLR4EBHYE6vZn5Q+N2@vger.kernel.org
-X-Gm-Message-State: APuU4Z+EgVWu/pb3aBiewU37srzF8SspmJreARCQTeZWhxnWMWA2Bmef
-	QkwPcwRshkotx4doTk1LPNXLn3n0QnpmS+HcEdLfeG3FrOIdjo7KEpZpDhEKZkIj4WlBle4JO04
-	j3p/0LAcfhwEBWfiMr8rDjfqcLcYZQ8E=
-X-Received: by 2002:a05:6512:b84:b0:5bf:fbe3:7cf1 with SMTP id
- 2adb3069b0e04-5c003c149e7mr1626109e87.62.1794025038687; Fri, 06 Nov 2026
- 20:17:18 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=S5/m/wxI
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1794067718;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=AkggF1IZMKELF6PrvsMx3bviXaYutAqrhI39oo9RDTg=;
+	b=S5/m/wxIiD98q+537ECVOftu16rk4BJHfmYv0kTIUNx1EznZvm1gzFzCOFG0AVZQgGDTlu
+	2TN6/lgMr8ua/NUxcTkNgYpyHG38H74lZLcep4ZLUx2VZpPc8l4lKEWIo2FuuTKVCMePLU
+	GnprQS8TGK2CmdhHGCDzEpoHOcxr/sc=
+Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-500-Y62LxWCdMJWR70Hg0IDtIg-1; Sat,
+ 07 Nov 2026 11:08:34 -0500
+X-MC-Unique: Y62LxWCdMJWR70Hg0IDtIg-1
+X-Mimecast-MFC-AGG-ID: Y62LxWCdMJWR70Hg0IDtIg_1794067712
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 958D4180055E;
+	Sat,  7 Nov 2026 16:08:31 +0000 (UTC)
+Received: from dhowells-thinkpadp1gen8.rmtgb.csb (headnet04.pony-001.prod.iad2.dc.redhat.com [10.2.32.116])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id BC228195608B;
+	Sat,  7 Nov 2026 16:08:25 +0000 (UTC)
+From: David Howells <dhowells@redhat.com>
+To: Christian Brauner <christian@brauner.io>
+Cc: David Howells <dhowells@redhat.com>,
+	Paulo Alcantara <pc@manguebit.org>,
+	Matthew Wilcox <willy@infradead.org>,
+	Namjae Jeon <linkinjeon@kernel.org>,
+	Marc Dionne <marc.dionne@auristor.com>,
+	Stefan Metzmacher <metze@samba.org>,
+	Eric Van Hensbergen <ericvh@kernel.org>,
+	Dominique Martinet <asmadeus@codewreck.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	netfs@lists.linux.dev,
+	linux-afs@lists.infradead.org,
+	linux-cifs@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	v9fs@lists.linux.dev,
+	linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v16 00/15] netfs, iov_iter: Use a chain of bio_vec arrays instead of folio_queue
+Date: Sat,  7 Nov 2026 16:08:03 +0000
+Message-ID: <20261107160823.1465553-1-dhowells@redhat.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -59,138 +89,248 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <1793931193.6AED37B6.000.4jLN4k2qrnz23wX@fangwg01>
-In-Reply-To: <1793931193.6AED37B6.000.4jLN4k2qrnz23wX@fangwg01>
-From: Xiubo Li <xiubli@kernel.org>
-Date: Sat, 7 Nov 2026 05:17:07 +0100
-X-Gmail-Original-Message-ID: <CAOuZWzyZoQ9oAHKmxVg7B292Vx-QZ2E+QLt6xVnpfKpps+4Yfw@mail.gmail.com>
-X-Gm-Features: AclHuK_AO2nP1B568IIQeBw7qHhP4TRBNEMRN2blc0PuhgjNtsctQcbDnQKWG48
-Message-ID: <CAOuZWzyZoQ9oAHKmxVg7B292Vx-QZ2E+QLt6xVnpfKpps+4Yfw@mail.gmail.com>
-Subject: Re: [PATCH] ceph: revalidate dentries under snapdir to drop stale snapshots
-To: zhangdaolong <dlzhangak@isoftstone.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-On Fri, Nov 6, 2026 zhangdaolong <dlzhangak@isoftstone.com> wrote:
-> When a snapshot is deleted on one client node, its corresponding
-> '.snap/<snapname>' dentry cached in the VFS dcache on other client nodes
-> never gets invalidated. As a result, recreating a snapshot with the same
-> name on another node fails with -EEXIST, and removing it fails with
-> -ENOENT while still leaving the stale positive dentry in the dcache.
+Hi Christian,
 
-Hi Daolong,
+Could you pull these patches please into your vfs-7.5.netfs branch?  This
+is the third of five batches (two already having gone upstream), in this
+case replacing the folio_queue struct with a bvecq struct.  It has been
+rebased on v7.4-rc1.  This was split from v11 of a larger netfslib
+series[1].
 
-Thanks for the patch. I can reproduce this with two kernel clients, and
-it is a bit worse than described: after B removes .snap/s3 and creates a
-new .snap/s3, A still reads the file contents of the old snapshot. A
-removed ancestor snapshot also stays visible as .snap/_p1_<ino> in child
-directories. Your patch fixes all of these cases.
+This series adds a new type, struct bvecq.  This points to a bounded array
+of bio_vecs with information about how to clean up the memory they point
+to.  A number of bvecq structs can be linked together to form a chain and
+an iterator type, ITER_BVECQ, is provided that can be pointed at the chain
+and can walk it.  Netfslib is then switched to use the new type and
+folio_queue is removed along with ITER_FOLIOQ.
 
-[...]
+This is intended as a more flexible replacement for struct folio_queue as
+the latter can only point to whole folios and cannot point to partial pages
+that might be extracted from an ITER_IOVEC/ITER_UBUF for direct or
+unbuffered I/O purposes.
 
->         /* always trust cached snapped dentries, snapdir dentry */
-> -       if (ceph_in_snap(dir)) {
-> +       if (ceph_in_snap(dir) && ceph_snap(dir) !=3D CEPH_SNAPDIR) {
+These patches make a more or less straight swap between struct folio_queue
+and struct bvecq.  The change is not quite trivial as the folio_queue
+struct contains a folio_batch struct and is basically a list of whole
+folios only, whereas the new bvecq struct is a chain of bio_vec arrays.
 
-With this change nothing can validate a dentry under .snap anymore. The
-MDS issues no lease for it, the snapdir only has CEPH_CAP_PIN, and a
-snapped inode has no real caps. So every path walk through .snap/<name>
-does a synchronous LOOKUPSNAP. With 3000 stats of .snap/s3/f on a cached
-snapshot (in a VM, so only the order of magnitude matters):
+A further patchset will switch the netfslib unbuffered I/O code to using
+bvecqs and then the bvecqs will be passed down into the filesystem rather
+than passing an iterator.
 
-                 ops/s   LOOKUPSNAP   p50/p99 (us)
-  unpatched     257834        0         3.1/6.9
-  this patch     10065     3000        89.9/273.1
-  realm check   234741        0         3.4/7.5
+The primary reason behind making this change is so that bvecq chains can be
+used in the assembly of network filesystem messages.  Netfslib can furnish
+the filesystem with bvecq chains representing the data buffers that need to
+be read or written and then, for example, for a write RPC, the filesystem
+can add protocol headers and trailers onto the chain without the need to
+copy it and can also glue multiple buffers together to form compound
+operations and/or perform sparse operations.
 
-The "realm check" row is an alternative that avoids the round trip. The
-client already knows which snapshots exist: the directory's snap realm
-keeps the list in cached_context, and the MDS sends a snap update to
-every client with caps in the realm when a snapshot is created or
-removed. So d_revalidate can keep trusting a dentry under .snap while
-its snapid (ceph_snap(inode)) is still in the realm's snap context of
-the head directory, and only fall back to LOOKUPSNAP when it is not, or
-when we hold no caps on that directory.
+One option here is to add two more fields to the bvecq struct, one to
+increase the offset of the first bio_vec and one to decrease the length of
+the last, thereby allowing a bvecq struct to point at a slice of another
+bio_vec array without having to copy the array - but at the cost of adding
+one or two extra conditional ops when getting the offset or length of a
+segment.
 
-I tried this on 7.2.9. It fixes the same cases as your patch: recreating
-a snapshot, reading stale data, removed ancestor snapshots, and 50/50
-"B rmdir, A mkdir right away" rounds. It sends no LOOKUPSNAP on cache
-hits. I can send you the diff I tested if it helps.
+I have in-progress patch sets to rewrite the cifs transport[2] and the ceph
+and rbd transport[3] to make use of bvecq chains.  For the cifs transport,
+the idea is to extend the SMB message concept further up the stack, where
+the PDU-marshalling routines will create individual RPC request blobs that
+the transport can then automatically chain together when it is assembling
+a compound SMB request for transmission.
 
->                 if (!err && !req->r_reply_info.head->is_dentry)
->                         d_delete(dentry);
-> +               else if (err =3D=3D -ENOENT)
-> +                       d_drop(dentry);
+With the ceph transport, the idea is to convert all the different data
+containers it has into just passing around bvecqs.  These can then be
+chained together in order to transmit them.
 
-Please make this a separate patch. With the revalidate fix, rmdir of a
-stale snapshot already fails in the lookup and never sends RMSNAP. I
-checked the MDS counter with and without this hunk. Also, this hunk
-affects unlink() of regular files too.
+This improves efficiency in the TCP stack as we no longer need to cork the
+TCP socket, call sendmsg() multiple times and then uncork; rather we can
+preassemble the message in a bvecq chain and just send the entire message
+in one shot with a single sendmsg() and reduce the number of places doing
+loops.  Using a single sendmsg got an improvement in nfsd performance[4].
 
-Nits: the "always trust cached snapped dentries, snapdir dentry" comment
-needs an update. Also, the trust-all check dates back to 2817b000b02c,
-while 200fd27c8fa2 only added the unreachable LOOKUPSNAP branch, so
-please explain the choice of Fixes: tag.
+I also have some changes on the TCP receive side for the cifs transport
+(which is also likely applicable to the ceph TCP transport) whereby the
+receive buffers are 'spliced' out into a bvecq in the cifs I/O thread
+rather than being copied.  Using a bvecq chain here is advantageous as we
+don't know in advance how many segments we're going to have.  This allows
+us firstly to avoid copying data with the socket lock held (thus holding up
+sendmsg) and secondly to avoid copying data in the I/O thread (copying can
+be offloaded to the app thread).  The last time I benchmarked this, it
+appeared to get fio reading tests on cifs a 5% speedup.
+
+Unfortunately, this doesn't help AFS much as that uses a UDP transport, but
+it might also help 9P, at least with its TCP transport.
+
+The patches can also be found here:
+
+	https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=netfs-next-3
 
 Thanks,
-- Xiubo
+David
 
-zhangdaolong <dlzhangak@isoftstone.com> =E4=BA=8E2026=E5=B9=B411=E6=9C=886=
-=E6=97=A5=E5=91=A8=E4=BA=94 03:13=E5=86=99=E9=81=93=EF=BC=9A
->
-> When a snapshot is deleted on one client node, its corresponding
-> '.snap/<snapname>' dentry cached in the VFS dcache on other client nodes
-> never gets invalidated. As a result, recreating a snapshot with the same
-> name on another node fails with -EEXIST, and removing it fails with
-> -ENOENT while still leaving the stale positive dentry in the dcache.
->
-> In ceph_d_revalidate(), the condition 'if (ceph_in_snap(dir))' matches
-> both immutable snapped directories (ceph_snap(dir) <=3D CEPH_MAXSNAP) and
-> the mutable virtual '.snap' directory itself (ceph_snap(dir) =3D=3D
-> CEPH_SNAPDIR). Because it unconditionally sets valid =3D 1 when dir is
-> CEPH_SNAPDIR, the CEPH_MDS_OP_LOOKUPSNAP revalidation path below inside
-> 'if (!valid)' is rendered unreachable dead code.
->
-> Fix this by excluding CEPH_SNAPDIR from the unconditional trust check in
-> ceph_d_revalidate() so that cached dentries directly under '.snap' are
-> revalidated via CEPH_MDS_OP_LOOKUPSNAP. Additionally, drop the dentry in
-> ceph_unlink() when the MDS returns -ENOENT.
->
-> Fixes: 200fd27c8fa2 ("ceph: use lookup request to revalidate dentry")
-> Link: https://tracker.ceph.com/issues/81579
-> Signed-off-by: zhangdaolong <dlzhangak@isoftstone.com>
-> ---
->  fs/ceph/dir.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index 6eb5b1cb039b..9f84beac189e 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -1475,6 +1475,8 @@ static int ceph_unlink(struct inode *dir, struct de=
-ntry *dentry)
->                 err =3D ceph_mdsc_do_request(mdsc, dir, req);
->                 if (!err && !req->r_reply_info.head->is_dentry)
->                         d_delete(dentry);
-> +               else if (err =3D=3D -ENOENT)
-> +                       d_drop(dentry);
->         }
->
->         ceph_mdsc_put_request(req);
-> @@ -2003,7 +2005,7 @@ static int ceph_d_revalidate(struct inode *dir, con=
-st struct qstr *name,
->         mdsc =3D ceph_sb_to_fs_client(dir->i_sb)->mdsc;
->
->         /* always trust cached snapped dentries, snapdir dentry */
-> -       if (ceph_in_snap(dir)) {
-> +       if (ceph_in_snap(dir) && ceph_snap(dir) !=3D CEPH_SNAPDIR) {
->                 doutc(cl, "%p '%pd' inode %p is SNAPPED\n", dentry,
->                       dentry, inode);
->                 valid =3D 1;
-> --
-> 2.48.1
->
->
+Changes
+=======
+ver #16)
+- Rebase on v7.4-rc1.
+- Add docs for the bvecq tools.
+- Add some kunit tests for the bvecq iterator.
+- Fixed issues found by local review with claude-opus-5-5:
+  - Added missing linux/mempool.h inclusion.
+  - Fix bvecq_alloc_one() to check the rounded-up allocation size against
+    the pool allocation size, not the struct+array size which may have a
+    gap.
+  - Fix bvecq_alloc_one() to limit the max slots to USHRT_MAX to not
+    overrun the slot counters.
+  - Make bvec_kmap_partial()'s bvec pointer const.
+  - Added an iter_to_sg kunit test for bvecq.
+  - Added a patch to make afs symlink's use of ->directory_size
+    consistent.
+  - In netfs_writeback_single(), fix the value ->submit_extendable_to is
+    set to (though a future patch series will remove this).
+  - Split the afs dir bvecq patch into three:
+    - A patch to pass the content length to netfs_writeback_single(),
+      separately from the buffer size in the iov_iter.  The filesystem is
+      then responsible for providing zeroed padding.
+      - A check is added to make sure the buffer is not smaller than the
+        content.
+      - The API doc is updated.
+    - A patch to simplify netfs_writeback_single():
+      - No looking inside the iov_iter.
+      - Effectively do DIO rather than buffered I/O (pagecache not used).
+      - Pass a single op to the cache.
+      - Wait synchronously for op completion for now as the calling
+        filesystem should otherwise do a wait.
+      - Removed the bits to set up a write to the server since it should
+        only write to the cache.
+    - A patch to switch afs dir (and symlink) buffering to use bvecq
+      instead of folio_queue.
+  - Clear new pages as added and clear the tail if shrunk by a third party
+    for AFS directories.
+  - Clear the buffer tail before calling netfs_writeback_single() for AFS
+    symlinks.
+  - Fix netfs_limit_bvecq() to handle empty bvecqs and short chains.
+  - Added missing SPDX to new doc.
+  - Added new files to MAINTAINERS.
+
+ver #15)
+- Fix issues from Sashiko[7]:
+  - Don't need to set page counts after calling alloc_pages_bulk().
+  - Adjust netfs_writeback_single() to return 0 on success, not the amount
+    written.
+  - Remove a couple of unused constants.
+
+ver #14)
+- Fix issues from Sashiko[6]:
+  - In iter_bvecq_get_pages(), use folio_get() not get_pages.
+  - In netfs_read_set_unlock_at(), netfs_read_unlock_folios(),
+    netfs_pgpriv2_unlock_copied_folios() and
+    netfs_writeback_unlock_folios(), skip wholly unoccupied bvecqs.
+  - Remove some now-unused trace bits.
+
+ver #13)
+- Fix issues from Sashiko[5]:
+  - In iter_bvecq_get_pages(), need to add bv_offset when calling
+    want_pages_array().
+  - In iter_bvecq_get_pages(), make the getting of a ref on the page
+    dependent on the page being non-slab.
+  - In bvecq_alloc_one(), use mempool_alloc(), not
+     mempool_alloc_noreserve().
+  - In bvecq_expand_buffer(), don't add __GFP_NORETRY|__GFP_WARN for
+    order 0 allocations.
+  - Drop the netfs_bv_slot tracepoint as it's not used in these patches.
+  - In afs_do_read_single(), afs_dir_get_block() and afs_do_read_symlink(),
+    use mapping_gfp_mask() rather than GFP_KERNEL.
+  - In netfs_writeback_single(), set ->submitted so that
+    netfs_wait_for_write() doesn't then just return -EIO.
+  - In netfs_unlock_abandoned_read_pages(), reset ->first_tail_slot when
+    moving on to next node.
+  - Remove netfs_folioq_trace(s) trace info enum and string set as their
+    tracepoint got removed.
+
+ver #12)
+- Split from v11 of "netfs: Keep track of folios in a segmented bio_vec[]
+  chain"[1]
+
+[1] https://lore.kernel.org/r/20260902173350.3468672-1-dhowells@redhat.com/
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=cifs-experimental
+[3] https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/linux-fs.git/log/?h=ceph-iter
+[4] https://lore.kernel.org/netdev/168979108540.1905271.9720708849149797793.stgit@morisot.1015granger.net/
+[5] https://sashiko.dev/#/patchset/20260929075913.2740968-1-dhowells%40redhat.com
+[6] https://sashiko.dev/#/patchset/20260929103412.2807494-1-dhowells%40redhat.com
+[7] https://sashiko.dev/#/patchset/20260930125247.3232130-1-dhowells%40redhat.com
+
+David Howells (15):
+  Add a function to kmap one page of a multipage bio_vec
+  iov_iter: Add a segmented queue of bio_vec[]
+  netfs: Add some tools for managing bvecq chains
+  iov_iter: Add an API document for the bvecq structure
+  iov_iter: Add a bvecq kunit test
+  afs: Fix an inconsistency in the symlink code
+  netfs: Explicitly pass tail padding to netfs_writeback_single()
+  netfs: Change netfs_writeback_single() to not look inside the iterator
+  afs: Use a bvecq to hold dir content rather than folioq
+  cifs: Use a bvecq for buffering instead of a folioq
+  smbdirect: Support ITER_BVECQ in smbdirect_map_sges_from_iter()
+  netfs: Switch folioq to bvecq
+  smbdirect: Remove support for ITER_FOLIOQ from
+    smbdirect_map_sges_from_iter()
+  iov_iter: Remove ITER_FOLIOQ
+  netfs: Remove folio_queue
+
+ Documentation/core-api/bvecq.rst            | 229 ++++++++
+ Documentation/core-api/folio_queue.rst      | 209 -------
+ Documentation/core-api/index.rst            |   2 +-
+ Documentation/filesystems/netfs_library.rst |  47 +-
+ MAINTAINERS                                 |   3 +
+ fs/afs/dir.c                                |  47 +-
+ fs/afs/dir_edit.c                           |  44 +-
+ fs/afs/dir_search.c                         |  33 +-
+ fs/afs/inode.c                              |   2 +-
+ fs/afs/internal.h                           |   6 +-
+ fs/afs/symlink.c                            |  55 +-
+ fs/netfs/Makefile                           |   1 +
+ fs/netfs/buffered_read.c                    |  34 +-
+ fs/netfs/bvecq.c                            | 357 ++++++++++++
+ fs/netfs/internal.h                         |   8 +-
+ fs/netfs/iterator.c                         |  42 +-
+ fs/netfs/main.c                             |  13 +-
+ fs/netfs/misc.c                             |  96 ----
+ fs/netfs/objects.c                          |   1 -
+ fs/netfs/read_collect.c                     |  48 +-
+ fs/netfs/read_pgpriv2.c                     |  26 +-
+ fs/netfs/read_retry.c                       |  29 +-
+ fs/netfs/rolling_buffer.c                   | 190 ++-----
+ fs/netfs/stats.c                            |   6 +-
+ fs/netfs/write_collect.c                    |  26 +-
+ fs/netfs/write_issue.c                      | 195 ++-----
+ fs/smb/client/cifsglob.h                    |   2 +-
+ fs/smb/client/smb2ops.c                     |  78 ++-
+ fs/smb/smbdirect/connection.c               | 135 +++--
+ include/linux/bvec.h                        |  18 +
+ include/linux/bvecq.h                       | 176 ++++++
+ include/linux/folio_queue.h                 | 282 ---------
+ include/linux/iov_iter.h                    |  87 +--
+ include/linux/netfs.h                       |  18 +-
+ include/linux/rolling_buffer.h              |  42 +-
+ include/linux/uio.h                         |  17 +-
+ include/trace/events/netfs.h                |  37 +-
+ kernel/bpf/btf.c                            |   2 -
+ lib/Kconfig.debug                           |  13 +
+ lib/iov_iter.c                              | 517 ++++++++++++-----
+ lib/scatterlist.c                           |  82 ++-
+ lib/tests/Makefile                          |   1 +
+ lib/tests/kunit_bvecq.c                     | 599 ++++++++++++++++++++
+ lib/tests/kunit_iov_iter.c                  | 124 ++--
+ 44 files changed, 2395 insertions(+), 1584 deletions(-)
+ create mode 100644 Documentation/core-api/bvecq.rst
+ delete mode 100644 Documentation/core-api/folio_queue.rst
+ create mode 100644 fs/netfs/bvecq.c
+ create mode 100644 include/linux/bvecq.h
+ delete mode 100644 include/linux/folio_queue.h
+ create mode 100644 lib/tests/kunit_bvecq.c
+
