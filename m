@@ -1,57 +1,125 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=219.143.121.9
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=103.168.172.147
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794209404;
-	b=MX3p7Ikh8tbdYJuavhJckt36vf8ZxGVfMw2SCTyipaD8egrX8I84++400tubRFqlYEr8
-	 TXUPt8h1MjmAu1KitaUk3v6EwXGkzsKUzN7BYJBaEms5MF6biFs/L9RLEETSfzGPHmfM0
-	 yTQ7wNKZIVpNBMRvSrP4bCwCu1G8J8yD2+LKZEcTaYiMFvHcKyL46dEHU/H1jA9oDVn6h
-	 BtTjjXkdthyNkirvazCSLD4JqqYEmXgBXpjvNkq9tbX5i17Cp2XYywBjzWqrgy2jqAUZ1
-	 19GMZzHED+W4kwlZDAnYq6QCctZbTSyUVb2v1PmX9HSHbL1OqURqeBrVMAQ071c966w==
+	t=1794255839;
+	b=0rWz0hdE4oLlNhACshUSCC6gz8jKCW1HIOeMCY9ffxhPfmDOOojVkMlhzsJeHNxlIO//
+	 ZEBCQ5QK1KBxdle8Niy5GhYqW/GWwAsl+dIhouvpiSGVk7QmZU0pmAR92ujiQ3BitB0F7
+	 b4IcejQqR3PLau7xbiOJgsftySMiBKJx4wVYzTIOPXREuYn9N+kvzqxtXKwWqt8Qq+I3u
+	 /VWjnXKthRXjhqMOZxe3BDOZnnzg6U3IhEqrVHSmgrkIOYVyAxZ5O0yKVChbZFzI0vpDK
+	 bxMHTSylgFZv8VZdN9EDEE2uaZqaTrysf2w6xsuxg8xssWfmk1Gl+Vo+dHNL/W7wu8A==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794209404;
-	h=DMARC-Filter:Received:From:To:Cc:Subject:Date:X-Mailer:In-Reply-To:
-	 References:MIME-Version:Content-Transfer-Encoding:X-TLS:
-	 X-ENVELOPE-SENDER:X-SOURCE-IP:X-FangMail-Miltered:X-FangMail-Envelope:
-	 X-FangMail-Bounce-Flag:X-FangMail-Outinfo:X-CLEAN:Message-Id:
-	 X-Fangmail-Anti-Spam-Filtered:X-Fangmail-MID-QID;
-	bh=y4XXizAsEXauZ8xNy3Uvk2MUwvg11466f+qVHEdRMkA=;
-	b=YA7bFut2dHchcl64X4o+XPtv1cza35PINbSfxvzfm2REm+ptisfAO3SpwDdWerUqZLX4
-	 vBYjjSaGFGlM/TPOCapFIR58+8CQ79Eeblc6K51I7WEsE1m8V/kV1rFBCVKMr8Y+I7SBH
-	 veXkaKvqm2QMueI3UTzoQjXCF1B9fYMnC8kv135oMl/O9u/i8BhIdA3IQf9JSeVhQh1ag
-	 Ew5fGJu4VsN7KrG1puqa3BE17si4HL0MalE7ImT3BFkJJWfqtozRsSFqqZMITiFYpNC7q
-	 u9IkDtbo3RLl8onkXHYUcHH7ix9wWQF5SMqQNYhMkTASHADeF57TxwqhFXNU9EZoYjg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794255839;
+	h=DMARC-Filter:Received:Received:DKIM-Signature:DKIM-Signature:
+	 X-DKIM2-Info:DKIM2-Signature:X-DKIM2-Info:Message-Instance:
+	 X-ME-Sender:X-ME-Received:X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:
+	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:Reply-To:
+	 MIME-Version:Content-Transfer-Encoding;
+	bh=YgAFQd7bekj3d7oevT9/mkDM82sDq88XmkOWnMQYsvw=;
+	b=Bi3K/8H4/Xq2MWeUAepyBdKSCY6Ex3PPxjoSdTeDzSkR4KibfcwQIVQjaNmUnDk8h1+O
+	 g/axVGyyI3JkZ+OXaWpYgHsu4sqBrb0W/TmC6azqllv9b0eL9EYS8YkTssQX53RNqWUXi
+	 jDvXKUAVfsf5IGCoOELa/crICLdo7K0tGdz1Po9xv4Un+Rv/WaaytKfF9zRcGMqk/pO7b
+	 s7TWeW585Q2unzUD+LGooLxnbLgO47N0A4Pho8BRtPAMZaYzT0oHxJRYmXk1XN+ExZab+
+	 ZwyQ3kr3vRGeZqKSgzmAX9F3CNPcWqTMuRw65ldrwuLCnX8xfADWKfxjKUMePEBIUNA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=isoftstone.com;
-	spf=pass smtp.mailfrom=isoftstone.com;
-	arc=none smtp.remote-ip=219.143.121.9
-Received: from spam.isoftstone.com (smg.isoftstone.com [219.143.121.9])
+	dmarc=pass header.from=ownmail.net;
+	spf=pass smtp.mailfrom=ownmail.net;
+	dkim=pass header.d=ownmail.net header.i=@ownmail.net header.a=rsa-sha256 header.s=fm3 header.b="V7/TZ9BP";
+	dkim=pass header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=vl6so0Ty;
+	arc=none smtp.remote-ip=103.168.172.147
+Received: from fout-a4-smtp.messagingengine.com (fout-a4-smtp.messagingengine.com [103.168.172.147])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B43C606A325;
-	Mon,  9 Nov 2026 07:30:02 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 1B43C606A325
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=isoftstone.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isoftstone.com
-Received: from ldzh.. (unknown [221.226.109.28])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: dlzhangak@isoftstone.com)
-	by spam.isoftstone.com (FangMail) with ESMTPSA id 4jNLys3BPKz22sb;
-	Mon, 09 Nov 2026 15:29:57 +0800 (CST)
-From: zhangdaolong <dlzhangak@isoftstone.com>
-To: Xiubo Li <xiubli@kernel.org>,
-	Ilya Dryomov <idryomov@gmail.com>,
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70888606A33A
+	for <ceph-devel@vger.kernel.org>; Mon,  9 Nov 2026 20:23:53 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 70888606A33A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key, unprotected) header.d=ownmail.net header.i=@ownmail.net header.a=rsa-sha256 header.s=fm3 header.b=V7/TZ9BP;
+	dkim=pass (2048-bit key, unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=vl6so0Ty
+Received: from phl-compute-04.internal (phl-compute-04.internal [10.202.2.44])
+	by mailfout.phl.internal (Postfix) with ESMTP id AEB62EC01DC
+	for <ceph-devel@vger.kernel.org>; Mon,  9 Nov 2026 15:23:52 -0500 (EST)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-04.internal (MEProxy); Mon, 09 Nov 2026 15:23:52 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to; s=fm3; t=1794255832; x=1794342232; bh=YgAFQd7bek
+	j3d7oevT9/mkDM82sDq88XmkOWnMQYsvw=; b=V7/TZ9BPvMZmCzesF1rCMPstjL
+	gv9sCFN9awQqzHFbOf6HPF7BCbuC1nBgrJehw9N8pU0MKG2uDkG8C2j7xjk7EcjX
+	hEXn+d9yCBTnp2hG870p1iPovQn3gcAC+FhcU2decsOJacO81J+KsvbJYQUkMNJv
+	9l5/90Fp4oG73FmAteT1RoSdJ5gIltDHzzlwlcObz+9rzfO3lrHX+c6s3QnvtDSA
+	+DbF+2ceU5LV45TRezm6p8fBO4aWq/Nln0aPrRFxXovWN+BF6fvBO1Pom2+9nE82
+	4mFlSN94C4RSF5+pTMZRkL5jXNYL30f+iO3jV3zubpwYgHhEXyrtyJN3A5fQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:date:date:feedback-id:feedback-id:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm3; t=1794255832; x=1794342232; bh=YgAFQd7bekj3d7oevT9/mkDM82sD
+	q88XmkOWnMQYsvw=; b=vl6so0TyDCypo65LT2FOy0VQ0BefABHm5OaT2QmMxJ94
+	8kgoJdiRKCd4EbdDjEzOPBMmQlfFWUtgl+/rrbTd+7PxZlLzHOGjhbm13ymsrX2l
+	mshk8+FH9Zp/uz5jD9NhhKoKl036ZF4mExBQu8vmYtPrq+k1fUVuus1L1zbKG1e9
+	1fnbZAhozyS89mm/74FXckr4DdDjOC1zKXte1dUnWO4JQHmU0CWvGn8EW9TWiFqE
+	CHdG/pSr8fNLWex08A33ZOvlFQGBBx0erRgJAtXMjpVTjz2SiBA7JyAJvHMBRTTk
+	sUnYK9O1JDpHVhJ7wFH/0ibgkFRtwT+u5izUgSq1+g==
+X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
+	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
+	action=sign d=ownmail.net a=rsa-sha256;
+DKIM2-Signature: i=1; m=1; t=1794255832; d=ownmail.net;
+	mf=PG5laWxiQG93bm1haWwubmV0Pg==;
+	rt=PGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg==;
+	s=fm3:rsa-sha256:gJtOMvQNq/8VFDCOn0K2qF1WLIIeLr4bblfB7JcXSe43mMD
+	+jqB5mLds0zAyS3mqFIu9lZnA0xZUG1GxcMiTicAg+WzCD2O7FJnReB/jaUlRw5H
+	GClCioWmk5oZ4XyjxP429e+uhN9u3G1ZOsqIbGkqJEluvo9nXWzPsur2H+6UOJ9I
+	7YaloyPBe5dVca1Dx3oBrlsPbo+mdADkNuR6aPJzlP1E5rpiaBnB8f0zO2Q82Tve
+	CcsjviIZwF6p+pMnQxzLt3mQlwEv3xQuPldL1eaPye9qE58b0Phpsj+o+6iVZu6S
+	RZj5RBkSl3t1OKSTztBx96RN2dj9Gqu8qEmrcZA==;
+X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
+	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
+	action=mi-m=1; hc=10;
+	hn=cc,content-transfer-encoding,date,feedback-id,from,
+	message-id,mime-version,reply-to,subject,to;
+Message-Instance: m=1; h=sha256:ZuVE5KupMboxf8CJR5q9TNrICTq3KeBKw2JNTUYCMkE=:pYqqfF3ON6NV4H1AoY3rAvBK1gVr4WtDfU1tarkcu18=;
+X-ME-Sender: <xms:1yvyamazFYUtfzqihhtMEdIK9V-CMslgvyrMEgSKJvLvLpOBRA3H1Q>
+    <xme:1yvyanqM62FPzOrrNjdotbLW1ifVWtWcE6KEtx8Boq34V-yBFAVD4HMA0xpuN5hgF
+    XVuGzrB1i0yYXdbV0b8dZsueQM21wneCuaJjS0auq6W54I_RBw>
+X-ME-Received: <xmr:1yvyaqSvRpW1oVHVay9UNrCHtXvN41YIO2t5sOl-kHHl3VEK3IOAw-_b7eW83nO1UVg5ChONZIheXFAJOsW300peTEJm58U>
+X-ME-Proxy-Cause: dmFkZTFb9ERLq480HsM4xsch1wsVTeR4VK1aOwVAMqkGvq1SNe0pnoHhuxUvqWWxaaBhxb
+    38E1ZY7E3a6l5iRZOf77TQwuVyacb2k4xro7oAvHDhyIl2HfVZnhdpZ+UdpZwTDy6lN/Y5
+    3/c1y0VJVZGHmXMmVWGToQdDCO3N5v7Gn0Stv9OUvbNbgh/fyMlV4nR/+4lgGGPnyCtdQ3
+    3mGQsa+nqqTvgGKJZaNBOih+iHGhbIoUZJpFfTiBHyzNc8evEwmRrcSEUqBKl/MPYCKi8d
+    hKchU+Zcd1stBG++Mt2GMUfELYtmZKj5i3LvD9pjbeOj708zAGetmj+eaRh2LfdH9n/mj3
+    NQoQ6P61St0zI19naVawRN3yRGCPbyS6hTywNrdrlD8zZggrQUDu6SqDx7Xa0Rey/Hj0v9
+    KfaF6rrelKJVdyXCtLKAsW/XU2qoEBZU7/Gh1iwmQ9BISgZS1Q5sBhD8G7L0lvAtApTxg/
+    ywtJWYkqif+yfsKSF5VoY7nop3Lx4OuQO9eMLNPdzJb5XqrZJqvuQhI7FdGFRUfLahoFxC
+    HPs5ynvO3r0CMNGVRwUP6dQGZhf2pxumhg3cUBUfpwYfogfiSEPsCOhLrK/jKLqWspVqb8
+    UeulRmZOjWTRHo1szNn+ZmEOa5P7258ev9jSGt575GItWDiflLGQICGG0d9g
+X-ME-Proxy: <xmx:1yvyarrz-ioqEg_BjgEf_d3ZOh-9TxrguY95TwC9JAIkBcCnOcrmHw>
+    <xmx:1yvyak39FY977EA4yRb2yUQLZPnRFZxWogAnVap7n1Hddamn6imQbg>
+    <xmx:1yvyaq5yHbSDAYQidgkFw_7NLts4MKprMLn80nyO6_pOcgVX4qxUPw>
+    <xmx:1yvyaoRhS4pRYrrg-nWY3BQfjs_y331-3BIHPBhoiFP4OyPxUi4g7w>
+    <xmx:2CvyapNwe2-kh_MnJ9BB_5PfxjGJ-pxs2DU-n7nIxLEHA18x5ukTyrf7>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 9 Nov 2026 15:23:48 -0500 (EST)
+From: NeilBrown <neilb@ownmail.net>
+To: Ilya Dryomov <idryomov@gmail.com>,
 	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	dlzhangak@isoftstone.com
-Subject: [PATCH v2] ceph: revalidate dentries under snapdir to drop stale snapshots
-Date: Mon,  9 Nov 2026 15:29:57 +0800
-X-Mailer: git-send-email 2.48.1
-In-Reply-To: <CAOuZWzx7eg1bNzyoY+kTP2CB4NqwwC23K1RC-etdWW1VyF01fA@mail.gmail.com>
-References: <CAOuZWzx7eg1bNzyoY+kTP2CB4NqwwC23K1RC-etdWW1VyF01fA@mail.gmail.com>
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	Alexander Viro <viro@zeniv.linux.org.uk>,
+	Christian Brauner <brauner@kernel.org>
+Cc: Jeff Layton <jlayton@kernel.org>,
+	Jan Kara <jack@suse.cz>,
+	linux-fsdevel@vger.kernel.org,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 0/2] cephfs: prepare for changes to VFS locking
+Date: Tue, 10 Nov 2026 07:20:22 +1100
+Message-ID: <20261109202339.1380828-1-neilb@ownmail.net>
+X-Mailer: git-send-email 2.50.0.107.gf914562f5916.dirty
+Reply-To: NeilBrown <neil@brown.name>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -62,159 +130,38 @@ List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-TLS: YES
-X-ENVELOPE-SENDER: dlzhangak@isoftstone.com
-X-SOURCE-IP: 221.226.109.28 unknown Mon, 09 Nov 2026 15:29:57 +0800
-X-FangMail-Miltered: at fangwg01 with ID 6AF17675.001 by FangMail milter!
-X-FangMail-Envelope: 1794209397/4jNLys3BPKz22sb/6AF17675.001/221.226.109.28/[221.226.109.28]/ldzh../<dlzhangak@isoftstone.com>
-X-FangMail-Bounce-Flag: 1794209397.6AF17675.001
-X-FangMail-Outinfo: 1794209397/6AF17675.001/4jNLys3BPKz22sb/dlzhangak@isoftstone.com/1
-X-CLEAN: YES
-Message-Id: <1794209399.6AF17675.001.4jNLys3BPKz22sb@fangwg01>
-X-Fangmail-Anti-Spam-Filtered: true
-X-Fangmail-MID-QID: 6AF17675.001/4jNLys3BPKz22sb
 
-When a snapshot is deleted on one client node, its corresponding
-'.snap/<snapname>' dentry cached in the VFS dcache on other client nodes
-never gets invalidated. As a result, on another client node:
-- recreating a snapshot with the same name fails with -EEXIST;
-- removing the already deleted snapshot fails with -ENOENT while leaving
-  the stale positive dentry in the dcache;
-- if the deleted snapshot is recreated with the same name on the remote
-  node, the local client still reads the file contents of the old
-  snapshot;
-- a removed ancestor snapshot stays visible as '.snap/_<name>_<ino>' in
-  child directories.
+This v2 drops 3/3 which was deprecating d_add() - there is no rush for
+that so I'm not going to push it at present.
+It also fixes the first patch to increment "skipped" when d_alloc_trylock()
+returns -EWOULDBLOCK.
 
-Since commit 2817b000b02c ("ceph: directory operations"),
-ceph_d_revalidate() has unconditionally trusted all dentries whose
-parent directory has ceph_snap(dir) != CEPH_NOSNAP (later written as
-ceph_in_snap(dir)). Because that condition matches both immutable
-snapped directories (ceph_snap(dir) <= CEPH_MAXSNAP) and the mutable
-virtual '.snap' directory itself (ceph_snap(dir) == CEPH_SNAPDIR), it
-unconditionally sets valid = 1 when dir is CEPH_SNAPDIR, rendering the
-CEPH_MDS_OP_LOOKUPSNAP revalidation path added in commit 200fd27c8fa2
-("ceph: use lookup request to revalidate dentry") unreachable.
+The VFS patches that this series depends on are upstream, so this can
+land in any tree.
 
-However, simply falling back to CEPH_MDS_OP_LOOKUPSNAP for every dentry
-under CEPH_SNAPDIR would cause every path walk through '.snap/<name>' to
-send a synchronous LOOKUPSNAP request to the MDS, because the MDS issues
-no lease for dentries under '.snap', the snapdir only has CEPH_CAP_PIN,
-and a snapped inode has no real caps.
+Thanks,
+NeilBrown
 
-Instead, introduce snapdir_dentry_is_valid() to validate cached dentries
-under CEPH_SNAPDIR against the snapped head directory's snap realm
-cached_context. Because the MDS sends a snap update to every client
-holding caps in a realm whenever a snapshot in it is created or removed,
-we can keep trusting a cached dentry under '.snap' as long as we hold
-real caps on the head directory and the snapshot's snapid
-(ceph_snap(inode)) is still present in its realm's cached_context, and
-only fall back to CEPH_MDS_OP_LOOKUPSNAP when it is not or when no caps
-are held on that directory.
+original intro:
+I am working on changes to directory locking.  The medium term goal is
+to lift d_alloc_parallel() locking above i_rwsem, so d_alloc_paralle()
+can be run unlocked, and consequently cannot be called when ->i_rwsem is
+held.
 
-Fixes: 2817b000b02c ("ceph: directory operations")
-Link: https://tracker.ceph.com/issues/81579
-Suggested-by: Xiubo Li <xiubli@kernel.org>
-Signed-off-by: zhangdaolong <dlzhangak@isoftstone.com>
----
-Changes in v2:
-- Add snapdir_dentry_is_valid() to validate dentries under .snap against
-  the head directory's snap realm cached_context when holding caps,
-  avoiding unnecessary LOOKUPSNAP round trips on cache hits (Xiubo Li).
-- Drop the ceph_unlink() -ENOENT hunk (to be sent separately).
-- Update comments in ceph_d_revalidate() and point Fixes: to 2817b000b02c.
-- Note: Xiubo, please feel free to change Suggested-by to Co-developed-by
-  (with your Signed-off-by) if you prefer.
+The requires:
+ 1/ that d_alloc_parallel() not be called while i_rwsem is held and also
+    that d_alloc()/d_splice_alias() not be used (unless the filesystems
+    doesn't support creating objects).
+    cephfs uses d_alloc()/d_splice_alias() when priming the dcache from
+    the results of readdir.  A new interface d_alloc_trylock()
+    is now available and can be used instead.
 
- fs/ceph/dir.c | 64 +++++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 62 insertions(+), 2 deletions(-)
+ 2/ a dentry must not be d_drop()ed while an operation is ongoing, as an
+    unlocked d_alloc_parallel() would then be able to create a new
+    dentry with the same name.  cephfs calls d_drop() in couple of places
+    before d_splice_alias() but this is no longer needed as d_splice_alias()
+    handles spliced aliases now.
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 6eb5b1cb039b..21983e14cb67 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1979,6 +1979,58 @@ static int dir_lease_is_valid(struct inode *dir, struct dentry *dentry,
- 	return valid;
- }
- 
-+/*
-+ * Check whether a cached dentry under .snap still names an existing snapshot.
-+ *
-+ * The MDS issues no lease for these dentries, but it sends a snap update to
-+ * every client holding caps in a realm when a snapshot in it is created or
-+ * removed.  So as long as we hold caps on the snapped directory, its realm's
-+ * snap context tells us whether the snapshot still exists.  Without caps we
-+ * cannot tell, and the caller has to ask the MDS.
-+ */
-+static int snapdir_dentry_is_valid(struct inode *dir, struct dentry *dentry,
-+				   struct ceph_mds_client *mdsc)
-+{
-+	struct inode *inode = d_inode(dentry);
-+	struct ceph_vino vino = {
-+		.ino = ceph_ino(dir),
-+		.snap = CEPH_NOSNAP,
-+	};
-+	struct ceph_snap_context *snapc = NULL;
-+	struct ceph_inode_info *pci;
-+	struct inode *parent;
-+	u32 i;
-+	int valid = 0;
-+
-+	if (!inode || ceph_snap(inode) > CEPH_MAXSNAP)
-+		return 0;
-+
-+	parent = ceph_find_inode(dir->i_sb, vino);
-+	if (!parent)
-+		return 0;
-+	pci = ceph_inode(parent);
-+
-+	down_read(&mdsc->snap_rwsem);
-+	spin_lock(&pci->i_ceph_lock);
-+	if (__ceph_is_any_real_caps(pci) && pci->i_snap_realm &&
-+	    pci->i_snap_realm->cached_context)
-+		snapc = ceph_get_snap_context(pci->i_snap_realm->cached_context);
-+	spin_unlock(&pci->i_ceph_lock);
-+	up_read(&mdsc->snap_rwsem);
-+	iput(parent);
-+
-+	if (!snapc)
-+		return 0;
-+	for (i = 0; i < snapc->num_snaps; i++) {
-+		if (snapc->snaps[i] == ceph_snap(inode)) {
-+			valid = 1;
-+			break;
-+		}
-+	}
-+	ceph_put_snap_context(snapc);
-+	return valid;
-+}
-+
- /*
-  * Check if cached dentry can be trusted.
-  */
-@@ -2002,12 +2054,20 @@ static int ceph_d_revalidate(struct inode *dir, const struct qstr *name,
- 
- 	mdsc = ceph_sb_to_fs_client(dir->i_sb)->mdsc;
- 
--	/* always trust cached snapped dentries, snapdir dentry */
--	if (ceph_in_snap(dir)) {
-+	if (ceph_snap(dir) == CEPH_SNAPDIR) {
-+		/* a snapshot under .snap may have been removed by others */
-+		if (flags & LOOKUP_RCU)
-+			return -ECHILD;
-+		valid = snapdir_dentry_is_valid(dir, dentry, mdsc);
-+		doutc(cl, "%p '%pd' inode %p under snapdir, valid %d\n",
-+		      dentry, dentry, inode, valid);
-+	} else if (ceph_in_snap(dir)) {
-+		/* snapshots are immutable: trust dentries inside one */
- 		doutc(cl, "%p '%pd' inode %p is SNAPPED\n", dentry,
- 		      dentry, inode);
- 		valid = 1;
- 	} else if (inode && ceph_snap(inode) == CEPH_SNAPDIR) {
-+		/* the .snap dentry itself */
- 		valid = 1;
- 	} else {
- 		valid = dentry_lease_is_valid(dentry, flags);
--- 
-2.48.1
 
+ [PATCH v2 1/2] cephfs: Use d_alloc_trylock() in
+ [PATCH v2 2/2] cephfs: Don't d_drop() before d_splice_alias()
