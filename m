@@ -1,79 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794184047;
-	b=qZsV2IPsmaJShYiS7uc352MMgVI2ejMbJkRzYtNDkdp+i4OKRkkC1uLnslqRBtkvtgOf
-	 I6c6AEAU+HH9euz1+pfp2lkq+e6WwYbe0rGZ8fpSGPZSxCddWvyD2WVS/ckb91REYeLGu
-	 kdU2ZiHFKWq/bhYUWapNIrbM69fGto2BIpaRKhVvU2/B3vtbbO7Kn2kQgWBk3vzDM0uis
-	 QODXst33ARYw9MB4QhzDEA2Ot1rBkEfe/kfGt4RJW0h1E3qYxw+LbjDhwYL+b9Arb4cn6
-	 jPj+NYhNe0j07c4l210YJ0T1DAEz7U0Un3yFl0OU9P6xyxU5LA4j3XauX4IhP4V7hdQ==
+	t=1794184046;
+	b=qaXKTxUlFuh6c/G89Ra48k8vqwgzXnGK4xojt7xtBDUIifj5/KdYirqQ4MopKehi/291
+	 1JtFz0N3R03GdLNTUvqJSz+B55gcj8Lqxs0nLea/vG9V3MUnhmN5oS9tGXkFjYk3lXcVp
+	 juGHEzoWz/cAo+RLMKFtQZZk6eOmKraB7jFa/IusWKMJ3EOAshY7VLeoqRatS4vkR4YzN
+	 roWBrmiD+3VJyB1GDDf0muFqAIosw3ZoMLBdBNM/oI3JXY6JJm7G9Uk669u0opw6YoVQY
+	 J/BST7hO8ixCuP4cjgTzuSbIxyWTKDf9ZpIF/Ozk6/cI3g4V7l87UDFg9lBzi7fZB+g==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794184047;
-	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
-	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=YSNQBlnYy4Tyvhr3MfIx5hMTrcKDdnzgSLzZLIt/m6A=;
-	b=OJaJtsTMVMjU/gKj9Z81C55hWnDxSP/Lnaabd3OMFwlJqsimHWVNfWLW+ccoHQKXf5w1
-	 wNyiGoRBlpvL2eut5QAHQz+7qRA+G/nIOrvOIL9epYL/ktJ18ztjOwL5c6yhk2PnB8sbr
-	 ogSYHnrmWrKDT3u6ALWUfSlc/2llD6n/5RvcIDgnGU380bmjKvlneau8zqEs3PjWfv86z
-	 JTh7CqYjPFU2rQR7Kowr7+MKc7P0w2+OxQI5epNGONn9U8m7gO+mMomfyoKUPPA0pGIuB
-	 NWzWwhxqdcfg/gx6EJusK2wE4hCM8iAfWgm1dWpY/TdgwGRGxXcvqRYiWUx9kiPsL8w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794184046;
+	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
+	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
+	 X-Endpoint-Received:X-Original-From:Reply-To;
+	bh=Fgi8dZsDiVgf5P721ugNnqmxUTix2UebH9jaWVQXTb8=;
+	b=ioHkCSbvcxgrmgUmeoQ0MkstQdTIqydxFC9tho5KaPxVvT4BXslToSnVyUkV5h8dsxOO
+	 XJStexOmPVBqwjVWZEd1aKvWYEfirD3i71tIU80IHipQ46wmMZslOXIpa3/HW7wy2AO9i
+	 qkx0cBEzvgYb1YgHQ83mOfG3Iqm4zHA/UHeYcEThKo3DjaGu7ozG5ooVi21KO+uz4+akS
+	 necM/3bcFFyd1JQbPw+g4N4klp4rnrzZJhX7c2ViJF3Hh8f4klcrKD15liC/6knEtQeUg
+	 iG8rNxJ9kzy0Ed0fipugiOKYuT/ZoDnYIfhP4kxRh3rF1TFh6Dlx8/uL3L//Dv0MW3A==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=WXpRukcu;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GUVYf5da;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3614606A32A;
-	Mon,  9 Nov 2026 00:27:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC5CD606A31C;
+	Mon,  9 Nov 2026 00:27:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=WXpRukcu
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GUVYf5da
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1794184046;
-	b=wEQvNoKFlLe5rml0OHJh8ahPWS3saygmd79gciSI10YM/adtCgt+h9cEDtMfTWjUwrL2
-	 LjnUGS/E11NGxwWP55azKTcgi2+3+hqJ2jPymoNSe7wNU7KPqFSnW+ZnhisxqzoAdYox+
-	 Oy6B0cX+WecZgcgn1hQOZQNHpy3zdVpzXYAyUoZ0k+bmSOOxR+zuxfPKGclxQULkiUS6n
-	 ujadZlkEnlN+bXKj0/NIh7R9ZO6pjyF5vOdLx+0c0lGUyU8UAXQrGy0MJJT3doG007FRd
-	 kedQLir4KaV932nsJR6tKcefU+geVXgqEJhGQXHC7uUVlqfpmrqOT7r/NEkgkOOSzCg==
+	t=1794184045;
+	b=RdsXnd5xhd7xVDv8v0lJ66jUdvlUtkuJhh2cZb6qFLj8Tk9RXav7OvUx0DO9Kk+K5cAw
+	 +s2/SQH54APMKi8LA7pkHt5Qo8ywWYXkQa1nbHzDFg+rBVN3KWo2aj9p0N91X/YPIsrc2
+	 2aZIn05MMdif1PaqGh3m0HuiBvsh7Shwh27MUKp1GpFgV0KHyyvk/VF8oCPb66kqxX/6s
+	 e1vbkI6mZwHySbbEqiJdNH/YLJlPTurOdyiFS0IcU2QcB+ER/6V9loXrqMPnWPgo/fLhn
+	 BNSnuzhQLIa5aFtjldT/WgAmHE6BXKF8GapIy0mhmK0XIAEHFFRnJSaxM9ecSmBiYYg==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1794184046;
-	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
-	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=YSNQBlnYy4Tyvhr3MfIx5hMTrcKDdnzgSLzZLIt/m6A=;
-	b=wP63zBqrfZX490nOZuuxDQtpncqOcAGOhfF8fTJpLd0Ocz9nr8B+7/zw0DxDpU2X1SOf
-	 t1uDuRISebPZLg74rLbez55m/VZZ2BXzkB4BALNDM+xuoCJsirTXFyCFC7hJQX70xKI/w
-	 wi7U0NJut2sawEZ57evv/qz+hyhY9l8MwSltF8SoTd8zBDIF1mQbrLaWN13muIbcyGuyk
-	 N+Ljw/WNfgPKTbC1oPVfR4BeQ0oGHluUIKqPn4Hcvpkr9nSKuxAIWH59bCXqFO2wKIfpD
-	 OwhYvo9xBLcPD2IYSRyNx9f/8T5vkNvBHc6hI7R50hk009dBO0/BaQ8pNnEuVmG7X7g==
+	c=relaxed/relaxed; t=1794184045;
+	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
+	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To;
+	bh=Fgi8dZsDiVgf5P721ugNnqmxUTix2UebH9jaWVQXTb8=;
+	b=ncRpzZHAGpEPkGZhvIllhhZTcAKaJnlZBT2YhhnhZ5cx/GtxFM4iUSOlHgy+6Wj9p0sj
+	 2G47OsA8EgR0H54beba9CHG62w0bdei/agve4WuxblMIPuJYfhB2Og2Irgu6lOk2XAb9q
+	 dElywECHSzHWhYFwOjrXwh6mgdG6FDD4GM6ToPEW46ILNrbHx7Jy9uo6m44uGbVeRLCKj
+	 624RqWOq8V1TueWdcHRyh0jaCMllxbqFTL6nEKpgMJExP3J0G8eLA/5tm+B7f+UrZrCkn
+	 x15F5jse0sfN2PJuH/s/Xbg7VABGDK9Z8aCObSl2YgpEX4bIUo8cHJmdpgczhaZkt4w==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id D72F01F008A1;
+	by smtp.kernel.org (Postfix) with ESMTPS id D733A1F008A2;
 	Mon,  9 Nov 2026 00:27:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794184046;
-	bh=YSNQBlnYy4Tyvhr3MfIx5hMTrcKDdnzgSLzZLIt/m6A=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
-	b=WXpRukcuC1Y7xoCqbOd+YvtIliMEY8RtHZOTeMXUDNh4iESv87mLNQsna+QcsVtoR
-	 HqfSSaBtGJKoT3ZEehlmA+u+3i+EavkMkIKUt0DXWMGjtDiW8AhXWmlHWQnEi/5bw1
-	 eYl11o0l7PGbnPmGqm1XblOeoEdOWu/hOEcS0hG1zTL4plWPZyQaXt+e5Ngd6vW3Rz
-	 5dSf8roCfrPB5Xv15RPIxpyeeK4kvFxwHjTuXLeRwN85nvNOUwSQ3K3wvS8UiV9w2g
-	 mueKIsq6qNIP9MzZJmVvQhNZGuO14jhQhWISNBGUjo5jWTEpdAH6/aecC9jbxvSGxh
-	 TNXvpQl59mt1g==
+	s=k20260515; t=1794184045;
+	bh=Fgi8dZsDiVgf5P721ugNnqmxUTix2UebH9jaWVQXTb8=;
+	h=From:Subject:Date:To:Cc:Reply-To;
+	b=GUVYf5daHBDxHwl8kwVRg+RWzxVyCO16CNueufhIumCKBOaLbQ5zM5pyRho1xPPux
+	 2H94rOOd2MJb68TDk22Jt30mxeXho2DI/vPVERaZvYGg/V828rB8OWBkCZsaXM0IRx
+	 HMC4qA2DlT8UO1xNDh65q7zcFqknZM0Z/oF5wbAa/NJhIO7JmHRevpYFPw8IVa8PR8
+	 gofjDtb85Gxda2Lf3GXWyZBqjebqC0X3JRDmX+ek0iVh0pP2uKQ4km/KUkTdrUFoe/
+	 TXeis3PecfC//V/HPVG8CA1y76t+V7X8An9DInY9ROe8cu2pyw66CcgrJH0etd4lR1
+	 PURHsVAi1jM3g==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 5D0304819A;
+	by lkml.kernel.org (Postfix) with ESMTP id 37F6948196;
 	Mon,  9 Nov 2026 00:27:24 +0000 (UTC)
 From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Mon, 09 Nov 2026 01:27:19 +0100
-Subject: [PATCH 2/2] ceph: drop the dirty folios that a shut down mount
- cannot write back
+Subject: [PATCH 0/2] ceph: dirty folios left at umount
+Date: Mon, 09 Nov 2026 01:27:17 +0100
+Message-Id: <20261109-ceph-shutdown-dirty-folios-v1-0-34600e8dab20@clyso.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -84,107 +84,65 @@ List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261109-ceph-shutdown-dirty-folios-v1-2-34600e8dab20@clyso.com>
-References: <20261109-ceph-shutdown-dirty-folios-v1-0-34600e8dab20@clyso.com>
-In-Reply-To: <20261109-ceph-shutdown-dirty-folios-v1-0-34600e8dab20@clyso.com>
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMOw7DIAwA0KtEnmMJGNKoV6k6JGAXRxVEmPSjK
+ Hcvbce3vB2UipDCuduh0ENUcmqwfQc+TulGKKEZnHGDtWZET2tEjVsN+ZkwSKlv5HyXrMh08uw
+ 4zM4M0IK1EMvrl1+uf+s2L+Trd4Tj+ACF24EUfgAAAA==
+X-Change-ID: 20261108-ceph-shutdown-dirty-folios-fe7cf2fdb206
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
  Viacheslav Dubeyko <slava@dubeyko.com>, 
  Christian Brauner <brauner@kernel.org>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Xiubo Li <xiubo.li@clyso.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1794184042; l=3297;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794184042; l=1539;
  i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=apUGUAugMMqkzlDQq7ZBOtMNcuBWkirzNCz7wqu3KjU=;
- b=azC8ejpzs7pUV5FvwNmYgF0qXFQc6onGrB/Eo8qFBp+qNRpyI9JMZiVibAw0v0H918RqrmJgy
- VPFIEa1hU1OANkmw04/+oFXbnlsfL4bn9DDtmxH0i3vV+8XKzg6soOz
+ bh=DkStLvIYCGVjAQ5edL4dBSmnuabmcLt1n1rz2B8iYco=;
+ b=7uEsb17jqcBxX+vBu72dHD9qkkoj9z4jHlj5shmzZGDT3qCIOHA2tdqpy/h6L2l8Ghm2QM9yY
+ AaGh9GIeIyFBExGA0Q8RA1wKYjw72Q5xyOywJaLTkybKCSxRMIwZuTM
 X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
  pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
 X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
  auth_id=840
 X-Original-From: Xiubo Li <xiubo.li@clyso.com>
 Reply-To: xiubo.li@clyso.com
-Content-Transfer-Encoding: 7bit
 
-From: Xiubo Li <xiubo.li@clyso.com>
+Two fixes for dirty folios that umount waits for until mount_timeout,
+and that can leave the inode busy, which BUGs in generic_shutdown_super().
 
-When the MDS closes the session of a client (e.g. it evicts it), the
-caps go, with any dirty cap state, but the dirty folios stay in the
-page cache: the inode is not shut down then, so ceph_purge_inode_cap()
-does not have them invalidated, and they are left for writeback.  If
-the mount is then shut down by a forced umount before they were written
-back, they never are: ceph_writepages_start() only sets -EIO on the
-mapping and returns, so they stay dirty for good.  Each keeps its count
-in mdsc->dirty_folios and its Fb cap ref, which holds a reference to
-the inode, so umount waits until mount_timeout and then finds the inode
-busy:
+Patch 1 takes a folio out of mdsc->dirty_folios wherever it stops being
+dirty: ceph_invalidate_folio() and write_folio_nounlock() only put its
+snap context and Fb cap ref, so after e.g. a truncate of dirty data
+umount waits for the folio until mount_timeout.
 
-  ceph: ... dropping dirty Fw state for ... 10000000001.fffffffffffffffe
-  ceph: ... 10000000001.fffffffffffffffe 1099511627777 forced umount
+Patch 2 drops the dirty folios of an inode when the mount is shut down
+and they can no longer be written back.  When the client was evicted,
+the caps went before the forced umount, so nothing invalidated the
+folios; they kept their Fb cap ref, and with it the inode:
+
   ceph: ... umount timed out, 0
   VFS: Busy inodes after unmount of ceph (ceph)
   kernel BUG at fs/super.c:731!
 
-Have the page cache of such an inode invalidated there instead, which
-for a shut down inode truncates it, as ceph_purge_inode_cap() does.
-That has to happen from the inode work, not from writeback: putting the
-last Fb cap ref may put the last reference to the inode, and evicting
-it would wait for the writeback that does it.  Then ceph_kill_sb()
-flushes the inode work after syncing the fs, so that the folios and
-their references are gone before the inodes are evicted.
+Tested with the qa lazy I/O suite (the evicted writer case hit the BUG
+on the first run without the fixes, and passes 5/5 with them) and with
+fsstress, on a KASAN + lockdep + kmemleak kernel.
 
 Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
- fs/ceph/addr.c  | 14 ++++++++++++++
+Xiubo Li (2):
+      ceph: count a dirty folio out wherever it stops being dirty
+      ceph: drop the dirty folios that a shut down mount cannot write back
+
+ fs/ceph/addr.c  | 43 +++++++++++++++++++++++++++++++++----------
  fs/ceph/super.c |  8 ++++++++
- 2 files changed, 22 insertions(+)
+ 2 files changed, 41 insertions(+), 10 deletions(-)
+---
+base-commit: 5dcec86cc31f8144857c0d9bf2a7fa13b6e6f531
+change-id: 20261108-ceph-shutdown-dirty-folios-fe7cf2fdb206
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 2abed478a4ad..2202906f4e18 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -2097,6 +2097,20 @@ static int ceph_writepages_start(struct address_space *mapping,
- 	      (wbc->sync_mode == WB_SYNC_ALL ? "ALL" : "HOLD"));
- 
- 	if (is_forced_umount(mapping)) {
-+		/*
-+		 * What is dirty here can never be written back now.  Left
-+		 * dirty, each folio keeps its Fb cap ref, which holds the
-+		 * inode, and its count in the dirty folios that umount
-+		 * waits for.  ceph_purge_inode_cap() has them invalidated
-+		 * when it removes the caps of a shut down inode, but the
-+		 * session may have been closed (the client evicted), and
-+		 * the caps removed, before the shut down.  Have them
-+		 * dropped now, but not from here: putting the last Fb cap
-+		 * ref may put the last reference to the inode, and its
-+		 * eviction would wait for this writeback.
-+		 */
-+		if (mapping_tagged(mapping, PAGECACHE_TAG_DIRTY))
-+			ceph_queue_invalidate(inode);
- 		ceph_blog_exit(&__ji);
- 		return -EIO;
- 	}
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 40be4b16e486..bb5591c1e154 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -1634,6 +1634,14 @@ static void ceph_kill_sb(struct super_block *s)
- 	 */
- 	sync_filesystem(s);
- 
-+	/*
-+	 * A shut down mount can't write back its dirty folios, and
-+	 * writeback queued their invalidation instead: let it drop them,
-+	 * and the references they hold to the inodes, before the inodes
-+	 * get evicted.
-+	 */
-+	flush_workqueue(fsc->inode_wq);
-+
- 	if (atomic64_read(&mdsc->dirty_folios) > 0) {
- 		wait_queue_head_t *wq = &mdsc->flush_end_wq;
- 		long timeleft = wait_event_killable_timeout(*wq,
-
--- 
-2.53.0
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
 
 
