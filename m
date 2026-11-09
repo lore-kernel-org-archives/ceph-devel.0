@@ -1,79 +1,57 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794184212;
-	b=smgY0V3DhEoULXq8DwiNwWDXdONd+Xy8Ncahbh9MLh42dE34ytwNVqEEgSb8P/1DPj3w
-	 ejzvEmnYOcjufzooFVvAd6rQaZ34/7O8GTr5lIaoTfLQ4Ls+20VcjA6Xv+AGRpENkTvJz
-	 1Vd3rkbWKJBMZC5Heh+6VMzebA+gsAxQn7yZVqana5bYusIktB8L16388q+R/ZaO1dc43
-	 yzG4irH0CghD+RLNcP4lBdnG2UtGqqd497JNxGA3fyZs/5tCTOcsLJp7otKaWGzLRhMJp
-	 iQDM7mB5pDHRfLURa9Te3wlKySzVdOu05Qj5zerw5PwMNkZ/d7D6M0RQK3AMfydvyjg==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794184212;
-	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
-	 Content-Type:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=LKyISZsU8OqUQ6rBGfsWetUZIzQ/NjY9vPkHt5QTooA=;
-	b=ub9IiOhyGVVEm1QQSepE4TBbO7yJy4DlCHAex54TcyFGVFM1rA6AVTBOVI2eH9/L4Gf8
-	 OqLisUCMFfSAamE1D5jwf9JIb8htP3knSSCVjL8HWiVcyzKxt/BZJPXuAX4xDCo5lpR4U
-	 A2SmMeFbbWR9AHo5y2mC1Y5ByU7ce/YfrLjLwCkldnwmipONUN1yRN1PAxAHXtRG+mtZR
-	 iRCe51n3W18NcDSMtogApP+d96TaqjEEL4StTGl00CObrTgLnNxC2cw1SjMQuU6GUFPKK
-	 4I04rFd6KZhHuZnHQSYtwOODCkKsWnw4kScYvePV3DbyPd8YvzjhqR64UB9EAE6EEuw==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hvrcnNKs;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB0F8606D804;
-	Mon,  9 Nov 2026 00:30:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hvrcnNKs
-Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
-ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1794184211;
-	b=ev/u0/IBM9q+M6KaOgY8TTCdGA1Y1AeqMyZHK9GkQMm14zr8Z0gP9rLl7hNGn2cz04Te
-	 op7OoV0FRuTW2OAHwwGlSRwzHF1D+quhZqWzN0cdan1f6hawmrkpeCUibZESzGQbC5m6N
-	 u9InGYme2OIj42Rbl65Qt6iATRPb0s8zOVY0jLOAQlOfDL/Ee21U0eoyh7fDs+5CXV4QH
-	 B4h2siXYHJgdjgV7m4ctGU5l4c5u50Nj2ZbCbMhMVkPFHoTNjMrhCkG/DW8D0/k2S/JXu
-	 cpHqLqlB39s78i5giCKu5yP5N6deF+ot7zE6EeMzRqN20f1v8p4YkdRDF/w5vfGhKYQ==
-ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1794184211;
-	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
-	 Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=LKyISZsU8OqUQ6rBGfsWetUZIzQ/NjY9vPkHt5QTooA=;
-	b=GmZgplOHS13UpsMsy7iXvPzM1xNeX+mBT3x53T8H0vIePkbsPtyGhxsFheRCmltAln9y
-	 KHfZ2RXCCb42Cj+vtkCATfhfhu1UiV+KxLun3eYXNoY2zhuP50AJFH1lIaS7P2GBVDJE2
-	 4gwODZV8b+VM7wx9uXKUc1AuLOWx6hGLdn7mKW9pdrRn0if+PLLL8viRJL8r3A8VpTsVQ
-	 SIBAVCpEke7JbqyI+ErP2u+2IM9SnNI7NPHZRlJ3D+SUMXDRhdU4RpUMsmi/00N8cY4K+
-	 ijsyxZiM2lkKtTC5osUFwqaYjxaZjznkeftsXzqnLOkHlttXhIk8q21hEeqMquRYA0w==
-ARC-Authentication-Results: i=1; smtp.kernel.org; 
-	arc=none smtp.remote-ip=100.80.115.77
-Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=219.143.121.9
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794188340;
+	b=SjayT1GetzkphwJfTRwUPZhkPZ6KwagrkkFpbr/+ezlz71CRnG3o4P+99+SClwbr97au
+	 ND5s+zaQH0kQHaMTeodQbUY4SG+ikDJZ6+MyWP0sBX26F1mV4m56NN/oJV+HsVBeT+3Dc
+	 5n2olIT6Co/HLiQ8SDxnexOZzpZMFIe6oFL+Maw6WOUH4dNQ/JrWDgMiwXfVtSEfwaEiR
+	 W0vbXbXmmYFHVz8yatzKDwThDe3y6uDPG9EaSdOtJSvopNyMII6LLKGr4lgY1sj5q5EQR
+	 TcRw5QJ0i296AElpGope1qf1SV7HFb+0zyb/h7Ng98lM02xB0E7E7gvXC4FmgzkF1UQ==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794188340;
+	h=DMARC-Filter:Received:From:To:Cc:Subject:Date:X-Mailer:In-Reply-To:
+	 References:MIME-Version:Content-Type:Content-Transfer-Encoding:X-TLS:
+	 X-ENVELOPE-SENDER:X-SOURCE-IP:X-FangMail-Miltered:X-FangMail-Envelope:
+	 X-FangMail-Bounce-Flag:X-FangMail-Outinfo:X-CLEAN:Message-Id:
+	 X-Fangmail-Anti-Spam-Filtered:X-Fangmail-MID-QID;
+	bh=x1muTvUlf9SEhMdygrZyzxBP7L0PY5h9SJntq65AnLM=;
+	b=twUL7sBPxQo46VOQIv4Wbvlwo/H4FuIR+pHe9dJtwXvqfVbxP6tAh+/15QqADNxyVmbW
+	 tgdO5plDwOJcUI9HuBAc8EOBhWyF7RWB2u7848pY0Gl3bvGDRCsiPYsy7HDD4G+lkQC8c
+	 vNMpcuTii11GAQuO31lQlvfvbxGLqBg7WAdFdWcn2HATcCq2Nk4B0j+zz3t+HWUnJcEk+
+	 WfkfWjvT5ww8lUdjsRtYMigZNN4wvQq8IfQKhM29Rg2Ep3H+FLfQ3ZsQ3wlQ/mplujUdX
+	 8BxEEcfJZxe9X4ALpqKQ6y1jdxgbqsxx9QyqdLFrezw3xNJbNKK45ak7+uq1ZqeLGsA==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=isoftstone.com;
+	spf=pass smtp.mailfrom=isoftstone.com;
+	arc=none smtp.remote-ip=219.143.121.9
+Received: from spam.isoftstone.com (smg.isoftstone.com [219.143.121.9])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id 9F34D1F0092F;
-	Mon,  9 Nov 2026 00:30:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794184211;
-	bh=LKyISZsU8OqUQ6rBGfsWetUZIzQ/NjY9vPkHt5QTooA=;
-	h=From:Date:Subject:To:Cc:Reply-To;
-	b=hvrcnNKsVAj/t5162EeqdvOHXjMX6kkiLXIZ7j5I7qSP7j/jt7JFV40+nxnnBo/3d
-	 nrkN6o5M7XQkpYprEq8tTNkw7SOa5etl2neMxKnCStMDyADpuBxeegfidXT6oUqHT3
-	 hrWYSCJo4A+TW46BvIM6CkBSrZgOVQMPll2pio23vY8m1tlIQxkBMpR8fBgsyqWNiL
-	 J56OtNRcWG7LAIa+GDPp9lmzwAdSB9cY1cD8g2KIBEQydEVyH8N1kRJsU8wx6YpmA6
-	 J39x6dd0LQ7bRGb9yFYF4pLbDvEvwKNbxobeiNU5/IVGUE13gaFPQI0tnGy4CbUQHZ
-	 NIGnCjX+MzZ+A==
-Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 1926D4818E;
-	Mon,  9 Nov 2026 00:30:10 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Mon, 09 Nov 2026 01:30:09 +0100
-Subject: [PATCH] ceph: hand the lookup lock of an in-lookup dentry over to
- the reply
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 406DA606A31C;
+	Mon,  9 Nov 2026 01:38:57 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 406DA606A31C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=isoftstone.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isoftstone.com
+Received: from ldzh.. (unknown [221.226.109.28])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: dlzhangak@isoftstone.com)
+	by spam.isoftstone.com (FangMail) with ESMTPSA id 4jNC9j12vbz23pF;
+	Mon, 09 Nov 2026 09:38:49 +0800 (CST)
+From: zhangdaolong <dlzhangak@isoftstone.com>
+To: Xiubo Li <xiubli@kernel.org>
+Cc: Ilya Dryomov <idryomov@gmail.com>,
+	Alex Markuze <amarkuze@redhat.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	ceph-devel@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	dlzhangak@isoftstone.com
+Subject: Re: [PATCH] ceph: revalidate dentries under snapdir to drop stale snapshots
+Date: Mon,  9 Nov 2026 09:38:48 +0800
+X-Mailer: git-send-email 2.48.1
+In-Reply-To: <CAOuZWzyZoQ9oAHKmxVg7B292Vx-QZ2E+QLt6xVnpfKpps+4Yfw@mail.gmail.com>
+References: <20261106021310.777075-1-dlzhangak@isoftstone.com> <CAOuZWzyZoQ9oAHKmxVg7B292Vx-QZ2E+QLt6xVnpfKpps+4Yfw@mail.gmail.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -83,176 +61,97 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261109-ceph-lookup-lockdep-v1-1-54f9cbf9e147@clyso.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMQQqDMBCF4avIrA0kg5bUqxQXOk6bqWJCoiKId
- ze2q8e3eP8BiaNwgqY4IPImSfycYcoCyHXzh5UM2YAaH8Zoq4iDU5P34xry0DhwUPWzM1qjRaw
- I8jNEfsv+q77av9Paf5mWOwXneQEAlGOOdwAAAA==
-X-Change-ID: 20261108-ceph-lookup-lockdep-59a10028224c
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>, NeilBrown <neil@brown.name>, 
- "Christian Brauner (Amutable)" <brauner@kernel.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1794184208; l=5611;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=uc7SSQdBXs9iK/Wx2A/lVvyGm3o8mWlNwqwwtVdLWZw=;
- b=qGIO4+hKS5hb9H+Ny1IF6XbOizl6oW+zw1aUvubXFs5msYEaQAPsqakqEqtma4oik34TFeqFF
- 7THQ1caSgG6DyPS+TV6dtyPg8xgX61NF8iVJn8lR9/LRTQ+y17MgeLx
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-TLS: YES
+X-ENVELOPE-SENDER: dlzhangak@isoftstone.com
+X-SOURCE-IP: 221.226.109.28 unknown Mon, 09 Nov 2026 09:38:49 +0800
+X-FangMail-Miltered: at fangwg01 with ID 6AF12428.004 by FangMail milter!
+X-FangMail-Envelope: 1794188329/4jNC9j12vbz23pF/6AF12428.004/221.226.109.28/[221.226.109.28]/ldzh../<dlzhangak@isoftstone.com>
+X-FangMail-Bounce-Flag: 1794188329.6AF12428.004
+X-FangMail-Outinfo: 1794188329/6AF12428.004/4jNC9j12vbz23pF/dlzhangak@isoftstone.com/1
+X-CLEAN: YES
+Message-Id: <1794188329.6AF12428.004.4jNC9j12vbz23pF@fangwg01>
+X-Fangmail-Anti-Spam-Filtered: true
+X-Fangmail-MID-QID: 6AF12428.004/4jNC9j12vbz23pF
 
-From: Xiubo Li <xiubo.li@clyso.com>
+On Sat, Nov 7, 2026 at 12:17 PM Xiubo Li <xiubli@kernel.org> wrote:
+>
+> Hi Daolong,
+>
+> Thanks for the patch. I can reproduce this with two kernel clients, and
+> it is a bit worse than described: after B removes .snap/s3 and creates a
+> new .snap/s3, A still reads the file contents of the old snapshot. A
+> removed ancestor snapshot also stays visible as .snap/_p1_<ino> in child
+> directories. Your patch fixes all of these cases.
+>
+> [...]
+>
+> >         /* always trust cached snapped dentries, snapdir dentry */
+> > -       if (ceph_in_snap(dir)) {
+> > +       if (ceph_in_snap(dir) && ceph_snap(dir) != CEPH_SNAPDIR) {
+>
+> With this change nothing can validate a dentry under .snap anymore. The
+> MDS issues no lease for it, the snapdir only has CEPH_CAP_PIN, and a
+> snapped inode has no real caps. So every path walk through .snap/<name>
+> does a synchronous LOOKUPSNAP. With 3000 stats of .snap/s3/f on a cached
+> snapshot (in a VM, so only the order of magnitude matters):
+>
+>                  ops/s   LOOKUPSNAP   p50/p99 (us)
+>   unpatched     257834        0         3.1/6.9
+>   this patch     10065     3000        89.9/273.1
+>   realm check   234741        0         3.4/7.5
+>
+> The "realm check" row is an alternative that avoids the round trip. The
+> client already knows which snapshots exist: the directory's snap realm
+> keeps the list in cached_context, and the MDS sends a snap update to
+> every client with caps in the realm when a snapshot is created or
+> removed. So d_revalidate can keep trusting a dentry under .snap while
+> its snapid (ceph_snap(inode)) is still in the realm's snap context of
+> the head directory, and only fall back to LOOKUPSNAP when it is not, or
+> when we hold no caps on that directory.
+>
+> I tried this on 7.2.9. It fixes the same cases as your patch: recreating
+> a snapshot, reading stale data, removed ancestor snapshots, and 50/50
+> "B rmdir, A mkdir right away" rounds. It sends no LOOKUPSNAP on cache
+> hits. I can send you the diff I tested if it helps.
 
-Since lockdep tracks DCACHE_PAR_LOOKUP as a lock held by the task that
-started the lookup, ceph trips it on every lookup or open whose reply
-ends the lookup: ceph_fill_trace() runs in the messenger worker, and
-the d_splice_alias() there releases a lock that the worker never took:
+Hi Xiubo,
 
-  WARNING: bad unlock balance detected!
-  kworker/0:0/9 is trying to release lock (DCACHE_PAR_LOOKUP) at:
-  __d_lookup_unhash+0x112/0x380
-  but there are no more locks to release!
-  ...
-   d_splice_alias_ops+0x3e7/0x14e0
-   splice_dentry+0x140/0x1110 [ceph]
-   ceph_fill_trace+0x29c0/0x6fc0 [ceph]
-   handle_reply+0xe4b/0x2d60 [ceph]
+Thank you very much for reproducing the issue, identifying the additional
+stale read and removed ancestor snapshot cases, and benchmarking the
+LOOKUPSNAP overhead.
 
-and the task that waits for the reply returns to user space still
-holding it as far as lockdep knows.  The first report turns lockdep
-off, so it hides any real lock problem found after it.
+Validating the dentry against the head directory's snap realm
+cached_context (when holding caps on the head directory) before falling
+back to LOOKUPSNAP makes total sense and avoids the unnecessary MDS round
+trips on cache hits. Could you please share the diff you tested? I would
+be glad to incorporate it and test it for v2.
 
-Hand the lock over as NFS does for its async unlink: when
-ceph_mdsc_do_request() sends a request for an in-lookup r_dentry, it
-releases it with d_lookup_release() and marks the request; handle_reply()
-owns it with d_lookup_acquire() for as long as ceph_fill_trace() runs,
-and releases it again if the lookup did not end there; once the wait
-is over the requester takes it back, if the lookup has not ended,
-under r_fill_mutex so that it does not race with ceph_fill_trace().
+> >                 if (!err && !req->r_reply_info.head->is_dentry)
+> >                         d_delete(dentry);
+> > +               else if (err == -ENOENT)
+> > +                       d_drop(dentry);
+>
+> Please make this a separate patch. With the revalidate fix, rmdir of a
+> stale snapshot already fails in the lookup and never sends RMSNAP. I
+> checked the MDS counter with and without this hunk. Also, this hunk
+> affects unlink() of regular files too.
 
-Requests sent with ceph_mdsc_submit_request() alone (async create and
-unlink) do not hand it over: the lookup ends in the task that started
-it.
+Agreed. I will drop this hunk from v2 and send it as a separate patch.
 
-Fixes: 59492f9991dc ("VFS: add lockdep monitoring of DCACHE_PAR_LOOKUP lock.")
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
-lockdep now tracks DCACHE_PAR_LOOKUP as a lock owned by the task that
-started the lookup, and ceph trips it on the first lookup whose reply
-ends the lookup in the messenger worker (bad unlock balance), which
-turns lockdep off for the rest of the boot.  Hand the lock over to the
-reply handler, as NFS does for its async unlink.
----
- fs/ceph/mds_client.c | 40 ++++++++++++++++++++++++++++++++++++++++
- fs/ceph/mds_client.h |  1 +
- 2 files changed, 41 insertions(+)
+> Nits: the "always trust cached snapped dentries, snapdir dentry" comment
+> needs an update. Also, the trust-all check dates back to 2817b000b02c,
+> while 200fd27c8fa2 only added the unreachable LOOKUPSNAP branch, so
+> please explain the choice of Fixes: tag.
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index f178efc8f7ad..01091dbb37a2 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -4130,14 +4130,38 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
- 			 struct ceph_mds_request *req)
- {
- 	struct ceph_client *cl = mdsc->fsc->client;
-+	struct dentry *lookup_dn = req->r_dentry;
- 	int err;
- 
- 	boutc(cl, "do_request on %p\n", req);
- 
-+	/*
-+	 * lockdep sees the DCACHE_PAR_LOOKUP state of an in-lookup dentry as
-+	 * a lock held by the task that started the lookup.  The reply to a
-+	 * request for it (a lookup or an open) is handled by the messenger,
-+	 * whose ceph_fill_trace() may end the lookup: hand the lock over to
-+	 * it for as long as we wait, and take it back after, if the lookup
-+	 * has not ended.  r_fill_mutex keeps that away from a running
-+	 * ceph_fill_trace().
-+	 */
-+	if (lookup_dn && d_in_lookup(lookup_dn)) {
-+		d_lookup_release(lookup_dn);
-+		set_bit(CEPH_MDS_R_LOOKUP_HANDOFF, &req->r_req_flags);
-+	} else {
-+		lookup_dn = NULL;
-+	}
-+
- 	/* issue */
- 	err = ceph_mdsc_submit_request(mdsc, dir, req);
- 	if (!err)
- 		err = ceph_mdsc_wait_request(mdsc, req, NULL);
-+
-+	if (lookup_dn) {
-+		mutex_lock(&req->r_fill_mutex);
-+		clear_bit(CEPH_MDS_R_LOOKUP_HANDOFF, &req->r_req_flags);
-+		d_lookup_acquire(lookup_dn);
-+		mutex_unlock(&req->r_fill_mutex);
-+	}
- 	boutc(cl, "do_request %p done, result %d\n", req, err);
- 	return err;
- }
-@@ -4180,6 +4204,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 	struct ceph_mds_reply_info_parsed *rinfo;  /* parsed reply info */
- 	struct ceph_snap_realm *realm;
- 	unsigned int nofs_flags;
-+	struct dentry *lookup_dn;
- 	u64 tid;
- 	int err, result;
- 	int mds = session->s_mds;
-@@ -4335,6 +4360,18 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 	/* insert trace into our cache */
- 	mutex_lock(&req->r_fill_mutex);
- 
-+	/*
-+	 * ceph_fill_trace() may end the lookup of an in-lookup r_dentry
-+	 * (d_splice_alias()), which lockdep sees as releasing its
-+	 * DCACHE_PAR_LOOKUP lock: own it here meanwhile, see
-+	 * ceph_mdsc_do_request().  splice_dentry() may replace r_dentry.
-+	 */
-+	lookup_dn = NULL;
-+	if (test_bit(CEPH_MDS_R_LOOKUP_HANDOFF, &req->r_req_flags)) {
-+		lookup_dn = req->r_dentry;
-+		d_lookup_acquire(lookup_dn);
-+	}
-+
- 	/* Disable filesystem reclaim while journal_info carries Ceph state. */
- 	nofs_flags = memalloc_nofs_save();
- 	{
-@@ -4350,6 +4387,9 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 		ceph_blog_exit(&ji);
- 	}
- 	memalloc_nofs_restore(nofs_flags);
-+
-+	if (lookup_dn)
-+		d_lookup_release(lookup_dn);
- 	mutex_unlock(&req->r_fill_mutex);
- 
- 	up_read(&mdsc->snap_rwsem);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 4749438d94e1..ff9ba09f3b59 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -360,6 +360,7 @@ struct ceph_mds_request {
- #define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
- #define CEPH_MDS_R_ASYNC		(8) /* async request */
- #define CEPH_MDS_R_FSCRYPT_FILE		(9) /* must marshal fscrypt_file field */
-+#define CEPH_MDS_R_LOOKUP_HANDOFF	(10) /* r_dentry in-lookup, owned by the reply */
- 	unsigned long	r_req_flags;
- 
- 	struct mutex r_fill_mutex;
+I originally chose 200fd27c8fa2 ("ceph: use lookup request to revalidate
+dentry") because it explicitly added the CEPH_MDS_OP_LOOKUPSNAP branch in
+ceph_d_revalidate() intending to revalidate dentries under CEPH_SNAPDIR,
+but overlooked that the earlier check from 2817b000b02c ("ceph: directory
+operations") made it unreachable. In v2, I will update the comment and
+point Fixes: to 2817b000b02c (while also mentioning 200fd27c8fa2 in the
+commit message).
 
----
-base-commit: 5dcec86cc31f8144857c0d9bf2a7fa13b6e6f531
-change-id: 20261108-ceph-lookup-lockdep-59a10028224c
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
-
-
+Thanks,
+Daolong
