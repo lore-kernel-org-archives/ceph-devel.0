@@ -1,79 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794312739;
-	b=m27ALdzn2O+wJ7IhPTBWTlZ6L0RfhXgSlOne9LC0EZ/Imp42KoF1dyceVUZEac7fGf5Z
-	 p7tFVwzQmlfuXhU+TLDBKJcXuunJsuqSrgezNeMZF0dxedjHVoD5aJQZ2S+jBQJexTf83
-	 nuAuvUAx/bN3gP0G2IWnw5LbwB0AllptIA0Fg3HiYd4b063VgAwo6NMwy98nluVd/YTy9
-	 QcCuh3RJR2SpQzwUrE/qMlw+sDZlt+gcuwkCQWtq/UYcCwuEI8qJ08fC73QxFivkts+ag
-	 kwfk0C+dJvw3ylVwPSVWF6dx+fUmOtzflUMIHCNY529bbjWM0wCFYmz5N/VIm6snF+A==
+	t=1794312740;
+	b=J8mjiFErsqDpnHToBVDeI5gT0mHcPjxWVBrihvj/Rk4z89rTmILVLU670vEdhVLyIzK1
+	 8G9wZ8O3zsgJyPwzvJiQyRYMutGWM+yXLeiWQUbbYbThPiYglVzuIIxm9PKgyYF4c3w76
+	 y+QvvY3X5WWgK/my1m7VQ1pSXPYVbzb6l4bP7MZZpAU2G4PuONa8vb5wec3g1s79wO8eA
+	 55XP8KO9hs8HztNW1uVwM73CPGblB9QusfXXkmwCysaC2gAemzQo7r736uN4tnM6olOdd
+	 tfzCDPAjtFfx/FUBHTJ3usvhEgBmGP+wZD2kBkvKilSlF2O9eDs9c94pm8YXxlUoJaQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794312739;
-	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
-	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
-	 X-Endpoint-Received:X-Original-From:Reply-To;
-	bh=2yoD5VZ9ZvyluG4ip+5+fzbZiI13Ev8Wj9W7ZG1+DXQ=;
-	b=K4jlvXICcKPCWOR+W5lGxSiHVblTf/mYVkqBSAAxCyP4erF59/zFmBoYocQTDHVoq5mP
-	 BRqEBUPiCD/z3zWF41MT80n3X8RB5j6JkbODLsdHQYfgJHNBShxCVJB8Y6OyDIBkBgqGx
-	 anbxbqqwM4nwRptVD2jReFL3KsntSd58JDlh7kOCupTjvx7hx9dJ8GHQXANi/tFKvHq5G
-	 pNug9CIPGi4D3FytBdXcMgusR4AVPcXGIqKmYqQJqv2WJkzifN1QkNMi08evNkls8uoRk
-	 B8UgKQWYyTBSuCPA6P93TRg8GDiftWajkJ1fA9H8n1lFIGKz0Tr7ek483Ao3eoGwnBg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794312740;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=xV5tb8fmJXwJLXpv4sdYEGIbHi2LQtR9BW99TKy5YNE=;
+	b=k2Vg8k6OL7Phok1DXt6LN+qxikc0EDmT8HPBjyuDRjtWg3Cyy128MAbb+OXlx/kVrI5k
+	 f2UI1bCP/+BhuPggkm3jjRyHhpUJ4s81eFFYfYd8/+mimDXQ2x/60/eSEM9ueY+wqfLzN
+	 Gd2MTy0p7/aMfPCwqyg8BXciDqjwRrREHUZVqYnimJg7AncS8tIaQv5V4GxBHk7xNM1Qt
+	 PuNcLPzthqm1xBHATp1RtcTknpmco/5HqLL2uyfE1ntx+iLdBhy77CXLd/aRoP+JW6Eac
+	 dBG9vMDp4kitzpWaJekkaE559vTNVfGiqxwjpuml/wstJvcSH1v2fzk5sULEYN4vEew==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FV8njbz9;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YNtZtt+i;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFD3A606A32E;
-	Tue, 10 Nov 2026 12:12:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A19D6606A331;
+	Tue, 10 Nov 2026 12:12:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FV8njbz9
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YNtZtt+i
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1794312738;
-	b=yTOgB3mUa1xEfRRfxuYInpqylTBakIyBEOilwbaf0xJQbotUvy/sGrx2lUYH4r21rqIc
-	 ZwsMGkGTMuxTrj84db7VpQmvpJZLdLeJ1vRwh2TRUU2rcnMCaHtyQ2GLE6TFNZd41rgor
-	 2WuvNZ0nIhvCMPL6U9qKqTCyK5PfvKoPfxTSacHJGnYAwMn9gW5Vv2IctKUmbZ7n2rhE+
-	 SdBrSAiU/J7fpQcsPfQEejZZPLSoyYgC7QzfmRsqS3borl6GmGlWnX/JavtCth5m1hzPF
-	 xLcLV4Qkmk+WGjjjeIuh2h9My96aGQG5cpzvNLkNZyv/3V6k7crH+lMwCN0tAJE21eQ==
+	t=1794312739;
+	b=han8DZ/vzMy1r4si85WFCfNnBhETVuNpfLVITfiADxlZnBblLA5pHXut/xf2YXobC8A5
+	 l/3rSgM8iEL3IlexqfFKhB2WhriDTjfnDAs3tKXh08IhHRDQdr8RPVfihlgj9Kpnb2ABt
+	 z1z99/vC3pYpIBs0AEWcyHj6WQNZ9jTkRt1HnTogb9l//DxrgPWZ4L0KKIHiGOmXKYmyO
+	 tHPDaiMqOR0Vf8XghT3vhj3VOusCPxGzCFPL/wIKbSRUrmMiE++CZL8xHYrZbq5Jr67Kt
+	 K7d00Kc+h4lBUOCMvU+5ArE25cyvnRcEEobcMKpGR7pnezmNOgog/qRBYzCmdbS2MhQ==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1794312738;
-	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
-	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
-	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To;
-	bh=2yoD5VZ9ZvyluG4ip+5+fzbZiI13Ev8Wj9W7ZG1+DXQ=;
-	b=ZiP8Ngx1MkBGb8c7UfO6Ky+YBM+Zu/dPyd74RamSzrVhjL+1CENZCE1GLKvO5pdLoqJd
-	 cpWqnMGmfnefIhaKZXfwx+wInLNaYGNTT9yK7lg2IM+b1HSdQn29OvbWMND64YpfXmp2K
-	 sBUNJRaMALAuOP+lFRJZoDxhvp50+uen19M3hNIel4xGYlDM2Vo+WqtzHkmUAj02fSCSc
-	 qg+zm+Y3MSXsj8ZNH5gp4FRdYvUwJlxp+Rslue3Ax5vDWHCcm29lHbbbhF+mUje5kPwIl
-	 nD3hdfbv65rGQHNaUWxYpbJOWK7dZ1gsaXp9jiYRS5kLzuwEhuMmGGbIm3qfIPNhPLQ==
+	c=relaxed/relaxed; t=1794312739;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=xV5tb8fmJXwJLXpv4sdYEGIbHi2LQtR9BW99TKy5YNE=;
+	b=eY2tbuV0b3fJzJKQP6my3PAQ4X/LJa5FT/xV7kmP8Sd1wTYA62JHM6mQIzVx2wXWuleQ
+	 XSy81zA8EL5vE+aybzzZAycgvDAmfxuevHhCyAT5hmA7iCmTmZ8e+RB9HFfDPOq4fp28J
+	 Mk+bs9SVNyl2JW13NGxPGwB9z3viiHqu7REAVaMI0MVkzYebv4Tp9fkHWdGAB1utkb5kH
+	 R75KkNzzpRxzOrLxdSMuqviWDdn58atEwKOmZq/dWDq31X8ZfUiK3SynUHk/GIzy/fD4Y
+	 EVX3ev24uzhQ+wDXd8unfxQIW0RfiHwiuhpJE9tn8X+kmlaWz6rZ+kzY1wSxmsegitA==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id 1DBFA1F008BD;
+	by smtp.kernel.org (Postfix) with ESMTPS id 1DC2E1F008BE;
 	Tue, 10 Nov 2026 12:12:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794312738;
-	bh=2yoD5VZ9ZvyluG4ip+5+fzbZiI13Ev8Wj9W7ZG1+DXQ=;
-	h=From:Subject:Date:To:Cc:Reply-To;
-	b=FV8njbz9OzLs/QOmUrObxrlgttsD66DAKYu2ug+vGkPt8gWS8IRxiROx8iEJRWPOF
-	 weKhvUeh7katYdGQWbMfvbr0OXy3vVQs1eVgAvgraNnRrAbXeDndfl+EVvxR7r+YQi
-	 7r9FsRJiwxwSFEeBzfU2RMH+KxmsK4wvK9Q4/5nauDDOX6PrxcmiksHdUtcyKWLb78
-	 F3Zh24fORSrzCOUeNvdwjVo+3tXTA+/39bdeMvvTEvXpt/18e6H+smPNE/M0+ksmD5
-	 NYzJa/ui25yIUYRafsmXZDs5Aoamuy92dlYH/rafSvaYPkry1tESAaq9f1y0q5n+Rz
-	 zWSNulM6R6nOQ==
+	s=k20260515; t=1794312739;
+	bh=xV5tb8fmJXwJLXpv4sdYEGIbHi2LQtR9BW99TKy5YNE=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
+	b=YNtZtt+i/A7+78cjBYlc96G02c/k5F6gohC3Ox1ZCdEUeB9YcU7Fw41e+x28YV8Yx
+	 +FXFiPBJBQxVNLVfEaZ6lxTLPTXKuiZAU/XVzROV9GJSSyymA5l4AY2tI3x0A7eWBr
+	 JnJGWaCqCFaIvgAN9a8UL4EJvPclK9pnB90TCSRGKCRw25LzWCGdouA3fIVboyYHLu
+	 JA/eyUxXnCE9ELmzHwAJH5yNVTkzV347dUB9gVbjKp1o2HXY4kCeERbmjYvPd8DR76
+	 Buu7YPjN1vcYtjUl4WXmylGNUmChZpvxBWkqUeqK56rIdHqeb0QHmyNOaeXdGN9KIj
+	 w4CJv1iHGbyTg==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 67C8E48B31;
+	by lkml.kernel.org (Postfix) with ESMTP id 8D0C148B35;
 	Tue, 10 Nov 2026 12:12:17 +0000 (UTC)
 From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Subject: [PATCH v2 0/2] ceph: lazy I/O write and LAZYIO revoke fixes
-Date: Tue, 10 Nov 2026 13:11:51 +0100
-Message-Id: <20261110-ceph-lazyio-noread-v2-0-259775214b39@clyso.com>
+Date: Tue, 10 Nov 2026 13:11:53 +0100
+Subject: [PATCH v2 2/2] ceph: do not hold a LAZYIO revoke for pages that
+ CACHE covers
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -84,78 +84,99 @@ List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/32NQQ6CMBBFr0Jm7ZgWDQVX3MOwKNNRxiAlLRKRc
- HcB9y5f8v77M0QOwhEuyQyBR4niuxXSQwLU2O7OKG5lSFWaaa0MEvcNtvYzicfOB7YOVW5cVud
- EVDhYh33gm7z36LX6cXzVD6ZhK21GI3HwYdpfR715fw9GjQqdOp+ygoyytSmpnaI/kn9CtSzLF
- wj6UGTGAAAA
-X-Change-ID: 20261107-ceph-lazyio-noread-087d6b8ccc9d
+Message-Id: <20261110-ceph-lazyio-noread-v2-2-259775214b39@clyso.com>
+References: <20261110-ceph-lazyio-noread-v2-0-259775214b39@clyso.com>
+In-Reply-To: <20261110-ceph-lazyio-noread-v2-0-259775214b39@clyso.com>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
  Viacheslav Dubeyko <slava@dubeyko.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Xiubo Li <xiubo.li@clyso.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1794312723; l=2171;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794312723; l=3142;
  i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=46MayRn4PkowK9ASiX0DvHBX+OfL5NdVD7YGVyWj/BA=;
- b=GgXnyZE3IzT7VP0izkQ5xcbLu1b+Wh5PGbuTgtvGFEd4S3AjouRpdyV0D32JA0sEuOZ9xQfwX
- gQ/1kobFcL/CcP3RTSikmVyNaaA9XOxFHnjvazRjtD/G29DPYRNvn3p
+ bh=Sl0LxPrKAtHetqfgc/TKI9v6Rg/tbvwlkGhYdSOWqMI=;
+ b=oRGjDdp80KOgLWfgVhpTNHFJSYrByfMDdn4K2erJkJtw8iTqyin5FNJq/wsnk1EhjMnqkcBCd
+ VsAJDgQNoOZDf7THRBy/8uNArNjHKNPLZ0mMKGpTzRl8ASqfFRim6j3
 X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
  pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
 X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
  auth_id=840
 X-Original-From: Xiubo Li <xiubo.li@clyso.com>
 Reply-To: xiubo.li@clyso.com
+Content-Transfer-Encoding: 7bit
 
-Two lazy I/O changes on top of the lazy I/O series already in testing.
+From: Xiubo Li <xiubo.li@clyso.com>
 
-Patch 1 stops a buffered lazy I/O write into part of a folio that is
-not uptodate from reading the folio in first.  That read is done
-synchronously under i_rwsem and serialises every writer of a shared
-file on the client; with lazy I/O only the dirty range of the folio
-goes out, so the read buys nothing.  16 writers on 4 clients writing
-47008-byte records into one shared file go from 0.27 to 0.71 GiB/s.
+ceph_adjust_caps_used_for_lazyio() reports LAZYIO as used in place of
+CACHE or BUFFER when that cap is not issued.  It does so even when the
+used set does not contain the cap at all: with BUFFER not issued, a
+file that only has clean pages cached (CACHE used and still issued)
+is reported as using LAZYIO too.
 
-Patch 2 makes ceph_adjust_caps_used_for_lazyio() move a use to LAZYIO
-only when that use is in the used set and its cap is not issued.
-Otherwise a file with only clean cached pages holds a LAZYIO revoke
-until the delayed cap check, up to 60 s, and a getattr from another
-client waits that long.
+When the MDS then revokes LAZYIO and leaves CACHE issued, e.g. from a
+writer that has closed the file, (revoking & used) stays non-zero.
+handle_cap_grant() checks the caps with CHECK_CAPS_NOINVAL and there
+are no dirty pages to write back, so nothing acks the revoke until the
+delayed cap check runs, up to caps_wanted_delay_max (60 s) later.  The
+MDS request that needed the revoke, such as a getattr from another
+client, waits that long.
 
+Only move a use to LAZYIO when it is in the used set and its cap is
+not issued.
+
+Reproducer, 5 lazyio mounts: 4 create ~174k files of 3901 bytes in
+one directory, a 5th lstats them all, then a 4th mount opens and
+writes 5000 files of the 1st one.  Mean of 4 runs (open+write: 2):
+
++--------------------------------+---------+---------+
+| metric                         |    base |   patch |
++--------------------------------+---------+---------+
+| unacked revokes after lstat    |    7355 |      10 |
+| lstat walk time (s)            |   27.69 |   25.19 |
+| open+write p50 (ms)            |    2.70 |    2.89 |
+| open+write p99 (ms)            |    3.26 |    3.53 |
+| open+write max (ms)            |  5325.8 |    51.9 |
+| open+write calls > 1 s         |       1 |       0 |
++--------------------------------+---------+---------+
+
+In a parallel walk that stats every file with 4 clients and 3 active
+MDS ranks, right after other lazy I/O clients wrote the files, the walk
+no longer stalls on such revokes: its worst time over the runs went
+from 90.2 s to 42.4 s, and its mean from 51.7 s to 41.5 s.
+
+Fixes: 488ffbdd99d8 ("ceph: add 'lazyio' mount option to kclient")
 Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
-Changes in v2:
-- Patch 1: always install the dirty range on a folio that was not read
-  in, even if folio_maybe_dma_pinned() reports a pin; a folio that was
-  never mapped cannot be pinned, and a refcount false positive sent its
-  unread bytes to the OSD (Alex).
-- Patch 1: accept and report a short copy into such a folio instead of
-  returning 0; the copied bytes could already have replaced bytes of an
-  earlier write in the dirty range, and a failing retry wrote them back
-  without reporting them (Alex).
-- Link to v1: https://patch.msgid.link/20261107-ceph-lazyio-noread-v1-0-d04369c70ab7@clyso.com
+ fs/ceph/caps.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
-To: Ilya Dryomov <idryomov@gmail.com>
-To: Alex Markuze <amarkuze@redhat.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index aca09351a094..5669e458f287 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1112,11 +1112,18 @@ static inline int ceph_adjust_caps_used_for_lazyio(struct ceph_inode_info *ci,
+ 	 */
+ 	if ((issued & CEPH_CAP_FILE_LAZYIO) && !__ceph_all_opens_lazy(ci))
+ 		return used;
+-	if (!(issued & CEPH_CAP_FILE_CACHE)) {
++	/*
++	 * Only a use that the issued caps no longer cover moves to LAZYIO.
++	 * Clean pages under an issued CACHE are not using LAZYIO, so a
++	 * revoke of LAZYIO that leaves CACHE issued must not count them;
++	 * otherwise it is never acked from handle_cap_grant() and waits
++	 * for the delayed cap check.
++	 */
++	if ((used & CEPH_CAP_FILE_CACHE) && !(issued & CEPH_CAP_FILE_CACHE)) {
+ 		used &= ~CEPH_CAP_FILE_CACHE;
+ 		used |= CEPH_CAP_FILE_LAZYIO;
+ 	}
+-	if (!(issued & CEPH_CAP_FILE_BUFFER)) {
++	if ((used & CEPH_CAP_FILE_BUFFER) && !(issued & CEPH_CAP_FILE_BUFFER)) {
+ 		used &= ~CEPH_CAP_FILE_BUFFER;
+ 		used |= CEPH_CAP_FILE_LAZYIO;
+ 	}
 
----
-Xiubo Li (2):
-      ceph: don't read a folio in for a partial lazy I/O write
-      ceph: do not hold a LAZYIO revoke for pages that CACHE covers
-
- fs/ceph/addr.c | 179 ++++++++++++++++++++++++++++++++++++++++++++++++++++-----
- fs/ceph/caps.c |  11 +++-
- 2 files changed, 174 insertions(+), 16 deletions(-)
----
-base-commit: 5dcec86cc31f8144857c0d9bf2a7fa13b6e6f531
-change-id: 20261107-ceph-lazyio-noread-087d6b8ccc9d
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
+-- 
+2.53.0
 
 
