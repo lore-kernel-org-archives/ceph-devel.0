@@ -1,98 +1,92 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794312826;
-	b=Tahz6V6m3ZCMW5s7qc2zRv6Y9DKnDRZnOmmplFSNIoZWgkIedLU13e2pLV2+9Tmgr2HK
-	 htcGRmXMvXd/LOgVjWYNouiKZE8JlJ9V0EJQsMgpixpjk1gGqXkMtYmVmcUxU3WuzI9H8
-	 XIocNfIPoNdv/DnSvedO0GpbfxnoOgWDVX8YifR+35iJCY2IH7gOvxBUIz397SUGK5Oq4
-	 /f6H9dWv6EpZJLcT54/DZiG2akz6lcF+dcsQl67DIg1ZnJZoTtl4zeQGO+YrVw8w2BBIO
-	 QQwfGCVWnoR2i/m1tfjw8jNeMfo6DzD70km5mEPuJwNA1Q52QTNY249wQ7rq75VY5mA==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794312826;
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.222.180
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794341466;
+	b=kyXldQZa6+Zc91ecT5xQH0y7Ujaxu9DtcmqNL5xbbHrm9aWDTz3pgUmyWk1eIsoJIKJt
+	 sbb2XiGW6BFBbThNt13lSdoAfC5y3oH9asHumseOwtrpiFZVmAs5FJO6wNsI3O+SZPzxq
+	 UDx4GoVoPeehW7OWlSv0wwjtrFZnEqaByC6tyhI3laIaxEcuQhkMWkQJlZo5lr/nL38+n
+	 4lmqK2Nd61Ser9SVrfIF5/z4rhMOuOADsmQM0DXPsuyrV6LZmWlePa5pByJJVcfS3XV5L
+	 Siip15l3q2uFmPWM7kGJbLrasy1nLWUkiK9p+9/YN+36+vrPdIIdiQFd6rXfE8AAdPg==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794341466;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
-	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
-	 Content-Type;
-	bh=t31sN60p8JglLP4rRIVrVQ+OXQ0CDI0f5Uv1sh0jU08=;
-	b=yAWdpEFQMcveCyKmsC1CK2chshiumuOhy0IIHxTAw47OuGHq6ScacdSuLuMM/dzY30bB
-	 sb3uuYGywxAscZgCOW6eF2lGEBX/PNcmkl2nQNu+HPry8ADpnD2QJ3YYiNrl1DLduZ7J7
-	 TJ+y1PHhv0EOtwNYZdD8qBDjtwVaq1Mvnq1mZbpmHQ70ALWcxW36kr5I7XtUns+O83vVQ
-	 /9tfBK6JB14Ar5coShf0WpAkHQY6+cR9QvdBaG/BWLGLW8MJrVeSs/+iZY8hXcAZ6M+uL
-	 tNJHvaVLyNahSaUFAk/sZpG/F9jINbfjLm7Y4N+fIJ7tR3INX69CVgff54BLSFzHjVg==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=clyso.com;
-	spf=pass smtp.mailfrom=clyso.com;
-	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=Gxm7uzCF;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=oD7V5JnOTBsRPWmIXzAKOsRS//p2Ym79gsdNorj5/Ow=;
+	b=avzuIjwf14fVkuKIT1L94jbQgsHMHnIvmELewz01FrylFZOZ5DxBBUyEvOURKCYT1O2f
+	 iXmeNM8b+4MPzvw4kBMw7EQbp2XA8kAc7vf6QK60RovEILGHXnPO+x8URAfkvSjuuATkz
+	 sUKwq/G56TnkTMUKpoQ57/O+6QdQj3/DxV/TV3ydqXQykblqbvL1+8AjzpK/zckw+hgpx
+	 Br0uD7e9+JUNwOlofRnG0A3806HK/0m782rxh1nJsfQVWOCfTSaIyojXMiXxPsVgQo1dc
+	 LDpDfR6Q1iU1L+6XGmVdTqMWmO9SCe2HzeAA95GqyHVhuFfRNUVtO9CdTEJkE2BoSPw==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Hk5l7OjI;
+	arc=none smtp.remote-ip=209.85.222.180
+Received: from mail-qk1-f180.google.com (mail-qk1-f180.google.com [209.85.222.180])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6091E606A31C
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 12:13:44 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6091E606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D05E5606A321
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 20:11:05 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D05E5606A321
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=Gxm7uzCF
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-6a642495d81so2983640a12.2
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 04:13:44 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1794312823; cv=none;
-        d=google.com; s=arc-20260327;
-        b=kU4OU/5aYq9FuKkguxPb6ufiUKon5eqAgDjnpsiAYysQ6Yn01hpqQ9NrezM82wtfS1
-         fZ+3wzu/AsHbmJqtxE6CwIEPg7C/PBNz5isseFS4Ivhvm38qo1zCmlM1Gqev1LkVSlav
-         E4aQk3e2t0ADDxM0QYA0HBaB9oQEGdiF+z/dJX9InY4GJx/GenQxXwzkvvH1pHRhEILy
-         I3Ed1Q26xvE24Rbfkj93XHXR0V/h3FWQEoiB03GzLe5c2riFMF5/O+5rsm8xYhRWBCxV
-         kiGLSIpYuguPyPdaiX2Je+jDQYN1Eyvze1QmS0icm36lkUIw7zzJ8UgnP//wAwjf6s74
-         JECg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=t31sN60p8JglLP4rRIVrVQ+OXQ0CDI0f5Uv1sh0jU08=;
-        fh=qmD2qf71wgkdDvmSV8Api1alOOZ0LJiXrah1hj/rA6Q=;
-        b=o5M11hudGdZ5IqN87GuAL0XFO3h6wNOl/PiGSS5zfJg1BqGQc4ktST+95WlezKuB5f
-         IwsEt5BjvfANqlnP5sX/Mo9PxhaVuRKb4NhF4tOwXyWxbwyPKF4hP3NlQ71sbPAUYcuk
-         1v/Ij56uK0VOXh6Eb48xJJY2fnp7FlIYa8wJxUr3abgvrqHlvfHjhnQmx/+pykNMqagA
-         kUnI0PMQXExCbcMvIvVHm4nKeC6i2PTY54owEKSnkn2khselJ/HVY+dYfh6ZiDfQJ3dC
-         K2mqUvqlPXzO3qy2bfIF2plhIa5PZu0Xi41EwYkM7VCnWKhDcFn3N9aNF4UzWnNMvgmX
-         rcMw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Hk5l7OjI
+Received: by mail-qk1-f180.google.com with SMTP id af79cd13be357-93f1e5d7450so238530085a.2
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 12:11:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1794312823; x=1794917623; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=t31sN60p8JglLP4rRIVrVQ+OXQ0CDI0f5Uv1sh0jU08=;
-        b=Gxm7uzCF2M+eLkxI2KJ1ryn/OZsljWWnpNAN+zsiEcIv2c6nJ0/VxRuFTWtbq8HLb7
-         6/rFRPekB7anFkxjD6SVDJqojspEZJkOkDiox7SOQZDOfkjFg32FNsPplANQfBr9hkMD
-         bBK/vPOlgdEwBNVFLGwaRuoi6Pe5sEmwf3zavw3aFRJDhYqUnS3rqw7gVkopyvU8fG2p
-         3CKjXwB/g94oD17EL8FAqiOVhMccharEuWM3bx7aIFdbdHSrzS4abWXmAK1F8DnKQW5v
-         99pjpbThMeAshpR/xQ6PtHal87EBF1dSLCuQjeAGssCzd+ZfaTFK6sKp8uuJCMPOGS5m
-         08mA==
+        d=gmail.com; s=20260707; t=1794341465; x=1794946265; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=oD7V5JnOTBsRPWmIXzAKOsRS//p2Ym79gsdNorj5/Ow=;
+        b=Hk5l7OjIvcHezNMlIIc023p3FSXgw+1evRUTnVlwDSeHXedeQkVxZL0RyVeYAGfNqr
+         TTJ+JJh6y1m4r2O1cTVqEBEiAtFQW8668xM1rm/+bG1OVTXnCUpQUZIjSHJZeGiVmgwl
+         lh6WbtSwF0/rKJfW3IBJop3E3ZJSJzYctJPM0hjAdsRPMebqSZXDtOE45gi8KYpy8tFu
+         gWUxu04SGk8cix4l085bwi+zwldNewM+fOEuTsEcpkfuRJZNiS8uUafyIQt7/amDGVNh
+         rHZDceTSTjV2/vObt9uHPlfehN9aHdOR7N4GKEJLZYIQhhGe8+FD2BeX64yMIl4fhKso
+         cSYw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794312823; x=1794917623;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=t31sN60p8JglLP4rRIVrVQ+OXQ0CDI0f5Uv1sh0jU08=;
-        b=JlTN3HKqJtUAUVt1QPelf4ax4qT/GSLoyPuvfK6GpLJ9h7wJIgjXPgOmK6mC5Fz68W
-         5Xdsklciucm2kvFeck5yhmZjFBDqyAQPR50Kjknv3evugnh+0mQ1dCYvT07MECE91+8a
-         cugaIwKi8grwH1JriSwSbyRtn+xDqMy/diqtBj2nHuFLXSYk5dcifk7YSumT2B3ZbZxy
-         YBo+vBVEpfuF4YBz1dRMAiRHgQg1DjFyEjm9XdIzlp2gNUDepDoHBMxJclZXU67jFnmr
-         KoaIQTFlVX60kRBEwuZOJV3JKBbNtklkJFmgcMmGtGoxFPys46Fthrt0ZN+u14nPCoGH
-         blfQ==
-X-Gm-Message-State: APuU4Z9GlelRwnXJ7sWapVchCl05PuXwwNw1juq8XFaktz3dAqqhLJjT
-	YPhahXdKorwKF7lPnD4cpEipE/gWYSM8r0Qh7TNwrL3zG8AtTCct7yJ8pACQsyn7E43QQ4ScQ1R
-	kr/jt8FS9tLo1LUD11/AjIrPQUsNj2AaTGlUiD0ZN4nyFc4jgYNdBWt0=
-X-Gm-Gg: AYBFou3jUSMfU1Nfc9wuTVpx0fNcMJVKzF8i4j//M2y6L6yRLR2VsgDUxlWovPUE7Ye
-	GvC8O+uuFRewfcHUMCboH/Zu7CaGU1ini3XbZEKemuSoFJQKCyyxsqwV33k6QjOG53rPdVZpbli
-	u16BtJk3AuNf46fFr+ZQl3nW+uxKY/A9eMc7Gx9OtVL3ZFR4YYxnzU/2D5jvbnGHdHXBc+Uzk+B
-	c/mokLY4/DmuZ8nyRHUKVAPBkHu5SKk+l0fo7Ysn5h44FaZW6EWnnKIqmFuq3r3wYzSwG/0EPLT
-	PsTNY9ESCcwGtzfGL1TmrUY34R0mhLHI16CCN5GqtdUaeIuxxh2IzYhVe4WKxujZoq2AGlm9YDZ
-	FAXwj+/QqoE5Omd5Ear0Sy2Txlo/WnZIhFXVBCgs=
-X-Received: by 2002:a05:6402:2350:b0:6b4:583b:daf5 with SMTP id
- 4fb4d7f45d1cf-6b756b1d555mr2154263a12.43.1794312823251; Tue, 10 Nov 2026
- 04:13:43 -0800 (PST)
+        d=1e100.net; s=20260707; t=1794341465; x=1794946265;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=oD7V5JnOTBsRPWmIXzAKOsRS//p2Ym79gsdNorj5/Ow=;
+        b=tiCnIyzRfGxr6n5bGk76iz7uT1kJ46fcYJDqB4QxNhCf+HFUdFRa2QvSuH34RZP0f9
+         KqobPwIP9dp0Q2KyhxZfX/s6w25xQ2Ppt2zi6EnTZJ4Rgdbyot7N56101Hz25+rPW6h2
+         EtwOnpzcS3tFIoOaZPSa1D+7PQcUA9N3AmWjSPIep6MaRh3kqFC6l6vQVcIJ88htK5fo
+         cRVg/IkOeeOFDdqvdxN+k3MBF1OkQZrWaZu+7XpZqP9BnlaLYqYWfrgAY4P/7I7DTTx1
+         lDc4hszXXxFcXhDkqDiUK9eqOkSWnou9i7Zn31eX40ZlgpOSFC9j6BEONU/rUspc8USX
+         u7zA==
+X-Gm-Message-State: APuU4Z9zDBDuP0TJgrM2fWMG5diR3Lns/FLED89UH5AR72NAOeGZNbEx
+	aXwDwliUCJV++c4QL74Xwtbw2qaU/wQEA8c4ITEf74KuzP9kbLS6oxCZf+5rU9sK
+X-Gm-Gg: AYBFou3dwsC8yQbbQAo6v6XOp4Vlvdx9Ovu7PV99PN4WeGdF1eFaq2FXpBUEmFgM4qC
+	KThkztkHmjzhvtlpqeziksuMwngb/YkRBkM1DsQDbEO1Wze4ZJfdU1coPgAQxKMavScPbB+2IDf
+	5v2ji8Xz6o4pPPuwcLqXzsRbVPKet3jfLyGHw3WJvxYO5RPozfIJighZiZnKLVQ6MX6HkzgoVFM
+	hq+SyRnEe92RQBvEs811IqNPy34z9uC4vdqkKsIo5XhGdTaJjwHtzZKYwR4vvJD1A483zzz6z+Q
+	FnZLLNrhOFGgGPX07jJ82lujvfOKcWpH1tSDUN4rdnjvDwiqL0Y1mn8I7MeUR2//dI7NB57LTOZ
+	T149Ah/BtEu3i+LwXjz3QF2uNUE7ZDTkcpRbHzuADwadeCQ3XdN9HSL2wMNQKoRLH3sraaLZm1f
+	HwXy/aewQ6cb9eMYjumpU966/n71ybtlEEAinu9Vn+0Pwi4LZfvgLx9Anmi3FHz78gIUi0djA83
+	M+wxEiPSBGxjZhADfJtj+HhfqiJtp3WSPNBvrSIgeeyZVSb2WaQXckf1WZSxSnBLawTkzNSrjuW
+	645Q28vrDg9DlL6tNHmOvspuOglMme3b2tw5xm006V1mz6Rmx2J32/yuWWJc+LonRkWJp3Ow4Q=
+	=
+X-Received: by 2002:a05:620a:1713:b0:93a:14c:32ad with SMTP id af79cd13be357-947afa562b3mr23310485a.0.1794341464854;
+        Tue, 10 Nov 2026 12:11:04 -0800 (PST)
+Received: from zambezi.front.sepia.ceph.com ([2a02:8308:b10e:9400:faf:460b:2f23:8f6f])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-9479e73c84bsm301815085a.9.2026.11.10.12.11.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Nov 2026 12:11:04 -0800 (PST)
+From: Ilya Dryomov <idryomov@gmail.com>
+To: ceph-devel@vger.kernel.org
+Cc: Dongsheng Yang <dongsheng.yang@linux.dev>
+Subject: [PATCH 1/3] libceph: replace lreq->ping_sent with req->r_start_stamp
+Date: Tue, 10 Nov 2026 21:10:14 +0100
+Message-ID: <20261110201025.255594-2-idryomov@gmail.com>
+X-Mailer: git-send-email 2.55.0
+In-Reply-To: <20261110201025.255594-1-idryomov@gmail.com>
+References: <20261110201025.255594-1-idryomov@gmail.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -102,64 +96,92 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261107-ceph-lazyio-noread-v1-0-d04369c70ab7@clyso.com> <179430930932.3260974.10127961697716262149.ceph-lazyio-noread-nack@redhat.com>
-In-Reply-To: <179430930932.3260974.10127961697716262149.ceph-lazyio-noread-nack@redhat.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Tue, 10 Nov 2026 13:13:30 +0100
-X-Gm-Features: AclHuK9qKAfUTfVE7pQu-UIFP9Y1SK_tC2_IEPpJwJ63-usPR2rlndAkqOy80vM
-Message-ID: <CAOJNxRJ80C8vPLB9EfwbhW3HSYYfK-2T7Qj5SnLjKUcPRdRdWA@mail.gmail.com>
-Subject: Re: [PATCH 0/2] ceph: lazy I/O write and LAZYIO revoke fixes
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-Hi Alex,
+Eliminate lreq->ping_sent by making more use of req->r_start_stamp.
+This requires setting req->r_start_stamp outside of account_request()
+but it only has one other caller apart from send_linger_ping().
 
-Thanks for the detailed review. You are right, those paths look
-problematic. I have reproduced these two cases and I've sent a fix.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ include/linux/ceph/osd_client.h |  1 -
+ net/ceph/osd_client.c           | 14 ++++++++------
+ 2 files changed, 8 insertions(+), 7 deletions(-)
 
-Thanks,
-Xiubo
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 50b14a5661c7..0847c522f897 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -316,7 +316,6 @@ struct ceph_osd_linger_request {
+ 	struct ceph_osd *osd;
+ 	struct ceph_osd_request *reg_req;
+ 	struct ceph_osd_request *ping_req;
+-	unsigned long ping_sent;
+ 	unsigned long watch_valid_thru;
+ 	struct list_head pending_lworks;
+ 
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index b8e4740d07fe..5053363134ee 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -2482,12 +2482,13 @@ static void account_request(struct ceph_osd_request *req)
+ 	req->r_flags |= CEPH_OSD_FLAG_ONDISK;
+ 	atomic_inc(&req->r_osdc->num_requests);
+ 
+-	req->r_start_stamp = jiffies;
+ 	req->r_start_latency = ktime_get();
+ }
+ 
+ static void submit_request(struct ceph_osd_request *req, bool wrlocked)
+ {
++	req->r_start_stamp = jiffies;
++
+ 	ceph_osdc_get_request(req);
+ 	account_request(req);
+ 	__submit_request(req, wrlocked);
+@@ -3195,11 +3196,11 @@ static void linger_ping_cb(struct ceph_osd_request *req)
+ 	}
+ 
+ 	dout("%s lreq %p linger_id %llu result %d ping_sent %lu last_error %d\n",
+-	     __func__, lreq, lreq->linger_id, req->r_result, lreq->ping_sent,
++	     __func__, lreq, lreq->linger_id, req->r_result, req->r_start_stamp,
+ 	     lreq->last_error);
+ 	if (lreq->register_gen == req->r_ops[0].watch.gen) {
+ 		if (!req->r_result) {
+-			lreq->watch_valid_thru = lreq->ping_sent;
++			lreq->watch_valid_thru = req->r_start_stamp;
+ 		} else if (!lreq->last_error) {
+ 			lreq->last_error = normalize_watch_error(req->r_result);
+ 			queue_watch_error(lreq);
+@@ -3218,6 +3219,7 @@ static void send_linger_ping(struct ceph_osd_linger_request *lreq)
+ {
+ 	struct ceph_osd_client *osdc = lreq->osdc;
+ 	struct ceph_osd_request *req;
++	unsigned long now = jiffies;
+ 	int ret;
+ 
+ 	if (ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD)) {
+@@ -3225,10 +3227,8 @@ static void send_linger_ping(struct ceph_osd_linger_request *lreq)
+ 		return;
+ 	}
+ 
+-	lreq->ping_sent = jiffies;
+ 	dout("%s lreq %p linger_id %llu ping_sent %lu register_gen %u\n",
+-	     __func__, lreq, lreq->linger_id, lreq->ping_sent,
+-	     lreq->register_gen);
++	     __func__, lreq, lreq->linger_id, now, lreq->register_gen);
+ 
+ 	if (lreq->ping_req) {
+ 		if (lreq->ping_req->r_osd)
+@@ -3251,6 +3251,8 @@ static void send_linger_ping(struct ceph_osd_linger_request *lreq)
+ 	req->r_linger = true;
+ 	lreq->ping_req = req;
+ 
++	req->r_start_stamp = now;
++
+ 	ceph_osdc_get_request(req);
+ 	account_request(req);
+ 	req->r_tid = atomic64_inc_return(&osdc->last_tid);
+-- 
+2.55.0
 
-On Tue, 10 Nov 2026 at 12:16, Alex Markuze <amarkuze@redhat.com> wrote:
->
-> Hi Xiubo,
->
-> I can't give the series a Reviewed-by yet. In 1/2, two paths through
-> ceph_write_end() in fs/ceph/addr.c can corrupt data:
->
-> 1. With encryption and fscache disabled, pwrite() 16 bytes at offset 128
->    of an existing, uncached 4 KiB page through a lazy descriptor. While
->    ceph_write_begin_noread() holds the new order-0 folio locked, concurrent
->    mmap faults waiting on that lock can retain 1024 ordinary references.
->    That makes folio_maybe_dma_pinned() return a false positive, without
->    any GUP pin. ceph_write_end() then sets lazy=false and skips installing
->    the dirty range, but leaves the folio not uptodate. The warning does
->    not stop the write.
->
->    ceph_folio_dirty_range() treats the missing range as whole-folio dirty,
->    so ceph_writepages_start() sends unread bytes outside [128,144) to the
->    OSD, overwriting existing file data after a successful partial write.
->    The old read-before-write path made those bytes valid.
->
-> 2. First leave [100,200) dirty and not uptodate with a successful lazy
->    write inside an existing page. Then pwritev() 100 bytes at offset 100,
->    with a resident 20-byte first iovec and a valid but nonresident second
->    iovec. The atomic copy can replace [100,120) before stopping short.
->    ceph_write_end() returns zero without restoring the old dirty bytes.
->
->    If range preallocation fails on the generic retry, the netfs fallback
->    flushes the old [100,200) range, including those unaccepted bytes.
->    Failure of the subsequent netfs read-request allocation then returns
->    -ENOMEM with no bytes reported for the new write, although it has
->    already replaced part of the earlier successful write on the OSD.
->    Neither user buffer needs to change during the call. On the old
->    uptodate folio, the copied prefix was accepted and reported instead.
->
-> For clean pages with CACHE still issued on the cap being revoked, 2/2
-> removes the phantom LAZYIO use as intended. But 1/2 needs to preserve byte
-> validity and short-copy accounting before the series can go in.
->
-> Thanks,
-> Alex
->
