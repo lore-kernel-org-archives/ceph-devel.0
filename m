@@ -1,111 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794311420;
-	b=vMtNNAEFpbSE7ikIO2lzcFJKTc4rUfyist7o8HM4hqkwUNDZX+TCY0iI7Y6qoNUSYzxL
-	 HJVmTAonVoT80B9fHcqnPc45GUnXeb9+6rEuicTWHg6Bcp5tem/K3J2O/QYy2BqlsSMac
-	 KJOE0NMOjLSOYSgXy5XjOvqojwwfcxfnSSZy18ny9k88cZa3PYAS+FriCIUlNLTfPijEA
-	 h/rswYOa2gxWFfeMO7Kh4v1RA4QSOMAwQCkzFvVLfr6TuTRHxQ353nVb0vfe1mMoCMPKP
-	 plW8uY8Q/0lfP3HttUFPVbJp5lvsc49NR0mOgsyI8Jx41uVwb68iBs4ZPgIUDzZVqKw==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794311420;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
-	 Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=NV3VnFLMuKlrnZgC5P5AIbtQYdgALzpVqxSBUSYHI4Y=;
-	b=ZQJa36x6UVTRZ/CG3wQARnlwLe9h7RyaSIy57HT1yErJ5x8nVKzZg8bKdkmlChqZrLzw
-	 F8ZraZTa4cwPo4Ffwg/6+xDY4pTSJ5xBcn2AMnqsm2EwhKHlMRI5k4he6l1b56f8AfIAd
-	 X6E1wWMGLg/Z9zL+ii1p3IZewGfdVfCaIVTGwAY3uwWYAd/Fr6J12cotJioPbQD69f14k
-	 FzGcocZTMQX/9TF18ZU7oyUPt+95o68P94OncRqyPdDXuCSY5waSZwvzwkoz5LTfOHO3b
-	 OSwhetYtvOwGxJTH6VcQ0v0+j5AI/dy/utOhWPjq8mOZ319ct8cwXwCYNAz5wqIfxjQ==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=redhat.com;
-	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=LYQr6Ktc;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=qZoB60fz;
-	arc=none smtp.remote-ip=170.10.133.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1794312739;
+	b=m27ALdzn2O+wJ7IhPTBWTlZ6L0RfhXgSlOne9LC0EZ/Imp42KoF1dyceVUZEac7fGf5Z
+	 p7tFVwzQmlfuXhU+TLDBKJcXuunJsuqSrgezNeMZF0dxedjHVoD5aJQZ2S+jBQJexTf83
+	 nuAuvUAx/bN3gP0G2IWnw5LbwB0AllptIA0Fg3HiYd4b063VgAwo6NMwy98nluVd/YTy9
+	 QcCuh3RJR2SpQzwUrE/qMlw+sDZlt+gcuwkCQWtq/UYcCwuEI8qJ08fC73QxFivkts+ag
+	 kwfk0C+dJvw3ylVwPSVWF6dx+fUmOtzflUMIHCNY529bbjWM0wCFYmz5N/VIm6snF+A==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794312739;
+	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
+	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
+	 X-Endpoint-Received:X-Original-From:Reply-To;
+	bh=2yoD5VZ9ZvyluG4ip+5+fzbZiI13Ev8Wj9W7ZG1+DXQ=;
+	b=K4jlvXICcKPCWOR+W5lGxSiHVblTf/mYVkqBSAAxCyP4erF59/zFmBoYocQTDHVoq5mP
+	 BRqEBUPiCD/z3zWF41MT80n3X8RB5j6JkbODLsdHQYfgJHNBShxCVJB8Y6OyDIBkBgqGx
+	 anbxbqqwM4nwRptVD2jReFL3KsntSd58JDlh7kOCupTjvx7hx9dJ8GHQXANi/tFKvHq5G
+	 pNug9CIPGi4D3FytBdXcMgusR4AVPcXGIqKmYqQJqv2WJkzifN1QkNMi08evNkls8uoRk
+	 B8UgKQWYyTBSuCPA6P93TRg8GDiftWajkJ1fA9H8n1lFIGKz0Tr7ek483Ao3eoGwnBg==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FV8njbz9;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFD3A606A32E;
+	Tue, 10 Nov 2026 12:12:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FV8njbz9
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1794312738;
+	b=yTOgB3mUa1xEfRRfxuYInpqylTBakIyBEOilwbaf0xJQbotUvy/sGrx2lUYH4r21rqIc
+	 ZwsMGkGTMuxTrj84db7VpQmvpJZLdLeJ1vRwh2TRUU2rcnMCaHtyQ2GLE6TFNZd41rgor
+	 2WuvNZ0nIhvCMPL6U9qKqTCyK5PfvKoPfxTSacHJGnYAwMn9gW5Vv2IctKUmbZ7n2rhE+
+	 SdBrSAiU/J7fpQcsPfQEejZZPLSoyYgC7QzfmRsqS3borl6GmGlWnX/JavtCth5m1hzPF
+	 xLcLV4Qkmk+WGjjjeIuh2h9My96aGQG5cpzvNLkNZyv/3V6k7crH+lMwCN0tAJE21eQ==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1794312738;
+	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
+	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To;
+	bh=2yoD5VZ9ZvyluG4ip+5+fzbZiI13Ev8Wj9W7ZG1+DXQ=;
+	b=ZiP8Ngx1MkBGb8c7UfO6Ky+YBM+Zu/dPyd74RamSzrVhjL+1CENZCE1GLKvO5pdLoqJd
+	 cpWqnMGmfnefIhaKZXfwx+wInLNaYGNTT9yK7lg2IM+b1HSdQn29OvbWMND64YpfXmp2K
+	 sBUNJRaMALAuOP+lFRJZoDxhvp50+uen19M3hNIel4xGYlDM2Vo+WqtzHkmUAj02fSCSc
+	 qg+zm+Y3MSXsj8ZNH5gp4FRdYvUwJlxp+Rslue3Ax5vDWHCcm29lHbbbhF+mUje5kPwIl
+	 nD3hdfbv65rGQHNaUWxYpbJOWK7dZ1gsaXp9jiYRS5kLzuwEhuMmGGbIm3qfIPNhPLQ==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BA42606A325
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 11:50:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7BA42606A325
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=LYQr6Ktc;
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=qZoB60fz
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1794311418;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=NV3VnFLMuKlrnZgC5P5AIbtQYdgALzpVqxSBUSYHI4Y=;
-	b=LYQr6Ktckj+Kkbx7yOdYbFsAmypoT3JYZ0Wk4fban6FBx2lyJ0wqViB2EzAjfBTSFiJS0U
-	6HQ4FTaN66qRDUzgkKF3q53vZsbRUmpEJCle4kTwOOXs05lh3EFJe7kkKqxI78xeN8yOJW
-	is9dgmO+qjJDSgTs7wVDfaedl9Q5vsg=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-372-zlqZvsxyOtCUHQZKkmmvmQ-1; Tue, 10 Nov 2026 06:50:16 -0500
-X-MC-Unique: zlqZvsxyOtCUHQZKkmmvmQ-1
-X-Mimecast-MFC-AGG-ID: zlqZvsxyOtCUHQZKkmmvmQ_1794311416
-Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-c504991a35eso81183966b.3
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 03:50:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1794311415; x=1794916215; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=NV3VnFLMuKlrnZgC5P5AIbtQYdgALzpVqxSBUSYHI4Y=;
-        b=qZoB60fz1UvXdufp25YZxJHODxYfQI0ewOGXlB2CkEEJbmsN4od6EhUgWA9P/l09zq
-         0p+q1YoPUmtqgG+Sp+xbPcosfU8AZNK6y6iX0A5JRW925bYOnW+ff7c/gGiOiR286seW
-         hz5Wj4JIs2YlIftCfpHLBz0L5l2bAgzT9yl7cDpMl+Rvvs+Zvxbb9AhyqjxBUY2si82X
-         1l9cr1VGcMxnlC9SPX610uKM25fN+qtr7IPDM8SQR0Xu5X9JE00Qng7Gfj+9kW9IUYKj
-         Wawf5yOjrnNOaJtLcFm1GzWp8iXNLH39lBCeQ4DR65f1wGgeXVcU8QaBAb8xLeUVDl/R
-         y9Dw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794311415; x=1794916215;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=NV3VnFLMuKlrnZgC5P5AIbtQYdgALzpVqxSBUSYHI4Y=;
-        b=Px2lWSoVMnqDFgYVdAf8FChWbvboswca57/KUSBZeDB8dBUM0/n1+PfEzRS9/dRpqD
-         L5RHJ9imZ97m6k2dp2bUKH33S2O7vM8eri70dDMGR/8IkVVcBu9JX2gAoDiPJUoAuQJx
-         3MCdyyBsgxysdlC/jtEAasA1QGVw/0CwTOxoPj4iotpxWEWqSuMSuGXqtMp8DKBFG7+4
-         bj4TvoqdJVYRx4rpmPW1T+uqoh2k+RJjbtKtOv9HE/xFSGPiarhTEnHF7Lm7kzIQMGWt
-         dS7OBaTVlkkvhkOfDZdgqWOQnzGpmdnZkwYjysAjJ8idlTVfrhH/83xPNzjk9JuZZ7vF
-         0dqw==
-X-Gm-Message-State: APuU4Z+belPTxBr1jtkqhwBrdtrymMhnr9DMW0RXRwwaoKZM81mEvM+h
-	9vB0mCov8/DqsQjuDC5cWPsBkZDSlorKfePoOyMukbhYTOJ4Z+jTMuwwTdiG8Qs46PjHpgHGI9u
-	7hBVGIt2RxOUIfsfJRzMxLwG2GWXCbu4r9Yglx8Fq9GZsO7iLf8+5n9k8/noEwLw=
-X-Gm-Gg: AYBFou0zTj81EhY6v4Ws+W8CrVd5or+d2GZYP5b+iy7wWHXfwDEeC1m6Tpcg6V74A6Q
-	cOYJmGPB7G8jFSpOiBj009T4+Le5HXRgDs04e33Dbov+rJIVrndMtyuIPHOHKI4XALTs7H+kJGY
-	hKosBz7PA/+gSTNecEjA08vNQQKQ9Jb9PUZHhZEZ310JsL+C4k+7q7GEM7YuOVS68r9I4snm7o2
-	vMJU9x2Jcwfgd17kvYwHWQOMsixAUcOFpsmWoRsc2XlhpaiXK39EradKZ9cU0VL7ciwsZUonJMh
-	NLc1vKoFj1h6dFzDVIHW10Jx1AgAdD6zz3a3eAZSbLbMdYLzrSDCQv9ygbkECTmzV/0SFidTCjW
-	XtpyBi448HUT2lpSouYSU/jD9s0OH+Eagmfsdu+LNr4IEav4wy7+RAmj/svWwJjclTVSUhMasQk
-	3SZYz0kfKhWcjBMEJfJQiGQHDUzKI4AGyU+9Kc33TFK+pcorEmNQiNxT3QvfpJpUP3dpqPSXHZN
-	HTFod1OFB/kyTQew/lZiokKvjpgTuHjJZ/X4MTVSItb+pKhWCfJ
-X-Received: by 2002:a17:906:9f92:b0:c50:59e4:199 with SMTP id a640c23a62f3a-c5059e40eccmr82397666b.3.1794311415682;
-        Tue, 10 Nov 2026 03:50:15 -0800 (PST)
-X-Received: by 2002:a17:906:9f92:b0:c50:59e4:199 with SMTP id a640c23a62f3a-c5059e40eccmr82395866b.3.1794311415312;
-        Tue, 10 Nov 2026 03:50:15 -0800 (PST)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c504a618abesm98403566b.50.2026.11.10.03.50.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Nov 2026 03:50:13 -0800 (PST)
-From: Alex Markuze <amarkuze@redhat.com>
-To: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: rbd: Handle overlarge result codes in rbd read replies more gracefully
-Date: Tue, 10 Nov 2026 11:50:13 +0000
-Message-Id: <20261110115013.3268036-1-amarkuze@redhat.com>
-In-Reply-To: <20261104153659.1117700-1-raphael.zimmer@tu-ilmenau.de>
-References: <20261104153659.1117700-1-raphael.zimmer@tu-ilmenau.de>
+	by smtp.kernel.org (Postfix) with ESMTPS id 1DBFA1F008BD;
+	Tue, 10 Nov 2026 12:12:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794312738;
+	bh=2yoD5VZ9ZvyluG4ip+5+fzbZiI13Ev8Wj9W7ZG1+DXQ=;
+	h=From:Subject:Date:To:Cc:Reply-To;
+	b=FV8njbz9OzLs/QOmUrObxrlgttsD66DAKYu2ug+vGkPt8gWS8IRxiROx8iEJRWPOF
+	 weKhvUeh7katYdGQWbMfvbr0OXy3vVQs1eVgAvgraNnRrAbXeDndfl+EVvxR7r+YQi
+	 7r9FsRJiwxwSFEeBzfU2RMH+KxmsK4wvK9Q4/5nauDDOX6PrxcmiksHdUtcyKWLb78
+	 F3Zh24fORSrzCOUeNvdwjVo+3tXTA+/39bdeMvvTEvXpt/18e6H+smPNE/M0+ksmD5
+	 NYzJa/ui25yIUYRafsmXZDs5Aoamuy92dlYH/rafSvaYPkry1tESAaq9f1y0q5n+Rz
+	 zWSNulM6R6nOQ==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id 67C8E48B31;
+	Tue, 10 Nov 2026 12:12:17 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Subject: [PATCH v2 0/2] ceph: lazy I/O write and LAZYIO revoke fixes
+Date: Tue, 10 Nov 2026 13:11:51 +0100
+Message-Id: <20261110-ceph-lazyio-noread-v2-0-259775214b39@clyso.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -115,17 +83,79 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/32NQQ6CMBBFr0Jm7ZgWDQVX3MOwKNNRxiAlLRKRc
+ HcB9y5f8v77M0QOwhEuyQyBR4niuxXSQwLU2O7OKG5lSFWaaa0MEvcNtvYzicfOB7YOVW5cVud
+ EVDhYh33gm7z36LX6cXzVD6ZhK21GI3HwYdpfR715fw9GjQqdOp+ygoyytSmpnaI/kn9CtSzLF
+ wj6UGTGAAAA
+X-Change-ID: 20261107-ceph-lazyio-noread-087d6b8ccc9d
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794312723; l=2171;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=46MayRn4PkowK9ASiX0DvHBX+OfL5NdVD7YGVyWj/BA=;
+ b=GgXnyZE3IzT7VP0izkQ5xcbLu1b+Wh5PGbuTgtvGFEd4S3AjouRpdyV0D32JA0sEuOZ9xQfwX
+ gQ/1kobFcL/CcP3RTSikmVyNaaA9XOxFHnjvazRjtD/G29DPYRNvn3p
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-Hi Raphael,
+Two lazy I/O changes on top of the lazy I/O series already in testing.
 
-NACK. Please respin.
+Patch 1 stops a buffered lazy I/O write into part of a folio that is
+not uptodate from reading the folio in first.  That read is done
+synchronously under i_rwsem and serialises every writer of a shared
+file on the client; with lazy I/O only the dirty range of the folio
+goes out, so the read buys nothing.  16 writers on 4 clients writing
+47008-byte records into one shared file go from 0.27 to 0.71 GiB/s.
 
-  1. drivers/block/rbd.c:2902: Overlarge read result is completed as a full success without filling the tail
-     Raphael is right that a malformed OSD reply should not `BUG()`.
-     If `*result > obj_req->ex.oe_len`, fail the object with `-EIO`
-     (keep the warning if wanted).
+Patch 2 makes ceph_adjust_caps_used_for_lazyio() move a use to LAZYIO
+only when that use is in the used set and its cap is not issued.
+Otherwise a file with only clean cached pages holds a LAZYIO revoke
+until the delayed cap check, up to 60 s, and a getattr from another
+client waits that long.
 
--- 
-Alex Markuze
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+Changes in v2:
+- Patch 1: always install the dirty range on a folio that was not read
+  in, even if folio_maybe_dma_pinned() reports a pin; a folio that was
+  never mapped cannot be pinned, and a refcount false positive sent its
+  unread bytes to the OSD (Alex).
+- Patch 1: accept and report a short copy into such a folio instead of
+  returning 0; the copied bytes could already have replaced bytes of an
+  earlier write in the dirty range, and a failing retry wrote them back
+  without reporting them (Alex).
+- Link to v1: https://patch.msgid.link/20261107-ceph-lazyio-noread-v1-0-d04369c70ab7@clyso.com
+
+To: Ilya Dryomov <idryomov@gmail.com>
+To: Alex Markuze <amarkuze@redhat.com>
+To: Xiubo Li <xiubo.li@clyso.com>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+
+---
+Xiubo Li (2):
+      ceph: don't read a folio in for a partial lazy I/O write
+      ceph: do not hold a LAZYIO revoke for pages that CACHE covers
+
+ fs/ceph/addr.c | 179 ++++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ fs/ceph/caps.c |  11 +++-
+ 2 files changed, 174 insertions(+), 16 deletions(-)
+---
+base-commit: 5dcec86cc31f8144857c0d9bf2a7fa13b6e6f531
+change-id: 20261107-ceph-lazyio-noread-087d6b8ccc9d
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
+
 
