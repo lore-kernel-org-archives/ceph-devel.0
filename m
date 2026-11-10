@@ -1,88 +1,89 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.222.171
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.222.170
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794341467;
-	b=3bTaG4EKPgt/U1uyaHxV95CICvBq0oAvvZ0ksA4JnaSmhngWUAT0eLmbtcoPgA7EPG5D
-	 13HukqYmtX290oRJ41EB9OOwHAtfiiQZczz9BVpGOIzxrSgjBIqxPcIkeIX8OrhzLGIoG
-	 MpE0hHJA0DNMXfcnAs9Nt59WKsIPmNF72yS1jj9NrY/DfRMXpqzPLmZlvFLl5v85Cu/ip
-	 DVaRnXrgpOXeH0N1WLPFAyZzzO35DLjYUCO1e0xDW8/UNGEUThEEa56Kwra8kPYKxbn02
-	 30SwiBeFmG1wRxb8aeduVwZMe9jU7o339YE6pzTe4srEWoK+i9PCPo3gB7V+ZUZVxdw==
+	t=1794341468;
+	b=ZmGHxvGu8TPWKxa+xFw7ONy/7Wj8zEZOUgfc604fzQMcWuyOoOsRvJ5etq8mRBSiwrw3
+	 Nc3op8bexbUgrfekVmoUEGG8f2YAPLXUB5xhQiDJo7j9UsaN3+a8bPVFKE1bg7/TBbyQ8
+	 RExpqLfyx1ovC+WZU2J90fNP09VESYP0UEJi7D8qpjVaivKUsBHcssd3CVn+g9y/a3JL7
+	 Ubtp1QOPm4uIbl+23WvuZd85QM7MOTRbC48xxu0poAcxBftzmnpM+f5yNkD5RY15P7b1Q
+	 hmOtHxHij+rpc/LSwlKqwLLBVe5+382bxRoPBB+JG785MACrR8aNNT23o++m3xg4Rnw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794341467;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794341468;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
 	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
 	 Content-Transfer-Encoding;
-	bh=u/VuDror7c4Qc2gIynWtFMp7xq9YgDMQIObIS309kqg=;
-	b=Th82jRz69o+7ZlDUR5iqf0RhH9/jogtwtJ4dDYoMyyQl0jDXBjKvBbl+vauieT7C9OCs
-	 vwlyk10UNyda/mcdtVNq4vbfmqvRwWz/iWnrv/4yeCOOdHC8olLNXXzPWL9DYLyiSVaCZ
-	 nCjDaiUlUC7kc15SsZpIwn42WTUo2YcwgMjclzwgPNkPyYdDn5lFoM6eP0KzF2ybw5PLI
-	 ESgm3UUgrVIwplyaOBz5jz1DqMXoFBUK1/uX2uZNMn4En3gSP5owi74VvLRBpAuyOC7qP
-	 Q2PmeIg+0rigwUsYiFcN+xNYsMdcLS2yxOXDGz90S6E5z9kdxZEGrsJD29cz5+q9oEg==
+	bh=on48w80Rou176JAdjsPSGWQMmQDfqhFmi5vMFS9k5gg=;
+	b=BLXANAnfsfu+46T4uCJQ5z30mkYw4tIGyKHN1F8wst767Ipp3OJC7VsUhgnCflcLbYm3
+	 H3JzM/WpwDLy73OrOqlRAYAZj3bNRAW9Ghp1sfn4NKAoTP6kEGMUMcn3UmvoatUer3lAh
+	 G5Yf20j2LB6yyA8ptndrLMibsX4Q2mIWDV+9cSEIUjhPH5OERuXWRG5QxJPQkDR0qyJEo
+	 EDhOY7Qqr39/u96dylWzAJg+v/1GdxEUSyaklqeuZaycH+F0hSyKuHDRlrQc4vYnpq5Rp
+	 55NSJ174Hhg71iiUhNMR/WOFUygs5wh27sduR0JkgsahGEzNOIByoOCORM4g0lzRcVA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=SSzgcOX4;
-	arc=none smtp.remote-ip=209.85.222.171
-Received: from mail-qk1-f171.google.com (mail-qk1-f171.google.com [209.85.222.171])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b="dgI/SSV1";
+	arc=none smtp.remote-ip=209.85.222.170
+Received: from mail-qk1-f170.google.com (mail-qk1-f170.google.com [209.85.222.170])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D34360A2600
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 20:11:07 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2D34360A2600
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5ECD660A2605
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 20:11:08 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5ECD660A2605
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=SSzgcOX4
-Received: by mail-qk1-f171.google.com with SMTP id af79cd13be357-93f22a8515eso198073585a.2
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 12:11:07 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=dgI/SSV1
+Received: by mail-qk1-f170.google.com with SMTP id af79cd13be357-9441591aa5cso279230085a.1
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 12:11:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794341466; x=1794946266; darn=vger.kernel.org;
+        d=gmail.com; s=20260707; t=1794341467; x=1794946267; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=u/VuDror7c4Qc2gIynWtFMp7xq9YgDMQIObIS309kqg=;
-        b=SSzgcOX4O2odga5kF/LnsNcgmHgKKR3eIQm6NiXh5qxC9e3OYu8BJ8cX9IexZkJkB5
-         cl4LKJJAWg2X8gg49OsAHYVLU5WwtHTExRESpWFgQvV+89ylii/kWTNYcoSvGaQk/fHt
-         aVx1qx7bY4luwhg/Hk6PDZXgw5rjrn4hM/bBO6UnkUy7obzwXRekozntGi+hi7LKRT0u
-         vQ5KjZw8Z7JJPOtbmiFPZ2pBJ5w0UtXT/9y/TlXIw4BYJkiksMf2ylG47ROsSwshWQ3K
-         MsFyUdRw6kGxZ2Hx4+3LrEE02kPt2dqNVSnDPTZthm8JJNZSQPe9S6Th4nG2ygdC01ah
-         rtFA==
+        bh=on48w80Rou176JAdjsPSGWQMmQDfqhFmi5vMFS9k5gg=;
+        b=dgI/SSV15f7OOipsBzaEI8JwMpA0nxu9BWiG7niGGBCFFz8LLa4LgLgIItY6xiwMDM
+         XCyDBW2E7BYVtmDNbCiG03uMwUz0sfAACJos369yD2vsRiaxERVTbUfdEnmFMPVJ8WA4
+         HdCI+82mGt6S5Tz6DYIjJDdJaj4/+J5QLdIlcuQWbwwFkpe4MrZyokjyK3V8o0g9uPcP
+         O+P+27cJwxzrPuuQgxRw1koWJ1VepBJ3lPymvF3V5Cu3BKIv4kDDAAjND60C+AIU4+Ac
+         nOGVPzf0bwvmcvTyK3B9axKCDPYe3fa0gCeTDv0TG7uBXaXnB5p+e1QZ0GQej11wFWjY
+         uciA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794341466; x=1794946266;
+        d=1e100.net; s=20260707; t=1794341467; x=1794946267;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=u/VuDror7c4Qc2gIynWtFMp7xq9YgDMQIObIS309kqg=;
-        b=ElBvwbwfUVr66MuWMMCDALqfEwUpr04kITkLcHS9Ax51SSbZ5EZUjkGqyuHCrBQLv7
-         lRX0Lf/S2opOURHIpUWaHTiIfH1dQLHQAE5y0j7R8TRE1YJUsr5wuRT/njLvsAdGkKEK
-         b/EbTJo9tX64QPalxTtJdo0AqGv0hzVsfhkLsIb18qou42kstimvc94pTgmVEiKbK7ND
-         HVWA5CqXzyNmkb3jjevse84oSfXvuKDVzLT/6ObQrbvzttxK47I0ZX+8fg0lHTMJozxx
-         b6ayKDsunwwOvroe61u/rTWkGYGRoswE6u7xJ31jdSH4hleAcBXs+rMS437XfLywGWKe
-         pZKA==
-X-Gm-Message-State: APuU4Z+eGLc1ZbkiusSp7FbaAfuEd6N6GBRQ68ihGTyYiIKH7Nl77qAF
-	bcG2vEfjwiz02N8avFA1WAxoebyVG6HrRoGyybx4Y1N401R/nLA3WY2gK1Ehypz1
-X-Gm-Gg: AYBFou3CAZg39HQlK3xXegPIG/sN917aMBOWOhFHVneptK1a1uxO3GD0Zr1QdXOENwd
-	+c7J5meavr50qIxRsPlli/d5I96/dnPFTgKixT3IMZSaXB0EgyVNRH6LZ4Z/LACmp5NYtNZ48I1
-	n/RZ15X9u8/dmG8AAD2vgseMlcgGG+Q1+WxLUgWCaXFlgPKXDVn54qTYuHRPwqz/EvZce8rrhh9
-	upuiWg0pAgRBX+KToo82vULHrQXqsIUy5nMC6Ha/4aCudL1l4UBLhnBxtManMVTsC/AqGBA0X6Y
-	5YUTBo4atrGD+nHq6GCotq2QtGKmZuSJJe7OE1ef8QLHK7uWPYj4VyJ7H2Rm7H/He7j55e5Yaj+
-	ooDYmWvZeG1m/2tGo5q7u/yTAmlvF9WTz2L67ppQ6oIKaSBf0Ykp8dshzKFid1j5rTvva0pGXJk
-	HWuMCGMagpxT+RCxKJhlegFdayUamnbxyvMXO/qFUsXh5NBHx6G78LCcLUuEEH2cbaGF0A0xrE6
-	Ulz35ti2OA3tXyg8owRiOVd1Fy1ssogi9uy8w5IHHPWpIn7VGakMeLNlGS+0MIySR5vo9PDYndO
-	sgF+r1IgTjNjCUlbdZY/A0oQJqqZ5M9gKKv6KiAR3j70tEzASg+9Og==
-X-Received: by 2002:a05:620a:2686:b0:93e:f4f4:346 with SMTP id af79cd13be357-947b002d3ffmr8114185a.39.1794341466109;
-        Tue, 10 Nov 2026 12:11:06 -0800 (PST)
+        bh=on48w80Rou176JAdjsPSGWQMmQDfqhFmi5vMFS9k5gg=;
+        b=b+PhCWU053fbAzJN+K4OR9wLtulI9w8b+Et57yBY1MW2aZmIKUqosDVewcXLIvbaAu
+         Wl3zRdvzVl5k+wzGzknWfsVxobfAjhp2Cbq1qD2kcgTQEyEazN0KB1JQ03n+SOUSoqfD
+         gZMKwemTYh3C+GFvbbaQ0zYtyKWvTu5oxqGMEq6QtJPnSSi82RHmKOT8RAes5NjexlF2
+         PeRKBvrFmyvnzKSjaPKNSkb0fefSEVGy+d044OfIRhmCi/5/t8OTd41nIlOoxb0I+TOc
+         JQ2iRRHLIU27vFzVbEDzskMYGiEF1vU7DEmBh6pxVHpeIGi3qirs+XRmFgA1+CIRYdGn
+         uSEQ==
+X-Gm-Message-State: APuU4Z/rP7Js5UbjVJXtoy7ajeDHIe9ZgDKcIHABQL83ZOgPZMLDiKMV
+	MSJ2yNQKRjzl0wFJHSFNFwh9qvjfZOZDWqxOW8AXPIMo01bfQEgehOQR7nH4+Aca
+X-Gm-Gg: AYBFou3RBxupOmAEKrztX7H1tx2RXYd6QBxRhTqUZmEEoELZlYzBC3xTZ4DrIoiQGB3
+	xbqMR34fF8jOqKSfpKO4Cyg/4mXd/JBjNfE8KNWIsk0YbaqVT82/gkDEo52VNJVtAOAyXfCXbwi
+	LojEAk4LvHovxImAsVd/wAs6PvDEMBfipR+oSh2oyqzaUBbF8Vv8pZP2MHAqUxKR8HdbCOiZkSq
+	hMHou41yCNQPO/Em+UE8ygRezM6f3InPRZ0kNZ290belSgi+NdraR3r2e8WzU/SMVb5MfIyjRMc
+	MQiRM9XAWfXqTYf5NEtzJH3BQ20j1fU3AUrPuxx1sKZCsaAsU3lIfts4vQcb4tEVDSVwQUNa64O
+	2mh+vDG13OTIw+LXhEaLEPXAhrCfoOtrwBdg7ZmZAVsPLX5PrOv0Nf5Sou6m91SEzSDmxzOZwLx
+	ufFYe4+1m8nfOHu95A2pCR2M24tETYRDqRsmvwN6DsWGZVNzKaD6a2XfM9HQsqZiKqTzieYw8/Q
+	1vfLSEDIyb3+DuX42Q4y1u6TBdjAHT+gs2hkS5XXXQfFX5qosr0XuXsD0r4WyYoL14ZeaHBTo8W
+	4C9oU2akT7Uzbhq/MrQyiBXdlQwEdpoBZFfVppdKOE2VN/qZBC8aIZFVSOmbTd3wHbdLiYsItQ=
+	=
+X-Received: by 2002:a05:620a:46a3:b0:945:d7a2:4b57 with SMTP id af79cd13be357-947afff049emr9749085a.21.1794341467313;
+        Tue, 10 Nov 2026 12:11:07 -0800 (PST)
 Received: from zambezi.front.sepia.ceph.com ([2a02:8308:b10e:9400:faf:460b:2f23:8f6f])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-9479e73c84bsm301815085a.9.2026.11.10.12.11.05
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-9479e73c84bsm301815085a.9.2026.11.10.12.11.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Nov 2026 12:11:05 -0800 (PST)
+        Tue, 10 Nov 2026 12:11:06 -0800 (PST)
 From: Ilya Dryomov <idryomov@gmail.com>
 To: ceph-devel@vger.kernel.org
 Cc: Dongsheng Yang <dongsheng.yang@linux.dev>
-Subject: [PATCH 2/3] libceph: don't cancel in-flight ping in send_linger_ping()
-Date: Tue, 10 Nov 2026 21:10:15 +0100
-Message-ID: <20261110201025.255594-3-idryomov@gmail.com>
+Subject: [PATCH 3/3] libceph: include current latency in debugfs osdc dump
+Date: Tue, 10 Nov 2026 21:10:16 +0100
+Message-ID: <20261110201025.255594-4-idryomov@gmail.com>
 X-Mailer: git-send-email 2.55.0
 In-Reply-To: <20261110201025.255594-1-idryomov@gmail.com>
 References: <20261110201025.255594-1-idryomov@gmail.com>
@@ -97,231 +98,50 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Linger pings are emitted every 5 seconds (by default) but currently
-there can only ever be one linger ping in flight: send_linger_ping()
-always tries to revoke and free the OSD request that corresponds to the
-previous ping before allocating a fresh instance for the next ping.
-Because these linger ping requests go through the same per-OSD queue as
-regular OSD requests, this can cause some pings to not be delivered to
-the OSD on time or be lost entirely in environments with high latency
-or where low/moderate latency is coupled with huge spikes.  That in
-turn can cause the watch to time out on the OSD, exposing this client
-instance to the risk of erroneous blocklisting in case another client
-manages to proceed with breaking exclusive lock before the watch gets
-reestablished.
+For regular OSD requests, it's very straightforward.
 
-Rework send_linger_ping() and related logic to allow for multiple
-in-flight linger pings.  In hindsight, this should have been done in
-commit 75dbb685f4e8 ("libceph: fix potential use-after-free on linger
-ping and resends").
+For linger requests, reference the oldest corresponding OSD request
+still in flight and in addition to that surface the otherwise unused
+lreq->watch_valid_thru timestamp.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- include/linux/ceph/osd_client.h |  3 +-
- net/ceph/osd_client.c           | 73 +++++++++++++++------------------
- 2 files changed, 33 insertions(+), 43 deletions(-)
+ net/ceph/debugfs.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 0847c522f897..7349ca09a227 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -314,8 +314,7 @@ struct ceph_osd_linger_request {
- 	bool is_watch;                  /* watch or notify */
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index 83c270bce63c..b068e25f2acc 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -219,7 +219,8 @@ static void dump_request(struct seq_file *s, struct ceph_osd_request *req)
+ 	seq_printf(s, "%llu\t", req->r_tid);
+ 	dump_target(s, &req->r_t);
  
- 	struct ceph_osd *osd;
--	struct ceph_osd_request *reg_req;
--	struct ceph_osd_request *ping_req;
-+	struct list_head osd_reqs;	/* w/ r_private_item */
- 	unsigned long watch_valid_thru;
- 	struct list_head pending_lworks;
+-	seq_printf(s, "\t%d", req->r_attempts);
++	seq_printf(s, "\t%d\t%u", req->r_attempts,
++		   jiffies_to_msecs(jiffies - req->r_start_stamp));
  
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 5053363134ee..b2ad2510fd91 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2771,13 +2771,13 @@ static void linger_release(struct kref *kref)
- 	struct ceph_osd_linger_request *lreq =
- 	    container_of(kref, struct ceph_osd_linger_request, kref);
- 
--	dout("%s lreq %p reg_req %p ping_req %p\n", __func__, lreq,
--	     lreq->reg_req, lreq->ping_req);
-+	dout("%s lreq %p\n", __func__, lreq);
- 	WARN_ON(!RB_EMPTY_NODE(&lreq->node));
- 	WARN_ON(!RB_EMPTY_NODE(&lreq->osdc_node));
- 	WARN_ON(!RB_EMPTY_NODE(&lreq->mc_node));
- 	WARN_ON(!list_empty(&lreq->scan_item));
- 	WARN_ON(!list_empty(&lreq->pending_lworks));
-+	WARN_ON(!list_empty(&lreq->osd_reqs));
- 	WARN_ON(lreq->osd);
- 
- 	if (lreq->request_pl)
-@@ -2785,8 +2785,6 @@ static void linger_release(struct kref *kref)
- 	if (lreq->notify_id_pages)
- 		ceph_release_page_vector(lreq->notify_id_pages, 1);
- 
--	ceph_osdc_put_request(lreq->reg_req);
--	ceph_osdc_put_request(lreq->ping_req);
- 	target_destroy(&lreq->t);
- 	kfree(lreq);
- }
-@@ -2820,6 +2818,7 @@ linger_alloc(struct ceph_osd_client *osdc)
- 	RB_CLEAR_NODE(&lreq->mc_node);
- 	INIT_LIST_HEAD(&lreq->scan_item);
- 	INIT_LIST_HEAD(&lreq->pending_lworks);
-+	INIT_LIST_HEAD(&lreq->osd_reqs);
- 	init_completion(&lreq->reg_commit_wait);
- 	init_completion(&lreq->notify_finish_wait);
- 
-@@ -3055,12 +3054,6 @@ static void linger_commit_cb(struct ceph_osd_request *req)
- 	struct ceph_osd_linger_request *lreq = req->r_priv;
- 
- 	mutex_lock(&lreq->lock);
--	if (req != lreq->reg_req) {
--		dout("%s lreq %p linger_id %llu unknown req (%p != %p)\n",
--		     __func__, lreq, lreq->linger_id, req, lreq->reg_req);
--		goto out;
--	}
--
- 	dout("%s lreq %p linger_id %llu result %d\n", __func__, lreq,
- 	     lreq->linger_id, req->r_result);
- 	linger_reg_commit_complete(lreq, req->r_result);
-@@ -3084,8 +3077,10 @@ static void linger_commit_cb(struct ceph_osd_request *req)
- 		}
- 	}
- 
--out:
-+	list_del_init(&req->r_private_item);
- 	mutex_unlock(&lreq->lock);
-+
-+	ceph_osdc_put_request(req);
- 	linger_put(lreq);
- }
- 
-@@ -3107,12 +3102,6 @@ static void linger_reconnect_cb(struct ceph_osd_request *req)
- 	struct ceph_osd_linger_request *lreq = req->r_priv;
- 
- 	mutex_lock(&lreq->lock);
--	if (req != lreq->reg_req) {
--		dout("%s lreq %p linger_id %llu unknown req (%p != %p)\n",
--		     __func__, lreq, lreq->linger_id, req, lreq->reg_req);
--		goto out;
--	}
--
- 	dout("%s lreq %p linger_id %llu result %d last_error %d\n", __func__,
- 	     lreq, lreq->linger_id, req->r_result, lreq->last_error);
- 	if (req->r_result < 0) {
-@@ -3122,8 +3111,10 @@ static void linger_reconnect_cb(struct ceph_osd_request *req)
- 		}
- 	}
- 
--out:
-+	list_del_init(&req->r_private_item);
- 	mutex_unlock(&lreq->lock);
-+
-+	ceph_osdc_put_request(req);
- 	linger_put(lreq);
- }
- 
-@@ -3137,10 +3128,13 @@ static void send_linger(struct ceph_osd_linger_request *lreq)
- 	mutex_lock(&lreq->lock);
- 	dout("%s lreq %p linger_id %llu\n", __func__, lreq, lreq->linger_id);
- 
--	if (lreq->reg_req) {
--		if (lreq->reg_req->r_osd)
--			cancel_linger_request(lreq->reg_req);
--		ceph_osdc_put_request(lreq->reg_req);
-+	while (!list_empty(&lreq->osd_reqs)) {
-+		req = list_first_entry(&lreq->osd_reqs,
-+				       struct ceph_osd_request, r_private_item);
-+		if (req->r_osd)
-+			cancel_linger_request(req);
-+		list_del_init(&req->r_private_item);
-+		ceph_osdc_put_request(req);
- 	}
- 
- 	req = ceph_osdc_alloc_request(osdc, NULL, 1, true, GFP_NOIO);
-@@ -3176,9 +3170,9 @@ static void send_linger(struct ceph_osd_linger_request *lreq)
- 	ret = ceph_osdc_alloc_messages(req, GFP_NOIO);
- 	BUG_ON(ret);
- 
-+	list_add_tail(&req->r_private_item, &lreq->osd_reqs);
- 	req->r_priv = linger_get(lreq);
- 	req->r_linger = true;
--	lreq->reg_req = req;
- 	mutex_unlock(&lreq->lock);
- 
- 	submit_request(req, true);
-@@ -3189,12 +3183,6 @@ static void linger_ping_cb(struct ceph_osd_request *req)
- 	struct ceph_osd_linger_request *lreq = req->r_priv;
- 
- 	mutex_lock(&lreq->lock);
--	if (req != lreq->ping_req) {
--		dout("%s lreq %p linger_id %llu unknown req (%p != %p)\n",
--		     __func__, lreq, lreq->linger_id, req, lreq->ping_req);
--		goto out;
--	}
--
- 	dout("%s lreq %p linger_id %llu result %d ping_sent %lu last_error %d\n",
- 	     __func__, lreq, lreq->linger_id, req->r_result, req->r_start_stamp,
- 	     lreq->last_error);
-@@ -3210,8 +3198,10 @@ static void linger_ping_cb(struct ceph_osd_request *req)
- 		     lreq->register_gen, req->r_ops[0].watch.gen);
- 	}
- 
--out:
-+	list_del_init(&req->r_private_item);
- 	mutex_unlock(&lreq->lock);
-+
-+	ceph_osdc_put_request(req);
- 	linger_put(lreq);
- }
- 
-@@ -3230,12 +3220,6 @@ static void send_linger_ping(struct ceph_osd_linger_request *lreq)
- 	dout("%s lreq %p linger_id %llu ping_sent %lu register_gen %u\n",
- 	     __func__, lreq, lreq->linger_id, now, lreq->register_gen);
- 
--	if (lreq->ping_req) {
--		if (lreq->ping_req->r_osd)
--			cancel_linger_request(lreq->ping_req);
--		ceph_osdc_put_request(lreq->ping_req);
--	}
--
- 	req = ceph_osdc_alloc_request(osdc, NULL, 1, true, GFP_NOIO);
- 	BUG_ON(!req);
- 
-@@ -3247,9 +3231,9 @@ static void send_linger_ping(struct ceph_osd_linger_request *lreq)
- 	ret = ceph_osdc_alloc_messages(req, GFP_NOIO);
- 	BUG_ON(ret);
- 
-+	list_add_tail(&req->r_private_item, &lreq->osd_reqs);
- 	req->r_priv = linger_get(lreq);
- 	req->r_linger = true;
--	lreq->ping_req = req;
- 
- 	req->r_start_stamp = now;
- 
-@@ -3298,10 +3282,17 @@ static void cancel_linger_map_check(struct ceph_osd_linger_request *lreq)
-  */
- static void __linger_cancel(struct ceph_osd_linger_request *lreq)
+ 	for (i = 0; i < req->r_num_ops; i++) {
+ 		struct ceph_osd_req_op *op = &req->r_ops[i];
+@@ -255,10 +256,17 @@ static void dump_requests(struct seq_file *s, struct ceph_osd *osd)
+ static void dump_linger_request(struct seq_file *s,
+ 				struct ceph_osd_linger_request *lreq)
  {
--	if (lreq->ping_req && lreq->ping_req->r_osd)
--		cancel_linger_request(lreq->ping_req);
--	if (lreq->reg_req && lreq->reg_req->r_osd)
--		cancel_linger_request(lreq->reg_req);
-+	struct ceph_osd_request *req;
++	struct ceph_osd_request *req =
++	    list_first_entry_or_null(&lreq->osd_reqs, struct ceph_osd_request,
++				     r_private_item);
 +
-+	while (!list_empty(&lreq->osd_reqs)) {
-+		req = list_first_entry(&lreq->osd_reqs,
-+				       struct ceph_osd_request, r_private_item);
-+		if (req->r_osd)
-+			cancel_linger_request(req);
-+		list_del_init(&req->r_private_item);
-+		ceph_osdc_put_request(req);
-+	}
-+
- 	cancel_linger_map_check(lreq);
- 	unlink_linger(lreq->osd, lreq);
- 	linger_unregister(lreq);
+ 	seq_printf(s, "%llu\t", lreq->linger_id);
+ 	dump_target(s, &lreq->t);
+ 
+-	seq_printf(s, "\t%u\t%s%s/%d\n", lreq->register_gen,
++	seq_printf(s, "\t%u\t%u\t%u\t%s%s/%d\n", lreq->register_gen,
++		   req ? jiffies_to_msecs(jiffies - req->r_start_stamp) : 0,
++		   lreq->is_watch && lreq->committed && !lreq->last_error ?
++                        jiffies_to_msecs(jiffies - lreq->watch_valid_thru) : 0,
+ 		   lreq->is_watch ? "W" : "N", lreq->committed ? "C" : "",
+ 		   lreq->last_error);
+ }
 -- 
 2.55.0
 
