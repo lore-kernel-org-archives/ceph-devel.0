@@ -1,111 +1,111 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794293567;
-	b=MuguE9na/qT3Sse+2/GgH0KRc3UDrmQQtqHzpYRn0bOt2foyKe7b8HS7jLjPh01qnZDg
-	 sFQ82V80BGDhspCGEERDlv3H90tLwp5gDHP8er6d13oHH5+1QpMEe2hoyRpPR0x3WSsqa
-	 KEcYVMRk0xBbOG+sqog3hfR1i+lOgMjA/CsopWuiEoC0+Mv/vGqDsAuFLIGt025ouwc3Z
-	 zAYmGq6sfHdyyxqDhi19G+ICxFdYzULwCHUbwgI0IXkaIEeXNh6MR8X0rE533RlsvUPGe
-	 K1QBzqQ6FKFtB3SsPGh2jQi+G0tjbxTSiEVSf5XgqUicXgBesl5k5Lf+LxI1lP3+CRQ==
+	t=1794299835;
+	b=PWVsQra3KrqlZBKNuoX8MQBeWCoOqInSXYGG8qz20QD+woecbnP7PvSO9L9urCCoc76B
+	 ZspFnI8kU0P/TXZxwWrfzwfTbZJ0uU+cfX82MQa03KCscBx34l5djNlSqEdmxiq+QfAqz
+	 bfxfgOTw5EyxKqwl4GRr0jJzDWBHhU1pj/bOYVYU1/AUZkjETWQ/gncGruYmqfrcA6bZb
+	 rP/qSM4yCNw7YXYX8vcnF8+vb2eJpa8ADH//07miXde0dRmU5jZ6TUHWeHwQRVXy1Fq4G
+	 6GVDM3fOyNgPEkoXnAOIxqfmt/wVP/SMIau3CxAFGgDmY87NXK9Vbu1wZTpI4kWfzfg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794293567;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794299835;
 	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
 	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
 	 Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:
 	 Content-Transfer-Encoding;
 	bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
-	b=xfP3Lpeh1GIBUXxSeR2b+4iZE05pfDlZcowuZ3Qgvqtu9+z84eFXAK8/JrUhq2qv99V2
-	 tiPbeWQvRsRdrcdeB3OzJCW7O7wfuFLJoolSq3qXGg5mdmP9uGMCbgdrl60XgXDhWKgzb
-	 iptb3r/niXu5zUMtzFK9kLSMdUUTTTNpakUJG8xj4sDvlyhdW4Q+e6QQjsxRpvVtx3cPT
-	 q2dW2JWGadINSD42cCV1YySmj64bw2Ca2fdoYSgLSB9VUThPfuTV4OdhEkRt9DCGIgZLn
-	 oZZdzflOdJlPOVmUrMbk/AtqejVgUdSVHCKawtS1cHTugt+13uxg/S+/HW//U0orOsA==
+	b=30+obonAEECMlB7hWjzhOPzq7Y/PwqLRXpVq19+W4VuxFZ2P1bqKCF1LJgv1JzhJhVia
+	 BoH8HFl21gvx+wFvCYJVTlK8AezfG4M9FUUQ2BdAa8LfhOMOWow1if8CkHjgkXAQM1Unr
+	 XKkKnp4PS0JYbvJekNZ3L5EnuFfYmhDAO7EsCr+558quUzk67Ta2x1zLjy0zXkmTcq6Rs
+	 8+P9gfTgNDqkJfgoBs1hLPaszVr1HxOMwfhp0ZGE7ydlUB8g/f/rJ6Fl/LLxOmdN+Bxif
+	 H5zBJeo9dZew7btS18IVt8DuYnPECq1hwcsV9XIDEgFitFZoZnVsAKeNLwEz+ejSHfQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=redhat.com;
 	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=JZrBjlHk;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=gfD1a7V8;
-	arc=none smtp.remote-ip=170.10.129.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b="bh/8lJke";
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=pzfYZC2t;
+	arc=none smtp.remote-ip=170.10.133.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF478606A31C
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 06:52:46 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BF478606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E313E606A321
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 08:37:14 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E313E606A321
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=JZrBjlHk;
-	dkim=pass (2048-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=gfD1a7V8
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=bh/8lJke;
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=pzfYZC2t
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1794293565;
+	s=mimecast20190719; t=1794299833;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
 	bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
-	b=JZrBjlHkaKRfCu41TTtJLWk6xvlsUz79EGtgsMIu0q2xQ/b0ylqtmOJ0XWiSf5fwtpsNxh
-	9PbMxV2ARGb4dAUbiWntTsszpfzLVxqc+MiSP4K0lBhrdXVQd0Kag4IgE+ZUHPZGTWROl7
-	zYtrVR6Gim+IbyLrPBAV1GUWOJvk/Rw=
-Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
- [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
+	b=bh/8lJke27ObZyzCeyWHLNbcBpEeJphihL3ZwHMuLp8MrDwB+68dQapARgaRykjOMg398P
+	tqLEJQVP27VbVmXmPmLjETfb2axxsBTQ+Q+wLidbdCI3g9DacSfCkiWWn9AFMGssw1SoKN
+	pO5fljKhxhXj0COAyzq6UFTnUWSh1PM=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-201-wuUImKWTNpWXnskepTpbRA-1; Tue, 10 Nov 2026 01:52:44 -0500
-X-MC-Unique: wuUImKWTNpWXnskepTpbRA-1
-X-Mimecast-MFC-AGG-ID: wuUImKWTNpWXnskepTpbRA_1794293563
-Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-6b7221c0ea6so1976598a12.0
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Nov 2026 22:52:43 -0800 (PST)
+ us-mta-614-uLYYupkMNTiB5jtk2f3lSQ-1; Tue, 10 Nov 2026 03:37:11 -0500
+X-MC-Unique: uLYYupkMNTiB5jtk2f3lSQ-1
+X-Mimecast-MFC-AGG-ID: uLYYupkMNTiB5jtk2f3lSQ_1794299831
+Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-93cbf2fd504so333915285a.2
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 00:37:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1794293563; x=1794898363; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1794299831; x=1794904631; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
         bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
-        b=gfD1a7V8Gooi4gqECHR87sR/UEDN5xStfr3hVrTOxrD5HrPw9/i5DYX265XlCZpu6C
-         Myt7CRNCmtqtawOsHWZHcuXAt5jgQ0hCYrblCRH7vbp2h+4EYihlOWGG61+NkVHVif/e
-         YkgfBZIaob029TwpibTHFZFlesfcb+Eudnjl2eSlRJ/uQMamknmgNEO1qmcX4hcp9lgb
-         uCUdzXFJ2N0/ORUVpHPB2pKluDgfEQY7EOQ32MBZiq0zuoBP3OvQmW8of5dR8RNmekJd
-         q0n0cg8R4vNPcN1SCgbzYuQ5HZckWta7vJlXh380heF+KhwUeDFIzVtMweqPMXUORs70
-         OzEw==
+        b=pzfYZC2tgEIP0UADEtRtlfFu6KnHO+zoCpcligYSlRfVe9vbUDyIFq/fsvRmgS/6Zg
+         y/5U2da93rqebo/zvWaWt6OLrXCs6GYy02x7FRJ+8edUNLXvTvHw5F20XqZduH2NiL+f
+         vyoXzqBN9C0NPn8MeUn3F0YO17Vyt2RriWsdHU9U4FoDwbJT5rbpOXJMPgb0KZZjM036
+         QMHpq9AhlGKtS/DHxnCv6aMb0wSFP71pEi3F1fU9w1Um7cZ9RT532UmbhDmrHuVHDrYB
+         9abxHjdNQYVljXNSA2ey4ShGqMx5aVe4MCTUkCNjyRvqdHLvu/mQQwAbazUjWf76/mSd
+         9gsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794293563; x=1794898363;
+        d=1e100.net; s=20260707; t=1794299831; x=1794904631;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
         bh=QXMKzKJ1tvAdYcvy4+GirvQzIyrrS8LlfStHEJpnk64=;
-        b=1sz4hy3mMKjdN2W+neYTvkVS8ZaTbfKUM8uxcT7GXrXeI++6jSLOuqMz3swaBVbQZL
-         OSuLgeLajmrC8kOjsFOSgveiuZfF1j+yzlCj0UAOMIVrfsHdVzm525QSP+GoMbb03ylH
-         54cyj0orAYZobszaNIl6lF9hzpnTtj3RNTqC6zF0XAsMFeFq4hPIzC7+NRFOrwBk2aJZ
-         N7QaPnmh/K5Q+ZWtrzYESyGzi/61qoIHIFDtfRIJNQBef30WNBZgip7a049xAGhEehSf
-         JZl5AkWmQNIGn91rPAWQcy+I+v6n10btAzy5HDmw+YjuWhzB6xXVa4jHG6XYYwHVKOpC
-         gvpg==
-X-Gm-Message-State: APuU4Z/zpRJ9G6rujvMJ1RNM/l/8ark3U+wRjWt0FBmB+Hc2ZRJeDzYc
-	cEyat37AEB2N3Cy+VfgbkcSa2aWtkUaXcGSz6fHS+DO1IruiEINJP3W65XtcHhY6WxDhfkzhWhj
-	PAscbv3RUpLjvjD42kRsA3ziRQi8nHUxlV1yt2ve2fGHZTi0ue06lALBOpxPDzCk/zRad5Pk=
-X-Gm-Gg: AYBFou1RL9SnEcndHWmHqJK2lK2iGqEqw33IDNq7MTAtbEuoASe1fj2fj5+BI5YVs+k
-	/r4b7L9MT+DF18Qhl67qbUpVolr9KoqDiViQE7kC4qP6bJwZ/L7F2Yg7XQ/3mDMEqlhomSKPmM7
-	eiBOD7T3cO09wGjl9r8ByR7jnRTZlbgwMXO3gW8CFx24v8e4O8Yt7dWb/1SRxuy9Py8CyZdxnE2
-	p7blSJvtKBzG0LLN0S9nNkUWQz3jBQIdRscq108SvB26MN/gbR5MSbWqj49IqcYBgWIThsgRAZ8
-	i6rx0DfYYWaEwrThQzyYy8nXhYz9PkrjAbuSZnvvT8ARlc3IxxkCH1Qaepgh4w70iCPsoMymGtb
-	/BuuJTKks0IU9A8SE/SWDjYb9Bx8u7YJEXH+YyAjrss+X03ZEzzsPKSUsbJod9cxQbJYtfWEPE0
-	poKQTaEPSir4mfu3eVALSA1pID4v7h7AKQSTWp2/TxjHhHUe0JqQdSiX6X0Pc8+ccoNNF/ijnHW
-	k200VDlaQgRXE6TeE5ONEras+Um2GQvzrgZtmpMDNch8KzE8e6j
-X-Received: by 2002:a05:6402:13d4:b0:6b7:182c:5d4e with SMTP id 4fb4d7f45d1cf-6b755e6c44cmr1550930a12.5.1794293562797;
-        Mon, 09 Nov 2026 22:52:42 -0800 (PST)
-X-Received: by 2002:a05:6402:13d4:b0:6b7:182c:5d4e with SMTP id 4fb4d7f45d1cf-6b755e6c44cmr1550923a12.5.1794293562420;
-        Mon, 09 Nov 2026 22:52:42 -0800 (PST)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6b75791d210sm706409a12.37.2026.11.09.22.52.41
+        b=XMFXR2tyhP92oy7P99RU91xeiOusokFOxgeE4q9w1JEOWAqPjdyivdpEKLNFvq+U7s
+         9YOcxPfiWbbc3sMafbxrYIFNWVX5oTj66rL631zhoyMceClf4d975IL1t/Egwjd1sDoX
+         04RFOr2Ni1g6XQvrj+rUQhdDx2eKeSlbw7EAIH0rXHrjQ6Wd4gHAs6RyJbKBAbTwsSU6
+         RNLbRSaZYnTb+gbmP558WJK7ClThHOa0PDR2f0PgexfyuBGc1sMLE9fgoMm6H0goAxln
+         jXXmrupePWYgLstw7wkIrA9ARhFafEr2OUA0llJFTvRytGOU0hw5RfmnHmpccIL+jT+T
+         hfPg==
+X-Gm-Message-State: APuU4Z943djF6EXV+9yJLJ1ET+Gb5EHXJAjkF2pbWA+8EqN7VsW+hToZ
+	AUcGqdX6ZfRuiC0G2gIQ18H4TUAXrfShjL5TJrVLAey8Lepg3Mv4F8uN7kEMUI0bXvPeNTdyB47
+	tA0SoPlCQL/vjWWt9mZHoPupQy7vTD3I4NDOCUniy+NTYJmhACokmXk49ri178oI=
+X-Gm-Gg: AYBFou3LfjcXb50ejyIXCSit1LHVMxZk0f/0bSrj/YWx4jR1Z822zGB8+EpdHOYTWNM
+	+bdWz/PXGhJWsnakkNQ0+Fsi3rIjRFOhk34waTC8/wyAwCtYf/yMLTpHw3kkwwJRLfxAC3p8Fb1
+	CMrJ6M7UvN88UTKlNOcYJTSkH8DZu3E1YKxuc1Tv6ZuUcL2s+mCJxwxweaW4kLJ34HxziaOTQrL
+	IicAhhvLjClYc45PGzYpcuN6RXt1tmk0A2hcX6ndocezimITZuGYwf5H478uxq8WleXf9Lozpo9
+	ZxH6sCDwfABZgL0aYK8jLEXCbzKQnZpU+A2n8CYZ5yMOZ32vV578Qy30xG8yOAWumrShU1BQat1
+	caklYl8P8eSkw1Mwl18SAWRcLlinY35R7xPjQbbOu32M+oVDwr/izEl9jhM5mjrzORvnL/0wpep
+	N3R7uE7hrvihbajJI6kigVd3nLKGAXxGW1c6KKnRG3AEXByIH3a1+Pk4saTok5zfqbelnpXR0gv
+	cxK1bsF2KFp
+X-Received: by 2002:a05:620a:458a:b0:93f:3163:3e25 with SMTP id af79cd13be357-9479f301c25mr311416585a.24.1794299831158;
+        Tue, 10 Nov 2026 00:37:11 -0800 (PST)
+X-Received: by 2002:a05:620a:458a:b0:93f:3163:3e25 with SMTP id af79cd13be357-9479f301c25mr311415185a.24.1794299830772;
+        Tue, 10 Nov 2026 00:37:10 -0800 (PST)
+Received: from cluster.. ([13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-9479e7d6964sm173107785a.34.2026.11.10.00.37.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Nov 2026 22:52:41 -0800 (PST)
+        Tue, 10 Nov 2026 00:37:10 -0800 (PST)
 From: Alex Markuze <amarkuze@redhat.com>
 To: Xiubo Li <xiubo.li@clyso.com>
 Cc: ceph-devel@vger.kernel.org
-Subject: Re: ceph: flush the caps ceph_write_inode() queues from the delayed work
-Date: Tue, 10 Nov 2026 06:52:40 +0000
-Message-Id: <20261110065240.3170288-1-amarkuze@redhat.com>
-In-Reply-To: <20261107-ceph-write-inode-flush-v1-1-6d414faf9ccd@clyso.com>
-References: <20261107-ceph-write-inode-flush-v1-1-6d414faf9ccd@clyso.com>
+Subject: Re: ceph: write back a cap snap's dirty pages as soon as it is finished
+Date: Tue, 10 Nov 2026 08:37:04 +0000
+Message-Id: <20261110083704.3181507-1-amarkuze@redhat.com>
+In-Reply-To: <20261109-ceph-capsnap-writeback-v1-1-d2130bce504b@clyso.com>
+References: <20261109-ceph-capsnap-writeback-v1-1-d2130bce504b@clyso.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
