@@ -1,79 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
 	t=1794312740;
-	b=J8mjiFErsqDpnHToBVDeI5gT0mHcPjxWVBrihvj/Rk4z89rTmILVLU670vEdhVLyIzK1
-	 8G9wZ8O3zsgJyPwzvJiQyRYMutGWM+yXLeiWQUbbYbThPiYglVzuIIxm9PKgyYF4c3w76
-	 y+QvvY3X5WWgK/my1m7VQ1pSXPYVbzb6l4bP7MZZpAU2G4PuONa8vb5wec3g1s79wO8eA
-	 55XP8KO9hs8HztNW1uVwM73CPGblB9QusfXXkmwCysaC2gAemzQo7r736uN4tnM6olOdd
-	 tfzCDPAjtFfx/FUBHTJ3usvhEgBmGP+wZD2kBkvKilSlF2O9eDs9c94pm8YXxlUoJaQ==
+	b=kaZZbUAaHF29iln1ms0bYCsyYPWb9ig8PeVQ0442N8xFXZ4fwAvwQmmompFmErvsN4+B
+	 OZ+oIQ8XfH3FYT4tFyKBUer8huek+PcnAYPPPfdLru7GcP81duWPahsqPXioWAW+JBHaP
+	 N90QLYQhiiISVl9uf4FS5A3xQlyO1TQPpGS1wg/xcu15R4Iyjuhs03Pd3F5smks4rB18C
+	 Rm6hWp0tnAnHYjTe1IDrLUm5uR8hrt0FmVAaGkq9dNqxCULl1XBJw4WIAh/mUl4Ct4ORn
+	 X1husWiovWOEwW4QTc1fTM20n+P7UrCR+kZUYiqLwDfR0aHqA/otJfmTteBLTztA2fw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794312740;
 	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
 	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=xV5tb8fmJXwJLXpv4sdYEGIbHi2LQtR9BW99TKy5YNE=;
-	b=k2Vg8k6OL7Phok1DXt6LN+qxikc0EDmT8HPBjyuDRjtWg3Cyy128MAbb+OXlx/kVrI5k
-	 f2UI1bCP/+BhuPggkm3jjRyHhpUJ4s81eFFYfYd8/+mimDXQ2x/60/eSEM9ueY+wqfLzN
-	 Gd2MTy0p7/aMfPCwqyg8BXciDqjwRrREHUZVqYnimJg7AncS8tIaQv5V4GxBHk7xNM1Qt
-	 PuNcLPzthqm1xBHATp1RtcTknpmco/5HqLL2uyfE1ntx+iLdBhy77CXLd/aRoP+JW6Eac
-	 dBG9vMDp4kitzpWaJekkaE559vTNVfGiqxwjpuml/wstJvcSH1v2fzk5sULEYN4vEew==
+	bh=N6ZT5KgoCqbaR+xK1d0k1H1Y/tObuY8zUjNBVpIcBxg=;
+	b=jwsIxQl5mPq5l+kMloyG2408cRIAWsTLXahfiinFyFHyNQfGtD2oz20WGVIA5aAAuULa
+	 /8uznXTOTdkH6tVSxSyTU+Pf6lkxSs8ePB5LvDJZwlV1h5F6eMcMDhWtopl5PPxHs89za
+	 wP7P1M20lijrQ5DmlcsiFrxxgGG3rq5oDHZDIuUf2rY0oMPJBBZjNf2APcH9ETDjp3+Od
+	 oYAm8FS9pQhzsuv2bCxM8/bx6gg9KLPXkH477yTiKKasmtk1D5ZYNMmzwQ0ZUs7kUV8eH
+	 tzSoal6CiQjHwePlnzyhKihx1oxU6lxduLRdjBQCQbNcJwP52nSR377unJcwpdva2Lg==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YNtZtt+i;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=d0H2REQe;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A19D6606A331;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC10C606A50C;
 	Tue, 10 Nov 2026 12:12:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YNtZtt+i
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=d0H2REQe
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
 	t=1794312739;
-	b=han8DZ/vzMy1r4si85WFCfNnBhETVuNpfLVITfiADxlZnBblLA5pHXut/xf2YXobC8A5
-	 l/3rSgM8iEL3IlexqfFKhB2WhriDTjfnDAs3tKXh08IhHRDQdr8RPVfihlgj9Kpnb2ABt
-	 z1z99/vC3pYpIBs0AEWcyHj6WQNZ9jTkRt1HnTogb9l//DxrgPWZ4L0KKIHiGOmXKYmyO
-	 tHPDaiMqOR0Vf8XghT3vhj3VOusCPxGzCFPL/wIKbSRUrmMiE++CZL8xHYrZbq5Jr67Kt
-	 K7d00Kc+h4lBUOCMvU+5ArE25cyvnRcEEobcMKpGR7pnezmNOgog/qRBYzCmdbS2MhQ==
+	b=wCFq+ts4gjv0xhaVEHd7c4DGG7A5ESuaLXeF9FNt6CrAMTfS9T8Q5YMdQD3OZiOnQX8s
+	 J+SAU3OOYbNtcC2/v/RppE2bve7NSNWbVSbuAttUOvz4PYaFmk2yF3sF/AgBLZwrgcExt
+	 FIwd6JG+BVUOfeNgHyK5oGyaKU8VryO91btMiwPM1LtFdnVKctKEUcOabDRs3SIYyx6su
+	 X8OvuhMo6c7pfCdVEs9VLkgs11oQWmucFUaadC2i5FMTcCHV2eYUNzjc+kc6CmsAx+TLY
+	 Nz0FNmEWFib50l3kKVPG04oXpseBturVLRJdUF2yMaCOUwOmccY9F7Jtkynj1EhjDgw==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
 	c=relaxed/relaxed; t=1794312739;
 	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
 	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=xV5tb8fmJXwJLXpv4sdYEGIbHi2LQtR9BW99TKy5YNE=;
-	b=eY2tbuV0b3fJzJKQP6my3PAQ4X/LJa5FT/xV7kmP8Sd1wTYA62JHM6mQIzVx2wXWuleQ
-	 XSy81zA8EL5vE+aybzzZAycgvDAmfxuevHhCyAT5hmA7iCmTmZ8e+RB9HFfDPOq4fp28J
-	 Mk+bs9SVNyl2JW13NGxPGwB9z3viiHqu7REAVaMI0MVkzYebv4Tp9fkHWdGAB1utkb5kH
-	 R75KkNzzpRxzOrLxdSMuqviWDdn58atEwKOmZq/dWDq31X8ZfUiK3SynUHk/GIzy/fD4Y
-	 EVX3ev24uzhQ+wDXd8unfxQIW0RfiHwiuhpJE9tn8X+kmlaWz6rZ+kzY1wSxmsegitA==
+	bh=N6ZT5KgoCqbaR+xK1d0k1H1Y/tObuY8zUjNBVpIcBxg=;
+	b=3gtvkovonfBrZ/G7K5Sd9ldkAo9SKjtXLQiUZISdsaa3KN1hUZNHqlkMiLmuFXaUk+1H
+	 GoJFFmZTllBF6KkNJqccOxYh0skyP8pQxtOpthPHFeRnYdmqBXY/t3u6cv9MBYyfry34w
+	 hKjFMwbo02IAdHL67ggiMwx/Jc86esNmeMQh/OIeIZII9bOkBv0TvEK0UBcwkILsFry+c
+	 DEaLRXq7Smkp2SQ4nadTR868KwvYapBBSPU3f3R5fe6IjHR+f2c1jcvLDYuPg99m7yYT/
+	 czXKwRn9lB8J0mbO8UIUhn6vttCFUZDUw+/sdJTpyv7DjY14dmA62vGEQmukZAgjK6A==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id 1DC2E1F008BE;
+	by smtp.kernel.org (Postfix) with ESMTPS id 1DAF21F008A4;
 	Tue, 10 Nov 2026 12:12:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
 	s=k20260515; t=1794312739;
-	bh=xV5tb8fmJXwJLXpv4sdYEGIbHi2LQtR9BW99TKy5YNE=;
+	bh=N6ZT5KgoCqbaR+xK1d0k1H1Y/tObuY8zUjNBVpIcBxg=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
-	b=YNtZtt+i/A7+78cjBYlc96G02c/k5F6gohC3Ox1ZCdEUeB9YcU7Fw41e+x28YV8Yx
-	 +FXFiPBJBQxVNLVfEaZ6lxTLPTXKuiZAU/XVzROV9GJSSyymA5l4AY2tI3x0A7eWBr
-	 JnJGWaCqCFaIvgAN9a8UL4EJvPclK9pnB90TCSRGKCRw25LzWCGdouA3fIVboyYHLu
-	 JA/eyUxXnCE9ELmzHwAJH5yNVTkzV347dUB9gVbjKp1o2HXY4kCeERbmjYvPd8DR76
-	 Buu7YPjN1vcYtjUl4WXmylGNUmChZpvxBWkqUeqK56rIdHqeb0QHmyNOaeXdGN9KIj
-	 w4CJv1iHGbyTg==
+	b=d0H2REQe1lfZeTRhlvO29l2uZIyp1bjBcN/I6cvXT58UAauqbJl2qoH4Saj1MIxqR
+	 lQISmq/dnsYTQRAuNeGc9Dy/ppHdgKbilssxYu6BOrh+9XsjB3iGBQMT3eckOTB2xg
+	 VJu1G4CrCSJ7geD4A59B36mYe9y0J1GzRIVUkQqV8RuDyVtUE71pKHJcCNKrJy+V3J
+	 I/rCnkF3x5ScmcBp4+z2Ck8v5a5lxkt4Y/B3HkPZB+YGUIgF6ekjW54sWo4bihqelt
+	 fFwPnc3QeJ8zhmoLBsnbYrEMDqUK3FQQ0C58a0ANArHGBLudiCymkd+NNYXyByLGh9
+	 18vyOf3/oNnAg==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 8D0C148B35;
+	by lkml.kernel.org (Postfix) with ESMTP id 7BE9B48B02;
 	Tue, 10 Nov 2026 12:12:17 +0000 (UTC)
 From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Tue, 10 Nov 2026 13:11:53 +0100
-Subject: [PATCH v2 2/2] ceph: do not hold a LAZYIO revoke for pages that
- CACHE covers
+Date: Tue, 10 Nov 2026 13:11:52 +0100
+Subject: [PATCH v2 1/2] ceph: don't read a folio in for a partial lazy I/O
+ write
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -84,7 +84,7 @@ List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261110-ceph-lazyio-noread-v2-2-259775214b39@clyso.com>
+Message-Id: <20261110-ceph-lazyio-noread-v2-1-259775214b39@clyso.com>
 References: <20261110-ceph-lazyio-noread-v2-0-259775214b39@clyso.com>
 In-Reply-To: <20261110-ceph-lazyio-noread-v2-0-259775214b39@clyso.com>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
@@ -92,11 +92,11 @@ To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Xiubo Li <xiubo.li@clyso.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1794312723; l=3142;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794312723; l=13386;
  i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=Sl0LxPrKAtHetqfgc/TKI9v6Rg/tbvwlkGhYdSOWqMI=;
- b=oRGjDdp80KOgLWfgVhpTNHFJSYrByfMDdn4K2erJkJtw8iTqyin5FNJq/wsnk1EhjMnqkcBCd
- VsAJDgQNoOZDf7THRBy/8uNArNjHKNPLZ0mMKGpTzRl8ASqfFRim6j3
+ bh=mf+TzKe5S8lPX+bdAkEjsVs+0Las+u8UgN1GLp85M7U=;
+ b=wDuo38QhQCUkEU1SGRWa3vhhnruxiwM9quX0q6ACqlkPjJYZMl3IYZj4+FSpi9zI5L+k0jX4a
+ OFsVf9DiCaaB4laHHRrXowPtbrmaQAU/RwT1jOJh2PqAUlVrGbWb2/w
 X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
  pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
 X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
@@ -107,74 +107,361 @@ Content-Transfer-Encoding: 7bit
 
 From: Xiubo Li <xiubo.li@clyso.com>
 
-ceph_adjust_caps_used_for_lazyio() reports LAZYIO as used in place of
-CACHE or BUFFER when that cap is not issued.  It does so even when the
-used set does not contain the cap at all: with BUFFER not issued, a
-file that only has clean pages cached (CACHE used and still issued)
-is reported as using LAZYIO too.
+A buffered write into part of a folio that is not uptodate reads the
+folio from the OSDs first, synchronously, under the inode's i_rwsem.
+With lazy I/O that read buys nothing: only the dirty range of such a
+folio goes out on writeback, and the bytes around it may be another
+client's data, stale here anyway.  But it serialises every writer of
+the file on this client behind one OSD round trip per unaligned edge.
 
-When the MDS then revokes LAZYIO and leaves CACHE issued, e.g. from a
-writer that has closed the file, (revoking & used) stays non-zero.
-handle_cap_grant() checks the caps with CHECK_CAPS_NOINVAL and there
-are no dirty pages to write back, so nothing acks the revoke until the
-delayed cap check runs, up to caps_wanted_delay_max (60 s) later.  The
-MDS request that needed the revoke, such as a getattr from another
-client, waits that long.
+Several processes per client writing small unaligned records of one
+shared file spend most of their time this way: in a 60 s sample of 16
+writers on 4 clients, 75% of the time in ceph_write_iter() went to
+waiting for i_rwsem, and 88% of the time it was held went to these
+reads.
 
-Only move a use to LAZYIO when it is in the used set and its cap is
-not issued.
+Leave such a folio not uptodate instead, with only its dirty range
+valid.  A later write next to the range widens it as before; one apart
+from it writes the folio back first, as before.  Anything that reads
+the folio (read_folio, or netfs_write_begin() for a write that is not
+lazy) writes it back first, so it is read whole from the OSDs, and the
+writeback completion no longer warns about it.  Encrypted inodes and
+inodes with fscache keep reading the folio.
 
-Reproducer, 5 lazyio mounts: 4 create ~174k files of 3901 bytes in
-one directory, a 5th lstats them all, then a 4th mount opens and
-writes 5000 files of the 1st one.  Mean of 4 runs (open+write: 2):
+Such a folio always gets its dirty range, even where the folio looks
+pinned for DMA: it was never mapped, so it cannot be, and a refcount
+that only looks like a pin must not send its unread bytes out.  The
+bytes of a short copy into it are kept and reported, as on an uptodate
+folio: they may already have replaced bytes of an earlier write in the
+dirty range, and a retry that writes the folio back would send them.
 
-+--------------------------------+---------+---------+
-| metric                         |    base |   patch |
-+--------------------------------+---------+---------+
-| unacked revokes after lstat    |    7355 |      10 |
-| lstat walk time (s)            |   27.69 |   25.19 |
-| open+write p50 (ms)            |    2.70 |    2.89 |
-| open+write p99 (ms)            |    3.26 |    3.53 |
-| open+write max (ms)            |  5325.8 |    51.9 |
-| open+write calls > 1 s         |       1 |       0 |
-+--------------------------------+---------+---------+
+16 writers on 4 lazyio mounts, each writing 47008-byte records
+interleaved with the others' into one shared file (IOR, -t 47008
+-b 47008), mean of 2 runs each, data read back and verified:
 
-In a parallel walk that stats every file with 4 clients and 3 active
-MDS ranks, right after other lazy I/O clients wrote the files, the walk
-no longer stalls on such revokes: its worst time over the runs went
-from 90.2 s to 42.4 s, and its mean from 51.7 s to 41.5 s.
++--------------------+-------+---------+---------+---------+
+| metric             | unit  |    base |   patch | speedup |
++--------------------+-------+---------+---------+---------+
+| write bandwidth    | GiB/s |   0.272 |   0.710 |   2.61x |
+| data check         |       |    PASS |    PASS |         |
++--------------------+-------+---------+---------+---------+
 
-Fixes: 488ffbdd99d8 ("ceph: add 'lazyio' mount option to kclient")
+write() latency in ms:
+
++-------+-----+-----+-----+-------+---------+-----------+------+
+|       | p50 | p90 | p95 | p99   | p99.9   | p99.99    | max  |
++-------+-----+-----+-----+-------+---------+-----------+------+
+| base  | 0.5 | 3.1 | 3.5 | 5.5   | 131-262 | 1049-2097 | 8314 |
+| patch | 0.2 | 0.2 | 0.2 | 16-33 | 66-131  | 524-1049  | 6326 |
++-------+-----+-----+-----+-------+---------+-----------+------+
+
+p99 is higher because the writers now reach the dirty limit: a writer
+throttled in balance_dirty_pages() holds i_rwsem, and the other writers
+of the file wait for it.
+
+Writes that cover whole folios, and writes that do not use lazy I/O,
+take the same path as before.
+
 Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
- fs/ceph/caps.c | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+ fs/ceph/addr.c | 179 ++++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 165 insertions(+), 14 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index aca09351a094..5669e458f287 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1112,11 +1112,18 @@ static inline int ceph_adjust_caps_used_for_lazyio(struct ceph_inode_info *ci,
- 	 */
- 	if ((issued & CEPH_CAP_FILE_LAZYIO) && !__ceph_all_opens_lazy(ci))
- 		return used;
--	if (!(issued & CEPH_CAP_FILE_CACHE)) {
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index b0f06d21ca72..be30911188d9 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -176,7 +176,8 @@ static void ceph_folio_dirty_whole(struct folio *folio)
+ /*
+  * Note a write of @copied bytes at @pos into @folio, which it has just
+  * dirtied; @was_dirty: the folio already was dirty before; @lazy: the
+- * write came through a lazy I/O open.
++ * write came through a lazy I/O open; *@prealloc: a range to use instead
++ * of allocating one, taken (set to NULL) if used.
+  *
+  * Only a lazy I/O write starts a range: without lazy I/O this client
+  * holds the buffer cap, the rest of the page is current, and it may go
+@@ -187,7 +188,8 @@ static void ceph_folio_dirty_whole(struct folio *folio)
+  */
+ static void ceph_folio_note_write(struct inode *inode, struct folio *folio,
+ 				  bool was_dirty, loff_t pos,
+-				  unsigned int copied, bool lazy)
++				  unsigned int copied, bool lazy,
++				  struct ceph_dirty_range **prealloc)
+ {
+ 	struct ceph_dirty_range *dr = __ceph_dirty_range(folio->private);
+ 	unsigned int start = offset_in_folio(folio, pos);
+@@ -211,7 +213,10 @@ static void ceph_folio_note_write(struct inode *inode, struct folio *folio,
+ 		return;
+ 	if (!start && end >= folio_size(folio))
+ 		return;
+-	dr = kmalloc_obj(*dr, GFP_NOFS);
++	dr = *prealloc;
++	*prealloc = NULL;
++	if (!dr)
++		dr = kmalloc_obj(*dr, GFP_NOFS);
+ 	if (!dr)
+ 		return;		/* then it all goes out */
+ 	dr->snapc = folio_get_private(folio);
+@@ -1287,7 +1292,8 @@ static void writepages_finish(struct ceph_osd_request *req)
+ 				fscrypt_free_bounce_page(osd_data->pages[j]);
+ 				osd_data->pages[j] = &folio->page;
+ 			}
+-			WARN_ON(!folio_test_uptodate(folio));
++			WARN_ON(!folio_test_uptodate(folio) &&
++				!__ceph_dirty_range(folio->private));
+ 
+ 			if (atomic_long_dec_return(&fsc->writeback_count) <
+ 			     CONGESTION_OFF_THRESH(
+@@ -2281,8 +2287,12 @@ ceph_find_incompatible(struct folio *folio)
+ 	return NULL;
+ }
+ 
+-static int ceph_netfs_check_write_begin(struct file *file, uoff_t pos, unsigned int len,
+-					struct folio **foliop, void **_fsdata)
++/*
++ * Wait until the locked *@foliop may be dirtied in the current snap
++ * context.  If that means dropping it, *@foliop is cleared and 0 (or an
++ * error) returned: the caller grabs the folio again and rechecks it.
++ */
++static int __ceph_check_write_begin(struct file *file, struct folio **foliop)
+ {
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+@@ -2312,6 +2322,94 @@ static int ceph_netfs_check_write_begin(struct file *file, uoff_t pos, unsigned
+ 	return 0;
+ }
+ 
++/*
++ * Unlock a dirty folio that is not uptodate, and write it back: only its
++ * dirty range is valid (see ceph_write_begin_noread()), so it has to go
++ * out before the folio is read.
++ */
++static int ceph_writeback_partial_folio(struct folio *folio)
++{
++	struct address_space *mapping = folio->mapping;
++	loff_t start = folio_pos(folio);
++	loff_t end = start + folio_size(folio) - 1;
++
++	folio_unlock(folio);
++	return filemap_write_and_wait_range(mapping, start, end);
++}
++
++static int ceph_netfs_check_write_begin(struct file *file, uoff_t pos, unsigned int len,
++					struct folio **foliop, void **_fsdata)
++{
++	if (!folio_test_uptodate(*foliop) && folio_test_dirty(*foliop)) {
++		struct folio *folio = *foliop;
++		int r;
++
++		/* netfs_write_begin() would read it over the dirty range */
++		*foliop = NULL;
++		r = ceph_writeback_partial_folio(folio);
++		folio_put(folio);
++		return r;
++	}
++	return __ceph_check_write_begin(file, foliop);
++}
++
++/*
++ * A lazy I/O write into part of a folio that is not uptodate: grab the
++ * folio without reading it from the OSDs first.  Its other bytes may be
++ * another client's data here, so they would be stale anyway, and only
++ * the dirty range of the folio goes out on writeback.  The folio stays
++ * not uptodate, with only its dirty range valid, until it is written
++ * back or ceph_read_folio() writes it back to read it whole.
++ *
++ * *@drp is the dirty range for ceph_write_end(), allocated here.
++ * Returns 1 with *@foliop locked, 0 if the folio has to be read as
++ * usual, or an error.
++ */
++static int ceph_write_begin_noread(struct file *file,
++				   struct address_space *mapping, loff_t pos,
++				   unsigned int len, struct folio **foliop,
++				   struct ceph_dirty_range **drp)
++{
++	struct inode *inode = mapping->host;
++	struct folio *folio;
++	size_t offset;
++	int r;
++
++	if (IS_ENCRYPTED(inode) || ceph_is_cache_enabled(inode))
++		return 0;
++	if (!*drp) {
++		*drp = kmalloc_obj(**drp, GFP_NOFS);
++		if (!*drp)
++			return 0;
++	}
++	for (;;) {
++		folio = __filemap_get_folio(mapping, pos >> PAGE_SHIFT,
++					    FGP_WRITEBEGIN,
++					    mapping_gfp_mask(mapping));
++		if (IS_ERR(folio))
++			return PTR_ERR(folio);
++		offset = offset_in_folio(folio, pos);
++		if (folio_test_uptodate(folio) ||
++		    (!offset && len >= folio_size(folio))) {
++			folio_unlock(folio);
++			folio_put(folio);
++			return 0;
++		}
++		r = __ceph_check_write_begin(file, &folio);
++		if (r < 0) {
++			if (folio) {
++				folio_unlock(folio);
++				folio_put(folio);
++			}
++			return r;
++		}
++		if (folio)
++			break;
++	}
++	*foliop = folio;
++	return 1;
++}
++
+ static bool ceph_file_is_lazy(const struct file *file)
+ {
+ 	return ((struct ceph_file_info *)file->private_data)->fmode &
+@@ -2348,22 +2446,32 @@ static int ceph_write_begin(const struct kiocb *iocb,
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	bool lazy = ceph_file_is_lazy(file);
++	struct ceph_dirty_range *dr = NULL;
++	bool lazy = ceph_file_is_lazy(file), noread = false;
+ 	int r;
+ 	struct ceph_journal_info __ji;
+ 
+ 	ceph_blog_enter(fsc, &__ji);
+ 
++	*fsdata = NULL;
+ 	for (;;) {
+ 		struct folio *folio;
+ 		loff_t fpos, fend;
+ 
+-		r = netfs_write_begin(&ci->netfs, file, inode->i_mapping, pos,
+-				      len, foliop, NULL);
++		r = 0;
++		if (lazy)
++			r = ceph_write_begin_noread(file, mapping, pos, len,
++						    foliop, &dr);
++		if (!r)
++			r = netfs_write_begin(&ci->netfs, file,
++					      inode->i_mapping, pos, len,
++					      foliop, NULL);
+ 		if (r < 0) {
++			kfree(dr);
+ 			ceph_blog_exit(&__ji);
+ 			return r;
+ 		}
++		noread = r > 0;
+ 		folio = *foliop;
+ 		if (!lazy || !ceph_folio_write_leaves_gap(folio, pos, len))
+ 			break;
+@@ -2380,12 +2488,19 @@ static int ceph_write_begin(const struct kiocb *iocb,
+ 		*foliop = NULL;
+ 		r = filemap_write_and_wait_range(mapping, fpos, fend);
+ 		if (r < 0) {
++			kfree(dr);
+ 			ceph_blog_exit(&__ji);
+ 			return r;
+ 		}
+ 	}
+ 
+-	folio_wait_private_2(*foliop); /* [DEPRECATED] */
++	if (noread) {
++		/* not read: ceph_write_end() starts or widens the range */
++		*fsdata = dr;
++	} else {
++		kfree(dr);
++		folio_wait_private_2(*foliop); /* [DEPRECATED] */
++	}
+ 	WARN_ON_ONCE(!folio_test_locked(*foliop));
+ 	ceph_blog_exit(&__ji);
+ 	return 0;
+@@ -2404,7 +2519,9 @@ static int ceph_write_end(const struct kiocb *iocb,
+ 	struct inode *inode = file_inode(file);
+ 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
+ 	struct ceph_client *cl = ceph_inode_to_client(inode);
++	struct ceph_dirty_range *dr = fsdata;
+ 	bool check_cap = false, was_dirty, lazy = ceph_file_is_lazy(file);
++	bool noread = dr;
+ 	struct ceph_journal_info __ji;
+ 
+ 	ceph_blog_enter_gfp(fsc, &__ji, GFP_ATOMIC);
+@@ -2412,7 +2529,15 @@ static int ceph_write_end(const struct kiocb *iocb,
+ 	boutc(cl, "%llx.%llx file %p folio %p %d~%d (%d)\n", ceph_vinop(inode),
+ 	      file, folio, (int)pos, (int)copied, (int)len);
+ 
+-	if (!folio_test_uptodate(folio)) {
 +	/*
-+	 * Only a use that the issued caps no longer cover moves to LAZYIO.
-+	 * Clean pages under an issued CACHE are not using LAZYIO, so a
-+	 * revoke of LAZYIO that leaves CACHE issued must not count them;
-+	 * otherwise it is never acked from handle_cap_grant() and waits
-+	 * for the delayed cap check.
++	 * A folio that ceph_write_begin_noread() did not read has only its
++	 * dirty range valid, and keeps it so: the bytes copied are valid
++	 * too, even on a short copy, and are accepted like on an uptodate
++	 * folio.  Refusing them would leave them in the dirty range anyway,
++	 * replacing bytes of an earlier write, and a writeback before the
++	 * retry would send them although the write reported none of them.
 +	 */
-+	if ((used & CEPH_CAP_FILE_CACHE) && !(issued & CEPH_CAP_FILE_CACHE)) {
- 		used &= ~CEPH_CAP_FILE_CACHE;
- 		used |= CEPH_CAP_FILE_LAZYIO;
++	if (!noread && !folio_test_uptodate(folio)) {
+ 		/* just return that nothing was copied on a short copy */
+ 		if (copied < len) {
+ 			copied = 0;
+@@ -2459,16 +2584,26 @@ static int ceph_write_end(const struct kiocb *iocb,
+ 		 * and one that finished before found it clean and dirtied it
+ 		 * as a whole.  A pin taken from now on write-faults first, in
+ 		 * ceph_page_mkwrite(), which makes the range whole.
++		 *
++		 * A folio that was not read in cannot be pinned: it is not
++		 * uptodate, so it was never mapped, and a fault reads it
++		 * first, under the folio lock held here.  It must get its
++		 * range whatever folio_maybe_dma_pinned() says (it guesses
++		 * from the refcount of a small folio), or its bytes that
++		 * were never read would go out.
+ 		 */
+-		if (lazy && folio_maybe_dma_pinned(folio))
++		if (lazy && !noread && folio_maybe_dma_pinned(folio))
+ 			lazy = false;
+ 		folio_mark_dirty(folio);
  	}
--	if (!(issued & CEPH_CAP_FILE_BUFFER)) {
-+	if ((used & CEPH_CAP_FILE_BUFFER) && !(issued & CEPH_CAP_FILE_BUFFER)) {
- 		used &= ~CEPH_CAP_FILE_BUFFER;
- 		used |= CEPH_CAP_FILE_LAZYIO;
- 	}
+ 	if (was_dirty || lazy)
+ 		ceph_folio_note_write(inode, folio, was_dirty, pos, copied,
+-				      lazy);
++				      lazy, &dr);
++	WARN_ON_ONCE(!folio_test_uptodate(folio) &&
++		     !__ceph_dirty_range(folio->private));
+ 
+ out:
++	kfree(dr);
+ 	folio_unlock(folio);
+ 	folio_put(folio);
+ 
+@@ -2479,8 +2614,24 @@ static int ceph_write_end(const struct kiocb *iocb,
+ 	return copied;
+ }
+ 
++/*
++ * A dirty folio that is not uptodate has only its dirty range valid (see
++ * ceph_write_begin_noread()): write it back before reading it whole.
++ */
++static int ceph_read_folio(struct file *file, struct folio *folio)
++{
++	int r;
++
++	if (unlikely(folio_test_dirty(folio))) {
++		/* the caller looks the folio up again */
++		r = ceph_writeback_partial_folio(folio);
++		return r < 0 ? r : AOP_TRUNCATED_PAGE;
++	}
++	return netfs_read_folio(file, folio);
++}
++
+ const struct address_space_operations ceph_aops = {
+-	.read_folio = netfs_read_folio,
++	.read_folio = ceph_read_folio,
+ 	.readahead = netfs_readahead,
+ 	.writepages = ceph_writepages_start,
+ 	.write_begin = ceph_write_begin,
 
 -- 
 2.53.0
