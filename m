@@ -1,99 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794438385;
-	b=O9mM1Ez96Wa8/G2VGd5Ok4k3GJUreB/5qEU2YFUuuL6hgfK7AnQFmtZsdKmEM528KKgA
-	 c2ShSopbfRexojOApIfXvDDSAiCNRdtLKc4aD4bI3v1HuHic+3iTotu/G61TQc1/nfNFs
-	 ASmPLX76yXuUFPn4ilUzmr/aoWZAjNg5qu+uNVKSEiN1p9rQ8OTMKicLk94ZZEXhNcFID
-	 U5OPqgWkbnmgQovn5m8Rhc4xiXHfrxi1bpgI4NurdRtoDRaad9tVBvUs6vYOpoz9NOOf0
-	 sgWc4+ZXEqv7jTjOw5VWKhoKAWTfghv3KUCSGzoWsizNLTXzKFAzqDEnPhAFmcyJFdA==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794438385;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
-	 MIME-Version:References:In-Reply-To:From:Date:X-Gm-Features:
-	 Message-ID:Subject:To:Cc:Content-Type;
-	bh=UBAHlhDi5WQPAtUaYtX9EVzqNVw4F9k31X3Owyz2mLA=;
-	b=r1YF/PR5Wwjn9/VyrzvSlWLjIDK4MEV3lrc0T4rivO+Hex/Lgg8CAVlww37DSeyOxxX7
-	 1Ch5mFpPJJts4OCvuA0n24jEiDJbiPePzzQQKvpjybh7Xa9p0SOSYhiP6o6Cv1h4XoPsm
-	 qu41VwvXmlMi1ltzSp7PdfO/tDNB19xmkEqfUIJYGHgnTqRemXL/RFjFMjWJnWAbdcYWs
-	 KzQ1UjLAscpPMNKCjgFb+5TdYu569P9NUFenkwYBOaSreclNyKUiu4BZDnCSa2P/OkFxQ
-	 ovf6bUr/U01SpgZoSzohSR2GHy5GbiGkMRGtQAu2zh7p21aNzsEFPGSrVZvXUehzMUQ==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=clyso.com;
-	spf=pass smtp.mailfrom=clyso.com;
-	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=nuU7BGkg;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794441541;
+	b=jdKHX0m/0VnHP/6oKRGzIyAp0dVa9qyBD+5wC+2y2ph8Sbdn0s7sxU+VFxiVKev8hRKA
+	 LqTfzYYaVDpTKEsAf87UjkTb0ngk87OptA7N/sWw4cLut9EqQc41U/L1uMXljRfe6z2DK
+	 3sH92xZGCra/A7kIW7wBKv80qFBf+9pO4WgUdHEkemb5TSXi8YEldZFPK+vtfSkQ52HoD
+	 L4t5phZS3V26huhhJrgq0iEJ7CNQ5bQj6QD4x/xYoan9QTJQt9guYgcLcCtCj5houaNQX
+	 E/tBxZa8i7afhpukLP7EOBvniDpaej4dUXPOaxhk+iZMqNNca1xnFbEiTYoMdeeR/sw==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794441541;
+	h=Received:DKIM-Signature:Received:X-Gm-Message-State:X-Received:
+	 MIME-Version:References:In-Reply-To:From:Date:
+	 X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:Subject:To:Cc:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=OtBub8b20bbqMuFkyJTcKI4DqlyTDvoNk2aq53vrnfc=;
+	b=ESzF3XxWUWgsy6USWMdAP96FpepnsqPNhY3sCN2VnJg/xu4uPl21eKiflNS1Jh/FsZbN
+	 XFx6K4w7Svy1bOY7GK9p9nMbAJfLIjtx0djTqPBvxTvywDMxN6l+4zrQE6KL4N8isz/8e
+	 s0Npjq8uxYsiZeyEQXBlwiULSzLymr2vcQfL5VLoLbgX0xtV9aqxZ8hTMgMIDmYMbNXFF
+	 EXSRtHQSdT9q3Zmzj3SH9nFo2qi6RVwpIoQBSZrFjDtAvXVBTfLgtr6TGPSAcTZ+++04x
+	 nNEuj0uY/TW8DOzaF7zyO6IVTZStfri6UUPJQ2LPNSSzERUb2q8itjojwsU45RHh5Ng==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EjthG5G1;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F1AA606A31C
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 23:06:22 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5F1AA606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2638606A321
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 23:59:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=nuU7BGkg
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-6b6f42095bcso4918554a12.3
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 15:06:22 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1794438381; cv=none;
-        d=google.com; s=arc-20260327;
-        b=nVKxfhBGWrar1Tv9t59yHy+U0tMtHjRn9mGPedhYmqKqSbSwHqI898YQ/uTkmGykXv
-         Qrm2TjMtm+QJfIOm5dGEgRv93kwB+hSkPXaa0Dyt7NIbqPNfPtKKNKm8gHFc6OlAac9a
-         ExjYZEnC+gCZSjZkK+c8Si0BwI0rW4PM0e2elMUdHZ5eWSWyeDO2jO5FjHCslyf+ocpi
-         xiCfDlrwOvwUKjyhLurVsM4qbQUOvRH4uownmw7fmrd57iLrcgBkGxYcvuUzNCK8gFtp
-         mvSQg0uzWnJKlI1sx1G7rY7Np3W5nY8EKZo3MzTIghwuz5wygbgBoXxjpu9PgJIl7bIl
-         Ruaw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=UBAHlhDi5WQPAtUaYtX9EVzqNVw4F9k31X3Owyz2mLA=;
-        fh=t/JWAUz2lQQ1VLxwwSo+DMlRmbr00crS0hAvTc8qGIo=;
-        b=aLIc1jUs+W9Lmor/FopLirplKlAs7Dg03HPSi760q13impzDD052YSHcuV2HCmWUTI
-         brCeL34kj688brAwdJPJge7rDzg9e7UwWxwIMiB+d+Ykp+uNYucE7+T03Fj2hV3Allae
-         ycKuDxO8cLH2jaAZhWKthaKCr2KleYiFGx2EQ3NyulLX8Q6VpsAW6NU0KY9IlE//jaJl
-         rYNsh1en+NR9Xa1xRagOVA5WPE7BYzP3e79XYsjX3QrxIGGl8rwDAvNiBnUN8V7kN+9I
-         /jRqYoKVw2AIxi179buq5neLwbkPveHI75FMyhW4xMGQFAAGw8ImsdCe1/nmTE1rve2k
-         B9fA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1794438381; x=1795043181; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=UBAHlhDi5WQPAtUaYtX9EVzqNVw4F9k31X3Owyz2mLA=;
-        b=nuU7BGkgeaBonrt8SiDqzF42Ei7Sj9iRF0pQx0xNoYjkaeJfIUegbcAFZP23/jDlfn
-         f/TjmBk0tZ3jzNTo61K/YOkV5OaIT+VENaOUS0OB1yhiK3HjlARMEsdbeT+1WdrTDABo
-         LLGSdkG49e0VBARKd5QqZcAM2BpayfoI5AjvoIrQ8MK7xlN7rY6sIE4+yZgRrwxNQVuq
-         Od6EaykX2Bp647jWK/q0Wt2YGhhclT2esYQzGg/JMQ7IBeQExgEEpMH+CVwbxjggC8pw
-         D7XXn3A1OcIVpxsb+Gv4edqs4ke2WWLGHfLLcW+jXrEi1nB+dhxN3j+3XIBhD0uNCvY2
-         AYzA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794438381; x=1795043181;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=UBAHlhDi5WQPAtUaYtX9EVzqNVw4F9k31X3Owyz2mLA=;
-        b=2QvNn+XLRy1caRtbmAaJitUrpFUquWvPB3Zt4WLEGi+WjILbSX4zvniqZF1wQpNAs2
-         9CIHwBM9V2mlfXYChGMPLXSAzr0M5CDlcCXcwyf8+laZvsjHbWIYRBBdnyW5IE3Xp15a
-         dbgzjH+L8qcTaz1o3au+dCNIb88IEp+bswgqo57qRr+eYnymDMTEaq/R+evemw/WAlms
-         48aVRlA1/8knunlijy4rMZ/ZX56I34Q7oP6cyd6Ml34HEMUzkQuYuEVsf4MtXurw7gVR
-         92wQNkXylw+lV2oOVx6emIZi9IF33qbmfVgCyI7xvCtQN5o+2IUya5R4G5rZGDabBiG+
-         E+ew==
-X-Forwarded-Encrypted: i=1; AL+hErFnhETYsROmwPxMvWXHe9vckOUfG0JvJbmrhDI6kyQLXEUirDaAE3b4MMfyFGuwzDD8fHf+qes49WQe@vger.kernel.org
-X-Gm-Message-State: APuU4Z8M5w9eK79ZXitaYTAh0Idig0ZlWarYRYVRH58zT1kI8O9LrBnK
-	SBtG+ILbeCC2vL2+kPckcljU4w52jDR8D0inw0LlwzqsM9MIsAVqOJQYFISEoOQAFFkD0F1y8A6
-	/yB8R/F2IrESP2vKyeKokZp/5XhIgvJcEoVrBebD/0oFFpvNuG0+3CUHkSw==
-X-Gm-Gg: AYBFou3qx8OiY8f8ZAEbK9V/RMWp1SDwRBwDR8uC2kDdJrQtLh2g7n39jw/Lo0jzo/k
-	AlDGQAXrRRQuA9gUC4PwilzgPg+40E9TPFMeLgyh3zT4O1B5YrIzOe2NqpFKoZnknXhunqqQFrb
-	Hz5EfebNfPwQ8tNnKZs02s5NqS2EQjhw92w07Iuty8Qqo82uCQfw3lo3PQsPAHSifA4ucWQpmMI
-	vrtlCDvNdbVzW/OpXGgQPjdLSxq/c3SbQ4tL/bum1ZZYylQt/jTxSYlJCXGbpSyZTQv2V7WMxzW
-	fCEITiXjvrcgNeRg9+u198/z62IoRM4mnwMzRHKbtmzHb0rirVlqhN6VZtNFwUJwMeq9ttf/ezl
-	UBy++Jb3bqfzFxv+GzQcKx1UEgT3tSlEiqPtcbMo=
-X-Received: by 2002:a05:6402:2110:b0:6b4:1037:2b87 with SMTP id
- 4fb4d7f45d1cf-6b7778161f1mr2989176a12.31.1794438381548; Wed, 11 Nov 2026
- 15:06:21 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=EjthG5G1
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 775D01F00A05
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 23:59:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794441540;
+	bh=OtBub8b20bbqMuFkyJTcKI4DqlyTDvoNk2aq53vrnfc=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=EjthG5G11Gx7GyWU5tsLdVpO4clAZzkK9SxTO4uY64NKPvdFri8srDZ0FtNHmtLx2
+	 wWb2EJfUrAfaPkPJ9F1V3xoS6403dT9Bm/XnEPf3JRrrkEIxSPXyNLdnT8MlBxT3bP
+	 vGzR62gI5GVqySisuIX5yQ0spORmE4H3jgUbqjRqtCtEhnkbcWYCWLd8zanJymPv86
+	 ICSelHe16P9XPkCUFIyc610BA39Xtn/gQCQKUVX90lKB0V9GB9jJmzGOdqu+mmiCCl
+	 6Tu0LoSRzYdow6JGyY1ydP1n+CU/AAK6m4CbIuauh4KBI814CWfZ4DzyWM4D74rnyP
+	 OwKjUcVUmXx5A==
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5be47aa555cso3377018e87.3
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 15:59:00 -0800 (PST)
+X-Gm-Message-State: APuU4Z/K6tM1f+qoz7Sqhtoass8TMmZyGDZMofCsWO6EcDT2kcc0pEro
+	XBkkcU7VMdKQuLMdiQ8FCbEID9kgtJHBxaxRrFkAlNTYCn5tLmZ9wD1gGlvxi096/xRxaxIHsi1
+	eGcDwWfAWhRbksyX5vs7SN3HqesSgQ6g=
+X-Received: by 2002:ac2:5691:0:b0:5c1:50f6:9b84 with SMTP id
+ 2adb3069b0e04-5c15d7a209amr1132025e87.58.1794441539234; Wed, 11 Nov 2026
+ 15:58:59 -0800 (PST)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -103,174 +58,127 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261111113029.959595-1-max.kellermann@ionos.com>
-In-Reply-To: <20261111113029.959595-1-max.kellermann@ionos.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Thu, 12 Nov 2026 00:06:09 +0100
-X-Gm-Features: AclHuK9aye7AVhvzAeKWqenEAyLYJI-Y8Iege0JrFoT70qCLwujofRbt6K_kSvU
-Message-ID: <CAOJNxR+fkE3LigjhojZzk-XOpOBpT-2mqe5ky5ho91TmyFmpxw@mail.gmail.com>
-Subject: Re: [PATCH] ceph: fix d_lock leak in debugfs mdsc_show()
-To: Max Kellermann <max.kellermann@ionos.com>
-Cc: idryomov@gmail.com, amarkuze@redhat.com, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+References: <20261110201025.255594-1-idryomov@gmail.com> <20261110201025.255594-2-idryomov@gmail.com>
+In-Reply-To: <20261110201025.255594-2-idryomov@gmail.com>
+From: Xiubo Li <xiubli@kernel.org>
+Date: Thu, 12 Nov 2026 00:58:46 +0100
+X-Gmail-Original-Message-ID: <CAOuZWzwY5woDuD+L_a2=h5hR++Ro3onSazUV5_1L-Kur+Hy1Vg@mail.gmail.com>
+X-Gm-Features: AclHuK85uOSENTtM5gvAwoqfusVpa_QkpNCW9asXOFTOVMsp1U2QH746KtpcihY
+Message-ID: <CAOuZWzwY5woDuD+L_a2=h5hR++Ro3onSazUV5_1L-Kur+Hy1Vg@mail.gmail.com>
+Subject: Re: [PATCH 1/3] libceph: replace lreq->ping_sent with req->r_start_stamp
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Dongsheng Yang <dongsheng.yang@linux.dev>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Max,
+Hi Ilya
 
-Good catch.
+This patch lgtm. Tested it and works well.
 
-I reproduced this on a KASAN + lockdep 7.4-rc1 kernel against a vstart
-cluster.  The real window is only a few instructions wide, because
-ceph_invalidate_dentry_lease() takes dn->d_lock right after d_move(),
-so I widened it with a test-only udelay(2000) in ceph_fill_trace()
-between the lease invalidation and the r_dentry/r_old_dentry swap,
-plus a 50us delay inside the d_lock sections of mdsc_show().  The load
-was 4 tasks doing rename() back and forth while 2 tasks read the
-debugfs "mdsc" file in a loop.
-
-Without the patch it locks up within seconds.  The check in mdsc_show()
-fires first:
-
-  mdsc_show tid 229 op 4612 r_dentry changed ffff888209d8acb0 ->
-ffff8882939b92e8 while d_lock held
-
-and then:
-
-  watchdog: BUG: soft lockup - CPU#4 stuck for 26s! [cat:30609]
-   _raw_spin_lock+0x73/0x80
-   lockref_get+0xd/0x50
-   ceph_mdsc_build_path+0x23e/0x1560 [ceph]
-   mdsc_show+0x242/0xab0 [ceph]
-   seq_read_iter+0x2e9/0x12d0
-
-The ceph-msgr worker is stuck in handle_reply() waiting for
-mdsc->mutex, which the reader holds while it spins.  So this is the
-same leaked d_lock as in your report, with the two CPUs arriving in the
-other order.
-
-With the patch and the same delays, 120s and ~6300 renames went through
-ceph_fill_trace() with no warnings.  bpftrace showed mdsc_show() taking
-1-8ms, so the readers really did wait out the window on r_fill_mutex.
-A further 180s of renames plus fsstress without the test delays was
-also clean.  lockdep stayed enabled throughout, recorded the new
-&mdsc->mutex -> &req->r_fill_mutex dependency and reported nothing.
-
-One side effect, not a problem in my view: a debugfs reader now waits
-for any reply that is being filled (including readdir_prepopulate on a
-large directory) while it holds mdsc->mutex, so it can stall request
-handling on that client for that long.  The abort paths you listed
-already do the same, and this is debugfs, so I think it is fine.  If
-anyone cares, mutex_trylock() with a placeholder in the output would
-avoid it.
-
-Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
 Tested-by: Xiubo Li <xiubo.li@clyso.com>
+Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
 
-Thanks
-- Xiubo
+Thanks,
+Xiubo
 
-On Wed, 11 Nov 2026 at 12:30, Max Kellermann <max.kellermann@ionos.com> wrote:
+Ilya Dryomov <idryomov@gmail.com> =E4=BA=8E2026=E5=B9=B411=E6=9C=8810=E6=97=
+=A5=E5=91=A8=E4=BA=8C 21:11=E5=86=99=E9=81=93=EF=BC=9A
 >
-> mdsc_show() walks the request tree under `mdsc->mutex` and prints the
-> request's dentries like this:
+> Eliminate lreq->ping_sent by making more use of req->r_start_stamp.
+> This requires setting req->r_start_stamp outside of account_request()
+> but it only has one other caller apart from send_linger_ping().
 >
->   spin_lock(&req->r_old_dentry->d_lock);
->   seq_printf(...);
->   spin_unlock(&req->r_old_dentry->d_lock);
->
-> (same for `r_dentry`).  The pointer is loaded again for the
-> unlock, but ceph_fill_trace() can change it in the meantime:
-> ceph_fill_trace() runs with req->r_fill_mutex held, but not
-> mdsc->mutex, and:
->
-> - after d_move() for a rename, it swaps `r_dentry` and `r_old_dentry`
-> - splice_dentry() replaces `r_dentry` with the spliced alias and drops
->   the request's reference to the old dentry
-> - a lookup without a locked parent assigns a new `r_dentry`
->
-> If an unsafe rename reply is being processed while mdsc_show() is
-> between spin_lock() and spin_unlock(), mdsc_show() unlocks the other
-> dentry, and the `d_lock` of the one it locked is never released.  The
-> next attempt to lock it spins forever.  I have seen this on a
-> production server, where our monitoring reads the debugfs "mdsc" file
-> periodically:
->
->  watchdog: BUG: soft lockup - CPU#67 stuck for 48s! [kworker/67:2:3746175]
->  Workqueue: ceph-msgr ceph_con_workfn
->  RIP: 0010:queued_spin_lock_slowpath+0x4a/0x240
->  Call Trace:
->   <TASK>
->   ceph_fill_trace+0x7a4/0x910
->   mds_dispatch+0x9f4/0x1ac0
->   ceph_con_process_message+0x66/0x80
->   ceph_con_v1_try_read+0x392/0x17e0
->   ceph_con_workfn+0x329/0x590
->   process_one_work+0x146/0x2b0
->   worker_thread+0x182/0x2f0
->   kthread+0xe4/0x1d0
->
->  watchdog: BUG: soft lockup - CPU#55 stuck for 49s! [cm4all-kernel-e:16346]
->  RIP: 0010:queued_spin_lock_slowpath+0x1a2/0x240
->  Call Trace:
->   <TASK>
->   lockref_get+0x47/0x60
->   ceph_mdsc_build_path.part.0+0x85/0x2a0
->   mdsc_show+0x239/0x3e0
->   seq_read_iter+0x11f/0x480
->   seq_read+0xfd/0x130
->   full_proxy_read+0x50/0x80
->   vfs_read+0xa4/0x340
->
-> Both CPUs were waiting for the `d_lock` of the same dentry, which
-> nobody is locked but nobody will unlock it.  The first CPU was in
-> update_dentry_lease(), called after the rename swap.  The second one
-> was the next read of the debugfs file.  Since the ceph-msgr worker was
-> blocked, all requests to that MDS hung.
->
-> Replacing `r_dentry` with a spliced alias also means mdsc_show() can
-> call dget() on a dentry whose last reference has just been dropped.
->
-> Fix this by holding `r_fill_mutex` while mdsc_show() uses `r_dentry`
-> and `r_old_dentry`.  Taking r_fill_mutex with mdsc->mutex held is the
-> established lock order; __do_request(), handle_forward(),
-> ceph_mdsc_wait_request() and ceph_lock_wait_for_completion() do the
-> same.
->
-> Fixes: 76aa844d5b2f ("ceph: debugfs")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 > ---
->  fs/ceph/debugfs.c | 10 ++++++++++
->  1 file changed, 10 insertions(+)
+>  include/linux/ceph/osd_client.h |  1 -
+>  net/ceph/osd_client.c           | 14 ++++++++------
+>  2 files changed, 8 insertions(+), 7 deletions(-)
 >
-> diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-> index 6a9a5551d9d7..83506d9207fa 100644
-> --- a/fs/ceph/debugfs.c
-> +++ b/fs/ceph/debugfs.c
-> @@ -109,6 +109,14 @@ static int mdsc_show(struct seq_file *s, void *p)
->                 else
->                         seq_puts(s, "\t");
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_cli=
+ent.h
+> index 50b14a5661c7..0847c522f897 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -316,7 +316,6 @@ struct ceph_osd_linger_request {
+>         struct ceph_osd *osd;
+>         struct ceph_osd_request *reg_req;
+>         struct ceph_osd_request *ping_req;
+> -       unsigned long ping_sent;
+>         unsigned long watch_valid_thru;
+>         struct list_head pending_lworks;
 >
-> +               /*
-> +                * ceph_fill_trace() may replace r_dentry (dropping the
-> +                * request's reference to the old one) or swap r_dentry
-> +                * and r_old_dentry; it does so while holding
-> +                * r_fill_mutex, so hold it while using them.
-> +                */
-> +               mutex_lock(&req->r_fill_mutex);
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index b8e4740d07fe..5053363134ee 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2482,12 +2482,13 @@ static void account_request(struct ceph_osd_reque=
+st *req)
+>         req->r_flags |=3D CEPH_OSD_FLAG_ONDISK;
+>         atomic_inc(&req->r_osdc->num_requests);
+>
+> -       req->r_start_stamp =3D jiffies;
+>         req->r_start_latency =3D ktime_get();
+>  }
+>
+>  static void submit_request(struct ceph_osd_request *req, bool wrlocked)
+>  {
+> +       req->r_start_stamp =3D jiffies;
 > +
->                 if (req->r_inode) {
->                         seq_printf(s, " #%llx", ceph_ino(req->r_inode));
->                 } else if (req->r_dentry) {
-> @@ -151,6 +159,8 @@ static int mdsc_show(struct seq_file *s, void *p)
->                                 seq_printf(s, " %s", req->r_path2);
->                 }
->
-> +               mutex_unlock(&req->r_fill_mutex);
-> +
->                 seq_puts(s, "\n");
+>         ceph_osdc_get_request(req);
+>         account_request(req);
+>         __submit_request(req, wrlocked);
+> @@ -3195,11 +3196,11 @@ static void linger_ping_cb(struct ceph_osd_reques=
+t *req)
 >         }
->         mutex_unlock(&mdsc->mutex);
+>
+>         dout("%s lreq %p linger_id %llu result %d ping_sent %lu last_erro=
+r %d\n",
+> -            __func__, lreq, lreq->linger_id, req->r_result, lreq->ping_s=
+ent,
+> +            __func__, lreq, lreq->linger_id, req->r_result, req->r_start=
+_stamp,
+>              lreq->last_error);
+>         if (lreq->register_gen =3D=3D req->r_ops[0].watch.gen) {
+>                 if (!req->r_result) {
+> -                       lreq->watch_valid_thru =3D lreq->ping_sent;
+> +                       lreq->watch_valid_thru =3D req->r_start_stamp;
+>                 } else if (!lreq->last_error) {
+>                         lreq->last_error =3D normalize_watch_error(req->r=
+_result);
+>                         queue_watch_error(lreq);
+> @@ -3218,6 +3219,7 @@ static void send_linger_ping(struct ceph_osd_linger=
+_request *lreq)
+>  {
+>         struct ceph_osd_client *osdc =3D lreq->osdc;
+>         struct ceph_osd_request *req;
+> +       unsigned long now =3D jiffies;
+>         int ret;
+>
+>         if (ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD)) {
+> @@ -3225,10 +3227,8 @@ static void send_linger_ping(struct ceph_osd_linge=
+r_request *lreq)
+>                 return;
+>         }
+>
+> -       lreq->ping_sent =3D jiffies;
+>         dout("%s lreq %p linger_id %llu ping_sent %lu register_gen %u\n",
+> -            __func__, lreq, lreq->linger_id, lreq->ping_sent,
+> -            lreq->register_gen);
+> +            __func__, lreq, lreq->linger_id, now, lreq->register_gen);
+>
+>         if (lreq->ping_req) {
+>                 if (lreq->ping_req->r_osd)
+> @@ -3251,6 +3251,8 @@ static void send_linger_ping(struct ceph_osd_linger=
+_request *lreq)
+>         req->r_linger =3D true;
+>         lreq->ping_req =3D req;
+>
+> +       req->r_start_stamp =3D now;
+> +
+>         ceph_osdc_get_request(req);
+>         account_request(req);
+>         req->r_tid =3D atomic64_inc_return(&osdc->last_tid);
 > --
-> 2.53.0
+> 2.55.0
+>
 >
