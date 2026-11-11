@@ -1,84 +1,84 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.49
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794413919;
-	b=T+fz8FWg8ZV/qeFAbhTErQ2pNw40rTdYSoPijj16aLJW3hIfcSzrJ62jan28nuw3+heN
-	 YKgY90AU1ue8LuFypoUWIPSJ8s9Lgf7PUsOId+C9XqrSbtWUdJk6Ph5VNZXMcSGP8Rxcp
-	 rQAZAP+zHVYmYNCgUvo2VuuGWGIOpwl0wDO6kyJqH4YYhUDHFb3OB8/Ybep6O/GLRV8Yr
-	 mO2VUiIS9RinXFMY4xZHW0kWiqnRuHfG0bdWCZqSF/SUNxIpp64hhRKm5oXUhf9n4ZMQs
-	 UvqRgmzb39lvALnmEbHjMqggKmUytFz6I8NLWYFB2ujjgv7KidOXgdHQJCEQWAXD5ig==
+	t=1794413920;
+	b=x9Esim+kEhb7ZbFpD2SvM4GGQFAu0tXEWygA0DWSELeqepTmaZtHL779hcptq24lnL37
+	 YiWJGsL/HcJb3dQyhhFZiT7a6J1Icl+MG1YdRn5HiTSboZUoi7sd2KP/YRGF5Fq72DEXD
+	 u8B5vRAKRHWO9Fg83omKTJ98rsqsPD/d21+rDuVt/XcV9YL0xzZBmE9iahEVNFDFwgH37
+	 +3tBi36JELBDB0vH3zUT26ty6rF9FfmIozojpx9jN9cWHWkOGr8G9uOM33Asdco0xczEX
+	 vhTeormnqGvXMdFCaHdoI985qfOip5QChlv2+mndORAkMr2nMP6Fr4UT4VoDnyYUzvQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794413919;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794413920;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Transfer-Encoding;
-	bh=1GD4Df7Fux7pFJTIJwvNlT1oVwGjVEElYOnH6LUdavM=;
-	b=A66wjkb65APobY11wVFJKSGraXp+j5LkwojvdmoN22noK27fPQHJFRXLAYXjw1JMnFGG
-	 Jq3APYq6/NJBMdsy5b7YURDSToq9vNmgImgadsQIyGuc2l1VAhRst3EWyCZNWhd05GmZH
-	 VTzbNeTzbdpXJp2xBpNlPN8VX6PJWK2f/B3vtCZ7sOki8/prarp8cizc+2SwIDacjcAeq
-	 XT6SnC2g6DNmTEpO2PEh6u2mrORJgWXU+XVO+uajJMzxP3zOlBe6fq04esWanSOZ5VcBM
-	 NE6lU/GZWfes/lhsXoaXcRlTo2D7gp0aqvl6nqe1ueK29WJlFbh+ihY20CFdnQ2CvqQ==
+	bh=oM/6l2zeyiYa7HEKwL18/fyBBln2kYpUTJiHwLiTo84=;
+	b=eQjSZjtoao3jIFvH33h8Pcf6k033Zsy0C0rPvLxCg7XXpjhgvCrzZJaoavrWgQiBFAwZ
+	 7QXlF8hxIyC4sJrsx9ovbtBBswRaR+td/OgHub2Nus5Zjm2A2eVkl4l4iitID2WJueKew
+	 MpaIieBKvdted9V2s2hoWWvvEf2+Np7nAXClGVBALxVkqhMH2ZDxhnoSmbOaVxvL4koyV
+	 WvlPxPjbAWf9zaLA8efMupMQHmpxNx/57UTNhXc1DFuvWWdMZ02fv965/GDt5O0OHBW5/
+	 R7jjsLVyD76EMSF5xiSiXy02pkaLxCMLG9+a8KLoWsNjUEjuWnxwCTp1hmfqU5+XOyQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=ionos.com;
 	spf=pass smtp.mailfrom=ionos.com;
-	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=TzwoMaCz;
-	arc=none smtp.remote-ip=209.85.128.47
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=ExLC8ry0;
+	arc=none smtp.remote-ip=209.85.221.49
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A61B1606A885
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:38 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A61B1606A885
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B47C560A2603
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:39 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B47C560A2603
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=TzwoMaCz
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4a60f9474c4so40651265e9.0
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:38 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=ExLC8ry0
+Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-490d59c3edaso2437471f8f.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1794413917; x=1795018717; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1794413918; x=1795018718; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=1GD4Df7Fux7pFJTIJwvNlT1oVwGjVEElYOnH6LUdavM=;
-        b=TzwoMaCz9KlhroQfTJItRVBaooOxRed9KVWymwHFSAxMvTL3OfEZFzwDH5SFH9pu/2
-         pjJ7J05cK1yCD98UZ0GpRNK7YSqSkWVm5ybdDdD+OuGN8faTepKsNYC1KJCQmfRZslEQ
-         Q2q88uZN3KMiQcXYLlQ+piVHe6GE2UYMseYc3Z63fWJ2ZaRT0EnKVtH5GiucikqrwsSz
-         /Oya2PJfT1S6kvAQxO4n2zF6lDy3a6i2O/C2eP+Y9xATRQ4gTATcdVvRq+mMCNmFFazS
-         3EewfzxhEq6bu9QQ09jkGU2hzRoLQszfILnRTU8pPrYvyQ6sqNqNK0+CSwjWVYU1eILN
-         t2/g==
+        bh=oM/6l2zeyiYa7HEKwL18/fyBBln2kYpUTJiHwLiTo84=;
+        b=ExLC8ry04gNbzdm24tLh3UFZXQJ6TJH01gda+GcXsaqej5tdZPsNkiqdM6uyRs5I1G
+         GEu1GFYAU2GzhquwA3Rvz5MQBofvL6s8Gvtba0o7qo39XNpOg391HOYXtomqgceGl/Wm
+         vhKuf996W7fesOBSmrP6cF78g9x2nvX2pZPY10uDJ823xfguO8D82SYjS0mRmDPeG3RJ
+         9pBbBFgQkdrNNkSHadG3YLmCd6oAcuo8oqwbgNqZFKGvjzTY0R+pFM5wY4iIJ9rLpoYY
+         uxN5T1Gvf0zpwzDIRyKyVUw7BVXH8Dp3BYu23m9jBtCFziMG360GMAXrIAsHRbRMDEgg
+         s+ag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794413917; x=1795018717;
+        d=1e100.net; s=20260707; t=1794413918; x=1795018718;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=1GD4Df7Fux7pFJTIJwvNlT1oVwGjVEElYOnH6LUdavM=;
-        b=XUA8mhRDU8Bc5Falpd9LvPdxQF0b/7fY0hGz/pdmzBlt/Cmxe4fYCratOTuerOLjXY
-         am2ed4HGH0mdXvq1Fl5JGndtKPwThAoTlwnaI/wCKy42bizLuTkJST4zMv7GCHFjtXd4
-         2FTcPln/8owKVDpb2czrZ58aJFQ7DN4WG8AsLhUh/xJubyr6bXLaY/ndnMuAf+TxMcWO
-         QQ1XaGPhmeOcga9XwGV4eVA61L0L0Z7LT10FucHO9ofR4n8ZM36+ea4up/cvmYQvfmQe
-         l1M7Pj9AG5eAT8cMw/oqLk49RD2slaMGqHW4UF/lnwPgKKyxlJ3JS3sl4SvhZJ/MLE1r
-         XSZA==
-X-Forwarded-Encrypted: i=1; AL+hErFxcSK4y26F+vTClGtp2hhXyt1hcT69EtdDR7ySDNGVZdMpPS56j/Mp8ItJ8xGOr7nwSkQVfR5NNZST@vger.kernel.org
-X-Gm-Message-State: APuU4Z+ZCTQICKCopszkzf/ARGYJfXQUuBFE/Ur5C0oghJ1NlY8rgXWK
-	6lKCQal86aT+eZ+4z6XS9o1u0xMcRcDfHQ8G2TLo+ekTlOzt79NZ6PSH8KI51mL+DyI=
-X-Gm-Gg: AYBFou35xT8a3l4D+Z1KAD1TTa9ypIm4sizLkLX+L/pHqptRFD563cXYxDcCRIo0Dk+
-	Nvk8jrbIKDma7x+AtFcI8QlgInTIXlmOX94foHd4hf0GQcEP0G4DjwkBT9wuPfne3wGn9xrrKjf
-	zrwLyQ7DyxdckFtmCS8ttm0rhuK02nc6Zuo+AhOK6sCTAmH0EAZDbttXKwIBk6TV9rlU1J5UQgP
-	r6uhKFaN4vFx1kj3yo8TMhsFV6dy+LGi6vhu1y+bguZ4KunPVSlUQmj8vJOE1kKBlg8GV/2Rf0I
-	w8Oo8cjz0UImMlc9lpNYWD6VuS80fFA3PkbTz9jR9D5fU7G6Bljck9D6hD1t21aQlJ9kVyQzyng
-	RnkjYBGFIYfMZZIl68rm/GnZM5yF4X2JKbYwpxzr86UpkleFMBd8WeiPvvPKynBqBebBHEhPtO4
-	Ce4HwqZpltpNS287cfJjaX/rwjCTrnzs2Hoi9IcNz2Vq9blaZvFmPj4X2nbvhomPDEF58u6cXe2
-	uAXr0hCE3YYqSIlSTIShJFtxC1VBHnW3o/wpr3SukNpBnlbuawd+JmtxtMXl5Jag5lBdVxNuE9g
-	YVOh3mLwozyu7yUC4mFiKLKP3+dxTy1RCcgeDEYUhQlD+jSNe8RR8Zo0mqlnfV5LagiNNAinIyC
-	epC76YQNsh63KxKTwq3SYkEdFZ7f5hA==
-X-Received: by 2002:a05:600c:c167:b0:4a1:a6e0:4ce4 with SMTP id 5b1f17b1804b1-4ba093acf6dmr49528575e9.33.1794413917166;
+        bh=oM/6l2zeyiYa7HEKwL18/fyBBln2kYpUTJiHwLiTo84=;
+        b=2oashW72KROYT8rJjClTWw189WGtxsVhjgYBkqPvQKGtmhmi3ZPQ4VCmhItp6AiSRV
+         UWVvwqALaGNHlgzs6UThj57P23RSc2jr0KJKxg2C0yRseW9p9sdFlUbd+jsnwF3gvG26
+         EFTWBYmg8YhYft/C7NmcOB+4nmB9obCX22UN8ecHTENUbXAHPOu7esMs/xuDcMR2AQ7X
+         Ym+gbpdkCi2fSgHbltYBmeu4Pwa3GOaDbelsOM7NPQqTZtcZs01Zop+Fxzd67mPBQaob
+         r+dBHQJn8eh1ybELqzkfvVLEz0OQv+AjIkabN4gwEu/DcxfFxupHeV9F2Yc7fqSxHe+K
+         otrQ==
+X-Forwarded-Encrypted: i=1; AL+hErFlGz4yNPC6GoUEsInBE6LDLv2T7NUrbYLagFgdZprJROv9MJIwYXWS6Q+ZKnT6ygoKAeHiDlxfn29w@vger.kernel.org
+X-Gm-Message-State: APuU4Z8c21ZH1tHGaE2IZnVSaasIRpuJAIQtYHbQNiA92pGiDwn95mgs
+	pf32DI/4RGCubZ7HS9lAIotIrGniuxKAoct9vrxNzihnKC0G1TiQNLyczZ7hnPud4M4=
+X-Gm-Gg: AYBFou1M7G43Sh8dEZFj1vbpODK2tlO2AP0t0vLthBkrOgD6+4wtm8PdFKm/MkG+GfB
+	zUs6ThaidwllxxpXIFMElKTYkwoSjpU4z02CiE4j3PIoamtF4EmTBTCqse2VuoK8VfmaX+NRgPi
+	UKpfzSSzQVrb46r0SZsSlY+oyuaF5X4To/bWr2WgQ0JjPM/JTrHh+rriSY1QOSmh/FumGIpymzY
+	DlNjXokfFw26nmCCkF40XPLUzyW1DwEZNfHW92WpNsHNXwoAyoRI+NrUdeVkCA7/6MxB7jbRLSc
+	vJXs0wTbH0B6xhyzhIbweywrcfIRkq3ojmND/fxzIZoZ+a0LnYEGVuuhTI4/5aSToeFFV2pm8Z6
+	kfvqaLD+Qlvu23teby/OljhSqUF/YtDlUDCgLmrCJbJEpWbEhUoq9LhIELcQp4XJwRHlhZVjwkQ
+	z71LJZ3nGWaDZIbRirRjsjB4duJCbvzBqFK8Pxw6fYsmd433Kl8Pgz+jTYz1Z/1GspYJIlYkwsM
+	fScBKw2AkAH2yFT3nCtq4afslyp1iqHpXRr/NVAQM4ToIcylM5tBdiIVSNvea08wrVG/ssQ85if
+	wVLwc8QnasqPl3KCawAFUHTC87GAarqcU+0le7Khgc7FXttJxp2stUp7rUjuorLN3d96eADzQMO
+	My0k0FTmg4+muehmKV1hGwgm8wZvDVA==
+X-Received: by 2002:a05:6000:4615:b0:48f:8eb6:2320 with SMTP id ffacd0b85a97d-499c3c96806mr5058142f8f.3.1794413917994;
         Wed, 11 Nov 2026 08:18:37 -0800 (PST)
 Received: from raven.intern.cm-ag (p200300dc6f4cbe00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f4c:be00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.36
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Nov 2026 08:18:36 -0800 (PST)
+        Wed, 11 Nov 2026 08:18:37 -0800 (PST)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: xiubli@redhat.com,
 	idryomov@gmail.com,
@@ -87,9 +87,9 @@ To: xiubli@redhat.com,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>,
 	stable@vger.kernel.org
-Subject: [PATCH 3/9] ceph: fix mdsmap use-after-free in __ceph_setxattr()
-Date: Wed, 11 Nov 2026 17:18:24 +0100
-Message-ID: <20261111161830.1336485-4-max.kellermann@ionos.com>
+Subject: [PATCH 4/9] ceph: fix mdsmap use-after-free in send_renew_caps() and renewed_caps()
+Date: Wed, 11 Nov 2026 17:18:25 +0100
+Message-ID: <20261111161830.1336485-5-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20261111161830.1336485-1-max.kellermann@ionos.com>
 References: <20261111161830.1336485-1-max.kellermann@ionos.com>
@@ -104,95 +104,59 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-__ceph_setxattr() reads mdsc->mdsmap->m_max_xattr_size while holding
-only ci->i_ceph_lock, but ceph_mdsc_handle_mdsmap() replaces the
-mdsmap and frees the old one under mdsc->mutex.  A setxattr() racing
-with an mdsmap update can therefore read freed memory.
+send_renew_caps() and renewed_caps() read mdsc->mdsmap while holding
+only session->s_mutex, but ceph_mdsc_handle_mdsmap() replaces the
+mdsmap and frees the old one under mdsc->mutex.  They are called from
+delayed_work() and handle_session(), both of which can run while a
+new mdsmap arrives, so they can read the MDS state and the session
+timeout from freed memory.
 
-mdsc->mutex cannot be taken under i_ceph_lock, so keep a copy of the
-limit in struct ceph_mds_client, updated by ceph_mdsc_handle_mdsmap()
-under the mutex, and read that instead.
+Read those values while holding mdsc->mutex.  Callers hold s_mutex
+but not mdsc->mutex, and taking mdsc->mutex under s_mutex is the
+existing lock order (e.g. check_new_map(), handle_session()).
 
-Fixes: d93231a6bc8a ("ceph: prevent a client from exceeding the MDS maximum xattr size")
+Fixes: 2f2dc053404f ("ceph: MDS client")
 Cc: stable@vger.kernel.org
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/mds_client.c |  1 +
- fs/ceph/mds_client.h |  7 +++++++
- fs/ceph/xattr.c      | 10 ++++++----
- 3 files changed, 14 insertions(+), 4 deletions(-)
+ fs/ceph/mds_client.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 15df9d22008d..da40f2cb80f2 100644
+index da40f2cb80f2..a43ce23d48f4 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -7247,6 +7247,7 @@ void ceph_mdsc_handle_mdsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- 	} else {
- 		mdsc->mdsmap = newmap;  /* first mds map */
- 	}
-+	WRITE_ONCE(mdsc->max_xattr_size, mdsc->mdsmap->m_max_xattr_size);
- 	mdsc->fsc->max_file_size = min((loff_t)mdsc->mdsmap->m_max_file_size,
- 					MAX_LFS_FILESIZE);
+@@ -2190,7 +2190,9 @@ static int send_renew_caps(struct ceph_mds_client *mdsc,
  
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index ff9ba09f3b59..bd97f73ede20 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -495,6 +495,13 @@ struct ceph_mds_client {
- 	struct mutex            mutex;         /* all nested structures */
+ 	/* do not try to renew caps until a recovering mds has reconnected
+ 	 * with its clients. */
++	mutex_lock(&mdsc->mutex);
+ 	state = ceph_mdsmap_get_state(mdsc->mdsmap, session->s_mds);
++	mutex_unlock(&mdsc->mutex);
+ 	if (state < CEPH_MDS_STATE_RECONNECT) {
+ 		boutc(cl, "ignoring mds%d (%s)\n", session->s_mds,
+ 		      ceph_mds_state_name(state));
+@@ -2232,14 +2234,19 @@ static void renewed_caps(struct ceph_mds_client *mdsc,
+ 			 struct ceph_mds_session *session, int is_renew)
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
++	u32 session_timeout;
+ 	int was_stale;
+ 	int wake = 0;
  
- 	struct ceph_mdsmap      *mdsmap;
++	mutex_lock(&mdsc->mutex);
++	session_timeout = mdsc->mdsmap->m_session_timeout;
++	mutex_unlock(&mdsc->mutex);
 +
-+	/*
-+	 * Copy of mdsmap->m_max_xattr_size for readers that cannot take
-+	 * the mutex; updated by ceph_mdsc_handle_mdsmap().
-+	 */
-+	u64			max_xattr_size;
-+
- 	struct completion       safe_umount_waiters;
- 	wait_queue_head_t       session_close_wq;
- 	struct list_head        waiting_for_map;
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index c6085191c29a..8f97b6448d7a 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -1211,6 +1211,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_cap_flush *prealloc_cf = NULL;
- 	struct ceph_buffer *old_blob = NULL;
-+	u64 max_xattr_size;
- 	int issued;
- 	int err;
- 	int dirty = 0;
-@@ -1260,13 +1261,14 @@ int __ceph_setxattr(struct inode *inode, const char *name,
+ 	spin_lock(&session->s_cap_lock);
+ 	was_stale = is_renew && time_after_eq(jiffies, session->s_cap_ttl);
  
- 	spin_lock(&ci->i_ceph_lock);
- retry:
-+	max_xattr_size = READ_ONCE(mdsc->max_xattr_size);
- 	issued = __ceph_caps_issued(ci, NULL);
- 	required_blob_size = __get_required_blob_size(ci, name_len, val_len);
- 	if ((ci->i_xattrs.version == 0) || !(issued & CEPH_CAP_XATTR_EXCL) ||
--	    (required_blob_size > mdsc->mdsmap->m_max_xattr_size)) {
-+	    (required_blob_size > max_xattr_size)) {
- 		boutc(cl, "sync version: %llu size: %d max: %llu\n",
- 		      ci->i_xattrs.version, required_blob_size,
--		      mdsc->mdsmap->m_max_xattr_size);
-+		      max_xattr_size);
- 		goto do_sync;
- 	}
+ 	session->s_cap_ttl = session->s_renew_requested +
+-		mdsc->mdsmap->m_session_timeout*HZ;
++		session_timeout * HZ;
  
-@@ -1294,9 +1296,9 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 	 * prealloc_blob size check below reflects the current tree state.
- 	 */
- 	required_blob_size = __get_required_blob_size(ci, name_len, val_len);
--	if (required_blob_size > mdsc->mdsmap->m_max_xattr_size) {
-+	if (required_blob_size > max_xattr_size) {
- 		boutc(cl, "sync (size too large): %d > %llu\n",
--		      required_blob_size, mdsc->mdsmap->m_max_xattr_size);
-+		      required_blob_size, max_xattr_size);
- 		goto do_sync;
- 	}
- 
+ 	if (was_stale) {
+ 		if (time_before(jiffies, session->s_cap_ttl)) {
 -- 
 2.53.0
 
