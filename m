@@ -1,87 +1,112 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.222.178
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=148.163.150.240
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794341465;
-	b=N+7ZAoDiYxcGyrzz+hnfjqKKG4NHbUs28M3Ai8MVrYp0220I3PN83HNmJLJPchlD7//a
-	 yyymrtFWv1/3YzhN3td7G6djxBMqBRQ2Im7oqs9zY/09c7FPstasQWcr4LrVB+72iY+ua
-	 mg0FvLxGKmNrXWXr7kM5NFy6tMuXXpYuHxS3J3W1RmkAfKI8kplmvPn2evkqZVdutEfuL
-	 2zRd6MUuHI7wSEIWsFLN0Does3Rx7Y3N4I2iWtZDcrkGzER3lWwQENa7m8dRDscJOqqFV
-	 y2gYOtuY+ib2V8Ks/NzjK9AjE7ph4Thy9fj1UHimIX3WWHvBoxy6AQkfOHrjJcGyEVQ==
+	t=1794367980;
+	b=dpvAnRdO1pbmX5QgiB2NYbQqJhw2PFOdYQFXh9H7ScwVh3qXM/j7cEOGygQIrOnGpbHo
+	 zBEmMGrNj4DKy6O8zv+odx4hsyLmPaecSI8sf/CiXwk8jnbOV7QMgRS+XGicyRROHoZ43
+	 eubXPpKfQ2T0L5pIhiV5Dz93GC7NWKs62ZnaMUpESDfXxn4GOMhyQRercZRbihP6lQgaH
+	 eecyBrKjgkI56LVTeOqyDE8uDnMzNxmTzGDr4O7iuzqeS6Y0uaxnJzvUPejlpwF7wCtEG
+	 oL/Rcnx0t8zxqNFaVK2kAWJYTj6qdw8NCOzwiGW2araq9pGyUc4+dT88vx20OmjXyKA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794341465;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=S7zqB5SvRtnuqQjx4/vkTzi7+UFhTC8EsGHBx1Mz340=;
-	b=Lvl3NZZwFu5ZAeCMKNfRR7svhhhBEeaacsIr0LFZ7y5IrdNco0cowlgHNQLZBoehpBoR
-	 rNpX8AtumWM4V3AO2a6ym7fFMlmXebC0hM2zMmrRhu1Ir/0QAZKGHairUwKiaL7WnPVj5
-	 MzkWRbliQjb2g1wB3vRsqSTYyjoTCFD3HTVG0Wfc/7ZTYW4VdiZKJDWZxWm/c5P1F5jV5
-	 U/um3TuGYKxzlwBN9lfEAyDR22xz4wOMVtOPiWRzL6O8YHRHoj/OU0MiS1Qu/iNbYuhPN
-	 ysj7QdtKtmonuaIg7WnpJEZ21408dZcbhCI9JK5DDpMdaTk9e8xvkhHRiEpdOy2ZsUQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794367980;
+	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Gm-Message-State:X-Gm-Gg:
+	 X-Received:X-Received:Received:From:To:Cc:Subject:Date:Message-ID:
+	 X-Mailer:MIME-Version:Content-Transfer-Encoding:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-GUID:
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-Spam-Info:X-Authority-Analysis:
+	 X-Orig-IP:X-Proofpoint-Spam-Details;
+	bh=bQ7xCGeyKivCNLHanIQkVR3eV/kMY2IG8KqwPvVm/cM=;
+	b=vWc5KfeBHQ/NNZqMVtLU2qp0+qDOqLz+dIgZU4dWhqMozZe6QdwI+XeMr4zh14QDcMe+
+	 Llfb/mSUwZjD+gzE4w/VeENwvqA4anBIR/06XNFW6QxkR3I0AWoWVSuFyDZIq2bSn/GBd
+	 WaRZav9ptyo2hPR54XVl6hGvSqeHVfJ0r/1OXkvZcH1ddNbCia6DLecM5/QkPVr/g9oUy
+	 kSmLUkvk7k7/mPCKy5ud42AOdnE9P+ABsi8tiSx9mNxjPLgeUljmADkwK/cYbxOBKbqf6
+	 CJPlR+rasUiihuX8qwA7WbNptcaWfxkYd2vVBvlZQ2vVVB5efyxneGCWH03QwjIDE0Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=HmwSTMhe;
-	arc=none smtp.remote-ip=209.85.222.178
-Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=pass header.from=nyu.edu;
+	spf=pass smtp.mailfrom=nyu.edu;
+	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=v6iMNFcf;
+	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=uPsmbQ47;
+	arc=none smtp.remote-ip=148.163.150.240
+Received: from mx0a-00256a01.pphosted.com (mx0a-00256a01.pphosted.com [148.163.150.240])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4D4B606A320
-	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 20:11:04 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A4D4B606A320
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFA5C606A321
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 03:32:59 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AFA5C606A321
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nyu.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nyu.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=HmwSTMhe
-Received: by mail-qk1-f178.google.com with SMTP id af79cd13be357-93f3c616c84so228709685a.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 12:11:04 -0800 (PST)
+	dkim=pass (2048-bit key, unprotected) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=v6iMNFcf;
+	dkim=pass (2048-bit key, unprotected) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=uPsmbQ47
+Received: from pps.filterd (m0380321.ppops.net [127.0.0.1])
+	by mx0b-00256a01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AALmVki098904
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 22:32:53 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nyu.edu; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=20180315; bh=bQ7xCGeyKivCNLHanIQkVR3eV/kMY2IG8Kqw
+	PvVm/cM=; b=v6iMNFcfWrjyl90pLk/uRuozJ2Go+1iAeDdwrlxiLR1pqH5vbGQe
+	SxJ+LwDeaezfrmtmCOpyB9Z8gp39d3hZbjRomWPgPmu8okU552Qkw2waE3qMPdsO
+	nz+Q53ytBGWVuXJyNWVsnTR4GJSHddCE/R1/F+7fCrvs0Cp1ojfe4C2fHsWHH572
+	6Bayfen+GQgz2My+usDvdC+QmM1SGNZO7IgnCOFUw+QhSxAxPxfwXJAQ6u2mv9OM
+	HTqltuNDwdjBNSEkSViLg/+49bSA8cxzzxTPmhJwobWBb/0BTVp49llGSQoIAbCo
+	8Th4nC14oJHg47HvxPyvpn6mejnYhqigzQ==
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com [209.85.219.70])
+	by mx0b-00256a01.pphosted.com (PPS) with ESMTPS id 4hvbgubvwv-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 22:32:52 -0500 (EST)
+Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-91ea864ee9cso75143316d6.3
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Nov 2026 19:32:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794341463; x=1794946263; darn=vger.kernel.org;
+        d=nyu.edu; s=nyu-googleapps1; t=1794367972; x=1794972772; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=S7zqB5SvRtnuqQjx4/vkTzi7+UFhTC8EsGHBx1Mz340=;
-        b=HmwSTMheNwcrpeFLVNfMVoTvpSIiDea4eZJjTAeJCfTfsP0XiArNoUv7FKXbJwpYqc
-         ngDhwcGksCyZblDXM8zV1Ghz7VN78rJqbkRzhx9NpdB1Y+zYrIkAnTn/bCP1AU1wJ+4o
-         w/bQcgvTHyhWuAN4LQkpiVnGQHIDdqU+iacnnAYzpm6ahbKk5qH+8h6VNz4v+6PsmDEY
-         5Tfevxwxkbpy/+VtfMx5HW/UgZm7Grm71KQNRr6SNVaaXqZntaHFTOzpSWcVx2TaMw30
-         Rr/6tjcLvcZnFiThSCKFcKroxz6uyEkbXModSpnvmC66LNp+jkM0VTU8ratbl0WbsI7q
-         fpPg==
+        bh=bQ7xCGeyKivCNLHanIQkVR3eV/kMY2IG8KqwPvVm/cM=;
+        b=uPsmbQ47UIY/FJS/RsCm1j9cJWsT6UksWf44W0uJthuxDbn/9DqBG2RT/dencJlEGi
+         uOmpKPw7WSyTglYAjNYkR7JK1ZhUlZdiF9NZi3gCEDaEZBTrpuD4JQddz4GjvfggZqFc
+         n/qrUZfv3DDrl4n13wP5UROlDNy3XLGfuTQs9WMa1ZA/qNdWqsJ2AK0vX5D0wrXub4pS
+         yF3THlErtlk6xyFRZ20LvnNcFy+oxGVkVgij3q+Bw2wg3WvFD0DpmidXSJIQ2DdzgytO
+         5au7W1JDtDoXllGOQdDglUSoNU27hxijDiT0jg72aSbNIQ/Pz51MDCvfMLVE82ogRSy/
+         GPeg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794341463; x=1794946263;
+        d=1e100.net; s=20260707; t=1794367972; x=1794972772;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=S7zqB5SvRtnuqQjx4/vkTzi7+UFhTC8EsGHBx1Mz340=;
-        b=t00vbEAosVNN6PvOXWj9Rd/B2hdVfESOCGL1bV+dVddb7OPAPSuLYDrxlT3NGmR3rV
-         shY8xs9pgezT8p/lh1O01yhpOCMbG2IeG60tgBNpxsj4lA/B7ee9uaCqTTbtGQlacfnN
-         Lo1WOLvGQXhxIbjjmKzY1KaG6YanuGAb2Bk89dv9spGTNaUZqOD5SoiGiumSrO0et9wC
-         X697/OHk0DlfzmVdgb0sLdG7y27SxayK8vt9xxeNtuBRGRBl7Uc+7YdOFwbuuyRvGscb
-         kqIeCOu1oQDlaxnDQCgMubqtEbLCMc0LoRoJHbG5yJvtG9K0BT9lvmuXyl+1ewAgkMC9
-         lIPg==
-X-Gm-Message-State: APuU4Z/TTmdL9iqFXd3WASKo9U0KNOZ2YzqqA2+lo4C/xeYRKgpAcDAS
-	3ZTQzu1zeMfp/fEebt3SbA/5rI32vI5Z9uOrhlAnSmQzs24RE0JM1zkjL25Df5EO
-X-Gm-Gg: AYBFou03tpFF48fBNyKVUaME14PGsdi+VqxAuE2aNEpOAaPBeDl644g0nlC5/YU5JCi
-	fn9plR+sSaaKNvvgJkBKlmFfLoPQ14esL6gAsxNq0owlQW2xfkRk6VSv5A0XYvCUdXpbMfIXVw6
-	rVX5ZB6IOM71J6siqQlB7VaU29XhbZPTPJR6ylA+TXvNBNaxIl1Pp3+Q5blnJAOejZqHqd9HUHZ
-	LSx4GIW813eeKcEEwBk4Yorc2mBNg8CXqa8NjrAdLuCC8CzQuYjY6rPs7c5+IID1GJaAKV9DYcN
-	xcQnf5gpcWvD3m6JjKIOTW2omY5SccCmXhNcohNAzduou5o2L0tT8jZz8lS1J/HjDZUbHjpZX1+
-	uDgl321+GExTl1/LVYvNpD8IFq1f0aLz0ogGxIBZCiMsZXCE3tDB5D14RVoWKs/WLeYIjVKxw6a
-	Ik/jkFl5rHEuo7HBIc9O51Mmimc1apwO8W7BNcu4fJGBgwx4w/VWJsdKl/GHmBJZVLTt9/LpXK0
-	mmykItS6rJ2hPSKVhHFeUhkxHt5Ej/m8z9bquPJb7IOH1E/gDcBjzquHLis6Xb7EmBQB1RPiBEw
-	aXWgr6nTXBZLLeBLM80yO3iQCl5eJph6UJUQAvJRdVIoqQTVY6QV
-X-Received: by 2002:a05:620a:8089:b0:93e:8614:bbe7 with SMTP id af79cd13be357-947afb8bfe4mr16005385a.12.1794341463584;
-        Tue, 10 Nov 2026 12:11:03 -0800 (PST)
-Received: from zambezi.front.sepia.ceph.com ([2a02:8308:b10e:9400:faf:460b:2f23:8f6f])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-9479e73c84bsm301815085a.9.2026.11.10.12.11.02
+        bh=bQ7xCGeyKivCNLHanIQkVR3eV/kMY2IG8KqwPvVm/cM=;
+        b=v2HwAzC0VkYxVghPt25zYodtnHfgEuuDT77zrBqkzLA6v+SaLuo4OXFIBeHiJgfRfu
+         4lfDB8eEbpSIUliiOpoy4lH1ufJWtsmHJOAyT9qF9dLv01lqzAtPHcfhOraU0yn0RVHn
+         qnTDxit2Cluo0GCW4qlgnHyofS0h79ZzbB4v+csp6xp47jEHDqdhsPjrVhy/LemRefa0
+         oHNb+51jYx5cjq4CaUHgcVphbttSIxTfdGfO7hUwXsVbqiZBWEVLbcvYZb2FjFAMH96l
+         FDrjjTGoVYHy1gyEtbz5zhD7qUUrcux5i9cUa5ZogRw4Rbcu1dONfQ8H835VLflFoVvP
+         w3NQ==
+X-Gm-Message-State: APuU4Z/CcUYe/+rHWgJTVs4MQw69Uk3nJdJDsBWJl5VrxRAOS8vCaGrN
+	BvrnM9NysuhRZIBHBEiIsAAPG2tsVAsZXFVV5fPfy0pKh69Mv79FDY0+RU8AOfnALOXfRHvnX6Z
+	FJuGAOvJRioZiI0oN5HVzoFDNHCSOfWWz5zKLWHBqLgS/KoK9hpa8eAWIbzjs
+X-Gm-Gg: AYBFou02VsRR+CbpGJsLegwzkyriqLoQsI+Dz56/URO34mq8uYwNbJoR0m/HmwHkmxg
+	Hv8pHECICv7GZ1sAKOIUefjRZBw2dX4Xknlz4/DQXmgi9lYBYYcybZ8gjDUPU7gjDVVhjLVxr9b
+	QSkiDGjUWoGm5ZgDC483GLMJUe8p1I2wnB0WQFU9ZhX7CtfOXne6YGhz4kyTndFIY4KnR1WZY01
+	u+77p+i6SaVXh44yOFDtd96UpAAt1m5SYAhkLC1o1yn9gLY5gdeCSPaYqhO0k26m2M7JTTp4EVN
+	J6E4+I5g5hL6AsXYqA0WdXAYKbkjDSVXI6EqEzsdf9t4Ran6YMTIPyquNEanWzG/ZDij2uTJ4hx
+	ahqTjZ8VC6r1jMcW50gcLCVIhG0J2I6smbpNIHIDW975+kTCQV16giHd+IVhh7BHyQ3Wcv/rSDH
+	mhfLMUEcbJYA==
+X-Received: by 2002:a05:6214:c2f:b0:91e:a762:94e5 with SMTP id 6a1803df08f44-91f0404accamr24041336d6.14.1794367971946;
+        Tue, 10 Nov 2026 19:32:51 -0800 (PST)
+X-Received: by 2002:a05:6214:c2f:b0:91e:a762:94e5 with SMTP id 6a1803df08f44-91f0404accamr24041056d6.14.1794367971473;
+        Tue, 10 Nov 2026 19:32:51 -0800 (PST)
+Received: from jerrythepro.nyu.edu (216-165-95-164.natpool.nyu.edu. [216.165.95.164])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-91ef051dc53sm37025576d6.32.2026.11.10.19.32.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Nov 2026 12:11:02 -0800 (PST)
-From: Ilya Dryomov <idryomov@gmail.com>
-To: ceph-devel@vger.kernel.org
-Cc: Dongsheng Yang <dongsheng.yang@linux.dev>
-Subject: [PATCH 0/3] libceph: allow for multiple in-flight linger pings
-Date: Tue, 10 Nov 2026 21:10:13 +0100
-Message-ID: <20261110201025.255594-1-idryomov@gmail.com>
-X-Mailer: git-send-email 2.55.0
+        Tue, 10 Nov 2026 19:32:51 -0800 (PST)
+From: Kaho Jiang <kj2864@nyu.edu>
+To: idryomov@gmail.com, amarkuze@redhat.com, slava@dubeyko.com
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        co+408fcc361565713f@bugs.sh, Kaho Jiang <kj2864@nyu.edu>,
+        stable@vger.kernel.org
+Subject: [PATCH] ceph: Use unsigned types for snapshot split counts
+Date: Tue, 10 Nov 2026 22:31:50 -0500
+Message-ID: <20261111033150.847104-1-kj2864@nyu.edu>
+X-Mailer: git-send-email 2.43.0
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -92,28 +117,91 @@ List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTExMDAxMyBTYWx0ZWRfX1ZvNFn1aIomZ
+ auaKfiOhlD+DAO/4DQ0p9EndbD0yLaM94UrPF6QcpSCtLfg5NHu6LsBCB7b/wJGIjpsDzaGayTB
+ r5SyBGE9bRKkUSeNVyWuCvl3Y8xaO7/5FkgyZADXsE/8lIVLmp30W3Et+uJouhT/ceWmNQNdhZv
+ khC+mMUpiWVSWv0MspEaGWiwnlG8tSTZbpa0ZIaOBzeUfCPqa6jwdxj/oC0b2urbe2VEP4pTPnm
+ Kk9XW5IFrcbt9NQV+cLWohaSkNcR6yJ87LLQKfOWMvDcUiq5/Ao2FJZxBzD0dX7epEZ4xI188iy
+ HkudmbS/mGaWrzguuY1+COHAkLkPb7aVAXNwHAtw5841+BGx/nWBe0CRSuOKFA3Wo2l9TWncube
+ Qbg1BdrpvnmcX4FwzCDyu0JInc/vGtanjpbe9++p471Zm9mXxBDTfH1IoqFm7FWgQ6cAaCzv1nP
+ 7gZO7LtRSMLjdtKLKSQ==
+X-Proofpoint-GUID: -oF0w3A0KjV8Z_jI7zDvJ9iQ61MohsF4
+X-Proofpoint-ORIG-GUID: -oF0w3A0KjV8Z_jI7zDvJ9iQ61MohsF4
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTExMDAxMyBTYWx0ZWRfXwlyqSq5Xkueg
+ Oa8Ja/pJymo9NE/N4YtC5bM7CA31kqcfAvTHI6I1mPITQo6kvE0+4SAaWApkTaCQqkn87z04Q2J
+ qOxxf3dnzWCrc73U/sz4i/9coFxbLFo=
+X-Authority-Analysis: v=2.4 cv=KIfPn1Fo c=1 sm=1 tr=0 ts=6af3e1e5 cx=c_pps
+ a=oc9J++0uMp73DTRD5QyR2A==:117 a=ZtTe6gSuN0kH6OIYMjA5WQ==:17
+ a=zJRp6_cAMcgA:10 a=x7bEGLp0ZPQA:10 a=S0S_EcBMpFAA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=Se5WoFf3ZZRiLcel0nel:22 a=Vu6uP2Wp0I46Sktgawq-:22
+ a=VwQbUJbxAAAA:8 a=yYqStf5IHDHNmpx8MkMA:9 a=iYH6xdkBrDN1Jqds4HTS:22
+X-Orig-IP: 209.85.219.70
+X-Proofpoint-Spam-Details: rule=outbound_bp_notspam policy=outbound_bp score=0
+ spamscore=0 phishscore=0 impostorscore=0 priorityscore=1501 malwarescore=0
+ bulkscore=0 adultscore=0 clxscore=1011 suspectscore=0 lowpriorityscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611110013
 
-Hello,
+ceph_handle_snap() stores the unsigned 32-bit split counts from the
+message header in signed integers. Values with the high bit set become
+negative and, on 64-bit systems, cause the subsequent pointer arithmetic
+to move backwards before the message buffer.
 
-This change significantly reduces the risk of erroneous blocklisting in
-environments with high latency or where low/moderate latency is coupled
-with huge spikes for RBD images with exclusive-lock feature enabled.
+BUG: KASAN: slab-out-of-bounds in ceph_update_snap_trace (fs/ceph/snap.c:815)
+Read of size 8 at addr ffff888024f45478 by task kworker/1:3/2220
+CPU: 1 UID: 0 PID: 2220 Comm: kworker/1:3 Not tainted 7.4.0-rc2-g7475ea8b5861 #1 PREEMPT(full)
+Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+Workqueue: ceph-msgr ceph_con_workfn
+Call Trace:
+ <TASK>
+ dump_stack_lvl (lib/dump_stack.c:94 lib/dump_stack.c:120)
+ print_report (mm/kasan/report.c:378 mm/kasan/report.c:482)
+ ceph_update_snap_trace (fs/ceph/snap.c:815)
+ ceph_handle_snap (fs/ceph/snap.c:1057)
+ __pfx_ceph_update_snap_trace (./include/linux/list.h:172)
+ down_write (kernel/locking/rwsem.c:1350 kernel/locking/rwsem.c:1356 kernel/locking/rwsem.c:1632)
+ __pfx_down_write (kernel/locking/rwsem.c:602)
+ ceph_handle_snap (fs/ceph/snap.c:1158)
+ mds_dispatch (fs/ceph/mds_client.c:7298)
+ find_held_lock (kernel/locking/lockdep.c:5401)
+ ceph_con_process_message (net/ceph/messenger.c:1413)
+ ceph_con_process_message (net/ceph/messenger.c:1424)
+ ceph_con_in_msg_alloc (net/ceph/messenger.c:2094)
+ ceph_con_v1_try_read (net/ceph/messenger_v1.c:1434)
+ ceph_con_workfn (net/ceph/messenger.c:1576)
+ process_one_work (kernel/workqueue.c:3495)
+ worker_thread (kernel/workqueue.c:3578 kernel/workqueue.c:3659)
+ kthread (kernel/kthread.c:436)
+ ret_from_fork (arch/x86/kernel/process.c:158)
+ ret_from_fork_asm (arch/x86/entry/entry_64.S:245)
+ </TASK>
+Kernel Offset: disabled
 
-Thanks,
+Use u32 for both counts to prevent negative
+counts from moving the pointer backwards.
 
-                Ilya
+Fixes: 963b61eb041e ("ceph: snapshot management")
+Cc: stable@vger.kernel.org
+Reported-by: co+408fcc361565713f@bugs.sh
+Assisted-by: LLM
+Signed-off-by: Kaho Jiang <kj2864@nyu.edu>
+---
+ fs/ceph/snap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-Ilya Dryomov (3):
-  libceph: replace lreq->ping_sent with req->r_start_stamp
-  libceph: don't cancel in-flight ping in send_linger_ping()
-  libceph: include current latency in debugfs osdc dump
-
- include/linux/ceph/osd_client.h |  4 +-
- net/ceph/debugfs.c              | 12 ++++-
- net/ceph/osd_client.c           | 87 +++++++++++++++------------------
- 3 files changed, 51 insertions(+), 52 deletions(-)
-
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index 9b79a5eaca93..7ed782abfbbc 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -1027,7 +1027,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 	void *p = msg->front.iov_base;
+ 	void *e = p + msg->front.iov_len;
+ 	struct ceph_mds_snap_head *h;
+-	int num_split_inos, num_split_realms;
++	u32 num_split_inos, num_split_realms;
+ 	__le64 *split_inos = NULL, *split_realms = NULL;
+ 	int i;
+ 	int locked_rwsem = 0;
 -- 
-2.55.0
+2.43.0
 
