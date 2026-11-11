@@ -1,84 +1,84 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.52
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.42
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794413924;
-	b=cpqDarWiOnt9SUppPLRa4+7mJzvosNwKRlLpXKH+ZLIGIy5ot/PnAVJc+k1kuY9CnaWm
-	 EcOenpQ0FQJ+FRYe0S9uNrc4K6laq2FDq7Au304HYgJQLgpIqPzjJKp5qZ7QT73IbDfgI
-	 lyYOFaFIbDu9GEHSzsv5ynUXS9jVaOS2C85fQP9PvCXqWo8EX74YwHtnaDiGOWlT3sINK
-	 QyyhQ83mjbujCjaYe67lfPWhe95YXbVNYIitownnj8mfaNjjIMYF4Y/lgjDYXmq7+fMKN
-	 vcVPnhIK3/rtHs9flQoLmEIYFWZiP1tVwVZ4E1yeaBqp/mfgH9FzWxhGk1DJ+RL0/rA==
+	t=1794413925;
+	b=wV1tiH/iFZdoGK1LkqDqzqNN6MloXPARYzsTx87YczCWzj0wSDnU99tuov9XhLyn/emw
+	 quBLehbIeHeu94vochvnf9bCQ/6Y0Xk+5gawVaFSZQOi5gCRNG/ca4BzZJKPDdwmqtQTv
+	 Q0W1ENtS4wV/xtbqRiiUjtp8YzeUmmEPjq1oXbuKentYB6X43P65xR12SNsQBBBPEqTn0
+	 YSl2mLs0pJYu1PY/o2e1YwiiS9v/eXlBwo+uRtzyxgpeURHwQO7Q2BixN2QMLJJjgw/mw
+	 +WDBFTEbalYIIaXryyndIchPeVkcjUK9zDlHlS4Yive9jfhGWAmiwtUrf7MEJLgbtBQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794413924;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794413925;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Transfer-Encoding;
-	bh=xB2s5ICjL3oZNT6AvTpBrsJtB4knw0Blt3rv8CPT2C4=;
-	b=Pgdr6z1QnIqFIqgBA/y9+aF0Y/d8B/HIxAVcQflM4//gykieLtTVa1qQjWW7wnUK7TlX
-	 MSlWxTMjrIqAdPbHPIP9OokxR8yTVQNyOU6r7K0AyxyQKk+CncruJgfXBLJKzoyNtKUYg
-	 xmT+2oclLzzcXkRzrzG3HnaxxDcSfLWg56uUKg+ly4rJKG25PQDWtFCOeJMLaLyoOY7Nc
-	 VFEjQnbywtJ6CGqzE80tT3vuzQkyGn1qpLvwvOWhowlJwW8u2tsNM/588qjfCQ2472p7A
-	 MI1+kWRvFWY36vi7yWtX2OWERRJtDP7skgFoPl1LyTIejMt7kRYiNnoNGPpNfvjbT0w==
+	bh=SQTg6mu9eOLnWguJd3WECuqCcHwaFD0TQuF9ZQxG35k=;
+	b=eFi8n5Se/yM//qUiGGJ5CuZRqpaj5DJCbhDzq8cV1rSfyuxMcoY+SL1B+5mNaRs//1Kl
+	 lCgQjdKA3/uSuG86meT56N4bkGI/DtiYK6yx791P7z8av6rJl8Q218WC/gqG63EJVQROX
+	 yiu70mQDsjGmKSPZORyH0Hl+hLEw7bS/vkQGjaI39vSLaXOwxpsHgoeqadNLmnGea+ewJ
+	 bbRSaHr2nTqbtVCE+FVNMite6CVCNaVa4oSdaPk5nug/ZFPj4HuEHQaFGUDP29W3JLWxY
+	 bLnQ+Y0ZMk9Npqe2IVY9cio+b3Pgf8RjqhIYi+czSo2p0Zdcluf7XL+n+WLoZwATOzw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=ionos.com;
 	spf=pass smtp.mailfrom=ionos.com;
-	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=TGAaFXZq;
-	arc=none smtp.remote-ip=209.85.128.52
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b="L28Sy/53";
+	arc=none smtp.remote-ip=209.85.221.42
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABCFE606A881
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:43 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org ABCFE606A881
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0AEA860A383C
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:44 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0AEA860A383C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=TGAaFXZq
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4a59100fa83so29405585e9.0
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:43 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=L28Sy/53
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-49134c8509fso2746049f8f.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1794413922; x=1795018722; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1794413923; x=1795018723; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=xB2s5ICjL3oZNT6AvTpBrsJtB4knw0Blt3rv8CPT2C4=;
-        b=TGAaFXZqf2Brxuyh2Exohfr7P8fxYKFal37wdrA7UNjI79I0ZnjXdGiL4EJesRtQsG
-         D76COQSg5iYYvHX9juvxJ/zB+k/o22jwdL8GzfsubnXIeFFE5hNhq8II71G5Y1CUZYoy
-         9fLwoG+YTOnvITgSGe3iZ8iG14qxTwiQMvech6s3ROnxuMCwFR4/Ld/N3uXvTdm8vfri
-         czNlMo8XOQGS+MKEsSBlIPtItvNBy74On4GuUOU/awT2qLro+LUpyCGGL2b4wpuOk85r
-         2IKdHPSA/uSTx+/F8TwFPeDMsQln3bOiVp77+J1180cNhMl8sMou+OWPwjStpw7HbyLY
-         usZQ==
+        bh=SQTg6mu9eOLnWguJd3WECuqCcHwaFD0TQuF9ZQxG35k=;
+        b=L28Sy/53fBIDZZA5JNFU3qj7CHWSZMS6zMvqhV8cs690h/ubOdtBbR3+T/B2a7JVTk
+         rVQVjtZ+HqfCHbRp/0W3IInVub3vTTcOBJt8pKiQmJO2Ber1TGHkM5n0BVt2BU+d9Ary
+         aavTVlcexyEZgM14fKIqNkE/GB45NFm9ffMvANhq1eJRoG2uv2PW3l7E5Bwq/W6assIv
+         ZK9Y4cPi5d2/UR6x4cWRCzl3aK82HlMQGOCtZY9uEqEtVmi7T0mMDSY9bkKbKo+cnCLo
+         7ZzDuiGmLS4CMjK05w8jpB1fQBJYi48vr0kfClvaYl7dc4aZfhNgZmNnCoEIR78ktG0k
+         wj0w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794413922; x=1795018722;
+        d=1e100.net; s=20260707; t=1794413923; x=1795018723;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=xB2s5ICjL3oZNT6AvTpBrsJtB4knw0Blt3rv8CPT2C4=;
-        b=Ln6ZJkgAli+SCUbuoCI8neBr4Z7S/uWlKFVIR7ed3pf0aan1MPoRlR8lkZ7AXnpSQ3
-         Egbc6Rg8Dr4gVCeW/Fs6LHTnkCswQHbJZJvWsiJPZFDH889rnSSS76fYXTW+QS5fBRTh
-         PWbDSpRisjKwb7uNhVtEzQZ7zEcKbK/E9PQna2VHUW0B5rl4KU7n4xxf2OqYS66a9Fgj
-         wrgizVvU7EAiSzHU62/4C6/AWnRdZMwWfVacAPkEhkP11iPujI5rShXCX5pmvUH96Xef
-         vT+gLmHF1atweZyTldyDmuzlb5tjSmr2NY3SO6erHFST7JRyl8ybI95EEBMf60f5vE8B
-         6YPA==
-X-Forwarded-Encrypted: i=1; AL+hErGty8zbfokivRXL5TOAwjSjWVkgheyOFf2KKBy+CpIU+G/IE4fHmiDWEGDJ77kq3KUR4YnVw3EbCXjj@vger.kernel.org
-X-Gm-Message-State: APuU4Z8xKKAih9j+916Nvt+AddRXz2J71DrbwPtpcR5ZFTvl9oXCr0EE
-	h7ALG4Z1TIffRzXi2CjYA8xuppN5KiREvxnbtD7apVg0+YnypvK+MXPMn1YmR/vSndM=
-X-Gm-Gg: AYBFou0enMMLAEGWrVfOeicRVrosvdD65TZ5bXmgj7ghtkVEUqhd7jxWrcMw4Rqvhv0
-	6qi9VfBsLcNPdW2rNk5fU2TlbILcss1B8KLPbXe0kWT57muhuoYHaP75253ptCXcTvTWqMAgAv4
-	dOhmkdGzxkMqNpftmj9Tn1ne6tdzn1o4x8dTn9R+WSOjUfpFP+fo0ZKegDAOTrDt0AK5ynL+I+L
-	yeHtLLvCkSF8CipNSCAvZYsTMXz6rWGc69bMVZSqB/SMkiUjvyINgVyxcvbNIfQMT+tKu/9gAl0
-	xb6ACFTNQsYzFF4pKzHPGpOtUI1LAWfBd8DsviB7AggFn3t1hkFJVC9iy6LzvCbJufgfiSCw488
-	RwQYcu962RgVl10dfzvokV7y7LjOXjvA79IwGy7bVjgbrlQyfOq1n6quSaos8XqObQlzKOJ05Lf
-	b9/UABn/Nmwr3bEQet0VAqZB8fC/X7koBiKTbHnWOHlHkg0VDcB7uGcs5AAZB67h+Oasa7vRKP6
-	e+CX3jn8UMDulfe0i6mLVWKFm0U3tGUi2MQe7DMmuKfR+75IxIrhmpoBf2wKxORDskPXJ1wXc10
-	kmMTWl9qU5j/c3bBl4PNeOKxNY/npdN4VfrT1rZ5daqnv5Sqvq6Lo3fGHcnzX7tzPQUGb27uO8h
-	MnW5aDABEaC/T5d4Oj64qRD9utAmx43UAFsIAJFnmHKVN2dMajhM=
-X-Received: by 2002:a05:600c:354a:b0:4a6:42cc:bf66 with SMTP id 5b1f17b1804b1-4ba0935dacbmr52726595e9.11.1794413922136;
-        Wed, 11 Nov 2026 08:18:42 -0800 (PST)
+        bh=SQTg6mu9eOLnWguJd3WECuqCcHwaFD0TQuF9ZQxG35k=;
+        b=kQ9Wq6XbvJsH1X9DeEC+SpKgi7BxC/JdB6nmGwArULLWrMHg9co3jH30r8ayjU1AJk
+         0kJGHeljus6cvrX0h4f0DjsWP9H6SOxmTOxk+z+fePB6UHCKrvVBvHlU4qpgXlqotDod
+         E7QbBVCsAY4VzQDoH42V4V461vAebbUcGNe/c8FFf/Dt0rs0G9+k95Z3hxPYuxotALyf
+         uKcIZbBGQPUG8DMaq0AGS/4AuaNPOjj4Jl39iBPHd7aA1m5CJIGlHWRWMGuVBWkUEve1
+         vYJU5sTxZlhpSB0TfPSSneWt8phwSeGrMbNE9Jcswcp4HepCeoLQ6gurWjelk1IRFpV8
+         yvhg==
+X-Forwarded-Encrypted: i=1; AL+hErFHlHq6Wf6qYNPA2NlHX1v0PG5JggvVQ1SxQpmKcljP2nfljyFvvlqtPARBTvK3syWdEjwUPFxQXbzR@vger.kernel.org
+X-Gm-Message-State: APuU4Z9/TRLtIcfKTRGABeGLnMjcrRikFGDZgqAhWbvdBYUV3wSMfQot
+	8Sgqe8ksnmMbOIvRk5w0J+XHu0LzQuX/17JAmgqw/n9w09ankGxp+0Lr9ubwHcfKrtk=
+X-Gm-Gg: AYBFou279VKCxr3KZIa4Zyi2qgSGu9Q/Om2q7Ar0He7j1boZJFOPy3WXefl8X9gCz55
+	2Ei9xsmt87mToHEsYF39fmS4sGcM1Pk/OXiofudaXBnxTpqd9BoepeRDGhmi9PerEzjR7XK65DU
+	9XSpFvDQzqNoR3VP5IiKUmX3WMzz1/8VR1t0Ug0fk86JSvDyHBuOSrxfJGyzC3iQMQ2EgwgIT5y
+	ZVe7CBjoyTlpModAFO4rVYpIBhp2PmZX2JOmzUQPERvckJY9X2KTqcBwvMmKYnrNly2dDVEAT/i
+	pjE6NdLGYpH7njwFFbhYDwlsujRqsqB1EoEk73h3rpl60BpUZIf/Qfn6dwsl354H5yfYw0zS+SB
+	1eOq/dR0OoXplCvVC0Bn5xzqJ5PLmPvKndhTk760wfEyQWrSvJJGxIPFZ2KE0hpXgDJbNjc9CR4
+	WsptfFSZ/tXlOT+8Q2Nv1GfCkBJnIBbm8kGKs0gA2mEa8SvE+ZkIPHKU4rAT2tk9Bf2zGYhrX2/
+	+wahUU4S0HTQnk662YV5ayJv1MwJXcjsn+DH07HZOUCDb5tchyFbb/zrO3Nu6z0SLsCY1/8XuJV
+	NPft9trGo2F5OymrYbk85RdI/SuVqc8grjabH0X08Bz/dFcCaymiGp3GePxRAvllCFH4NTpGwYj
+	EcC+qWF6p/EboZxbtONay0ef2P1M/NA==
+X-Received: by 2002:a05:6000:993:b0:48e:7508:bc20 with SMTP id ffacd0b85a97d-499c38bb64cmr5066357f8f.2.1794413923390;
+        Wed, 11 Nov 2026 08:18:43 -0800 (PST)
 Received: from raven.intern.cm-ag (p200300dc6f4cbe00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f4c:be00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.40
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Nov 2026 08:18:41 -0800 (PST)
+        Wed, 11 Nov 2026 08:18:42 -0800 (PST)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: xiubli@redhat.com,
 	idryomov@gmail.com,
@@ -87,9 +87,9 @@ To: xiubli@redhat.com,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>,
 	stable@vger.kernel.org
-Subject: [PATCH 7/9] ceph: fix osdmap use-after-free in ceph_sync_setxattr()
-Date: Wed, 11 Nov 2026 17:18:28 +0100
-Message-ID: <20261111161830.1336485-8-max.kellermann@ionos.com>
+Subject: [PATCH 8/9] libceph: fix osdmap use-after-free in ceph_wait_for_latest_osdmap()
+Date: Wed, 11 Nov 2026 17:18:29 +0100
+Message-ID: <20261111161830.1336485-9-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20261111161830.1336485-1-max.kellermann@ionos.com>
 References: <20261111161830.1336485-1-max.kellermann@ionos.com>
@@ -104,38 +104,47 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-ceph_sync_setxattr() reads osdc->osdmap->epoch without holding
-osdc->lock, but ceph_osdc_handle_map() replaces the osdmap and frees
-the old one under that lock (held for writing).  A setxattr() racing
-with an osdmap update can therefore read the epoch from freed memory
-and send a garbage epoch to the MDS, which uses it to decide whether
-it needs a newer osdmap to validate the layout.
+ceph_wait_for_latest_osdmap() reads osdc->osdmap->epoch without
+holding osdc->lock, but ceph_osdc_handle_map() replaces the osdmap and
+frees the old one under that lock (held for writing).  The function
+waits for the monitor's reply first, so an osdmap update arriving in
+the meantime is likely, and the epoch can then be read from freed
+memory.
 
 Read the epoch while holding osdc->lock for reading.
 
-Fixes: 968cd14edc3a ("ceph: set osdmap epoch for setxattr")
+Fixes: bb229bbb3bf6 ("libceph: wait for latest osdmap in ceph_monc_blacklist_add()")
 Cc: stable@vger.kernel.org
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- fs/ceph/xattr.c | 3 +++
- 1 file changed, 3 insertions(+)
+ net/ceph/ceph_common.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 8f97b6448d7a..64ccf70aa3dd 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -1179,8 +1179,11 @@ static int ceph_sync_setxattr(struct inode *inode, const char *name,
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 67e88f30409d..39a0ddde3554 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -863,13 +863,19 @@ int ceph_wait_for_latest_osdmap(struct ceph_client *client,
+ 				unsigned long timeout)
+ {
+ 	u64 newest_epoch;
++	u32 epoch;
+ 	int ret;
  
- 	if (op == CEPH_MDS_OP_SETXATTR) {
- 		req->r_args.setxattr.flags = cpu_to_le32(flags);
-+		/* ceph_osdc_handle_map() replaces and frees the osdmap */
-+		down_read(&osdc->lock);
- 		req->r_args.setxattr.osdmap_epoch =
- 			cpu_to_le32(osdc->osdmap->epoch);
-+		up_read(&osdc->lock);
- 		req->r_pagelist = pagelist;
- 		pagelist = NULL;
- 	}
+ 	ret = ceph_monc_get_version(&client->monc, "osdmap", &newest_epoch);
+ 	if (ret)
+ 		return ret;
+ 
+-	if (client->osdc.osdmap->epoch >= newest_epoch)
++	/* ceph_osdc_handle_map() replaces and frees the osdmap */
++	down_read(&client->osdc.lock);
++	epoch = client->osdc.osdmap->epoch;
++	up_read(&client->osdc.lock);
++
++	if (epoch >= newest_epoch)
+ 		return 0;
+ 
+ 	ceph_osdc_maybe_request_map(&client->osdc);
 -- 
 2.53.0
 
