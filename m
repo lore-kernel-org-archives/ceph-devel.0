@@ -1,56 +1,56 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=219.143.121.9
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=141.24.179.34
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794382825;
-	b=5rOCRC3l1y2NzbLN9CreQOlfGA38/cYH9APfIIdvRv0HnWPUvG1BqrCr+hGwnL5tVgMV
-	 aRTCK1vvc/DI2Rqo24ee4c3qYk3XxhhLtSXyS2OqzMjjf8aKwQz6CEzRzksVm9aPEYLAW
-	 b7ejQQkwvKWwdZEjIMaRLFkN026bZymoVrI2M7rZqwNa0RRdk6wNIRrKwaUDzJ+tJpXXE
-	 5R2TdxQtwud/3hA1+VMpBDCQZBj2nXCCBBqxfQg85JLa4sAPdMOxB6BeHFA6PbeWlIH0K
-	 ptjHmv+TbZmwIW5mqJbLGYfZCmosNC4bgHzQI6kd3KaIFRCK9bZUknm5Wbn4859TYAQ==
+	t=1794389130;
+	b=5QrgqgLHq/QRmyl3WmdJI0FPwId+E6c4LDR60cCxPo8FHAcrXZ+kBmVs8vH1Roon3pSC
+	 33Q0o/5IwfVE5Rftua+OE+9a+rumclUGoG3UOUgTGi0GmCPGZwxIbqeUGV84Jbfr24qIq
+	 viLo1VE6dCpjWxUjy7soTitahEqQuS6+C45rlgQYCuRqu6IXgQP5vK46/py+CYWrO9d5I
+	 iVfeoLEPAvSB1xFRHGqnAj21IqcnLZJ47Llg+6sbhjVkPAl5dNiBkpoiF1Ou9L65/ZtU3
+	 5BABGB/xXoFBMrhnH87OBbUvfBGz5WxCNibatfPiCIh6/VYGxI/363Jj/ir9DmvvY6g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794382825;
-	h=DMARC-Filter:Received:From:To:Cc:Subject:Date:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding:X-TLS:X-ENVELOPE-SENDER:X-SOURCE-IP:
-	 X-FangMail-Miltered:X-FangMail-Envelope:X-FangMail-Bounce-Flag:
-	 X-FangMail-Outinfo:X-CLEAN:Message-Id:X-Fangmail-Anti-Spam-Filtered:
-	 X-Fangmail-MID-QID;
-	bh=QDtPahw/9d52GP8Q9eE8fV2HAD09jxXguaL7/707geg=;
-	b=LDb87yelvYap9MeeDexipDjiSWNiPQJTZ/j8qjbuW8gPDDF4dE9aF8g6hu3s4Ry/1y3J
-	 xx/ORF2lI3sN45/+LLiDCvwhfAm0NsJAfvphT2x3EoeUW83OzVJdTIJpMkxZ9u1apIOx0
-	 jfyooThzxFtNZzQ7drOYFFHLQ1jPHNLr9jHiBMrGs9AFRqV3eU9R1BhnW4Vp2iCU95dRe
-	 zjjDAlgetjIhaRIqspUpbfZt2nI5kRr/lmZm+VWV8zGnB26wnwa6qCSvW3oE/MHgRVmON
-	 2PvKFhxQvdjHLjtgqMs1Y1gA17Hu5xebR9dw5BC7AzNzGHkZ5atKOvVznWMDwON4T6A==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794389130;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:Message-ID:Date:
+	 MIME-Version:User-Agent:Subject:To:Cc:References:Content-Language:
+	 From:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+	bh=+WZcGvLxQshkYZfLE/BvNL4fpFJlVGBbsEy+D7qPg/0=;
+	b=0EJe3Z+OsZNGEGQxr6TWCI/9Uj5zbDVXs1hHiXeKhpk5tnq3HxqiWu+rTVPmK6Roa37D
+	 lr4NRYC1o/uZlr1/fIF3lBl+LRIgpTIA7soIQfvI61jfjYNsD6Fmq1fx3/NMDxcj0ptAV
+	 dVqw43b/UWy65LuxyiQkpWcKZsa7zqLCJDhXjaWzRvSdxslvod9HFRy1eViHK7favDVFp
+	 Y8ktIpAMzES+76f7jKarDTHpr/y71bECDOYhO6LEFAm+BOmG/YaIVkp1u3zIMLpIzP+U1
+	 rrR8IvY09uXtPjmaULTfBCjFV0A6Uk5bhBDYrcxchrXGgMFtpfbOdxMskGzl+XIYCrw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=isoftstone.com;
-	spf=pass smtp.mailfrom=isoftstone.com;
-	arc=none smtp.remote-ip=219.143.121.9
-Received: from spam.isoftstone.com (smg.isoftstone.com [219.143.121.9])
+	dmarc=pass header.from=tu-ilmenau.de;
+	spf=pass smtp.mailfrom=tu-ilmenau.de;
+	dkim=pass header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.a=rsa-sha256 header.s=tuil-dkim-1 header.b=dlRgTmSI;
+	arc=none smtp.remote-ip=141.24.179.34
+Received: from mail-router1.rz.tu-ilmenau.de (mail-router1.rz.tu-ilmenau.de [141.24.179.34])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B31F0606A333;
-	Wed, 11 Nov 2026 07:40:23 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B31F0606A333
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=isoftstone.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isoftstone.com
-Received: from ldzh.. (unknown [221.226.109.28])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: dlzhangak@isoftstone.com)
-	by spam.isoftstone.com (FangMail) with ESMTPSA id 4jPb5k0FlFz6R2s;
-	Wed, 11 Nov 2026 15:40:10 +0800 (CST)
-From: zhangdaolong <dlzhangak@isoftstone.com>
-To: Ilya Dryomov <idryomov@gmail.com>,
-	Alex Markuze <amarkuze@redhat.com>,
-	Viacheslav Dubeyko <slava@dubeyko.com>,
-	Xiubo Li <xiubli@kernel.org>
-Cc: ceph-devel@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Shuangpeng Bai <shuangpeng.kernel@gmail.com>,
-	zhangdaolong <dlzhangak@isoftstone.com>
-Subject: [PATCH] ceph: fix slab-use-after-free of capsnap in ceph_put_wrbuffer_cap_refs()
-Date: Wed, 11 Nov 2026 15:40:09 +0800
-X-Mailer: git-send-email 2.48.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B107606A324
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 09:25:29 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9B107606A324
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tu-ilmenau.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key, unprotected) header.d=tu-ilmenau.de header.i=@tu-ilmenau.de header.a=rsa-sha256 header.s=tuil-dkim-1 header.b=dlRgTmSI
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tu-ilmenau.de;
+ i=@tu-ilmenau.de; q=dns/txt; s=tuil-dkim-1; t=1794389121; h=message-id
+ : date : mime-version : subject : to : cc : references : from :
+ in-reply-to : content-type : content-transfer-encoding : from;
+ bh=0c8nQJY1EwGY58kQ+tclmz5nR5SZVHL7abLJPMoQSwA=;
+ b=dlRgTmSIYEHXGEW4GRHpIoWB/RQ2tTiZaUf/la3v3ba7SVhSQl/HmGWSquM4FEpwTQbw0
+ WfSxMl+nDJ14S0474ZSgsPfBXsb7tyc6amNeSq+rrwFWdMYkMXVLVCCyVCfhZaAS12mPeTX
+ kmhTEKvJ98WD6QjrsR+TLubOJhD+ArgA4P+8iN7ysrwV0p3npy4DnduIhgDFhZIQNQ+kvV2
+ wycDnYPLnn6VGBrRj/nhPVGnIbI0UmxPBVTF6AqJ3fMFl440ODG+jNTQQUNS/Bp55qzNMaZ
+ XQcbFCRHNTKzTalDw8bRe1gDSXPoaf95VZEgI9bwnaiwxBfpA/ZHQ09OAgSQ==
+Received: from mail-front1.rz.tu-ilmenau.de (mail-front1.rz.tu-ilmenau.de [141.24.179.32])
+	by mail-router1.rz.tu-ilmenau.de (Postfix) with ESMTPS id DE9155FD57;
+	Wed, 11 Nov 2026 10:25:21 +0100 (CET)
+Received: from [141.24.212.106] (unknown [141.24.212.106])
+	by mail-front1.rz.tu-ilmenau.de (Postfix) with ESMTPSA id BBB385FB59;
+	Wed, 11 Nov 2026 10:25:20 +0100 (CET)
+Message-ID: <5a84c2e1-da59-461e-b1ed-f2ea3962f283@tu-ilmenau.de>
+Date: Wed, 11 Nov 2026 10:25:20 +0100
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -60,76 +60,50 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TLS: YES
-X-ENVELOPE-SENDER: dlzhangak@isoftstone.com
-X-SOURCE-IP: 221.226.109.28 unknown Wed, 11 Nov 2026 15:40:10 +0800
-X-FangMail-Miltered: at fangwg01 with ID 6AF41BD9.002 by FangMail milter!
-X-FangMail-Envelope: 1794382810/4jPb5k0FlFz6R2s/6AF41BD9.002/221.226.109.28/[221.226.109.28]/ldzh../<dlzhangak@isoftstone.com>
-X-FangMail-Bounce-Flag: 1794382810.6AF41BD9.002
-X-FangMail-Outinfo: 1794382810/6AF41BD9.002/4jPb5k0FlFz6R2s/dlzhangak@isoftstone.com/1
-X-CLEAN: YES
-Message-Id: <1794382813.6AF41BD9.002.4jPb5k0FlFz6R2s@fangwg01>
-X-Fangmail-Anti-Spam-Filtered: true
-X-Fangmail-MID-QID: 6AF41BD9.002/4jPb5k0FlFz6R2s
+User-Agent: Mozilla Thunderbird
+Subject: Re: rbd: Handle overlarge result codes in rbd read replies more
+ gracefully
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: ceph-devel@vger.kernel.org
+References: <20261104153659.1117700-1-raphael.zimmer@tu-ilmenau.de>
+ <20261110115013.3268036-1-amarkuze@redhat.com>
+Content-Language: en-US
+From: Raphael Zimmer <raphael.zimmer@tu-ilmenau.de>
+In-Reply-To: <20261110115013.3268036-1-amarkuze@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-In ceph_put_wrbuffer_cap_refs(), when capsnap->dirty_pages drops to 0
-and !capsnap->writing, ceph_try_drop_cap_snap() may drop the last
-reference on capsnap and free it via ceph_put_cap_snap(). However, the
-subsequent doutc() statement still dereferences capsnap->context->seq
-and capsnap->dirty_pages, triggering a KASAN slab-use-after-free when
-debug logging is enabled.
+On 10.11.26 12:50 PM, Alex Markuze wrote:
+> Hi Raphael,
+> 
+> NACK. Please respin.
+> 
+>   1. drivers/block/rbd.c:2902: Overlarge read result is completed as a full success without filling the tail
+>      Raphael is right that a malformed OSD reply should not `BUG()`.
+>      If `*result > obj_req->ex.oe_len`, fail the object with `-EIO`
+>      (keep the warning if wanted).
+> 
 
-Fix this by emitting the doutc() log message before calling
-ceph_try_drop_cap_snap().
+Hi Alex,
 
-Fixes: 860560904962 ("ceph: avoid sending unnessesary FLUSHSNAP message")
-Reported-by: Shuangpeng Bai <shuangpeng.kernel@gmail.com>
-Closes: https://tracker.ceph.com/issues/77923
-Signed-off-by: zhangdaolong <dlzhangak@isoftstone.com>
----
- fs/ceph/caps.c | 21 +++++++++++----------
- 1 file changed, 11 insertions(+), 10 deletions(-)
+I would like to know your reason for wanting to fail the object read
+with -EIO. I went for this solution to keep the handling consistent
+between the read and write path. For writes, a reply message isn't
+allowed to have a data payload. Therefore, the result code should always
+be zero for success or a negative error code. Positive result codes are
+handled by simply resetting them to zero and treating the reply as
+success. In my opinion, this behavior is similar to accepting overlarge
+result codes for read replies as success. I think we also only deal with
+a wrong result code here, because if the actually received data were too
+large, the incoming message would already have been discarded by the
+osd_client.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 4b37d9ffdf7f..2f9f334276d1 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -3393,23 +3393,24 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode_info *ci, int nr,
- 		}
- 
- 		capsnap->dirty_pages -= nr;
--		if (capsnap->dirty_pages == 0) {
-+		if (capsnap->dirty_pages == 0)
- 			complete_capsnap = true;
--			if (!capsnap->writing) {
--				if (ceph_try_drop_cap_snap(ci, capsnap)) {
--					put++;
--				} else {
--					set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
--					flush_snaps = true;
--				}
--			}
--		}
-+
- 		doutc(cl, "%p %llx.%llx cap_snap %p snap %lld %d/%d -> %d/%d %s%s\n",
- 		      inode, ceph_vinop(inode), capsnap, capsnap->context->seq,
- 		      ci->i_wrbuffer_ref+nr, capsnap->dirty_pages + nr,
- 		      ci->i_wrbuffer_ref, capsnap->dirty_pages,
- 		      last ? " (wrbuffer last)" : "",
- 		      complete_capsnap ? " (complete capsnap)" : "");
-+
-+		if (complete_capsnap && !capsnap->writing) {
-+			if (ceph_try_drop_cap_snap(ci, capsnap)) {
-+				put++;
-+			} else {
-+				set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ceph_flags);
-+				flush_snaps = true;
-+			}
-+		}
- 	}
- 
- unlock:
--- 
-2.48.1
+In the solution proposed in this patch, the result code is also reset to
+zero directly after the WARN_ON_ONCE, and the reply is processed
+normally afterwards. For me, returning an error here would appear like a
+behavioral mismatch between the read and write path. However, I'm happy
+to change my approach if you have a reason for doing it differently.
+
+Best regards,
+Raphael
 
