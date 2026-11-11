@@ -1,84 +1,84 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.42
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.44
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794413925;
-	b=wV1tiH/iFZdoGK1LkqDqzqNN6MloXPARYzsTx87YczCWzj0wSDnU99tuov9XhLyn/emw
-	 quBLehbIeHeu94vochvnf9bCQ/6Y0Xk+5gawVaFSZQOi5gCRNG/ca4BzZJKPDdwmqtQTv
-	 Q0W1ENtS4wV/xtbqRiiUjtp8YzeUmmEPjq1oXbuKentYB6X43P65xR12SNsQBBBPEqTn0
-	 YSl2mLs0pJYu1PY/o2e1YwiiS9v/eXlBwo+uRtzyxgpeURHwQO7Q2BixN2QMLJJjgw/mw
-	 +WDBFTEbalYIIaXryyndIchPeVkcjUK9zDlHlS4Yive9jfhGWAmiwtUrf7MEJLgbtBQ==
+	t=1794413926;
+	b=0VLEtgo5OAQqOIOOpxuVP9c8BbGuDKpqOh+E/VMqulldXkOssRiJBhm9lbwWAWnSMJDE
+	 qcx2Yb813ddyDuU3FllkYBM5NVYBUgLSLXJ7Wd0Go7cksviZzXdW8JiLXrWeSY/23DUOW
+	 FhFYPZVPD7wi1VvNWk4ZettoHiQvmbovgAHMzyAC0mm9Cq4OMTmYZBmxujKV8tmiIQ47Q
+	 NMc2XM6ASJiJMrg8DUJgAQIeGPoBBZEu8JIYBDo5IsZiJd0FASOnWG1Ewh7ln5wZw2b2i
+	 5PaL5TiHVEFojwNOdxiZ96YAWJOVx3hY3yUbcYxLgYqBpfEXmdv6n256JilRf/q5oMw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794413925;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794413926;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Transfer-Encoding;
-	bh=SQTg6mu9eOLnWguJd3WECuqCcHwaFD0TQuF9ZQxG35k=;
-	b=eFi8n5Se/yM//qUiGGJ5CuZRqpaj5DJCbhDzq8cV1rSfyuxMcoY+SL1B+5mNaRs//1Kl
-	 lCgQjdKA3/uSuG86meT56N4bkGI/DtiYK6yx791P7z8av6rJl8Q218WC/gqG63EJVQROX
-	 yiu70mQDsjGmKSPZORyH0Hl+hLEw7bS/vkQGjaI39vSLaXOwxpsHgoeqadNLmnGea+ewJ
-	 bbRSaHr2nTqbtVCE+FVNMite6CVCNaVa4oSdaPk5nug/ZFPj4HuEHQaFGUDP29W3JLWxY
-	 bLnQ+Y0ZMk9Npqe2IVY9cio+b3Pgf8RjqhIYi+czSo2p0Zdcluf7XL+n+WLoZwATOzw==
+	bh=zHAbfUofqZjzoaZj66J2AEb1qG75/hMFQRjc/fK5hjg=;
+	b=s2wckpgmEV9oxl2xjJrnOdey5tq/zknqcJyw9LfLDbwMTfWliakEPfzBOEVUNWKd21DZ
+	 LplviJ//1E4nBOKqMuNQARG73sHwRWBkbcZDG079aXhFSQ8g2nEROTt4SNTPEaVPIjKAI
+	 2V086BGP//sbzhLXQPAad2Dcz76JQBNC61dZZrkuK4+DKawzttCZZZSglP3liOKr6mc9i
+	 ngCLrO9xrQPEn1genHWIF0gdBuH6A5hVQjFwxEC/j38osyskBbh+LSf29XvAWTjc5TWyT
+	 weuwy10XkC7DsHJjkd80d1GG+e5joIZRI2q8QVYtYsarqB0zuLQj16TOzqfcSxEEgiQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=ionos.com;
 	spf=pass smtp.mailfrom=ionos.com;
-	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b="L28Sy/53";
-	arc=none smtp.remote-ip=209.85.221.42
-Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
+	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=LcTx5C4X;
+	arc=none smtp.remote-ip=209.85.221.44
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0AEA860A383C
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:44 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0AEA860A383C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E36BC60A5BD0
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:45 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E36BC60A5BD0
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=L28Sy/53
-Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-49134c8509fso2746049f8f.1
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:44 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=LcTx5C4X
+Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-490f38e9688so2671136f8f.0
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1794413923; x=1795018723; darn=vger.kernel.org;
+        d=ionos.com; s=google; t=1794413924; x=1795018724; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=SQTg6mu9eOLnWguJd3WECuqCcHwaFD0TQuF9ZQxG35k=;
-        b=L28Sy/53fBIDZZA5JNFU3qj7CHWSZMS6zMvqhV8cs690h/ubOdtBbR3+T/B2a7JVTk
-         rVQVjtZ+HqfCHbRp/0W3IInVub3vTTcOBJt8pKiQmJO2Ber1TGHkM5n0BVt2BU+d9Ary
-         aavTVlcexyEZgM14fKIqNkE/GB45NFm9ffMvANhq1eJRoG2uv2PW3l7E5Bwq/W6assIv
-         ZK9Y4cPi5d2/UR6x4cWRCzl3aK82HlMQGOCtZY9uEqEtVmi7T0mMDSY9bkKbKo+cnCLo
-         7ZzDuiGmLS4CMjK05w8jpB1fQBJYi48vr0kfClvaYl7dc4aZfhNgZmNnCoEIR78ktG0k
-         wj0w==
+        bh=zHAbfUofqZjzoaZj66J2AEb1qG75/hMFQRjc/fK5hjg=;
+        b=LcTx5C4Xz1FOa9eEWojWoGvMhDB2PhsCg6WivIIm1qYMMM8rfWlP/5meHeI35+lpZh
+         UgorwTqXUHZkiDIlL7fM49fxcp5ENfI69dgARVMXoCgVEr8NC/5g4qJ3htMsWhAfyDP4
+         x8m+KOzu3OPC8zo7xY3/fFfgDV95pGxjTRd8XVUZeCoz9xj1GLrzp4WoEIIXURb9CQNc
+         MncoR2uje0y7Nh8z6w07tungs0ceMkn9TOCxfo2n+/W0OeDqJN0TLE7dbQ2kGcaqb+uE
+         P+4W6DBBBheowZgoNWkwgPpF47xiwNALjlaQ+Ew7teA6V8ztu/nK1qXJzZz79bV+fQ7I
+         gVsg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794413923; x=1795018723;
+        d=1e100.net; s=20260707; t=1794413924; x=1795018724;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=SQTg6mu9eOLnWguJd3WECuqCcHwaFD0TQuF9ZQxG35k=;
-        b=kQ9Wq6XbvJsH1X9DeEC+SpKgi7BxC/JdB6nmGwArULLWrMHg9co3jH30r8ayjU1AJk
-         0kJGHeljus6cvrX0h4f0DjsWP9H6SOxmTOxk+z+fePB6UHCKrvVBvHlU4qpgXlqotDod
-         E7QbBVCsAY4VzQDoH42V4V461vAebbUcGNe/c8FFf/Dt0rs0G9+k95Z3hxPYuxotALyf
-         uKcIZbBGQPUG8DMaq0AGS/4AuaNPOjj4Jl39iBPHd7aA1m5CJIGlHWRWMGuVBWkUEve1
-         vYJU5sTxZlhpSB0TfPSSneWt8phwSeGrMbNE9Jcswcp4HepCeoLQ6gurWjelk1IRFpV8
-         yvhg==
-X-Forwarded-Encrypted: i=1; AL+hErFHlHq6Wf6qYNPA2NlHX1v0PG5JggvVQ1SxQpmKcljP2nfljyFvvlqtPARBTvK3syWdEjwUPFxQXbzR@vger.kernel.org
-X-Gm-Message-State: APuU4Z9/TRLtIcfKTRGABeGLnMjcrRikFGDZgqAhWbvdBYUV3wSMfQot
-	8Sgqe8ksnmMbOIvRk5w0J+XHu0LzQuX/17JAmgqw/n9w09ankGxp+0Lr9ubwHcfKrtk=
-X-Gm-Gg: AYBFou279VKCxr3KZIa4Zyi2qgSGu9Q/Om2q7Ar0He7j1boZJFOPy3WXefl8X9gCz55
-	2Ei9xsmt87mToHEsYF39fmS4sGcM1Pk/OXiofudaXBnxTpqd9BoepeRDGhmi9PerEzjR7XK65DU
-	9XSpFvDQzqNoR3VP5IiKUmX3WMzz1/8VR1t0Ug0fk86JSvDyHBuOSrxfJGyzC3iQMQ2EgwgIT5y
-	ZVe7CBjoyTlpModAFO4rVYpIBhp2PmZX2JOmzUQPERvckJY9X2KTqcBwvMmKYnrNly2dDVEAT/i
-	pjE6NdLGYpH7njwFFbhYDwlsujRqsqB1EoEk73h3rpl60BpUZIf/Qfn6dwsl354H5yfYw0zS+SB
-	1eOq/dR0OoXplCvVC0Bn5xzqJ5PLmPvKndhTk760wfEyQWrSvJJGxIPFZ2KE0hpXgDJbNjc9CR4
-	WsptfFSZ/tXlOT+8Q2Nv1GfCkBJnIBbm8kGKs0gA2mEa8SvE+ZkIPHKU4rAT2tk9Bf2zGYhrX2/
-	+wahUU4S0HTQnk662YV5ayJv1MwJXcjsn+DH07HZOUCDb5tchyFbb/zrO3Nu6z0SLsCY1/8XuJV
-	NPft9trGo2F5OymrYbk85RdI/SuVqc8grjabH0X08Bz/dFcCaymiGp3GePxRAvllCFH4NTpGwYj
-	EcC+qWF6p/EboZxbtONay0ef2P1M/NA==
-X-Received: by 2002:a05:6000:993:b0:48e:7508:bc20 with SMTP id ffacd0b85a97d-499c38bb64cmr5066357f8f.2.1794413923390;
-        Wed, 11 Nov 2026 08:18:43 -0800 (PST)
+        bh=zHAbfUofqZjzoaZj66J2AEb1qG75/hMFQRjc/fK5hjg=;
+        b=lvSHRu91qYjfXX+G5Y+tuPSxi7kZTmFbwsEOGfJzgSbwPiomAc8GAFVR4fpFOQ66cI
+         6xkVrO/hXa4l1jgN2ZuFzOcdrzM9qTXrAkuUQDBUE9QZKiz863QhH0FSb7cIVdZUxdHh
+         KBKRWclA6Suev3gym1pHaHU5J8ABlVoxZH2t4AcO8rL1gJQMx8n2velVehlBHXjg/0vK
+         c//gbTV+1Jndd38ZAVgpM+FONuLEDqGu1LwEwyLsM3B5CMn/qFKomaMYWgwQMR+IPSBn
+         hkzjRJDAzrAYXrWhkSGWYEMnOTmpZFhIi2KEWRUvXwFG2HeaP6e4Wjm/Q8R431TaVUMh
+         /xNw==
+X-Forwarded-Encrypted: i=1; AL+hErEy2/4q4a677tcisOem86AK2TWkBmParIz2yyWm5QDNdOaFrL8vjEAMgkhC9MoDnxbkMF2KJE2tyjSV@vger.kernel.org
+X-Gm-Message-State: APuU4Z8LsJYpBZ9/6C9YmuBxeT8O1+/lMhhdsY1MuDGrJBIySVr5juy6
+	FX1wfKoZigJeSECNpZZFk7yJo8o8H6f53JZwnQFusee7elCm4FiMQgMIIXE2TcmZlvY=
+X-Gm-Gg: AYBFou1+FzPZBmXLeOGc3r9lBARL+CMMlu10EHnqhgIoX7DpPwpmcz+Tpsw/GeVpsuG
+	ktfOU1UPb9Ju+l5ByrRWKYXVeJLR/zhQ3FFVLxQbXa8pzOmPcKpOf6VJk3gxhuvNk0PaGvM9Sx2
+	fVlUNFPE/fE6x+IZZGGfJh0Aw2Ic3+Ry5To/pCwRjie0zhNE4C3tA+1R7HZwtX/W8ynEb4okGUK
+	5Xr+4yPcvIpE0X+JJWJPAfVBoMLVOmghtTcaY29dFmCJDMBpvTg8icYoWcRLAlyeAHECaEi2cey
+	qOcXCP/nGsxRiKcgnXEmofeUXBUVN+72vWgD1glBlgEOyHnLx61Bu6blyrsHoTdaN/tMqKlghhE
+	km6PtoHmzH7OYfYgfic3AQijZofQMZyPIgSNAbldxE6WWV+oW9Dq63vw3hzJj6AsZakfvXnY/5p
+	r8LJVZVXayqebOK8cHxX+Qa8YeRrUBGoB+pacZ1KTPYiaXMkCFgllWaXOzAXUwBS5z1vBjwmRRL
+	DUyrBK5nZ+PFb6rDUPLU/4RXEn+FymcLxVtQ62eFCTgQvkRlsR91cJzOuAiU8oiz1R81Jis1g4c
+	vs//13lLByw39hOCs5gahH3FR7O0pcP8G7zCYP6atyhCM8oW7ad9u7MNw7mRzJjv0Qjx06MIjez
+	e51KTRJF2Md9cCmqtxpXBankYtSXDXA==
+X-Received: by 2002:a05:6000:603:b0:48a:f4d4:e1f3 with SMTP id ffacd0b85a97d-499c7648566mr5495254f8f.13.1794413924411;
+        Wed, 11 Nov 2026 08:18:44 -0800 (PST)
 Received: from raven.intern.cm-ag (p200300dc6f4cbe00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f4c:be00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.42
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Nov 2026 08:18:42 -0800 (PST)
+        Wed, 11 Nov 2026 08:18:43 -0800 (PST)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: xiubli@redhat.com,
 	idryomov@gmail.com,
@@ -87,9 +87,9 @@ To: xiubli@redhat.com,
 	linux-kernel@vger.kernel.org
 Cc: Max Kellermann <max.kellermann@ionos.com>,
 	stable@vger.kernel.org
-Subject: [PATCH 8/9] libceph: fix osdmap use-after-free in ceph_wait_for_latest_osdmap()
-Date: Wed, 11 Nov 2026 17:18:29 +0100
-Message-ID: <20261111161830.1336485-9-max.kellermann@ionos.com>
+Subject: [PATCH 9/9] rbd: fix osdmap use-after-free in pool lookups
+Date: Wed, 11 Nov 2026 17:18:30 +0100
+Message-ID: <20261111161830.1336485-10-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20261111161830.1336485-1-max.kellermann@ionos.com>
 References: <20261111161830.1336485-1-max.kellermann@ionos.com>
@@ -104,47 +104,64 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-ceph_wait_for_latest_osdmap() reads osdc->osdmap->epoch without
-holding osdc->lock, but ceph_osdc_handle_map() replaces the osdmap and
-frees the old one under that lock (held for writing).  The function
-waits for the monitor's reply first, so an osdmap update arriving in
-the meantime is likely, and the epoch can then be read from freed
-memory.
+rbd_spec_fill_names() and do_rbd_add() look up pools in osdc->osdmap
+without holding osdc->lock, but ceph_osdc_handle_map() replaces the
+osdmap and frees the old one under that lock (held for writing).  An
+"rbd map" racing with an osdmap update can therefore walk the freed
+pool tree, and rbd_spec_fill_names() can kstrdup() a pool name that
+has been freed already.
 
-Read the epoch while holding osdc->lock for reading.
+Do the lookups while holding osdc->lock for reading, and copy the pool
+name before releasing it.  Use GFP_NOIO for the copy, because reclaim
+could issue I/O to an rbd device, which needs osdc->lock while a writer
+may be waiting for it.
 
-Fixes: bb229bbb3bf6 ("libceph: wait for latest osdmap in ceph_monc_blacklist_add()")
+Fixes: 9e15b77d9af3 ("rbd: get additional info in parent spec")
+Fixes: 30ba1f020221 ("rbd: make sure we have latest osdmap on 'rbd map'")
 Cc: stable@vger.kernel.org
 Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
 ---
- net/ceph/ceph_common.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ drivers/block/rbd.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
 
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 67e88f30409d..39a0ddde3554 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -863,13 +863,19 @@ int ceph_wait_for_latest_osdmap(struct ceph_client *client,
- 				unsigned long timeout)
- {
- 	u64 newest_epoch;
-+	u32 epoch;
- 	int ret;
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 96743c059d98..d287c4882ca0 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -6001,14 +6001,21 @@ static int rbd_spec_fill_names(struct rbd_device *rbd_dev)
+ 	rbd_assert(spec->image_id);
+ 	rbd_assert(spec->snap_id != CEPH_NOSNAP);
  
- 	ret = ceph_monc_get_version(&client->monc, "osdmap", &newest_epoch);
- 	if (ret)
- 		return ret;
+-	/* Get the pool name; we have to make our own copy of this */
++	/*
++	 * Get the pool name; we have to make our own copy of this
++	 * because ceph_osdc_handle_map() replaces and frees the
++	 * osdmap
++	 */
  
--	if (client->osdc.osdmap->epoch >= newest_epoch)
-+	/* ceph_osdc_handle_map() replaces and frees the osdmap */
-+	down_read(&client->osdc.lock);
-+	epoch = client->osdc.osdmap->epoch;
-+	up_read(&client->osdc.lock);
-+
-+	if (epoch >= newest_epoch)
- 		return 0;
++	down_read(&osdc->lock);
+ 	pool_name = ceph_pg_pool_name_by_id(osdc->osdmap, spec->pool_id);
+ 	if (!pool_name) {
++		up_read(&osdc->lock);
+ 		rbd_warn(rbd_dev, "no pool with id %llu", spec->pool_id);
+ 		return -EIO;
+ 	}
+-	pool_name = kstrdup(pool_name, GFP_KERNEL);
++	pool_name = kstrdup(pool_name, GFP_NOIO);
++	up_read(&osdc->lock);
+ 	if (!pool_name)
+ 		return -ENOMEM;
  
- 	ceph_osdc_maybe_request_map(&client->osdc);
+@@ -7100,7 +7107,9 @@ static ssize_t do_rbd_add(const char *buf, size_t count)
+ 	}
+ 
+ 	/* pick the pool */
++	down_read(&rbdc->client->osdc.lock);
+ 	rc = ceph_pg_poolid_by_name(rbdc->client->osdc.osdmap, spec->pool_name);
++	up_read(&rbdc->client->osdc.lock);
+ 	if (rc < 0) {
+ 		if (rc == -ENOENT)
+ 			pr_info("pool %s does not exist\n", spec->pool_name);
 -- 
 2.53.0
 
