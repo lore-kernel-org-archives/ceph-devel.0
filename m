@@ -1,94 +1,98 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.50
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.51
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794413916;
-	b=xivyj5tqRPwSvLNZNer++wGYEnMsyrX1M+iDf+TnXNUpGPmliIrEEDQDlGOttJMcSAr3
-	 298Z7GdwSe5jaPz27khviO/Ae3jirKu4QlaVreJ66E8bOx7yfk7hXuWmq/OnjoT1/9J0M
-	 pu4UY+ATY+wVnfsXSAm3IYHUYbNxOqz/UacIkFGQdqbNO3z0S7EEi+edo1e1159dqKHbJ
-	 r6IPjfdBSfKoXU6Z83Qo8mUYVHkrYhWafjZfIFtlJ2YqMSiev7jdHC546w0bsv3FbM5LB
-	 c69V861uNL3siyNyljVunFobLh+39OgZzr3bcTLUy6HDQfzlcqkyaI2rXdv/Jj4u8zQ==
+	t=1794413917;
+	b=o934CuHf3e2U8tx3aZKOMYan4JYqJQpBq48v2VlTWrcdzuE4KHOXAZkZtjfc+UsuOd+W
+	 9x9u3jVD+u9+YB1wuPyt6oBSpmFWZnJ05mkJiUNzgdkC4ueJ+M623UEIZVMoWd7WN8nns
+	 upZ5nH7y1q8/qpvTAATk+fU+g0wUvIVonP/Cs8kBI1PZM18ROORp8HrDksBk//0J89GQX
+	 MyX9255LGu5w0aAB9KezSDiuaiCUonBfGDK7F+8WjBpQykx23AtjYCbNBNzLLZydvpcng
+	 Ry2rNt2OT3WPmSOyrnN4FBTHLyCqNCL2Ye6i57ce9ilGhT8mPWYCLfSo/ts8CLw0BdA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794413916;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794413917;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=pYaVqWRfVMO0uhb95MhhUmPfOL+wJE0vw9tIEmvoQMU=;
-	b=5B/Tu+Fl5twxHdpR37EVa3A/V2VKKuVrfhS/WxK9t1Y11u8XTnk8uzTlMXV3sIvrNsKL
-	 /koLXQEeMI5nIyBMcl+qSM92GNQB5i4FmL/r7H9eKzoVrw0p7PeTXAiUS3M+8Pu8QWvy5
-	 plsdVLdrlkwdkyz+3rhGnBlZSBvZsW4P8XXtghMqnAs/TsYuECKVia6+pS9xu4fIgnkwo
-	 lRHQ5Bpark6i0M000cR6rlRbCpaLfM93albEcCIfp8TNs6RoXgayMp90yPtTsWpQ419hh
-	 7TFQoM1/mxrqbeA9vtlU0EQuDRsA9N17FjiDuSSZvu4AFMOIr6eEMCEaZhYHQWCeSOA==
+	 From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
+	 MIME-Version:Content-Transfer-Encoding;
+	bh=PywhPEppgcWI+Me/jVt+CP7Qe/6FQfOUGlT878EeRYg=;
+	b=EKNmYJs2ZmEy1QWdO0LLaxOjqE2oGK5d01gJRmeg3FlTBtRhkIbmBo0r+EJBZdtB9x3/
+	 u0D3x45APzhlLmqzjfPX/0/o5epCCPS6pEJUbLLRovh6HI6Zdrneunmjm2aPN9fbXuG5s
+	 O2QruToBxhLWshh2eceXfZJ04EjHIsc9Go9bqmgPm9U3Wl6lJnP+66aMKzrfGuxx2Vqej
+	 SIgjE2WS68JFRxxwVky0FUjg/HCGYiwbL4wwKXWUTL3G/1fwkXgY9x+vTXyeT8bgVLii0
+	 auF6J6kCZj8Ts8suxqKgMsL6xqAZt5BFvtSI6gJ9KGWY8R9PG1Z5t7QMuUs5tia79Uw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=ionos.com;
 	spf=pass smtp.mailfrom=ionos.com;
-	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=Rwc5Xg7p;
-	arc=none smtp.remote-ip=209.85.128.50
-Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+	dkim=pass header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=MAULci7y;
+	arc=none smtp.remote-ip=209.85.128.51
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6C66606A32A
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:35 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D6C66606A32A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA5DF606A32D
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 16:18:36 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CA5DF606A32D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ionos.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ionos.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=Rwc5Xg7p
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-4a1b07c3c5fso32071855e9.1
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:35 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=ionos.com header.i=@ionos.com header.a=rsa-sha256 header.s=google header.b=MAULci7y
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4a215e64962so37528845e9.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 08:18:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google; t=1794413914; x=1795018714; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=pYaVqWRfVMO0uhb95MhhUmPfOL+wJE0vw9tIEmvoQMU=;
-        b=Rwc5Xg7pOzJR7tJn91gyQ+7iHZOO1AkhGOyIbokAGQB7iwuy1rDutrIgH8HWLCj5U2
-         FRxt62Agv68Xt/BwXY2JVslgR7sN+xb5xZWyiGeqbln29nva+H2xWYlFTmkDQRnvkXNh
-         jRqR0ypCH5Pp8NZHKYOlVwNhj09wqJDmivf8Sa4+hfWDMGAOy4nZrGSPLhhSPsDxjCJ3
-         bMiPMWUY68s13BiZngXpRlpwIs7s73+jJmVb8p8WDYUEFptoN5lm7GcD2Any49M6EL8/
-         HV701N3DNqfIuERDhulzdNY29glm/i2QqkHZB4SpMB90xW0tbT+OmjiQDvNL8N8dLbRc
-         y5Yw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794413914; x=1795018714;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=ionos.com; s=google; t=1794413915; x=1795018715; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=pYaVqWRfVMO0uhb95MhhUmPfOL+wJE0vw9tIEmvoQMU=;
-        b=F4JBYxliCv3dJWwQOOVpeIODXnRXT78R8nYog0PKAion2edZFAHoiltowsPDtYiQQj
-         SYakJUqJGmIuRA8loF3eX8OTioi4TzdaBPBMLHuajGFdauRwJE44Pe1qd2F3NMYnrRBh
-         16PDfDHUfq0DHtVVCyNll++YgVFNPOEQqUb9emC7gPTm3KqjV64zWgpFFbT4yurPF7lv
-         kYhbvEhfuDIfeOJawnpHQawVBVv66YUT5ItPhJXlwQ+7mT1C/me3ntOQjsM1y19UPDI0
-         IKC6gDht/5yjwu1GuW01EHav6/XcNAuZsX46Bqv5z1M1P+KH9ANytnV3GdUl6/xG5WCH
-         Ph3A==
-X-Forwarded-Encrypted: i=1; AL+hErE5rUijXUT95tbL45qVA4aiTB8OmXTd+M1BY1itMhrVwDc4Hm1UO1Q9wLDvvht7hqYy+D+g3GHh8sFU@vger.kernel.org
-X-Gm-Message-State: APuU4Z8GwYuC3uq2U/F05IAE0RaxHJ8LZsPsC6l/hFdsdrq/pbBsZzzC
-	nMxjNYTGq3N6wKp8v2bH0dc9FAf5oKeGgMMf/xBQMeNmbQDT3PnGyZmlqI7Q4w4TMHM=
-X-Gm-Gg: AYBFou0zLKO7q9tq28xhYRO1uw0aMQuJtHGtvn7OHhY5vplCtu8Ymre7aH3Cc685WYg
-	xQ+bp3VonE3Otddgvto+Bsy+21hf8XAeatlFtQsvDDrG0MFi3Hacec+w7VlrzGhvNZ8KEiuyhvw
-	8u3+B6w1VIAo4LmCn8CsliHDkO9E5bPZ10l7ku51lBpw7zw1SCPM8mdwrwLAYmAqAufz3IPrLC8
-	b7S0ibKNIFNwEX0cb8QeqrMnOo7CO6hRmunk3c6wfCQqm5iuqkQ26DJ6irniueff2FYbIDgPhWU
-	yrZv23eQ31zyvn6qJXHvZvUikMwUZk71W7kxOBZ/9sH5iSZv6b+WvqwzSvg8i4YRD1p5y+t7G3m
-	8UIVeiZVtASJIghBDPsGhvJgWZggcC8QEzfAy6bn5vx+PPBj/r6Oihost8i592QOqG49esDM3DG
-	W+npTPyWc2tvYB68Oa2UBBrv7Sg4rjjkJvdR2jAFAzeqJCAjxXCZOp/Lwth/9qWj8/2Yp57p0ud
-	W1uYhEPDQaOwG/lenpNNJRWaqsioIOZUDR8pwcYoSlLs2ZRrOBS9pGVdxyjnG/gt3/ODmweliS4
-	UbkgoWQ+ZJIl7bgZUdwnzy+Ivt262qzObs4bEti190Q+R4YsCYB42uOe4oKFfmetuVaiteHDFgH
-	YQ3Zt7uh7IvHdGkBp0Kinaes7K5SX7A==
-X-Received: by 2002:a05:600c:8b34:b0:4ba:e7:ef3d with SMTP id 5b1f17b1804b1-4ba09321cbemr52115015e9.1.1794413914216;
-        Wed, 11 Nov 2026 08:18:34 -0800 (PST)
+        bh=PywhPEppgcWI+Me/jVt+CP7Qe/6FQfOUGlT878EeRYg=;
+        b=MAULci7y91YTKEUFyO/XThAFj2Pe9m5tWcxpxxpPKFaUanSCNrn4fBmKilzd34WSVy
+         F1Rl+ozGWD4G5Lrf1+qZs/31vD47Do6X0Px+St1/m7+GMjp3+b06PHGA4G5TDoTHc/Jk
+         PlHZOdI0PvQpwMieLqh8X1C8gG6fSmoMHQggRwuvU52FLa5qfw0OX9eY0mWZP+o9x/P4
+         7JTJKsWSfHwz1gtTy4+jlmc2v9A4mBHhfHPcwH7NN3ZzhsfHHyk0JVkRMgcdvvnDj6p+
+         EmpBTZrZwmTtWi9pjEBzEpowQ4p+LvPs+JzZi0RuNSyAKMd8KZPs4UGDT1678uLXaDDS
+         HFlw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794413915; x=1795018715;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=PywhPEppgcWI+Me/jVt+CP7Qe/6FQfOUGlT878EeRYg=;
+        b=QL4+z9ilP0OERqYk54XDfFalLGXU01l7gRWOnT1/SiF98fxCL389G7yj2voch1Wgnh
+         XHTUtNqsk7sh7otRdFCWqhaPu7gS7pjJPzUWxgm9MCkarDhkcY98KThZ//ut1y0SMFXa
+         RB2g/UXi1Aop/X89r2O2ylemr4KbDesZEdzL4kmCU/KqOA77xFzNLBIVHYInqup3cSqr
+         ZwB8AHbvQIgKavwdpQJjr6tqbnXPEP51HOSar3B9n9zKdfpXj6dX3F9rRyT3jfz5WGyi
+         PFBjduXnFWNxCqLllkerLXia8l48b7mkYfResQxKlN7Ig9x0uSu8WYrOlsLF1PbPAc8O
+         MWyg==
+X-Forwarded-Encrypted: i=1; AL+hErH2+6GYs9/LhMA0KxFdoem2e5469fE6lfXv8fKnUmaiHlHkAI0CpYrD53cUopqUK/OsXKghWEvgtGcS@vger.kernel.org
+X-Gm-Message-State: APuU4Z/dN5+djXua07di9Li/4yiLOY7E8C+rwyAt6RKEObA9rgR52kFM
+	KZB4OPyGDp0k/bZ+DDjNcy7Wfqtaf+EXyx5m9MSZy09pN3sDrWsP2Hx0oM6kvKJgxTg=
+X-Gm-Gg: AYBFou2U2+vJ8szH+mz5PWQpqhsd8EXtpQHusG7jfrUM6NJPx9C5K1hxBD2OBRQURjg
+	w/UpIY2tj7AVRtr1XotngH2w54AMpVgGaaGwg0a42pmxNK7bscDCGtavtkXptW4JRnzDkOtjTyW
+	CbsH0Vu9QYP2n5Stv6eJHsu8a3bqtxP41RTbZI52/1y74Uw56cmHDqmirgBsMeojA4F+1b1cXKj
+	rap1vLy45SynEa+8rDnv2ULR2RgTgxgKwKNBOhjhK9ytKG27dWuVkJLqOxAXp/3nrsKWfOefSAS
+	8fQvrAIvcm2LkDN/ZPBXSzzuGh39emPYUa4epmq/VEKkjCrH511b7KBHTuWOKUn+tPf+4d6rOuV
+	kFybEx3ZjyyHzN9sXYz6vRnwd3bmvzfVaRfN1HO/7DyRsAUyWRHPbaFRmoz4d1VhRpd/z/uRGWU
+	d2unpGqg8ffZRafQvGLfFUbVUyx/67xWnauhQP/P6IroXDTv9RJYAEqFFwDq6160VckGYOaoQJJ
+	hI85iNf8is/Khwssi2yLwerHyXd+7C1ZtB3SCHxPccyy2+YiikdzE6TKeZk6psBApXjm2eoioLP
+	UCENnKLbTy/Ngk/x7aBDJVISIwL0nScVlbNVCdl3xzqFPTF4pJTsbjag8W/wK2Uny3aGEmHKiqm
+	tYPiJ0RnRT32WfUJjvS9/F51tibAjkQ==
+X-Received: by 2002:a05:6000:2008:b0:48e:d88:55f4 with SMTP id ffacd0b85a97d-499c38bce0cmr5171391f8f.2.1794413915273;
+        Wed, 11 Nov 2026 08:18:35 -0800 (PST)
 Received: from raven.intern.cm-ag (p200300dc6f4cbe00023064fffe740809.dip0.t-ipconnect.de. [2003:dc:6f4c:be00:230:64ff:fe74:809])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.33
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4983600bd6esm12209506f8f.28.2026.11.11.08.18.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Nov 2026 08:18:33 -0800 (PST)
+        Wed, 11 Nov 2026 08:18:34 -0800 (PST)
 From: Max Kellermann <max.kellermann@ionos.com>
 To: xiubli@redhat.com,
 	idryomov@gmail.com,
 	amarkuze@redhat.com,
 	ceph-devel@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: Max Kellermann <max.kellermann@ionos.com>
-Subject: [PATCH 0/9] ceph: fix mdsmap and osdmap use-after-free in unlocked readers
-Date: Wed, 11 Nov 2026 17:18:21 +0100
-Message-ID: <20261111161830.1336485-1-max.kellermann@ionos.com>
+Cc: Max Kellermann <max.kellermann@ionos.com>,
+	stable@vger.kernel.org
+Subject: [PATCH 1/9] ceph: fix mdsmap use-after-free in ceph_statfs()
+Date: Wed, 11 Nov 2026 17:18:22 +0100
+Message-ID: <20261111161830.1336485-2-max.kellermann@ionos.com>
 X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20261111161830.1336485-1-max.kellermann@ionos.com>
+References: <20261111161830.1336485-1-max.kellermann@ionos.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -100,44 +104,55 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The MDS and OSD clients replace their maps and free the old ones
-under a lock: mdsc->mutex for the mdsmap and osdc->lock for the
-osdmap.  Several readers dereference these maps without that lock and
-can therefore access freed memory if a new map arrives concurrently.
-The worst is ceph_statfs(), which any user can reach and which loads
-and dereferences a pointer from the old mdsmap.
+ceph_statfs() reads mdsc->mdsmap without holding mdsc->mutex, but
+ceph_mdsc_handle_mdsmap() replaces the mdsmap and frees the old one
+under that mutex.  A statfs() racing with an mdsmap update can
+therefore read m_num_data_pg_pools from freed memory, and then load
+the m_data_pg_pools pointer from it and dereference it.
 
-Each patch takes the lock that protects the replacement around the
-reads.  __ceph_setxattr() cannot take mdsc->mutex under i_ceph_lock,
-so it uses a copy of m_max_xattr_size kept in the mds client.
+Any user can call statfs(), and mdsmap updates happen whenever an
+MDS changes state.
 
-The same problem in ceph_compare_options() was already fixed by
-commit 19db525816db ("libceph: use RCU to protect monmap in
-ceph_compare_options()").
+Read the data pool while holding mdsc->mutex.
 
-These bugs were found by code review and have not been reproduced.
+Fixes: 06d74376c8af ("ceph: more accurate statfs")
+Cc: stable@vger.kernel.org
+Signed-off-by: Max Kellermann <max.kellermann@ionos.com>
+---
+ fs/ceph/super.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
 
-Max Kellermann (9):
-  ceph: fix mdsmap use-after-free in ceph_statfs()
-  ceph: fix mdsmap use-after-free in debugfs mdsmap_show()
-  ceph: fix mdsmap use-after-free in __ceph_setxattr()
-  ceph: fix mdsmap use-after-free in send_renew_caps() and
-    renewed_caps()
-  ceph: fix mdsmap use-after-free in mds_peer_reset()
-  ceph: fix mdsmap use-after-free in ceph_get_tree() error path
-  ceph: fix osdmap use-after-free in ceph_sync_setxattr()
-  libceph: fix osdmap use-after-free in ceph_wait_for_latest_osdmap()
-  rbd: fix osdmap use-after-free in pool lookups
-
- drivers/block/rbd.c    | 13 +++++++++++--
- fs/ceph/debugfs.c      | 12 ++++++++++--
- fs/ceph/mds_client.c   | 18 ++++++++++++++++--
- fs/ceph/mds_client.h   |  7 +++++++
- fs/ceph/super.c        | 19 ++++++++++++++-----
- fs/ceph/xattr.c        | 13 +++++++++----
- net/ceph/ceph_common.c |  8 +++++++-
- 7 files changed, 74 insertions(+), 16 deletions(-)
-
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index bb5591c1e154..01f92d77ef45 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -64,6 +64,7 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ {
+ 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(d_inode(dentry));
+ 	struct ceph_mon_client *monc = &fsc->client->monc;
++	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_monmap *monmap;
+ 	struct ceph_statfs st;
+ 	int i, err;
+@@ -73,11 +74,14 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	ceph_blog_enter(fsc, &__ji);
+ 
+ 	boutc(fsc->client, "begin\n");
+-	if (fsc->mdsc->mdsmap->m_num_data_pg_pools == 1) {
+-		data_pool = fsc->mdsc->mdsmap->m_data_pg_pools[0];
+-	} else {
++
++	/* ceph_mdsc_handle_mdsmap() replaces and frees the mdsmap */
++	mutex_lock(&mdsc->mutex);
++	if (mdsc->mdsmap->m_num_data_pg_pools == 1)
++		data_pool = mdsc->mdsmap->m_data_pg_pools[0];
++	else
+ 		data_pool = CEPH_NOPOOL;
+-	}
++	mutex_unlock(&mdsc->mutex);
+ 
+ 	err = ceph_monc_do_statfs(monc, data_pool, &st);
+ 	if (err < 0) {
 -- 
 2.53.0
 
