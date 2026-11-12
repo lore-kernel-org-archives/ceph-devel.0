@@ -1,55 +1,55 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794447081;
-	b=TA6mcNFrgdaBmmO/6DrS3FowzljCCtuoStkBLMUxmqhLCrDCQYNM1du3Us7d/VUpqFG2
-	 w1nuADp8EbnIvPtbMvOpH81m7o5VwOyX8mY4IMoRGxz/RjoA6SJ9DW2hFmomjpLIkTEI8
-	 NOndUCnuf/i2mSVBjZcaN/1MBodakYGVQKDf0+MdCnTTrp3BjTmZmw02cQZX4P+ubAjKU
-	 0nkVel2yo/nZH3j49eN99bmJTbtomBDDCs8+E5JlcZzojtDokmX2ahaN6CfZ5GGEARE/k
-	 2Ou9ezi8GuAFmR4tnswWlLj7uZyjVpbUAk97d7Y+Zqk1RIptlniJsYrhaRbXfE1EW+Q==
+	t=1794448617;
+	b=zJfDFMVTWlZEhAaSVY3jTjuFsBDIeehYN+nRt0/WqDdpFABv8/IuENFHBuNILinDkTgj
+	 jWYTvwhnX7z256fMRPwG4r/zJwd8lCHdThCnRBBCQ0nblQAabC+rVGU2FARvrtOY4DyLC
+	 vVnfF2G2BfZ5/JIzDT8HMSykT9IRc6u0de+nNncSrsaTAbhLcRQJdHo9PEdMQuIUaCIk5
+	 JRApSq/oTpgj/EpRpHrK2raaUPsLUktd0YCQ0M5akzU3SjUI8k2CLe9y6ugKsc3EmdoU1
+	 4gv4NfQDHRLn6or+D0RjJb81Sbfny1XtKJEobyyPxx8YvsjJT8EFdHpF3gOuwt7DFJQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794447081;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794448617;
 	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
 	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
 	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type;
-	bh=tbAelE0MgrzBlqY6meyYnUeXwzPQQ8o74J39xWeGzMI=;
-	b=aNR4h0coqfqTua/5NSesGQJ43uMQ9k/nI1Uth/L+dvSNhHILuWrD8NFXxygSKGI+kQp3
-	 HdOXcybJfotb0JHUKuQ8aOkewg2tZh5WDNnDKSvm+bSEqduuu3Elbnhmm05n4A3qlRyaH
-	 dtzt7AWHxO2yZlrgGZQaOYJLHX/pjATTEG/2uTXqhASRYFaEthZhVRZRZsf+atTND0XQS
-	 GJaDvJ9KD99qblmxF3GZqL4duFeMRt3vOH8N4EX0sKmTd43t9lX70ovQgNkB37X+wNn1S
-	 3GgI2Eg7IDUOA2ixbdZ7M8a0y35QjN0fmXyZv0cFh4XFq+4z+2KAygkrmdYo6Niq1mw==
+	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
+	bh=vlcD19G9xALmfVWh6qixAsChTTMjTVjAvWOnGyaCmRU=;
+	b=CNDBMMPVBclcBuu3z+emMOerSww9A5A92P2w+wJSeRCKjQdHGgGFsyWuq0/X9VyMo3ye
+	 RkLOujB8xwmweo774AiHLk+0h9Xj2TskKdqjgbOhcoLOzZNpNKfMHP4PqLaum6/5a34/l
+	 uz5uTCsIbCbs/iKErkU+xu13VcrwJDBSPimzWz62WoUdKxmkXos6eN2YxVAdseA+4c9sR
+	 HcGrysxMIR0rfCA7R7WziZZoPS1Xerw575QQwUr8ziP2HNT6/88a/tEKIXuQpHyFLNHE5
+	 gip0rNtnUNdJJEL0+W6y1c+F56WAlhavocEC6LsnzOJbNr84ufiHPtxLiGh/twlU3Mw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cAX1KQf1;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KVg8hANL;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4305606A334
-	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 01:31:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75809606A31C
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 01:56:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cAX1KQf1
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 949AE1F00A09
-	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 01:31:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KVg8hANL
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17E7A1F00A09
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 01:56:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794447080;
-	bh=tbAelE0MgrzBlqY6meyYnUeXwzPQQ8o74J39xWeGzMI=;
+	s=k20260515; t=1794448617;
+	bh=vlcD19G9xALmfVWh6qixAsChTTMjTVjAvWOnGyaCmRU=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=cAX1KQf1Rzsl3baWjSeoL9KqFkTL1LmLNbp0E7qvwOM0SZG/F5dkudx/fNzxgDuMK
-	 GK/I7Yw6HwlPiQQsj3ellpPk3FiAvNUAb+8kNfBwSkPOvSIjKy+Eicot9YEg0s3OPO
-	 3c68Ud/AcuoSMRQcGVhTkxPtAYF2zG8Y855SXbuP6NE9e7yWaEK8/PxZniNNPDXHfl
-	 HW5rJtHZoo3tPzKBs4DbPLKZbDYPi1BTOBK2pPoYbDVc0N7g/NJGX5L6VhpZ7W0WUK
-	 TqwJBmB/5yyxNJJN/6g1OttGDgZ9sS/p46Mx1UFXCzfiPZW5xkagpHbky8bqUYNx71
-	 YXOqfx3pBCcyw==
-Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-5c102ad8420so3093455e87.1
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 17:31:20 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AL+hErFiZHjHj/OnW4v9yCHEky/ua2I3VIdtCbuG/2ETsX3KWxqICeVktzaQ5/V+vXaeASZa7HQRKGrdmQFw@vger.kernel.org
-X-Gm-Message-State: APuU4Z80SU9NYaCKfDSStTZB4kcu8Ql0mBcHBwxAW34/qS5dMahQ9vE/
-	PU5ect3pfNpeeegjb6VxIvMogQhHAvHoN/XQW7TpL2nXXDHEaOxQ9ZkZuuO+TvsF9rcI3kN17Nm
-	9J236SZIoGvrhtVFD/8ao7oo+25cA+CQ=
-X-Received: by 2002:a05:6512:4011:b0:5c0:a57:2cc5 with SMTP id
- 2adb3069b0e04-5c15d5459a1mr1246023e87.3.1794447079338; Wed, 11 Nov 2026
- 17:31:19 -0800 (PST)
+	b=KVg8hANLAXoO4hjUTXJD88oRydg5HS0AYNxQVPyuoKzVm0EzcXS4t3Cp1efu4QNd7
+	 cCoMliDydlabNX8nRDYdEGCFwjwXqDgyyu0hdKT80vkFoduN/6sitOT8AyRkuIHV4K
+	 uOxX5aY6+YRtM7uHFbuVgOBArvcFsqgDs73ZqlCntPtna1kMcrjnhOQ5NVRSOuGXfl
+	 7A64kABhMJvbZ0kuwlsbQPOuWFhfhEXlqDA3rTFZTK2DgDJ+c1Dbt507GZLSwBGEFX
+	 Js+zqSfokjA1+OWT8REZ91NlF8u6ZgoVDrXMPxQ43o3/iM1ua5rub1UZZNxqZzccZn
+	 rqxfZU2t2B+qw==
+Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-3ab46699a09so32030781fa.0
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Nov 2026 17:56:57 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AL+hErHkAHROY2BqKc/bN2WoDjshpI2oak0bUFNifoZEEX+DSCQ95v7wbzuJn3BYbPC61ogv6rchHh0QLSxn@vger.kernel.org
+X-Gm-Message-State: APuU4Z/oZ4N/ygPhdkv4qHXze+KICk+kthLjc/357wotMhCX3zTcv0XZ
+	fj8SHvkZG0sRuTwVh6X21hkI7KOHkioRSqyNXJnuErNwc27aoBa63+uXqTCu09A2+7yucrL9c2e
+	DNMVAdcrZtOV6sPVgLJVaHUshnFFJwC4=
+X-Received: by 2002:a05:6512:b9e:b0:5c1:44ea:cfa8 with SMTP id
+ 2adb3069b0e04-5c15d649f37mr1460481e87.47.1794448615836; Wed, 11 Nov 2026
+ 17:56:55 -0800 (PST)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -59,34 +59,112 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261111033150.847104-1-kj2864@nyu.edu>
-In-Reply-To: <20261111033150.847104-1-kj2864@nyu.edu>
+References: <1794382813.6AF41BD9.002.4jPb5k0FlFz6R2s@fangwg01>
+In-Reply-To: <1794382813.6AF41BD9.002.4jPb5k0FlFz6R2s@fangwg01>
 From: Xiubo Li <xiubli@kernel.org>
-Date: Thu, 12 Nov 2026 02:31:08 +0100
-X-Gmail-Original-Message-ID: <CAOuZWzyKFAfOFDu1p8O4M4qCS6WgvTXtoFq89wnZSx3OcCXz2w@mail.gmail.com>
-X-Gm-Features: AclHuK-2jkI_1P4f-3m0WBpZsZ-pjI-2oWTd2FJHzyQYsGPvJZ5SBMTR5ALOLsI
-Message-ID: <CAOuZWzyKFAfOFDu1p8O4M4qCS6WgvTXtoFq89wnZSx3OcCXz2w@mail.gmail.com>
-Subject: Re: [PATCH] ceph: Use unsigned types for snapshot split counts
-To: Kaho Jiang <kj2864@nyu.edu>
-Cc: idryomov@gmail.com, amarkuze@redhat.com, slava@dubeyko.com, 
-	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	co+408fcc361565713f@bugs.sh, stable@vger.kernel.org
+Date: Thu, 12 Nov 2026 02:56:43 +0100
+X-Gmail-Original-Message-ID: <CAOuZWzxwa2hB-Sr7zm7aAhhsM6OBqMF_A5C==Y=HvM47EAc9Nw@mail.gmail.com>
+X-Gm-Features: AclHuK_9QaL_JNXEb95zt0gFcFLZIxE5kmkdC5h7lK5XobXrnpOjdQOgNcl3ID8
+Message-ID: <CAOuZWzxwa2hB-Sr7zm7aAhhsM6OBqMF_A5C==Y=HvM47EAc9Nw@mail.gmail.com>
+Subject: Re: [PATCH] ceph: fix slab-use-after-free of capsnap in ceph_put_wrbuffer_cap_refs()
+To: zhangdaolong <dlzhangak@isoftstone.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Shuangpeng Bai <shuangpeng.kernel@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Kaho
+On ... zhangdaolong wrote:
+> In ceph_put_wrbuffer_cap_refs(), when capsnap->dirty_pages drops to 0
+> and !capsnap->writing, ceph_try_drop_cap_snap() may drop the last
+> reference on capsnap and free it via ceph_put_cap_snap(). ...
+
+Hi Daolong,
 
 Thanks for your patch.
 
-The u32 change fixes the backwards move on 64-bit (I reproduced the
-KASAN slab-out-of-bounds with injected split counts and it is gone with
-this patch), but on 32-bit sizeof(u64) * num_split_inos is still a
-32-bit size_t multiplication and wraps: 0xffffffe0 still moves p
-backwards, and 0x20000000 leaves p in place while the split loop then
-walks split_inos[] far past the front buffer.  Could you bound the
-counts before advancing p instead, like b3bf89767e3c does for the snap
-trace, e.g.
+Reproduced on testing with KASAN and the doutc in
+ceph_put_wrbuffer_cap_refs() enabled: dirty a file under a snapshotted
+dir, rmdir the snapshot (snapc seq bump without new snaps, so the
+cap_snap is queued with need_flush =3D=3D false), then sync. Every
+writeback completion that drops the cap_snap gave two
+slab-use-after-free reports (4-byte read of dirty_pages and 8-byte
+read of ->context) on the ceph_cap_snap cache, freed by
+ceph_try_drop_cap_snap(). With this patch the same 30 drops give no
+KASAN report.
 
-        ceph_decode_need(&p, e, size_mul(num_split_inos, sizeof(u64)), bad);
+Reviewed-by: Xiubo Li <xiubo.li@clyso.com>
+Tested-by: Xiubo Li <xiubo.li@clyso.com>
 
-for both arrays, and ceph_decode_skip_n() in the non-split branch?
-Also, please rebase onto the current testing branch.
+Thanks
+- Xiubo
+
+zhangdaolong <dlzhangak@isoftstone.com> =E4=BA=8E2026=E5=B9=B411=E6=9C=8811=
+=E6=97=A5=E5=91=A8=E4=B8=89 08:40=E5=86=99=E9=81=93=EF=BC=9A
+>
+> In ceph_put_wrbuffer_cap_refs(), when capsnap->dirty_pages drops to 0
+> and !capsnap->writing, ceph_try_drop_cap_snap() may drop the last
+> reference on capsnap and free it via ceph_put_cap_snap(). However, the
+> subsequent doutc() statement still dereferences capsnap->context->seq
+> and capsnap->dirty_pages, triggering a KASAN slab-use-after-free when
+> debug logging is enabled.
+>
+> Fix this by emitting the doutc() log message before calling
+> ceph_try_drop_cap_snap().
+>
+> Fixes: 860560904962 ("ceph: avoid sending unnessesary FLUSHSNAP message")
+> Reported-by: Shuangpeng Bai <shuangpeng.kernel@gmail.com>
+> Closes: https://tracker.ceph.com/issues/77923
+> Signed-off-by: zhangdaolong <dlzhangak@isoftstone.com>
+> ---
+>  fs/ceph/caps.c | 21 +++++++++++----------
+>  1 file changed, 11 insertions(+), 10 deletions(-)
+>
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 4b37d9ffdf7f..2f9f334276d1 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -3393,23 +3393,24 @@ void ceph_put_wrbuffer_cap_refs(struct ceph_inode=
+_info *ci, int nr,
+>                 }
+>
+>                 capsnap->dirty_pages -=3D nr;
+> -               if (capsnap->dirty_pages =3D=3D 0) {
+> +               if (capsnap->dirty_pages =3D=3D 0)
+>                         complete_capsnap =3D true;
+> -                       if (!capsnap->writing) {
+> -                               if (ceph_try_drop_cap_snap(ci, capsnap)) =
+{
+> -                                       put++;
+> -                               } else {
+> -                                       set_bit(CEPH_I_FLUSH_SNAPS_BIT, &=
+ci->i_ceph_flags);
+> -                                       flush_snaps =3D true;
+> -                               }
+> -                       }
+> -               }
+> +
+>                 doutc(cl, "%p %llx.%llx cap_snap %p snap %lld %d/%d -> %d=
+/%d %s%s\n",
+>                       inode, ceph_vinop(inode), capsnap, capsnap->context=
+->seq,
+>                       ci->i_wrbuffer_ref+nr, capsnap->dirty_pages + nr,
+>                       ci->i_wrbuffer_ref, capsnap->dirty_pages,
+>                       last ? " (wrbuffer last)" : "",
+>                       complete_capsnap ? " (complete capsnap)" : "");
+> +
+> +               if (complete_capsnap && !capsnap->writing) {
+> +                       if (ceph_try_drop_cap_snap(ci, capsnap)) {
+> +                               put++;
+> +                       } else {
+> +                               set_bit(CEPH_I_FLUSH_SNAPS_BIT, &ci->i_ce=
+ph_flags);
+> +                               flush_snaps =3D true;
+> +                       }
+> +               }
+>         }
+>
+>  unlock:
+> --
+> 2.48.1
+>
