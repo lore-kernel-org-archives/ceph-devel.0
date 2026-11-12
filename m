@@ -1,113 +1,111 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794489512;
-	b=QnKPmV2YCCWaEeJPtAKDAP5lZQm4JODsARaK8ML4vrGxnas95CQr63u6jOgWp2hfEO8m
-	 ae/xSgrgEjV4H8tLCxMuT88pm1J8gJQ2coWH5E4UhQwYqklrCg+tsoG+ygjFbdDFxvfKi
-	 +e9hICrcmICbOtsx4DMVr69psy6cMbAsUROMDU52yic5ecGgQ76S5AmuW6SKM5HXSzjZF
-	 0fye4KlK+9iSeYMfW3Xsp/jOsmnAkGs2GLJnNSfhM8Fc/WrTz5fhQzuRgLB4DCtNAOsgH
-	 unSCy3xx13toRLzlfuOp2MaiWrObM+smfluzMmGy8ITf3jr3aRPnXtH7UJvoKXKfRjg==
+	t=1794494203;
+	b=ROPyxrz4f5b5nxQy6CUhvW2xr136C9jDnqR5qM8DaQ06J4Z2tj0e5T6bH3F/VFBK3Lo3
+	 toR7qfNzWOs3lyFJc1bygAawwpazl8qvOnF9iGziXRtvXP83/pINgBOZPql8vZUwoTDRy
+	 DLkrIOrZHvjXroDqc+1ydEUeTG8+b4uRQ5+NtSBH5bze5Oi16k2oxbPpO8RVpMYGt8fTI
+	 o0Fuopqq6pHFR5sAIi9JLLe1UQVq7Kwfy28gtbDkq70T9lHoxR94A8TsLycBxhn17nX6L
+	 NUl5AAxgoLx+0g78Fulb8NDxDDshEVz9I5zYIDMUtFpPOZHZXOIcFDWqIhqP+mSMTLg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794489512;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794494203;
 	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
 	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
-	 X-Received:Received:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
-	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=LosFSTGbZO+f/zG7X8uytuOE1D7kZdFxkLZIZS8x1Dc=;
-	b=H6aEUidJxQUKo6R9wYpN2sHeC+yznZb1Pl4lBEevzeXQOSlJUnOudsRbULOkiG23klQo
-	 jMAieuqVnuk2jlvLy3lR1vIAYJkY66yQszkzbMSBXFoWbDoirlVn3d1m1UtMPXxP2dzAs
-	 e1hSl2g2AGW0Ew6ApmuNYY0xFgFUNxwFEGWUe2q+tVkASuxVR4v8/0AnlZyu15WjkpDBn
-	 hKvFnHedz9d+2MqgJQZqm5JiKPSlNMPyhpTdAmzdvRK+ScD9K1h2Hv3SGr+mtIiP5uZwC
-	 UIwyopRElNx/Zpn4I0oWm/5OublZ2qzm6f380A6VJPZ68JuKkJWn+hzF9RaIRxpZNxA==
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
+	 Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
+	b=ggmAyHxz5I3qvSUTl7vvTj41qdxSBaiwRx1yboq7UI2cvC0PiiOPlJ5YNaHOsESODrkG
+	 vO30/B6VddMVMXrXUupbxv8p4H1rNX6K97pafttdclNTX3Gqh4cW01K/EmJCZE6BGwPgs
+	 S1NhYZ9PZKJh7uYWu6zEwTnjiawJNTaZSv3ALn6446EN895vIjBI4KsoY62PItgzlHrYW
+	 IchDsP6/Esv/exQBgeEHs2huOhXqys2cSY9FNLDilWiaWKiEhswdr+jOSbjxZEZaQ8Uuh
+	 Oy+8ucOlR16fRi9eOF1zi2ZBCvqU2hK9NObU5TenkybuW/UoqVU/E9841/f59iyHx6w==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=redhat.com;
 	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=O3TPlrj5;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=Vlk7i5RN;
-	arc=none smtp.remote-ip=170.10.129.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=cp3FlLVk;
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=a6yH5bE5;
+	arc=none smtp.remote-ip=170.10.133.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A083C606A31C
-	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 13:18:31 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A083C606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C9FF606A327
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 14:36:42 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3C9FF606A327
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=O3TPlrj5;
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=Vlk7i5RN
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=cp3FlLVk;
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=a6yH5bE5
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1794489510;
+	s=mimecast20190719; t=1794494202;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=LosFSTGbZO+f/zG7X8uytuOE1D7kZdFxkLZIZS8x1Dc=;
-	b=O3TPlrj5d7OlnrPtdWoUIP9jevnjaZV4LQwKuQB3DUHVbRG2EP0ZAjeZqDegJb0wZLlCLy
-	Dn2O1FiY7dqKoNBT9twcUb5OOSJqFx97x68kOS1xzMF4hrKWswGb6BxuKDdauaSOD9ZEs6
-	P+PS999o91h+rf/QzpboO5B0zYTl7dE=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
+	b=cp3FlLVk8CySVhpvRM4dfrYqt8UvV5jXQ96NC2a+tNXCwgMqKGx7UjkEscfsbWUr/gPj1e
+	CkrWCg/E8e/Hz0GEneB4uKuf24CwVVlJTSo+c9qb7EDwiMFjRVg5WUnLkJwu4XmZTgO0oo
+	6ek+yBnrKfZnacwyWthZqXTNA0XBSLw=
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
+ [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-421-FUCF0Bv3OGSMoeupgtJscw-1; Thu, 12 Nov 2026 08:18:29 -0500
-X-MC-Unique: FUCF0Bv3OGSMoeupgtJscw-1
-X-Mimecast-MFC-AGG-ID: FUCF0Bv3OGSMoeupgtJscw_1794489508
-Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-6b6fb975053so5242948a12.0
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 05:18:28 -0800 (PST)
+ us-mta-624-7a1pcP5IN1anVQonzFG9gw-1; Thu, 12 Nov 2026 09:36:39 -0500
+X-MC-Unique: 7a1pcP5IN1anVQonzFG9gw-1
+X-Mimecast-MFC-AGG-ID: 7a1pcP5IN1anVQonzFG9gw_1794494198
+Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-c5079a4a21fso28881766b.2
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 06:36:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1794489508; x=1795094308; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1794494198; x=1795098998; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=LosFSTGbZO+f/zG7X8uytuOE1D7kZdFxkLZIZS8x1Dc=;
-        b=Vlk7i5RN7azLsD0bG8mWjO2wpBgHg1u2dCYSh08/9z/i9vJzb0fZVhsAVGQakkAWxS
-         ae5F0/F6oX0q7+m3Xy1V/ZpHxENIjaL/i1B4luVVx4w/Yyx6GKTTP5rU0weq2b3VduEX
-         rqQltuCNQ+TxXC7mJ4xhHizidUStfl2nglVdwIe3m+QCbz66CDZez+JRQBUF5q2iQwNM
-         K9hqpvZ4YrdbhiCDoNuaEZRGnFc+Ub24Cbi2Iqu/kxkp9aWvg4NtThqH4MtoPCHcpWbm
-         m7PMX+tGK9rG0OVfkQGY2DFyKHd9oY8QytwZ8fYz02vTAdRPINZtpx4x7QzlsjGDVsNg
-         8DNA==
+        bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
+        b=a6yH5bE5mSDskc86W4IkXdc3vx3Tl+7do4gEY5DRwR7v+I2mbrG9X5DS3d8uSk48yy
+         cJE4UiG/fjwe3l1MC1NZJg5my5YI5wrgtsRtVsN3vwjGMsAT9LuNrWU3hKkaadG84mmJ
+         sVaWZ6Uvcf1vG3Eqt+zTqqQskEqeIDbynSKF88glMYCgalAmexZ7DfjWIizHC3m5XDLB
+         LTD2RuAQ5ZZ9wIJZcU9uSOmL1Fnk2EJFQowPM+VOksWBfB0o7KWaWONjUCL45/4XeCx2
+         kGIb/r/jgJwzZ3QLUt0tfTOj7md157J8ZUeqGu5HHnSYEg4K3/qHWMEGYHkFZ3FvDG0m
+         Jnxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794489508; x=1795094308;
+        d=1e100.net; s=20260707; t=1794494198; x=1795098998;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=LosFSTGbZO+f/zG7X8uytuOE1D7kZdFxkLZIZS8x1Dc=;
-        b=2Wd53CY8QWrbXP3sRSPCW1iLRkQ2dWfhY1GBHUlEE4qeHa+o7dF8VKTmXVMkhVJHfe
-         5ErTkFB/EAlXOK7kiSrCn1h4M1HXW9hdTWcxplKXpfr52uOe/4J50RdScWVOhz9FSp8r
-         DtR0sThMxnhYsp2DwPma8mNOMnxNyh9cCGuVgnuFDtyPHvM6Zm6SuTnSevpGHjGFoJJt
-         kj56A7gnjLSJMIiUrpDjmfuotrZ+VLwtyJhkKPleEEv6ZGyvDtJuSjwau7nm89TX3mii
-         60TzzlZ/2/8FB7tq+8khsf8JWMXgk9gNKRWDhWJlg6mnhTkDy21QGw/y2cGw2osWSFrO
-         HKrg==
-X-Forwarded-Encrypted: i=1; AL+hErHE0ZLzjQL9tWmbS/dR+OL/p8nw5p+hJ2MZUX1sZ6ce93c7n8Q/IpVPbKjXXxiDsd1752jLHnHu5jIg@vger.kernel.org
-X-Gm-Message-State: APuU4Z9kyyCe/xyTUvSENy2WuKfz6/fFEy6r9pbDmkyMLI+5hSV/Avwd
-	W0nuN4w4qwOx2HcUvJ96EMZfPfo9gIpknONsQu5yQdeTL5gxSF39o2dZafKj7HP4zBc738FgmcF
-	CVgD/XRXQsBOWdnJe2yloiG60g3LU7S13sAnWnoGIJ9EyZMnc0LoxXVZqhy7M/zQ=
-X-Gm-Gg: AYBFou2pQOAnHWLxC/YQVZhhLaU2bLFESVakOY4uhtwGfaQI3ubdP+0dXPJgZ9ZRSP0
-	MbDRuuxkrWvJOPVNmKGv85G+s6ZySxXAi3zZlXNK3E+lUWwSNTFYfKeIS3lzNxkUFtVlZF2Srvk
-	Jid+vchZHeAKbCcXdLbB/EnwzSjU4+Z7+mtS1VULNA9N9pd3qGHG+gwHTZemDSihpVkSMJIqGX3
-	cnmU8moJ5A+ejI91FlTxDcNJorA9qhArBB96ewHVbyP7WbGtiUakmM0nCTp9x7Td3GQGAQMDiWk
-	rC3boPu4xeVTAssW47iiXlPZ7uAY2Y9QvofrKVbwHGQzynwM+20CEPwYvOvIF0eyFo46a4dqCaq
-	9OsF1GI0WFZweyHfCaYdcH5UpGM3LVrJ7W+sNZttGBpf4GO89vGYYGUwfhBC4i4OySRSxROQoX9
-	hpY+Ut/5Ifxjen9D7QdhFOzArecdxsxek5w7enTjr/GVq5B4FlZBblhX5Ug90slmQq0bXpNqRki
-	gwLPIOvjIz4AP/eo5Mni06EFAneKnW8xBaQX541kZbEns6ozpa8
-X-Received: by 2002:a05:6402:49:b0:6b5:74dd:37ec with SMTP id 4fb4d7f45d1cf-6b77733eafamr2910406a12.1.1794489507910;
-        Thu, 12 Nov 2026 05:18:27 -0800 (PST)
-X-Received: by 2002:a05:6402:49:b0:6b5:74dd:37ec with SMTP id 4fb4d7f45d1cf-6b77733eafamr2910393a12.1.1794489507522;
-        Thu, 12 Nov 2026 05:18:27 -0800 (PST)
+        bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
+        b=0sueZTQfJUC1kov1maSK+8Mu1BhekpIlpiXIQyqHXTFk5mWSsWwJDfbC3WqxZ7aAcI
+         tP3WJtUtiXorh5QxFT5WVpNGfOCzhMDTwCJPQxUC1nhIh5MwENo0sj+zQBla3JE3ZAh3
+         oH8cnFtOKjsjaKowozDwLEEm/Mo2/kMHFNENf75ZKiglJAxrOgrsB9XtDc+WS87U9R80
+         0NJq8U+lWpGfuBzIE2P4oow69mO39zMcGQpkDzbngSo6x6PccGQiwqKcRpV+qeSN7/PV
+         WFQmtNygn9SZJq7+e+11RgrBo9URFqAn+oNCsuWRZmqxR2VF8GqOk7bf7V2ydQK1ACdX
+         wK9A==
+X-Gm-Message-State: APuU4Z9ukzGfozcaS0t/FHvJ8Ezud5toA5onYU0xKFj5gxvfA9vHW18s
+	X1Bnna1gc62qkxuzFfrqfQiN+thm9D5plTF0Rkt1BeYV4ijUuYs+1Mc4sigtm6xGyc0sLnZPIFJ
+	nJHLZRPc6vCiqKyf26HEC8M7OYetXSASuTGPpmsyUkV5GgGx+zW/kSWTypBkef4x40rpk+GI=
+X-Gm-Gg: AYBFou1obe9pQOY9EK6rhUPKHXiDMl7kqPzLkcbwAzrWUqqEZoCTt0eMF8MP5xDCp6J
+	A8lpcHM61aip6z2Umc7tOyGhx1qao2/e3Yy928MnRf1GzNsXVf6t6quEh2IMZJ4a+pRbtusJH+B
+	rR39h9WdqK/YFtWM1E5llDXXEyObH5R5UtkuDZpJZiSZrK9q8mvQ/gQWU1Vx0Zy0dol/pjlQqf/
+	6yEH0UFxKIHu4WzgC4fMjadz2TLVcmBpu+i8m7BYTdLctfmNnDaJ38QPJ51f2pbPSN7qexXmxcz
+	pwr6qWcbQy77A47SYVl7ACYnU1QJy2Vwl9a0vZYrPVtXFk0aEMgvFMRT3/ISRA6VqdjtCvOnN60
+	zVG5O21cd6kZREko6nMQScnkAGn8xf3/hSFBbqoFSe9wH/3c+aprAZXLQFGGr/mKitaN4i2U2xm
+	pI6dn3GCa7OUrSdfwHST2yqifxz86aomdn+CUw1pThyK5AlG0uGWzeJSrqkDRSdwuZVbltExmBm
+	m8/iK0nG7YXHWDDEOiAbAF/VDQDHHJt/lFBbUL/8F+ZgWufRPex
+X-Received: by 2002:a17:907:da2:b0:c4d:167d:dcee with SMTP id a640c23a62f3a-c5066b7cdb6mr462137166b.40.1794494198519;
+        Thu, 12 Nov 2026 06:36:38 -0800 (PST)
+X-Received: by 2002:a17:907:da2:b0:c4d:167d:dcee with SMTP id a640c23a62f3a-c5066b7cdb6mr462136366b.40.1794494198119;
+        Thu, 12 Nov 2026 06:36:38 -0800 (PST)
 Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6b7b2580ed9sm286477a12.11.2026.11.12.05.18.26
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c504a3a6909sm366314166b.1.2026.11.12.06.36.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 12 Nov 2026 05:18:27 -0800 (PST)
+        Thu, 12 Nov 2026 06:36:36 -0800 (PST)
 From: Alex Markuze <amarkuze@redhat.com>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Xiubo Li <xiubo.li@clyso.com>,
-	ceph-devel@vger.kernel.org
-Subject: Re: [PATCH 0/3] libceph: allow for multiple in-flight linger pings
-Date: Thu, 12 Nov 2026 13:18:26 +0000
-Message-Id: <20261112131826.3599035-1-amarkuze@redhat.com>
-In-Reply-To: <20261110201025.255594-1-idryomov@gmail.com>
-References: <20261110201025.255594-1-idryomov@gmail.com>
+To: Xiubo Li <xiubo.li@clyso.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: [PATCH v6 0/5] ceph: reduce mdsc->mutex contention in the cephfs kclient
+Date: Thu, 12 Nov 2026 14:36:35 +0000
+Message-Id: <20261112143635.3608632-1-amarkuze@redhat.com>
+In-Reply-To: <20260829-ceph-mdsc-mutex-optimization-v6-0-466936ccbd9d@clyso.com>
+References: <20260829-ceph-mdsc-mutex-optimization-v6-0-466936ccbd9d@clyso.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -119,26 +117,36 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Hi Ilya,
+Hi Xiubo,
 
-Two further problems in 2/3.
+The two problems from v4 are fixed. replay_unsafe_requests() leaves the
+request on s_unsafe, and ceph_mdsc_create_request() initializes
+r_aux_item.
 
-linger_ping_cb() applies every ping whose register_gen still matches.
-With osd_request_timeout set, handle_timeout() abort_request()s a ping
-whose r_start_stamp is older than that timeout, and then
-send_linger_ping() runs in the same pass because last_error is still 0.
-The queued callback still owns that request: it stores -ETIMEDOUT and
-queue_watch_error(). rbd_watch_errcb() clears the exclusive-lock owner
-and re-registers the watch. The default timeout is 0, so a default mount
-does not abort. Previously req != lreq->ping_req dropped this completion.
-An older ping's error has to be ignored once a later ping for the same
-register_gen has been sent or has already succeeded.
+Patch 5 still loses a request across MDS reconnect. __do_request() holds
+CEPH_MDS_R_DISPATCHING across the unlocked section, including
+create_request_message() and the async-create wait_on_bit().
+send_mds_reconnect() holds s_mutex and calls replay_unsafe_requests()
+during that window. __do_request() does not take s_mutex, so the two
+overlap. Both loops in replay_unsafe_requests() continue when
+test_and_set_bit(CEPH_MDS_R_DISPATCHING) fails, and neither sets
+CEPH_MDS_R_RESEND. That request is omitted from the replay.
+CEPH_SESSION_OPEN only wakes s_waiting, and a request that already has
+r_attempts > 0 is not on that list, so nothing sends it again. The
+caller waits for a reply that does not arrive.
 
-__linger_cancel() walks lreq->osd_reqs without lreq->lock. The callbacks
-unlink under that lock alone, after handle_reply() has dropped
-osdc->lock. send_linger() takes lreq->lock around its walk;
-__linger_cancel() needs to as well, or unwatch can list_del_init() a
-node the callback is unlinking.
+replay_unsafe_requests() has to wait until that dispatch drops
+CEPH_MDS_R_DISPATCHING and then send the replay itself, before
+send_mds_reconnect() finishes the reconnect message. A later
+__do_request() sees CEPH_MDS_SESSION_RECONNECTING and only parks the
+request on s_waiting.
+
+In the same window, cleanup_session_requests() and handle_forward()
+store r_attempts, and handle_forward() stores r_num_fwd, while
+__prepare_send_request() reads them into num_retry and num_fwd. The
+legacy num_retry field is a u8 and ext_num_retry is a __le32, so a
+concurrent store of 0 becomes 255 and 0xffffffff on the message already
+being built.
 
 Thanks,
 Alex
