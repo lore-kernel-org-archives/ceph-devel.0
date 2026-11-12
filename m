@@ -1,111 +1,55 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794494203;
-	b=ROPyxrz4f5b5nxQy6CUhvW2xr136C9jDnqR5qM8DaQ06J4Z2tj0e5T6bH3F/VFBK3Lo3
-	 toR7qfNzWOs3lyFJc1bygAawwpazl8qvOnF9iGziXRtvXP83/pINgBOZPql8vZUwoTDRy
-	 DLkrIOrZHvjXroDqc+1ydEUeTG8+b4uRQ5+NtSBH5bze5Oi16k2oxbPpO8RVpMYGt8fTI
-	 o0Fuopqq6pHFR5sAIi9JLLe1UQVq7Kwfy28gtbDkq70T9lHoxR94A8TsLycBxhn17nX6L
-	 NUl5AAxgoLx+0g78Fulb8NDxDDshEVz9I5zYIDMUtFpPOZHZXOIcFDWqIhqP+mSMTLg==
+	t=1794494935;
+	b=Br1ENaoxzA2kPeHpAbAuwh4etLqyX71zOZhsc7noa9JxothtfCrS+tYpISVf6Y8YGqMK
+	 AAZMejreizD9da8F1ifgPR326F2QCUGqa5kFFfO27FQWuayEz3CxYsbeBj9Zch257nqG8
+	 nDMMLxdj2tlB1tyCxft/9rq0OjfRhqDncdZBaxmMUFYvo65CJXpzSmpVqp6D/NJGErPYL
+	 LaHp0er4EsiZ3uGT5qLLmOs8hs3ufDVb4kJeDjbovcCdr/urOoOi0FnwgZTvG2411Bqxa
+	 FXMPoohS+BgH3PIWQyNZO8ExLJq0/3BesPpG4K92KEtWibI19rnSLZVlDaZVpXjOG9g==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794494203;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:Received:From:To:Cc:
-	 Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
-	b=ggmAyHxz5I3qvSUTl7vvTj41qdxSBaiwRx1yboq7UI2cvC0PiiOPlJ5YNaHOsESODrkG
-	 vO30/B6VddMVMXrXUupbxv8p4H1rNX6K97pafttdclNTX3Gqh4cW01K/EmJCZE6BGwPgs
-	 S1NhYZ9PZKJh7uYWu6zEwTnjiawJNTaZSv3ALn6446EN895vIjBI4KsoY62PItgzlHrYW
-	 IchDsP6/Esv/exQBgeEHs2huOhXqys2cSY9FNLDilWiaWKiEhswdr+jOSbjxZEZaQ8Uuh
-	 Oy+8ucOlR16fRi9eOF1zi2ZBCvqU2hK9NObU5TenkybuW/UoqVU/E9841/f59iyHx6w==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794494935;
+	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
+	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
+	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
+	bh=NK6DQy/PgvE1uinYZL0z00JjXXDXdQ+VD4k9F1j0Myc=;
+	b=oohu5w9D2VmRw4YoTnDXYgnXwPodJg38tlacHxSZJf45dnv5W3GhM1qcZXyy0sryFxSb
+	 iHXJ4OdmExH9GGEX4Wzivj918S1POidPb6p+7ZgXQt8ZB9NI4ncQOenQutPRdDFV39pMG
+	 LKwkl8OpJ/wUMMl4aLQP85mL1scX/wxheN7kN50Jjfo4aiXSlcQZ8vzIPLm8MJrtHwwt4
+	 mzzAH2ZYBK/AbhH8/tSz7gc292mf7U9a/r0p1KU/ecN/dNtKzISievGceV0J9NN7HNN8Z
+	 kQol585e6XNDfWA5A/FFpfOJ9FdK/ejR8gb1CmPgOLFgvsllz89oevgkd3s0TN2x0lw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=redhat.com;
-	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=cp3FlLVk;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=a6yH5bE5;
-	arc=none smtp.remote-ip=170.10.133.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BkuCx9bd;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C9FF606A327
-	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 14:36:42 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3C9FF606A327
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F347606A32A
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 14:48:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=cp3FlLVk;
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=a6yH5bE5
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1794494202;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
-	b=cp3FlLVk8CySVhpvRM4dfrYqt8UvV5jXQ96NC2a+tNXCwgMqKGx7UjkEscfsbWUr/gPj1e
-	CkrWCg/E8e/Hz0GEneB4uKuf24CwVVlJTSo+c9qb7EDwiMFjRVg5WUnLkJwu4XmZTgO0oo
-	6ek+yBnrKfZnacwyWthZqXTNA0XBSLw=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-624-7a1pcP5IN1anVQonzFG9gw-1; Thu, 12 Nov 2026 09:36:39 -0500
-X-MC-Unique: 7a1pcP5IN1anVQonzFG9gw-1
-X-Mimecast-MFC-AGG-ID: 7a1pcP5IN1anVQonzFG9gw_1794494198
-Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-c5079a4a21fso28881766b.2
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 06:36:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1794494198; x=1795098998; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
-        b=a6yH5bE5mSDskc86W4IkXdc3vx3Tl+7do4gEY5DRwR7v+I2mbrG9X5DS3d8uSk48yy
-         cJE4UiG/fjwe3l1MC1NZJg5my5YI5wrgtsRtVsN3vwjGMsAT9LuNrWU3hKkaadG84mmJ
-         sVaWZ6Uvcf1vG3Eqt+zTqqQskEqeIDbynSKF88glMYCgalAmexZ7DfjWIizHC3m5XDLB
-         LTD2RuAQ5ZZ9wIJZcU9uSOmL1Fnk2EJFQowPM+VOksWBfB0o7KWaWONjUCL45/4XeCx2
-         kGIb/r/jgJwzZ3QLUt0tfTOj7md157J8ZUeqGu5HHnSYEg4K3/qHWMEGYHkFZ3FvDG0m
-         Jnxg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794494198; x=1795098998;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=UkEBDXWZEMwDbszUgsfrG97wOOCOR83J/+o9Z+vJcJE=;
-        b=0sueZTQfJUC1kov1maSK+8Mu1BhekpIlpiXIQyqHXTFk5mWSsWwJDfbC3WqxZ7aAcI
-         tP3WJtUtiXorh5QxFT5WVpNGfOCzhMDTwCJPQxUC1nhIh5MwENo0sj+zQBla3JE3ZAh3
-         oH8cnFtOKjsjaKowozDwLEEm/Mo2/kMHFNENf75ZKiglJAxrOgrsB9XtDc+WS87U9R80
-         0NJq8U+lWpGfuBzIE2P4oow69mO39zMcGQpkDzbngSo6x6PccGQiwqKcRpV+qeSN7/PV
-         WFQmtNygn9SZJq7+e+11RgrBo9URFqAn+oNCsuWRZmqxR2VF8GqOk7bf7V2ydQK1ACdX
-         wK9A==
-X-Gm-Message-State: APuU4Z9ukzGfozcaS0t/FHvJ8Ezud5toA5onYU0xKFj5gxvfA9vHW18s
-	X1Bnna1gc62qkxuzFfrqfQiN+thm9D5plTF0Rkt1BeYV4ijUuYs+1Mc4sigtm6xGyc0sLnZPIFJ
-	nJHLZRPc6vCiqKyf26HEC8M7OYetXSASuTGPpmsyUkV5GgGx+zW/kSWTypBkef4x40rpk+GI=
-X-Gm-Gg: AYBFou1obe9pQOY9EK6rhUPKHXiDMl7kqPzLkcbwAzrWUqqEZoCTt0eMF8MP5xDCp6J
-	A8lpcHM61aip6z2Umc7tOyGhx1qao2/e3Yy928MnRf1GzNsXVf6t6quEh2IMZJ4a+pRbtusJH+B
-	rR39h9WdqK/YFtWM1E5llDXXEyObH5R5UtkuDZpJZiSZrK9q8mvQ/gQWU1Vx0Zy0dol/pjlQqf/
-	6yEH0UFxKIHu4WzgC4fMjadz2TLVcmBpu+i8m7BYTdLctfmNnDaJ38QPJ51f2pbPSN7qexXmxcz
-	pwr6qWcbQy77A47SYVl7ACYnU1QJy2Vwl9a0vZYrPVtXFk0aEMgvFMRT3/ISRA6VqdjtCvOnN60
-	zVG5O21cd6kZREko6nMQScnkAGn8xf3/hSFBbqoFSe9wH/3c+aprAZXLQFGGr/mKitaN4i2U2xm
-	pI6dn3GCa7OUrSdfwHST2yqifxz86aomdn+CUw1pThyK5AlG0uGWzeJSrqkDRSdwuZVbltExmBm
-	m8/iK0nG7YXHWDDEOiAbAF/VDQDHHJt/lFBbUL/8F+ZgWufRPex
-X-Received: by 2002:a17:907:da2:b0:c4d:167d:dcee with SMTP id a640c23a62f3a-c5066b7cdb6mr462137166b.40.1794494198519;
-        Thu, 12 Nov 2026 06:36:38 -0800 (PST)
-X-Received: by 2002:a17:907:da2:b0:c4d:167d:dcee with SMTP id a640c23a62f3a-c5066b7cdb6mr462136366b.40.1794494198119;
-        Thu, 12 Nov 2026 06:36:38 -0800 (PST)
-Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c504a3a6909sm366314166b.1.2026.11.12.06.36.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 12 Nov 2026 06:36:36 -0800 (PST)
-From: Alex Markuze <amarkuze@redhat.com>
-To: Xiubo Li <xiubo.li@clyso.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v6 0/5] ceph: reduce mdsc->mutex contention in the cephfs kclient
-Date: Thu, 12 Nov 2026 14:36:35 +0000
-Message-Id: <20261112143635.3608632-1-amarkuze@redhat.com>
-In-Reply-To: <20260829-ceph-mdsc-mutex-optimization-v6-0-466936ccbd9d@clyso.com>
-References: <20260829-ceph-mdsc-mutex-optimization-v6-0-466936ccbd9d@clyso.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BkuCx9bd
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9E8E91F00A08
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 14:48:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794494934;
+	bh=NK6DQy/PgvE1uinYZL0z00JjXXDXdQ+VD4k9F1j0Myc=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=BkuCx9bdEB09GpIY01z+Og6iW+RcWJ+lQNAihF3bcuIpZoNy/X2c/JjmNQxFMga0Y
+	 7jL1iZkU1/A7NBXZiwaAbtb/yzJ7ebyUGZsY8MZP08mTbgGxfuTnbgHl3rqwPm/Fxc
+	 rc1T2Sh56lEdAm1FmDc4q4s0CFqZ27B2iRwEN/Nw1XM/i8CIZ6mfoR6uNk8roF853+
+	 OVQVGFZssuOfxWwIm6cHUcBi9CTsfMakuNi7VBlhEWt4E7d8uaWsx6KHQJfFCNzVql
+	 Op+0YuuhSPNt5oqENhxALjT5xkqxvClVY/7N9Kih9YlCCBJ+tZD4DGZmQLuq4z/lCN
+	 KmTYaWA9k9FKA==
+Received: by mail-lj1-f178.google.com with SMTP id 38308e7fff4ca-3ad5529ae64so35725621fa.2
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 06:48:54 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AL+hErGT3A/2N39ntSIjJOkbgJPlsGIGT0/EiFLsCRbDOg8eBrV4Rs7m4B5nVyv6ysS2hgTU3kwTYizfkXTJ@vger.kernel.org
+X-Gm-Message-State: APuU4Z/YcTw1bgXgGwTnvWVPYYresoIScZsAHCQLo+IWABZEg6N9tiGR
+	mSc1BaUfI4bXE60ff/WZTeaO3ybcyR2WHLKOyl4qmJWPzW5AMm1F5sfp9wsC4jdpLoOFuh3gMbb
+	j6zoUn914L8WCGqVYrjOzxhvIlOB+EVE=
+X-Received: by 2002:a05:6512:1384:b0:5be:5199:1c11 with SMTP id
+ 2adb3069b0e04-5c15d7a649emr1931998e87.60.1794494933355; Thu, 12 Nov 2026
+ 06:48:53 -0800 (PST)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -115,39 +59,97 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20261111161830.1336485-1-max.kellermann@ionos.com>
+In-Reply-To: <20261111161830.1336485-1-max.kellermann@ionos.com>
+From: Xiubo Li <xiubli@kernel.org>
+Date: Thu, 12 Nov 2026 15:48:41 +0100
+X-Gmail-Original-Message-ID: <CAOuZWzxtPXvbXKiEOeTOb8cNG1h49Frx7xkQyn+Gg0HCWnmQUQ@mail.gmail.com>
+X-Gm-Features: AclHuK-ky70TlfaGrCLe-ZVXnIOAqR_PdwHrfvAXgBZp77G1oVwzCh_Qxqhd7DM
+Message-ID: <CAOuZWzxtPXvbXKiEOeTOb8cNG1h49Frx7xkQyn+Gg0HCWnmQUQ@mail.gmail.com>
+Subject: Re: [PATCH 0/9] ceph: fix mdsmap and osdmap use-after-free in
+ unlocked readers
+To: Max Kellermann <max.kellermann@ionos.com>
+Cc: xiubli@redhat.com, idryomov@gmail.com, amarkuze@redhat.com, 
+	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Xiubo,
+Hi Max,
 
-The two problems from v4 are fixed. replay_unsafe_requests() leaves the
-request on s_unsafe, and ceph_mdsc_create_request() initializes
-r_aux_item.
+Tested on a KASAN+lockdep kernel (on top of the ceph testing branch)
+with sleep injection widening each window: all the UAFs fixed by
+patches 1-6 and 9 reproduce on the base and are gone with the series;
+patches 7-8 were exercised under osdmap churn; lockdep stays quiet,
+also across fsstress with MDS failovers.
 
-Patch 5 still loses a request across MDS reconnect. __do_request() holds
-CEPH_MDS_R_DISPATCHING across the unlocked section, including
-create_request_message() and the async-create wait_on_bit().
-send_mds_reconnect() holds s_mutex and calls replay_unsafe_requests()
-during that window. __do_request() does not take s_mutex, so the two
-overlap. Both loops in replay_unsafe_requests() continue when
-test_and_set_bit(CEPH_MDS_R_DISPATCHING) fails, and neither sets
-CEPH_MDS_R_RESEND. That request is omitted from the replay.
-CEPH_SESSION_OPEN only wakes s_waiting, and a request that already has
-r_attempts > 0 is not on that list, so nothing sends it again. The
-caller waits for a reply that does not arrive.
+One reader is missed: send_mds_reconnect() still does
 
-replay_unsafe_requests() has to wait until that dispatch drops
-CEPH_MDS_R_DISPATCHING and then send the replay itself, before
-send_mds_reconnect() finishes the reconnect message. A later
-__do_request() sees CEPH_MDS_SESSION_RECONNECTING and only parks the
-request on s_waiting.
+        ceph_con_open(&session->s_con, CEPH_ENTITY_TYPE_MDS, mds,
+                      ceph_mdsmap_get_addr(mdsc->mdsmap, mds));
 
-In the same window, cleanup_session_requests() and handle_forward()
-store r_attempts, and handle_forward() stores r_num_fwd, while
-__prepare_send_request() reads them into num_retry and num_fwd. The
-legacy num_retry field is a u8 and ext_num_retry is a __le32, so a
-concurrent store of 0 becomes 255 and 0xffffffff on the message already
-being built.
+with only s_mutex held, and it is reached from mds_peer_reset() (the
+path patch 5 fixes).  With the series applied:
 
-Thanks,
-Alex
+  BUG: KASAN: slab-use-after-free in ceph_con_open+0x14f/0x230 [libceph]
+  Read of size 136 ...
+   send_mds_reconnect+0xa91/0x1710 [ceph]
+   mds_peer_reset+0x26c/0x36b [ceph]
+   process_session_reset+0x349/0x540 [libceph]
+  Freed by: ceph_mdsmap_destroy <- ceph_mdsc_handle_mdsmap
 
+Copying the address into a local while mdsc->mutex is held for the
+sessions[mds] check a few lines earlier would fix it; could you add
+that as a follow-up patch?
+
+Nit for 7-9: incremental maps are applied in place, so the osdmap is
+only replaced on a full map; the rbd case is really hit through
+incrementals (a pool rename kfree()s pi->name).
+
+Thanks
+- Xiubo
+
+Max Kellermann <max.kellermann@ionos.com> =E4=BA=8E2026=E5=B9=B411=E6=9C=88=
+11=E6=97=A5=E5=91=A8=E4=B8=89 17:25=E5=86=99=E9=81=93=EF=BC=9A
+>
+> The MDS and OSD clients replace their maps and free the old ones
+> under a lock: mdsc->mutex for the mdsmap and osdc->lock for the
+> osdmap.  Several readers dereference these maps without that lock and
+> can therefore access freed memory if a new map arrives concurrently.
+> The worst is ceph_statfs(), which any user can reach and which loads
+> and dereferences a pointer from the old mdsmap.
+>
+> Each patch takes the lock that protects the replacement around the
+> reads.  __ceph_setxattr() cannot take mdsc->mutex under i_ceph_lock,
+> so it uses a copy of m_max_xattr_size kept in the mds client.
+>
+> The same problem in ceph_compare_options() was already fixed by
+> commit 19db525816db ("libceph: use RCU to protect monmap in
+> ceph_compare_options()").
+>
+> These bugs were found by code review and have not been reproduced.
+>
+> Max Kellermann (9):
+>   ceph: fix mdsmap use-after-free in ceph_statfs()
+>   ceph: fix mdsmap use-after-free in debugfs mdsmap_show()
+>   ceph: fix mdsmap use-after-free in __ceph_setxattr()
+>   ceph: fix mdsmap use-after-free in send_renew_caps() and
+>     renewed_caps()
+>   ceph: fix mdsmap use-after-free in mds_peer_reset()
+>   ceph: fix mdsmap use-after-free in ceph_get_tree() error path
+>   ceph: fix osdmap use-after-free in ceph_sync_setxattr()
+>   libceph: fix osdmap use-after-free in ceph_wait_for_latest_osdmap()
+>   rbd: fix osdmap use-after-free in pool lookups
+>
+>  drivers/block/rbd.c    | 13 +++++++++++--
+>  fs/ceph/debugfs.c      | 12 ++++++++++--
+>  fs/ceph/mds_client.c   | 18 ++++++++++++++++--
+>  fs/ceph/mds_client.h   |  7 +++++++
+>  fs/ceph/super.c        | 19 ++++++++++++++-----
+>  fs/ceph/xattr.c        | 13 +++++++++----
+>  net/ceph/ceph_common.c |  8 +++++++-
+>  7 files changed, 74 insertions(+), 16 deletions(-)
+>
+> --
+> 2.53.0
+>
+>
