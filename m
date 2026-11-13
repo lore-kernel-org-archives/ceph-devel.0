@@ -1,55 +1,112 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=67.231.153.242
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794494935;
-	b=Br1ENaoxzA2kPeHpAbAuwh4etLqyX71zOZhsc7noa9JxothtfCrS+tYpISVf6Y8YGqMK
-	 AAZMejreizD9da8F1ifgPR326F2QCUGqa5kFFfO27FQWuayEz3CxYsbeBj9Zch257nqG8
-	 nDMMLxdj2tlB1tyCxft/9rq0OjfRhqDncdZBaxmMUFYvo65CJXpzSmpVqp6D/NJGErPYL
-	 LaHp0er4EsiZ3uGT5qLLmOs8hs3ufDVb4kJeDjbovcCdr/urOoOi0FnwgZTvG2411Bqxa
-	 FXMPoohS+BgH3PIWQyNZO8ExLJq0/3BesPpG4K92KEtWibI19rnSLZVlDaZVpXjOG9g==
+	t=1794539007;
+	b=ed+Xdb+UOzmPjUxZsQGZoYwuCP5xY689iaKYtOG9AMEKDdzq2a2yKlrGY4BT2UfmcSCC
+	 I+azoQg5WlU0sjRHiNogO2fT6ZP5CXEmm7yMjqCmfmWyctFg3hv4VLoognTq8MjlDoJAo
+	 b6AzBPVmTYuhB7cgui3wpIQgTNVkbcmBKrd0IdqgsXl8OL7ztE8rHNI90DS6CUQ9HFKGC
+	 1RdlfqPRx1e1FOto+ffImWIg11pLRu02/MBiesUdiVaP7iGhQFInun/LgpXHemmB/oehM
+	 j6aE+PM37RlpZWf2bsD35rdr+N20aAw0dV6no7giK77Ai0xPJVAhQwQCbGm4W0W/GeA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794494935;
-	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=NK6DQy/PgvE1uinYZL0z00JjXXDXdQ+VD4k9F1j0Myc=;
-	b=oohu5w9D2VmRw4YoTnDXYgnXwPodJg38tlacHxSZJf45dnv5W3GhM1qcZXyy0sryFxSb
-	 iHXJ4OdmExH9GGEX4Wzivj918S1POidPb6p+7ZgXQt8ZB9NI4ncQOenQutPRdDFV39pMG
-	 LKwkl8OpJ/wUMMl4aLQP85mL1scX/wxheN7kN50Jjfo4aiXSlcQZ8vzIPLm8MJrtHwwt4
-	 mzzAH2ZYBK/AbhH8/tSz7gc292mf7U9a/r0p1KU/ecN/dNtKzISievGceV0J9NN7HNN8Z
-	 kQol585e6XNDfWA5A/FFpfOJ9FdK/ejR8gb1CmPgOLFgvsllz89oevgkd3s0TN2x0lw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794539007;
+	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Gm-Message-State:X-Gm-Gg:
+	 X-Received:X-Received:Received:From:To:Cc:Subject:Date:Message-ID:
+	 X-Mailer:MIME-Version:Content-Transfer-Encoding:
+	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:X-Authority-Analysis:
+	 X-Proofpoint-Spam-Info:X-Proofpoint-Spam-Details-Enc:X-Orig-IP:
+	 X-Proofpoint-Spam-Details;
+	bh=UZPdBtWA9pQKMZMHNBUh0eB5Fnnm3slLNwC8Pi8shQo=;
+	b=i0F3GesPE/mwl31PSxv12pkZDDu8h3BEYupGePMNyPIAYbtbiqgUs/EANWOU2aJo79fV
+	 eEqnl7JeUu1ZTWb92qxoNU73f9bm52u9STZ01qfkXbB5Yq8sHmcSQnPRqpNp1EezBpFJX
+	 jpDSZLH3fNGLSJR8BBWnwsHy5pLAcOLXPgE0x7frH2uW1TgCumQ29TgBpUz4B0EJzLngE
+	 3K4V9X1E4ZJPum8fGBAVNuntCaCdookLK4CTp8jDE2M5fMmspud9AEiouRlYQes+CeWJE
+	 S2ZYYiSQ1sP5VpIY+1jZMgBTVZPwdqXPTwHuhMsjYRMO+uGYTtW61ChUaRXbOr/E4+Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BkuCx9bd;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=nyu.edu;
+	spf=pass smtp.mailfrom=nyu.edu;
+	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=pkgUP0GT;
+	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=R6rAnkXE;
+	arc=none smtp.remote-ip=67.231.153.242
+Received: from mx0b-00256a01.pphosted.com (mx0b-00256a01.pphosted.com [67.231.153.242])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F347606A32A
-	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 14:48:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9410606A323
+	for <ceph-devel@vger.kernel.org>; Fri, 13 Nov 2026 03:03:25 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C9410606A323
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nyu.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nyu.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BkuCx9bd
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9E8E91F00A08
-	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 14:48:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794494934;
-	bh=NK6DQy/PgvE1uinYZL0z00JjXXDXdQ+VD4k9F1j0Myc=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=BkuCx9bdEB09GpIY01z+Og6iW+RcWJ+lQNAihF3bcuIpZoNy/X2c/JjmNQxFMga0Y
-	 7jL1iZkU1/A7NBXZiwaAbtb/yzJ7ebyUGZsY8MZP08mTbgGxfuTnbgHl3rqwPm/Fxc
-	 rc1T2Sh56lEdAm1FmDc4q4s0CFqZ27B2iRwEN/Nw1XM/i8CIZ6mfoR6uNk8roF853+
-	 OVQVGFZssuOfxWwIm6cHUcBi9CTsfMakuNi7VBlhEWt4E7d8uaWsx6KHQJfFCNzVql
-	 Op+0YuuhSPNt5oqENhxALjT5xkqxvClVY/7N9Kih9YlCCBJ+tZD4DGZmQLuq4z/lCN
-	 KmTYaWA9k9FKA==
-Received: by mail-lj1-f178.google.com with SMTP id 38308e7fff4ca-3ad5529ae64so35725621fa.2
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 06:48:54 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AL+hErGT3A/2N39ntSIjJOkbgJPlsGIGT0/EiFLsCRbDOg8eBrV4Rs7m4B5nVyv6ysS2hgTU3kwTYizfkXTJ@vger.kernel.org
-X-Gm-Message-State: APuU4Z/YcTw1bgXgGwTnvWVPYYresoIScZsAHCQLo+IWABZEg6N9tiGR
-	mSc1BaUfI4bXE60ff/WZTeaO3ybcyR2WHLKOyl4qmJWPzW5AMm1F5sfp9wsC4jdpLoOFuh3gMbb
-	j6zoUn914L8WCGqVYrjOzxhvIlOB+EVE=
-X-Received: by 2002:a05:6512:1384:b0:5be:5199:1c11 with SMTP id
- 2adb3069b0e04-5c15d7a649emr1931998e87.60.1794494933355; Thu, 12 Nov 2026
- 06:48:53 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=pkgUP0GT;
+	dkim=pass (2048-bit key) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=R6rAnkXE
+Received: from pps.filterd (m0119692.ppops.net [127.0.0.1])
+	by mx0b-00256a01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6ACMBREq1746306
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 22:03:19 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nyu.edu; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=20180315; bh=UZPdBtWA9pQKMZMHNBUh0eB5Fnnm3slLNwC8
+	Pi8shQo=; b=pkgUP0GTSqLkHf8q+wXoGyenYuJcwhv/WLF5KOZDx0oedEdUhbJF
+	IRUw68ezuiY30hzY1AFFGTZDBvvDM5TaDPpImCICqJSQnnC1FCKzIcAOckZ4oawZ
+	uhZpl2jjEOguHwBtltTsDAaOuk5ZvcYSz10Brod3iDGaziRO3ZvcUiG8O6HFNQWf
+	2a8yPwJqECVxUKoxRqMDQhNZX+/+YledREEXEvxJNZcA8DU5zAtw5yN+7KPcN//S
+	AXaiDczMdiMO02v9TZASFkXHfZMySSelNW5YuUjH1uTPBhjgnne0hPoOUcZMnd0R
+	AIZ5poKlDeXY1SjGW8kERH5LbBhXWwGjtA==
+Received: from mail-yw1-f200.google.com (mail-yw1-f200.google.com [209.85.128.200])
+	by mx0b-00256a01.pphosted.com (PPS) with ESMTPS id 4hwp1kat22-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 22:03:18 -0500 (EST)
+Received: by mail-yw1-f200.google.com with SMTP id 00721157ae682-8b0bf2140b7so9051557b3.3
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Nov 2026 19:03:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=nyu.edu; s=nyu-googleapps1; t=1794538998; x=1795143798; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=UZPdBtWA9pQKMZMHNBUh0eB5Fnnm3slLNwC8Pi8shQo=;
+        b=R6rAnkXESu2Q363z3aAdgxXzm0eYqZEvsg5siKL0IT0cya/QX2mmHr1bldf02AruO8
+         /Vym84hBFwTlbMOTY0GA3jA+R9/1QfJBodGbdqDlvjoe2mVQDhp5t9Ytf4WC7B8wg6ca
+         8zwjIR+RR2Bj6lNiNxrGpBmF/CYxDBUVfe7M6ztvpOZwACzydj9H2SGG9WoRagjJdU8u
+         J+/JMKFc7TucTWHUQW6Xf1qqeyWQjNGHH2YHBaPxT6+CwF4MDtE2zyL39sYWGSpw+BcR
+         W/y6tUIpD/OSyRpG+3b776ce7jzSX4omaA/arFe1JdN6eQ13L/RItsxoSaBEHV/YKiAc
+         4MJg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794538998; x=1795143798;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=UZPdBtWA9pQKMZMHNBUh0eB5Fnnm3slLNwC8Pi8shQo=;
+        b=yq5RIdXE2y3xemqwZNPKJskUViAH4vfiin/dSMRIOpuV/ndgAsK71I/loV5j28ypRM
+         zVu+p3sUna0Vffeif/xs3d5jKSMeCdI5WLMcmmZERppCJ/FsFzTFwzZIeTnpleP1GDpT
+         AVu/57uzo1Dvx/de1GGr8d5PFHUry+luA2D5eGUSbSzg0FlOOBJtEU0ttkcvg7hve7rU
+         Y3fkQEfKNd9v5VUSxyGVXMbOfug9xFXUT6ZPQLe7GXqheO8673lohTaGeONL7QITaOWh
+         gkMf3HQjydplwmhAj/Bw5oVfLrwj0uK1x6MeIfFL9Y8dSlY1P8SQVffbtHFOd8I/Ihnf
+         OlhQ==
+X-Gm-Message-State: APuU4Z+zwDAEWRLt3ovLxEPPFa9+It+mImcVO25IJeeb3pqvHoL7V1wh
+	sgC/1/RWCyUCRQHDG7jsqvNuoqeLmqCKYweXaIlc5Sl+yGiDCuGU1lnAu+rJog2fpjUGx2+eFGX
+	WdOBrkxougU8M1bnWBLrz7LDBnD0SuJl2Jlkdp9iTZnTw4LR8/Uaxc+vWe3US
+X-Gm-Gg: AYBFou0kGeGogPgnZMy34ru+MgOq+s4I4BGVe/5qgiYzsPx73u2aZqb7S7j/3coglQA
+	vCw/4ltAwTxwYtTawBhmvEqV7k/kDa6frJI7kDpE/91++G5rMpu3rmxb3TBMR8aFCqAsJ3C/y3H
+	MFC2dw0NzvfcKqiNO5ZYS/VnIw9X6TaI4Uq4h+eMnA7/j8zApKnaBFPcSdo6FtJMYCmoIQu75aF
+	kq/hp9/S2Px5Cpc0COgsRPK4O5zNt/D/JzxLAf69E4PbkMs701ZK7zyB59sxrSBuWzsE5JxiW9z
+	wT984bWtD1/9Gv0rcSHP5LkbUc0euHWX9H/3+lMSlpURlzsU/HceC5khUI29Oz7J4tsIiohTjT2
+	0JZ/wKw4TDlwrmG0kikAreg10sTj6cuLNp/PCjF1Nd0Xv0Wyw1ypSyF/FezUp3ut1HCkcKwaKnF
+	q0QmXz6lgg0A==
+X-Received: by 2002:a05:690c:1b:b0:8b3:7782:6759 with SMTP id 00721157ae682-8b4aa323715mr13793427b3.38.1794538998363;
+        Thu, 12 Nov 2026 19:03:18 -0800 (PST)
+X-Received: by 2002:a05:690c:1b:b0:8b3:7782:6759 with SMTP id 00721157ae682-8b4aa323715mr13793137b3.38.1794538997808;
+        Thu, 12 Nov 2026 19:03:17 -0800 (PST)
+Received: from jerrythepro.nyu.edu (216-165-95-156.natpool.nyu.edu. [216.165.95.156])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-8b4aa99a6a3sm10905557b3.28.2026.11.12.19.03.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Nov 2026 19:03:16 -0800 (PST)
+From: Kaho Jiang <kj2864@nyu.edu>
+To: idryomov@gmail.com, amarkuze@redhat.com, slava@dubeyko.com
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        co+408fcc361565713f@bugs.sh, Kaho Jiang <kj2864@nyu.edu>,
+        stable@vger.kernel.org
+Subject: [PATCH v2] ceph: Use unsigned types for snapshot split counts
+Date: Thu, 12 Nov 2026 22:02:58 -0500
+Message-ID: <20261113030257.1061200-2-kj2864@nyu.edu>
+X-Mailer: git-send-email 2.43.0
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -59,97 +116,116 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261111161830.1336485-1-max.kellermann@ionos.com>
-In-Reply-To: <20261111161830.1336485-1-max.kellermann@ionos.com>
-From: Xiubo Li <xiubli@kernel.org>
-Date: Thu, 12 Nov 2026 15:48:41 +0100
-X-Gmail-Original-Message-ID: <CAOuZWzxtPXvbXKiEOeTOb8cNG1h49Frx7xkQyn+Gg0HCWnmQUQ@mail.gmail.com>
-X-Gm-Features: AclHuK-ky70TlfaGrCLe-ZVXnIOAqR_PdwHrfvAXgBZp77G1oVwzCh_Qxqhd7DM
-Message-ID: <CAOuZWzxtPXvbXKiEOeTOb8cNG1h49Frx7xkQyn+Gg0HCWnmQUQ@mail.gmail.com>
-Subject: Re: [PATCH 0/9] ceph: fix mdsmap and osdmap use-after-free in
- unlocked readers
-To: Max Kellermann <max.kellermann@ionos.com>
-Cc: xiubli@redhat.com, idryomov@gmail.com, amarkuze@redhat.com, 
-	ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: 4058YEawnLNNOkcXbkdMx0vMohoYarpa
+X-Proofpoint-GUID: 4058YEawnLNNOkcXbkdMx0vMohoYarpa
+X-Authority-Analysis: v=2.4 cv=Y65tIReN c=1 sm=1 tr=0 ts=6af67df6 cx=c_pps
+ a=NMvoxGxYzVyQPkMeJjVPKg==:117 a=00YF/gXxkIOuibRGLzhWGw==:17
+ a=zJRp6_cAMcgA:10 a=x7bEGLp0ZPQA:10 a=S0S_EcBMpFAA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=Se5WoFf3ZZRiLcel0nel:22 a=_0uBWF9-lnOxR1nRej8j:22
+ a=VwQbUJbxAAAA:8 a=09FrV-9A3yaSbjUTAGAA:9 a=kLokIza1BN8a-hAJ3hfR:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTEzMDAxMSBTYWx0ZWRfX/LMM83QKS8Lw
+ GJFS+BM7YS63IQz0+RlgKSS9sTJIzfeQmRhvVtbwqaQCac871PUibi00gv/le5/FDpCeGJ7+qKL
+ 6NGva2QZc90v3DJq5ZFWYD4ciJzKZxM=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTEzMDAxMSBTYWx0ZWRfX1YcgRqiEYkDx
+ RMivH9LSwcZRekdWLWuxivSi1P/GQkJ6fIFthq4fB5fvjalbq1jKivxJ1u4nnbYhxoC2Iv/cWDm
+ Kq8KdA5IvP3f8waKG1KBRjvTe6kygI4uGcpyWTp7LrHFSbAD+z81qJ4z2Dn5mP6fNT1GcKXiTFQ
+ jweKbnJeHcK87c15M339uDYGop36z1oZb1+Lal5eTAxQafXCSXZpUj28dIa9J0Q2Ndl4jJI7SqO
+ adGOKZhUj2MUOZRBRXMtobqWNsEjiA5LVVBm7FaY0L2K+ui1awI2A+rkZq01sBv65d2Dx0rr5tT
+ qm2WJC4mehG52QfVqCh4+SaMb0FcL/6R96bGjmtI15DYU1cSOlb+qfCM8EU2CQvvO0uppaImiPt
+ MMNwiUQ3oWcz3x3HXhVDnOebov8C+uWJra/8z53I9EG9PWuRnibY6LTNN0BDOPXYDSQTs5/zNYn
+ cucHibmyJwnPspyhgjA==
+X-Orig-IP: 209.85.128.200
+X-Proofpoint-Spam-Details: rule=outbound_bp_notspam policy=outbound_bp score=0
+ clxscore=1015 phishscore=0 lowpriorityscore=0 bulkscore=0 malwarescore=0
+ suspectscore=0 spamscore=0 impostorscore=0 priorityscore=1501 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611130011
 
-Hi Max,
+ceph_handle_snap() stores the unsigned 32-bit split counts from the
+message header in signed integers. Values with the high bit set become
+negative and, on 64-bit systems, cause the subsequent pointer arithmetic
+to move backwards before the message buffer.
 
-Tested on a KASAN+lockdep kernel (on top of the ceph testing branch)
-with sleep injection widening each window: all the UAFs fixed by
-patches 1-6 and 9 reproduce on the base and are gone with the series;
-patches 7-8 were exercised under osdmap churn; lockdep stays quiet,
-also across fsstress with MDS failovers.
+BUG: KASAN: slab-out-of-bounds in ceph_update_snap_trace (fs/ceph/snap.c:815)
+Read of size 8 at addr ffff888024f45478 by task kworker/1:3/2220
+CPU: 1 UID: 0 PID: 2220 Comm: kworker/1:3 Not tainted 7.4.0-rc2-g7475ea8b5861 #1 PREEMPT(full)
+Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+Workqueue: ceph-msgr ceph_con_workfn
+Call Trace:
+ <TASK>
+ dump_stack_lvl (lib/dump_stack.c:94 lib/dump_stack.c:120)
+ print_report (mm/kasan/report.c:378 mm/kasan/report.c:482)
+ ceph_update_snap_trace (fs/ceph/snap.c:815)
+ ceph_handle_snap (fs/ceph/snap.c:1057)
+ __pfx_ceph_update_snap_trace (./include/linux/list.h:172)
+ down_write (kernel/locking/rwsem.c:1350 kernel/locking/rwsem.c:1356 kernel/locking/rwsem.c:1632)
+ __pfx_down_write (kernel/locking/rwsem.c:602)
+ ceph_handle_snap (fs/ceph/snap.c:1158)
+ mds_dispatch (fs/ceph/mds_client.c:7298)
+ find_held_lock (kernel/locking/lockdep.c:5401)
+ ceph_con_process_message (net/ceph/messenger.c:1413)
+ ceph_con_process_message (net/ceph/messenger.c:1424)
+ ceph_con_in_msg_alloc (net/ceph/messenger.c:2094)
+ ceph_con_v1_try_read (net/ceph/messenger_v1.c:1434)
+ ceph_con_workfn (net/ceph/messenger.c:1576)
+ process_one_work (kernel/workqueue.c:3495)
+ worker_thread (kernel/workqueue.c:3578 kernel/workqueue.c:3659)
+ kthread (kernel/kthread.c:436)
+ ret_from_fork (arch/x86/kernel/process.c:158)
+ ret_from_fork_asm (arch/x86/entry/entry_64.S:245)
+ </TASK>
+Kernel Offset: disabled
 
-One reader is missed: send_mds_reconnect() still does
+Use u32 for both counts and validate both split arrays against the
+remaining message buffer before advancing the decode pointer. Use
+size_mul() to detect multiplication overflow on 32-bit systems, and
+ceph_decode_skip_n() for checked skips in the non-split branch.
 
-        ceph_con_open(&session->s_con, CEPH_ENTITY_TYPE_MDS, mds,
-                      ceph_mdsmap_get_addr(mdsc->mdsmap, mds));
+Fixes: 963b61eb041e ("ceph: snapshot management")
+Cc: stable@vger.kernel.org
+Reported-by: co+408fcc361565713f@bugs.sh
+Assisted-by: LLM
+Signed-off-by: Kaho Jiang <kj2864@nyu.edu>
+---
+ fs/ceph/snap.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-with only s_mutex held, and it is reached from mds_peer_reset() (the
-path patch 5 fixes).  With the series applied:
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index e03d89db61fe..b7f0db7bb515 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -1039,7 +1039,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 	void *p = msg->front.iov_base;
+ 	void *e = p + msg->front.iov_len;
+ 	struct ceph_mds_snap_head *h;
+-	int num_split_inos, num_split_realms;
++	u32 num_split_inos, num_split_realms;
+ 	__le64 *split_inos = NULL, *split_realms = NULL;
+ 	int i;
+ 	int locked_rwsem = 0;
+@@ -1079,8 +1079,10 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 		 * child.
+ 		 */
+ 		split_inos = p;
++		ceph_decode_need(&p, e, size_mul(num_split_inos, sizeof(u64)), bad);
+ 		p += sizeof(u64) * num_split_inos;
+ 		split_realms = p;
++		ceph_decode_need(&p, e, size_mul(num_split_realms, sizeof(u64)), bad);
+ 		p += sizeof(u64) * num_split_realms;
+ 		ceph_decode_need(&p, e, sizeof(*ri), bad);
+ 		/* we will peek at realm info here, but will _not_
+@@ -1159,8 +1161,8 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
+ 		 * positioned at the start of realm info, as expected by
+ 		 * ceph_update_snap_trace().
+ 		 */
+-		p += sizeof(u64) * num_split_inos;
+-		p += sizeof(u64) * num_split_realms;
++		ceph_decode_skip_n(&p, e, size_mul(num_split_inos, sizeof(u64)), bad);
++		ceph_decode_skip_n(&p, e, size_mul(num_split_realms, sizeof(u64)), bad);
+ 	}
+ 
+ 	/*
+-- 
+2.43.0
 
-  BUG: KASAN: slab-use-after-free in ceph_con_open+0x14f/0x230 [libceph]
-  Read of size 136 ...
-   send_mds_reconnect+0xa91/0x1710 [ceph]
-   mds_peer_reset+0x26c/0x36b [ceph]
-   process_session_reset+0x349/0x540 [libceph]
-  Freed by: ceph_mdsmap_destroy <- ceph_mdsc_handle_mdsmap
-
-Copying the address into a local while mdsc->mutex is held for the
-sessions[mds] check a few lines earlier would fix it; could you add
-that as a follow-up patch?
-
-Nit for 7-9: incremental maps are applied in place, so the osdmap is
-only replaced on a full map; the rbd case is really hit through
-incrementals (a pool rename kfree()s pi->name).
-
-Thanks
-- Xiubo
-
-Max Kellermann <max.kellermann@ionos.com> =E4=BA=8E2026=E5=B9=B411=E6=9C=88=
-11=E6=97=A5=E5=91=A8=E4=B8=89 17:25=E5=86=99=E9=81=93=EF=BC=9A
->
-> The MDS and OSD clients replace their maps and free the old ones
-> under a lock: mdsc->mutex for the mdsmap and osdc->lock for the
-> osdmap.  Several readers dereference these maps without that lock and
-> can therefore access freed memory if a new map arrives concurrently.
-> The worst is ceph_statfs(), which any user can reach and which loads
-> and dereferences a pointer from the old mdsmap.
->
-> Each patch takes the lock that protects the replacement around the
-> reads.  __ceph_setxattr() cannot take mdsc->mutex under i_ceph_lock,
-> so it uses a copy of m_max_xattr_size kept in the mds client.
->
-> The same problem in ceph_compare_options() was already fixed by
-> commit 19db525816db ("libceph: use RCU to protect monmap in
-> ceph_compare_options()").
->
-> These bugs were found by code review and have not been reproduced.
->
-> Max Kellermann (9):
->   ceph: fix mdsmap use-after-free in ceph_statfs()
->   ceph: fix mdsmap use-after-free in debugfs mdsmap_show()
->   ceph: fix mdsmap use-after-free in __ceph_setxattr()
->   ceph: fix mdsmap use-after-free in send_renew_caps() and
->     renewed_caps()
->   ceph: fix mdsmap use-after-free in mds_peer_reset()
->   ceph: fix mdsmap use-after-free in ceph_get_tree() error path
->   ceph: fix osdmap use-after-free in ceph_sync_setxattr()
->   libceph: fix osdmap use-after-free in ceph_wait_for_latest_osdmap()
->   rbd: fix osdmap use-after-free in pool lookups
->
->  drivers/block/rbd.c    | 13 +++++++++++--
->  fs/ceph/debugfs.c      | 12 ++++++++++--
->  fs/ceph/mds_client.c   | 18 ++++++++++++++++--
->  fs/ceph/mds_client.h   |  7 +++++++
->  fs/ceph/super.c        | 19 ++++++++++++++-----
->  fs/ceph/xattr.c        | 13 +++++++++----
->  net/ceph/ceph_common.c |  8 +++++++-
->  7 files changed, 74 insertions(+), 16 deletions(-)
->
-> --
-> 2.53.0
->
->
