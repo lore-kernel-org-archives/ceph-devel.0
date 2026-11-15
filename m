@@ -1,77 +1,49 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.175.65.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794634827;
-	b=zsW6SZh0Y6sCg5FkXls9RMK0v3Zp5oNoHlRaWiDNFx8WvCfKihUuAQKufU/jzhOQox0p
-	 iEnNSL+A6euupkaFvgyfXPewoU6P4ZhGIepoJIVW9vPhVCqsubyGrv6sLXC/T0S+o8zed
-	 pfheERyDN+8bVF+PaeORaNPHN+tQ3oH6Ei6dNHEQKTlrobFeKgZt5QSaZYaofsFtsiNVr
-	 a5txcKRIvQmS8j4G52Zcl7mr4HAPu+dKi5Ez3C/zwnzRiegMD+zo0czNuKSoVjKQWDser
-	 nnzyxlqlyeeO4Mb3L2yXFklS7ga3ZzX7e3KqMY3e192q8szRiy4/lPsqdPUuqiki8uQ==
+	t=1794778761;
+	b=opt68KOG0EyE51BbJ5ZnintK9nZip3BnEWnZBz0KiXbBJRSipHWMIXK4YOHbtM52t6n/
+	 LwYA/UVzD/Yr0WGx6E91ar8/ZgqVnsqRP5OX13AkkNZLPWbdkjzo7N6L8gN2msq1rgXMT
+	 LVrc9Det2UTMqzp+EVhLE4zREoKOVfvEd6SIi/06RO6wUfsgG/nSnMPD9zDY8OfQOELNo
+	 YSAqPHGf0H/XMg0hBxqb2f2kQWi+KVrrV4hyGV9kj0RmvPmLXmR+b7x1XpgcujgAmZqDq
+	 7u5BV0bpESn4h/qhZ/e89K224j6/wqiBOqodsvz2y8PyF61V31XoeljiKHFy0k2GKfw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794634827;
-	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
-	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
-	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:Received:Date:From:To:
-	 Cc:Subject:Message-ID:User-Agent;
-	bh=SeNeb6oYj5oGoonb9MGZ+Sk4LsaSO6fMvFrmMttvsDI=;
-	b=5a5oH4YwZkhvzLl+5CDz430/MglwQIPkny1dZ7gkiSBgR+UwtCy9QuoXQ9JRMOul1EIG
-	 1lOyMl3wfwond7Aql6F+UlhJxFhJ6Air876u4lfG6ZffD5tkCcsYmzTDb4ofNIVSrgRgj
-	 b/KNya9+Qi8ri2Jb2yfc9jvmU4gY1Vn2dR6I45i4Ig3Q2j7i1MopmTPKjiLGn9JnsfoQm
-	 R3uRUyboPvPAeTE+szuww8fm59DT/87/EB+gJbEPaSQXgCJKCWpbpg9kGC35jl93cAcgD
-	 Rd4DyaUU54h/7I36jYajwuYsHcFFjMVVzZ09z8D19En2ZNG94vvn9ZMmf1eDhcDdrFQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794778761;
+	h=Received:DKIM-Signature:From:Date:Subject:MIME-Version:Content-Type:
+	 Content-Transfer-Encoding:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:
+	 X-Mailer:X-Developer-Signature:X-Developer-Key;
+	bh=AgmXiYwsbFtClFrM0wh7o6D+RpJ4fbleaDulYZzEPzs=;
+	b=hPl7o38AqGODgtsiEjbpbh7E/TtRtfAuu3iu7lFTOFFZdQhwFv0TXsvv1GPo30M55KHC
+	 6raXky5Y/rSxmeM425POZI51mS0I0Z1h6OioMyzfZpdol1flfbOu68OuiZlbLT1y8/yvV
+	 Ms45P5wadKrd46ej9Tx+8llTcrwQzr4MH/PQKxRdO7I3vgzMdKcZWFM4gYttaUKQL7ISZ
+	 iykxb3hEfvUOXQmsJcALNY2ZBWqSziW/f9fY4tYPMRqFpk0mU7y8jx05ZiuXAxcKr4ioe
+	 XxSY8w0t0zjettCUI/tUfT+smBcfyWBLqHrZAaN8oMW5uYZ09rBaX34/lpJzJA7713Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=intel.com;
-	spf=pass smtp.mailfrom=intel.com;
-	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=aj98Tl+v;
-	arc=none smtp.remote-ip=198.175.65.18
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=gWmxyC9b;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A08DE606A32D
-	for <ceph-devel@vger.kernel.org>; Sat, 14 Nov 2026 05:40:26 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A08DE606A32D
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22528606A329;
+	Sun, 15 Nov 2026 21:39:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=aj98Tl+v
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1794634826; x=1826170826;
-  h=date:from:to:cc:subject:message-id;
-  bh=1+VA0oZJ1MlbOFl4iLs3s1djNxwsEg4Q5pEcdAPQXjE=;
-  b=aj98Tl+v/YyZZuYwxpUrzCFKmPu4euezHcBgQdxuQ2oUn4d+OTj0Jtvh
-   Q7QGKKVFrV6+mCjJfuNiRBeHWrO+shWyud10j5Pe/C2PZpbkgmoMk/aZU
-   sZK1e9lWgZFJfKfZ52XdSWj1kpU6bYtJ9o/5wioqS3+tYVhgWFvzBKkA+
-   fmIXg2QMtAn9uz+aEWDdZXo1Fy+Z/ygYgpQISmjiWTuL3qKZjUdptF2XG
-   Vz4EgoC1PXHk5BOuJvPGByoApWJo5FGLJ9PDmCrFcRHvnbmmSpYKjXgHC
-   eiXPW5Pqzy4Ww18sgNSxsg54opT0aphDW9tipZTIryo5knzAwXOXYjF5v
-   g==;
-X-CSE-ConnectionGUID: VrwverH1QG2bpYUrVKqFdg==
-X-CSE-MsgGUID: N5EHQdQvRkaYisM702hwfw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11965"; a="3459372"
-X-IronPort-AV: E=Sophos;i="6.27,213,1787036400"; 
-   d="scan'208";a="3459372"
-Received: from fmviesa011.fm.intel.com ([10.60.135.151])
-  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Nov 2026 21:40:26 -0800
-X-CSE-ConnectionGUID: lVXOwViyQz+fLSC4PVUVvA==
-X-CSE-MsgGUID: thfTVkHGQ16oM7CYech6BA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.27,213,1787036400"; 
-   d="scan'208";a="10872587"
-Received: from igk-lkp-server01.igk.intel.com (HELO 1073a420ae3a) ([10.211.93.152])
-  by fmviesa011.fm.intel.com with ESMTP; 13 Nov 2026 21:40:25 -0800
-Received: from kbuild by 1073a420ae3a with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1xS6Uw-000000001Up-42Uh;
-	Sat, 14 Nov 2026 05:40:22 +0000
-Date: Sat, 14 Nov 2026 06:39:48 +0100
-From: kernel test robot <lkp@intel.com>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: oe-kbuild-all@lists.linux.dev, ceph-devel@vger.kernel.org
-Subject: [ceph-client:wip-linger-ping-lat 7/7]
- net/ceph/debugfs.c:269:42: warning: unsequenced accesses to volatile
- qualified 'jiffies'
-Message-ID: <202611140615.C6i3Z4Ih-lkp@intel.com>
-User-Agent: s-nail v14.9.25
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=gWmxyC9b
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DA571F000C4;
+	Sun, 15 Nov 2026 21:39:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794778760;
+	bh=AgmXiYwsbFtClFrM0wh7o6D+RpJ4fbleaDulYZzEPzs=;
+	h=From:Date:Subject:To:Cc;
+	b=gWmxyC9bKog3m9DpNjBIEoKmRHcUJIlDRSRZkKnJ7ncNpBHDUpX7AyQ+/Id+kKvXJ
+	 T/qLkhd2JeTx4IMlwQpDhmdGOVSgJPMhCLyi4JUX79RhLhZEgvlFcpyxlf4lA2KpTf
+	 9OnhnNpVYYH+o69Ht4YjjgSVcmBT3W4nOq4dvSkjXtkWwie1WeOck5/DJZtgACvSXH
+	 pKak/xSHVmsg8F7sKbMIYjALeDs/RxJfazxaF7t+NtcMQDrn/0CosTF1DGS38fXFD4
+	 pLwZaQ5QO/v+k4r/YYpZA1g2kurLBqdCGmNI8zcjBPrQ43eP8UX5G8SvDSMCbou360
+	 +ERuF0paV0NwA==
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Sun, 15 Nov 2026 14:39:13 -0700
+Subject: [PATCH] libceph: Avoid unsequenced accesses to jiffies in
+ dump_linger_request()
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -80,52 +52,88 @@ List-Subscribe: <mailto:ceph-devel+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20261115-ceph-wunsequenced-v1-1-6910c560ba9b@kernel.org>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAA/yXMQQ6CMBBG4auQWduEKWCiVzEuoP0L46Jih6oJ4
+ e4WWX6L91ZSJIHStVop4S0qz1jAp4rc1McRRnwx2dqembkzDvNkPjkqXhnRwZu27W3NFx+aEKh
+ 0c0KQ7/95ux/WPDzgln1E2/YDSrgGRHUAAAA=
+X-Change-ID: 20261115-ceph-wunsequenced-44a2019df3ff
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Xiubo Li <xiubo.li@clyso.com>
+Cc: Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+ Nathan Chancellor <nathan@kernel.org>
+X-Mailer: b4 0.17-dev
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2758; i=nathan@kernel.org;
+ h=from:subject:message-id; bh=eXBp/KB6vBLLPNVJIOG85QieDKCMzM3UE/e2kzkIpmQ=;
+ b=owGbwMvMwCUmm602sfCA1DTG02pJDFm/1Jqd8rRnPOB3yWxdU39yTR5D2pKo+wGKbjz6Vtc8v
+ CcuFl/UUcrCIMbFICumyFL9WPW4oeGcs4w3Tk2CmcPKBDKEgYtTACbS9o+RYdGHvU0+FonqRd0s
+ ef19h62V3pvLWvqcFQvYuGXN9T8cXIwMs1fuNjty91feosw3J+Z7dVbJs/GmzQhPD990+gHzM5E
+ tnAA=
+X-Developer-Key: i=nathan@kernel.org; a=openpgp;
+ fpr=2437CB76E544CB6AB3D9DFD399739260CB6CB716
 
-tree:   https://github.com/ceph/ceph-client.git wip-linger-ping-lat
-head:   1428966bcb1a1e537f406812f7d91f81a127431a
-commit: 1428966bcb1a1e537f406812f7d91f81a127431a [7/7] libceph: include current latency in debugfs osdc dump
-config: riscv-allmodconfig (https://download.01.org/0day-ci/archive/20261114/202611140615.C6i3Z4Ih-lkp@intel.com/config)
-compiler: clang version 24.0.0git (https://github.com/llvm/llvm-project 8621950157210c1fa68f20f0614cb51310ec9dff)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20261114/202611140615.C6i3Z4Ih-lkp@intel.com/reproduce)
+After a recent improvement in clang to warn on unsequenced accesses to
+volatile variables [1], an instance appear in dump_linger_request(),
+which can break the build with CONFIG_WERROR=y / W=e:
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202611140615.C6i3Z4Ih-lkp@intel.com/
+  net/ceph/debugfs.c:269:42: error: unsequenced accesses to volatile qualified 'jiffies' [-Werror,-Wunsequenced]
+    267 |                    req ? jiffies_to_msecs(jiffies - req->r_start_stamp) : 0,
+        |                                           ~~~~~~~
+    268 |                    lreq->is_watch && lreq->committed && !lreq->last_error ?
+    269 |                         jiffies_to_msecs(jiffies - lreq->watch_valid_thru) : 0,
+        |                                          ^
 
-All warnings (new ones prefixed by >>):
+Per C11 5.1.2.3.2, accessing a volatile object is a side effect. Per C11
+6.5.2, unsequenced side effects on the same scalar object are undefined
+behavior. Per C11 6.5.2.2.10/12, the evaluation of arguments in a
+function call is indeterminately sequenced, meaning any side effects in
+the arguments are unsequenced.
 
->> net/ceph/debugfs.c:269:42: warning: unsequenced accesses to volatile qualified 'jiffies' [-Wunsequenced]
-     267 |                    req ? jiffies_to_msecs(jiffies - req->r_start_stamp) : 0,
-         |                                           ~~~~~~~
-     268 |                    lreq->is_watch && lreq->committed && !lreq->last_error ?
-     269 |                         jiffies_to_msecs(jiffies - lreq->watch_valid_thru) : 0,
-         |                                          ^
-   1 warning generated.
+Add a local variable to hold the value of jiffies before the function
+call so that there are no unsequenced side effects, clearing up the
+warning.
 
+Fixes: a407f9961902 ("libceph: include current latency in debugfs osdc dump")
+Closes: https://github.com/ClangBuiltLinux/linux/issues/2200
+Link: https://github.com/llvm/llvm-project/commit/955715460eaf9188c241c74750637fc82dfcc423 [1]
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ net/ceph/debugfs.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-vim +/jiffies +269 net/ceph/debugfs.c
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index b068e25f2acc..82270f0e4d7e 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -259,14 +259,15 @@ static void dump_linger_request(struct seq_file *s,
+ 	struct ceph_osd_request *req =
+ 	    list_first_entry_or_null(&lreq->osd_reqs, struct ceph_osd_request,
+ 				     r_private_item);
++	unsigned long j = jiffies;
+ 
+ 	seq_printf(s, "%llu\t", lreq->linger_id);
+ 	dump_target(s, &lreq->t);
+ 
+ 	seq_printf(s, "\t%u\t%u\t%u\t%s%s/%d\n", lreq->register_gen,
+-		   req ? jiffies_to_msecs(jiffies - req->r_start_stamp) : 0,
++		   req ? jiffies_to_msecs(j - req->r_start_stamp) : 0,
+ 		   lreq->is_watch && lreq->committed && !lreq->last_error ?
+-                        jiffies_to_msecs(jiffies - lreq->watch_valid_thru) : 0,
++                        jiffies_to_msecs(j - lreq->watch_valid_thru) : 0,
+ 		   lreq->is_watch ? "W" : "N", lreq->committed ? "C" : "",
+ 		   lreq->last_error);
+ }
 
-   255	
-   256	static void dump_linger_request(struct seq_file *s,
-   257					struct ceph_osd_linger_request *lreq)
-   258	{
-   259		struct ceph_osd_request *req =
-   260		    list_first_entry_or_null(&lreq->osd_reqs, struct ceph_osd_request,
-   261					     r_private_item);
-   262	
-   263		seq_printf(s, "%llu\t", lreq->linger_id);
-   264		dump_target(s, &lreq->t);
-   265	
-   266		seq_printf(s, "\t%u\t%u\t%u\t%s%s/%d\n", lreq->register_gen,
-   267			   req ? jiffies_to_msecs(jiffies - req->r_start_stamp) : 0,
-   268			   lreq->is_watch && lreq->committed && !lreq->last_error ?
- > 269	                        jiffies_to_msecs(jiffies - lreq->watch_valid_thru) : 0,
-   270			   lreq->is_watch ? "W" : "N", lreq->committed ? "C" : "",
-   271			   lreq->last_error);
-   272	}
-   273	
+---
+base-commit: a407f99619029b76548774af1006319f810bb345
+base-tree: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git master
+change-id: 20261115-ceph-wunsequenced-44a2019df3ff
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Best regards,
+--  
+Cheers,
+Nathan
+
