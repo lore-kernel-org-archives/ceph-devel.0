@@ -1,143 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=194.104.111.126
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795109417;
-	b=2LeOiuKOmWxwlr9Ylgxw/I5xyd/IGTQMloTtVpEl+Iv1K02mgC5n7D9qiWJfOfKOOF8z
-	 amvFDwPA2qulE3hQmjsY0wayAVfPLH8cqIFodw78SJzQ4SKrWwGPqlx/CyZDkSrWHIKdI
-	 wXAe3j1jQcQHdv/RPV6M0633YatVS0bAThVI6VKvoFPNom6S0ymgdEM6qE6OZOhJpKtC2
-	 IYq1oDe+E/0KvLlF1PBUnGcY8pSoQbyjmxEm00rRmZB1Qy34cc+VzL7dHRaU1diB+aAVH
-	 SS0fofDWRURuNEW10KQ3Ke7mQ1hRu520A8ab9mlf2JfpA0sU0NvwTwwr2e/oOY6WYiQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795109417;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:Received:From:To:CC:Subject:
-	 Thread-Topic:Thread-Index:Date:Message-ID:References:In-Reply-To:
-	 Accept-Language:X-MS-Has-Attach:X-MS-TNEF-Correlator:msip_labels:
-	 x-ms-publictraffictype:x-ms-traffictypediagnostic:
-	 x-ms-office365-filtering-correlation-id:x-ms-exchange-senderadcheck:
-	 x-ms-exchange-antispam-relay:x-microsoft-antispam:
-	 x-microsoft-antispam-message-info:x-forefront-antispam-report:
-	 x-ms-exchange-antispam-messagedata-chunkcount:
-	 x-ms-exchange-antispam-messagedata-0:MIME-Version:
-	 X-Exchange-RoutingPolicyChecked:
-	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-AuthAs:X-MS-Exchange-CrossTenant-AuthSource:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-originalarrivaltime:
-	 X-MS-Exchange-CrossTenant-fromentityheader:
-	 X-MS-Exchange-CrossTenant-id:X-MS-Exchange-CrossTenant-mailboxtype:
-	 X-MS-Exchange-CrossTenant-userprincipalname:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped:
-	 X-Mimecast-Spam-Score:X-Mimecast-MFC-PROC-ID:X-Mimecast-Originator:
-	 Content-Language:Content-Type:Content-Transfer-Encoding;
-	bh=y7cjZzv1IlDLrfgzr3NrNfR2FLKP9U+YpXy2c9bC5sI=;
-	b=V91oqcSSXchxdyg/+q5D6+SsCTtoLFw6nQDp/IWEoV/LavhZJ3sNDcT83BpHdZsnIbY7
-	 YAEOLI8opvdP2mbtw9FfjxJpIcnC2BF0KVaMh9uxHwkTVm/5PyQG0uVkdHkekPjAitz7t
-	 pF1JKp8rf/tFxvseRL5DqVwgYpLwMyljoUeDyDBrg1CWOjFzsZiS0qeaShVBTwoBS9lwI
-	 QFPVoxQGGO4rk2kWIjABG1VCDeCDSaEod5VLm9nHqe8E6hDW5lC7/+CXoLVtj+VtVtURd
-	 OIoB0K6lpSwFJ1ZblpUrw5/fAi5sgICpfJHsklGfRR5GjpffI3F5fe7419VDveqFsvw==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=francetv.fr;
-	spf=pass smtp.mailfrom=francetv.fr;
-	dkim=pass header.d=francetv.fr header.i=@francetv.fr header.a=rsa-sha256 header.s=mc20251209 header.b=W1XBgqp1;
-	arc=none smtp.remote-ip=194.104.111.126
-Received: from de-smtp-delivery-126.mimecast.com (de-smtp-delivery-126.mimecast.com [194.104.111.126])
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1795158679;
+	b=j52dLZnRF6f1KLMn5kgJfTjwER0IUN0KoQ9zIduVH8J1vxfGpt7vlMrQkQU7rfc3Gr7t
+	 mfLWT8FaKrXA7F42ciFzYl7rdICHYNWMVJYR3SVbS+01M6intJZONsfX9uj++OVJU6r1C
+	 X1sJwzdbzC2WEZqZJjayNLyF7jVod11vEccOQDIuu3iadHhU7XnpTBnrk/ZWOxIGfqUM6
+	 PX9tBAxh+eEzr6eQ4NtjP7P94xFPKxNgzAPJauubIPCw0/2Q3jiaJGi6CBWtjoXF++s64
+	 +rrb/4FDpz2TDh5+Jp/RShKN8JuBTZ8IzIQ40SJm2uVpUgFltnhkH3btIV8leA/DlXg==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795158679;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=CDCgnjKYuJcLFNxaq18WnfsOWSqlif3g0ng4iiH/swA=;
+	b=UdjADl+83Tm3MwuZstgMn0UAYAaiJnG9xSm5Qxj46vu/TiotjuHHMKOelC8cVVvhsf+M
+	 h3sMw7hPHpfDgXUlH9AvtauF2cIGLCFqUX/g03nrxw1pkbYP7u5MhxInBxi5aUFSp2sfA
+	 tCWwdSnnr5EI20pLKcqj8tmdkSinOiMNUjyt0iEXEgBkSRYqvaONy90Z9WCaQZN55nnO0
+	 aw8mRi2iJvwnfcs61Yn2njTLYIMB2CVdlc+b2or3DXL8x/779wsJI/AoDcUhyxIFHOV4D
+	 8TmmbvBX3ToSSH2Z+fuaM2SzTN+Uzby3Ep6Odb7XypBmCq5VsEiglLR63ERm9d4L6fg==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="hRbwq68/";
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 790A0606A338;
+	Fri, 20 Nov 2026 07:11:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hRbwq68/
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1795158679;
+	b=OlWhPgT0UepvOrEpcJqhoZHCdWW79hnnqRJDFFUE+23IJZOzRJYp3C7qGzlRsz4OAB+P
+	 qWDQoy0eksiO1D9iaDtmpSsL/T33dsKxAjFtprFYgwZ2rTSO4ANq0c0UvO1eYJjG9W9A3
+	 bqwwy594G2daOcbvbznz3iV7oetvhSkxky0OAlNfugpcw2aKSg1F6UI9kFlw+vJkzYadr
+	 7ZWwtHWcevOCrP+TnJac8E+kqWNoZiyO/BjZVFVT/kD9aPkq0+jbZ/7RcZLxZKQ/B2WT9
+	 RSMgoKOvlu4WbIVnddXbQVcYNAAsnSqePZUbLfVrnGgaagPgdV+gw4U5VmslohrhnCg==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1795158679;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=CDCgnjKYuJcLFNxaq18WnfsOWSqlif3g0ng4iiH/swA=;
+	b=rVIpUAozQ52LMhH4Mmst0uRGHgEEuDeXXhJ7mB2prOMHkeomUrU86SHwwdrF9txfHf9/
+	 5Kyxjii6DLh9cUrYXHWHK1zWRtyJiyZdtBWRe9cRiU/9/5jMNxV3mx+PPD9JLAoAUsRCT
+	 8B1aBdGkxXyqEFJLFNrOoclbM4FIGn3h5+u4TVwKLunCnGgyPE7vpzu7DwrUT6t+fkOwC
+	 sc/BLhRwN8+pGuVxKMXZ+0qQtq/pnKGqRBc2TuW39GziWheOjFUJdpkxYvFaqa70i3PC6
+	 w9srXa3d0WSdjOLZfyj4a8aSWKv2NN4dC7Dv2blMwWTayFQN3WaSG4U0tHcI+Y/htKw==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 737FA606A331
-	for <ceph-devel@vger.kernel.org>; Thu, 19 Nov 2026 17:30:16 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 737FA606A331
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=francetv.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=francetv.fr
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=francetv.fr header.i=@francetv.fr header.a=rsa-sha256 header.s=mc20251209 header.b=W1XBgqp1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=francetv.fr; s=mc20251209;
-	t=1795109408;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=y7cjZzv1IlDLrfgzr3NrNfR2FLKP9U+YpXy2c9bC5sI=;
-	b=W1XBgqp1k35Uc9fj02z1U2gaukPpsulFDTBpXIbh7wD6Ra/AtzJaO1eFOSFgIKvHBgrDZJ
-	3SQapWX/5fNJUAx3k51O62a3AVqp8ihHGKEIba5r/X8VEzlvMkXtNuFjiKtYU+eHZY9s+G
-	s5YMYcSCDhpENyexQh3UJxl0vfajuaRPPoDOYavB7k38IEPZI8CZtNAv2BOryob/lO2dRJ
-	TR/GB8CxF4nGKSIl/7aQ57Ko9+VMVdHSSpvnA81D9cYe+2K+ScMGXoF7tRS2i2Rg2tKsV7
-	YBJhE97EbZX/kvlwPSMiPq9s5PTzpEvgGxU9KJW+ZMxds2ZwYp4SPlIynn08Ow==
-Received: from PA5P264CU001.outbound.protection.outlook.com
- (mail-francecentralazon11010061.outbound.protection.outlook.com
- [52.101.167.61]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- de-mta-40-nXv_n2i6Mty82DRMYAAcfQ-1; Thu, 19 Nov 2026 17:30:00 +0000
-X-MC-Unique: nXv_n2i6Mty82DRMYAAcfQ-1
-X-Mimecast-MFC-AGG-ID: nXv_n2i6Mty82DRMYAAcfQ_1795109400
-Received: from PR1P264MB1805.FRAP264.PROD.OUTLOOK.COM (2603:10a6:102:1b2::19)
- by MR1P264MB3475.FRAP264.PROD.OUTLOOK.COM (2603:10a6:501:20::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.639.12; Thu, 19 Nov
- 2026 17:29:58 +0000
-Received: from PR1P264MB1805.FRAP264.PROD.OUTLOOK.COM
- ([fe80::f6d2:e60e:fbde:58fe]) by PR1P264MB1805.FRAP264.PROD.OUTLOOK.COM
- ([fe80::f6d2:e60e:fbde:58fe%4]) with mapi id 15.21.0639.010; Thu, 19 Nov 2026
- 17:29:58 +0000
-From: =?iso-8859-1?Q?DESNO=CBS_Jordan?= <jordan.desnoes@francetv.fr>
-To: Sasha Levin <sashal@kernel.org>, "stable@vger.kernel.org"
-	<stable@vger.kernel.org>
-CC: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
-	Xiubo Li <xiubo.li@clyso.com>, Viacheslav Dubeyko <slava@dubeyko.com>,
-	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Subject: Re: [PATCH 6.18.y 0/4] libceph: add CEPH_CRYPTO_AES256KRB5 support
-Thread-Topic: [PATCH 6.18.y 0/4] libceph: add CEPH_CRYPTO_AES256KRB5 support
-Thread-Index: AQHdeAQFdZHh8UJ140Gs2wrkimE5e7c1kFYAgAAVJ84=
-Date: Thu, 19 Nov 2026 17:29:58 +0000
-Message-ID: <PR1P264MB18059C3971471D3CD7E5F7DD88792@PR1P264MB1805.FRAP264.PROD.OUTLOOK.COM>
-References: <20261119-aes256k-6-18-y-v1-0-bd5db87da2f5@francetv.fr>
- <2026-11-19-1-daily-reply-0014@kernel.org>
-In-Reply-To: <2026-11-19-1-daily-reply-0014@kernel.org>
-Accept-Language: fr-FR, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-msip_labels: 
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PR1P264MB1805:EE_|MR1P264MB3475:EE_
-x-ms-office365-filtering-correlation-id: ced8e9b4-818c-4fbb-0984-08df4662bc1f
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|23010399003|376014|366016|1800799024|38070700021|10067099003|4143699003|56012099006|261022075727099003|261026121527099003|261021121427099003|261102123227099003|261009223027099003|18002099003|22082099003|6133799003
-x-microsoft-antispam-message-info: JsjnZ40YQJCrfZ8skealskAOtRKHlA5FK+Qn+i7XQPCxnFAGP0qf1JrtXfxXu5/XfXJ7GGETN/JbmQnx1xCBU3umEfTczHDvx7Tmj+ynkpuGexyr8ZUtwx/jCHIAYrAWtKIRj6MVwOcRLtmm5R4lJ+4MOUOSsvSPaQ4dAuqd6RWo9wAqvpWSNZmFHeKO6LIrZeomtKoJSJju7YMU9pshUIa0fYb0QNPoWrYSno3e0Uz7mij5f3tbzivtrXQ3RIsCfznzBTKjcP8nKl/cNk3puutarU8qldz87MMTd9WWWVWM9ij45ElyoDAv33gqwtvWH0XBaEtuf+9O0tK04gVyLYLixyJsSm8ZZRkUPw6lRwIrTHY8mUa0Igy6lV1NrM1kRi8YvLY369GPQVGWEjdh9Ldh3Gmm8iYM2/rbr93gQqiLeL2ADo1BwFJAGGwb3Hu3CpMFEy2aX7YYaLafSuMLCfNB6khaBSxXccMc1IeH2HAI4AtDFJkM15feyOZVJ73h4gJfLaueIZ2BOjeiC/l3StUKIMxBA8rx/FD/vnOVEhTpg0oWv7e0FgZb/72Qvl87VapyU1b/FQ8ZcSXqU8MQ+2nDlj4QuGOlk31/VCbSOpkpE4W7V5nqnZhCQlPxPLAzDRJg6STE2bLZ5INItdyr8fUYAidD8biJ3o9uok/JYfo=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PR1P264MB1805.FRAP264.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(376014)(366016)(1800799024)(38070700021)(10067099003)(4143699003)(56012099006)(261022075727099003)(261026121527099003)(261021121427099003)(261102123227099003)(261009223027099003)(18002099003)(22082099003)(6133799003);DIR:OUT;SFP:1101
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?XPAd0Ve5XaDTrW7LZ+rfx7qZWL8SJZBGcFpD2TMBv9st+AzkGPKr1B5Nmy?=
- =?iso-8859-1?Q?n0PFLYrXfEMtIdLBsSRSzosQxk4BUww8r80t87uPTY2K4aJsMfiX/phKUs?=
- =?iso-8859-1?Q?jTMfBmTKECQnDciNZ5U8Il8/TMgWXOk7auQ+Q2F8xpjY2LP9CfezISTqp9?=
- =?iso-8859-1?Q?PcrUDLzuNiXq9l+O3td/hGSsiilCq4YX6/pnTNwyDS/fkOoENLEX7/qEqL?=
- =?iso-8859-1?Q?LqAKWfzTmxg2oSYqtHZq59sTlZfIKiOVhvFS5QTQY6trzT3qfzZFuSIIJ+?=
- =?iso-8859-1?Q?YyQe7YUndRasyDLtcGso//oE3lUAZGZhHSgRm3WGoPN0A1rohJs/t1kEvk?=
- =?iso-8859-1?Q?znXM4DA4v5MiewrG0FyKl4i4rgbo0ztP2OOJZHRslGYgrP//ayNK4soxwk?=
- =?iso-8859-1?Q?KquugcGay5T/8M7o2dbaAMS/kzPJsuZYywMIpvyw4Wft1f4ew4eUMR6yVt?=
- =?iso-8859-1?Q?KMbWVst/RnCvNyNqms5a2/Kjve0TQkwwJ8Al3wZK1YXy7cLOHizmE1Klzv?=
- =?iso-8859-1?Q?r71PqEQwDezlLTybN7UirNM7LtBn8mIJTLJ5EwPku1z6U3Rw7JjNyawsZk?=
- =?iso-8859-1?Q?G4d13amS6trjCdhjmdoSbc6pdysoDDR/N8MFcfxhgIUtYy2ARjguzZYtJD?=
- =?iso-8859-1?Q?NhRAgtRWXDn84f85PklasWXZkdvxjP00s3k2FBtro5QGZr08aYHvTnO0Ba?=
- =?iso-8859-1?Q?B2rIjPA9ahHPJeRwJJkYg5XLVlScKSLUCgfVhs9Vu/GfyQYHNUFJ5VrNJf?=
- =?iso-8859-1?Q?YLjZH1jz4iTaZIOX5eusOFcgCdl2tYeCC1QUJ8fLU417Uz5aLHCzWMM2ua?=
- =?iso-8859-1?Q?zyhrGAElrL2twy47PpQ+Pgb86V/IdNfcY/aPteU9BkqemtQQ4jkuuNWgq8?=
- =?iso-8859-1?Q?uNiLYp3HG/swytNTBjpnov5RtlLsXM29uerjPt5OTMT7csVDiVVaCoBB01?=
- =?iso-8859-1?Q?E4W7ftcTiDM7nhrLVbpNsld8IEYE5DGtNNkytOwgSn9VCO/pmsz5TTbJKK?=
- =?iso-8859-1?Q?Q7xbirduXG6stcJNXgDet1q1G6equMX1La+PKi596cXFv4DIomgFed7tbx?=
- =?iso-8859-1?Q?p475zDpL+PhofnvYRb6gB9B4KrLNZWp/vM++tBpAXvybpJgH+vzoyCyECU?=
- =?iso-8859-1?Q?dzMGN8a37KLPmHU6cYntwERgcjBisyRhvaRxOQegYAOTYeyaxRPn8cKwL+?=
- =?iso-8859-1?Q?cPY+3me/ID7LzXQUOu9NFim1mV4HgD9u0lSkN32eF35L3eqhkSLwyOqW1c?=
- =?iso-8859-1?Q?d48J6K4QJ+J3PWg3dG3nsta4irGmhDbWkD0jzaFoq3c06tHD+3FpHcyNHC?=
- =?iso-8859-1?Q?eXGMicjTML0IL9Usvk7F5dn6Sowz8eCo3/sLCunr96DtBEYziFXLqMtz3+?=
- =?iso-8859-1?Q?ud/mjBgoXGKcdwZIgv/OCNU1ITbDXyCsVlgebeUQVr7Vvj+5eUU592ctgC?=
- =?iso-8859-1?Q?GHxJ4/VVIa8KJBS0iKgL2gPKkx5GRbIzHKrpQblo7+VajW8u+Ta8cLM5PG?=
- =?iso-8859-1?Q?kEzyVvfCW2vDgQ8EBCBSZ7xWZcQDTviYx4tTs4bSFUy04uq5Qd1RVLF/N7?=
- =?iso-8859-1?Q?TQ7kqZ2lh3eKGK/GKn1r7Z49Tu/x+Kmi3ysrO35CKYwGnfDTFbgMVB3kV5?=
- =?iso-8859-1?Q?fQ1u2hcqR6z5hVaQdwpCqmOF5UA8VPND20xQ7EwkpgvD5ck9b74Fqi9o+O?=
- =?iso-8859-1?Q?SmvgQCNhR6EZ1uzWTSC8TXutpJtFra9vFi9t9hFlxmE5wpdZtXynpUBQme?=
- =?iso-8859-1?Q?eEDBkeaIBRcjyieDVbnOSSu5fJkM7wWI6JM9260ADAFPnWzgtjt6d64EWf?=
- =?iso-8859-1?Q?/nHcNjZTpw=3D=3D?=
+	by smtp.kernel.org (Postfix) with ESMTPS id DF3B71F000EC;
+	Fri, 20 Nov 2026 07:11:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795158679;
+	bh=CDCgnjKYuJcLFNxaq18WnfsOWSqlif3g0ng4iiH/swA=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
+	b=hRbwq68/zqwe9AlIYEgD8JsZwqbd1xxqGM2ncazaABIryHzKWpkxT7FpIEVam+G4q
+	 6E+uidceTDnATmIPOJVf+gD8++Ix/DZI4VfB6BHCWJLYRM5d0Ws1JLMwLuMDtJoF9W
+	 hGU7b7DzQqvMzdd0+1bivoPSvIQ917ZsIF/0Bvk/yOYL5ehZVrMiuFmHuWG2lrw+Wb
+	 m6TPhG8RIK+FmsQ2nT7tpKLWYcUAASvvFO8kQG8JzgecZRdA+b2YKvN1J7VwrWNhA+
+	 eC+dlnCJFEF/f/JEupkNn+wm74MhzchwkxP53Nu/x1C0iyYEW1/mb+ttgnFsFddmUt
+	 iBv0xQHTeWjBg==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id 6B81449748;
+	Fri, 20 Nov 2026 07:11:17 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Fri, 20 Nov 2026 09:11:10 +0200
+Subject: [PATCH v7 2/5] ceph: replace the request_tree rbtree with an
+ xarray keyed by r_tid
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -147,36 +83,375 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked: h+4bteAny4TDIFwLqC/RWXzCjDFh/Z3ncu+je03OQwKfFGO84xJSCace3OlRC7xrbJuNLcnSbO7zey82ijnW4PgY0T69mw2Vvk1XqwtorWQE6Lgtu6HS08XXjupv8C6/gfNZtsJOmCmnZL2hpbevlhmERb709exd1f4Y/L3eEMHSxLTAEuxGNMPPKxuEjINdB8G9PseiosoeUOiNR9lK/MnjPQ1V1X6W+SsdxObeGa/OxdAMp9V03yM5qRfH5KxnmMqimie9kg6tngE2C/uOY1+9Pmm7BpYVG2MDF/JWsDi3uNO9gbvyc5hu6R91cev99bIVfLrhRCGHXXx417q73g==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 1auuWAjIyTNIbkcO8kyBqj79sXFYIz4OV9lRHpuLZ7wHg/gg/g2sm3fnDfsTJ2Xuy2L9/NLQGx4a3cRANcT5Xh9ohD8M2m5aT/e3geQxX3cQgdm+b2EeLy5zgpg6WCDkAia4RZ3YTuSl5ykTNE6/tKKazVNZQKUDuDggPRwIVAZ8X+h1H1Ry0yhKPLSlq3FPyOnW7l7rbJ7+dbVn+ISCYefRVHHXGomulnJIr73FeibDvegqqs8YCSmVnvSyfcWSRddJQqoDPR48Ky0C90l5Vu+wWKJALa8uHjfnecXV9QWBxVdhCrwsNUiP1Rt4iSlo4BzEz3q2ou20hOG1/df2iQiUTVOtmyF9/j6Xg2joF1WfXwmklLSsKuoCisNCQbwNBFA8gWbgd9ETVZRW4x6S4f1D86reBFrgxO341hd9qsUisbY1kfa2B975X+tKA32qc3VN8dFc0hkCYZAmk1Egu3kixlfMoNanONSHuvW7uji3NbmKCT3+A3V8fk5MPivT/88iISmPuKqq9OqwyFla9Vvq9bwEVPYZ6K+6OeTv8btcs1V2jt0qEirfA88xWhLxuVduCp6gR29vce42OAl7gPyFLTE/cHafx6hyQ3NfWqucUtg9VufUbOWJH68TMOC+
-X-OriginatorOrg: francetv.fr
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PR1P264MB1805.FRAP264.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: ced8e9b4-818c-4fbb-0984-08df4662bc1f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 19 Nov 2026 17:29:58.6612
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: aed0e243-afb5-4e96-af34-ea4e5df4979e
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: fyJgBpva+6tD/0iqNQzKigIFFzYteRXX5Ve9CkhevJU+45o8Tp0NL23wdyYIdqHUkiWv1Uk3uYsoUda0vfgj0Yup4V46tnWLV7Wl6rKVotQ=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MR1P264MB3475
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: Y6ir6qjMjQcWbS5BFnw-ohjZkI206sFCJikcX4xaUxc_1795109400
-X-Mimecast-Originator: francetv.fr
-Content-Language: fr-FR
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Message-Id: <20261120-ceph-mdsc-mutex-optimization-v7-2-a4eee70e0038@clyso.com>
+References: <20261120-ceph-mdsc-mutex-optimization-v7-0-a4eee70e0038@clyso.com>
+In-Reply-To: <20261120-ceph-mdsc-mutex-optimization-v7-0-a4eee70e0038@clyso.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1795158674; l=11800;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=c/9avo6RkJVgyP7p607F3UhMViKNwJJKHp6b9vPjvqw=;
+ b=+DPuSUxj1BtjLXRDeYCdJew9bW+7wfAkLdj/Uj8sE9NmxyIdE6CWRb2qcnNT2/OfH5bTAB6ao
+ VX4NokmzgrZB7/gq33fU0K2hBy9lvTFzpGtiW0IzF2bK2hk0g8IgkEv
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
+Content-Transfer-Encoding: 7bit
 
-On Thu, Nov 19, 2026 Sasha Levin wrote:=0A> Ugh, this really looks like a b=
-rand new feature... Is it not?=0A=0AIt is, but it's the client side of a se=
-curity fix: aes256k is Ceph's=0Aremediation for CVE-2025-30156 (CephX auth =
-bypass via the old "aes" key=0Atype) [1]. Completing the remediation means =
-disallowing "aes", which=0Abreaks kernel clients older than 7.0 [2]. CentOS=
- Stream 9 and 10 already=0Acarry a backport, and Ilya is fine with this one=
- [3].=0A=0A[1] https://docs.ceph.com/en/latest/security/CVE-2025-30156/=0A[=
-2] https://docs.ceph.com/en/latest/rados/configuration/auth-config-ref/#cep=
-hx-upgrade=0A[3] https://lore.kernel.org/stable/PR1P264MB1805408F7C4A11E6F4=
-D2F6BE887B2@PR1P264MB1805.FRAP264.PROD.OUTLOOK.COM/T/#u=0A=0AThanks,=0AJord=
-an=0A
+From: Xiubo Li <xiubo.li@clyso.com>
+
+Replace the red-black tree that indexes pending MDS requests by
+transaction ID with an xarray.  The xarray provides O(1) keyed
+lookups versus the rbtree's O(log N), and its internal RCU
+locking eliminates the need for an external mutex during lookups.
+Iteration is also simpler, with the xarray's native iterators
+replacing open-coded rb_first() / rb_next() walks.
+
+Because xarray indices are unsigned long, a u64 transaction ID
+would be truncated on 32-bit platforms.  Restrict CEPH_FS to
+64BIT since there are no 32-bit users.
+
+Validate the xarray insertion and clean up the structure at
+shutdown.
+
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+ fs/ceph/Kconfig      |   1 +
+ fs/ceph/debugfs.c    |   6 +--
+ fs/ceph/mds_client.c | 113 +++++++++++++++++++++++----------------------------
+ fs/ceph/mds_client.h |   3 +-
+ 4 files changed, 56 insertions(+), 67 deletions(-)
+
+diff --git a/fs/ceph/Kconfig b/fs/ceph/Kconfig
+index be1c8ada5665..a703071a1089 100644
+--- a/fs/ceph/Kconfig
++++ b/fs/ceph/Kconfig
+@@ -2,6 +2,7 @@
+ config CEPH_FS
+ 	tristate "Ceph distributed file system"
+ 	depends on INET
++	depends on 64BIT
+ 	select CEPH_LIB
+ 	select NETFS_SUPPORT
+ 	select FS_ENCRYPTION_ALGS if FS_ENCRYPTION
+diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
+index 18eb5da03411..491ead3fe1c6 100644
+--- a/fs/ceph/debugfs.c
++++ b/fs/ceph/debugfs.c
+@@ -87,12 +87,12 @@ static int mdsc_show(struct seq_file *s, void *p)
+ 	struct ceph_fs_client *fsc = s->private;
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
+-	struct rb_node *rp;
++	unsigned long idx;
+ 	char *path;
+ 
+ 	mutex_lock(&mdsc->mutex);
+-	for (rp = rb_first(&mdsc->request_tree); rp; rp = rb_next(rp)) {
+-		req = rb_entry(rp, struct ceph_mds_request, r_node);
++	idx = 0;
++	xa_for_each(&mdsc->request_tree, idx, req) {
+ 
+ 		if (req->r_request && req->r_session)
+ 			seq_printf(s, "%lld\tmds%d\t", req->r_tid,
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index b84d04835329..fdaf6f56ecd3 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1257,7 +1257,6 @@ void ceph_mdsc_release_request(struct kref *kref)
+ 	kmem_cache_free(ceph_mds_request_cachep, req);
+ }
+ 
+-DEFINE_RB_FUNCS(request, struct ceph_mds_request, r_tid, r_node)
+ 
+ /*
+  * lookup session, bump ref if found.
+@@ -1269,7 +1268,7 @@ lookup_get_request(struct ceph_mds_client *mdsc, u64 tid)
+ {
+ 	struct ceph_mds_request *req;
+ 
+-	req = lookup_request(&mdsc->request_tree, tid);
++	req = xa_load(&mdsc->request_tree, tid);
+ 	if (req)
+ 		ceph_mdsc_get_request(req);
+ 
+@@ -1303,7 +1302,14 @@ static void __register_request(struct ceph_mds_client *mdsc,
+ 	}
+ 	doutc(cl, "%p tid %lld\n", req, req->r_tid);
+ 	ceph_mdsc_get_request(req);
+-	insert_request(&mdsc->request_tree, req);
++	if (xa_is_err(xa_store(&mdsc->request_tree, req->r_tid, req,
++			       GFP_NOFS))) {
++		pr_err_client(cl, "%p tid %lld: xa_store failed\n",
++			      req, req->r_tid);
++		ceph_mdsc_put_request(req);
++		req->r_err = -ENOMEM;
++		return;
++	}
+ 
+ 	req->r_cred = get_current_cred();
+ 	if (!req->r_mnt_idmap)
+@@ -1332,20 +1338,19 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
+ 	list_del_init(&req->r_unsafe_item);
+ 
+ 	if (req->r_tid == READ_ONCE(mdsc->oldest_tid)) {
+-		struct rb_node *p = rb_next(&req->r_node);
++		unsigned long tidx = req->r_tid + 1;
++		struct ceph_mds_request *next_req;
++
+ 		WRITE_ONCE(mdsc->oldest_tid, 0);
+-		while (p) {
+-			struct ceph_mds_request *next_req =
+-				rb_entry(p, struct ceph_mds_request, r_node);
++		xa_for_each_start(&mdsc->request_tree, tidx, next_req, tidx) {
+ 			if (next_req->r_op != CEPH_MDS_OP_SETFILELOCK) {
+ 				WRITE_ONCE(mdsc->oldest_tid, next_req->r_tid);
+ 				break;
+ 			}
+-			p = rb_next(p);
+ 		}
+ 	}
+ 
+-	erase_request(&mdsc->request_tree, req);
++	xa_erase(&mdsc->request_tree, req->r_tid);
+ 
+ 	if (req->r_unsafe_dir) {
+ 		struct ceph_inode_info *ci = ceph_inode(req->r_unsafe_dir);
+@@ -1905,7 +1910,7 @@ static void cleanup_session_requests(struct ceph_mds_client *mdsc,
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	struct ceph_mds_request *req;
+-	struct rb_node *p;
++	unsigned long idx;
+ 
+ 	doutc(cl, "mds%d\n", session->s_mds);
+ 	mutex_lock(&mdsc->mutex);
+@@ -1921,10 +1926,8 @@ static void cleanup_session_requests(struct ceph_mds_client *mdsc,
+ 		__unregister_request(mdsc, req);
+ 	}
+ 	/* zero r_attempts, so kick_requests() will re-send requests */
+-	p = rb_first(&mdsc->request_tree);
+-	while (p) {
+-		req = rb_entry(p, struct ceph_mds_request, r_node);
+-		p = rb_next(p);
++	idx = 0;
++	xa_for_each(&mdsc->request_tree, idx, req) {
+ 		if (req->r_session &&
+ 		    req->r_session->s_mds == session->s_mds)
+ 			req->r_attempts = 0;
+@@ -2806,7 +2809,6 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+ 	req->r_fmode = -1;
+ 	req->r_feature_needed = -1;
+ 	kref_init(&req->r_kref);
+-	RB_CLEAR_NODE(&req->r_node);
+ 	INIT_LIST_HEAD(&req->r_wait);
+ 	init_completion(&req->r_completion);
+ 	init_completion(&req->r_safe_completion);
+@@ -2826,10 +2828,9 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+  */
+ static struct ceph_mds_request *__get_oldest_req(struct ceph_mds_client *mdsc)
+ {
+-	if (RB_EMPTY_ROOT(&mdsc->request_tree))
+-		return NULL;
+-	return rb_entry(rb_first(&mdsc->request_tree),
+-			struct ceph_mds_request, r_node);
++	unsigned long idx = 0;
++
++	return xa_find(&mdsc->request_tree, &idx, ULONG_MAX, XA_PRESENT);
+ }
+ 
+ static inline  u64 __get_oldest_tid(struct ceph_mds_client *mdsc)
+@@ -3890,12 +3891,11 @@ static void kick_requests(struct ceph_mds_client *mdsc, int mds)
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
+ 	struct ceph_mds_request *req;
+-	struct rb_node *p = rb_first(&mdsc->request_tree);
++	unsigned long idx;
+ 
+ 	doutc(cl, "kick_requests mds%d\n", mds);
+-	while (p) {
+-		req = rb_entry(p, struct ceph_mds_request, r_node);
+-		p = rb_next(p);
++	idx = 0;
++	xa_for_each(&mdsc->request_tree, idx, req) {
+ 		if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
+ 			continue;
+ 		if (req->r_attempts > 0)
+@@ -4748,7 +4748,7 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
+ 				   struct ceph_mds_session *session)
+ {
+ 	struct ceph_mds_request *req, *nreq;
+-	struct rb_node *p;
++	unsigned long idx;
+ 
+ 	doutc(mdsc->fsc->client, "mds%d\n", session->s_mds);
+ 
+@@ -4760,10 +4760,8 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
+ 	 * also re-send old requests when MDS enters reconnect stage. So that MDS
+ 	 * can process completed request in clientreplay stage.
+ 	 */
+-	p = rb_first(&mdsc->request_tree);
+-	while (p) {
+-		req = rb_entry(p, struct ceph_mds_request, r_node);
+-		p = rb_next(p);
++	idx = 0;
++	xa_for_each(&mdsc->request_tree, idx, req) {
+ 		if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
+ 			continue;
+ 		if (req->r_attempts == 0)
+@@ -5609,7 +5607,7 @@ static void ceph_mdsc_reset_workfn(struct work_struct *work)
+ 	 */
+ 	{
+ 		struct ceph_mds_request *req;
+-		struct rb_node *rn;
++		unsigned long idx;
+ 		u64 last_tid;
+ 
+ 		mutex_lock(&mdsc->mutex);
+@@ -5617,14 +5615,12 @@ static void ceph_mdsc_reset_workfn(struct work_struct *work)
+ 		mutex_unlock(&mdsc->mutex);
+ 
+ 		mutex_lock(&mdsc->mutex);
+-		rn = rb_first(&mdsc->request_tree);
+-		while (rn) {
+-			req = rb_entry(rn, struct ceph_mds_request, r_node);
+-			if (req->r_tid > last_tid)
+-				break;
++		idx = 0;
++		while ((req = xa_find(&mdsc->request_tree, &idx, last_tid,
++				      XA_PRESENT))) {
+ 			if (req->r_op == CEPH_MDS_OP_SETFILELOCK ||
+ 			    !(req->r_op & CEPH_MDS_OP_WRITE)) {
+-				rn = rb_next(rn);
++				idx++;
+ 				continue;
+ 			}
+ 			ceph_mdsc_get_request(req);
+@@ -5637,7 +5633,7 @@ static void ceph_mdsc_reset_workfn(struct work_struct *work)
+ 			ceph_mdsc_put_request(req);
+ 			if (time_after(jiffies, drain_deadline))
+ 				break;
+-			rn = rb_first(&mdsc->request_tree);
++			idx = 0;  /* restart: tree may have changed */
+ 		}
+ 		mutex_unlock(&mdsc->mutex);
+ 
+@@ -6369,7 +6365,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 	mdsc->snap_realms = RB_ROOT;
+ 	INIT_LIST_HEAD(&mdsc->snap_empty);
+ 	spin_lock_init(&mdsc->snap_empty_lock);
+-	mdsc->request_tree = RB_ROOT;
++	xa_init(&mdsc->request_tree);
+ 	INIT_DELAYED_WORK(&mdsc->delayed_work, delayed_work);
+ 	mdsc->last_renew_caps = jiffies;
+ 	INIT_LIST_HEAD(&mdsc->cap_delay_list);
+@@ -6695,34 +6691,33 @@ static void flush_mdlog_and_wait_mdsc_unsafe_requests(struct ceph_mds_client *md
+ 						 u64 want_tid)
+ {
+ 	struct ceph_client *cl = mdsc->fsc->client;
+-	struct ceph_mds_request *req = NULL, *nextreq;
++	struct ceph_mds_request *req;
+ 	struct ceph_mds_session *last_session = NULL;
+-	struct rb_node *n;
++	unsigned long idx;
+ 
+ 	mutex_lock(&mdsc->mutex);
+ 	doutc(cl, "want %lld\n", want_tid);
+-restart:
+-	req = __get_oldest_req(mdsc);
+-	while (req && req->r_tid <= want_tid) {
+-		/* find next request */
+-		n = rb_next(&req->r_node);
+-		if (n)
+-			nextreq = rb_entry(n, struct ceph_mds_request, r_node);
+-		else
+-			nextreq = NULL;
+-		if (req->r_op != CEPH_MDS_OP_SETFILELOCK &&
+-		    (req->r_op & CEPH_MDS_OP_WRITE)) {
++	idx = 0;
++	while ((req = xa_find(&mdsc->request_tree, &idx, want_tid,
++			      XA_PRESENT))) {
++		u64 next_tid = req->r_tid + 1;
++
++		if (req->r_op == CEPH_MDS_OP_SETFILELOCK ||
++		    !(req->r_op & CEPH_MDS_OP_WRITE)) {
++			idx = next_tid;
++			continue;
++		}
++
++		{
+ 			struct ceph_mds_session *s = req->r_session;
+ 
+ 			if (!s) {
+-				req = nextreq;
++				idx = next_tid;
+ 				continue;
+ 			}
+ 
+ 			/* write op */
+ 			ceph_mdsc_get_request(req);
+-			if (nextreq)
+-				ceph_mdsc_get_request(nextreq);
+ 			s = ceph_get_mds_session(s);
+ 			mutex_unlock(&mdsc->mutex);
+ 
+@@ -6740,16 +6735,9 @@ static void flush_mdlog_and_wait_mdsc_unsafe_requests(struct ceph_mds_client *md
+ 
+ 			mutex_lock(&mdsc->mutex);
+ 			ceph_mdsc_put_request(req);
+-			if (!nextreq)
+-				break;  /* next dne before, so we're done! */
+-			if (RB_EMPTY_NODE(&nextreq->r_node)) {
+-				/* next request was removed from tree */
+-				ceph_mdsc_put_request(nextreq);
+-				goto restart;
+-			}
+-			ceph_mdsc_put_request(nextreq);  /* won't go away */
++			/* restart from the next tid; tree may have changed */
++			idx = next_tid;
+ 		}
+-		req = nextreq;
+ 	}
+ 	mutex_unlock(&mdsc->mutex);
+ 	ceph_put_mds_session(last_session);
+@@ -6908,6 +6896,7 @@ static void ceph_mdsc_stop(struct ceph_mds_client *mdsc)
+ 	if (mdsc->mdsmap)
+ 		ceph_mdsmap_destroy(mdsc->mdsmap);
+ 	kfree(mdsc->sessions);
++	xa_destroy(&mdsc->request_tree);
+ 	ceph_caps_finalize(mdsc);
+ 
+ 	if (mdsc->s_cap_auths) {
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index e7a262c9c2ab..baba5dcf0def 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -331,7 +331,6 @@ typedef int (*ceph_mds_request_wait_callback_t) (struct ceph_mds_client *mdsc,
+  */
+ struct ceph_mds_request {
+ 	u64 r_tid;                   /* transaction id */
+-	struct rb_node r_node;
+ 	struct ceph_mds_client *r_mdsc;
+ 
+ 	struct kref       r_kref;
+@@ -536,7 +535,7 @@ struct ceph_mds_client {
+ 	u64                    last_tid;      /* most recent mds request */
+ 	u64                    oldest_tid;    /* oldest incomplete mds request,
+ 						 excluding setfilelock requests */
+-	struct rb_root         request_tree;  /* pending mds requests */
++	struct xarray           request_tree;  /* pending mds requests */
+ 	struct delayed_work    delayed_work;  /* delayed work */
+ 	unsigned long    last_renew_caps;  /* last time we renewed our caps */
+ 	struct list_head cap_delay_list;   /* caps with delayed release */
+
+-- 
+2.53.0
+
 
