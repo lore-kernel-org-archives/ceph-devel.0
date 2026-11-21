@@ -1,79 +1,78 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795224081;
-	b=kGn3qsV/+wvmiU3/zHPKlFFHmiPLivY4bw3t+hNaPFDQITC4knThM+cIy/jH18lCjCcY
-	 W6EH9y98MIxsMzYtLVmV1fHnAgfaJBmLu0LQ9sLuzAFHDSqYNAJF4c060izOU3oc8hSKc
-	 n/TVDUfkiOiuHtuuwPNjT728j8JK/DWTX+KTeoKpfOBQxSA7S0NfEXgZ/sd5vy/C5Ko7K
-	 2ReW+LbSE4lkOWiPpx4FwiAsa0tWp6jMXcS4VGEWGnbMzevah6oPTjfc8EkP547L617qz
-	 GDYeEfuTLnPvI9DxSVrmKqPnk1N7XsivcoMQfaZKayrIhHIZfHZaambNiUE6r9RWwqA==
+	t=1795224089;
+	b=hebycsoFBOajzMBv5hy1CvUH8CG5s+BByrn0kVq03p7h70E3T3oUfedYVvIRaTv0SMF6
+	 Ikl3C1AtVHmMqxinmMrFvF/Atkq48t1nVuu/++Ab/1JR0uWGA4W+E99z3ZC7iphip+cfq
+	 NJy5kS6qwMTPgBPWG3pDND99VVUkw/9JJqHaiF+Y7+AFNQI9JLR4s/3h82fvpAhaQYNfp
+	 gH2IKGdkRWuZtdOFa8m9cV9aLXTe6d3C8kkuzkIBCYjtbways4gL4Ayp1pDn9sQi3nk+g
+	 kisXfMPYsAMB9tjEjaZYCOOQg+vvaupJyE5b/it4p6KVvsk1MdH89vzMCqws1Y9/Hxw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795224081;
-	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
-	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
-	 X-Endpoint-Received:X-Original-From:Reply-To;
-	bh=7nN+j2hfkPr6uBqRp6A98tWhEuwkE+WnQxFkIA9FSCw=;
-	b=NkZ4xlBSqm+gFr27iwBbAsEW0lpfShSgbbFugqnttoNLhbFAqZw+P20rsFhXaWEu2tsV
-	 2HdOr5naS9bYFWfrvT+8Z6O2/jeZd6C20DPWpLBOSxKxIfnU+OMgPWfJPIg0pcO0q6kzb
-	 OCZ6amazV5+dkP0FGQfCW2ywPNLvXz7XGOohfiAxv8uD8LquJX4Qy02n1FpR+Nz4WGPwH
-	 AU/xp43JpvRT3xYpm8eU09oGO98vFhpbaORfC/QDTiKPLuPpD7u/Dn6gHsY6MrB2AZVE2
-	 FRtLHKR3PeyoJhwT/dfllXsxxx1AknCOY4qquUSW9omugX/rjNCHlKaYbM45zBfGKww==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795224089;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=UHYAGL0t1BJXULC5m6Y5ZDElOn7qZe8zQk3/pbVty5E=;
+	b=3uaOVPAkdHU7yGGhvh4j921hoy+ZHRYT9kqtKy/+4bF97i3qNs4X9EoJMHLSNmO2pHpO
+	 K6pzGNc15azIUegHGE2XD35wGakLAg3NaErL4Y4ahMUqRJvyeP74+MA3hPAmAxAhZLkZt
+	 DhQOziL5kfcoG4uWa+arjtK19JAfrxfDyzVkxohfwaVpr8QvZzm4Kf5agO/cVjBnYlJb4
+	 9CbQPafx8dipnyYUYYx1aBLot7MG0i8DcgpNcx5AIumEsrUycA7OsO/TikrdqCEBhYZxd
+	 RyuC4i442XiTfiEUn7byhm8XCRiTu0gMCPof9F7svYhUU9Fa659Zd3I1vyAKG/pVgIg==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=a5yP7+7x;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cU2S0fpx;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBE52606A692;
-	Sat, 21 Nov 2026 01:21:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F6CC606A6A3;
+	Sat, 21 Nov 2026 01:21:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=a5yP7+7x
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cU2S0fpx
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1795224080;
-	b=BuPSXmkAPEDxjCo05j6YShMRa+joF1A+no18CrwVxnUHNU4G3tM4q9egBM903UIQcAQL
-	 scU2OSkMKc5PrEC6DqtRGhPCHnHjfkO27WVv4rUQuZrIuIdZVWvWT5CBc2XuviURRQW0/
-	 75A37QQZ8lOmuLyrRV/S3UBE8J+DpMRlD9y8a+Ur59j8GXKq5671SX0HqMzb4uQlDYCYy
-	 dsWy5tqsLjU93yoBupGIArnQ7yWHWCTBpHX4dyQPjMjIdpaLNQ5883cTW49eCGcvOZ+v6
-	 BFKVwOlY8UkV3P2viZnCMPKwAuUZkoSFDG/ugyKSFn/qpCQWOrNrHHhTD9YYVTt5v6w==
+	t=1795224088;
+	b=VI2v2sKAEp0MQqHhBQ0c1zQt71EEVfOcHkdSCnaLieYPqxBAJXpiov7rr9nA/N2CDOjh
+	 hlWb/Cl618YzZMXZMHpEryHDApQ3zLnjaTdmjEwQDDd7kdt9dujTf5U/PY0VEnfotTMGn
+	 puyDNe1c7fjnsUyVcsgfki6osXYhR4wbeLER/UmhCq4B4ntX3HOXEz/FalaieDUvfWsn2
+	 Z6m8PojFznR11MLOgOb7r4J35UbqGxUbgaG+QQzLOcjj4GU40mbTUPJGpVSlKafzpPwYb
+	 EIhfU7r/k9Bvpr7DimmGX520XfcL4SynMz1lu0Gf+C734JGEnzp58OC2PUfyq5IS9cQ==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1795224080;
-	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
-	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
-	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To;
-	bh=7nN+j2hfkPr6uBqRp6A98tWhEuwkE+WnQxFkIA9FSCw=;
-	b=eo0oqZlGT0ytm3ppY2R/ZyZvEq6FrhrQV2y/ggk6lt6bL5QKZGdNToXoAiwtFIAsgsPs
-	 gtJK0AN8yS8U8rd76QJVPgH3xhsy7Wi4n53hBZ/GrdaeqEwLIaUt62ibICKr8UCYx0wvY
-	 dAarLeyfXE3aEfgdWvQeF5SVWSVbPRm2t9LZze5apm3hiDVXS8plqS8E5WtM1OEix6Jtj
-	 ViwJhYmp5Lr5LKOu8R1gMkf2CVn1fpQZEClynUVEvnxcWihS5+q4maDHW0mOu0qPH+f+9
-	 ULLn0wcpaSCcczHlVSOyB+NVmX3J+nBAnUXJ0g2PSaHYj7LexOjdVZZZug9yrjpInsw==
+	c=relaxed/relaxed; t=1795224088;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=UHYAGL0t1BJXULC5m6Y5ZDElOn7qZe8zQk3/pbVty5E=;
+	b=b03OgkuBxKjnj6gYKKi3ogHAOkt6amDxbNngLxvbB9oqNOIwT45P3+DpO15wiRUEGVlq
+	 a3/e2UxFRR8eES4iwUmWdCCYeCAOPm9b60XlAeZHdap7OGXnkxREq/7JhvQ5yZLopbfsa
+	 lkTF4wZaCO8rq5h8sPYrrDt9qYhoh2LkisG3OXYX38UQvSbqq/TgaA2RTPd4JrOL0ULwW
+	 eiVgnonpSX9xZw66GcktLO007VUXQQCiwUtGx8cwNFH3YgHy097kYdXBHsatIfMYmnoCm
+	 i9ZXF/m7T6OobCk6ve6RxFAIGrbwsFdVIVNle6X21PAVlzH6fxiYq4y1QNKsJABvOeg==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id A32D11F000D2;
+	by smtp.kernel.org (Postfix) with ESMTPS id C11DB1F000D8;
 	Sat, 21 Nov 2026 01:21:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795224080;
-	bh=7nN+j2hfkPr6uBqRp6A98tWhEuwkE+WnQxFkIA9FSCw=;
-	h=From:Subject:Date:To:Cc:Reply-To;
-	b=a5yP7+7x+hPDo8M7aMpgSwNO8GU7gKf8fibiin61Rxs/zydKJDRa+6byHrzsmjKRN
-	 j0m/jBHn2XjxX2pUdn0fXLeQ56EiOb/zKNXRAL1QB3Qloz5V5fFtG9IR/WERPfktTq
-	 fyXZloZyMEsoy78p3W+wPmoQk4o4CrMwylD1C60RSknq+w4SPkH/ltMYpzheRQwb6r
-	 L7EhHaGquapto2/WOZM53x4IKZZnJfDzR6HQ5uMJXcaRPzIAlpv1tCTH/7OG2NUwcD
-	 tfxSRbrydpp4bU5ECg0k+N0388k49QCRlno8afbYZ5qwv3tIZqUGU8kwidM5j99Cbb
-	 mxo3ZE35CXcAw==
+	s=k20260515; t=1795224088;
+	bh=UHYAGL0t1BJXULC5m6Y5ZDElOn7qZe8zQk3/pbVty5E=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
+	b=cU2S0fpxkD16Zv9WG2eTMxYrXMZRmZMzhvpXuIO3vyLNDFwVlOmAknTAiVjxK7rmH
+	 rJhX8A0KduUUX13p1whgf2oNejUh2F22eOaTQgeUmcsZ63e0CjOWV5mYjw+x0G2ADJ
+	 VwZQLZA8YbSIDkjd5xP9Vuu+4CJ+FvdMsZsNFI/cP3s+SST5Sh3p/os2qBrbiGLOtP
+	 EyJ19Grckcar4uISvJiDf7isBGCGbHwkz7TKYVJLDlvBHqCeiFXi15sZxRWfDRNAhf
+	 oydFtgUhH5WQ2TEEPYsAF2x0cFuQkaCqlF/BSOqlOZKqwYKubf4WdWS2tu03RhxdvX
+	 K2d2IwIM2553A==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 048194BA9F;
+	by lkml.kernel.org (Postfix) with ESMTP id 4F3314BAAE;
 	Sat, 21 Nov 2026 01:21:14 +0000 (UTC)
 From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Subject: [PATCH 0/2] ceph: serialize O_APPEND writes across clients
-Date: Sat, 21 Nov 2026 03:21:04 +0200
-Message-Id: <20261121-ceph-append-excl-v1-0-5870375edeb8@clyso.com>
+Date: Sat, 21 Nov 2026 03:21:06 +0200
+Subject: [PATCH 2/2] ceph: serialize O_APPEND writes across clients on Fx
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -84,87 +83,477 @@ List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMQQ6CMBBG4auQWTsJUwgLr0Jc1OmvjCG1aZWQE
- O5O0eW3eG+jgmwodG02ylis2DtWyKUhnXx8gi1Uk2vdIOKEFWlinxJiYKw689ArOtcF8W1PNUs
- ZD1t/y/H2d/neX9DP+aF9PwDiK5dVdAAAAA==
-X-Change-ID: 20261121-ceph-append-excl-64ce323d1a04
+Message-Id: <20261121-ceph-append-excl-v1-2-5870375edeb8@clyso.com>
+References: <20261121-ceph-append-excl-v1-0-5870375edeb8@clyso.com>
+In-Reply-To: <20261121-ceph-append-excl-v1-0-5870375edeb8@clyso.com>
 To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
  Viacheslav Dubeyko <slava@dubeyko.com>
 Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
  Anthony D'Atri <anthony.datri@gmail.com>, Xiubo Li <xiubo.li@clyso.com>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1795224072; l=2848;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1795224072; l=17172;
  i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=RCPLg7Ke9jKSrF2JxKZJ5I96oPla1eTrmZ1jJ4NOnWs=;
- b=GOoO+Hp6nnCDWHPEgyORCvLlfMUbIJy2HFEj8sd5wMCj4biuKWBOUWTKeeaqoVUgLMwW8pV66
- KvtBjaGRA+UBlUENECfLOlwVX6D/boql/HSNcLLxbq4Sd7YoWmBSRgJ
+ bh=3rlWYujx9TXZvzA2nDZJ0jKdsJ6J7KdkRiRb164g8iI=;
+ b=J+9jyoelIPJOdJOoSdn3ze07FhpOMYrXSrOvNP5PgfTt8mv5N33f+NvOPYIl5yMGBDZDjT2W6
+ bMZ1S2MssqOBnX5E5TAtihEAELIpZzGbsz/J8SSqAYSrGKQbZsUQdOt
 X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
  pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
 X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
  auth_id=840
 X-Original-From: Xiubo Li <xiubo.li@clyso.com>
 Reply-To: xiubo.li@clyso.com
+Content-Transfer-Encoding: 7bit
 
-When two clients append to one file, the filelock is in MIX and both
-hold Fw, so each appends at the end of file it has cached and may
-overwrite what the other one appended.  Commit d2a8d446a09c ("ceph:
-revalidate ki_pos for O_APPEND writes after cap acquisition") does
-not cover this case: neither client waits for caps, and the other
-client's size only arrives after it flushed its caps.
+From: Xiubo Li <xiubo.li@clyso.com>
 
-The MDS side [1] lets O_APPEND writers take turns on Fx, in request
-order, and sends the current size together with Fx.  It is enabled by
-the new CEPHFS_FEATURE_APPEND_EXCL feature bit; with an MDS that does
-not have it, the client behaves as before.
+An O_APPEND write takes its offset from the cached i_size, but with two
+clients writing a file the filelock is in MIX and both hold Fw, so a
+client may append at an end of file that another client has already
+moved, and overwrite what that client appended.  Re-reading i_size
+after ceph_get_caps() does not help there: neither client waits for
+caps, and the other client's size reaches us only after it flushed its
+caps.
 
-Patch 1 fixes a reordering of the cap messages of an inode that this
-work exposed: a later cap update could overtake the flush carrying the
-new size, the MDS then finished its Fw gather early and gave Fx with
-the old size to the other client.
+The MDS can now hand Fx to O_APPEND writers one at a time, in request
+order (CEPHFS_FEATURE_APPEND_EXCL): a client asks for its turn with
+CEPH_CLIENT_CAPS_APPEND in a cap update, the MDS gathers the other
+writers' Fw first, so that their size updates are applied, and sends
+the size with Fx.  While a client holds Fx no other client can write
+the file, so i_size is the true end of file.
 
-Patch 2 is the O_APPEND change itself.
+When the auth MDS supports it, let an O_APPEND write need Fx as well as
+Fw, and ask the auth MDS for a turn while it waits.  Ask once per turn,
+and again only if the auth cap moved (an export or an MDS restart may
+have lost the request) or after CEPH_GET_CAPS_WAIT_TIMEOUT: the waiter
+is woken by every cap message, and answering each of them with another
+request would flood the MDS.
 
-Tested on a vstart cluster with [1], KASAN and lockdep enabled, two
-mounts (noshare, or ceph-fuse + kernel), 4 writers on each, without
-any file locking; a lost record means one append overwrote another:
+The MDS revokes Fx as soon as the next client asks for a turn, maybe
+before the waiting write could take its cap refs.  Keep a revoked Fx,
+with Fw and Fb, until then, or the turn would be lost before it was
+used.  The write's Fx and Fw refs then hold the hand-over back until
+it is done, and the cap flush that releases Fw carries the new size.
+Only the write that was waiting when Fx came may use it while it is
+being revoked: a later one, e.g. this client's next write while the
+revoke waits for our dirty data to be written back, gives the turn up
+and asks for a new one, or the other clients would never get theirs.
+So does a write that needs more max_size than it has, which the MDS
+cannot grant while it takes Fx back.
 
-  +--------------------------------------+--------+------------------+
-  | case                                 | runs   | lost records     |
-  |                                      |        | base / patched   |
-  +--------------------------------------+--------+------------------+
-  | buffered, kernel + kernel            | 4      | ~3300-4000 / 0   |
-  | O_DIRECT, kernel + kernel            | 10     | ~4000 / 0        |
-  | buffered/O_DIRECT, ceph-fuse+kernel  | 6      | - / 0            |
-  | 2 active MDS, export every 3 s       | 4      | - / 0            |
-  | MDS failover during the writes       | 2      | - / 0            |
-  +--------------------------------------+--------+------------------+
+Once it holds Fx, the write moves to i_size as before; if that range
+needs more max_size, it drops its refs and asks again instead of
+writing less.
 
-With an MDS without the feature the patched client loses records like
-the base one, and does not hang.  xfstests -g quick shows the same 8
-failures (ceph/006, fscrypt key tests) with and without the series.
-
-[1] https://github.com/ceph/ceph/pull/70279
-
+Link: https://tracker.ceph.com/issues/7333
 Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
 ---
-Xiubo Li (2):
-      ceph: send the cap messages of an inode in the order they were prepared
-      ceph: serialize O_APPEND writes across clients on Fx
-
- fs/ceph/caps.c               | 208 +++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/file.c               |  33 +++++--
- fs/ceph/inode.c              |   6 ++
+ fs/ceph/caps.c               | 179 +++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/file.c               |  33 ++++++--
+ fs/ceph/inode.c              |   3 +
  fs/ceph/mds_client.h         |   4 +-
- fs/ceph/super.h              |  17 ++++
+ fs/ceph/super.h              |  14 ++++
  include/linux/ceph/ceph_fs.h |   1 +
- 6 files changed, 261 insertions(+), 8 deletions(-)
----
-base-commit: 6a9830a8f414d3830c584782568d0233be969d09
-change-id: 20261121-ceph-append-excl-64ce323d1a04
+ 6 files changed, 226 insertions(+), 8 deletions(-)
 
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index fd6f3a372271..0431cb7f17eb 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1056,6 +1056,24 @@ static bool __ceph_is_any_revoking(const struct ceph_inode_info *ci)
+ 	return false;
+ }
+ 
++/*
++ * The caps that an O_APPEND write waiting for its turn keeps while the
++ * MDS revokes them, see ceph_get_append_caps().
++ */
++#define CEPH_APPEND_TURN_CAPS	(CEPH_CAP_FILE_EXCL | CEPH_CAP_FILE_WR | \
++				 CEPH_CAP_FILE_BUFFER)
++
++static int __ceph_append_turn_caps(struct ceph_inode_info *ci,
++				   int implemented)
++{
++	lockdep_assert_held(&ci->i_ceph_lock);
++
++	if (ci->i_append_waiting && !ci->i_append_yield &&
++	    (implemented & CEPH_CAP_FILE_EXCL))
++		return implemented & CEPH_APPEND_TURN_CAPS;
++	return 0;
++}
++
+ int __ceph_caps_used(struct ceph_inode_info *ci)
+ {
+ 	int used = 0;
+@@ -2270,6 +2288,13 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 	 */
+ 	issued = __ceph_caps_issued(ci, &implemented);
+ 
++	/*
++	 * An O_APPEND write that asked for Fx must be able to use it: do
++	 * not let the revoke for the next appender, which may come right
++	 * with the grant, complete before the write took its cap refs.
++	 */
++	used |= __ceph_append_turn_caps(ci, implemented);
++
+ 	revoking = implemented & ~issued;
+ 
+ 	want = file_wanted;
+@@ -2459,6 +2484,13 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 				goto ack;
+ 		}
+ 
++		/* an O_APPEND write asks for its turn */
++		if ((flags & CHECK_CAPS_APPEND) && cap == ci->i_auth_cap &&
++		    !(cap->implemented & CEPH_CAP_FILE_EXCL)) {
++			doutc(cl, "asking for the O_APPEND turn\n");
++			goto ack;
++		}
++
+ 		/* things we might delay */
+ 		if ((cap->issued & ~retain) == 0)
+ 			continue;     /* nope, all good */
+@@ -2497,6 +2529,10 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 
+ 		mds = cap->mds;  /* remember mds, so we don't repeat */
+ 
++		if ((flags & CHECK_CAPS_APPEND) && cap == ci->i_auth_cap &&
++		    !(cap->implemented & CEPH_CAP_FILE_EXCL))
++			mflags |= CEPH_CLIENT_CAPS_APPEND;
++
+ 		__prep_cap(&arg, ci, cap, CEPH_CAP_OP_UPDATE, mflags, cap_used,
+ 			   want, retain, flushing, flush_tid, oldest_flush_tid);
+ 
+@@ -3120,6 +3156,26 @@ static int try_get_cap_refs(struct inode *inode, int need, int want,
+ 
+ 	have = __ceph_caps_issued(ci, &implemented);
+ 
++	if ((need & CEPH_CAP_FILE_EXCL) && ci->i_append_waiting) {
++		if (!(implemented & CEPH_CAP_FILE_EXCL) ||
++		    (have & CEPH_CAP_FILE_EXCL)) {
++			ci->i_append_yield = false;
++		} else if (!(have & CEPH_CAP_FILE_EXCL) &&
++			   !ci->i_append_yield) {
++			/*
++			 * Fx is being revoked for the next appender, but it
++			 * stays ours until we ack, see ceph_check_caps().
++			 * Not if we need more max_size: the MDS cannot
++			 * grant that while it takes Fx back, so give the
++			 * turn up and ask for a new one.
++			 */
++			if (endoff > (loff_t)ci->i_max_size)
++				ci->i_append_yield = true;
++			else
++				have |= implemented & CEPH_APPEND_TURN_CAPS;
++		}
++	}
++
+ 	if (have & need & CEPH_CAP_FILE_WR) {
+ 		if (endoff >= 0 && endoff > (loff_t)ci->i_max_size) {
+ 			doutc(cl, "%p %llx.%llx endoff %llu > maxsize %llu\n",
+@@ -3349,6 +3405,54 @@ int ceph_try_get_caps(struct inode *inode, int need, int want,
+ 	return ret;
+ }
+ 
++/*
++ * An O_APPEND write is waiting for Fx: ack a revoke of the turn it gave
++ * up, and ask the auth MDS for a turn if we have none.  Ask once per
++ * turn; again only if the auth cap moved (an export or an MDS restart
++ * may have lost the request) or after CEPH_GET_CAPS_WAIT_TIMEOUT.  We
++ * are woken by every cap message, often with no news for us, and must
++ * not answer each of them with another request.
++ */
++static void ceph_append_kick(struct ceph_inode_info *ci)
++{
++	struct ceph_cap *auth;
++	int implemented, flags;
++
++	for (int i = 0; i < 2; i++) {
++		flags = 0;
++		spin_lock(&ci->i_ceph_lock);
++		__ceph_caps_issued(ci, &implemented);
++		auth = ci->i_auth_cap;
++		if (implemented & CEPH_CAP_FILE_EXCL)
++			ci->i_append_asked = 0;  /* that turn came */
++		if (ci->i_append_waiting && auth) {
++			if (!(implemented & CEPH_CAP_FILE_EXCL)) {
++				if (!ci->i_append_asked ||
++				    ci->i_append_asked_mds != auth->mds ||
++				    ci->i_append_asked_mseq != auth->mseq ||
++				    time_after(jiffies, ci->i_append_asked +
++					       CEPH_GET_CAPS_WAIT_TIMEOUT)) {
++					ci->i_append_asked = jiffies ?: 1;
++					ci->i_append_asked_mds = auth->mds;
++					ci->i_append_asked_mseq = auth->mseq;
++					flags = CHECK_CAPS_AUTHONLY |
++						CHECK_CAPS_APPEND;
++				}
++			} else if (ci->i_append_yield &&
++				   !(auth->issued & CEPH_CAP_FILE_EXCL)) {
++				flags = CHECK_CAPS_AUTHONLY;
++			}
++		}
++		spin_unlock(&ci->i_ceph_lock);
++		if (!flags)
++			return;
++		ceph_check_caps(ci, flags);
++		if (flags & CHECK_CAPS_APPEND)
++			return;
++		/* the revoke may be acked now: ask for a new turn */
++	}
++}
++
+ /*
+  * Wait for caps, and take cap references.  If we can't get a WR cap
+  * due to a small max_size, make sure we check_max_size (and possibly
+@@ -3400,6 +3504,8 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
+ 			/* make sure used fmode not timeout */
+ 			ceph_get_fmode(ci, flags, FMODE_WAIT_BIAS);
+ 			add_wait_queue(&ci->i_cap_wq, &wait);
++			if (need & CEPH_CAP_FILE_EXCL)
++				ceph_append_kick(ci);
+ 
+ 			flags |= NON_BLOCKING;
+ 			while (!(ret = try_get_cap_refs(inode, need, want,
+@@ -3421,6 +3527,8 @@ int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi, int need,
+ 					ret = -EUCLEAN;
+ 					break;
+ 				}
++				if (need & CEPH_CAP_FILE_EXCL)
++					ceph_append_kick(ci);
+ 			}
+ 
+ 			remove_wait_queue(&ci->i_cap_wq, &wait);
+@@ -3509,6 +3617,77 @@ int ceph_get_caps(struct file *filp, int need, int want, loff_t endoff,
+ 	return __ceph_get_caps(inode, fi, need, want, endoff, got);
+ }
+ 
++/*
++ * Whether the auth MDS serializes O_APPEND writes, see
++ * ceph_get_append_caps().
++ */
++bool ceph_append_excl_supported(struct ceph_inode_info *ci)
++{
++	bool ret;
++
++	spin_lock(&ci->i_ceph_lock);
++	ret = ci->i_auth_cap &&
++	      test_bit(CEPHFS_FEATURE_APPEND_EXCL,
++		       &ci->i_auth_cap->session->s_features);
++	spin_unlock(&ci->i_ceph_lock);
++	return ret;
++}
++
++/*
++ * Get the caps for an O_APPEND write.
++ *
++ * The end of file that the write was placed at may be out of date: two
++ * clients appending to a file both hold Fw with the filelock in MIX,
++ * and nothing makes one wait for the other.  Ask the MDS for Fx
++ * instead (CEPH_CLIENT_CAPS_APPEND).  It hands Fx to the appending
++ * clients one at a time, in request order, after it gathered the
++ * other writers' Fw so that their size updates are applied, and sends
++ * that size with Fx.  While we hold Fx no other client can write the
++ * file, so i_size is the true end of file.
++ *
++ * The MDS revokes Fx again as soon as another client asks for a turn,
++ * maybe before we could take our cap refs: keep a revoked Fx (with Fw
++ * and Fb) until then, see ceph_check_caps().  Our Fx and Fw refs then
++ * hold the hand-over back until the write is done, and the cap flush
++ * that releases Fw carries our new size.
++ */
++int ceph_get_append_caps(struct file *filp, int want, loff_t endoff,
++			 int *got)
++{
++	struct ceph_inode_info *ci = ceph_inode(file_inode(filp));
++	int ret, issued, implemented;
++
++	spin_lock(&ci->i_ceph_lock);
++	/*
++	 * A revoked Fx belongs to the write that waited for it.  A new
++	 * write that finds Fx being revoked already, e.g. the next one of
++	 * this client while the revoke waits for our dirty data, must let
++	 * the revoke complete and wait for a turn of its own, or the
++	 * other clients would never get one.
++	 */
++	issued = __ceph_caps_issued(ci, &implemented);
++	if (!ci->i_append_waiting &&
++	    (implemented & ~issued & CEPH_CAP_FILE_EXCL))
++		ci->i_append_yield = true;
++	ci->i_append_waiting++;
++	spin_unlock(&ci->i_ceph_lock);
++
++	ret = ceph_get_caps(filp, CEPH_CAP_FILE_WR | CEPH_CAP_FILE_EXCL, want,
++			    endoff, got);
++
++	spin_lock(&ci->i_ceph_lock);
++	if (--ci->i_append_waiting == 0)
++		ci->i_append_yield = false;
++	if (ret == 0)
++		ci->i_append_asked = 0;  /* our turn came, ask for the next */
++	spin_unlock(&ci->i_ceph_lock);
++
++	/* ack a revoke that we held back for this write */
++	if (ret < 0)
++		ceph_check_caps(ci, CHECK_CAPS_AUTHONLY);
++	return ret;
++}
++
+ /*
+  * Take cap refs.  Caller must already know we hold at least one ref
+  * on the caps in question or we don't know this is safe.
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 75fb12be209b..962f734066cc 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -2500,6 +2500,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 	ssize_t count, written = 0;
+ 	int err, want = 0, got;
+ 	bool direct_lock = false;
++	bool append_excl = false;
+ 	u32 map_flags;
+ 	u64 pool_flags;
+ 	loff_t pos;
+@@ -2578,18 +2579,25 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 		want |= CEPH_CAP_FILE_BUFFER;
+ 	if (fi->fmode & CEPH_FILE_MODE_LAZY)
+ 		want |= CEPH_CAP_FILE_LAZYIO;
++	if (iocb->ki_flags & IOCB_APPEND)
++		append_excl = ceph_append_excl_supported(ci);
++get_caps:
+ 	got = 0;
+-	err = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, pos + count, &got);
++	if (append_excl)
++		err = ceph_get_append_caps(file, want, pos + count, &got);
++	else
++		err = ceph_get_caps(file, CEPH_CAP_FILE_WR, want, pos + count,
++				    &got);
+ 	if (err < 0)
+ 		goto out;
+ 
+ 	/*
+-	 * For O_APPEND writes we may have waited for Fwx exclusive caps
+-	 * while the previous Fwx holder (another client) extended the
+-	 * file.  i_size has been updated via the cap grant message from
+-	 * the MDS, but ki_pos is still the old EOF.  Re-read i_size here
+-	 * (no extra MDS round-trip needed) and adjust ki_pos to the true
+-	 * EOF.  Since we hold Fwx, no other client can change the file.
++	 * For O_APPEND writes we may have waited for caps while another
++	 * client extended the file, so ki_pos may be an old EOF.  Re-read
++	 * i_size here and adjust ki_pos.  With append_excl we hold Fx: no
++	 * other client can change the file, and i_size is the true EOF
++	 * that the MDS sent with Fx.  Without it this only helps if the
++	 * cap grant we waited for brought the other client's size.
+ 	 */
+ 	if (iocb->ki_flags & IOCB_APPEND) {
+ 		loff_t cur_eof = i_size_read(inode);
+@@ -2615,6 +2623,17 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 			 * necessary.
+ 			 */
+ 			spin_lock(&ci->i_ceph_lock);
++			if (pos + count > (loff_t)ci->i_max_size &&
++			    append_excl) {
++				/*
++				 * Ask for more max_size with the new
++				 * range; we keep the turn if Fx is not
++				 * being revoked.
++				 */
++				spin_unlock(&ci->i_ceph_lock);
++				ceph_put_cap_refs(ci, got);
++				goto get_caps;
++			}
+ 			if (pos + count > (loff_t)ci->i_max_size) {
+ 				loff_t max_size = ci->i_max_size;
+ 
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 2e5d1256a3a5..9e586c7e40b7 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -710,6 +710,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+ 	ci->i_fx_ref = 0;
+ 	ci->i_wrbuffer_ref = 0;
+ 	ci->i_wrbuffer_ref_head = 0;
++	ci->i_append_waiting = 0;
++	ci->i_append_yield = false;
++	ci->i_append_asked = 0;
+ 	atomic_set(&ci->i_filelock_ref, 0);
+ 	atomic_set(&ci->i_shared_gen, 1);
+ 	ci->i_rdcache_gen = 0;
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index ff9ba09f3b59..750cc72d53a6 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -38,8 +38,9 @@ enum ceph_feature_type {
+ 	CEPHFS_FEATURE_HAS_OWNER_UIDGID,
+ 	CEPHFS_FEATURE_MDS_AUTH_CAPS_CHECK,
+ 	CEPHFS_FEATURE_SUBVOLUME_METRICS,
++	CEPHFS_FEATURE_APPEND_EXCL = 25,
+ 
+-	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_SUBVOLUME_METRICS,
++	CEPHFS_FEATURE_MAX = CEPHFS_FEATURE_APPEND_EXCL,
+ };
+ 
+ #define CEPHFS_FEATURES_CLIENT_SUPPORTED {	\
+@@ -57,6 +58,7 @@ enum ceph_feature_type {
+ 	CEPHFS_FEATURE_HAS_OWNER_UIDGID,	\
+ 	CEPHFS_FEATURE_MDS_AUTH_CAPS_CHECK,	\
+ 	CEPHFS_FEATURE_SUBVOLUME_METRICS,	\
++	CEPHFS_FEATURE_APPEND_EXCL,		\
+ }
+ 
+ /*
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index b11083ad1da7..2fbeef60b23c 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -254,6 +254,7 @@ struct ceph_cap {
+ #define CHECK_CAPS_FLUSH        2  /* flush any dirty caps */
+ #define CHECK_CAPS_NOINVAL      4  /* don't invalidate pagecache */
+ #define CHECK_CAPS_FLUSH_FORCE  8  /* force flush any caps */
++#define CHECK_CAPS_APPEND      16  /* ask the auth MDS for an O_APPEND turn */
+ 
+ struct ceph_cap_flush {
+ 	u64 tid;
+@@ -529,6 +530,16 @@ struct ceph_inode_info {
+ 	int i_pin_ref;
+ 	int i_rd_ref, i_rdcache_ref, i_wr_ref, i_wb_ref, i_fx_ref;
+ 	int i_wrbuffer_ref, i_wrbuffer_ref_head;
++	/*
++	 * An O_APPEND write is waiting for its turn (Fx) from the MDS, see
++	 * ceph_get_append_caps(); i_append_yield: it gave that turn up.
++	 */
++	int i_append_waiting;
++	bool i_append_yield;
++	/* when and where it last asked for a turn, see ceph_append_kick() */
++	unsigned long i_append_asked;
++	int i_append_asked_mds;
++	u32 i_append_asked_mseq;
+ 	atomic_t i_filelock_ref;
+ 	atomic_t i_shared_gen;       /* increment each time we get FILE_SHARED */
+ 	u32 i_rdcache_gen;      /* incremented each time we get FILE_CACHE. */
+@@ -1459,6 +1470,9 @@ extern int __ceph_get_caps(struct inode *inode, struct ceph_file_info *fi,
+ 			   int need, int want, loff_t endoff, int *got);
+ extern int ceph_get_caps(struct file *filp, int need, int want,
+ 			 loff_t endoff, int *got);
++extern bool ceph_append_excl_supported(struct ceph_inode_info *ci);
++extern int ceph_get_append_caps(struct file *filp, int want, loff_t endoff,
++				int *got);
+ extern int ceph_try_get_caps(struct inode *inode,
+ 			     int need, int want, bool nonblock, int *got);
+ 
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index d70bbce1a1b2..d3f4953f12df 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -773,6 +773,7 @@ extern const char *ceph_cap_op_name(int op);
+ #define CEPH_CLIENT_CAPS_SYNC			(1<<0)
+ #define CEPH_CLIENT_CAPS_NO_CAPSNAP		(1<<1)
+ #define CEPH_CLIENT_CAPS_PENDING_CAPSNAP	(1<<2)
++#define CEPH_CLIENT_CAPS_APPEND			(1<<3) /* O_APPEND turn wanted */
+ 
+ /*
+  * caps message, used for capability callbacks, acks, requests, etc.
+
+-- 
+2.53.0
 
 
