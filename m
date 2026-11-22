@@ -1,79 +1,117 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795241901;
-	b=hwU5eTNRt4XW9Do3QgHakPjXDvoqEKkeiNIZ6nZHGBHSTtNC/l5mtOsLXrUUwDIYnsp6
-	 6HqDwc0Ap4Z5+unf8zJKefv70J2/id+XJGIu5tEvmdKnvY0HftvBgVS2twLdozh/vSlNo
-	 40O6dUfQXqXS92K+xmAmTOHfGTWz+wLYiMq2HcUceNqrWwr5s5qPttak6rzIj26r8VBd7
-	 UPEMYS2oXBZJNj8cVoDuHASo8vc7hGi2XdLA4HWnROfz87o+1+9Yh/OPtowvbf3+4M+mB
-	 glHVF5OGgq1ebD/TWmCQjM7v4qYUxWNYJlqnrJ7UgeqIm1f3YF9rpnLMVpcLqWx+KEQ==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795241901;
-	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
-	 Content-Type:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=cyD+55yTSWllH/V4M00D2aK0PjmiLdG4LzGnKueD4ws=;
-	b=sN2YOqQNhF/V3MECLO1DzgrnTQdOdZXmmFdRwJxjuqVCrd1lGxVv/Hixiqvo3G1L2dgJ
-	 jt/t+Oe/26xa1fiDwFAzFCcrI1CXikKOn9rsTrN3wCpwX0RUuWB4+yLcWVKvIHFXBOehk
-	 xqy9yZh/mRwSD5yK1J86lH9R2u8iev40uHozxW6eMq5n4IYKHklyu2mbww8wkSHaUXWLA
-	 2mG80xItu9HAHvNA7i+D0LBqBagvz74l5P2RMpikWNA9MR38mG7nekLMDkj1qd9DlhHd9
-	 KQwBFyhguFtZf4poznyxH/BJgyEEGCUKsflCYk9ZhsSu7H3h66F5ilyv8oLgLU/HXKw==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QH5aCLg3;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1795367132;
+	b=mIcwvjyrb28rv/85ylg3BnEz8HA3NxiGbZKTlA3Z4ctVyf+3UG8VsuyJ7XC142CnWxnI
+	 lGG/NTpC3BFjwbncuQ3HXVD3A69Jhz00+5ow/hmoSJMh7peKkYTGgAIxXSzA9bg5aBNXg
+	 KF0pe9RxuRo0ZLzTpkmk/inTEiu49/soMPFNuLac5BMhUQsav9gGPzPqvC/hLQgCWpvjh
+	 KiBgF5uubmHjM72VMriMNxFN7drLGlqSlYn3I58hbjQrCgU+oNbksHoXyR+lXPpJFv27b
+	 UyBpGgGE41nL8pfN7rap3AXIQ1eNgcldlP6JIuf2AOwR0H6oHwfPZnhel+PLxBAfICA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795367132;
+	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
+	 X-Mimecast-MFC-AGG-ID:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
+	 X-Received:Received:From:To:Cc:Subject:Date:Message-Id:X-Mailer:
+	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
+	bh=JMf+MhBIiw5vVzxN4wAuJERjsw7EJStsqqgnBBCqdjE=;
+	b=U73WziFui+BB7X1yWsmz/J9yiTBsXQVDfov0qllmqsReQ4xJVVC1nv4BZtOlzsXNRso/
+	 gvIwcSt5rMhb+9CHZhl7C6DKmlUiUE5NLmbE3JtuvsVREv1eWzdJmuJwjc9xuhJJFaUxU
+	 qJlMKJz/5r4CH0LACVSWstKr6PEl7PyWlQu9r18LYKmMnxZV0OM5lOQSYP3ugdmHaY/ZV
+	 2WjoXx6BnuCKhMVJ9v76n2dT3Oub+IihwYZZXxpXqUQaqc24WuoywkdAWwOtZqgx/WcfG
+	 E2Mrz/wu21khVD+lj1Uq69nZwktxXtm8MvdXXUEGh7kqsbFbBsrkumozrxtUlH3z58w==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=redhat.com;
+	spf=pass smtp.mailfrom=redhat.com;
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b="RTW/50Tz";
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=DRDqoQNe;
+	arc=none smtp.remote-ip=170.10.133.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CDE03606A335;
-	Sat, 21 Nov 2026 06:18:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBED8606A32A
+	for <ceph-devel@vger.kernel.org>; Sun, 22 Nov 2026 17:05:31 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CBED8606A32A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QH5aCLg3
-Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
-ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1795241901;
-	b=AHiX2/wk3Nb+TIyam0cqcr2EcKaWiGS7AzxSb/BgtAKzFOTepwOWZqN/YN6MnA07rsXr
-	 SivtAJUOOLvsogiwe3Hyq9qZz4E1uN7PkKZSwNkh8PaNFyHWPEUW4LtCQFGCbiZCxzTqs
-	 qBIA4PkslsSBUXjgBxn7w2W967c92IhVIJkw6Dmh/E23sMAx8Jq1/qtX+FNCOFHTiEqax
-	 QFmKUs/v7EVlEQKr9ta3eD4tH63O0jxUxbMHrh08LSYA8c5ZmswjzWkKFIzDL45CJxx+o
-	 keFLccVTx2jLAiSiAda47iCiGUPkKdJQmqvYqDso8jxz+dumfHrZZWholuCPABuL8Xw==
-ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1795241901;
-	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
-	 Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=cyD+55yTSWllH/V4M00D2aK0PjmiLdG4LzGnKueD4ws=;
-	b=CXNARAyr6iwhsQvAKMzVCGuG+lX++7WPtUhOSLcevEemcX05PmUyXyNxM43Fod4v9eFS
-	 dg9lvMPqhKbOe+jHgIiBO3tuskykHPSruA6wIsOkWNcR5j8mVHJOoJOdva+EOmM3EJPgE
-	 6DcFjm3onMtCuq5+/Z+elT49/tWHekX/BYODvy0ydgC/LwUK7/FwldTbNNzrbT2RZAffk
-	 pMBayB2B7IPO/0s3eaP7JZnnTNiIE6eH+YZ8owUjeRkQYFdWsEkwdcaouoKgQF9yp0rA2
-	 i246JRvF2eDgk9+bFyr/20EtHkPA30gEPtyyIqSfJvg8JkiSM+3VwOudHlHZqEsJ2wQ==
-ARC-Authentication-Results: i=1; smtp.kernel.org; 
-	arc=none smtp.remote-ip=100.80.115.77
-Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
-	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id 7BE541F000C4;
-	Sat, 21 Nov 2026 06:18:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795241901;
-	bh=cyD+55yTSWllH/V4M00D2aK0PjmiLdG4LzGnKueD4ws=;
-	h=From:Date:Subject:To:Cc:Reply-To;
-	b=QH5aCLg3fSc99xnpitG9jJMs7OS/UV0wTnWeE1Up/N1gqEQJBI8t+3b27CGlRRxud
-	 2KSW4HbqFpdjsAMQPFsGuKN7Rt5w9mm/ERO49fnCY/b7tG4tRoFBUixODxodae7bJ+
-	 UgPEIxFPro7eisLXWs5BHwzXaPQXkoWURv9lkF/n/ywf+MDRnEGpauEEX1bp73kpgm
-	 pFuVbVz6CC4tvauIN8oLW/W7J4FNJ4LdTAGlzpKbqMPcvK2lmnA5phpntXAvOXg3jQ
-	 M4w7r1riDmFdTzrpM4+e/kXk1DscHTzbGU8sPWutZfL0HtJGsRlWwZ034BKGVRR94C
-	 zvHl11C09d15Q==
-Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id CEFEA4BB15;
-	Sat, 21 Nov 2026 06:18:19 +0000 (UTC)
-From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
-Date: Sat, 21 Nov 2026 08:18:15 +0200
-Subject: [PATCH] ceph: ignore a cap IMPORT peer that names the importing
- MDS
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=RTW/50Tz;
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=google header.b=DRDqoQNe
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1795367130;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=JMf+MhBIiw5vVzxN4wAuJERjsw7EJStsqqgnBBCqdjE=;
+	b=RTW/50TzhfCUW8kwSU0C48p8CtF8NdVrzobrEG/TMZz/2lemEBKRSS7Qjjy5nQ6N22sNpx
+	oC7eDKDuOgEqJ5ollV+XGDudXTTGf8lpSiTFLXggCUQtzJeoCtqY+LGjr+eqaMOG8498HL
+	xjGjUYDKwtAKqcEDdIww0P4pL0F+UQM=
+Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
+ [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-604-jI-htiWuNkSDigShVbeVOQ-1; Sun, 22 Nov 2026 17:05:29 +0000
+X-MC-Unique: jI-htiWuNkSDigShVbeVOQ-1
+X-Mimecast-MFC-AGG-ID: jI-htiWuNkSDigShVbeVOQ_1795367128
+Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-55d2c49c3d9so35188521cf.3
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Nov 2026 09:05:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1795367128; x=1795971928; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=JMf+MhBIiw5vVzxN4wAuJERjsw7EJStsqqgnBBCqdjE=;
+        b=DRDqoQNeINbShsStdaDhLcVjT6rovk3+Qxx5ompjdJ/TdHSpzf98oI40lVCJ7j4DNM
+         VxjmW4tMSUIhI+7jnXy8LR3un8Zgv41yZQNTGE7+25Jg5Ay4CvnBuLmvvb+/daieuSLn
+         qOrUt3VTeg/R5kOPdH8EgBZnX+A7mxOhXvIDNnVBk4GSoCm0qr7G6K6IKqpt4PuKS9wz
+         ZhNhmJItPbtkNNVG2vBOsoSm6Hgt0i8evL4K5Zaf5WRioHP346MZE5UtaVGkiidbvoqx
+         n7m6EeQmz/6rIz/O6WkL1rE1FcZQyOUyAztJykRB2j3VmM8ZQ8BI7zlp7gj7zzgMPBmr
+         lWIw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795367128; x=1795971928;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=JMf+MhBIiw5vVzxN4wAuJERjsw7EJStsqqgnBBCqdjE=;
+        b=CoVpHyeWdLfEDC+lp5XowPiiJG347SnZ76KW6ia3rcImQuDx6oGXo+BvKqwx683PNG
+         0Bnlb88YfBJe15z1YV+75jmrMiwyLbq+FAy7a4Uafgn7MM+X6Z2rJBVHn548X/FGFBhv
+         DrCEmrKpwMu8JLvSeT2XpoeXeTtbfUOzoidv67OQei9SMQCE7YxbERFwobzSrA8pTVGt
+         Hn1wptPP7KanwlGLs3b7N2mc/gHh6JQ2MjYZsbllTtXk+t3TGG2Fddvi3+v2JxxwFLwQ
+         1vV/9ORFiIgd/3ED4MLvtxuRLtJzkjkRpCZbOSz192rXTGmcyw+6Znr4GuCfz20bYzVg
+         a4dw==
+X-Forwarded-Encrypted: i=1; AL+hErGit8i9MPQAhg9ZfSLAC4jyJTg6MU6H1m2TqofNYZCZV6e7ml0DLGHkpckL8eysSAW1HFMXDtJahtTA@vger.kernel.org
+X-Gm-Message-State: APuU4Z+44vDrJtLH4hlIrin5pyN3GXhnjiYUtu9F8+mwGEI+EzkIbU6p
+	aRwKIYz0r4UQB4jsKigqLru1ZatBBZagP07Unbf2wbQm9LW8f5kmKnQWImO9ENEmodetI8z3brN
+	8BEwH4Ji/J85uRowVIsQQe64MPR5HXPEYlAJQ419tDernPzMJJGcrhaVRTpwqMLc=
+X-Gm-Gg: AZFdTZcscRHDfwAGc5qiqkDdXf6sVXBYa+y/7ZxJDBWypuU7zW+Qb4ki4AtPlFM9jUZ
+	BW9Uv+/pTfKpLpF4Ug56elqRb7qqea88WMo9rClfFwqeSCr3QMfDSM5pZsjHNUK3LA9zwSPDFq7
+	PUtEEc4kBnQnAuD21fttSYb2Easz2JcoZ5zi05qTGa0AX7e6dsSSHxWgkTwNOp0sgc9DoCaX6+2
+	fFGIpWrC2mtN02FjLVIJoxsn9ikw1XDbNOzxLXEL7nALMdqo4KCgmP2gzu6YK528Wv1dEnzopgk
+	/s/+ynW3rQ+BhdIrcIIwJLeyc/wsDHsOrk/W1fUAYkO/HWOvmi8TiRqveTIU5JFBn/sij2Ri4af
+	0e5cLG0uOYlPgJS3sitXo2nSrFbe/GltklFJOLvPOhVX5H5qwD7/garNcera64QW4Ti/WynKCnn
+	mz0diukcVUFvioKkFiKto5xAvhdBpyQtpZ0WUXQGI3qCV9jLhWl2kwoh18n4NW0QxwKrnwHSJXE
+	+3RAFDLplpwfzxULzgJiMSrpcDA2CQR9JE29Q==
+X-Received: by 2002:a05:622a:4a8a:b0:550:fe12:22da with SMTP id d75a77b69052e-55d7688cd8amr172622161cf.6.1795367128112;
+        Sun, 22 Nov 2026 09:05:28 -0800 (PST)
+X-Received: by 2002:a05:622a:4a8a:b0:550:fe12:22da with SMTP id d75a77b69052e-55d7688cd8amr172621171cf.6.1795367127446;
+        Sun, 22 Nov 2026 09:05:27 -0800 (PST)
+Received: from cluster.. (4f.55.790d.ip4.static.sl-reverse.com. [13.121.85.79])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-55d7889f8absm76210181cf.27.2026.11.22.09.05.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 22 Nov 2026 09:05:27 -0800 (PST)
+From: Alex Markuze <amarkuze@redhat.com>
+To: Alex Ainscow <aainscow@uk.ibm.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>,
+	Xiubo Li <xiubo.li@clyso.com>,
+	Viacheslav Dubeyko <slava@dubeyko.com>,
+	Jeff Layton <jlayton@kernel.org>,
+	ceph-devel@vger.kernel.org
+Subject: Re: [PATCH] libceph: don't put a linger request twice when its watch is cancelled
+Date: Sun, 22 Nov 2026 17:05:24 +0000
+Message-Id: <20261122170524.1272906-1-amarkuze@redhat.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20261119-wip-libceph-linger-uaf-v1-1-40f3661fea68@uk.ibm.com>
+References: <20261119-wip-libceph-linger-uaf-v1-1-40f3661fea68@uk.ibm.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -83,105 +121,14 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261121-b4-ceph-cap-import-self-peer-v1-1-9cbc14a6c8b7@clyso.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMwQrCMAwA0F8ZORtoO1Hmr4iHNaYuoltINhHG/
- t2qx3d5KzibsMOpWcH4JS7TWBF3DdDQjzdGuVZDCukQYwqY90isA1KvKE+dbEbnR0FlNqTUhtg
- dc1u6BLVQ4yLvX3++/O1LvjPN3xO27QOEUZxBgAAAAA==
-X-Change-ID: 20261120-b4-ceph-cap-import-self-peer-c230197b3f92
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
- Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, stable@vger.kernel.org, security@kernel.org, 
- Quinn Grant <leograntquinn@gmail.com>, linux-kernel@vger.kernel.org, 
- Xiubo Li <xiubo.li@clyso.com>
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1795241898; l=3029;
- i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
- bh=/3Lg5v/cOBVmlJ+Hh/ywgxHY68XitXvI31NKdYtN2P0=;
- b=Xrn1wuHrIpn8W8Cq4p1Heqk4JkoHGwrmCkFXb7IcicSv78cp+r1y90vhRJHPFn6ERr+ThxF0U
- /w6nxw8hzwlDpMF6NwjkKf6oFcWKRrt/fF6te/4NTCxV8le9LWGUcQa
-X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
- pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
-X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
- auth_id=840
-X-Original-From: Xiubo Li <xiubo.li@clyso.com>
-Reply-To: xiubo.li@clyso.com
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-From: Xiubo Li <xiubo.li@clyso.com>
+Hi Alex,
 
-handle_cap_import() first adds or updates the importing MDS's cap,
-then looks up the export peer's cap with __get_cap_for_mds() and
-removes it.  The caps rbtree holds one cap per MDS, so when the peer
-rank in the IMPORT is the sending MDS itself and the peer cap_id is
-the imported cap_id, the "export" cap is the very cap that was just
-added: ceph_remove_cap() puts it, and handle_cap_import() still hands
-it back to ceph_handle_caps(), which passes it to handle_cap_grant().
-That then writes the freed cap (KASAN: slab-use-after-free in
-handle_cap_grant()).
+Thanks for the patch.
 
-A cap is always moved from one MDS to another, so a real MDS never
-sends such a peer; only a broken or malicious one can.  Warn and treat
-the IMPORT as having no export peer.
+Reviewed-by: Alex Markuze <amarkuze@redhat.com>
 
-Fixes: 2cd698be9a3d ("ceph: handle cap import atomically")
-Cc: stable@vger.kernel.org
-Reported-by: Quinn Grant <leograntquinn@gmail.com>
-Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
----
-A buggy or malicious MDS can send a cap IMPORT whose export peer is the
-sending MDS itself, with the peer cap_id equal to the imported cap_id.
-handle_cap_import() then removes, and frees, the very cap it has just
-added, and handle_cap_grant() goes on to use it.  This patch ignores
-such a peer.
-
-Tested on a KASAN kernel, with a test-only hook that turns an MDS cap
-REVOKE into an IMPORT whose peer is the sending MDS (the cap pool was
-filled to its retention limit first, so the put really frees):
- - without the patch: KASAN reports a slab-use-after-free in
-   handle_cap_grant() on the ceph_cap freed by ceph_remove_cap(); the
-   client loses the cap and the other client's write waits for the
-   revoke forever
- - with the patch: the peer is ignored with a warning, the revoke
-   completes, and two-client read/write ping-pong and umount work with
-   no KASAN or lockdep reports
----
- fs/ceph/caps.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
-
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 3f4ac4d94d5b..ac780fdfaeb7 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -4652,6 +4652,21 @@ static void handle_cap_import(struct ceph_mds_client *mdsc,
- 		peer = -1;
- 	}
- 
-+	/*
-+	 * A cap moves from the exporting MDS to the importing one, so the
-+	 * export peer can never be the MDS that sends the IMPORT.  Caps are
-+	 * kept one per MDS, so a peer naming the sender itself would make
-+	 * the export cap removed below the very cap this IMPORT adds or
-+	 * updates, and handle_cap_grant() would then write the freed cap.
-+	 */
-+	if (peer == mds) {
-+		pr_warn_ratelimited_client(cl,
-+			"%llx.%llx mds%d names itself as cap export peer, ignoring it\n",
-+			ceph_vinop(inode), mds);
-+		p_cap_id = 0;
-+		peer = -1;
-+	}
-+
- 	boutc(cl, " cap %llx.%llx import from peer %d piseq %u pmseq %u\n",
- 	      ceph_vinop(inode), peer, piseq, pmseq);
- retry:
-
----
-base-commit: 6a9830a8f414d3830c584782568d0233be969d09
-change-id: 20261120-b4-ceph-cap-import-self-peer-c230197b3f92
-
-Best regards,
---  
-Xiubo Li <xiubo.li@clyso.com>
-
+-- 
+Alex Markuze
 
