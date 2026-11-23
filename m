@@ -1,20 +1,20 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.166.238
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795420967;
-	b=Its9LyeA0dZUnxvXfuayqXGZI/d4af6Ue+AVJVXOoOgginL07todEPcsdKU9zSw9x6x6
-	 F9BmzSmDVjI+fgXVRKXe+OwZ0O9jFJyk9vpneNmdpL6l2/yV2qF+GMSmksBXNnMT0fdiy
-	 hzQU/r3P9pjXgoz2nHbRunjtzWQ+s6qv9XR+L9YWHJCtfDgQGldPbW3ByFHSJghrx8O6z
-	 74jxYlrcOuwiA456m602UHOAtiOuBcWRdsh6cKGTYPy8sGZJL1uEWJSCrhm6Mjx6vcSPz
-	 O1iRnedU8Q/62BgT8Ou+fRlPwp+P4WIA7yC1q1q9afT20v8Y+rRaf1SrwautuRhhMSg==
+	t=1795420968;
+	b=pd5JO4afc0wt7YPGWXxdzrXo6oJsFqNqgpuSd54wA4ugXtwDeAtwK46Ny5HKdarsPlkX
+	 BrR/hj4GYEe+pbauKT+Qtss0FKSNcQCzoSRG9a5fa9n6qDWr6ZobIPWfvYic8r5xWtqvT
+	 zWR+VVV4YUk4KVJzKLOLPr3lupw2I5W/sOTeN3UkJWLzlzApe15Aerdb2pwk2DaTNecsB
+	 sNL8M7qmAiVa9l4KG+ValmSmz+31OmgFgVMUg7t/b7T8h736tfRpth5mZ2Cnt4A5KYwNM
+	 S//ifm3j6mPMDdZnJtUeFoXmrXhlMGXWRWwB03rx+Qwl6C48DFNQ56Ya8X8MTW7gy2g==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795420967;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795420968;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:Received:From:
-	 To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 Content-Transfer-Encoding:Content-Type:X-ClientProxiedBy:MIME-Version:
-	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
-	 X-MS-Office365-Filtering-Correlation-Id:X-MS-Exchange-SenderADCheck:
-	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
-	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
+	 To:Cc:Subject:Date:Message-ID:X-Mailer:Content-Transfer-Encoding:
+	 Content-Type:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
+	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
+	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
+	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
+	 X-Forefront-Antispam-Report:
 	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
 	 X-MS-Exchange-AntiSpam-MessageData-0:
 	 X-MS-Exchange-AntiSpam-MessageData-1:X-Exchange-RoutingPolicyChecked:
@@ -28,52 +28,51 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-GUID:X-Authority-Analysis:
 	 X-Proofpoint-Spam-Info:X-Proofpoint-ORIG-GUID:
 	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=/JjTlzR8I557LEQ8CbJUA7yfqjZ9iet28lWE1UWNG40=;
-	b=Gd8tO6DKCarGvaz7wbfX9HecIDZT5lV/VH3Vc3qUrCNldpMYAt2ug6YEI7qiVyaUZXKk
-	 L40tnOZf6ybTzyoW/AoB9y1gT1zgjhwGOIRqYy51gZNoAi8yGDVbqpnclMucajKyC1ItE
-	 XvKmhn2Y7mEG4wmqSTQ/nSF+Y/siLcnGwWnL/Dpz8LnPspH6WAgEIMSgSVHCc0mxTJi8J
-	 OO5YXczPJNRYya1ezRdgU6jOm1L6AwqkI64SdqqMRTcZBd2Pdtl7Qg5eW7h4j5hiZ8B4p
-	 ngBTs+weK9ssKmsJG8URwQSVZlYBLeDmLDNHEgf/Eotrvrtb6zDA+SDqfvFG7idJT6g==
+	bh=Zj+vyu2Z5yR2R/rgin0zvN5PvMmbE4wLXF4dM//2RWA=;
+	b=Fg+GefhIj7+jzXGTqmyY5AUTDAJ/I234UujqSWhLlJI8XvCWzmtpSOYDh06bWU8aDuO7
+	 A/P4UU8wt2Jc86ZIh0XeS9TF52obIIRj9orxF9nlPk3mgfbxHf0cvPF7mh7RDtwOiZya7
+	 n1Kz3YKVsZOSavqyQPi5NqtgR2XqbQwuTIY4UQKmGweC/d3Qll6Akt1SLVZw04znE/IAb
+	 OrOTm0xl1xvTtN0qbY/rg/Ni7o/ygzF4wINahOEkbobg1UH+Y1rGiMlTKeUl0FvtkOSZ3
+	 hYw5SBfQeFMINLL81Jq90Y0HBEKF4lyv6Q7FJ67egsT+vdQSnCEYkGX7dpN4g+UApGw==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=windriver.com;
 	spf=pass smtp.mailfrom=windriver.com;
-	dkim=pass header.d=windriver.com header.i=@windriver.com header.a=rsa-sha256 header.s=PPS06212021 header.b=gAwaZQxt;
+	dkim=pass header.d=windriver.com header.i=@windriver.com header.a=rsa-sha256 header.s=PPS06212021 header.b="Vn4m/f7f";
 	arc=pass header.oldest-pass=0 smtp.remote-ip=205.220.166.238
 Received: from mx0a-0064b401.pphosted.com (mx0a-0064b401.pphosted.com [205.220.166.238])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C87F606A681;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 999A4606AE79;
 	Mon, 23 Nov 2026 08:02:47 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4C87F606A681
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 999A4606AE79
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=windriver.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=windriver.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=windriver.com header.i=@windriver.com header.a=rsa-sha256 header.s=PPS06212021 header.b=gAwaZQxt
+	dkim=pass (2048-bit key) header.d=windriver.com header.i=@windriver.com header.a=rsa-sha256 header.s=PPS06212021 header.b=Vn4m/f7f
 Received: from pps.filterd (m0250809.ppops.net [127.0.0.1])
-	by mx0a-0064b401.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AN6kQad3025693;
-	Mon, 23 Nov 2026 00:02:26 -0800
+	by mx0a-0064b401.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AN51msH2840662;
+	Mon, 23 Nov 2026 00:02:18 -0800
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=windriver.com;
 	 h=cc:content-transfer-encoding:content-type:date:from
-	:in-reply-to:message-id:mime-version:references:subject:to; s=
-	PPS06212021; bh=/JjTlzR8I557LEQ8CbJUA7yfqjZ9iet28lWE1UWNG40=; b=
-	gAwaZQxt7EcqRzvITDg7gHKrlUcFSnUKuMc0pASkxKHIwPm+SG/kQNY4XawlaBbH
-	Y21iT1fX7ig74J4WDz4LdT8Van65+szXvj4D/B4rseAeozOQPMz9gKdlA+E2x1GM
-	3ri31Bcc6cyPl7ds+Qy0toQE8jp1lj31QCrxDcJ9BsCUoxjkwGQIQl0WF88UHdR7
-	l1g9sVXObM29fvUSxYrFwt6ZoJQL6WzNpBDpvY+FR56H2iS1Fu3KocIcxoe/cujJ
-	mDgUNm2EGuNNt8LtNcDbGEJ2AV+/FZd2+S5eJERuSzrFnZWyPqV5H0MKNaY6JFUa
-	cP3+6NiZMCqTUO9LS3hKFg==
-Received: from bn1pr04cu002.outbound.protection.outlook.com (mail-eastus2azon11020099.outbound.protection.outlook.com [52.101.56.99])
-	by mx0a-0064b401.pphosted.com (PPS) with ESMTPS id 4j3bpjsr51-1
+	:message-id:mime-version:subject:to; s=PPS06212021; bh=Zj+vyu2Z5
+	yR2R/rgin0zvN5PvMmbE4wLXF4dM//2RWA=; b=Vn4m/f7f+yhaHDvAJzY6KFyxp
+	dhJsND/l6MK7BmJqGI+7LfYjkYQqLYZBGlFQP6Fxu2dTQGwOEO8oO58A1zB97w2D
+	9ysmCX1EU4tT8XNn2Bi4+Kc4oao/hRlWFBF/ph8mkZn1b6+g0eBqMxcR+9VMs9RK
+	8gHxulFinWwuGoHosvQbpN07+jOaa+3b9nzy2O5iXv0Sjfg5KPZ2HR0DSyAqWgqr
+	WTMmEx7/jsCqSmw3343tQFKK574XEOk3WGUFKEqGVwT4GdGHzCB0BNMPhMYuN+gG
+	iF4Ea16vmZ+h2hy/tzngfJq1Mst1GX86upGgQ9CwZKoiUaVkKAAeQD2gMdxKA==
+Received: from bn1pr04cu002.outbound.protection.outlook.com (mail-eastus2azon11020118.outbound.protection.outlook.com [52.101.56.118])
+	by mx0a-0064b401.pphosted.com (PPS) with ESMTPS id 4j3bpjsr4w-1
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Mon, 23 Nov 2026 00:02:25 -0800 (PST)
+	Mon, 23 Nov 2026 00:02:17 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=c8f4YRPbA2vvI34dyNcSiD8ZtmH/DS6d6F3BQLgZf7S53B+5zqkN89MsdgcuzdGltZ9MajW2znlPpgItrB292NBQ/ebYoqjOA2DQNVKns2pLu7+A9R7jPpcbqwNCLeM/GUPiKT1HSQZUxlQUVzTUqUC+TAiCBabMZJYjPkTT/YkWcwe3Zlmxo+sbBdxkYAmGMd0xqBicye/6hAGuFZBscI0qYKkXsE3z7NSjxZh676rdeNs3Gs3KFzUNbK+TppZFZQCrvfGjKd2bIXcXhloqcuLL/z5HcdBNzFLweTfB/nndeeGKReYlPAydK5e8oSRgCQ7emqpvPOw4JTJtSLMjzA==
+ b=XECpycByDyGgXB+hWphrNl3tWQD0qRI4m42nmS30pAj7EE4Xr4T6sYhJqH2MiJ4S16hu1UBLinR2huM/JeWMwzdaMiLZ3T/1orqYxeIeFqpJcFunbJoz7U8NK+17vCbZ4BV31UfY2SQE+sXamgTwUPo4Ldy3cXoHS3Lcb5budFTbtEKvGms3/v7iJIHIG8eu42ORDA0sLcHZtfrwRAXoKoP6xW+ujXOTOL1DheM8kk+ZwHfHXAAZyXarvFqW5qxt4OycMP3UFCmyMQC0KEqJm235r2JjMEm2OilztDHXIPsE1aBr5edbypo0ROyvOsWskN25ptEN58mb5mtwRFhKag==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=/JjTlzR8I557LEQ8CbJUA7yfqjZ9iet28lWE1UWNG40=;
- b=pJDFvy9kHS8cjMWGopbwcA/xUKCA6v/QnwOJ6yiC0gCkCnxspKYDaGBtuli8CXkUb1A2i7SWOdPHrwVPhvHKJtqW4vfu63YTAfWwdXDoITnsl1MFMQ3dOfQwZHAfOzMqkLmmSKxnjLDAVV5v1txUAEkSqtUCQEAVjQoaHuHxNymRV6UbJs7m+DRJ7UAPRG8cAiSPz8eUcCOAYdBqzchT1iHSMnw77gstaXJ+WVAGd5PEZY5UyNYpJt/YdlqIUfODCLnxBPHnjttF2AJXnsr+57/Xiy8Uygxmo+TndyxPHgVKl5h1Dwk61BteDOeJ91lyMezI0TXXuT1DvOoW9C3qAQ==
+ bh=Zj+vyu2Z5yR2R/rgin0zvN5PvMmbE4wLXF4dM//2RWA=;
+ b=UYrQC7SSjIlMayDyAY6xHD6sdiTKJlIQgnnhO3Xy+6GkDfJ+NuDO3ffhs8IE1/8S52NOShhSe5U8A+XhubfMo0KlgKYIsbp32TihrTFyezMRC5qiFZ166gHcjjsYuFdWeiGkwln3FaXIQB3ZykrsgfIhGz0lKzdSWycQBmt1i1o8lpNfq0gQaSeruJvGtDkNjvlRa9gD7WXkULHEI2ugFS31K6KWWAh/1/bhGTNdBFs7CXlo+BsyuvWK3xyW1ZAl8EbEWxyvRPkLCfWC55iKpT2CSOF56Gh6OZaG8QINbs1w4bf/jV3SEw0PGsI4YVtAl0X5YVdaYwB1NRVsoJhfYw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=windriver.com; dmarc=pass action=none
  header.from=windriver.com; dkim=pass header.d=windriver.com; arc=none
@@ -83,11 +82,11 @@ Received: from SJ2PR11MB7546.namprd11.prod.outlook.com (2603:10b6:a03:4cc::8)
  by DS0PR11MB7802.namprd11.prod.outlook.com (2603:10b6:8:de::22) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.639.13; Mon, 23 Nov
- 2026 08:02:21 +0000
+ 2026 08:02:11 +0000
 Received: from SJ2PR11MB7546.namprd11.prod.outlook.com
  ([fe80::ca9b:dcf:8881:bced]) by SJ2PR11MB7546.namprd11.prod.outlook.com
  ([fe80::ca9b:dcf:8881:bced%4]) with mapi id 15.21.0639.010; Mon, 23 Nov 2026
- 08:02:21 +0000
+ 08:02:11 +0000
 From: Ionut Nechita <ionut.nechita@windriver.com>
 To: ceph-devel@vger.kernel.org
 Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
@@ -96,12 +95,10 @@ Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
         Xiubo Li <xiubo.li@clyso.com>,
         Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v3 4/5] ceph: request a full mdsmap when an MDS stays unreachable
-Date: Mon, 23 Nov 2026 10:01:49 +0200
-Message-ID: <20261123080152.163172-5-ionut.nechita@windriver.com>
+Subject: [PATCH v3 0/5] ceph/libceph: killable sync waits and faster recovery after network disruption
+Date: Mon, 23 Nov 2026 10:01:45 +0200
+Message-ID: <20261123080152.163172-1-ionut.nechita@windriver.com>
 X-Mailer: git-send-email 2.56.0
-In-Reply-To: <20261123080152.163172-1-ionut.nechita@windriver.com>
-References: <20261123080152.163172-1-ionut.nechita@windriver.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-ClientProxiedBy: VIUP296CA0051.AUTP296.PROD.OUTLOOK.COM
@@ -118,80 +115,80 @@ Precedence: list
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: SJ2PR11MB7546:EE_|DS0PR11MB7802:EE_
-X-MS-Office365-Filtering-Correlation-Id: 2677e46e-d290-4bd7-4573-08df49381a13
+X-MS-Office365-Filtering-Correlation-Id: 7c696da0-c685-4f6d-eef7-08df493813f4
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|52116014|366016|1800799024|10070799003|23010399003|22082099003|18002099003|5023799004|11063799006|56012099006|261026121527099003|261026140227099003|261102123227099003|261022075727099003|261021123027099003|261022105027099003|261028144727099003|261021121427099003|261009223027099003|10067099003;
+	BCL:0;ARA:13230040|376014|52116014|366016|1800799024|10070799003|23010399003|6133799003|18002099003|11063799006|56012099006|261026121527099003|261026140227099003|261102123227099003|261022075727099003|261021123027099003|261022105027099003|261028144727099003|261021121427099003|261009223027099003|10067099003;
 X-Microsoft-Antispam-Message-Info:
-	3hS1HhQeNXB13RwE19LsOHsbJaM9pUprmmLBzMjancaLO8ud4FItIT/Fk906XCoWfFF4GIbhPGzmYamHj/B/JRF/OOwXJtITh+X0ItyHQdq0zOKdnIikotkATVTvYxVrhA5gKjDoTlOWsBq7nfkqD1156GqnIGSpTohaIvMHnUsChJqA6qlzA9zFoM+vuU992AENfcZTqun9uBIPh/NH6/IPCvgxxsPWbZTt8zrLuMxGfl6Q3EOy/vSDc6RxUVm0bVDO3ayrwR7zKvcGAU+hOHXIYSZyrgXVywRBmsTFGMyskgNjfhDf+pSjwHDtHG22Ozh3wecjZaGRyzO0hS2Wpmh1ePPmhPFL4esXP0izHx74QqocR8F5QPDzcA0jVc0o6e9xYpLQx1kflSzt15FNXBxavhnw7qrT1TC/LasSCObaa7o+jLcnZULa4xuqiHMRsi5/j9ZedDl463+XO/dtAPd0U07bk7xIFIKzBS3W63piOOXM5JY6FSGV0lGBt1DXGge2Et2c1uqWNPg1/pl/ifbn/Q7ftSfOHjZTgtuq8UmT7iGMADAVygJi7BFwVK1XxXPRN9218mnQa9OGsVYDC30U0QhkVSndLdIYxfAfW+DWpCwrS4HTuMA6qQlxnvcW7E4QIJRAwRbt349gvzkZjmauj3a7Mk6BU8pSVusiapA=
+	l6yj/xoq2ND552FVIcQpiegW2Jbg14S9HtPSF1lmbrMXVrXB5FV8EDJye2SUr3hf580xSPEyWjGy7K6bcBV+3zDGI7gb4kmXbnwPseoVCTQkW1Dqih2tUn93Ag8TYVAf140nhrh0Cr445+TsncfOppax+4C/rT0llmm3kG0GEJ41YCbaczXnuRTpu7c5Qe7b9c9/+vsMYafV4EQyOoQw2/X6lixYBIhgwQmzy7xvv/zYAXUm3b22VG/oDWuPgI5E+AHDZdLU/usOQpXYjX48rMmfyvJ1Iy3vslf5N839LOITnfpieDUOl+ah0ScKiU8EfwUZ6LmrST4Xl9IWMKW340C1i7o+V0nQYhZUdwc/K7b3jshL7yiruyCTv4ykmXExv63ovMJ4i3aNr1xJvS/khD57VWDGf52cvyBXQH3xjw8LRB0WNwmzvL15cTwNLVXpxGOpOkxMcVb8SxgnYFQ3Dgpe27kgXtSZKObhX4apFJlxoD44jdcPdPNlEwHVKXSuHBBU4CADui9BK3ni4m8nU2ar+YJUMsdp70JvfS/AoKB5lg7en6PD0shccxsjAZniBL2BdFM4qYXwDibRxgyjR1373wiPCNq21dslK6tqcVs=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ2PR11MB7546.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(52116014)(366016)(1800799024)(10070799003)(23010399003)(22082099003)(18002099003)(5023799004)(11063799006)(56012099006)(261026121527099003)(261026140227099003)(261102123227099003)(261022075727099003)(261021123027099003)(261022105027099003)(261028144727099003)(261021121427099003)(261009223027099003)(10067099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ2PR11MB7546.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(52116014)(366016)(1800799024)(10070799003)(23010399003)(6133799003)(18002099003)(11063799006)(56012099006)(261026121527099003)(261026140227099003)(261102123227099003)(261022075727099003)(261021123027099003)(261022105027099003)(261028144727099003)(261021121427099003)(261009223027099003)(10067099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 2
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?oyMl/g+FxRVpPqAMIyaFCvSrNeKjGnK1bKTV+nFxIDxaFUVWbqPqI8Qbp7fY?=
- =?us-ascii?Q?51CFQF9xeTiA4Zvkkd6F4Zh8Ic9Z3nrkrKlpM+fRufkz69fzfeATMYv+w0S4?=
- =?us-ascii?Q?h6UxHNbVwi4ctK7l9sUGw7tuz/qZeZuLeHg96FIojIhza4qSHXWhOx3m2jgz?=
- =?us-ascii?Q?aIKWwbwUuBabQ9vNKW6mvNMtaC8tqTB0cECZ8rWoBMEAofsI0aZaTDcNb65Q?=
- =?us-ascii?Q?gskI89O39zlsJ6m0nae/x6XzR+yfBGliF1GsEFilTAUh9UxCTSi2u2OiVH98?=
- =?us-ascii?Q?oxursjdVU9RxAPflmtkn5bQTp93B5MTOyZNrtWRgqWQMzEiBrUeo2Rw+FnGa?=
- =?us-ascii?Q?yJ7KtI49PhF0cxo92e4VdyiXtjaTLJPEu6fn/mM/Dm3MGTGbrersPgkti0Jf?=
- =?us-ascii?Q?mVV7fUzRMmK8aoqbg1jRtiIGK5ZGxC0nMfq3AOir6DnDYIy1m0k9z2sfVIEt?=
- =?us-ascii?Q?xms4+4/rUWAtQH3sHg8/bINORibbi72nG4GpD1dlD6tVPlP6cIplgAjP61fO?=
- =?us-ascii?Q?ZvztiaEh0U3lewGcHJUHrDfFEFRoRHPV0AcUXPaj2zwVZS21G4XmI0ztot5n?=
- =?us-ascii?Q?TlXFzEzFI+r13c+2i861J/RooxcRI3PnW7JvvDMMd5HdO9ut+GhNT0ztxSBq?=
- =?us-ascii?Q?c8thCCmjISz28RASSgHiiBv0eLbI+j91yo541A/4oJn9iLbn1MuAMoNalZql?=
- =?us-ascii?Q?r24xZJx8NWKB41jKHauHvTvL3UPmwf13+Gst1lhvunl8INjvyRCD7lwh2zZB?=
- =?us-ascii?Q?yh6i4S8vNo5mqV5SR8c7CDx0oHy5SAx57RjAJSpD1gq0PQ+630vG67kVmdEI?=
- =?us-ascii?Q?QtLmKhjKHA8k3alGw6Qpm/cDhLzRVyDTHfNZvf/n35fYtQ9pB9RJn1PGQDfx?=
- =?us-ascii?Q?wviiPsTfTyWF+ktyheg8baIDtEYdgTf3zL8tngxO1gECrlO3F0SsE+cm/O3j?=
- =?us-ascii?Q?sBuimtWVQIVS/N9ijbOJW9OCpU/odXRBTfKSNzLME77UcS2mIRATW/zGJOx6?=
- =?us-ascii?Q?x40JzMCPnTSWK06KdKKnSLpH8/SJoNvF8Wmm68PIIrvf7Ln8P5v32IxQFOD1?=
- =?us-ascii?Q?zkgnlWMcTYWPLXlUCkYrqcFvA8SixshpmvMc33rpZ+H3Ire/DtiQUefgRtnV?=
- =?us-ascii?Q?fmxlF9FxPhXlwwpUE639QjA28M7t0iuP7QYtYNQtTnF1jzdoNfJcNmGDheC3?=
- =?us-ascii?Q?IFG0CEIAJeanBoJMYeUy5qju759Q9Os42YstCGFxrL+k8ieyDgypL14T4rg/?=
- =?us-ascii?Q?DfhtMphiTVJZJeW3NM5l+2+gIplZEuadhTl2Vlo17oUws/zbnyRtGcy93bM/?=
- =?us-ascii?Q?mU4lhByJTgk8KGNIB/tjhdudfJxEWlXTojJJUE+AQMlg+lNPdx7rx0/wg8Lw?=
- =?us-ascii?Q?h85HnLtGfTuR2LsgS2mwPSCvlpX+eiz4/1PsifcsV10iE+syKL0Al9Nz1Pu1?=
- =?us-ascii?Q?FaawjXzGUdE0WF1f2nLVLDSUJaGZA5QWS30gkdez73LS67Vae1Hjp718+8Jv?=
- =?us-ascii?Q?QOZf6FFPZ4v0Cf5rNgr9vdF/Es3Y1/y6w9D5i9j+57ei3hyA4sV0cbAoI3nA?=
- =?us-ascii?Q?NYomDnEDBU2PYFQND68czoRNlLmrR5GVdO8QcnwvI+nnWEaWpoLMnJRtqPgd?=
- =?us-ascii?Q?hOkNc8mSTscHlDoMRdf6Z/UIcXstotBJUengc0d/zqlFH2lHODJVejQk3Oqa?=
- =?us-ascii?Q?Tx+e1i3yDBXm76QPM0Ff09SE4z8y/eX9NtFzb3rkhtuW3eXGCpld9tWS3QjN?=
- =?us-ascii?Q?6pN4wKsRjyJyYU7fgNZ4B+XKfjVw9cHARlSyW+KcctjikDUACmaVWlpvkEr3?=
-X-MS-Exchange-AntiSpam-MessageData-1: FG9YBP8hz0cWvbO8wXjRV3KISD9p1/Vzge8=
+	=?us-ascii?Q?Tlbm8hJLulc9i5laaW68OZ506LCuV0hiL1ORu2sjzXY4znL9ajudRGR1spBC?=
+ =?us-ascii?Q?ly7cz+NTvy5MdFj+3DGU1Qxg/F7ZSADs1CP6jsrpLgLc41CVFZxuAjjBfxax?=
+ =?us-ascii?Q?OVZu35+FvN23LFwHlpa0uCjuRLvL6W0y7NGKp/cLslj62CrhI77tWLNOVF/0?=
+ =?us-ascii?Q?BPj+a04V9UtwuXX/YmPj+1CTNZVA+3c4P3iqkWm6uQFZkX2lbv9TDH9jl7u1?=
+ =?us-ascii?Q?FOdnnSMfdwc7ZWUuMdocXJSB7+qsZfqqAMV5eU5QAkLDgu/dpKD6dFV2uY+o?=
+ =?us-ascii?Q?QIbySxZoMJBVEdo/9W6akObh2XaGvTPuIfPLSGNqAu7Ang5WN88FQVN9Nn3R?=
+ =?us-ascii?Q?386dEybvGJD8RdBXs5BYQw7xnDrEVkqnGNsRPKxwRL+CpEL/m9zV6JzcOiBE?=
+ =?us-ascii?Q?SPH28pS9pd573gy6Tb4qJ7Asm6aWSNkzdWH3fDmA005HukQl/RUkz64j44h6?=
+ =?us-ascii?Q?WeqjG6n9tJDeMQhe975idhQIISYyFtqVlhenZojgABWgrYhKbg2HtdyHKWAF?=
+ =?us-ascii?Q?W5ZvlM8kZTfJSTr2O+K8G8ddrw8ynV+HKIv2ty1h2J7uf7pnlfpbDbLCg1r2?=
+ =?us-ascii?Q?MWhdm2kzcPCIyxewKlHwh4XM4ZWwvFwljXgCR6jSkqBdrNc5mmM4+KFpuBUd?=
+ =?us-ascii?Q?ugh64JrcNehREf+B45UuXIwr3cUeiy0iH+Yo71wxjDsw3G/9q6ovqM+wiJWu?=
+ =?us-ascii?Q?62BoGsqHo0db5vmy9U5Uq4sb6Ged8lAaabuiNZgU4dGg/bqzgwTL1JiXF/QE?=
+ =?us-ascii?Q?7KzWhPS+O58a9DYoj19nKNMg9bQFyqggWwTkHGkZVDBtE61f/WFj7gPh/MwT?=
+ =?us-ascii?Q?3OKrhWh4wf6qalTdxYlCd3j1T86qUn4cIouoEtcBhc650YQVuZsRtDIdgPUl?=
+ =?us-ascii?Q?1lKdk3XBEIT0N9tTQbiAURQ00H/N5AIKhROeUt73c6PE2tsT4RxiP3KVX6+c?=
+ =?us-ascii?Q?zKi5mCHEoEVi6IknP+u36mqGUT9K5Wia2me9YW/8QylcUfdPAb1PK6tGqvR9?=
+ =?us-ascii?Q?aeGDKjyO8MyFsNmCSMMLbU6jWBGfs0njCpqfFzUW/KPB+dNQq5t3UXYbKYpl?=
+ =?us-ascii?Q?jCdccmiFbkBDOpCGGgppJn/2TOgLk/IUqmSbP7DVxu6u/+BThd/k7RHC7Bjm?=
+ =?us-ascii?Q?+/z+m9ChR+Ktrp6wjaUuJTERVw47wRaLpgNbde61VltBfskhpHwpCM6lJzha?=
+ =?us-ascii?Q?agntjoxcvSJAueWxPLB9U5I9q48Jo/APwbQiv7tPtFkDjCsJAGDG6CdQV+fs?=
+ =?us-ascii?Q?RzZEwnmAt+UDfK3MSqeFOxoje73zCp+ekPVW6bV6KshZ6+8dAkV+gvuw8JFQ?=
+ =?us-ascii?Q?OaPm4oHC2kufkPxCGoHBqzsLAaHWZsbHUPYEW8ITW5OMxcviVCtHwHA+snZs?=
+ =?us-ascii?Q?l30KiSBZ/gubaxibvvnULQzlnwn+1zl3cu0P0d2SboHLEyI7qHOzUpqw+PRi?=
+ =?us-ascii?Q?S+Zn1G7Xdf7xpzNnzyjQ7SGJrY2ObfnrLa+QcioPAT5u71hFWvfZ5CE1KvY4?=
+ =?us-ascii?Q?F8aqnZ8Ehg/hgVKk+6xWG9z1Q6Dp0IqpClilATop3UtQCC2A6nLj9DvFebLI?=
+ =?us-ascii?Q?usnxcTkwxTP7ThXphfrEYztAIaApzRiJCs/fPlvFzugdYOGm3Gl2luJe98zW?=
+ =?us-ascii?Q?MImCyvNNljDzL7ukoIAEOvy5lyLjyIGaGw4uk2sRgcfsJy+1m8VwMS5kBPxl?=
+ =?us-ascii?Q?lzCYB168AVXOay2gl3TQtz6mr3illcd+iDnH/DJ20Ht46wPqEONFUL06rZJT?=
+ =?us-ascii?Q?SESm0ADc+RgTsXpdFQcttvevlmcfO/8+k3GchuAziNcufKyhMAV++0hA4YC4?=
+X-MS-Exchange-AntiSpam-MessageData-1: AD8ZnYWi0dU+Gi0srmrpbUQKWEeRy4qwf9k=
 X-Exchange-RoutingPolicyChecked:
-	FZxCrtfDe0UGpJmlh6v6UA/kZ6tSplqAw3t5jJwTcx84I8xWcSIh0pKDsteYiOyGOILkcfbqZW0doMA6EAqpwJC1yFwj+Dv9Rv+XpJ4GAG1/p3SGtv+xSxN+NcqmZmLUaJdycOG1KflpzCd/Um++UPZsCTJtqOI2kkXoS6cd5StqU6cVqkDzoC+i6+3rCIYg72KtDzJgtIzi8HBiinv54hyYrh5YLBEfgrU2VeqFU4H4285MLfE5uIdseKhBV0ApbG1xTxCbWGIwDb3sCEFpp4bnJWXn9CIILSnr8vdUBa7eNecMGSEqu8/+w6qFssjBOQVMUZTpzigTjlivTek7wQ==
+	PvbgwbaqD0uCVdi0fInMETS20KVLzULAyGu5J2VS7b2Mp2C1uZFlILrPUVMErPU/uhi14bi7nJFrp0DZL970+O79k+nbnbD/e6HUhsHUFsdAxTkWZp7QF/2/KSLZOHUIVaJzmaDwjHH527A2LyS5fv7g9Fh5hvb6ekpi39Q/YAE+C/5mds5DmHw6aXjsjnwX7XnvmYmp2iBt7zXr227MsgckFrxSii2f0H+x3TYX/0qCS3qdIDgZI+Zg06EyiUb9BE+E+y2W+qPGE1J+/uBiBB0F+3uD1Fyui8Jr56NzTHxzsF9ZzprjX2htVKtzhqDKBCCsHfe+Cf45OyUGrMFYKA==
 X-OriginatorOrg: windriver.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2677e46e-d290-4bd7-4573-08df49381a13
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7c696da0-c685-4f6d-eef7-08df493813f4
 X-MS-Exchange-CrossTenant-AuthSource: SJ2PR11MB7546.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Nov 2026 08:02:21.5964
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Nov 2026 08:02:11.4094
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 8ddb2873-a1ad-4a18-ae4e-4644631433be
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: HN3roR2oh2SV8xpzlOxB2GxvAePuGzv2cXuEsSzVdaREoyeIG82xVmLCG3/u+4ft8h7H2ORogo4eydRhn5RQq9604EOBIFbrnbMlyg+TQzE=
+X-MS-Exchange-CrossTenant-UserPrincipalName: ZokNPBm9Pk+rD6nRM9v73tfK60MsCZR8PkmZU3yipOElJTPMWltUNe7Zmm8wRhiN4b7e4Ct5XDM/zCCkEb4mo8nvcQYZyUI9S92n6rehygg=
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR11MB7802
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTIzMDAzMSBTYWx0ZWRfXxtGyFCNuVvju
- UYzQsJ1J17+6093G8pXGXkadbc8Ij2uJvw/jpC+l+7rfGB+4gCp5sR9O4vjIDpd3cr5x38y9QLO
- KdfxG/AHagy45Q8Y9huZKqMjwP3UDCk6n8zaBf2HspYV6+0QxpWCzyC/nvM5xhKBBDXl37gvwIn
- Rkj95qvsWbz+UBve3xqoMSPkUXQbHerqpdB9093DmhPkc6xNepmncQhmtIvXrnDp4NL+H7HrMjO
- /AYjylJK9b0y395qxHMbuYiAK00JV+YgGEvjwL+MHroM9EJVBdp+F610f7Dc33YCgx/6CP6hpO1
- azb9ESsG4/waqmIdltnP1cAc4HR6yt6oDIZybrDS/LrreqtMb7eHOka1Q9Kv3+qYcPCvsOT1jbZ
- UIlipXC2oMn8FTC3h7lcLl7Md8qewMDeHFoRtbtTnzZ//Ckhcxlc1E3CFBoMpMTDjYMlkbSRv36
- DQQU4AOaiKU7z1wmN+Q==
-X-Proofpoint-GUID: 5D3HPHb37lrCaweexKUewLD8qCd5YouT
-X-Authority-Analysis: v=2.4 cv=I8Hw19gg c=1 sm=1 tr=0 ts=6b03f311 cx=c_pps
- a=gw0jr/XWmcdhwQv4PjOuaQ==:117 a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTIzMDAzMSBTYWx0ZWRfX/LhYbWa7GWrF
+ 7S+cbCbjVlZ3LzN4Prf8hHkJ2DMa56tjt0swzyriB+xA5suPT947fpyZmqJHUV3vExKFXs6TEpy
+ g/zA6QDJuSvMhKtDW1mMBNGHtVUqIprNA2wnR0D/2LSl8S3g4o0lJ1vx6puwuuHtDtxnQQe1+uJ
+ fcUz6eY7W9c58YDMSlEgXy84IuZombHPcLydasRgZalB4J0zdhA47AzGofQQx61McKGiOj47QQg
+ 43TTdFGc1DMBy51D7a2IAdTLZ/xkKUxN3Owb+FvOTlPh1pjNcPa1GYCaSxQwMsW81VEfYmwn52s
+ k7p+WKqCTQFk/657g1hf0lhgvYADTCvWcgB/6SK2+ULmCgEOLtfNn/E+InHh5xXFH4gvcpqY5Ys
+ 7yqXqehQemjLhGjxO+fzD4BMqvd3fKYYw+JYGyqDgQCt4zOBycev+wICjAdHCDHS7FrjeNa1dhn
+ brIf/gcx1Wd0KcvUZrA==
+X-Proofpoint-GUID: KInEPlHei1MqXhxlvaouM3rFCC6JNzam
+X-Authority-Analysis: v=2.4 cv=I8Hw19gg c=1 sm=1 tr=0 ts=6b03f309 cx=c_pps
+ a=WTYiPbwPEgbs67/cDcbz6g==:117 a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19
  a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19
  a=xqWC_Br6kY4A:10 a=zJRp6_cAMcgA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=bi6dqmuHe4P4UrxVR6um:22 a=iKiJcTA2PjBS6x5JeXcw:22 a=t7CeM3EgAAAA:8
- a=sEnkRl3NJ9bUhnf8avIA:9 a=FdTzh2GWekK77mhwV6Dw:22
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTIzMDAzMSBTYWx0ZWRfX1lgnFvnkmHAs
- 0NMst0YiB5/UEZY0367Gvye7quLCCiVhHRjsgrpoIQK3CnbxtzKYrTQF6Of1PWWceT621mWiVY2
- 76HR7hGzHwVfU1xETaDu2Qmu2ZFwNxbnhdw9EthTVyMAdEH02kOk
-X-Proofpoint-ORIG-GUID: 5D3HPHb37lrCaweexKUewLD8qCd5YouT
+ a=bi6dqmuHe4P4UrxVR6um:22 a=iKiJcTA2PjBS6x5JeXcw:22 a=VwQbUJbxAAAA:8
+ a=t7CeM3EgAAAA:8 a=ktL5Xi3Faad82JckwtQA:9 a=FdTzh2GWekK77mhwV6Dw:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTIzMDAzMSBTYWx0ZWRfXzERsIm1igvFy
+ 3oryKGbaj9Jnx+Tcyf+BS1Kb3odXgf8HYCJVSVJPindivwxkZMvMpoOuKDJeH/iz6QNTPr0VOmq
+ /GMOw0fwMoikXb4zGUV2UgJrL4wYDlnQFdL7dxNwl8fwNo2i5FNY
+X-Proofpoint-ORIG-GUID: KInEPlHei1MqXhxlvaouM3rFCC6JNzam
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.138,FMLib:17.12.100.49
  definitions=2026-11-23_01,2026-11-22_01,2025-10-01_01
@@ -201,135 +198,70 @@ X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
  reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611230031
 
-The client subscribes to incremental mdsmap updates starting at
-current_epoch + 1.  If an MDS restarts at a different address while
-the monitor session is also down (e.g. during a rolling upgrade in a
-containerized deployment), the client can miss that update and keep
-reconnecting to the stale address indefinitely.  This was observed
-with the mdsmap stuck at epoch 53 while the cluster was at epoch 68,
-the session HUNG and monc reporting "have mdsmap 53 want 54+".
+When the Ceph daemons become unreachable for a long time (seen during
+Rook-Ceph rolling upgrades with active CephFS I/O), the kernel client
+leaves sync(2) and syncfs(2) stuck in an unkillable D state, keeps
+backing off on a purely local connect() error, and can miss the mdsmap
+update that carries the new MDS address.
 
-Nothing currently reacts to this: mds_con_ops has no .fault callback,
-and a session going HUNG doesn't touch the subscription either.
+  1    libceph: fixed 100ms retry instead of exponential backoff when
+       connect() fails locally with EADDRNOTAVAIL
+  2-3  make the sync(2)/syncfs(2) waits in ceph_mdsc_sync() and
+       ceph_osdc_sync() killable
+  4    request a full mdsmap when an MDS keeps faulting or a session
+       goes HUNG
+  5    don't escalate the monitor hunt backoff on EADDRNOTAVAIL
 
-Add a .fault callback that asks for a full mdsmap (start epoch 0) on
-every MDS_CON_FAIL_REFRESH_MDSMAP consecutive faults, resetting the
-count on any session message, and do the same when a session is
-marked HUNG, which covers a connection that went to STANDBY and thus
-never faults.
+Changes since v2 (thanks, Alex):
+- 2/7 and 3/7 no longer bound the waits by mount_timeout, because
+  sync(2) ignores the ->sync_fs() return value and would return with
+  metadata still unsafe.  The waits are now killable instead: an
+  un-killed sync still waits for everything, the task can be killed,
+  and the hung task detector no longer fires.  The wait_caps_flush()
+  diagnostic loop is kept.
+- Dropped "ceph: bound the safe-completion wait in
+  ceph_lock_wait_for_completion()".  That wait is already killable
+  upstream, and a timeout can return before a lock grant is installed
+  locally.
+- Dropped "ceph: set default timeout for MDS requests" (Slava's
+  Reviewed-by goes with it).  ceph_mdsc_wait_request() has been
+  killable since aa91647c898d ("ceph: make mds requests killable, not
+  interruptible"), so it doesn't trigger the hung task detector.  A
+  default timeout would only turn MDS outages into -ETIMEDOUT for
+  applications, and for file locks (the interrupt request as well as
+  non-blocking F_SETLK) it can leave a lock granted on the MDS but not
+  installed locally.
+- Rebased on next-20261120.
 
-Signed-off-by: Ionut Nechita <ionut.nechita@windriver.com>
----
- fs/ceph/mds_client.c | 48 ++++++++++++++++++++++++++++++++++++++++++++
- fs/ceph/mds_client.h |  2 ++
- 2 files changed, 50 insertions(+)
+Built with W=1 and sparse, and bisected build by build.  Not run
+against a live cluster.
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index f64a9c97cb882..0338c7feec108 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -72,6 +72,13 @@ static void ceph_mdsc_reset_workfn(struct work_struct *work);
- 
- static const struct ceph_connection_operations mds_con_ops;
- 
-+/*
-+ * Consecutive MDS connection faults after which we ask the monitor for
-+ * a full mdsmap.  With the messenger backoff (250ms doubling up to 15s)
-+ * ten faults take about a minute, comparable to mount_timeout.
-+ */
-+#define MDS_CON_FAIL_REFRESH_MDSMAP	10
-+
- static void ceph_metric_bind_session(struct ceph_mds_client *mdsc,
- 				     struct ceph_mds_session *session)
- {
-@@ -4632,6 +4639,9 @@ static void handle_session(struct ceph_mds_session *session,
- 	      ceph_session_op_name(op), session,
- 	      ceph_session_state_name(session->s_state), seq);
- 
-+	/* the connection works, see mds_fault() */
-+	session->s_con_failures = 0;
-+
- 	if (session->s_state == CEPH_MDS_SESSION_HUNG) {
- 		session->s_state = CEPH_MDS_SESSION_OPEN;
- 		pr_info_client(cl, "mds%d came back\n", session->s_mds);
-@@ -6266,6 +6276,18 @@ static void maybe_recover_session(struct ceph_mds_client *mdsc)
- 	ceph_force_reconnect(fsc->sb);
- }
- 
-+/*
-+ * Subscribe to the mdsmap from epoch 0 so that the monitor sends the
-+ * current full map rather than waiting for an incremental update.
-+ */
-+static void request_full_mdsmap(struct ceph_mds_client *mdsc)
-+{
-+	struct ceph_mon_client *monc = &mdsc->fsc->client->monc;
-+
-+	if (ceph_monc_want_map(monc, CEPH_SUB_MDSMAP, 0, true))
-+		ceph_monc_renew_subs(monc);
-+}
-+
- bool check_session_state(struct ceph_mds_session *s)
- {
- 	struct ceph_client *cl = s->s_mdsc->fsc->client;
-@@ -6275,6 +6297,12 @@ bool check_session_state(struct ceph_mds_session *s)
- 		if (s->s_ttl && time_after(jiffies, s->s_ttl)) {
- 			s->s_state = CEPH_MDS_SESSION_HUNG;
- 			pr_info_client(cl, "mds%d hung\n", s->s_mds);
-+			/*
-+			 * The MDS may have come back at a different
-+			 * address while the connection sat in STANDBY,
-+			 * which doesn't fault.
-+			 */
-+			request_full_mdsmap(s->s_mdsc);
- 		}
- 		break;
- 	case CEPH_MDS_SESSION_CLOSING:
-@@ -7499,12 +7527,32 @@ static int mds_check_message_signature(struct ceph_msg *msg)
-        return ceph_auth_check_message_signature(auth, msg);
- }
- 
-+/*
-+ * If the MDS keeps failing to connect, our mdsmap may be stale (e.g. the
-+ * MDS restarted at a different address and the incremental update was
-+ * missed while the monitor session was down).  Periodically ask for a
-+ * full map.
-+ */
-+static void mds_fault(struct ceph_connection *con)
-+{
-+	struct ceph_mds_session *s = con->private;
-+
-+	if (++s->s_con_failures < MDS_CON_FAIL_REFRESH_MDSMAP)
-+		return;
-+
-+	s->s_con_failures = 0;
-+	doutc(s->s_mdsc->fsc->client,
-+	      "mds%d keeps faulting, requesting full mdsmap\n", s->s_mds);
-+	request_full_mdsmap(s->s_mdsc);
-+}
-+
- static const struct ceph_connection_operations mds_con_ops = {
- 	.get = mds_get_con,
- 	.put = mds_put_con,
- 	.alloc_msg = mds_alloc_msg,
- 	.dispatch = mds_dispatch,
- 	.peer_reset = mds_peer_reset,
-+	.fault = mds_fault,
- 	.get_authorizer = mds_get_authorizer,
- 	.add_authorizer_challenge = mds_add_authorizer_challenge,
- 	.verify_authorizer_reply = mds_verify_authorizer_reply,
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 31abbb3b3bdb3..46e13446afcc7 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -301,6 +301,8 @@ struct ceph_mds_session {
- 	struct list_head  s_unsafe;   /* unsafe requests */
- 	struct xarray	  s_delegated_inos;
- 	atomic_t	  s_num_deleg_inos;
-+
-+	u8		  s_con_failures; /* consecutive connection faults */
- };
- 
- /*
+I used an LLM to help rebase the series, review the code and draft
+the changelogs.  I have reviewed every change and take responsibility
+for it.
+
+v2: https://lore.kernel.org/all/20261120073431.53636-1-ionut.nechita@windriver.com/
+v1: https://lore.kernel.org/all/20260312081619.40854-1-ionut.nechita@windriver.com/
+
+Ionut Nechita (5):
+  libceph: don't back off exponentially on EADDRNOTAVAIL
+  ceph: make the ceph_mdsc_sync() waits killable
+  ceph: make the ceph_osdc_sync() wait killable
+  ceph: request a full mdsmap when an MDS stays unreachable
+  libceph: don't escalate monitor hunt backoff on EADDRNOTAVAIL
+
+ fs/ceph/mds_client.c            | 85 +++++++++++++++++++++++++++++----
+ fs/ceph/mds_client.h            |  4 +-
+ fs/ceph/super.c                 |  9 ++--
+ include/linux/ceph/messenger.h  |  7 +++
+ include/linux/ceph/osd_client.h |  2 +-
+ net/ceph/messenger.c            | 15 ++++--
+ net/ceph/mon_client.c           |  8 ++++
+ net/ceph/osd_client.c           |  9 +++-
+ 8 files changed, 119 insertions(+), 20 deletions(-)
+
+
+base-commit: 909ef7a9a30fa139e69e555e3606680f5cca7726
 -- 
 2.56.0
 
