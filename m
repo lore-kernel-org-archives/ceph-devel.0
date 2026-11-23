@@ -1,112 +1,123 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=67.231.153.242
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795410376;
-	b=JXPq7eDq08A3zqBcUjXTVnoCglYG3zUpRNn5vJObTcfr5+TjHwFpzj0CJ68nL5PZ3Wai
-	 hj+pcgQl3z4yupozYYj0JwZW/gTk4kY52G8E+Vi68WiyT05RTrY0jWu1kQhQUnQ7HK2wL
-	 JgsSobzhhk+Fjo57Wy4pQ9FzXdW00nT0Fnv3Gn9ubz8RaUMju4aq8Lun7ESofdulwX/8p
-	 +Knp2bGwk0XxfhXT9jJ/i1x3+pzCBNRO/aU99cYsQoRkyXMnO2KC4dE+jLPZKw9LLn8aJ
-	 cdPPGIMNaQ2o/sFegCIQUdp47L8DjB7uCOh0CWuDqUuGevAJOFmmOBCPL7a487c0bSQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795410376;
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=148.163.150.240
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1795410457;
+	b=e87W94aGaB0i2y+8w9FsRr2wl2/o5rQpH/6WdYmv9DxJKQiqalnTaNIHG54tX6dfGIFe
+	 zA555N4eX2wfjq+FJ2yoCyFdvydjtR8NaFF6lCTlTIj79jt+3BPXRTzax49qDzgZdF3wJ
+	 XuhXq3l2e27OGLgxEJlgLedoabeXeoMgrVzaPUjdb96yZ+wW9eFVGUfWkkoL1zyO0IB8+
+	 lAOLiyYJQVxdDvV+VSehqtQ6obvNEnbkFYUSe+NSRA/XpSZGD2liycaISNQgDUEvNU20o
+	 ySzt/a0bRtpOGPfEs4ABOzhbs8mgbP6U4ftyJi2hmQX9b4etF7MxoCnVZy7hv5ZfI2Q==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795410457;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
-	 DKIM-Signature:X-Google-DKIM-Signature:X-Gm-Message-State:X-Gm-Gg:
-	 X-Received:X-Received:Received:From:To:Cc:Subject:Date:Message-ID:
-	 X-Mailer:MIME-Version:Content-Transfer-Encoding:X-Authority-Analysis:
-	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:X-Proofpoint-Spam-Info:
-	 X-Proofpoint-Spam-Details-Enc:X-Orig-IP:X-Proofpoint-Spam-Details;
-	bh=6J6EnRC3kLUDOIVWgNkPUrxRZlq6bOeFuE4yVWYWP1E=;
-	b=RMzYEnfyhb9pkEE48YFUpW4yWg4vjMlzY5op6vvKVYEGLy+ToIGlrHIhaRS8e+eLzgJW
-	 3CpV77GUXX+UEczFOFaJ81HmuVLWewBZkOM+qhr42Szr0hi6osUvKKPOSWEDMzj9jYfN6
-	 MJmsoTABy3mQ8m7NH4IxrB+E47HzqaF87GiZrBYSvG0xGhdR5LzR7ZgPy8aj6E3RZy08s
-	 7DbM/4XAod77ypQXlWyhydECYQPx1RCidN1ME+dpjAKUjL9wUASj8SUvEPFxlvPCAa30L
-	 D2tGkvgZs1g8rlzNEP64aPprBuQzdffR4Rr9B2ATkuVsGHocrYgVDKekHfgWmG86Bag==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	 DKIM-Signature:X-Google-DKIM-Signature:X-Forwarded-Encrypted:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:X-Received:MIME-Version:
+	 References:In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:
+	 Cc:Content-Type:Content-Transfer-Encoding:
+	 X-Proofpoint-Spam-Details-Enc:X-Proofpoint-ORIG-GUID:
+	 X-Proofpoint-Spam-Info:X-Authority-Analysis:X-Proofpoint-GUID:
+	 X-Orig-IP:X-Proofpoint-Spam-Details;
+	bh=/81pZypqQSSDxn9bb2q+RIkTbulWDFUKFacUC3zJgzU=;
+	b=c4E1jUb4ZlkwXELac0fnu+oM0aXolj0cuaaNgpBegHt7LsMuBNQk4Z3F4rHY1aSbH+cK
+	 iQ1OGJMJkl/C6/MlhdyInqWI/zqyoR9GontUGODbGnXcPMX867iiAoREgxBFQjf46FEk6
+	 OWYH4MXtxP7M7twFKNCkZcUAM2U2HIjRRxfgllGoEHZ/BBauUV0/mxvJ6YwhzYA6pl/0f
+	 Z/be155r4CZB4WofrbY7uQG0CM0E5LXuiJFJZqnnoAXVs4ryYXbSW3+SP5ztlNZr5mYCs
+	 Jpt0QTHf1tV7jg6kKJxBRRzLU8Qez5teBOCPoyZyiJ/GjxwsUHcbFxwvVuC+6S6v3rA==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=nyu.edu;
 	spf=pass smtp.mailfrom=nyu.edu;
-	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=j4ioHfd7;
-	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=b0wWkhLv;
-	arc=none smtp.remote-ip=67.231.153.242
-Received: from mx0b-00256a01.pphosted.com (mx0b-00256a01.pphosted.com [67.231.153.242])
+	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=SKecWwbz;
+	dkim=pass header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=tjp0B9dp;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=148.163.150.240
+Received: from mx0b-00256a01.pphosted.com (mx0a-00256a01.pphosted.com [148.163.150.240])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0B67606A320
-	for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2026 05:06:15 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B0B67606A320
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA330606A320
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2026 05:07:36 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AA330606A320
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nyu.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nyu.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=j4ioHfd7;
-	dkim=pass (2048-bit key, unprotected) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=b0wWkhLv
-Received: from pps.filterd (m0355791.ppops.net [127.0.0.1])
-	by mx0b-00256a01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AMMFxpi1879221
-	for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2026 00:06:08 -0500
+	dkim=pass (2048-bit key) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=20180315 header.b=SKecWwbz;
+	dkim=pass (2048-bit key) header.d=nyu.edu header.i=@nyu.edu header.a=rsa-sha256 header.s=nyu-googleapps1 header.b=tjp0B9dp
+Received: from pps.filterd (m0142701.ppops.net [127.0.0.1])
+	by mx0b-00256a01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6AN041a02372397
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2026 00:07:30 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nyu.edu; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=20180315; bh=6J6EnRC3kLUDOIVWgNkPUrxRZlq6bOeFuE4y
-	VWYWP1E=; b=j4ioHfd7Wn7gbVnK/Pq56qlz0lFtnb52j4gYIfH2WBZ/alO6ByvB
-	V3HPxL93cUgtXTKRSWeG/aOfHQf4kAWeRzMV8HCZXVzWeOAb0MvjnitIb0jCJDLE
-	+k5lU/DGkdaAarXnsEfPeiAcuW9KxKDiFQqLAChZ5+O/ufcerhGIeGX3I7OzMV03
-	l7Qav+r3ACXZKYi6r2axjPA3ftd5AOtpQZgfYcHYj1zEBtyvEckPdRYUFfYkrrMk
-	vxbAloKl2eX7B9Xptb1PCIM+olPSHYWcwRkEv9fiq+hRYKX4LOtp7/ihv24O3SV5
-	uRcbPuG9SnJfz0hCeL8q++fT4wOrIVlu3Q==
-Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com [209.85.219.70])
-	by mx0b-00256a01.pphosted.com (PPS) with ESMTPS id 4j491pk7mq-1
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=20180315; bh=/
+	81pZypqQSSDxn9bb2q+RIkTbulWDFUKFacUC3zJgzU=; b=SKecWwbzU2u9GAUzJ
+	mrZL/kgVq6L2kvuwaF/YIfl+qgqmmDSt2sOblwR7tFCY6lTY3GflTsPF4J82l9S8
+	/p2yQpxxeQeNG5+8UBqhhJtFdZON/7pPmq1hREBksdQPPU1XE16EcfELFmQVK4/k
+	jUfHdceuuZXG/jzPGDDu3UeSJC/fMMqly7KA+mq4UdFy15bpBYRSTNt+4bgoGFDQ
+	zOhDZCJBP7L9wwHWqG/Bqb8J046E5o7q8j0TlQB5JThmdcPeXBoFw6EUZXUtzBv7
+	mR7gwOyl30KUO1K28KRK7E27EaHm4u0PngI/D1Rxc3zkaqVmP7m32oah8JmgFzbs
+	RZxvg==
+Received: from mail-dy1-f199.google.com (mail-dy1-f199.google.com [74.125.82.199])
+	by mx0b-00256a01.pphosted.com (PPS) with ESMTPS id 4j4amb1xh0-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2026 00:06:08 -0500 (EST)
-Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-9213659143bso58545226d6.0
-        for <ceph-devel@vger.kernel.org>; Sun, 22 Nov 2026 21:06:08 -0800 (PST)
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Nov 2026 00:07:30 -0500 (EST)
+Received: by mail-dy1-f199.google.com with SMTP id 5a478bee46e88-386ad819860so1880943eec.0
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Nov 2026 21:07:30 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1795410449; cv=none;
+        d=google.com; s=arc-20260327;
+        b=RUtwteZAC+AVsaH4SLVQO85o7ZvJDfNNqqQ/geB2FqFNX0YHTN5wG5RbLXoVq3s+ME
+         efUDiTzDjDMosAT/0o+dXw7/LSffhXVXi8O5bbAATD6i68hgXFjVEvyFX1BaMgQkREhY
+         Lq8I6u53R3ovj+PlfQxTL3SuwP2R4xcZL7NfSBWW/avdF7mGbCqOE6a2xy211t/Ot6Gz
+         b/8ltyeV8d+XfYjfD0JwrBtBeaCBugT7dbrUPCWIBT5BF4MOjPa9JdPr9hjQmwz9SazZ
+         53Q77BsahdOD97F4ekTcH8LbrgVSHiVyZxTCYhli2k+JHIHbb7d16YA8WWc9jxnwAQbl
+         OCxw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=/81pZypqQSSDxn9bb2q+RIkTbulWDFUKFacUC3zJgzU=;
+        fh=8zenanObMaztJMAQrrr/yjuND9v/VLIlkkF+oYkSxgU=;
+        b=FV4+X2te7qRN7aDjBUjjUwI1D/j661wgkSdSLoyRn/Kj1l43TLfMkitytdy9BtGx0Y
+         lIanka2m8BhY8YS+aJCgAjKrUc8eNbTjaabxYva50Ux8ghJaZyFbQN30G+gT6UVuhft2
+         8skNIDGheujHuZextosqqThKwprqEDyyFNkQjwf2RQNb5KzS2GwWoR8M9MtuEQJQkecq
+         ck7WTpiDs8Cu/+DBfa1oUpuny6i6e5uEuhZca+IGEUQzRx+Nx9C5g+J5Kmea3PrUh1l+
+         rs/vp7E+A0FZTtiCwA+0nba3AH5OeY4Ezr8/GQUHMcSl+4qMAqvtMxs6ABTBwR8j4MBi
+         AwiA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=nyu.edu; s=nyu-googleapps1; t=1795410368; x=1796015168; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=6J6EnRC3kLUDOIVWgNkPUrxRZlq6bOeFuE4yVWYWP1E=;
-        b=b0wWkhLvjaaFrYXP4w19XyWiVp9uBdQ8sgEHr6ywIImiu2D6H6qPTmcaFKOHuHix//
-         g9u8PEkn4IkAGPPJkNyGv0P1sNc9bxMWgiBMzSYklAEIQKopOf52BB52QT+yWNe0vpDW
-         +16LP9AvyjiAzFABYIT6KMkiNelgi/ZJpqHut4TQg9N9o16/QE6kjExYxpfIwzpz9mzR
-         53odBcyTc/TQVd7TA+e+8p7bUB5smHfOj3YlK0jY4h+cXO5vygnociKKn7f2+khLne/P
-         Uv+Jdras+tKKIOa29416DievaKI619Xuv4KtVdSA7qyWptUanMScxeWh5S98buCbS1lD
-         zRKg==
+        d=nyu.edu; s=nyu-googleapps1; t=1795410449; x=1796015249; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=/81pZypqQSSDxn9bb2q+RIkTbulWDFUKFacUC3zJgzU=;
+        b=tjp0B9dpUTtHvZKITdtIzMLBR9uWyBxF5CO7WT456ajRggZ+ouCiU+WUTOp4MPjit7
+         Tfwv8gC8k9mf5IaIs2Nfyt/xc9S0zFOpCdkU97pMmpoe+PzOtgqsQ/lRn+F0u4Z5ij2v
+         FDFaNXJR4/vigltQVf82L+OCqIsnh26t4TVrnxzpqlkNzrMqMSXbm76tRvW7sQVmi2YB
+         D2oLamng2ZPNMsN5AkcsJAfpNrZE32FQ4ZKaPM8baj3rU2AHghyLbFzoD1a0C7MXCdpO
+         Ql0tCtDMSJxXAtcSvnFZogHxSxj5FBbE5nUCDUy/0ORxXAnCFQuPYstSX2YY4O3dXoD/
+         c1Gg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795410368; x=1796015168;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=6J6EnRC3kLUDOIVWgNkPUrxRZlq6bOeFuE4yVWYWP1E=;
-        b=ixqvrBXi/w6ENUbA/ZDVFKKfBLaYWjLtSE/bd0gg+pRNwrAlL/4fDEcBqNZuBuOACo
-         jRlvndh3buEitrYpcT4ViJi0g01DGjJYpqEFxF49Bv8r+AaREUZm+M64iTYEjxXkJ1+t
-         xD9vA+ZmfoHXiksglHFXorlMKjPjDFIoJJrXBg4nF3H4nc2tRsbiwp0t5cpkaZzdrvj2
-         C1r5HtPEpHM30VxV0tXUaCVeziBUp1bzwkSiOr3URKhaUPGshOeunvV9hvfahmr7PWYG
-         0puGuJ7NM5l3hcdFmFBoOZgn9ZG2zqGdZYGSEfWB14q5AZi4BlBp6KsDwrJGBkFx2Gyz
-         WL8A==
-X-Gm-Message-State: APuU4Z/I4suTqKJyODX8D7ygrfJYm7qS8+n1bEESx3k2b2aujQUEdp3i
-	4TdmpFsGTJHwmd6WoNQiQbJXOB/JJ4hIi5xKNKvD56QzguxaEEwEeK3PN0cbu+pFvhQXOx5APY1
-	1gTSyEpaH9z1j/Wd8xjE6quMSk7eRc3QIpLJu19Z3095nOM3vMgJmfTtK42QC
-X-Gm-Gg: AZFdTZfjOhlD0FgO70LXW+Z3BmUqNZUPjeo7cy4BF6kXQjQwYPWqLrF+2icMhcYVb5P
-	R11AmnQkBmpVms0CibIvQHLglWzrLSzBmRDDfEhgdCPK2bJIS8pPMOUQe/h1D8KVIAl0HkbYs3n
-	wAjxWb504Xx2t4RGUTJUo7dvR/7YLvVSAXb8RUkU3YX6iZ+xKlajSMMR+Zpt72rBAxPI0apWjlo
-	YG12p0V6DMc3PQHVdiduIbtKa6l3NN3rkz/k+cjClaMr9G0ef6rbXcRf1HFU4tI6SPdx5+ZblsA
-	bPW+z+7FTsgb4cMbfpmLf/50P7998EBJ89TvdFmQC1RO+SyH72DBEbx7K8dxK3Rb4o4ZyAXuk4w
-	gF/KkNcmoc6JoMQm26/3acmQYl2lnpyvfQWR2Y+gi8rKlUdk29M60xM4Re1EfsZjksxuLM7QntW
-	BSS9nS59V9Lg==
-X-Received: by 2002:a05:6214:8613:b0:921:2840:dc7 with SMTP id 6a1803df08f44-92134a5d430mr180874066d6.26.1795410368124;
-        Sun, 22 Nov 2026 21:06:08 -0800 (PST)
-X-Received: by 2002:a05:6214:8613:b0:921:2840:dc7 with SMTP id 6a1803df08f44-92134a5d430mr180873896d6.26.1795410367672;
-        Sun, 22 Nov 2026 21:06:07 -0800 (PST)
-Received: from jerrythepro.nyu.edu (216-165-95-169.natpool.nyu.edu. [216.165.95.169])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-92134a1d948sm95191616d6.40.2026.11.22.21.06.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 22 Nov 2026 21:06:07 -0800 (PST)
-From: Kaho Jiang <kj2864@nyu.edu>
-To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>,
-        Xiubo Li <xiubo.li@clyso.com>, Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        stable@vger.kernel.org, co+408fcc361565713f@bugs.sh,
-        Kaho Jiang <kj2864@nyu.edu>
-Subject: [PATCH v3] ceph: Use unsigned types for snapshot split counts
-Date: Mon, 23 Nov 2026 00:04:41 -0500
-Message-ID: <20261123050440.223436-2-kj2864@nyu.edu>
-X-Mailer: git-send-email 2.43.0
+        d=1e100.net; s=20260707; t=1795410449; x=1796015249;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=/81pZypqQSSDxn9bb2q+RIkTbulWDFUKFacUC3zJgzU=;
+        b=CAsoELbiKM+RVm9cMj5cffbGfcF0HCh/6f1lrgGhJ8rzJ5AxISz5F//E77Yh9MSv6L
+         aT3L0bCDCfgWHZQFTq7hbLPYCIouR7imj6W1lqNn+/Hz0UP28Pk6n9DZ+oPEifb3CRHI
+         BTeSN6nT2klJRAl+sLN8EX6wrB3mwOJamjj1LfQhpcLRwp/z74YFDM5QrG637yjO7jaJ
+         2Jr31umqnMHnHbNbr3BxvdP+Yr2NGLyO6ep1VQ2y17Aim9ltlTsRRQp8naSussV4AcyO
+         nu/ZvpT3WT93s9Jo8Z/Cf5MxfFrVVm2OIFQxoeF7gTnxSZClT9AUjH7rVtZqlySW+FbS
+         vzyQ==
+X-Forwarded-Encrypted: i=1; AL+hErFg4xyiuIID0lJyZY4aQZC+co3lCg092iPNRNnmuGcCQPzAX1XCM/Wca+TfBzLdvhinaWBC/KtCmpQp@vger.kernel.org
+X-Gm-Message-State: APuU4Z8O7nVqq5x0jAY6Hk0R0I5ZmSjIFSDeSbZFvrHm0IKa6An7zLIG
+	3DhH3oRvsNKPaGfqEp5XozyvqySxyEyIH8BkMdnmwTlZnNZNjVl/KmrAvdrFAOfWYm/nl9vvkAO
+	B2bK0SMAcyzh0Izkz+DgZ3if1W2fNgc/14lzNZypIdBFp68yDD8+ew+LCa++Pq3wZg+HFr/ii3f
+	KZGQSBntIQB0MWPUqBXuuRntV8Bo8DtgBzvVE=
+X-Gm-Gg: AZFdTZcLPYo/bAeQ8IOGxhmsMFPcIfBQTk3ydf5P61WmCMquMGXwFK/LO2zPaATUEnn
+	LR5beRP4w2/Ss+wOzXdsV3526YiIyii5jpyeFowbIWMsrSPFVSCnqJaw3H3RU6riPbobBO1BuZg
+	2zilHc43wCwi0wIyUrB7vD0hr2IZiGSWcFdUfwL5TDL+6uOfT5rlQ27KKNsA==
+X-Received: by 2002:a05:7301:df48:b0:386:a5d0:15d9 with SMTP id 5a478bee46e88-386a5d018c8mr4769336eec.37.1795410449605;
+        Sun, 22 Nov 2026 21:07:29 -0800 (PST)
+X-Received: by 2002:a05:7301:df48:b0:386:a5d0:15d9 with SMTP id
+ 5a478bee46e88-386a5d018c8mr4769315eec.37.1795410449104; Sun, 22 Nov 2026
+ 21:07:29 -0800 (PST)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -116,150 +127,69 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Authority-Analysis: v=2.4 cv=CJO/zhrD c=1 sm=1 tr=0 ts=6b03c9c0 cx=c_pps
- a=oc9J++0uMp73DTRD5QyR2A==:117 a=TGEpv/rl2ONqXpz49YwF+Q==:17
- a=zJRp6_cAMcgA:10 a=x7bEGLp0ZPQA:10 a=S0S_EcBMpFAA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=Se5WoFf3ZZRiLcel0nel:22 a=R6YzIN_bpWbBo3jmtC1i:22
- a=VwQbUJbxAAAA:8 a=rCkX3SQkd4zC8Pg9OjUA:9 a=iYH6xdkBrDN1Jqds4HTS:22
-X-Proofpoint-ORIG-GUID: hibcbwZUPuZ2Akzd-BNysNQ9lhbhPl3C
-X-Proofpoint-GUID: hibcbwZUPuZ2Akzd-BNysNQ9lhbhPl3C
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTIzMDAxOSBTYWx0ZWRfXzEexds6Poeyn
- +2CR+7iaaHsPsPy6wJ/l5N7A9sOzMyLZo2jjZiaXRDmFFs10KyKIJVJp31lkePWA4EVAfdxVa9d
- gRqIeTxqGcqnd+jSTRlDHRqsYZJ39rY=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTIzMDAxOSBTYWx0ZWRfX+SSetlkv4fiv
- gBdziktuOwbSfwRnRvmE9lPK9J3WZI2ai+J9o90oARVQEAfXeRSEPfJT2n89goPK2u33sTO7i0M
- Rxr2SwX7LK9YO8W14WgX4HHPPbUIuwuJsGPzUKymL+iQHb03LitCMqaMdZg1s/YVoEz3kjdGsLa
- P3UKPRcntKQHA0SbEP1hcj2RBrksGPnNv327tol5/K4ycuMYVT35lExE+pRzf9l5ur8B60PIRZT
- 0+DyLUG9KZY/UoqlhOn5oIV//doTrlSRYETzbx/24Ilxhjy6H4Ke6nuqekaN4WrBVlHmNnsO2lt
- eotZED+vAM8BPlt54jbwPt7o2MuIyV4qTjZ8s2m7gHsROD3uqWifUv5ZMb9/g6jnOp3t1Fp10i5
- QkrQLmQySznNmlWP2n+W/IDn2icw/Ks8VkVgGAn6RSAm4AesmPu/bmPsJCS7ps35C9zVypNXjio
- +j5tZxK0H2WNWF+o20w==
-X-Orig-IP: 209.85.219.70
+References: <20261113030257.1061200-2-kj2864@nyu.edu> <20261122181622.1294305-1-amarkuze@redhat.com>
+In-Reply-To: <20261122181622.1294305-1-amarkuze@redhat.com>
+From: Jerry Jiang <kj2864@nyu.edu>
+Date: Mon, 23 Nov 2026 00:07:18 -0500
+X-Gm-Features: Aa3M54rDQBOKRDXbJgbB5JJzrGqttkv3os_tIAGF8WXn09halqO4jreeG9nkw0Q
+Message-ID: <CAPqbLS1vgOhyXT8zLiDmf_1W3zVq3cgAcvu0AbmKCSUCstpqaA@mail.gmail.com>
+Subject: Re: [PATCH v2] ceph: Use unsigned types for snapshot split counts
+To: Alex Markuze <amarkuze@redhat.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Viacheslav Dubeyko <slava@dubeyko.com>,
+        Xiubo Li <xiubli@kernel.org>, ceph-devel@vger.kernel.org,
+        linux-kernel@vger.kernel.org, co+408fcc361565713f@bugs.sh,
+        stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTIzMDAxOSBTYWx0ZWRfX6i2TGmzkD4Wg
+ txf3vp+hzUpuO0bPfyg5uiyQAqwLq2hHKnkW9anrMXrI7CeJqxu1oet+haKaie8nGIFQ4ZTUkm/
+ OfV5Za84Ho/+ypxvHXmkx1+CUSFvgzRN1wIVBfd0fwyv/uRx+iNXEZtTwc6mhOX9maESxln8W8K
+ PuaKI7NfDggBm1S03y088VjPZRZoHkeW5REwJqO0Scm3++jesu52AT2Kiv8WokPGu1lZg+Tv8Vt
+ X1FxikMDOa1FrO68JUT/rCTAk+84anOaQj2NvrCHFk9loQKUlBy6vXvemlcTjuJfEqphxAYWVza
+ SSXeKeKfgh5n5MfZQVUia05XYIT/wBulym7NWeiqnBTXetPIBDszZoWIAXxq07s5ovv85qZc2pI
+ NL2ycBfOOW9EzZjgo4orcpzdHyYVbBaBes4gvosYSPzoGSuIqnZWxAS54kHNIw/1XhTPqexq4SJ
+ 7m8QK0YHji/aUOaVmTA==
+X-Proofpoint-ORIG-GUID: -XzT8SUT0nofieDhgu5RZOKzevpMwPcT
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTIzMDAxOSBTYWx0ZWRfX3nXY4ZzSOzLS
+ iGkYA67zkAXN5bpBRXQBalRmPbRIgLa//3wqSArsqcLwPoFvC4Ts/NN23C3wtRTAmXNynHjCDcg
+ TonSL7hEeoo8pT1d71L+CCNzipKGOQs=
+X-Authority-Analysis: v=2.4 cv=L9aI0OT8 c=1 sm=1 tr=0 ts=6b03ca12 cx=c_pps
+ a=cFYjgdjTJScbgFmBucgdfQ==:117 a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10
+ a=x7bEGLp0ZPQA:10 a=S0S_EcBMpFAA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=Se5WoFf3ZZRiLcel0nel:22 a=CxnIfPQeirmdGRAfp5MW:22 a=VwQbUJbxAAAA:8
+ a=20KFwNOVAAAA:8 a=ItuYklrUK8AZe7o1UmoA:9 a=QEXdDO2ut3YA:10 a=ZXulRonScM0A:10
+ a=scEy_gLbYbu1JhEsrz4S:22
+X-Proofpoint-GUID: -XzT8SUT0nofieDhgu5RZOKzevpMwPcT
+X-Orig-IP: 74.125.82.199
 X-Proofpoint-Spam-Details: rule=outbound_bp_notspam policy=outbound_bp score=0
- clxscore=1015 malwarescore=0 lowpriorityscore=0 priorityscore=1501
- suspectscore=0 phishscore=0 spamscore=0 bulkscore=0 adultscore=0
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2611040001
- definitions=main-2611230019
+ suspectscore=0 clxscore=1015 priorityscore=1501 bulkscore=0 malwarescore=0
+ adultscore=0 impostorscore=0 spamscore=0 lowpriorityscore=0 phishscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611230019
 
-ceph_handle_snap() stores the unsigned 32-bit split counts from the
-message header in signed integers. Values with the high bit set become
-negative and, on 64-bit systems, cause the subsequent pointer arithmetic
-to move backwards before the message buffer.
+Hi Alex,
 
-BUG: KASAN: slab-out-of-bounds in ceph_update_snap_trace (fs/ceph/snap.c:815)
-Read of size 8 at addr ffff888024f45478 by task kworker/1:3/2220
-CPU: 1 UID: 0 PID: 2220 Comm: kworker/1:3 Not tainted 7.4.0-rc2-g7475ea8b5861 #1 PREEMPT(full)
-Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
-Workqueue: ceph-msgr ceph_con_workfn
-Call Trace:
- <TASK>
- dump_stack_lvl (lib/dump_stack.c:94 lib/dump_stack.c:120)
- print_report (mm/kasan/report.c:378 mm/kasan/report.c:482)
- ceph_update_snap_trace (fs/ceph/snap.c:815)
- ceph_handle_snap (fs/ceph/snap.c:1057)
- __pfx_ceph_update_snap_trace (./include/linux/list.h:172)
- down_write (kernel/locking/rwsem.c:1350 kernel/locking/rwsem.c:1356 kernel/locking/rwsem.c:1632)
- __pfx_down_write (kernel/locking/rwsem.c:602)
- ceph_handle_snap (fs/ceph/snap.c:1158)
- mds_dispatch (fs/ceph/mds_client.c:7298)
- find_held_lock (kernel/locking/lockdep.c:5401)
- ceph_con_process_message (net/ceph/messenger.c:1413)
- ceph_con_process_message (net/ceph/messenger.c:1424)
- ceph_con_in_msg_alloc (net/ceph/messenger.c:2094)
- ceph_con_v1_try_read (net/ceph/messenger_v1.c:1434)
- ceph_con_workfn (net/ceph/messenger.c:1576)
- process_one_work (kernel/workqueue.c:3495)
- worker_thread (kernel/workqueue.c:3578 kernel/workqueue.c:3659)
- kthread (kernel/kthread.c:436)
- ret_from_fork (arch/x86/kernel/process.c:158)
- ret_from_fork_asm (arch/x86/entry/entry_64.S:245)
- </TASK>
-Kernel Offset: disabled
+I've made the changes you've requested, please let me know if any
+issues occur in my patch or anything further to fix.
 
-Use u32 for both counts and validate both split arrays against the
-remaining message buffer before advancing the decode pointer. Use
-size_mul() to detect multiplication overflow on 32-bit systems, and
-ceph_decode_skip_n() for checked skips in the non-split branch.
-Also fence I/O, blocklist the kclient and close the sessions on decode
-failure, so a malformed snap message can't leave the client writing
-with a stale snapshot context.
+v3 has been proposed:
+https://lore.kernel.org/all/20261123050440.223436-2-kj2864@nyu.edu/
 
-Fixes: 963b61eb041e ("ceph: snapshot management")
-Cc: stable@vger.kernel.org
-Reported-by: co+408fcc361565713f@bugs.sh
-Assisted-by: LLM
-Signed-off-by: Kaho Jiang <kj2864@nyu.edu>
----
- fs/ceph/snap.c | 21 ++++++++++++++++-----
- 1 file changed, 16 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index e03d89db61fe..45cd0275028d 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -1039,9 +1039,10 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 	void *p = msg->front.iov_base;
- 	void *e = p + msg->front.iov_len;
- 	struct ceph_mds_snap_head *h;
--	int num_split_inos, num_split_realms;
-+	u32 num_split_inos, num_split_realms;
- 	__le64 *split_inos = NULL, *split_realms = NULL;
- 	int i;
-+	int ret;
- 	int locked_rwsem = 0;
- 	bool close_sessions = false;
- 	struct ceph_journal_info __ji;
-@@ -1053,7 +1054,7 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 
- 	/* decode */
- 	if (msg->front.iov_len < sizeof(*h))
--		goto bad;
-+		goto fail;
- 	h = p;
- 	op = le32_to_cpu(h->op);
- 	split = le64_to_cpu(h->split);   /* non-zero if we are splitting an
-@@ -1079,10 +1080,12 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 		 * child.
- 		 */
- 		split_inos = p;
-+		ceph_decode_need(&p, e, size_mul(num_split_inos, sizeof(u64)), fail);
- 		p += sizeof(u64) * num_split_inos;
- 		split_realms = p;
-+		ceph_decode_need(&p, e, size_mul(num_split_realms, sizeof(u64)), fail);
- 		p += sizeof(u64) * num_split_realms;
--		ceph_decode_need(&p, e, sizeof(*ri), bad);
-+		ceph_decode_need(&p, e, sizeof(*ri), fail);
- 		/* we will peek at realm info here, but will _not_
- 		 * advance p, as the realm update will occur below in
- 		 * ceph_update_snap_trace. */
-@@ -1159,8 +1162,8 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 		 * positioned at the start of realm info, as expected by
- 		 * ceph_update_snap_trace().
- 		 */
--		p += sizeof(u64) * num_split_inos;
--		p += sizeof(u64) * num_split_realms;
-+		ceph_decode_skip_n(&p, e, size_mul(num_split_inos, sizeof(u64)), fail);
-+		ceph_decode_skip_n(&p, e, size_mul(num_split_realms, sizeof(u64)), fail);
- 	}
- 
- 	/*
-@@ -1187,6 +1190,14 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
- 	ceph_blog_exit(&__ji);
- 	return;
- 
-+fail:
-+	WRITE_ONCE(mdsc->fsc->mount_state, CEPH_MOUNT_FENCE_IO);
-+	ret = ceph_monc_blocklist_add(&cl->monc, &cl->msgr.inst.addr);
-+	if (ret)
-+		pr_err_client(cl, "failed to blocklist %s: %d\n",
-+			      ceph_pr_addr(&cl->msgr.inst.addr), ret);
-+
-+	close_sessions = true;
- bad:
- 	pr_err_client(cl, "corrupt snap message from mds%d\n", mds);
- 	ceph_msg_dump(msg);
--- 
-2.43.0
 
+On Sun, Nov 22, 2026 at 1:16=E2=80=AFPM Alex Markuze <amarkuze@redhat.com> =
+wrote:
+>
+> Hi Kaho,
+>
+> The new array-length checks return through ceph_handle_snap()'s bad
+> label, which drops the message without fencing I/O. If the MDS sends a
+> malformed snapshot update, the client can miss it and continue writing
+> with an out-of-date snapshot context, risking snapshot contents.
+>
+> Please fence I/O on these failures and use the same blocklisting and
+> session-close handling as for a corrupt snap trace.
+>
+> Thanks,
+> Alex
+>
