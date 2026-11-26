@@ -1,99 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.44
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795675575;
-	b=xbtUBmnNs0k1JYT7HnMmbOdgCVz9+reAjPgnBBFvEBfDu0sKsswbC1HbDFDxSGRXuiel
-	 YJn2S8H0Qgb0KAxvo2zVRIn1phoPDpBtXVYtBNlHxnWgZk2BuT3DQLkK2VvlCPXGO1MG9
-	 Qj0JtCHojdnJge7zurk6ibcdt84zuZB8AUpJm/Qqa07BCPy1OEJ129yewgixN/KBtNg7f
-	 mnn30E31RyoY7su6DWUwUC4ea7qzA6kddRT2+tmrrhkJpfmwhDcgutuAnq5LyFkWLk2O9
-	 AI7m0a64cUa9UvSikVwvY57H1BQPWFPP9ROkPVSJuPe4EgFy9YLR+4VJ1ltAeZX6kVw==
+	t=1795675845;
+	b=iXW4J5CPzYw/avgtLPaHDybDmc9JyKAHS0jPTUG2TtGwKyEU0V72YeXqZFxkvaLLEzM4
+	 9W1ht7+Edshje6psijTIGlBJfYObXWgB0jxOTmQfPnRg+mJSgGs0FYUUQesWLYxiNVpjO
+	 MVxORjdux0wZC3oMNSE3B7F9mVyNb82wQL3A9PGR+EszvkWsypXAL/oWYy/qOrgw3LPOW
+	 Y5BniW46pbXlAo3C0HXIbQ5AleFFbykAz54ZKbgiZqxSGdVMQi6EtOFl+kePFHzuhdjy/
+	 R2Zc43dRp2K+OF1rT01BE/MNXfqaMGzznCbvieJh910uTmzVOm4DzBka0UY9h/Cp5Dg==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795675575;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
-	 MIME-Version:References:In-Reply-To:From:Date:X-Gm-Features:
-	 Message-ID:Subject:To:Cc:Content-Type;
-	bh=iEdrgxs/YidBZzZOj+WIohy33aH+C5/pNi1p+tZ06Dk=;
-	b=FdTslNJMQKyPveBHDQVueld0iymqWGoEh//iCH9ZSusRWTEvaRV+HhM/A0MsMFsghhAT
-	 XYGf3Suu2b6g57Qds8nV/xXoPd/dVIh9KQKlksYIKlsrHUrpbZdUnAqn3yyW+lCdL4xwd
-	 oOcf3qov3bbl1e0gAWW+il+5+Uk0TnQY8oQ7QVeZhcq3ZgTvQFM9defQzo5VJbZK/sfXX
-	 f00SKumMXd1uLYHwrIjC/0Nzy2WcHSYMG3G1JWLCExiWXjlh6LcyTpr42tijukW+U6bkr
-	 lSYjhunQb2NaeUdptR1YUBMRrmtyRQXDI54cj18ShZz70S8KpLfQrHTJlOqNDUE30/Q==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795675845;
+	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
+	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
+	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
+	 X-Endpoint-Received:X-Original-From:Reply-To;
+	bh=GITWCZpfGAPgLC68CTN58WtoEbo20uJh8ldAc2YtjQY=;
+	b=xwMNeBgdyWvoDl1BYq/Ps44Ya5lnYyhdpkw1P8UHHBCn+X+z7/ZB8u1limABT3ALkCfh
+	 vWRhSvjitaLTtzDZfDAfdHteNecwvAo+t91mQmqluNNp/3kvKJ1LipJealsrF0ojF5ppE
+	 oZCGE7jEzf7m+bF6EsyF4LnLkvd3Vkh8sRy+B7DpRblw4jOzYrVTcMSLxGAlBxu+Zd5W6
+	 uZu0kRkenFnMA9czBuklySaRuoB/RXdHiPwxMi/rTJKnW+JS5UG4XKowPS83yxFNRL20F
+	 Y1PAyIKzD/T3nQk+SR4yRoeVUR/XhtwM0QOIbRN6MAt02Qn0SFyQPg8aC1/o7h7cECw==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=clyso.com;
-	spf=pass smtp.mailfrom=clyso.com;
-	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b="MBOwL/Pe";
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.44
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com [209.85.218.44])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Q8oF1Igf;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B6AA606A31C;
+	Thu, 26 Nov 2026 06:50:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=Q8oF1Igf
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1795675845;
+	b=bcEsJjvpRtUtGFTf8jr7MMUjRsmQ0t0cV8tCfCNFGhrMGGTKtx/FpTxlgODhvElRKo1+
+	 KarAwlfW2K8MAkCOp+zuk9GBUcGGxGIbWyOvERJ01OEGPmH0/dpn50vNM9km6z4ZxFbc2
+	 2ZaVAnixnbvjK4LKtKHfKkpghSYQK4WHAMYttDom9wHZwGPCZw8td+YylOg/zsygnBEx4
+	 hmqS8qdhL0JB1JESZdpLGPzW8sWyJQM0eenbRY86ty5IIC2Rne7Ukzk/CsvqJaPDieuD0
+	 w6EzF2sJZfXpmjUrBeoNc9P/HgMvzIqHuwVRd6+7gVbYReisxUM2QZ2q8N4GqVmdJSw==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1795675845;
+	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
+	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To;
+	bh=GITWCZpfGAPgLC68CTN58WtoEbo20uJh8ldAc2YtjQY=;
+	b=qXVH+Nigzm9PL/ywd5zbhpZlRxiMugcbs2x5V/PGzK3ZkHolgnGeB2VLFkL0EP1JKOtC
+	 A8UYs/3eTwgzIaBt84g7sK/V6SYYAZtREjWnaVdvPXdL3Yt0YfvMXF2zcjt0AvstvNjB3
+	 a0DknN1NF/UjjAqQ08bBXwrvFAGjz+tvuPrAmBLJpVCK2O4zxODJ9UvRiKvjiK2ZOqNfr
+	 3TDelHti9QcHTAgs/smESjJFZNZheW/5hUyIYpWNrinf+R90bhNG4HdV8yC2GX0i+rDFL
+	 kMWsdD6xCcBUocDMSQTNfmyMTQ2oFJ6GkQT0NvI9fLcLaqAWCZ3v6ovPSDUazllFLwA==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AC0C606A321
-	for <ceph-devel@vger.kernel.org>; Thu, 26 Nov 2026 06:46:09 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8AC0C606A321
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=MBOwL/Pe
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-c516a574bffso137414366b.3
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Nov 2026 22:46:09 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1795675568; cv=none;
-        d=google.com; s=arc-20260327;
-        b=mPz5uzMMWHM1KtsX2waLZYLNwIS47WapiPdC3hfh54LQgSIl9kkda/06bVXzeXEvVP
-         7gujSqJuEG1LKr6IY1QBu+kHtbKVj1cFavRM+PwfNpBTL9ywH3ThLXyqjoc8ZL0DQqBZ
-         DggaxMyIXUCRZa2NRvwoN8rriBUcU1avj8YX2Bu9uO4cuh4+MapdOyGtDR6SaycooFur
-         xQ9L09nmqJ4mjDqSH05u6hkmm92OljdySOj/DKk57K+dC7SQ7m/Gb0lo3M2P2tGgqk6M
-         iKrcdtvd+IXoQPiDyA14YGLuSIsbOnhfG6QPUUwbA7seK++lq80RVhGvv8f88JSGe1eT
-         Ddgg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=iEdrgxs/YidBZzZOj+WIohy33aH+C5/pNi1p+tZ06Dk=;
-        fh=PU5a9S05lBDNFlMn3iPMXQssMrhsNWnOsWF2DQJIn3M=;
-        b=K9bkCIddFcK1O9jc9qfKDXnGVIRDdOIOFdjr3oBdwJaIxk1CUI2S4Kb6jsU0lYtvQq
-         Pg0xDOhWwqIUzmTlMKYhLXC7OJMXNCeu19QFiaqXENL1tA4yPPOFvIzwsbJ0HYLALdp2
-         igumve0X1j7HRloxUzldiWC0hfAcwaBoA0sG0Se0t+r+7RhYWthmi01xy8rEZp/nVARQ
-         VmUVULUXgPy2Sd+AsjidMdKymv7GGlcUi63MYwIFVIxbLfi6siXjjz+7U5VqWrpjYX3e
-         chP2hPzdw+aIJzDDYRbi4yqd+GtQeOQXLWZEYccblni7W8Q7bO5ryOzqAxgSMgEVs2af
-         ZGsg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1795675568; x=1796280368; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=iEdrgxs/YidBZzZOj+WIohy33aH+C5/pNi1p+tZ06Dk=;
-        b=MBOwL/PeCNHQ7FOu/L9RROUabJft0BnoDu395QAGcFsOvj4kjrYXJxGfwd8q20f2Gy
-         B4GMY0d74+o9zd0SqXig8YVHtqG2hEqPwQeVKolPrzB1UF9omYWhowNS/Z3S98J05sGS
-         weQw7NxLczGTe1kxPLNGBsPAmmohuXAmsPv6G4Cy8sZa6q6hICOeVGQL6writsH3EFOe
-         4zERMOBZilDaQnmL0c0dD9QJBBbsr6EXOd0U1wc3MyxIMh1NYDxUADF0c0NmN/tdeMo+
-         0mIZYfiYiGlT9VKxaukoeYHFJ0zUzoMeh4VTd2W/vNVa7ftsXMmz4AhSj6l+AxLpbXWh
-         ZnOw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795675568; x=1796280368;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=iEdrgxs/YidBZzZOj+WIohy33aH+C5/pNi1p+tZ06Dk=;
-        b=VOJYuEJM0n3yNySHrauq8TTmYWjFvdgSqRr8ALrXHLA+cJlQak0HZVKNLuCbomAZc4
-         /U0zEyOoyzNvtWEHxwjDxx/QfBkIqHKDKuK8B8VwWfqzpD7j5I+hG4CpZgDbRrWcXmVw
-         ded65WIDakExZa66K/5lOZPt788uKsFTHo98xRxPjCUP0aJUhGVqJzIhcdyP1ybCpuoG
-         xnnUHmGH8YaoQW9ZDQ07YVamIgGR34Mr57ZJjklM4bITZjGuP/5/qm3dCba2rjNugmEc
-         oTCfpRMbWocTvjXwCcjQ2XlKE288641VsnWWXb6y6uNcE5DMlF4iBDKwpATBJCRKPWxa
-         S7VQ==
-X-Forwarded-Encrypted: i=1; AL+hErHnOmjG1qnE5y1Y70hP8GTeqD/TAuuqEutEWkAbYGGDiAp1B+mAceCB4vFWqq6fOij17oRXKN5vqoEs@vger.kernel.org
-X-Gm-Message-State: APuU4Z+ckdGwFb2zUoHTS+nHpD3SftfXvcxnLQvAnxXt+ScClFe1xqux
-	+90mT6oLY7DpL7VqeLQPR49F8sp7Fv8tvUHJUs/OkzacuOISR+ai1HHIn4za+GI+zlS/6w2p6jh
-	N2Nhk3XbdrvEV3Mas0Zus7FflthigFj4kDo3aO96VSg==
-X-Gm-Gg: AZFdTZcOhL1+5vRcnwOaLgAngqjlmswYD2E7YKUbTEJYRXOrPOpVWKOoUfV05IhK7U8
-	9P8ig3ytOUBd+LheKq91apPvXhMWqvR7raAmt1ZKZtMYxoyPmWoG1s9qLiiTXs1zw8k6uGzhuHM
-	nYSbV44IVuADZtUVfjxJJlox2JwWwwn3A/08/OjcgsSWRDjnfRIUrf8rk1Lcq/+3Uj5N+pwzBRz
-	EF4rnGKR6yj5OBflvQULyCSdO8vvx2u6kAmgqJmM7vsuKLKJSFHO62kKNm9LGbxTQ5WrG6rTHYh
-	zJhQYg+YPoGLWALo9R5OB9ont1AkSv6666GEyrvgge+aqEVQMWtkGsVx8xPtpWxDxpZ6R4aImii
-	NM0r1e7K6JOrJOLoFtZSkAbHlE5eTNBBA+ErW0FbuHgEHIA==
-X-Received: by 2002:a17:906:c1d3:b0:c2a:34fe:ea4d with SMTP id
- a640c23a62f3a-c513aafb433mr1233685566b.25.1795675567751; Wed, 25 Nov 2026
- 22:46:07 -0800 (PST)
+	by smtp.kernel.org (Postfix) with ESMTPS id A63FC1F000C6;
+	Thu, 26 Nov 2026 06:50:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795675845;
+	bh=GITWCZpfGAPgLC68CTN58WtoEbo20uJh8ldAc2YtjQY=;
+	h=From:Subject:Date:To:Cc:Reply-To;
+	b=Q8oF1IgfHdZORvXMyoGg7P3D6WATWVOo90wTmMudo7QC4tmRAJsie75jLHfK0zKtC
+	 1XnE13uE5vhxEzsCtpqNNDDJpaWQleAGSi3OJVDz0z9k8w2fibgv/1C+p7cTucRcIt
+	 toTlAqPXSGVNlL84kdmi85d2ngxy4zP5YW811cJSzghkdB8wsuV5ON1FpAmt2/hqGr
+	 ynydJGGJ4NCppZtN8OFwadhlMeBR4lm1Y4m47ZhjMA8cE+MsROwqtmAOYuIhYlkKCH
+	 nLf21AHlwNEBnC13hxUAbumGfJUI9+X19dYWH7m91XAlOKjfv0CT7R68zS3feDH+pG
+	 0k0LmjHJRYjQg==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id 33FAE4D2A0;
+	Thu, 26 Nov 2026 06:50:38 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Subject: [PATCH v2 0/2] ceph: serialize O_APPEND writes across clients
+Date: Thu, 26 Nov 2026 07:50:30 +0100
+Message-Id: <20261126-ceph-append-excl-v2-0-e8707d123d77@clyso.com>
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -103,50 +83,97 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261121-ceph-append-excl-v1-0-5870375edeb8@clyso.com> <20261122182549.1297448-1-amarkuze@redhat.com>
-In-Reply-To: <20261122182549.1297448-1-amarkuze@redhat.com>
-From: Xiubo Li <xiubo.li@clyso.com>
-Date: Thu, 26 Nov 2026 08:45:56 +0200
-X-Gm-Features: Aa3M54qS842e194_v0RfNFp9kMvv1asDtn4xiKKG2lxOtvBrpkvTvksVsDe3Yko
-Message-ID: <CAOJNxRKotmAGPhYjM8APGZq7Qzp=iSpoO_gM1qBnS1u9GEawDw@mail.gmail.com>
-Subject: Re: [PATCH 0/2] ceph: serialize O_APPEND writes across clients
-To: Alex Markuze <amarkuze@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, "Anthony D'Atri" <anthony.datri@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/32Nyw6CMBBFf4XM2jFtecYV/2FYwHSUGqRNiwRC+
+ HcL7l2e5NxzNwjsDQe4JRt4nk0wdoygLglQ345PRqMjgxKqkFJJJHY9ts7xqJEXGrDIiFOVatm
+ KDOLMeX6Y5Uzemx+HT/dimo7OYfQmTNav5+csD+9PfpYoMK9KkZY5a+6qmoY12CvZNzT7vn8BV
+ NjcF8IAAAA=
+X-Change-ID: 20261121-ceph-append-excl-64ce323d1a04
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Anthony D'Atri <anthony.datri@gmail.com>, Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1795675836; l=3273;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=yDlR2d1RaIN9FaFD/PWjCvrzAXlYIS3GqdUNfZSh0VY=;
+ b=20Yin0FM0HaY2A4M/cr7hLxyOBioqxrqW+iW5L5Pt/AhYMbq3I0Q5H76VGxMp2W8oAb6Hn9oK
+ ZB0g0sw2OrSAVl4cCCQijcv3lEUDNtnxxDH/b7rpze0hZ9/UpIMo4Hj
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
 
-Hi Alex,
+When two clients append to one file, the filelock is in MIX and both
+hold Fw, so each appends at the end of file it has cached and may
+overwrite what the other one appended.  Commit d2a8d446a09c ("ceph:
+revalidate ki_pos for O_APPEND writes after cap acquisition") does
+not cover this case: neither client waits for caps, and the other
+client's size only arrives after it flushed its caps.
 
-Good catch, thanks.  I reproduced it with two active MDSs, one of them
-hiding CEPHFS_FEATURE_APPEND_EXCL: once the directory was exported to
-it, the waiting append never got Fx and the writers hung.
+The MDS side [1] lets O_APPEND writers take turns on Fx, in request
+order, and sends the current size together with Fx.  It is enabled by
+the new CEPHFS_FEATURE_APPEND_EXCL feature bit; with an MDS that does
+not have it, the client behaves as before, also when the auth cap moves
+to such an MDS while an O_APPEND write waits for its turn.
 
-In v2 the waiter rechecks the auth session on every wakeup: if the
-auth cap is on an open session that does not have APPEND_EXCL,
-try_get_cap_refs() fails with -EOPNOTSUPP and ceph_write_iter()
-retries with the existing Fw-only path, and ceph_append_kick() stops
-asking that MDS for a turn.  With that the writes go on after the
-export, with the same behaviour as with an older MDS.
+Patch 1 fixes a reordering of the cap messages of an inode that this
+work exposed: a later cap update could overtake the flush carrying the
+new size, the MDS then finished its Fw gather early and gave Fx with
+the old size to the other client.
 
-Thanks,
-Xiubo
+Patch 2 is the O_APPEND change itself.
 
-On Sun, 22 Nov 2026 at 19:25, Alex Markuze <amarkuze@redhat.com> wrote:
->
-> Hi Xiubo,
->
-> The feature check happens once before ceph_get_append_caps(). If an
-> append starts waiting on an MDS that supports APPEND_EXCL and the auth
-> cap migrates to an MDS without that feature, ceph_append_kick() keeps
-> asking for Fx. With another writer active, the older MDS can stay in MIX
-> and grant Fw without Fx, so the append keeps waiting while holding
-> i_rwsem.
->
-> Could the waiter recheck the current auth session's features and fall
-> back to the existing Fw-only path once an open session is known not to
-> support APPEND_EXCL? That would preserve the existing older-MDS behavior
-> instead of leaving the write waiting after migration.
->
-> Thanks,
-> Alex
->
+Tested on a vstart cluster with [1], KASAN and lockdep enabled, two
+mounts (noshare, or ceph-fuse + kernel), 4 writers on each, without
+any file locking; a lost record means one append overwrote another:
+
+  +--------------------------------------+--------+------------------+
+  | case                                 | runs   | lost records     |
+  |                                      |        | base / patched   |
+  +--------------------------------------+--------+------------------+
+  | buffered, kernel + kernel            | 4      | ~3300-4000 / 0   |
+  | O_DIRECT, kernel + kernel            | 10     | ~4000 / 0        |
+  | buffered/O_DIRECT, ceph-fuse+kernel  | 6      | - / 0            |
+  | 2 active MDS, export every 3 s       | 4      | - / 0            |
+  | MDS failover during the writes       | 2      | - / 0            |
+  +--------------------------------------+--------+------------------+
+
+With an MDS without the feature the patched client loses records like
+the base one, and does not hang.  xfstests -g quick shows the same 8
+failures (ceph/006, fscrypt key tests) with and without the series.
+
+[1] https://github.com/ceph/ceph/pull/70279
+
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+Changes in v2:
+- Patch 2: fall back to the Fw-only path when the auth cap moves to an
+  MDS without CEPHFS_FEATURE_APPEND_EXCL while an O_APPEND write waits
+  for Fx; such an MDS may never send Fx, so the write hung (Alex Markuze).
+- Link to v1: https://patch.msgid.link/20261121-ceph-append-excl-v1-0-5870375edeb8@clyso.com
+
+---
+Xiubo Li (2):
+      ceph: send the cap messages of an inode in the order they were prepared
+      ceph: serialize O_APPEND writes across clients on Fx
+
+ fs/ceph/caps.c               | 246 +++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/file.c               |  38 +++++--
+ fs/ceph/inode.c              |   6 ++
+ fs/ceph/mds_client.h         |   4 +-
+ fs/ceph/super.h              |  17 +++
+ include/linux/ceph/ceph_fs.h |   1 +
+ 6 files changed, 304 insertions(+), 8 deletions(-)
+---
+base-commit: 6a9830a8f414d3830c584782568d0233be969d09
+change-id: 20261121-ceph-append-excl-64ce323d1a04
+
+Best regards,
+--  
+Xiubo Li <xiubo.li@clyso.com>
+
+
