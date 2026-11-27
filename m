@@ -1,155 +1,99 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.66.91
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.52
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795773706;
-	b=E2WpILOJ5Vxye36V0uuGyvODooBYy6HVs/dml+Kv2wu3pQjVZuuNl02Zc0b9sO07YcaF
-	 gPYnWBEtWNpD71csMpDo48kly3r80A0RjkT+vSu7cF8hnpCUvWpRKWWfy3A9FOkpbrJXu
-	 5QwTWwAbpiNWCLJ1qszOeH+8XARkfneE15Z1gIeEakZ4eskQkUTNSOFAs9KNT575mYp5u
-	 qa40sbOHAdF/JGiXY3YK9fEB44igXzRAbYwhm6CnvaoDdwAiWGQS3KbAytLJsgkYt9Lww
-	 upgZigCARXxnvaCHUiFNhdnYmITkzV3PGMGkIWqg3m+W8K2Xr/JuAwiteiDeaWHWzIg==
+	t=1795776732;
+	b=LICTPRCzvBHVtkv04TRKbws3qytEgq7hffIvCvbe1DC7GfBFdLoWnXhjU6VA1xfkICI6
+	 H9g7cXbJnOYge5C07/Ls7HnXC/ZolzeXWvpHpPxrMk373ht0l45DcGjLXO3dFZZAu7R8C
+	 gP3v4qre2HsgiCvZo8tbhDb05n6Wek0JCdcdmmkqctA7GQDT7zgnJHOp4Qva9ohF559SH
+	 O4I8dCFk73D5VDdFdaUB0xleRVM8eYhJvffdtFzZoSpEpu101gFFMwraC+1NKaT+3kQZJ
+	 4Doum2x+qzfj1kvouxjqlWBT75AbrMDNWr85f/SzigN0PiFT4iKFtSELbpIUdWoMicQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795773706;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:CC:Subject:
-	 Thread-Topic:Thread-Index:Date:Message-ID:References:In-Reply-To:
-	 Accept-Language:Content-Language:X-MS-Has-Attach:X-MS-TNEF-Correlator:
-	 x-ms-publictraffictype:x-ms-traffictypediagnostic:
-	 x-ms-office365-filtering-correlation-id:x-ms-exchange-senderadcheck:
-	 x-ms-exchange-antispam-relay:x-microsoft-antispam:
-	 x-microsoft-antispam-message-info:x-forefront-antispam-report:
-	 x-ms-exchange-antispam-messagedata-chunkcount:
-	 x-ms-exchange-antispam-messagedata-0:Content-Type:
-	 Content-Transfer-Encoding:MIME-Version:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-AuthAs:X-MS-Exchange-CrossTenant-AuthSource:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-originalarrivaltime:
-	 X-MS-Exchange-CrossTenant-fromentityheader:
-	 X-MS-Exchange-CrossTenant-id:X-MS-Exchange-CrossTenant-mailboxtype:
-	 X-MS-Exchange-CrossTenant-userprincipalname:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=jdzYN2wVg6q59ab3mgAOLx0cfCAgZb4+Gul2PsY5Yp0=;
-	b=TqxXgvmVVuPQzewpeiVcmXWYh5PdbIfPNjqcNB6PPJ3COq4+ONnddsB6/kNA/s4T8mYD
-	 c1io+MdWukljE1b/DeYw9yF37XvWSzd53lFXisq7ynaghOZJt4cUuq4qVf0poZfxoWlpF
-	 2Wp6W6XOMqExNOhVWc5kL7cfWdHnhxs1HNhtFkqU16qhv8IxPTE6gs0QPFyd6vnrcS+jC
-	 c42hTaYiqPWexdlAar7pfUXDLsMsaKy6nc1TdBBE8udLfEh4fcfwbzR0TtHLpoFODSJmf
-	 SK8/UE9d+l4j8/4CgCmweuo+vEM41PxOjQRxkVzUjhUEdfzdAFMU2n+naDmZkiCJR/Q==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795776732;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
+	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=kIuj8YOwz9TzNr2XbCgli685swxjI1FrbpdlDyQONKE=;
+	b=N2SXfSoDJcCWJ8Avn4OGlLCzeSpjqtge0EJULq0ykjpocUilstd4J3DMwuOkCM7OLt0W
+	 mW9NJJkc7Lj3szOQfTMvC7VCJzgiyPLJALtwK0bZ5B+ct0BQglt3KepTGBUPfHTN/ueo1
+	 UGBeZ0rQZHw53XS+xSzvozmB8MZRwmjvG32X/ob8pmEE9MPIiGWhHh37oJYgrSKGA86by
+	 nI82T4RLY/mIr8A6m7T7lzlNEyBUxuoWiy/xmn24ZBpEmEesN9tr8v9M3ZP49P8vjsTIU
+	 jAQAhIkZ49qyZai53/BhdSsJ4/aLTx/zkMg8XbRJGG+jUGPNCEFZILr8wHiIbAycuXw==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=mueller-it.de;
-	spf=pass smtp.mailfrom=mueller-it.de;
-	dkim=pass header.d=mueller-it.de header.i=@mueller-it.de header.a=rsa-sha256 header.s=selector1 header.b=oPkTrWVk;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.66.91
-Received: from DUZPR83CU001.outbound.protection.outlook.com (mail-northeuropeazon11022091.outbound.protection.outlook.com [52.101.66.91])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=clyso.com;
+	spf=pass smtp.mailfrom=clyso.com;
+	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=Pqa3RdVh;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.218.52
+Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A82A606A31C
-	for <ceph-devel@vger.kernel.org>; Fri, 27 Nov 2026 10:01:43 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5A82A606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mueller-it.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mueller-it.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3DF2606A323
+	for <ceph-devel@vger.kernel.org>; Fri, 27 Nov 2026 10:52:11 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B3DF2606A323
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=mueller-it.de header.i=@mueller-it.de header.a=rsa-sha256 header.s=selector1 header.b=oPkTrWVk
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=XRA2wFZkHRXg5FObz7ti48+v/eA0n8v8LgjsSq5SkQY8p2pWkjBfV9fT/xdGiS2xpYHHsbBiWRKEKhPP7danek0vv7HfUGxRqLMZieDkqZqI+3i4Z4ZoLRqfjHlVFlRvSUegCJcpOtFC7XRifR67QxX4nGxEqW4Z66XKjoQ1Rd3Kbas4/YhCXQ4xFJ+AVbPUXOsUW2kaknouc9P/Z4sEO+i3enaxRZ4oGEWyFOEK7aJ6HfnQ+GFWph2L80Nske0+nsaG/8+rJuHHOdQZCKZsuWfoG/owruVMI5V9PhbVqU2sQ19/QENgT8/v1sgEiFPZGFL0g8dcxILAUyTHKCI2Bw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=jdzYN2wVg6q59ab3mgAOLx0cfCAgZb4+Gul2PsY5Yp0=;
- b=t5vrew+k7uF0vd4P6EbYMen95xjIohcy2JTzKg7XgFLIu9MI4DFWt9yEzbtzfdq2uMXa0xuCi9ehXE71dQmsKensLr4mPcusXwwGCeJX9sivHw8/T643qEYVOQl5AHAuA0JHtdh/sUa197jex6m7++akWDNC1vU/6be4qom/PI1wU2rXHr/MFXii2mcs9UHSYFGz40KMlt6i0Nx6SgE2cnRkEwARRD9SaCgkzn3DN5Ghbcs9cj2Z8gcDDYdYVAtvEkhQhgH/NgwhK4exQQNWyiBFmpgKgGM/dnHeD+DyXitllG0kfJmVS7VisFVNq3HcaR27USZckQvKWqvPQNPwqA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=mueller-it.de; dmarc=pass action=none
- header.from=mueller-it.de; dkim=pass header.d=mueller-it.de; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mueller-it.de;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=jdzYN2wVg6q59ab3mgAOLx0cfCAgZb4+Gul2PsY5Yp0=;
- b=oPkTrWVkso9SQucGsykH5U61R5wNYDdw79sPftprGzjQnQW9QOR+33EPSEiE4QlVjNteat0/21SapzzPVLjaShGH9CVXoe0Sff/C+tzjcp0OQTWs33Lk3zdA5sClDQ4geSVVXqsj4+7tZr8fwuQJ43lF1VwcysE0ChSaKIdht80=
-Received: from GVUPR02MB11854.eurprd02.prod.outlook.com
- (2603:10a6:150:363::21) by AS8PR02MB9484.eurprd02.prod.outlook.com
- (2603:10a6:20b:5a7::6) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.639.12; Fri, 27 Nov
- 2026 10:01:40 +0000
-Received: from GVUPR02MB11854.eurprd02.prod.outlook.com
- ([fe80::4662:cbe0:4f13:a7fa]) by GVUPR02MB11854.eurprd02.prod.outlook.com
- ([fe80::4662:cbe0:4f13:a7fa%6]) with mapi id 15.21.0662.004; Fri, 27 Nov 2026
- 10:01:40 +0000
-From: =?utf-8?B?TmljbGFzIE3DvGxsZXI=?= <n.mueller@mueller-it.de>
-To: Xiubo Li <xiubo.li@clyso.com>
-CC: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
-	"idryomov@gmail.com" <idryomov@gmail.com>, "amarkuze@redhat.com"
-	<amarkuze@redhat.com>
-Subject: AW: [BUG] libceph: OSD request never re-targeted after PG merge,
- CephFS read hangs forever
-Thread-Topic: [BUG] libceph: OSD request never re-targeted after PG merge,
- CephFS read hangs forever
-Thread-Index: Ad18zScPSD7HdSGYSr2UOqnrqF1MUQAAC3XQAGCuTYAAAXRoUA==
-Date: Fri, 27 Nov 2026 10:01:39 +0000
-Message-ID:
- <GVUPR02MB11854B3BECB9F04A73142BCF0A5412@GVUPR02MB11854.eurprd02.prod.outlook.com>
-References:
- <AM6PR02MB522441DD8CECFA6C3BF2A2F8A5432@AM6PR02MB5224.eurprd02.prod.outlook.com>
- <AM6PR02MB522498A5600199DDE2296680A5432@AM6PR02MB5224.eurprd02.prod.outlook.com>
- <CAOJNxRJYBSnPc9Z-baNouF2v-6iADn0Q+CdpjYF7gGfLM4_Trg@mail.gmail.com>
-In-Reply-To:
- <CAOJNxRJYBSnPc9Z-baNouF2v-6iADn0Q+CdpjYF7gGfLM4_Trg@mail.gmail.com>
-Accept-Language: en-DE, en-US, de-DE
-Content-Language: de-DE
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=mueller-it.de;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: GVUPR02MB11854:EE_|AS8PR02MB9484:EE_
-x-ms-office365-filtering-correlation-id: 8d9b16ae-a8f7-4685-a64d-08df4c6d6e91
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|23010399003|376014|366016|38070700021|261102123227099003|260925021911599003|261026140227099003|10067099003|4143699003|261026121527099003|260925021311599003|260925022911599003|5023799004|56012099006|261021135927099003|261021121427099003|261022075727099003|261028144727099003|261022105027099003|6133799003|261009223027099003|22082099003|18002099003;
-x-microsoft-antispam-message-info:
- +rMWfTqF19mD0ksxdTjDURQaQN2NpoPeqCyjm2Gd32x1WRxOo0NyeLOkMsOlZwsh1D+D7eYwQFYsdMd2Cut5zBO5Cyj1Oh+6UePw8lDk9yWAgBzAi4h6NjjzAXmuZtAVIdkLh3VUvMifDxvORiA53oRmwaS0nPZPBboRacalJgXOSe2r+kE/7B262hekBxgDiCuz5V1Fps3AevTQk/b2sODpuTui89kB5Oi61CiFmw/J5sgMtAe+NK6GYkWom9Wslow5R+1zDxQ1MGr+AwsTPjoV0QFy3UDR2BuS3cPlhBeoi/kpysyJshoRXayYlsM7DuPF9cHuWtDIbcuYnCJ8E8DaaB2h8r09SISgFe8H5SYoLa+c8OyZOICYL/Gi0olTd89EswOCMZODOfKWMpMgPfvE6pdACAth/OnX+9S7a8IDtAwj9PLA7407ATVsL8bm0cKyP8J1SZ11agMzDzRhfJsObYJAXZmJWOhHdf/GvwMzkQMyMj5VjCylQUzxqossOM9yNtxbDBTuAHKqdZEt+7oO9IWTf5MEokBzKLzrM+zqFq/MBYGcZy7CmjHWNmYvTfJxKkjoqs7xO6oCOyYXH9VqXjX4b+6Ce2fNoB1Uefoc5RwPNWZFWDo8bSJc8DfN0Y/NeMOrt0JNmYMrtF9A0cb9PTpKe4jLai/XpRr4L3s=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GVUPR02MB11854.eurprd02.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(376014)(366016)(38070700021)(261102123227099003)(260925021911599003)(261026140227099003)(10067099003)(4143699003)(261026121527099003)(260925021311599003)(260925022911599003)(5023799004)(56012099006)(261021135927099003)(261021121427099003)(261022075727099003)(261028144727099003)(261022105027099003)(6133799003)(261009223027099003)(22082099003)(18002099003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?ci9Ba0w0bTNKS09hb3JIUmtZN3RFTDA3bWFCdFVXVis0RlNIL2lueEZmeW04?=
- =?utf-8?B?TjNTQ1dZWllVdXErbjFLZWw4TjZUNGZ3MFhzVk1JREdQS0oxakZKV1RRbVkw?=
- =?utf-8?B?Wm9iUEdvVUZwekEraFBmS2t3RzZBQkRXZEtnUXo4U1ZCYTkwcmNWRk5xSWVD?=
- =?utf-8?B?SGlxWXRnaFBjUThSTVRSSEp1ZnZVSFpHMUM5SXNkeXlHbWhRa1MxN29wMVlr?=
- =?utf-8?B?cTJETDlFc1VHK3V3ZVo4Ym4zMExsQ0NicFJFWjNTWG5lbzVsN3NWUVpBTnBM?=
- =?utf-8?B?Nm9jaUdwUEg1QWpqWlJmaUQvMFd6ZWR3Qy9vU3hQdnJWdDZJNlZza0ZJUGpZ?=
- =?utf-8?B?WmwwQVFyVm5BUm9ZV0JJQVVvMW5sUDR5bkhwaUpHOWk0SFpzTEtURUZVakhR?=
- =?utf-8?B?dmVyK0VDZTg3K0pRNTVDRXQ4ZHJxbkFnVDFRZ3d3djlVaDVYa21vRWlMQkFr?=
- =?utf-8?B?NTJ0aG9EVlBodGtjU2UybkpzUmtVMDBlSVQxc2s2K3ZZSklXSE5mRkNZY3cr?=
- =?utf-8?B?ZjdiSzhvOUk5Y0hZVkJNemp3eXVESXJ3dWhFMGRrQ1oxeE1vNTI2OTdMTzNO?=
- =?utf-8?B?eUVpRnlDbGtaYmhPOW41ZlFDUldYbXg5VmVsc2QvRGFjU2QrQWVpOTd6M2Qw?=
- =?utf-8?B?UGFJWVRzU01ZRXBzcEZ1M3VlNTZmN2xxK25zZWowVjZxZC9kUCtSa1B1QWNZ?=
- =?utf-8?B?cGlCQUg0U0NWM0tRU1JYOEpxU21CV3hUSEQ0ODJCMXMyVWZnVFJTUW9qNmYw?=
- =?utf-8?B?WVVGOVp5UllTclhudXRNdHNCSk5ORjV0dnUwaEx1cUJ1ZG5oN284S3BTdFl2?=
- =?utf-8?B?N2xFSnJjblh0aHNHaURiUWZiaHpaNFZwSlI0STVBaTJCUFpOQUFKaFdvT2c5?=
- =?utf-8?B?eTQ5bUJyc1VGdW9UR0liTVVvd2VBdGh0RjViL3Z2UlNlZk45NlVpU1E1bmtV?=
- =?utf-8?B?Mm8xN0wvd3dJY1V2UVQyQ3FLTTluVktuNnRyaWVXUU9zemNCMWFOTnZkdkVw?=
- =?utf-8?B?WEQrMjJwZlZHUUxNdVFURG4wTXlRamlpU0FBdUJuWnVxbWdpRkw5MWR2OEtQ?=
- =?utf-8?B?UVBHUHZ0VWlVcWl3VzhwNHAzLzdJTW56azgyVklTbythVllNNlZKSUY3TFRR?=
- =?utf-8?B?clRNWGNqSkN6RHlvSkFmYVhFM3hXcVoxWHVzSG1TQXJqbkcvSWZldGFkMTln?=
- =?utf-8?B?QU9UYlV3NTVHQ0Qxd1RCVkM3M0xxc0V0eTJGWnB5QktKbXFOZHZpbFdZV3do?=
- =?utf-8?B?MnJta1p0Vk9RWmFRajY3RVpiMFcyRWhmbHoyalU1bWpXS1B4N21ZbVFUc0tK?=
- =?utf-8?B?RndYV3dVSnl5RE1HTWVqbTYzdFM1M0R1NnVlWlluT1FiaUR1Z2VIV0UwS2JY?=
- =?utf-8?B?bW5UQ2JYZEJxQjBqaXI4SlFDMVpBN29uMDcreU9qbzRQWVNEZjZzL0dhb1Rs?=
- =?utf-8?B?TUxydlgrOVlzcTJOdGdpekpLM0JWemdxUi9Tb21WcGs2a2VtOUVlak01eTN6?=
- =?utf-8?B?bWFEdWJ1Wm1La2trVkxoS3JoU1M2T3BTWXI4dzNkcmxmWkc4WWdBdlhPaG51?=
- =?utf-8?B?MVdoejcvQlNscldOdlc5NEx3MHMwc25nZ29VNXVCNjREcXdjOHYrUGdEeGpY?=
- =?utf-8?B?WHcvVzI3YnJyU3gxeUJaMXdmcEhveFlhaDlxOXl6aVZhTWxZMzlpQUt1eGVy?=
- =?utf-8?B?Mi9kVy9wODVlM0g0QnBLc2xmeGRBRzFVZWZ6UmZzMEpUSFpRUWVERDV0Q2dB?=
- =?utf-8?B?QUJ3RTBCYjBSVHZKczA2Y3Z2UmFaVVpQRmxqSFRGWlhUVjV1ZUR4Y3A1SFdD?=
- =?utf-8?B?UWtrWG5maEN0cXdaYmNnbEZIR04wRXdRaWJPUStiaUd4V1JTTFF4TnlJcFlu?=
- =?utf-8?B?Z0hNVmpkYUpUK1lVTjhDY3R6TUFZdTVRcEl0UzFjcDlydWhhY2ROSGZYOVNU?=
- =?utf-8?B?R2IzalY1RlJuSjVPTE5ndUNMeXZOR0xTOFhQMjdyMUtKazVHeVlmR0JQa2x5?=
- =?utf-8?B?NGt1emRSWU5VS1MwV2JhdTBsL244dldYd1VZYk16cnlnQ0E0ZFMyYzZHMGNV?=
- =?utf-8?B?ODFnaG54R2hvL2gzajFnd2dDUTZUR2hESk9ZdXkvdy95UVhZdHN2d2FXeHdt?=
- =?utf-8?B?NFRlVjVQcHZQejZ2cnNZWkFmU2pmbERyQVBVaUxNaks5OXRoT1R0QjBIREtV?=
- =?utf-8?B?N0RoVHkzenNycjNVK1R6L2wxUEpHVFNkd054cWd5MHQwT3dja0p4aVJ5cm9G?=
- =?utf-8?B?QUZycXZQVnRjVllnMWROTWExS3VoaDdpKzJRT3FITVVLWDlIVW5CL0t2UUFo?=
- =?utf-8?Q?H0eA4gztyRDPLUD91T?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=Pqa3RdVh
+Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-c5133831027so1106143766b.2
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Nov 2026 02:52:11 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1795776730; cv=none;
+        d=google.com; s=arc-20260327;
+        b=BjuXSyqa6M7F0bacbHQ7+UDvF32E+gCFGv8UvWSM0oWNVPWqPHiArbslGMUSWkwMeb
+         fttnvxjd8jeS/1tsvaP1l7i80KzEPDb/mauz+66YrDn6XucmkA/YfmZuqHGAvqvv4BCF
+         CKVHQIfRqYRLF8kqKnpONquYBNPBM/dNYbEE15W4JjadMr65nU3i65RSkYMxUTb3+zBh
+         WgHzufwro1x3TtEGb6dw6oThmixMTMv2B3xHpOlSTltDiFe4k45uvS3+eCqGYA6Tj2fZ
+         PY/14KY27XjIQlfzLSxla/XdNbn7HX6gDHJrTd3v8mgVEN9/eI7AElFZ1xY6cEU3PZzW
+         aYrw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=kIuj8YOwz9TzNr2XbCgli685swxjI1FrbpdlDyQONKE=;
+        fh=PoW5V+tWitBEIMl0OIbEstdOSvSlAGMAJl0CvlD/kAI=;
+        b=o3UgCpSAUyINdvHKQ8T27pa5iwOlHO1+x08CYfsjpW4f+vW3sYotkUOSKIRAmNBnH9
+         jnFIPvj5iP6tGt7/Ayrd1jlXxg9aje9i0GH/s/q0q+C6BTPmg3MPI8A9zciq0yEnQ/l4
+         3itCHLnHWNEwogdw4q7HAjdtZGogq234zYytdLAKeo7V8S72UeM8unekog/iafxiKSS2
+         HJpnO1nFXsfw6OU71hEnUjeA4xdg3WkCd0x94iIKWQU17dI4aguMSclJZqpt+Pb3scNb
+         MILyZZ/f+4bxQMQgI2TqYN26uDvrHad4T6gZdtJGvWBbJEkQAxDmpfw7g+G2L2/0jNhA
+         1tLQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=clyso.com; s=google; t=1795776730; x=1796381530; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=kIuj8YOwz9TzNr2XbCgli685swxjI1FrbpdlDyQONKE=;
+        b=Pqa3RdVhxUjVVO7AaiQfqAZw2T1MAjkOphcrzYV2rT3DHbFHGWhZyomw/IoLLQ0Gbx
+         3Kg7B1KSBv0iLH3ejVUEXFujtNA2494yFIU1n9gsbF61Ub0BAt+MXpIwZtxVG67Bg454
+         Xv6R0apQ/o9YJ4GBoL5Os6+CWbV5wq4KlomhHvOFH53NgAnN3/U+vql7aGm0cmZVTYp8
+         /DZ1G1pHD9afICGP++QphdOBh3C2bx7LqvlyvORJAKZ620jkDAo1xI54JwE6dC1LIeF1
+         zq73G9FioOsUWMKFN8OO/i92Nw18jwZDbQLJQWq++SrSOAvr9lmMJEnF+bGs3OduIitG
+         lUcg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795776730; x=1796381530;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=kIuj8YOwz9TzNr2XbCgli685swxjI1FrbpdlDyQONKE=;
+        b=uXPNmHZcuPTmRPo8p3tGgmcJoKZJN9i+/QyfOcUGabktQwZhdh2bkAOajPZxTA1czo
+         5iLW3vEMsZM8SL70ytp3RMj6q0Cy/ew620ziioYQOuEOZRff8723OqVFr/3GixX5U8Bb
+         Je4O6SnKyVsfKQVR/pjub4FHojqCzPXgacF2nhqTRBs5BgiO0MxL0WguipnY6adTsSTI
+         XwITGJlCUXGLCfvtNNWvpJeDjfeFjPeB37GLVNcjJPj8fY4hgSNC6E00Vd9kMlcA+UqQ
+         pcnx1ko3nLP7mLmI1FRZLf8oG8PaqcLaLRlt3DahV2w4+O0wKDou+bOjj0/8XwUR1mEC
+         e/hw==
+X-Gm-Message-State: APuU4Z9O/sQdXhWLvUMaZxMIW4NzyoFagwZO3SYLHpOEplbqZ4cSaBQE
+	g9KV3eIcH2AenrapA7GJDVwGi1MslesQw/W5GmyzOSgHa6wH7zVpIqUB0o2Ict0NDCWAH1e8qlO
+	SSx4uIN4Z+8v7HmuaZx0lG/eKLc7a5Sed+S0cHka5LA==
+X-Gm-Gg: AZFdTZeBig9WZtKtomjknHyH/R0FuWXput+CX+OM8SAyxqWH4ZTb73+t4JcGb3hFeD1
+	Y4Dj0QsjONO2ffaLYq/FFE94WWMcXFiOrTcUD4Rw3DeLyJH8NWWu1CjTr+IoP8gU12GXyKQi2xF
+	XDExF55CW/JeaXD8WDGNBxwVp9AoJp8bAOo9/lUVSvLs6at+u16lvdvF5BCYO3FAqNP1gjqB7JL
+	bWiy6qvsmOOwpXzGaHarl2yYexKicXoPE/lIhAtfiIlaAE162qRLJDKRXsRrorjvPsEtyDH668o
+	vwl3bhgVZvdL46ryhifYjkuq0O5BSZ/mZfrlH1Hs4+X8pqT+JFhgB29Wa0+/wJs7PjUgUeKrKHD
+	iAvOxIFHT2cGfSfJE1nXticK8hA6w4+h2D6oci3NrHtcOWA==
+X-Received: by 2002:a17:906:9e14:b0:c29:f5d5:5a97 with SMTP id
+ a640c23a62f3a-c513a88015emr1447272866b.33.1795776729837; Fri, 27 Nov 2026
+ 02:52:09 -0800 (PST)
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -159,140 +103,200 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-OriginatorOrg: mueller-it.de
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: GVUPR02MB11854.eurprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8d9b16ae-a8f7-4685-a64d-08df4c6d6e91
-X-MS-Exchange-CrossTenant-originalarrivaltime: 27 Nov 2026 10:01:39.9681
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 39a4a88b-fd54-401b-8f7c-63f815ed5570
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Igz6xEOnpni8j65BBWfG9MAqIXMWkgpUtlZv4Cz3QRWqlSKOIwgWkMQApZb6AE/8uMXWXof1d6FhW3wd5BlSYQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR02MB9484
+References: <AM6PR02MB522441DD8CECFA6C3BF2A2F8A5432@AM6PR02MB5224.eurprd02.prod.outlook.com>
+ <AM6PR02MB522498A5600199DDE2296680A5432@AM6PR02MB5224.eurprd02.prod.outlook.com>
+ <CAOJNxRJYBSnPc9Z-baNouF2v-6iADn0Q+CdpjYF7gGfLM4_Trg@mail.gmail.com> <GVUPR02MB11854B3BECB9F04A73142BCF0A5412@GVUPR02MB11854.eurprd02.prod.outlook.com>
+In-Reply-To: <GVUPR02MB11854B3BECB9F04A73142BCF0A5412@GVUPR02MB11854.eurprd02.prod.outlook.com>
+From: Xiubo Li <xiubo.li@clyso.com>
+Date: Fri, 27 Nov 2026 12:51:57 +0200
+X-Gm-Features: Aa3M54p0WZp31ybO22xD5gZXvoHT6oVvIwVOc642ccxoCyjyVEBR0VBOkPMYId0
+Message-ID: <CAOJNxRKL3nO_LgziffV5vpNhFmMNY5b-gM8u0Arf0kMq-c1f7A@mail.gmail.com>
+Subject: Re: [BUG] libceph: OSD request never re-targeted after PG merge,
+ CephFS read hangs forever
+To: =?UTF-8?Q?Niclas_M=C3=BCller?= <n.mueller@mueller-it.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "idryomov@gmail.com" <idryomov@gmail.com>, 
+	"amarkuze@redhat.com" <amarkuze@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-SGkgWGl1Ym8sDQoNCnRoYW5rcyBhIGxvdCBmb3IgcmVwcm9kdWNpbmcgdGhpcyBzbyBxdWlja2x5
-IGFuZCBmb3IgdGhlIGZpeC4gWW91cg0KZXhwbGFuYXRpb24gb2YgaG93IHRoZSBmb3JjZSByZXNl
-bmQgZ2V0cyBsb3N0IG1hdGNoZXMgd2hhdCB3ZSBzYXc6DQp0aGUgaWRsZSBtb3VudHMgd2VyZSBz
-dGlsbCBhdCBlMzIyMiBhbmQgaGFkIHRvIGNhdGNoIHVwIHRvIGU0MDYxIGluDQpvbmUgZ28uDQoN
-ClVuZm9ydHVuYXRlbHkgd2UgY2Fubm90IHRlc3QgdGhlIHBhdGNoLiBUaGlzIGlzIG91ciBvbmx5
-IENlcGgNCmNsdXN0ZXIgYW5kIGl0IGlzIGluIHByb2R1Y3Rpb24sIHNvIHRoZXJlIGlzIG5vIGVu
-dmlyb25tZW50IHdoZXJlDQp3ZSBjb3VsZCBydW4gYSBwYXRjaGVkIGtlcm5lbC4gQWxsIGFmZmVj
-dGVkIG1vdW50cyB3ZXJlIHJlbW91bnRlZCBvbg0KMjUgTm92LCBzbyB0aGUgaGFuZ2luZyBzdGF0
-ZSBpcyBnb25lIGFzIHdlbGwuIEkgc2hvdWxkIGFsc28gbWVudGlvbg0KdGhhdCB3ZSBmb3VuZCBh
-bmQgYW5hbHlzZWQgdGhpcyB3aXRoIHRoZSBoZWxwIG9mIGFuIEFJIGFzc2lzdGFudA0KKENsYXVk
-ZSkuIEJ1aWxkaW5nIGFuZCB2YWxpZGF0aW5nIGtlcm5lbCBwYXRjaGVzIG91cnNlbHZlcyBpcyBi
-ZXlvbmQNCndoYXQgd2UgY2FuIGRvIHJlbGlhYmx5LiBXZSB3aWxsIHBpY2sgdXAgdGhlIGZpeCBv
-bmNlIGl0IHJlYWNoZXMgYQ0KcmVndWxhciBQcm94bW94IFZFIGtlcm5lbC4NCg0KT25lIHNtYWxs
-IHJlbWFyayBvbiB0aGUgY29tbWl0IG1lc3NhZ2U6IGl0IHNheXMgdGhhdA0KY2VwaF9pc19uZXdf
-aW50ZXJ2YWwoKSBjb21wYXJlcyBwZ19udW0uIEFzIGZhciBhcyBJIGNhbiBzZWUgaXQgb25seQ0K
-Y2hlY2tzIGZvciBhIHNwbGl0IHZpYSBjZXBoX3BnX2lzX3NwbGl0KCksIHdoaWNoIGlzIGFsc28g
-d2h5IHRoZQ0KcGF0Y2ggYWRkcyB0aGUgbWVyZ2UgY2hlY2tzIHRoZXJlLiBUaGF0IHdvcmRpbmcg
-Y2FtZSBmcm9tIG15IHJlcG9ydC4NCg0KVGhhbmtzIGFnYWluLA0KTmljbGFzDQrCoA0KTcO8bGxl
-ciBJVCBHbWJIICYgQ28uIEtHDQoNCi0tLS0tVXJzcHLDvG5nbGljaGUgTmFjaHJpY2h0LS0tLS0N
-ClZvbjogWGl1Ym8gTGkgPHhpdWJvLmxpQGNseXNvLmNvbT4gDQpHZXNlbmRldDogRnJlaXRhZywg
-MjcuIE5vdmVtYmVyIDIwMjYgMTA6MTcNCkFuOiBOaWNsYXMgTcO8bGxlciA8bi5tdWVsbGVyQG11
-ZWxsZXItaXQuZGU+DQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7IGlkcnlvbW92QGdt
-YWlsLmNvbTsgYW1hcmt1emVAcmVkaGF0LmNvbQ0KQmV0cmVmZjogUmU6IFtCVUddIGxpYmNlcGg6
-IE9TRCByZXF1ZXN0IG5ldmVyIHJlLXRhcmdldGVkIGFmdGVyIFBHIG1lcmdlLCBDZXBoRlMgcmVh
-ZCBoYW5ncyBmb3JldmVyDQoNCkhpIE5pY2xhcywNCg0KVGhhbmtzIGZvciB0aGUgZGV0YWlsZWQg
-cmVwb3J0LCB5b3VyIGFuYWx5c2lzIGlzIHJpZ2h0Lg0KDQpJIGNvdWxkIHJlcHJvZHVjZSBpdCBv
-biBhIHZzdGFydCBjbHVzdGVyOiBtb3VudCBDZXBoRlMsIHdyaXRlIHNvbWUgZmlsZXMsIGxlYXZl
-IHRoZSBtb3VudCBpZGxlIHdoaWxlIHRoZSBkYXRhIHBvb2wgZ29lcyBmcm9tIDEyOCB0byAzMiBQ
-R3MsIHRoZW4gcmVhZC4gIEEgZmV3IHJlYWRzIGhhbmcgd2l0aCBhIG5vbi1leGlzdGVudCBzcGdp
-ZCBpbiBvc2RjLCBleGFjdGx5IGFzIGluIHlvdXIgZHVtcC4NCg0KVGhlIGZvcmNlIHJlc2VuZCB0
-aGF0IG5vcm1hbGx5IGNvdmVycyBhIG1lcmdlIG9ubHkgZmlyZXMgb24gb25lIGV4YWN0IG1hcCBl
-cG9jaCwgYW5kIGl0IGdldHMgbG9zdCBlaXRoZXIgd2hlbiB0aGUgY2xpZW50IGp1bXBzIHRvIGEg
-ZnVsbCBtYXAgKHlvdXIgaWRsZSBjYXNlKSBvciB3aGVuIG9uZSBNT1NETWFwIG1lc3NhZ2UgY2Fy
-cmllcyBtYW55IGluY3JlbWVudGFscy4NCmNhbGNfdGFyZ2V0KCkgaXRzZWxmIGhhcyBubyBtZXJn
-ZSBjaGVjaywgdW5saWtlIHRoZSB1c2Vyc3BhY2UgT2JqZWN0ZXIuDQoNCkkgaGF2ZSBwb3N0ZWQg
-YSBmaXggdGhhdCBtYWtlcyBjYWxjX3RhcmdldCgpIHRyZWF0IGEgbWVyZ2Ugc291cmNlIG9yIHRh
-cmdldCBsaWtlIGEgc3BsaXQsIGFzIHRoZSBPYmplY3RlciBkb2VzOg0KDQpodHRwczovL2xvcmUu
-a2VybmVsLm9yZy9jZXBoLWRldmVsLzIwMjYxMTI3LWxpYmNlcGgtcGctbWVyZ2UtcmV0YXJnZXQt
-djEtMS0yNDI3NzU4Y2RkMWNAY2x5c28uY29tLw0KDQpXaXRoIGl0IGFsbCByZWFkcyBjb21wbGV0
-ZSBpbiBib3RoIGNhc2VzLiAgVGVzdGluZyBvbiB5b3VyIHNpZGUgd291bGQgYmUgdmVyeSB3ZWxj
-b21lLg0KDQpUaGFua3MsDQpYaXVibw0KDQpPbiBXZWQsIDI1IE5vdiAyMDI2IGF0IDEyOjA5LCBO
-aWNsYXMgTcO8bGxlciA8bi5tdWVsbGVyQG11ZWxsZXItaXQuZGU+IHdyb3RlOg0KPg0KPiBIaSwN
-Cj4NCj4gd2UgaGl0IGEgcGVybWFuZW50IGhhbmcgb2Yga2VybmVsIENlcGhGUyByZWFkcyB0aGF0
-LCBhcyBmYXIgYXMgd2UgY2FuIA0KPiB0ZWxsLCBpcyBjYXVzZWQgYnkgbGliY2VwaCBub3QgcmUt
-dGFyZ2V0aW5nIGluLWZsaWdodCBPU0QgcmVxdWVzdHMgDQo+IGFmdGVyIGEgUEcgbWVyZ2UgKHBn
-X251bSBkZWNyZWFzZSkuIFRoZSBjbHVzdGVyIGl0c2VsZiBzdGF5ZWQgDQo+IEhFQUxUSF9PSyB0
-aGUgd2hvbGUgdGltZS4gVGhlIGlzc3VlIHdhcyBvbmx5IHZpc2libGUgaW4gZGVidWdmcy4NCj4N
-Cj4gRW52aXJvbm1lbnQNCj4gLS0tLS0tLS0tLS0NCj4gLSBQcm94bW94IFZFIDkuMi4yNCwga2Vy
-bmVsIDcuMC4xNC0yNi1wdmUgKGtlcm5lbCBDZXBoRlMgbW91bnQpDQo+IC0gQ2VwaCAyMC4yLjQg
-KHRlbnRhY2xlKSwgMyBub2RlcywgMjcgT1NEcw0KPiAtIFRoZSBzYW1lIGNvZGUgcGF0aHMgYXJl
-IHVuY2hhbmdlZCBpbiBjdXJyZW50IG1haW5saW5lDQo+ICAgKG5ldC9jZXBoL29zZF9jbGllbnQu
-YywgbmV0L2NlcGgvb3NkbWFwLmMpLg0KPg0KPiBXaGF0IGhhcHBlbmVkDQo+IC0tLS0tLS0tLS0t
-LS0NCj4gMS4gQSBDZXBoRlMgd2FzIGNyZWF0ZWQgKGRhdGEgcG9vbCBjcmVhdGVkIHdpdGggcGdf
-bnVtIDEyOCwNCj4gICAgcGdfYXV0b3NjYWxlX21vZGUgb24pLiBBbGwgdGhyZWUgbm9kZXMgbW91
-bnRlZCBpdCByaWdodCBhd2F5DQo+ICAgIChvc2RtYXAgZTMyMjIpLg0KPiAyLiBOaW5lIG1pbnV0
-ZXMgbGF0ZXIgdGhlIGF1dG9zY2FsZXIgaGFkIG1lcmdlZCB0aGUgZGF0YSBwb29sIGRvd24NCj4g
-ICAgdG8gMzIgUEdzIChwb29sIGxmb3IgMC8zNjY5LzM2NjcsIGxhc3RfY2hhbmdlIDM2NjkpLg0K
-PiAzLiBUaGUgbW91bnRzIHRoZW4gc3RheWVkIGlkbGUgZm9yIDE4IGRheXMuIFRoZSBrZXJuZWwg
-Y2xpZW50IG9ubHkNCj4gICAgcmVxdWVzdHMgb3NkbWFwcyAib25ldGltZSIgKG1heWJlX3JlcXVl
-c3RfbWFwKCkpLCBzbyBhbiBpZGxlDQo+ICAgIGNsaWVudCBrZWVwcyB0aGUgb2xkIG1hcC4gT25l
-IG5vZGUgc3RpbGwgc2hvd3MgdGhpcyB0b2RheToNCj4NCj4gICAgICAvc3lzL2tlcm5lbC9kZWJ1
-Zy9jZXBoLzxmc2lkPi5jbGllbnQ8aWQ+L29zZG1hcDoNCj4gICAgICAgIGVwb2NoIDMyMjIgYmFy
-cmllciAzMjIyIGZsYWdzIDB4NTg4MDAwDQo+ICAgICAgICBwb29sIDUgJzxmcz5fZGF0YScgLi4u
-IHBnX251bSAxMjggLi4uDQo+ICAgICAgd2hpbGUgdGhlIGNsdXN0ZXIgaXMgYXQgZTQwNjEgd2l0
-aCBwZ19udW0gMzIuDQo+DQo+IDQuIFRoZSBmaXJzdCByZWFkIGFmdGVyIHRoYXQgKFFFTVUgcmVh
-ZGluZyBhbiBJU08gZmlsZSBvbiB0aGUNCj4gICAgQ2VwaEZTKSB3YXMgbWFwcGVkIHdpdGggdGhl
-IHN0YWxlIG1hcCB0byBhIFBHIHRoYXQgbm8gbG9uZ2VyDQo+ICAgIGV4aXN0cy4gQWZ0ZXIgdGhl
-IGNsaWVudCByZWNlaXZlZCB0aGUgY3VycmVudCBtYXAsIHRoZSByZXF1ZXN0DQo+ICAgIHdhcyBu
-ZXZlciByZS10YXJnZXRlZDoNCj4NCj4gICAgICBvc2RjOg0KPiAgICAgIFJFUVVFU1RTIDEgaG9t
-ZWxlc3MgMA0KPiAgICAgIDQgIG9zZDQgIDUuYWVhN2ZlYTEgIDUuMjEgIFs0LDE0LDIzXS80ICBb
-NCwxNCwyM10vNCAgZTQwNjENCj4gICAgICAgICAxMDAwMDAwMDFmYy4wMDAwMDgwMyAgMHg0MDAw
-MWMgIDEzICByZWFkDQo+DQo+ICAgICAgIyBjZXBoIHBnIG1hcCA1LjIxDQo+ICAgICAgRXJyb3Ig
-RU5PRU5UOiBwZ2lkICc1LjIxJyBkb2VzIG5vdCBleGlzdA0KPiAgICAgICMgY2VwaCBwZyBtYXAg
-NS4xDQo+ICAgICAgb3NkbWFwIGU0MDYxIHBnIDUuMSAoNS4xKSAtPiB1cCBbNCwxNCwyM10gYWN0
-aW5nIFs0LDE0LDIzXQ0KPg0KPiAgICBUaGUgY2xpZW50J3Mgb3duIG1hcCAoZGVidWdmcykgc2hv
-d3MgcGdfbnVtIDMyIGZvciB0aGUgcG9vbCwgYnV0DQo+ICAgIHRoZSByZXF1ZXN0IHN0aWxsIGNh
-cnJpZXMgc3BnaWQgNS4yMS4gSXQgaGFzIGJlZW4gcmVzZW50IDEzIHRpbWVzDQo+ICAgIHRvIHRo
-ZSBzYW1lIE9TRC4gb3NkLjQgcmVwb3J0cyBubyBvcHMgaW4gZmxpZ2h0DQo+ICAgIChkdW1wX29w
-c19pbl9mbGlnaHQgbnVtX29wcyAwKSBhbmQgbm90aGluZyBmb3IgdGhpcyBvYmplY3QgaW4NCj4g
-ICAgaGlzdG9yaWMgb3BzLiBSZWFkaW5nIHRoZSBzYW1lIG9iamVjdCB3aXRoIGxpYnJhZG9zIChy
-YWRvcyBnZXQpDQo+ICAgIHJldHVybnMgaW1tZWRpYXRlbHkuDQo+DQo+ICAgIEEgc2Vjb25kIG5v
-ZGUgc2hvd3MgdGhlIHNhbWUgcGF0dGVybjogMjIgcmVxdWVzdHMgc3R1Y2sgZm9yDQo+ICAgIG9i
-amVjdCAxMDAwMDAwMDAwNC4wMDAwMDBiNiwgc3BnaWQgNS4yMyAoZG9lcyBub3QgZXhpc3QpLA0K
-PiAgICBbMTUsMTksMjNdLzE1LCB3aGljaCBpcyBhbHNvIHRoZSBhY3Rpbmcgc2V0IG9mIHRoZSBt
-ZXJnZSB0YXJnZXQNCj4gICAgNS4zLg0KPg0KPiAgICBUaGUgUUVNVSBpb191cmluZyB3b3JrZXJz
-IHdlcmUgaW4gRCBzdGF0ZSBpbg0KPiAgICBmb2xpb193YWl0X2JpdF9jb21tb24gdW50aWwgdGhl
-IFZNIHdhcyBraWxsZWQuDQo+DQo+IEFuYWx5c2lzIChjdXJyZW50IG1haW5saW5lKQ0KPiAtLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gLSBzY2FuX3JlcXVlc3RzKCkgY2FsbHMgY2FsY190
-YXJnZXQob3NkYywgJnJlcS0+cl90LCBmYWxzZSkgZm9yDQo+ICAgcmVndWxhciByZXF1ZXN0cy4g
-V2l0aCBhbnlfY2hhbmdlID09IGZhbHNlOg0KPiAgIC0gY2VwaF9pc19uZXdfaW50ZXJ2YWwoKSBp
-cyBza2lwcGVkLiBJdCBpcyB0aGUgb25seSBjaGVjayB0aGF0DQo+ICAgICB3b3VsZCBub3RpY2Ug
-dGhlIHBnX251bSBjaGFuZ2UuDQo+ICAgLSBjZXBoX29zZHNfY2hhbmdlZCguLi4sIGZhbHNlKSBv
-bmx5IGNoZWNrcyBmb3IgYSBwcmltYXJ5IGNoYW5nZS4NCj4gLSBjZXBoX3BnX2lzX3NwbGl0KCkg
-cmV0dXJucyBmYWxzZSB3aGVuIG5ld19wZ19udW0gPD0gb2xkX3BnX251bS4NCj4gLSBmb3JjZV9y
-ZXNlbmQgb25seSBmaXJlcyB3aGVuIHRoZSBjdXJyZW50IG1hcCBlcG9jaCBlcXVhbHMNCj4gICBw
-aS0+bGFzdF9mb3JjZV9yZXF1ZXN0X3Jlc2VuZC4NCj4gLSBOZWl0aGVyIG9zZF9jbGllbnQuYyBu
-b3Igb3NkbWFwLmMgY29udGFpbnMgYW55IG1lcmdlIGhhbmRsaW5nLg0KPg0KPiBTbyBpZiB0aGUg
-bWVyZ2UgdGFyZ2V0IFBHIGhhcyB0aGUgc2FtZSBwcmltYXJ5IGFzIHRoZSBtZXJnZWQtYXdheSAN
-Cj4gc291cmNlIFBHICh3aGljaCBpcyB3aGF0IHdlIG9ic2VydmUgaW4gYm90aCBjYXNlcyksIHQt
-PnNwZ2lkIGlzIG5ldmVyIA0KPiByZWNvbXB1dGVkLiBUaGUgcmVxdWVzdCBpcyByZXNlbnQgZm9y
-ZXZlciB3aXRoIGFuIHNwZ2lkIHRoZSBPU0RzIG5vIA0KPiBsb25nZXIgaGF2ZSwgYW5kIHRoZSBP
-U0QgZHJvcHMgaXQsIGV4cGVjdGluZyB0aGUgY2xpZW50IHRvIHJlLXRhcmdldC4gDQo+IFVzZXJz
-cGFjZSBPYmplY3RlciBoYW5kbGVzIHRoaXMgdmlhIGlzX25ld19pbnRlcnZhbCgpIChwZ19udW0g
-Y2hhbmdlKSwgDQo+IHdoaWNoIGlzIHdoeSBsaWJyYmQvbGlicmFkb3MgY2xpZW50cyBvbiB0aGUg
-c2FtZSBob3N0cyB3ZXJlIA0KPiB1bmFmZmVjdGVkLg0KPg0KPiBBIHBvc3NpYmxlIGZpeCB3b3Vs
-ZCBiZSB0byBhbHNvIHJlY29tcHV0ZSB0aGUgdGFyZ2V0IHdoZW4NCj4gcGktPnBnX251bSA8IHQt
-PnBnX251bSAobWVyZ2UpLCBhbmFsb2dvdXMgdG8gdGhlIHNwbGl0IGNoZWNrLCBvciB0bw0KPiBl
-dmFsdWF0ZSBjZXBoX2lzX25ld19pbnRlcnZhbCgpIGZvciByZWd1bGFyIHJlcXVlc3RzIGFzIHdl
-bGwuDQo+DQo+IFJlcHJvZHVjdGlvbiAobm90IHRlc3RlZCBieSB1cywgZGVyaXZlZCBmcm9tIHRo
-ZSBhYm92ZSkNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLQ0KPiAxLiBDcmVhdGUgYSBwb29sIHdpdGggcGdfbnVtIDEyOCBhcyBDZXBoRlMg
-ZGF0YSBwb29sLCBtb3VudCBpdCB3aXRoDQo+ICAgIHRoZSBrZXJuZWwgY2xpZW50IGFuZCB3cml0
-ZSBhIGZldyBsYXJnZSBmaWxlcy4NCj4gMi4gTGVhdmUgdGhlIG1vdW50IGNvbXBsZXRlbHkgaWRs
-ZSBhbmQgcmVkdWNlIHBnX251bSB0byAzMi4gV2FpdA0KPiAgICB1bnRpbCB0aGUgbWVyZ2UgaXMg
-Y29tcGxldGUuDQo+IDMuIFJlYWQgdGhlIGZpbGVzIGZyb20gdGhlIGlkbGUgbW91bnQuIFJlYWRz
-IG9mIG9iamVjdHMgaW4NCj4gICAgbWVyZ2VkLWF3YXkgUEdzIHNob3VsZCBoYW5nLCB3aXRoIGVu
-dHJpZXMgaW4gb3NkYyBhcyBhYm92ZS4NCj4ga3JiZCBtYXBwaW5ncyB0aGF0IHN0YXkgaWRsZSBk
-dXJpbmcgYSBtZXJnZSBhcmUgcHJlc3VtYWJseSBhZmZlY3RlZCBpbiANCj4gdGhlIHNhbWUgd2F5
-Lg0KPg0KPiBXb3JrYXJvdW5kDQo+IC0tLS0tLS0tLS0NCj4gdW1vdW50IC1mICsgcmVtb3VudCBv
-ZiB0aGUgQ2VwaEZTIChmcmVzaCBjbGllbnQgd2l0aCB0aGUgY3VycmVudCBtYXApLCANCj4gYW5k
-IHBnX251bV9taW4gb24gcG9vbHMgdXNlZCBieSBrZXJuZWwgY2xpZW50cyB0byBwcmV2ZW50IGF1
-dG9zY2FsZXIgDQo+IG1lcmdlcy4NCj4NCj4gSGFwcHkgdG8gcHJvdmlkZSBtb3JlIGRhdGEgZnJv
-bSB0aGUgYWZmZWN0ZWQgbm9kZXMgd2hpbGUgdGhleSBhcmUgDQo+IHN0aWxsIGluIHRoaXMgc3Rh
-dGUuDQo+DQo+IFRoYW5rcywNCj4NCj4gTWl0IGZyZXVuZGxpY2hlbiBHcsO8w59lbg0KPiBOaWNs
-YXMgTcO8bGxlcg0K
+Hi Niclas
+
+No worries and thanks for your update.
+
+BRs
+Xiubo
+
+On Fri, 27 Nov 2026 at 11:01, Niclas M=C3=BCller <n.mueller@mueller-it.de> =
+wrote:
+>
+> Hi Xiubo,
+>
+> thanks a lot for reproducing this so quickly and for the fix. Your
+> explanation of how the force resend gets lost matches what we saw:
+> the idle mounts were still at e3222 and had to catch up to e4061 in
+> one go.
+>
+> Unfortunately we cannot test the patch. This is our only Ceph
+> cluster and it is in production, so there is no environment where
+> we could run a patched kernel. All affected mounts were remounted on
+> 25 Nov, so the hanging state is gone as well. I should also mention
+> that we found and analysed this with the help of an AI assistant
+> (Claude). Building and validating kernel patches ourselves is beyond
+> what we can do reliably. We will pick up the fix once it reaches a
+> regular Proxmox VE kernel.
+>
+> One small remark on the commit message: it says that
+> ceph_is_new_interval() compares pg_num. As far as I can see it only
+> checks for a split via ceph_pg_is_split(), which is also why the
+> patch adds the merge checks there. That wording came from my report.
+>
+> Thanks again,
+> Niclas
+>
+> M=C3=BCller IT GmbH & Co. KG
+>
+> -----Urspr=C3=BCngliche Nachricht-----
+> Von: Xiubo Li <xiubo.li@clyso.com>
+> Gesendet: Freitag, 27. November 2026 10:17
+> An: Niclas M=C3=BCller <n.mueller@mueller-it.de>
+> Cc: ceph-devel@vger.kernel.org; idryomov@gmail.com; amarkuze@redhat.com
+> Betreff: Re: [BUG] libceph: OSD request never re-targeted after PG merge,=
+ CephFS read hangs forever
+>
+> Hi Niclas,
+>
+> Thanks for the detailed report, your analysis is right.
+>
+> I could reproduce it on a vstart cluster: mount CephFS, write some files,=
+ leave the mount idle while the data pool goes from 128 to 32 PGs, then rea=
+d.  A few reads hang with a non-existent spgid in osdc, exactly as in your =
+dump.
+>
+> The force resend that normally covers a merge only fires on one exact map=
+ epoch, and it gets lost either when the client jumps to a full map (your i=
+dle case) or when one MOSDMap message carries many incrementals.
+> calc_target() itself has no merge check, unlike the userspace Objecter.
+>
+> I have posted a fix that makes calc_target() treat a merge source or targ=
+et like a split, as the Objecter does:
+>
+> https://lore.kernel.org/ceph-devel/20261127-libceph-pg-merge-retarget-v1-=
+1-2427758cdd1c@clyso.com/
+>
+> With it all reads complete in both cases.  Testing on your side would be =
+very welcome.
+>
+> Thanks,
+> Xiubo
+>
+> On Wed, 25 Nov 2026 at 12:09, Niclas M=C3=BCller <n.mueller@mueller-it.de=
+> wrote:
+> >
+> > Hi,
+> >
+> > we hit a permanent hang of kernel CephFS reads that, as far as we can
+> > tell, is caused by libceph not re-targeting in-flight OSD requests
+> > after a PG merge (pg_num decrease). The cluster itself stayed
+> > HEALTH_OK the whole time. The issue was only visible in debugfs.
+> >
+> > Environment
+> > -----------
+> > - Proxmox VE 9.2.24, kernel 7.0.14-26-pve (kernel CephFS mount)
+> > - Ceph 20.2.4 (tentacle), 3 nodes, 27 OSDs
+> > - The same code paths are unchanged in current mainline
+> >   (net/ceph/osd_client.c, net/ceph/osdmap.c).
+> >
+> > What happened
+> > -------------
+> > 1. A CephFS was created (data pool created with pg_num 128,
+> >    pg_autoscale_mode on). All three nodes mounted it right away
+> >    (osdmap e3222).
+> > 2. Nine minutes later the autoscaler had merged the data pool down
+> >    to 32 PGs (pool lfor 0/3669/3667, last_change 3669).
+> > 3. The mounts then stayed idle for 18 days. The kernel client only
+> >    requests osdmaps "onetime" (maybe_request_map()), so an idle
+> >    client keeps the old map. One node still shows this today:
+> >
+> >      /sys/kernel/debug/ceph/<fsid>.client<id>/osdmap:
+> >        epoch 3222 barrier 3222 flags 0x588000
+> >        pool 5 '<fs>_data' ... pg_num 128 ...
+> >      while the cluster is at e4061 with pg_num 32.
+> >
+> > 4. The first read after that (QEMU reading an ISO file on the
+> >    CephFS) was mapped with the stale map to a PG that no longer
+> >    exists. After the client received the current map, the request
+> >    was never re-targeted:
+> >
+> >      osdc:
+> >      REQUESTS 1 homeless 0
+> >      4  osd4  5.aea7fea1  5.21  [4,14,23]/4  [4,14,23]/4  e4061
+> >         100000001fc.00000803  0x40001c  13  read
+> >
+> >      # ceph pg map 5.21
+> >      Error ENOENT: pgid '5.21' does not exist
+> >      # ceph pg map 5.1
+> >      osdmap e4061 pg 5.1 (5.1) -> up [4,14,23] acting [4,14,23]
+> >
+> >    The client's own map (debugfs) shows pg_num 32 for the pool, but
+> >    the request still carries spgid 5.21. It has been resent 13 times
+> >    to the same OSD. osd.4 reports no ops in flight
+> >    (dump_ops_in_flight num_ops 0) and nothing for this object in
+> >    historic ops. Reading the same object with librados (rados get)
+> >    returns immediately.
+> >
+> >    A second node shows the same pattern: 22 requests stuck for
+> >    object 10000000004.000000b6, spgid 5.23 (does not exist),
+> >    [15,19,23]/15, which is also the acting set of the merge target
+> >    5.3.
+> >
+> >    The QEMU io_uring workers were in D state in
+> >    folio_wait_bit_common until the VM was killed.
+> >
+> > Analysis (current mainline)
+> > ---------------------------
+> > - scan_requests() calls calc_target(osdc, &req->r_t, false) for
+> >   regular requests. With any_change =3D=3D false:
+> >   - ceph_is_new_interval() is skipped. It is the only check that
+> >     would notice the pg_num change.
+> >   - ceph_osds_changed(..., false) only checks for a primary change.
+> > - ceph_pg_is_split() returns false when new_pg_num <=3D old_pg_num.
+> > - force_resend only fires when the current map epoch equals
+> >   pi->last_force_request_resend.
+> > - Neither osd_client.c nor osdmap.c contains any merge handling.
+> >
+> > So if the merge target PG has the same primary as the merged-away
+> > source PG (which is what we observe in both cases), t->spgid is never
+> > recomputed. The request is resent forever with an spgid the OSDs no
+> > longer have, and the OSD drops it, expecting the client to re-target.
+> > Userspace Objecter handles this via is_new_interval() (pg_num change),
+> > which is why librbd/librados clients on the same hosts were
+> > unaffected.
+> >
+> > A possible fix would be to also recompute the target when
+> > pi->pg_num < t->pg_num (merge), analogous to the split check, or to
+> > evaluate ceph_is_new_interval() for regular requests as well.
+> >
+> > Reproduction (not tested by us, derived from the above)
+> > -------------------------------------------------------
+> > 1. Create a pool with pg_num 128 as CephFS data pool, mount it with
+> >    the kernel client and write a few large files.
+> > 2. Leave the mount completely idle and reduce pg_num to 32. Wait
+> >    until the merge is complete.
+> > 3. Read the files from the idle mount. Reads of objects in
+> >    merged-away PGs should hang, with entries in osdc as above.
+> > krbd mappings that stay idle during a merge are presumably affected in
+> > the same way.
+> >
+> > Workaround
+> > ----------
+> > umount -f + remount of the CephFS (fresh client with the current map),
+> > and pg_num_min on pools used by kernel clients to prevent autoscaler
+> > merges.
+> >
+> > Happy to provide more data from the affected nodes while they are
+> > still in this state.
+> >
+> > Thanks,
+> >
+> > Mit freundlichen Gr=C3=BC=C3=9Fen
+> > Niclas M=C3=BCller
