@@ -1,99 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795739713;
-	b=kohRH/p/fc2DDiz1xkakQoRc33e5r4YSUlYMuJll6hA942pMXsiGV3dWz3c7XkShQYjE
-	 A0/R/e5qm43V7uBGP/tLmG5/lOF2/qh7B4PrX6+U05qs/KcdI1jhjgZgrxq9JMEO4VYMj
-	 DUO9CdlHuIsIOKg20DDLz3kyZuucJvug6HxKIb06ey1I6DYUsb+JFxuDnC0s//RGilfP9
-	 ass3nid9oB2dLQY2HqFXAJTVlRAFOnwVb0DgY+nYjuQiqufBAj7aKjcsN6QBmJPWf2Q2Y
-	 rOb1zKeDKEE/76bscp0zVC7BpFaPK4gldeP9wSoRLnTEMy+YWRSZ/A5Sgjg0IqpFVeA==
+	t=1795754091;
+	b=C9R0vqEEBuxi7t0rrkKPOReuqyPmq2i0QDW4v/PWN1QSL5W9rSGh2FgDR1MZxIjV4xjq
+	 IV5zaW4sKaWStAXGJC/keoGgM+S4hwVdPAuAK6zSOapQ30mLa2EacHL6dFzDRrtDJXJDP
+	 dHDVMar5iJ6iGxlFRBhsHsblFsb0guW/QSZLqzxIJtQMNUOfubyOpM6xRVFM2Bp045m0y
+	 8+t4LT0nWDD5IPidjxJbzkVk6XYloINo5I/3PqNJaMj6zJxp1ugrUU/tg6n/XshM1X1V0
+	 5X9lbgt/3iRmDSHCYgzDp0nSgR8TFFMVGwVFm67IPoL/DWy5ot+Ut3uLBPkS/UfL83Q==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795739713;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:
-	 MIME-Version:References:In-Reply-To:From:Date:X-Gm-Features:
-	 Message-ID:Subject:To:Cc:Content-Type;
-	bh=3OPfHOQKezyfH22MUdFSqfCGWM0ieUYy/o1MAmiR0LI=;
-	b=e3W1kAm2F1AzMXV+IQCOpDcxqMGgy4GaJ+q4QYPGKM7zmVc7sHVAyrz3Aj0nKvBN8lt2
-	 oR6IB9mTSEq9KDc8Hya9Z0GxP8XmgeirgkBRHFTWFrARN2nUJznSFKCZBSrU7Wia6Ff6U
-	 pgSlos+yivwthkOPt+FnW0YKj6nYTY78kSem226umJB0EQMoVb8wtrW4ChwmD5ZDq7Q4p
-	 GxR/ctIVjYODSstKIY1viroE75BHYzeSzcpCOx01oR4oKFZPMldlw0vfSEJf/5fhbMqtC
-	 S9FhzrPKd0uEblnsD6oYhiWPQrwoxMskHyQPyJ7A/3yMfP2K96syarqrZhDBHAwH4Ig==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795754091;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=5LMiR0I8eERcmOiHEs3fH0wY7Z7NXwv2db/BnsDj8zw=;
+	b=sCVspc3kbti08+9lWKi+qMs01rgWXpc99n076gWsxqnIXNVujdNnY1q8KC1q287Qka2W
+	 caimRGVjOgV2Z7WGpo9uAucLyU44tw3ro2ldDRDP+grkaIJ05Tx2TPKQWa8XmlP47ZEBE
+	 I2mk9He7TpkCEt2ldFlqPywiaXZGHg6P0AZnB5fkl/Kj+hFsjd/P5ZhqHFpqCLpQ1k7EP
+	 yIMGQEZlGIUZ8ZYscIUDytWhcyG3/yVb2kJUdvteFEirBLlpyN/5ffbAvsndpV6zRKCob
+	 UrRvoBPBNBTST4ZJcT29KIcL2lB4SN1VqWB7bpK8K+kb3ilVhyhIeYvA0C4LId5R1Ww==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=clyso.com;
-	spf=pass smtp.mailfrom=clyso.com;
-	dkim=pass header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=PJmHnSzU;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=W34LQhWv;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE7FD606A31C;
+	Fri, 27 Nov 2026 04:34:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=W34LQhWv
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1795754090;
+	b=xOxq0hg1j2OEp0Lzv7xK3oWoXo/ae2wU1qyBW63tVEtWRUKJ7igTLsxuuvbfBdn41kUu
+	 UhcdiuTPCL4xqmqyqK3PTXr3QcD8pEHa/Z6oWExp2+ybFIaFjRoRVhnRLVW05BIZ1kAuU
+	 f6dgJo+pHWHEYVX+QIHWxWT23BgkIFZ2EbhPsUKY3a+/zypuip6ZTm5j9f+cKKbWrRyA/
+	 lzZsd5HBTaxI+DzABSK5dm9wtujyKQZ69uyO5c7GQ7gPQjrwXPtTBBXt6OrjVYt/n9MMx
+	 qkMNV7IZbiCW23BUBcpLcuPWkOJb1Y03ausYRtE6v/vGBkJQEb/QpN65JwEIPV/OloQ==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1795754090;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=5LMiR0I8eERcmOiHEs3fH0wY7Z7NXwv2db/BnsDj8zw=;
+	b=hSN6CVKddd16xNHQLcRyAczkaQHT12Ogr2pQ08eIiN3f3tmS4Sr3Dnx1Y20VgcNWW/FL
+	 tr7wflZFxE/25M2Kqp/UKLxUx/5QjW7+0Zhs2oPx9roqTT7zWYqArr7nibc38y0lqnNeP
+	 CFnVgp9usrxOZbFX9C+6fvuFRsotQy6A2rm7DxeFL/33dANxGp3N9c2nqkd0cCACADmHR
+	 UeaAtANcZcYdA7ivsVcRYDg8rVVnO8YRKPXCavPVDJ17osUdImJMi5d2iR1sxNzuv3JrD
+	 /pt6UgUe6dyegm2N143lkPIAWB40ksr8rIS2ear5ukCewd+CDvxpkj/6iXm+mD/TDsQ==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60A7F606A337
-	for <ceph-devel@vger.kernel.org>; Fri, 27 Nov 2026 00:35:12 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 60A7F606A337
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=clyso.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=clyso.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=clyso.com header.i=@clyso.com header.a=rsa-sha256 header.s=google header.b=PJmHnSzU
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-6b8815693e2so8592741a12.0
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Nov 2026 16:35:11 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1795739710; cv=none;
-        d=google.com; s=arc-20260327;
-        b=MTehyw17sT+qpp5dFku64fwopCySpbTP0xUyVMPv3KandqMZdXdFVeeYUUj/slPK9y
-         kveoIzoDPhaeA9VRhdhhgL8QBmO/VgN3hcmdwe13dle5j9nBsGkFQqFWXCjDrA3vZYO5
-         KysdW4WMoMkbxt6YQHQQMwm4CZMOwb1JD1CfU+EBmCxJ8ABeN2tfNj59AjOFws5bdNJZ
-         /VSBUsfUSEhaTK6kfZ993RLi4u1BhyvdWKpTD3Ogdbh5MRpD82Lpe4sEaAE8SCs6cI4B
-         WxA147nSHlUxnUfH4truFfGnaM10wVCcNLc0e7b8xBpoa6qPnWRDSpIu2xBJp1n2YFAD
-         yjxg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=3OPfHOQKezyfH22MUdFSqfCGWM0ieUYy/o1MAmiR0LI=;
-        fh=0AHexotQdpFBBKfhbzoKO9Qpo2+RSsF+a3k0UyDGTKo=;
-        b=UZQAHzEtuJcYcX6Ojqo5PPnJ8dQdynSMP8yolcdlQPG1nBWC7lQoQWrKJ6L3XhQ1e/
-         qxnVuy0Ibk10/jypJd1ZPOQKJQIgWbqev/VK6aRwNUbe0qhyJMmpIZw/G2D3hki/+vPj
-         P3YiJi1nTkJ2R6kkjIsInwRSPSA4oyX9+FQSZrRQMsnwy+RfXAgi0eQX8SbNXuLrUPVp
-         vMy5vIVjnLfGLEcr/WMt4JYW8+uk9GfDdaiMsF/HigXDRqqJIUlNLkgQGzinMKWAKYe9
-         ed4UKsNG5DltxfQFnE90yAf8YVLIGCZR0K9mGKUkMYUmrWJFtdDFLbGEfbAtKy4azebd
-         a//A==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=clyso.com; s=google; t=1795739710; x=1796344510; darn=vger.kernel.org;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=3OPfHOQKezyfH22MUdFSqfCGWM0ieUYy/o1MAmiR0LI=;
-        b=PJmHnSzU6XtO6FIvEAIjv2s9ZHkuxwGCypQreOL5hKKBzDXLYw8nkeTiMqYNUwuHEH
-         toYhvei1VRUvL2ut1CXSO341YJ6CM7bMx2VlxDNPDLRnzPjqxmjTTpW43Ghnh1eadgjv
-         uxYQLbhifjHf2oksPwb0L6svFJ4nCBLDYa9gBp7YEesWgasxl1N6aIyOG6cItlDhB//Z
-         UVPZkOjPLZuWbyro0GnX8XrBrePhIRYimmxEVwWzgTP18SiIRnwmQbn5JwyjOnaZiXOE
-         JC9NZP9knC0wg1dSLJuhj8HOyHTEZynahu4MRcYR9smFsqi/j89kyAtYEnYvY3b2Hh7L
-         bz9g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795739710; x=1796344510;
-        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
-         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=3OPfHOQKezyfH22MUdFSqfCGWM0ieUYy/o1MAmiR0LI=;
-        b=py9PYkDMFSfF7mvNoJjPYBVre5U23Hoc2WeYDKHFZSlc++bHYFBWxJqzbKzbjIsUiT
-         43OYdojpIxF7sydaCamS4j6h2cHqnPHcoN80bKYt2Xidip1WWvTbHkWOMFS8hDnccPwM
-         YhzMRgoIvAO40AlF0b3lf7CwRcTb8UHTsRxYKDMITJN9/PDFoE1kFZvUNcUBq9d808ME
-         rshByrQb9WnQdHdntzKVRUgixNu6+2gTb0Oyw4DapxtDCN26qNLEtB1Zifb3LdWK8Enc
-         OFNOcZGeB/3OOvked+6K9W2DssRQoIgxpoyLqOYVHr+XVzzJZyc6s67G1Q1LIep04srJ
-         MV+w==
-X-Forwarded-Encrypted: i=1; AL+hErFBG7EvqH4o3I6ZOZP2lUoTL1DldzgT6L2CoFgRIRZVZlZUbmjsTK6J5fieqTk78yTV6bJsgkQJpO2A@vger.kernel.org
-X-Gm-Message-State: APuU4Z+cT1aezD5ZKN6uW0b6cifoEtDFZKsDiTykyLkmNyMLZjI5SAFw
-	avnDOFM2m0sPM76dlj4v3fGazBB44/TM9/f7AI2hpvdZQn3dwYj9R84sndTVD8DkyVSEDLanTO4
-	yfG3ASwjtJ+TWv9O+eBq5WIASrUSUBUeGBGv6Qb2PIw==
-X-Gm-Gg: AZFdTZfGKCyyl7HhQNuSBs1e7yO8nUaAsAwgh9O2sg/l3L/ilAFIGStv3QfYAcWChdV
-	32L1rJ9rXlL0+nFMGAxOkF2S4MPWvVASa9UuWVZO0UnXolUIfxKfdDTEem537Cp1Ut5LY/9LlJ4
-	mZKzFudCI4jUw2Bc7kcryFTmj8v2XTudr0oNxEa/qbCFz4Mo3TFHajXKGhWNvQ5GVmQl301FeKv
-	V0HnzkJQ6p/hxAS3pIfYfjkHmPNa61b4PF6wyKvcKCbwXhDzMA0UZMe7qn9eyHzd5b0Hwz634m4
-	sE1lYHBWGRECw1XrSY5YOGlQovyyjrTcx4Pl49MyM3cnUrLm8bLD9c7YdMM7oFFxzkM6mWjOmu4
-	amh/TbWGIlp1ylU30iej1CLCSmYpRuZlgXszy1JvcDNPTKg==
-X-Received: by 2002:aa7:df18:0:b0:6b9:c43d:88f with SMTP id
- 4fb4d7f45d1cf-6ba37d5c69dmr12692955a12.9.1795739710360; Thu, 26 Nov 2026
- 16:35:10 -0800 (PST)
+	by smtp.kernel.org (Postfix) with ESMTPS id 2F1191F00897;
+	Fri, 27 Nov 2026 04:34:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795754090;
+	bh=5LMiR0I8eERcmOiHEs3fH0wY7Z7NXwv2db/BnsDj8zw=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
+	b=W34LQhWvNnfC+06P84Z/0yM333S62BFDc9Flw8CJ64drI48BbrxzLubsWg5L03lla
+	 4MLbdypweOfrDhDQ0cuNed/CFwMeBaHZTTCJlcxwbgktk8vR25FamtgDjXFGk5xyOM
+	 h0yEBhAq6CtCOh33fTJGhXja9ygmzOySNnNK6jd4Gc1iRExwSi1pIZMjq8kFN805Mw
+	 2Kme0FHcvwm7PQ81MCUdwqA440/868tOahiDfR4oSjqC3kj2D+RF0uRYgmTEvIqAo/
+	 rBevYRziPUobGRsVIKwCcp9Z45yDnT32Ol9CLd5GuBlbTEDq5RwhYOa8pLMZ1Ly2dL
+	 anzMIn+N6Dlow==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id B53194B569;
+	Fri, 27 Nov 2026 04:34:45 +0000 (UTC)
+From: Xiubo Li via B4 Relay <devnull+xiubo.li.clyso.com@kernel.org>
+Date: Fri, 27 Nov 2026 05:34:38 +0100
+Subject: [PATCH 1/2] ceph: tell the MDS when a closed file no longer wants
+ Fr or Fw
 X-Mailing-List: ceph-devel@vger.kernel.org
 List-Id: <ceph-devel.vger.kernel.org>
 List-Post: <mailto:ceph-devel@vger.kernel.org>
@@ -103,274 +83,102 @@ List-Unsubscribe: <mailto:ceph-devel+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:ceph-devel+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261126032756.265377-2-kj2864@nyu.edu>
-In-Reply-To: <20261126032756.265377-2-kj2864@nyu.edu>
+Content-Type: text/plain; charset="utf-8"
+Message-Id: <20261127-ceph-drop-stale-wanted-v1-1-763882859c5f@clyso.com>
+References: <20261127-ceph-drop-stale-wanted-v1-0-763882859c5f@clyso.com>
+In-Reply-To: <20261127-ceph-drop-stale-wanted-v1-0-763882859c5f@clyso.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
+ Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ stable@vger.kernel.org, 
+ =?utf-8?q?PATRICK_B=C3=89GOU?= <patrick.begou@univ-grenoble-alpes.fr>, 
+ Xiubo Li <xiubo.li@clyso.com>
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1795754083; l=3161;
+ i=xiubo.li@clyso.com; s=20260625; h=from:subject:message-id;
+ bh=pffS/mCkZJh6WEF7XHRVXxBboLfbNbLy63vgUyCni1U=;
+ b=alo+dUHgRrOS5eTXfRsfrcUDJUXRjDegf4XMdgQuFH4qMkEdtJtj1icVFCYn7qVnxUQUx5TH0
+ 8TlVKHRe+H2AvjoDyUYLtCTzQ3VpDlJOI5jteQT7eHb+ZUtk0rN4COW
+X-Developer-Key: i=xiubo.li@clyso.com; a=ed25519;
+ pk=V3NGr0AgAopiUhaLY51ipBkLN5LlcLhjOEfLEq1RoZ8=
+X-Endpoint-Received: by B4 Relay for xiubo.li@clyso.com/20260625 with
+ auth_id=840
+X-Original-From: Xiubo Li <xiubo.li@clyso.com>
+Reply-To: xiubo.li@clyso.com
+Content-Transfer-Encoding: 8bit
+
 From: Xiubo Li <xiubo.li@clyso.com>
-Date: Fri, 27 Nov 2026 02:34:59 +0200
-X-Gm-Features: Aa3M54ptrl_WV_O1NFAZHq5_aaKdq5Wou8KIWA-tM-jRnpleYlFaLeK88Z4UKcg
-Message-ID: <CAOJNxR+mG_fn1Ru0dpzSeWVMwONBF6NYcfoeWTtP90AQp0QBvg@mail.gmail.com>
-Subject: Re: [PATCH v4] ceph: Use unsigned types for snapshot split counts
-To: Kaho Jiang <kj2864@nyu.edu>
-Cc: Ilya Dryomov <idryomov@gmail.com>, Alex Markuze <amarkuze@redhat.com>, 
-	Viacheslav Dubeyko <slava@dubeyko.com>, ceph-devel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, stable@vger.kernel.org, 
-	co+408fcc361565713f@bugs.sh
-Content-Type: text/plain; charset="UTF-8"
 
-Hi Kaho,
+ceph_check_caps() skips a cap whose issued caps are all ones we retain.
+Since commit fdac94fab799 ("ceph: skip updating 'wanted' caps if caps
+are already issued") this holds even when the MDS still has a 'wanted'
+mask we dropped long ago.  After a file opened for reading is closed,
+we may keep the inode with only Fr and shared caps issued, and then
+never tell the MDS that we no longer want Fr.
 
-On 11/26/26 11:27, Kaho Jiang wrote:
-> ceph_handle_snap() stores the unsigned 32-bit split counts from the
-> message header in signed integers. Values with the high bit set become
-> negative and, on 64-bit systems, cause the subsequent pointer arithmetic
-> to move backwards before the message buffer.
+The MDS counts every client wanting Fr or a write cap as a user of the
+file.  If another client keeps the file open for writing, no loner is
+chosen and the filelock stays in MIX for as long as we keep the inode
+cached.  The writer has no Fb, so every write() goes to the OSDs
+synchronously.  A single "tail" of a log file from a second mount made
+the writer of that file over 1000 times slower until the reader
+dropped its caches.
 
-[...]
+Send the cap message when the MDS still has Fr or a write cap in the
+'wanted' mask of a regular file that we no longer want.  Reopening an
+inode whose caps are still issued tells the MDS nothing, as before, so
+this does not bring back the two messages the commit above avoided.
 
-> Use u32 for both counts and validate both split arrays against the
-> remaining message buffer before advancing the decode pointer. Use
-> size_mul() to detect multiplication overflow on 32-bit systems, and
-> ceph_decode_skip_n() for checked skips in the non-split branch.
+The closed file is only checked again at caps_wanted_delay_max, so the
+writer gets Fb back about 60 s after the "tail".  Two noshare mounts
+on one VM, 1 MDS, 3 OSDs, 64 byte writes on mount A, one "tail" of the
+file on mount B:
 
-This changelog only describes the first half of the patch.  v4 also
-moves the blocklist out of ceph_update_snap_trace(), adds a fence work
-and changes handle_reply() and the umount path, and none of that is
-mentioned (the subject still says "Use unsigned types ...").
+  +--------+---------------+-----------------------------------+
+  |        | before "tail" | after "tail"                      |
+  | kernel | ops/s         | ops/s                             |
+  +--------+---------------+-----------------------------------+
+  | before | ~120,000      | ~85, as long as the test ran      |
+  | after  | ~120,000      | ~110,000, from 60 s after "tail"  |
+  +--------+---------------+-----------------------------------+
 
-Could you split it into two patches?  The u32 + bounds checks are a
-small stable fix on their own; the fence rework is not ready yet, see
-below.
+Fixes: fdac94fab799 ("ceph: skip updating 'wanted' caps if caps are already issued")
+Cc: stable@vger.kernel.org
+Reported-by: PATRICK BÉGOU <patrick.begou@univ-grenoble-alpes.fr>
+Link: https://tracker.ceph.com/issues/83627
+Signed-off-by: Xiubo Li <xiubo.li@clyso.com>
+---
+ fs/ceph/caps.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-I tested v4 on a KASAN + lockdep kernel with a 2-active-MDS vstart
-cluster, using a test-only module param patch that corrupts incoming
-snap messages: num_split_inos/num_split_realms forced to 0xfffffff0,
-or the snap trace in a CLIENT_SNAP, in a reply snapblob or in a cap
-IMPORT truncated to 4 bytes.  Same injection on the base tree and on
-v4, mount_timeout=20 unless said otherwise.
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index cc8748f7e0bd..add63a8f6212 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2418,6 +2418,21 @@ void ceph_check_caps(struct ceph_inode_info *ci, int flags)
+ 				goto ack;
+ 		}
+ 
++		/*
++		 * Does the mds still think we want to read or write a
++		 * file that is no longer open here?  It counts every
++		 * client wanting Fr or a write cap as a user of the
++		 * file, so it keeps the filelock in MIX and no other
++		 * client gets Fb or Fc back.  The caps we hold may all
++		 * be ones we retain, so tell it now.  This only fires
++		 * for bits the mds was told about, so reopening an
++		 * inode whose caps are still issued sends no update.
++		 */
++		if (!S_ISDIR(inode->i_mode) &&
++		    (cap->mds_wanted & ~want &
++		     (CEPH_CAP_ANY_WR | CEPH_CAP_FILE_RD)))
++			goto ack;
++
+ 		/* things we might delay */
+ 		if ((cap->issued & ~retain) == 0)
+ 			continue;     /* nope, all good */
 
-v4 no longer applies to the testing branch, since 11add64882a2 ("ceph:
-remove BLOG instrumentation") removed the ceph_blog_exit() context
-lines.  The conflicts are trivial; I tested it rebased onto testing
-3f90412e989c.
+-- 
+2.53.0
 
-> Fixes: 963b61eb041e ("ceph: snapshot management")
-> Cc: stable@vger.kernel.org
-> Reported-by: co+408fcc361565713f@bugs.sh
-> Assisted-by: LLM
-> Signed-off-by: Kaho Jiang <kj2864@nyu.edu>
-> ---
->  fs/ceph/mds_client.c | 34 +++++++++++++++++++++++++++++++++-
->  fs/ceph/mds_client.h |  3 +++
->  fs/ceph/snap.c       | 33 +++++++++++----------------------
->  3 files changed, 47 insertions(+), 23 deletions(-)
->
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 15df9d22008d..4b416fa2ad1a 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-[...]
-> @@ -4435,7 +4436,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
->
->       /* Defer closing the sessions after s_mutex lock being released */
->       if (close_sessions)
-> -             ceph_mdsc_close_sessions(mdsc);
-> +             ceph_mdsc_schedule_snap_fence(mdsc);
 
-With this change a corrupt reply snapblob deadlocks the msgr worker
-and umount.
-
-Earlier in handle_reply() the target inode is looked up/created with
-ceph_get_inode() before the snapblob is parsed, and it is only
-unlocked later in ceph_fill_trace().  When ceph_update_snap_trace()
-fails we jump to out_err and the inode stays hashed in I_NEW.  That
-part is old; on the base tree it shows up at umount as
-
-  WARNING: fs/inode.c:1987 at iput_final+0x626/0x870, CPU#17: umount/5384
-
-On the base tree the sessions are torn down synchronously right here in
-the same msgr worker, which is most likely why no later message looks
-the inode up.  With the deferred fence the sessions stay open for
-another mount_timeout, a cap message for that inode arrives, and the
-msgr worker waits on the I_NEW inode forever; umount then blocks
-flushing the msgr workqueue:
-
-  kworker/10:2 (ceph-msgr):
-   wait_on_new_inode+0x1d1/0x3f0
-   ilookup5+0x18f/0x1c0
-   ceph_handle_caps+0x8a6/0x23c0 [ceph]
-   mds_dispatch+0x21d/0x490 [ceph]
-  umount:
-   __flush_workqueue+0x3ad/0x10c0
-   ceph_mdsc_pre_umount+0x1c3/0x410 [ceph]
-   ceph_kill_sb+0x100/0x840 [ceph]
-
-With a corrupt snapblob in the reply to a create in a snapshotted
-directory, v4 hung like this in 4 out of 4 runs and the base tree in
-0 out of 4.  The out_err path needs to discard_new_inode() the target
-inode (or the snapblob has to be parsed before ceph_get_inode()),
-whatever the fence ends up looking like.
-
-[...]
-> +static void ceph_mdsc_snap_fence_workfn(struct work_struct *work)
-> +{
-> +     struct ceph_mds_client *mdsc =
-> +             container_of(work, struct ceph_mds_client, snap_fence_work);
-> +     struct ceph_client *cl = mdsc->fsc->client;
-> +     int ret;
-> +
-> +     ret = ceph_monc_blocklist_add(&cl->monc, &cl->msgr.inst.addr);
-> +     if (ret)
-> +             pr_err_client(cl, "failed to blocklist %s: %d\n",
-> +                           ceph_pr_addr(&cl->msgr.inst.addr), ret);
-
-The "was blocklisted, do remount to continue" warning that
-ceph_update_snap_trace() used to print is gone.  The base tree prints
-
-  ceph: ... ceph_update_snap_trace <addr> was blocklisted,
-  do remount to continue after corrupted snaptrace is fixed
-
-and with v4 nothing tells the admin why the mount stopped working.
-Please print it here when the blocklist succeeds.
-
-> +
-> +     ceph_mdsc_close_sessions(mdsc);
-
-Two problems here.
-
-First, the client has just been blocklisted, so the MDSs never ack the
-REQUEST_CLOSE and ceph_mdsc_close_sessions() always waits the full
-mount_timeout (20.3 s in every run).  With mount_timeout=0 it waits
-forever.  The base tree does the same thing in the ceph-msgr worker
-(verified: kworker/23:1+ceph-msgr stuck in ceph_mdsc_close_sessions()
-<- ceph_handle_snap()).  v4 frees the msgr worker, but the wait now
-blocks umount instead, see ceph_mdsc_destroy() below.
-
-With a non-zero mount_timeout, ceph_kill_sb() stops waiting for the
-stopping blocker after mount_timeout ("umount timed out") and runs its
-own ceph_mdsc_close_sessions() while this one is still running, so the
-two teardowns overlap:
-
-  [1456.265977] ceph: INJ close_sessions begin comm=kworker/u199:5 pid=10748
-  [1476.083255] ceph: ... umount timed out, 0
-  [1476.083614] ceph: INJ close_sessions begin comm=umount pid=14578
-  [1476.084088] ceph: INJ close_sessions end comm=umount pid=14578 took 1 ms
-  [1476.594193] ceph: INJ close_sessions end comm=kworker/u199:5
-pid=10748 took 20329 ms
-
-(the INJ lines come from my test patch.)
-
-Second, ceph_mdsc_close_sessions() is the umount teardown, not a fence.
-After the wait it unregisters the sessions and calls
-ceph_cleanup_snapid_map() and ceph_cleanup_global_and_empty_realms()
-while the mount is still alive and snapshot inodes still hold their
-snapid maps.  Every run with a snapshot inode cached hit:
-
-  WARNING: snap.c:1365 at ceph_cleanup_snapid_map+0x40e/0x660 [ceph]
-   ceph_mdsc_close_sessions+0x5cf/0x739 [ceph]
-   ceph_mdsc_snap_fence_workfn.cold+0x8/0x23 [ceph]
-  ...
-  BUG: KASAN: slab-use-after-free in atomic_dec_and_lock+0x1b/0xa0
-  Write of size 4 at addr ffff888107909ba8 by task umount/7518
-   ceph_put_snapid_map+0x36/0x2d0 [ceph]
-   ceph_evict_inode+0x59c/0x9a0 [ceph]
-  Allocated by: ceph_get_snapid_map <- ceph_fill_inode <- handle_reply
-  Freed by:     ceph_cleanup_snapid_map <- ceph_mdsc_close_sessions
-                <- ceph_mdsc_snap_fence_workfn
-
-This one is old too (the base tree hits the same UAF through the
-synchronous call), but moving the call into a work doesn't fix it, and
-Alex's point about retaining the required references until the
-deferred cleanup finishes applies here.  The teardown also leaves
-in-flight MDS requests waiting: on the base tree a snapshot mkdir that
-raced with the corrupt CLIENT_SNAP sat in ceph_mdsc_wait_request()
-until it was killed.
-
-So I don't think ceph_mdsc_close_sessions() belongs in this path.
-CEPH_MOUNT_FENCE_IO is already set (new writes and creates got -EIO in
-all my runs); after the blocklist this should fail the pending MDS
-requests with -EIO and drop each session's caps, as the
-force-umount/session-reject paths do, without the snapid map and realm
-cleanup and without waiting for a close ack that can't come.  The full
-teardown should stay in umount.
-
-> +     ceph_dec_osd_stopping_blocker(mdsc);
-> +}
-[...]
-> @@ -7120,6 +7151,7 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
->       wake_up_all(&mdsc->reset_state.blocked_wq);
->
->       cancel_work_sync(&mdsc->reset_work);
-> +     cancel_work_sync(&mdsc->snap_fence_work);
-
-With mount_timeout=0 this never returns, because the work is stuck in
-ceph_mdsc_close_sessions() above, and umount hangs in D state until the
-box is reset:
-
-  kworker/u110:5+events_unbound:
-   ceph_mdsc_close_sessions+0x432/0x739 [ceph]
-   ceph_mdsc_snap_fence_workfn.cold+0x8/0x23 [ceph]
-  umount:
-   cancel_work_sync+0x81/0xa0
-   ceph_mdsc_destroy+0x200/0x850 [ceph]
-   destroy_fs_client+0x127/0x3b0 [ceph]
-   ceph_kill_sb+0x2e6/0x840 [ceph]
-
-umount must not wait on this work without a bound.
-
->       ceph_mdsc_stop(mdsc);
-[...]
-> diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-> index e03d89db61fe..968486b0c2d4 100644
-> --- a/fs/ceph/snap.c
-> +++ b/fs/ceph/snap.c
-[...]
-> @@ -924,22 +922,8 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
->        * When receiving a corrupted snap trace we don't know what
->        * exactly has happened in MDS side. And we shouldn't continue
->        * writing to OSD, which may corrupt the snapshot contents.
-> -      *
-> -      * Just try to blocklist this kclient and then this kclient
-> -      * must be remounted to continue after the corrupted metadata
-> -      * fixed in the MDS side.
->        */
->       WRITE_ONCE(mdsc->fsc->mount_state, CEPH_MOUNT_FENCE_IO);
-> -     ret = ceph_monc_blocklist_add(&client->monc, &client->msgr.inst.addr);
-> -     if (ret)
-> -             pr_err_client(cl, "failed to blocklist %s: %d\n",
-> -                           ceph_pr_addr(&client->msgr.inst.addr), ret);
-
-ceph_update_snap_trace() has a third caller that this patch doesn't
-convert: ceph_handle_caps() for CEPH_CAP_OP_IMPORT still calls
-ceph_mdsc_close_sessions() directly.  So with this removal a corrupt
-snap trace in a cap IMPORT fences the client but no longer blocklists
-it, and the close still runs (and waits) in the msgr worker:
-
-  base:  blocklisted=1, close_sessions in kworker/10:1 (ceph-msgr), 20105 ms
-  v4:    blocklisted=0, close_sessions in kworker/4:2  (ceph-msgr), 20082 ms
-
-[...]
-> @@ -1079,10 +1063,12 @@ void ceph_handle_snap(struct ceph_mds_client *mdsc,
->                * child.
->                */
->               split_inos = p;
-> +             ceph_decode_need(&p, e, size_mul(num_split_inos, sizeof(u64)), fail);
->               p += sizeof(u64) * num_split_inos;
->               split_realms = p;
-> +             ceph_decode_need(&p, e, size_mul(num_split_realms, sizeof(u64)), fail);
-
-These checks are good.  On the base tree, forcing either count to
-0xfffffff0 reproduces your report on both the SPLIT and the non-split
-paths:
-
-  BUG: KASAN: slab-out-of-bounds in ceph_update_snap_trace+0xe11/0x12a0 [ceph]
-  Read of size 8 at addr ffff88816738cff8 by task kworker/17:0/5385
-   ceph_update_snap_trace+0xe11/0x12a0 [ceph]
-   ceph_handle_snap+0x3ec/0xea0 [ceph]
-
-and with v4 the same messages are rejected with "corrupt snap message
-from mds0" and no out-of-bounds access.
-
-[...]
-
-Thanks,
-- Xiubo
